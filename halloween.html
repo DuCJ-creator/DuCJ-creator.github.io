@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Halloween Word Search</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+            background: linear-gradient(135deg, #fff9f0 0%, #ffe0b2 100%);
+            padding: 16px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+            padding: 20px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        header h1 {
+            color: #e65100;
+            text-align: center;
+            font-size: 1.5rem;
+            margin: 0 0 12px;
+        }
+
+        .instructions {
+            text-align: center;
+            color: #5d4037;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        /* ✅ 11x11 網格：可水平滾動 */
+        .grid-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            background: #fdf6e3;
+            padding: 12px 8px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        /* 滾動提示 */
+        .grid-container::after {
+            content: '';
+            position: sticky;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 28px;
+            background: linear-gradient(to right, transparent, #fdf6e3);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(11, 40px);
+            grid-template-rows: repeat(11, 40px);
+            gap: 2px;
+            background: #bcaaa4;
+            border: 2px solid #8d6e63;
+            width: fit-content;
+            min-width: 100%;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            font-family: "Times New Roman", serif;
+            font-size: 18px;
+            font-weight: bold;
+            user-select: none;
+        }
+
+        .cell.selected { background-color: #c8e6c9; }
+        .cell.found { background-color: #81d4fa; color: #01579b; }
+
+        .word-list-container {
+            background: #fdf6e3;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .word-list-title {
+            text-align: center;
+            color: #e65100;
+            margin: 0 0 14px;
+            font-size: 1.25rem;
+        }
+
+        .word-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .word-item {
+            padding: 10px 0;
+            text-align: center;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .word-item.found {
+            background: linear-gradient(135deg, #b3e5fc, #81d4fa);
+            color: #01579b;
+        }
+
+        .stats {
+            text-align: center;
+            margin: 14px 0;
+            color: #d84315;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 14px;
+            background: #ff7043;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        /* 返回按鈕樣式 */
+        #back-btn {
+            background: #78909c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎃 Halloween Word Search</h1>
+            <p class="instructions">Touch and drag to find words in any direction!</p>
+        </header>
+
+        <div class="grid-container">
+            <div class="word-grid" id="word-grid"></div>
+        </div>
+
+        <div class="word-list-container">
+            <h3 class="word-list-title">Find These Words (9)</h3>
+            <div class="word-list" id="word-list"></div>
+            <div class="stats">Found: <span id="found-count">0</span> / 9</div>
+        </div>
+
+        <div class="controls">
+            <button id="reset-btn">Reset Game</button>
+            <!-- ✅ 返回按鈕：請替換 YOUR_GOOGLE_SITE_URL -->
+            <button id="back-btn">Back to Google Site</button>
+        </div>
+    </div>
+
+    <script>
+        // ✅ 你的 9 個單字
+        const words = ["ghost", "pumpkin", "witch", "vampire", "candy", "costume", "trick", "treat", "skeleton"];
+        const SIZE = 11;
+        const CELL = 40;
+        const DIRS = [[0,1],[1,0],[0,-1],[-1,0],[1,1],[1,-1],[-1,-1],[-1,1]];
+        let grid = Array(SIZE).fill().map(() => Array(SIZE).fill(''));
+        let wordPos = {};
+        let found = new Set();
+
+        function placeWords() {
+            grid = Array(SIZE).fill().map(() => Array(SIZE).fill(''));
+            wordPos = {};
+            const sorted = [...words].sort((a, b) => b.length - a.length);
+            for (const word of sorted) {
+                let placed = false;
+                for (let attempt = 0; attempt < 1000 && !placed; attempt++) {
+                    const dir = DIRS[Math.floor(Math.random() * DIRS.length)];
+                    const r = Math.floor(Math.random() * SIZE);
+                    const c = Math.floor(Math.random() * SIZE);
+                    if (canPlace(word, r, c, dir)) {
+                        doPlace(word, r, c, dir);
+                        placed = true;
+                    }
+                }
+            }
+            const letters = 'aaaaaaaaaabbcccddeeeeeeeeeeeeffgghhiiiiiiijkllllmmnnnnnnooooooooppqrrrrrrssssssttttttttuuuuvvwxyyz';
+            for (let i = 0; i < SIZE; i++) {
+                for (let j = 0; j < SIZE; j++) {
+                    if (grid[i][j] === '') grid[i][j] = letters[Math.floor(Math.random() * letters.length)];
+                }
+            }
+        }
+
+        function canPlace(word, r, c, [dr, dc]) {
+            for (let i = 0; i < word.length; i++) {
+                const nr = r + dr * i;
+                const nc = c + dc * i;
+                if (nr < 0 || nr >= SIZE || nc < 0 || nc >= SIZE) return false;
+                if (grid[nr][nc] !== '' && grid[nr][nc] !== word[i]) return false;
+            }
+            return true;
+        }
+
+        function doPlace(word, r, c, [dr, dc]) {
+            wordPos[word] = [];
+            for (let i = 0; i < word.length; i++) {
+                const nr = r + dr * i;
+                const nc = c + dc * i;
+                grid[nr][nc] = word[i];
+                wordPos[word].push({r: nr, c: nc});
+            }
+        }
+
+        function renderGrid() {
+            const el = document.getElementById('word-grid');
+            el.innerHTML = '';
+            for (let i = 0; i < SIZE; i++) {
+                for (let j = 0; j < SIZE; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.textContent = grid[i][j];
+                    cell.dataset.r = i;
+                    cell.dataset.c = j;
+                    el.appendChild(cell);
+                }
+            }
+            updateFound();
+        }
+
+        function renderWordList() {
+            const el = document.getElementById('word-list');
+            el.innerHTML = '';
+            words.forEach(word => {
+                const item = document.createElement('div');
+                item.className = 'word-item' + (found.has(word) ? ' found' : '');
+                item.textContent = word;
+                el.appendChild(item);
+            });
+        }
+
+        function updateFound() {
+            document.querySelectorAll('.cell').forEach(c => c.classList.remove('found'));
+            found.forEach(word => {
+                (wordPos[word] || []).forEach(({r, c}) => {
+                    const el = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+                    if (el) el.classList.add('found');
+                });
+            });
+            document.getElementById('found-count').textContent = found.size;
+        }
+
+        // 觸控邏輯
+        let isSelecting = false;
+        let startCell = null;
+
+        function getCell(x, y) {
+            const container = document.querySelector('.grid-container');
+            const gridRect = document.querySelector('.word-grid').getBoundingClientRect();
+            const scrollLeft = container.scrollLeft;
+            const adjX = x + scrollLeft;
+            if (adjX < gridRect.left || adjX > gridRect.right || y < gridRect.top || y > gridRect.bottom) return null;
+            const col = Math.floor((adjX - gridRect.left) / CELL);
+            const row = Math.floor((y - gridRect.top) / CELL);
+            if (row >= 0 && row < SIZE && col >= 0 && col < SIZE) return {r: row, c: col};
+            return null;
+        }
+
+        function getLine(from, to) {
+            const cells = [];
+            const dr = to.r - from.r;
+            const dc = to.c - from.c;
+            const steps = Math.max(Math.abs(dr), Math.abs(dc));
+            if (steps === 0) return [from];
+            const sr = dr === 0 ? 0 : dr > 0 ? 1 : -1;
+            const sc = dc === 0 ? 0 : dc > 0 ? 1 : -1;
+            let r = from.r, c = from.c;
+            for (let i = 0; i <= steps; i++) {
+                if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) break;
+                cells.push({r, c});
+                r += sr;
+                c += sc;
+            }
+            return cells;
+        }
+
+        const gridEl = document.getElementById('word-grid');
+
+        gridEl.addEventListener('touchstart', e => {
+            e.preventDefault();
+            if (isSelecting) return;
+            const touch = e.touches[0];
+            const cell = getCell(touch.clientX, touch.clientY);
+            if (!cell) return;
+            const el = document.querySelector(`.cell[data-r="${cell.r}"][data-c="${cell.c}"]`);
+            if (!el || el.classList.contains('found')) return;
+            isSelecting = true;
+            startCell = cell;
+            el.classList.add('selected');
+        }, { passive: false });
+
+        gridEl.addEventListener('touchmove', e => {
+            if (!isSelecting) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const cell = getCell(touch.clientX, touch.clientY);
+            if (!cell) return;
+            const path = getLine(startCell, cell);
+            document.querySelectorAll('.cell.selected').forEach(el => el.classList.remove('selected'));
+            path.forEach(({r, c}) => {
+                const el = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+                if (el && !el.classList.contains('found')) el.classList.add('selected');
+            });
+        }, { passive: false });
+
+        gridEl.addEventListener('touchend', e => {
+            e.preventDefault();
+            if (!isSelecting) return;
+            const selected = Array.from(document.querySelectorAll('.cell.selected'));
+            if (selected.length >= 2) {
+                const str = selected.map(el => el.textContent).join('');
+                const rev = str.split('').reverse().join('');
+                let foundWord = null;
+                for (const word of words) {
+                    if (!found.has(word) && (word === str || word === rev)) {
+                        foundWord = word;
+                        break;
+                    }
+                }
+                if (foundWord) {
+                    found.add(foundWord);
+                    selected.forEach(el => {
+                        el.classList.remove('selected');
+                        el.classList.add('found');
+                    });
+                    updateFound();
+                    renderWordList();
+                    if (found.size === words.length) {
+                        setTimeout(() => alert('🎉 You found all words!'), 100);
+                    }
+                } else {
+                    selected.forEach(el => el.classList.remove('selected'));
+                }
+            } else {
+                document.querySelectorAll('.cell.selected').forEach(el => el.classList.remove('selected'));
+            }
+            isSelecting = false;
+        }, { passive: false });
+
+        // 按鈕功能
+        document.getElementById('reset-btn').onclick = () => {
+            found.clear();
+            placeWords();
+            renderGrid();
+            renderWordList();
+        };
+
+        // ✅ 返回按鈕：請替換 YOUR_GOOGLE_SITE_URL 為你的 Google Site 網址
+        document.getElementById('back-btn').onclick = () => {
+            const siteUrl = "YOUR_GOOGLE_SITE_URL"; // ← ← ← 在這裡填入你的 Google Site 網址
+            if (siteUrl && siteUrl !== "YOUR_GOOGLE_SITE_URL") {
+                window.location.href = siteUrl;
+            } else {
+                alert("Please update the Google Site URL in the HTML code.");
+            }
+        };
+
+        // 初始化
+        placeWords();
+        renderGrid();
+        renderWordList();
+    </script>
+</body>
+</html>
