@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>單字挑戰無極限 - 復活節特別版</title>
+    <style>
+        /* 基礎樣式重置 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('https://images.unsplash.com/photo-1680530240063-8e2cc1a9a2a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        
+        .game-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 95%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            border: 2px solid #a8d8ea;
+            overflow: hidden;
+            margin: 10px;
+        }
+        
+        h1 {
+            color: #6b8cae;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            line-height: 1.3;
+        }
+        
+        .word-display {
+            font-size: 1.8rem;
+            margin: 15px 0;
+            color: #4a6fa5;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+        
+        .pos-display {
+            font-size: 1.1rem;
+            color: #6b8cae;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 10px;
+        }
+        
+        .egg-option {
+            width: 45%;
+            max-width: 140px;
+            height: 140px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            margin: 5px;
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.1));
+            touch-action: manipulation;
+        }
+        
+        .egg-option:active {
+            transform: translateY(-3px);
+        }
+        
+        .egg-text {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #333;
+            font-weight: bold;
+            padding: 5px 8px;
+            background-color: rgba(255,255,255,0.9);
+            border-radius: 12px;
+            margin: 0 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        
+        .timer-container {
+            width: 100%;
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to right, #a8d8ea, #6b8cae);
+            transition: width 0.1s linear;
+            border-radius: 5px;
+        }
+        
+        .bunny {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23a8d8ea" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208zm96-208c0-53-43-96-96-96s-96 43-96 96 43 96 96 96 96-43 96-96zm-96-64c35.3 0 64 28.7 64 64s-28.7 64-64 64-64-28.7-64-64 28.7-64 64-64z"/><circle fill="%23a8d8ea" cx="160" cy="144" r="32"/><circle fill="%23a8d8ea" cx="352" cy="144" r="32"/><path fill="%23a8d8ea" d="M256 304c-35.3 0-64 28.7-64 64s28.7 64 64 64 64-28.7 64-64-28.7-64-64-64z"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 0.5s infinite alternate;
+            z-index: 10;
+        }
+        
+        @keyframes bounce {
+            from { bottom: 10px; }
+            to { bottom: 18px; }
+        }
+        
+        .score-display {
+            font-size: 1.1rem;
+            color: #6b8cae;
+            margin: 8px 0;
+            font-weight: bold;
+        }
+        
+        .game-over {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            flex-direction: column;
+            color: white;
+            font-size: 1.5rem;
+            display: none;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .game-over h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #a8d8ea;
+        }
+        
+        .restart-btn, .start-btn {
+            padding: 14px 28px;
+            background-color: #6b8cae;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+            touch-action: manipulation;
+            min-width: 180px;
+        }
+        
+        .restart-btn:active, .start-btn:active {
+            background-color: #a8d8ea;
+            transform: scale(0.98);
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: #a8d8ea;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        /* 四種不同顏色的復活節彩蛋 */
+        .egg-1 { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23a8d8ea" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208z"/></svg>'); }
+        .egg-2 { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23f6d5f7" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208z"/></svg>'); }
+        .egg-3 { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23f8c3cd" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208z"/></svg>'); }
+        .egg-4 { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23faf3dd" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208z"/></svg>'); }
+        
+        /* 復活節彩蛋上的花紋 */
+        .egg-option::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><circle fill="%23ffffff" cx="128" cy="128" r="16"/><circle fill="%23ffffff" cx="256" cy="256" r="12"/><circle fill="%23ffffff" cx="384" cy="128" r="16"/><circle fill="%23ffffff" cx="128" cy="384" r="12"/><circle fill="%23ffffff" cx="384" cy="384" r="12"/></svg>');
+            background-size: 80%;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.2;
+        }
+        
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        
+        .easter-flower {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23f8c3cd" d="M256 0c-70.7 0-128 57.3-128 128s57.3 128 128 128 128-57.3 128-128S326.7 0 256 0zm0 208c-44.2 0-80-35.8-80-80s35.8-80 80-80 80 35.8 80 80-35.8 80-80 80z"/><circle fill="%23faf3dd" cx="256" cy="128" r="32"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            z-index: -1;
+        }
+        
+        .easter-leaf {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23a8d8ea" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208z"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            z-index: -1;
+        }
+        
+        .option-disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        /* 答對效果 */
+        .correct-answer {
+            animation: correctPulse 0.4s;
+            filter: drop-shadow(0 0 10px rgba(168, 216, 234, 0.7));
+        }
+        
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* 響應式調整 */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .word-display {
+                font-size: 1.6rem;
+            }
+            
+            .egg-option {
+                width: 45%;
+                height: 120px;
+            }
+            
+            .egg-text {
+                font-size: 0.8rem;
+                bottom: 15px;
+            }
+            
+            .bunny {
+                width: 50px;
+                height: 50px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .egg-option {
+                width: 45%;
+                height: 110px;
+            }
+            
+            .egg-text {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>CAP2000 Transport & Others 單字挑戰無極限</h1>
+        <div class="score-display">Score: <span id="score">0</span></div>
+        <div id="setup-screen">
+            <button class="start-btn" id="start-game">Start</button>
+        </div>
+        <div id="game-screen" style="display: none;">
+            <div class="word-display" id="current-word">單字</div>
+            <div class="pos-display" id="current-pos">詞性</div>
+            <div class="timer-container">
+                <div class="timer-bar" id="timer-bar"></div>
+            </div>
+            <div class="options-container">
+                <div class="egg-option egg-1" data-option="1">
+                    <div class="egg-text" id="option-1">選項1</div>
+                </div>
+                <div class="egg-option egg-2" data-option="2">
+                    <div class="egg-text" id="option-2">選項2</div>
+                </div>
+                <div class="egg-option egg-3" data-option="3">
+                    <div class="egg-text" id="option-3">選項3</div>
+                </div>
+                <div class="egg-option egg-4" data-option="4">
+                    <div class="egg-text" id="option-4">選項4</div>
+                </div>
+            </div>
+            <div class="bunny"></div>
+        </div>
+        <div class="game-over" id="game-over">
+            <h2 id="result-message">Game Over!</h2>
+            <div>Final Score: <span id="final-score">0</span></div>
+            <button class="restart-btn" id="restart-btn">One More Challenge</button>
+        </div>
+    </div>
+
+    <script>
+        // 遊戲變數
+        let vocabulary = [];
+        let currentWord = null;
+        let score = 0;
+        let timer = null;
+        let timeLeft = 8;
+        let gameActive = false;
+        let canAnswer = true; // 新增：控制是否可回答
+        
+        // DOM元素
+        const setupScreen = document.getElementById('setup-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over');
+        const startGameBtn = document.getElementById('start-game');
+        const restartBtn = document.getElementById('restart-btn');
+        const currentWordDisplay = document.getElementById('current-word');
+        const currentPosDisplay = document.getElementById('current-pos');
+        const optionDisplays = [
+            document.getElementById('option-1'),
+            document.getElementById('option-2'),
+            document.getElementById('option-3'),
+            document.getElementById('option-4')
+        ];
+        const scoreDisplay = document.getElementById('score');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+        const timerBar = document.getElementById('timer-bar');
+        const eggOptions = document.querySelectorAll('.egg-option');
+        
+        // 單字庫 (簡化版本)
+        const wordList = `accident,n.,車禍;意外事件
+airlines,n.,航線;航空公司
+airplane,n.,飛機
+ambulance,n.,救護車
+bicycle,n.,單車
+board,v.,上(交通工具);
+board,n.,木板
+boat,n.,小船
+bus,n.,公車
+car,n.,汽車
+drive,v.,駕駛
+flat tire,n.,爆胎
+flight,n.,飛機班次
+helicopter,n.,直昇機
+jeep,n.,吉普車
+metro,n.,地鐵
+motorcycle,n.,摩托車
+MRT,n.,捷運
+pack,v.,打包;裝箱
+park,v.,停車
+parking lot,n.,停車場
+platform,n.,月台;平台
+railroad,n.,鐵路
+railway,n.,鐵路
+ride,v.,騎
+road,n.,道路
+row,v.,划(船)
+row,n.,排;列
+sail,v.,揚帆;航行
+scooter,n.,機車
+seat,n.,座位
+ship,n.,大船
+sidewalk,n.,人行道
+speed,n.,速度
+station,n.,車站
+stop,n.,公車站牌
+subway,n.,地鐵;地下道
+taxi,n.,計程車
+traffic,n.,交通
+train,n.,火車
+truck,n.,卡車
+tunnel,n.,隧道
+underpass,n.,地下道
+way,n.,道路
+abroad,adv.,到國外
+airport,n.,機場
+America,n.,美國
+apartment,n.,公寓
+area,n.,區域
+arrive,v.,到達
+bakery,n.,麵包店
+bank,n.,銀行
+beach,n.,海灘
+block,n.,街道
+bookstore,n.,書店
+bridge,n.,橋
+castle,n.,城堡
+China,n.,中國
+company,n.,公司
+convenience store,n.,便利商店
+corner,n.,轉角處;街角
+country,n.,國家
+court,n.,法庭;(網球等的)場地
+crowded,adj.,擁擠的
+department store,n.,百貨公司
+direction,n.,方向; 說明
+distance,n.,距離
+downtown,n.,市區;鬧區
+drugstore,n.,藥妝店
+east,n.,東方
+entrance,n.,入口
+exit,n.,出口
+factory,n.,工廠
+farm,n.,農場;飼養場
+foreign,adj.,外國的
+ground,n.,地面
+gym,n.,體育館
+highway,n.,公路;幹道
+hospital,n.,醫院
+hotel,n.,旅館;飯店
+international,adj.,國際的
+kingdom,n.,王國
+library,n.,圖書館
+local,adj.,本地的
+mall,n.,購物中心;商場
+market,n.,市場;市集
+men's room,n.,男廁
+musem,n.,博物館
+nation,n.,國家
+national,adj.,國家的
+north,n.,北方
+overpass,n.,天橋
+overseas,adj./adv.,國外的; 在國外
+park,n.,公園
+path,n.,小徑;小路
+place,n.,地方
+playground,n.,操場
+position,n.,位置
+post office,n.,郵局
+public,adj.,公共的
+R. O. C.,n.,中華民國
+shop,n.,商店
+sign,n.,符號;標誌
+south,n./adj.,南方(的)
+spot,n.,斑點;場所
+square,n.,廣場;正方形
+state,n.,狀態;(美國的)州
+stop,v.,停止
+store,n.,商店
+street,n.,街道
+supermarket,n.,超市
+Taiwan,n.,臺灣
+temple,n.,寺廟
+theater,n.,戲院;劇場
+town,n.,城鎮;市鎮
+U. S. A.,n.,美國
+village,n.,村落
+west,n./adj.,西方; 西邊的
+women's room,n.,女廁
+zoo,n.,動物園
+a.m.,adv.,上午
+afternoon,n.,下午
+ago,adv.,以前
+ancient,adj.,古代的
+April,n.,四月
+August,n.,八月
+autumn,n.,秋天
+balloon,n.,汽球
+bitrhday,n.,生日
+bless,v.,祝福;保佑
+candle,n.,蠟燭
+card,n.,卡片
+celebrate,v.,慶祝
+century,n.,世紀
+cheer,v.,為…歡呼、鼓舞
+childhood,n.,童年時期
+current,adj.,現行的
+daily,adv.,每日
+daily,adj.,每日的
+date,n.,日期
+dawn,n.,黎明
+day,n.,天
+December,n.,十二月
+Easter,n.,復活節
+eve,n.,前夕
+evening,n.,傍晚
+ever,adv.,曾經
+fall,n.,秋天
+February,n.,二月
+festival,n.,節日
+Friday,n.,星期五
+future,n.,未來
+gift,n.,禮物
+Halloween,n.,萬聖節
+holiday,n.,假日
+hour,n.,小時
+January,n.,一月
+July,n.,七月
+June,n.,六月
+March,n.,三月
+May,n.,五月
+midnight,n.,午夜
+minute,n.,分鐘
+modern,adj.,現代的
+Monday,n.,星期一
+month,n.,月
+morning,n.,早上
+night,n.,晚上
+noon,n.,中午
+November,n.,十一月
+now,adv.,現在
+o' clock,adv.,點鐘
+October,n.,十月
+p.m.,adv.,午後
+party,n.,派對
+past,adj.,過去的;以前的
+period,n.,期間;句點
+present,adj.,現在的;出席的
+Saturday,n.,星期六
+season,n.,季節
+September,n.,九月
+spring,n.,春天
+summer,n.,夏天
+Sunday,n.,星期日
+Thursday,n.,星期四
+time,n.,時間
+today,adv.,今天
+tomorrow,n.,明天
+tonight,adv.,今晚
+traditional,adj.,傳統的
+Tuesday,n.,星期二
+Wednesday,n.,星期三
+week,n.,星期
+weekday,n.,週間
+weekend,n.,週末
+winter,n.,冬天
+year,n.,年
+yesterday,adv.,昨天
+youth,n.,青少年時期
+bad,adj.,壞的
+born,adj.,出生的、天生的
+brave,adj.,勇敢的
+careful,adj.,仔細的
+careless,adj.,粗心的
+childish,adj.,幼稚的;孩子氣的
+childlike,adj.,天真(單純)的
+clever,adj.,聰明的
+cruel,adj.,殘忍的
+curious,adj.,好奇的
+cute,adj.,可愛的
+dear,adj.,親愛的
+diligent,adj.,勤勉的
+dishonest,adj.,不誠實的
+energetic,adj.,精力充沛的
+evil,adj.,邪惡的
+excellent,adj.,傑出的
+foolish,adj.,愚蠢的
+friendly,adj.,親切的
+funny,adj.,滑稽的
+generous,adj.,慷慨的
+gentle,adj.,溫和的
+good,adj.,好的
+goodness,n.,善良
+greedy,adj.,貪婪的
+handsome,adj.,英俊的
+hard-working,adj.,勤勉的
+honest,adj.,誠實的
+honesty,n.,誠實
+humble,adj.,謙虛的;卑微的
+humor,n.,幽默
+humorous,adj.,幽默的
+impolite,adj.,沒禮貌的
+independent,adj.,獨立的
+intelligent,adj.,明智的
+kind,adj.,親切的;友善的
+lazy,adj.,懶惰的
+lovely,adj.,可愛的
+married,adj.,已婚的
+naughty,adj.,頑皮的
+nice-looking,adj.,(外表)好看的
+polite,adj.,有禮貌的
+proud,adj.,驕傲的
+responsible,adj.,負責任的
+rude,adj.,無禮的
+selfish,adj.,自私的
+shy,adj.,害羞的
+silly,adj.,傻的
+sincere,adj.,真誠的
+skillful,adj.,有技術的;熟練的
+sleepy,adj.,想睡的
+smart,adj.,聰明的
+sneaky,adj.,鬼鬼祟祟的
+social,adj.,社會的;交際的
+stingy,adj.,小氣的
+stupid,adj.,愚笨的
+successful,adj.,成功的
+talkative,adj.,愛說話的
+wise,adj.,有智慧的
+young,adj.,年輕的
+air,n.,空氣
+climate,n.,氣候
+cloud,n.,雲
+cloudy,adj.,多雲的
+cold,adj.,冷的
+cool,adj.,涼爽的
+fog,n.,霧
+foggy,adj.,有濃霧的
+freezing,adj.,酷寒的
+heat,n.,熱度
+hot,adj.,熱的
+humid,adj.,潮濕的
+lightning,n.,閃電
+rain,v.,下雨
+rainbow,n.,彩虹
+rainy,adj.,下雨的
+snow,n.,雪
+snowman,n.,雪人
+snowy,adj.,下雪的
+storm,n.,風暴
+stormy,adj.,暴風雨的
+sunny,adj.,晴朗的
+temperature,n.,溫度
+typhoon,adj.,颱風
+warm,adj.,溫暖的
+weather,n.,天氣
+wind,n.,風
+windy,adj.,有風的
+admire,v.,欽佩;愛慕
+afraid,adj.,害怕的
+anger,v./n.,激怒;憤怒
+angry,adj.,生氣的
+bored,adj.,感到厭煩/無聊的
+emotion,n.,情緒
+envy,v.,羨慕;嫉妒
+excited,adj.,感到興奮的
+fear,v./n.,畏懼;恐懼
+feel,v.,感覺;覺得
+feeling,n.,感覺;感受
+glad,adj.,高興的
+happy,adj.,快樂的
+hate,v.,仇恨;憎恨
+jealous,adj.,嫉妒的
+joy,n.,喜悅
+lonely,adj.,寂寞的
+mad,adj.,生氣的;發瘋的
+nervous,adj.,緊張的
+pleased,adj.,滿意的;高興的
+pleasure,n.,愉快;高興
+regret,v.,懊悔
+respect,v./n,尊敬; 敬意
+sad,adj.,悲傷的
+sorry,adj.,抱歉的
+surprised,adj.,感到驚訝的
+unhappy,adj.,不快樂的
+worry,v.,擔心;發愁
+actor,n.,男演員
+actress,n.,女演員
+artist,n.,藝術家
+assistant,n.,助理
+baby sitter,n.,保母
+barber,n.,理髮師
+boss,n.,老板
+business,n.,生意;事情
+businessman,n.,商人
+call,v.,打電話
+captain,n.,隊長;機長
+chart,n.,圖表
+clerk,n.,職員
+coach,n.,教練
+computer,n.,電腦
+contract,n.,合約
+copy,n./v,副本;複製;抄襲
+cowboy,n.,牛仔
+dentist,n.,牙醫
+department,n.,部門
+dial,v.,撥號(電話)
+diplomat,n.,外交官
+doctor,n.,醫生
+driver,n.,司機
+e-mail,n.,電子郵件
+elect,v.,選舉; 選擇
+employ,v.,僱用
+engineer,n.,工程師
+farmer,n.,農夫
+file,n.,文件夾
+fisherman,n.,漁夫
+form,v./n.,形成;表格
+government,n.,政府
+guide,n.,嚮導
+hairdresser,n.,美髮師
+hire,v.,僱用
+housewife,n.,家庭主婦
+information,n.,資訊
+Internet,n.,網路
+interrupt,v.,打斷(談話和工作等)
+interview,n.,面試;採訪
+job,n.,職業;工作
+journalist,n.,新聞記者
+judge,v./n.,判斷;審判;法官
+knowledge,n.,知識
+lawyer,n.,律師
+letter,n.,信件
+link,n.,(網路上的)連結
+list,v./n.,列出來;清單;名冊
+magician,n.,魔術師
+mail,n.,郵件
+mail carrier,n.,郵差=mailman
+manager,n.,經理
+matter,n.,事情;問題
+mechanic,n.,技工
+meeting,n.,會議;集會
+member,n.,成員
+message,n.,口信;訊息
+method,n.,方法
+model,n.,模範;模特兒
+musician,n.,音樂家
+nurse,n.,護士
+office,n.,辦公室
+officer,n.,軍官;官員
+painter,n.,油漆工;油畫家
+plan,n.,計畫;方案
+police,n.,警察
+president,n.,總統;總裁
+priest,n.,牧師;神父
+principal,n.,(中小學)校長
+printer,n.,印表機;印刷業者
+problem,n.,問題
+professor,n.,教授
+project,n.,專案;企劃案
+quit,v.,放棄;離職
+report,n.,報告
+reporter,n.,記者
+sailor,n.,水手
+salesman,n.,推銷員
+scientist,n.,科學家
+screen,n.,螢幕
+secretary,n.,秘書
+shopkeeper,n.,店主
+singer,n.,歌手
+skill,n.,技能
+soldier,n.,士兵
+student,n.,學生
+teacher,n.,老師
+team,n.,團隊
+trade,n.,交易;買賣
+vendor,n.,小販
+vote,v./n.,投票;選票
+waiter,n.,服務生
+waitress,n.,女服務生
+work,n.,工作
+worker,n.,工人
+writer,n.,作家
+adult,n.,成人
+American,n.,美國人
+angel,n.,天使
+aunt,n.,阿姨;伯(叔、舅)母
+baby,n.,嬰孩
+beauty,n.,美貌;美人
+boy,n.,男孩
+brother,n.,兄弟
+character,n.,角色;性格
+child,n.,小孩子
+cousin,n.,表(堂)兄弟姊妹
+crowd,n.,群眾
+customer,n.,顧客
+daughter,n.,女兒
+dragon,n.,龍
+elder,adj.,年長的
+elder,n.,長輩
+enemy,n.,敵人
+family,n.,家庭
+father,n.,爸爸
+female,adj.,女性的
+fool,n.,傻瓜;笨蛋
+foreigner,n.,外國人
+friend,n.,朋友
+genius,n.,天才
+gentleman,n.,紳士
+ghost,n.,鬼
+giant,n.,巨人
+girl,n.,女孩
+god,n.,神;上帝
+granddaughter,n.,(外)孫女
+grandfather,n.,祖父（外公）
+grandmother,n.,祖母（外婆）
+grandson,n.,(外)孫子
+guard,n.,警衛
+guest,n.,客人
+guy,n.,傢伙;人(口語)
+hero,n.,英雄
+host,n.,主人;主持人
+human,n.,人
+human,adj.,人類的
+hunter,n.,獵人
+husband,n.,丈夫
+kid,n.,孩子
+king,n.,國王
+lady,n.,淑女
+leader,n.,領導者
+local,n.,當地居民
+loser,n.,輸家
+ma'am,n.,女士
+male,adj.,男性的
+man,n.,男人
+master,n.,主人
+Miss,n.,小姐
+monster,n.,怪物
+mother,n.,媽媽
+Mr.,n.,先生
+Mrs.,n.,夫人;太太
+Ms.,n.,女士
+name,n.,名字
+neighbor,n.,鄰居
+nephew,n.,侄子;外甥
+niece,n.,侄女;外甥女
+owner,n.,擁有者
+parent,n.,雙親
+partner,n.,夥伴
+passenger,n.,乘客
+people,n.,人們
+person,n.,個人
+player,n.,選手
+population,n.,人口
+prince,n.,王子
+princess,n.,公主
+queen,n.,皇后
+relative,n.,親戚;親屬
+role,n.,角色
+servant,n.,僕人
+sir,n.,先生;長官
+sister,n.,姊妹
+son,n.,兒子
+stranger,n.,陌生人
+teenager,n.,青少年
+thief,n.,小偷
+uncle,n.,伯父;叔叔
+visitor,n.,訪客;遊客
+wife,n.,妻子
+winner,n.,贏家
+woman,n.,女人
+ankle,n.,腳踝
+arm,n.,手臂
+back,n.,背部
+beard,n.,落腮鬍
+blind,adj.,瞎的
+blood,n.,血液
+body,n.,身體
+bone,n.,骨頭
+cancer,n.,癌症
+chin,n.,下巴
+chubby,adj.,圓胖的
+cough,v./n.,咳嗽
+cure,v./n.,治癒;痊癒
+deaf,adj.,耳聾的
+dizzy,adj.,暈眩的
+dumb,adj.,愚笨的;啞的
+ear,n.,耳朵
+eye,n.,眼睛
+face,n.,臉
+fat,adj.,胖的
+fever,n.,發燒
+finger,n.,手指
+flu,n.,流行性感冒
+foot,n.,腳
+hair,n.,頭髮
+haircut,n.,理髮
+hand,n.,手
+head,n.,頭
+headache,n.,頭痛
+health,n.,健康
+healthy,adj.,健康的
+hear,v.,聽見
+heart,n.,心臟
+hip,n.,臀部
+hungry,adj.,飢餓的
+hurt,v.,受傷
+ill,n./adj.,不幸;禍害;生病的
+jam,v.,擠;夾傷
+knee,n.,膝蓋
+leg,n.,腿
+lip,n.,嘴唇
+listen,v.,聽
+look,v.,看
+mouth,n.,嘴巴
+nail,n.,指甲;釘子
+neck,n.,脖子
+nose,n.,鼻子
+operation,n.,手術;操作
+over-weight,adj.,超(過)重的
+pain,n.,疼痛;痛苦
+painful,adj.,痛苦的
+patient,n.,病人
+say,v.,說;講
+see,v.,看見
+sense,n.,感官;意識
+short,adj.,矮的
+shoulder,n.,肩膀
+sick,adj.,生病的
+sight,n.,視覺;視力
+skin,n.,皮膚
+slender,adj.,修長的;纖細的
+slim,adj.,纖細的;苗條的
+smell,v.,聞
+sore,adj.,疼痛的
+sour,adj.,酸的
+speak,v.,說話
+stomach,n.,胃
+stomachache,n.,胃痛
+strong,adj.,強壯的
+sweet,adj.,甜的
+talk,v.,說話
+tall,adj.,高的
+taste,v./n.,品嚐;味覺
+tell,v.,告訴
+thin,adj.,瘦的
+throat,n.,喉嚨
+thumb,n.,拇指
+tired,adj.,疲倦的
+toe,n.,腳趾
+tongue,n.,舌頭
+tooth,n.,牙齒(單數)
+toothache,n.,牙痛
+treat,v.,治療;對待;看待
+ugly,adj.,醜的;難看的
+voice,n.,聲音;嗓子
+waist,n.,腰
+weak,adj.,虛弱的
+well,adj.,健康的;安好的
+wound,v./n.,使受傷/傷口
+wrist,n.,手腕`;
+        
+        // 初始化遊戲
+        function initGame() {
+            // 解析單字列表
+            vocabulary = parseWordList(wordList);
+            
+            if (vocabulary.length === 0) {
+                alert('單字庫載入失敗！');
+                return;
+            }
+            
+            // 重置遊戲狀態
+            score = 0;
+            scoreDisplay.textContent = score;
+            canAnswer = true; // 重置回答狀態
+            
+            // 清除之前的計時器
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            
+            // 切換到遊戲畫面
+            setupScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+            gameOverScreen.style.display = 'none';
+            
+            // 啟用所有選項
+            enableOptions();
+            
+            // 添加復活節裝飾元素
+            addEasterDecorations();
+            
+            // 開始遊戲
+            gameActive = true;
+            nextQuestion();
+        }
+        
+        // 啟用所有選項
+        function enableOptions() {
+            eggOptions.forEach(option => {
+                option.classList.remove('option-disabled');
+                option.classList.remove('correct-answer');
+            });
+            canAnswer = true;
+        }
+        
+        // 禁用所有選項
+        function disableOptions() {
+            eggOptions.forEach(option => {
+                option.classList.add('option-disabled');
+            });
+            canAnswer = false;
+        }
+        
+        // 添加復活節裝飾元素
+        function addEasterDecorations() {
+            const positions = [
+                {top: '10%', left: '5%', rotate: '15deg'},
+                {top: '15%', right: '5%', rotate: '-10deg'},
+                {bottom: '20%', left: '8%', rotate: '20deg'},
+                {bottom: '15%', right: '7%', rotate: '-15deg'},
+                {top: '30%', right: '10%', rotate: '10deg'},
+                {bottom: '30%', left: '12%', rotate: '-5deg'}
+            ];
+            
+            const gameContainer = document.querySelector('.game-container');
+            
+            // 先清除現有的裝飾
+            document.querySelectorAll('.easter-flower, .easter-leaf').forEach(el => el.remove());
+            
+            positions.forEach(pos => {
+                // 添加花朵
+                const flower = document.createElement('div');
+                flower.className = 'easter-flower';
+                flower.style.top = pos.top || '';
+                flower.style.left = pos.left || '';
+                flower.style.right = pos.right || '';
+                flower.style.bottom = pos.bottom || '';
+                flower.style.transform = `rotate(${pos.rotate})`;
+                gameContainer.appendChild(flower);
+                
+                // 添加葉子
+                const leaf = document.createElement('div');
+                leaf.className = 'easter-leaf';
+                leaf.style.top = pos.top ? `calc(${pos.top} + 30px)` : '';
+                leaf.style.left = pos.left ? `calc(${pos.left} + 20px)` : '';
+                leaf.style.right = pos.right ? `calc(${pos.right} + 25px)` : '';
+                leaf.style.bottom = pos.bottom ? `calc(${pos.bottom} + 15px)` : '';
+                leaf.style.transform = `rotate(${pos.rotate}) scale(0.8)`;
+                gameContainer.appendChild(leaf);
+            });
+        }
+        
+        // 解析單字列表
+        function parseWordList(text) {
+            const lines = text.split('\n');
+            const words = [];
+            
+            for (const line of lines) {
+                const trimmedLine = line.trim();
+                if (!trimmedLine) continue;
+                
+                const parts = trimmedLine.split(',');
+                if (parts.length < 3) continue;
+                
+                const word = parts[0].trim();
+                const pos = parts[1].trim();
+                const meanings = parts[2].split(';').map(m => m.trim()).filter(m => m);
+                
+                for (const meaning of meanings) {
+                    words.push({
+                        word: word,
+                        pos: pos,
+                        meaning: meaning
+                    });
+                }
+            }
+            
+            return words;
+        }
+        
+        // 下一題
+        function nextQuestion() {
+            if (!gameActive) return;
+            
+            // 清除之前的計時器
+            if (timer) {
+                clearInterval(timer);
+            }
+            
+            // 隨機選擇一個單字
+            currentWord = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+            
+            // 顯示單字和詞性
+            currentWordDisplay.textContent = currentWord.word;
+            currentPosDisplay.textContent = currentWord.pos;
+            
+            // 準備選項
+            prepareOptions();
+            
+            // 重置計時器
+            timeLeft = 8;
+            timerBar.style.width = '100%';
+            
+            // 啟用選項
+            enableOptions();
+            
+            // 開始倒計時
+            timer = setInterval(() => {
+                timeLeft -= 0.1;
+                timerBar.style.width = `${(timeLeft / 8) * 100}%`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    endGame(false);
+                }
+            }, 100);
+        }
+        
+        // 準備選項
+        function prepareOptions() {
+            // 正確答案
+            const correctAnswer = currentWord.meaning;
+            
+            // 收集其他可能的選項
+            const otherMeanings = vocabulary
+                .filter(item => item.meaning !== correctAnswer)
+                .map(item => item.meaning);
+            
+            // 隨機選擇3個不重複的錯誤選項
+            const wrongAnswers = [];
+            while (wrongAnswers.length < 3 && otherMeanings.length > 0) {
+                const randomIndex = Math.floor(Math.random() * otherMeanings.length);
+                const selectedMeaning = otherMeanings[randomIndex];
+                
+                // 確保選項不重複
+                if (!wrongAnswers.includes(selectedMeaning)) {
+                    wrongAnswers.push(selectedMeaning);
+                    otherMeanings.splice(randomIndex, 1);
+                }
+            }
+            
+            // 合併所有選項並打亂順序
+            const allOptions = [correctAnswer, ...wrongAnswers];
+            shuffleArray(allOptions);
+            
+            // 更新選項顯示
+            for (let i = 0; i < 4; i++) {
+                if (i < allOptions.length) {
+                    optionDisplays[i].textContent = allOptions[i];
+                    optionDisplays[i].parentElement.dataset.meaning = allOptions[i];
+                } else {
+                    optionDisplays[i].textContent = '無選項';
+                    optionDisplays[i].parentElement.dataset.meaning = '';
+                }
+            }
+        }
+        
+        // 打亂陣列順序
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // 檢查答案
+        function checkAnswer(selectedOption) {
+            if (!gameActive || !canAnswer) return;
+            
+            // 禁用選項，防止連續點擊
+            disableOptions();
+            
+            const selectedMeaning = selectedOption.dataset.meaning;
+            const isCorrect = selectedMeaning === currentWord.meaning;
+            
+            if (isCorrect) {
+                // 正確答案 - 每題5分
+                score += 5;
+                scoreDisplay.textContent = score;
+                
+                // 顯示正確效果
+                showCorrectEffect(selectedOption);
+                
+                // 減少延遲時間，從1000ms改為600ms
+                setTimeout(() => {
+                    nextQuestion();
+                }, 600);
+            } else {
+                // 錯誤答案
+                endGame(false);
+            }
+        }
+        
+        // 顯示正確效果
+        function showCorrectEffect(correctOption) {
+            correctOption.classList.add('correct-answer');
+            
+            // 創建彩花效果
+            createConfetti();
+            
+            setTimeout(() => {
+                correctOption.classList.remove('correct-answer');
+            }, 500);
+        }
+        
+        // 創建彩花效果
+        function createConfetti() {
+            const colors = ['#a8d8ea', '#f6d5f7', '#f8c3cd', '#faf3dd', '#6b8cae', '#d4e6f1'];
+            
+           for (let i = 0; i < 15; i++) { // 減少彩花數量
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.top = '-10px';
+                confetti.style.opacity = '1';
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                
+                // 隨機形狀
+                const shape = Math.random();
+                if (shape > 0.5) {
+                    confetti.style.borderRadius = '50%';
+                } else if (shape > 0.3) {
+                    confetti.style.width = '10px';
+                    confetti.style.height = '3px';
+                }
+                
+                document.body.appendChild(confetti);
+                
+                // 動畫
+                const animationDuration = Math.random() * 1.2 + 0.6; // 減少動畫時間
+                confetti.style.transition = `top ${animationDuration}s linear, opacity ${animationDuration}s ease-out`;
+                
+                setTimeout(() => {
+                    confetti.style.top = `${Math.random() * 100 + 100}vh`;
+                    confetti.style.opacity = '0';
+                }, 10);
+                
+                // 移除元素
+                setTimeout(() => {
+                    confetti.remove();
+                }, animationDuration * 1000 + 100);
+            }
+        }
+        
+        // 結束遊戲
+        function endGame(isWin) {
+            gameActive = false;
+            clearInterval(timer);
+            
+            // 更新結束畫面
+            finalScoreDisplay.textContent = score;
+            resultMessage.textContent = isWin ? '恭喜你贏了!' : '遊戲結束!';
+            
+            // 顯示結束畫面
+            gameOverScreen.style.display = 'flex';
+            
+            // 如果不是勝利，添加震動效果
+            if (!isWin) {
+                gameScreen.style.animation = 'shake 0.3s'; // 減少震動時間
+                setTimeout(() => {
+                    gameScreen.style.animation = '';
+                }, 300);
+            }
+        }
+        
+        // 重新開始遊戲
+        function restartGame() {
+            // 移除所有裝飾元素
+            document.querySelectorAll('.easter-flower, .easter-leaf').forEach(el => el.remove());
+            
+            gameOverScreen.style.display = 'none';
+            setupScreen.style.display = 'block';
+            gameScreen.style.display = 'none';
+        }
+        
+        // 事件監聽器
+        document.addEventListener('DOMContentLoaded', function() {
+            startGameBtn.addEventListener('click', initGame);
+            restartBtn.addEventListener('click', restartGame);
+            
+            // 選項點擊事件
+            document.querySelectorAll('.egg-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    if (gameActive && canAnswer) {
+                        checkAnswer(option);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
