@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>單字挑戰 - 手機版</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+            background-color: #a8e6cf;
+            text-align: center;
+            color: #333;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            background-image: linear-gradient(to bottom, #a8e6cf, #88d4ba);
+        }
+        
+        .game-container {
+            width: 100%;
+            max-width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            border: 8px solid #ffaaa5;
+            display: flex;
+            flex-direction: column;
+            height: 95vh;
+            max-height: 95vh;
+        }
+        
+        h1 {
+            color: #ff8b94;
+            margin: 5px 0;
+            font-size: 1.5rem;
+            text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        
+        .game-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .start-screen, .game-screen, .end-screen {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+        
+        .screen-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            justify-content: space-around;
+        }
+        
+        .start-screen button, .option, .end-screen button {
+            background-color: #ffaaa5;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin: 8px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 0 #d46a6a;
+            font-family: 'Comic Sans MS', cursive;
+            flex-shrink: 0;
+        }
+        
+        .start-screen button:hover, .option:hover, .end-screen button:hover {
+            background-color: #ff8b94;
+            transform: translateY(-2px);
+        }
+        
+        .start-screen button:active, .option:active, .end-screen button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #d46a6a;
+        }
+        
+        .word-display {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #6b5b95;
+            min-height: 2.2rem;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        
+        .pos-display {
+            font-size: 1.1rem;
+            color: #a8e6cf;
+            margin-bottom: 10px;
+            background-color: #6b5b95;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex: 1;
+            overflow-y: auto;
+            padding: 5px;
+        }
+        
+        .option {
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s;
+            font-size: 1rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #a8e6cf;
+            color: #333;
+            box-shadow: 0 4px 0 #86c7b8;
+            border-radius: 15px;
+            word-break: break-word;
+        }
+        
+        .timer-container {
+            height: 12px;
+            background-color: #dcedc1;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        
+        .timer-bar {
+            height: 100%;
+            background: linear-gradient(to right, #ff8b94, #ffaaa5);
+            width: 100%;
+            transition: width 0.1s linear;
+            border-radius: 10px;
+        }
+        
+        .countdown {
+            position: absolute;
+            top: -30px;
+            left: 0;
+            right: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff8b94;
+            text-shadow: 0 0 5px rgba(0,0,0,0.2);
+            z-index: 10;
+            transition: all 0.3s;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        
+        .countdown.pulse {
+            animation: pulse 0.5s;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        
+        .score-display {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #6b5b95;
+            background-color: #dcedc1;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            box-shadow: 0 4px 0 #b7d1a0;
+            flex-shrink: 0;
+        }
+        
+        .character-container {
+            height: 120px;
+            margin: 10px 0;
+            position: relative;
+            background-color: #f0f8ff;
+            border-radius: 15px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .pig {
+            font-size: 70px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 10px;
+            transition: all 0.3s;
+            animation: bounce 0.5s infinite alternate;
+            filter: drop-shadow(2px 4px 0 rgba(0,0,0,0.2));
+        }
+        
+        .pig.fall-over {
+            animation: fallOver 0.6s forwards;
+        }
+        
+        @keyframes bounce {
+            from { transform: translateX(-50%) translateY(0); }
+            to { transform: translateX(-50%) translateY(-10px); }
+        }
+        
+        @keyframes fallOver {
+            0% { transform: translateX(-50%) rotate(0deg); }
+            100% { transform: translateX(-50%) rotate(90deg); bottom: -20px; }
+        }
+        
+        .bomb {
+            position: absolute;
+            right: 30%;
+            bottom: 80px;
+            font-size: 35px;
+            z-index: 5;
+            transform: rotate(-20deg);
+        }
+        
+        .fuse {
+            position: absolute;
+            right: calc(30% + 8px);
+            bottom: 115px;
+            width: 70px;
+            height: 6px;
+            background: linear-gradient(to right, #f39c12, #e74c3c);
+            transform-origin: right center;
+            z-index: 4;
+            transition: width 0.1s linear;
+            border-radius: 3px;
+        }
+        
+        .flame {
+            position: absolute;
+            right: calc(30% - 8px);
+            bottom: 110px;
+            font-size: 20px;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s;
+            z-index: 6;
+            animation: flicker 0.1s infinite alternate;
+        }
+        
+        @keyframes flicker {
+            0% { opacity: 0.8; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1.1); }
+        }
+        
+        .explosion {
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            font-size: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 90;
+        }
+        
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+            border-radius: 50%;
+        }
+        
+        .end-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+            padding: 20px;
+            overflow: auto;
+        }
+        
+        .end-screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .end-screen h2 {
+            color: #ff8b94;
+            margin-bottom: 15px;
+            font-size: 2rem;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.5s;
+            text-shadow: 2px 2px 0 #fff;
+        }
+        
+        .end-screen p {
+            font-size: 1.3rem;
+            margin: 8px 0;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.5s 0.2s;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: #6b5b95;
+        }
+        
+        .end-screen button {
+            margin-top: 20px;
+            background-color: #a8e6cf;
+            color: #333;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.5s 0.4s;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            min-width: 180px;
+            box-shadow: 0 6px 0 #86c7b8;
+            border-radius: 50px;
+        }
+        
+        .end-screen.active h2,
+        .end-screen.active p,
+        .end-screen.active button {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .end-screen button:hover {
+            background-color: #86c7b8;
+        }
+        
+        .correct {
+            background-color: #a8e6cf !important;
+            color: #333 !important;
+            transform: scale(1.05);
+            box-shadow: 0 4px 0 #86c7b8;
+            animation: correctBounce 0.3s;
+        }
+        
+        @keyframes correctBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1.05); }
+        }
+        
+        .wrong {
+            background-color: #ffaaa5 !important;
+            color: white !important;
+            transform: scale(1.05);
+            box-shadow: 0 4px 0 #d46a6a;
+            animation: shake 0.3s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* 農場裝飾元素 */
+        .farm-decoration {
+            position: absolute;
+            font-size: 25px;
+            z-index: 1;
+        }
+        
+        .sun {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 40px;
+            color: #ffd700;
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .cloud {
+            position: absolute;
+            font-size: 30px;
+            color: white;
+            animation: float 15s linear infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateX(-100px); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateX(calc(100vw + 100px)); opacity: 0; }
+        }
+        
+        /* 橫屏專用樣式 */
+        @media (orientation: landscape) {
+            .game-container {
+                height: 98vh;
+                max-height: 98vh;
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+                margin: 3px 0;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+                margin-bottom: 5px;
+            }
+            
+            .option {
+                min-height: 50px;
+                font-size: 0.9rem;
+                padding: 8px;
+            }
+            
+            .character-container {
+                height: 80px;
+                margin: 5px 0;
+            }
+            
+            .pig {
+                font-size: 50px;
+            }
+            
+            .bomb {
+                font-size: 25px;
+                bottom: 50px;
+            }
+            
+            .fuse {
+                bottom: 75px;
+                width: 50px;
+            }
+            
+            .flame {
+                bottom: 70px;
+                font-size: 15px;
+            }
+            
+            .word-display {
+                font-size: 1.5rem;
+                margin: 5px 0;
+            }
+            
+            .pos-display {
+                font-size: 1rem;
+                margin-bottom: 5px;
+            }
+            
+            .score-display {
+                font-size: 1.1rem;
+                margin-bottom: 5px;
+            }
+            
+            .timer-container {
+                margin: 5px 0;
+            }
+            
+            .countdown {
+                top: -25px;
+                font-size: 1.3rem;
+            }
+            
+            .start-screen button, .end-screen button {
+                padding: 10px 15px;
+                font-size: 1rem;
+                margin: 5px;
+            }
+            
+            .end-screen h2 {
+                font-size: 1.8rem;
+                margin-bottom: 10px;
+            }
+            
+            .end-screen p {
+                font-size: 1.1rem;
+                margin: 5px 0;
+            }
+            
+            .end-screen button {
+                padding: 10px 20px;
+                font-size: 1rem;
+                min-width: 150px;
+            }
+        }
+        
+        /* 超小螢幕橫屏優化 */
+        @media (orientation: landscape) and (max-height: 400px) {
+            .character-container {
+                height: 60px;
+            }
+            
+            .pig {
+                font-size: 40px;
+            }
+            
+            .bomb {
+                font-size: 20px;
+                bottom: 40px;
+            }
+            
+            .fuse {
+                bottom: 60px;
+                width: 40px;
+            }
+            
+            .flame {
+                bottom: 55px;
+                font-size: 12px;
+            }
+            
+            .word-display {
+                font-size: 1.3rem;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+            
+            .option {
+                min-height: 40px;
+                font-size: 0.8rem;
+                padding: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sun">☀️</div>
+    <div class="cloud" style="top: 20px; animation-delay: 0s;">☁️</div>
+    <div class="cloud" style="top: 60px; animation-delay: 5s;">☁️</div>
+    <div class="cloud" style="top: 40px; animation-delay: 10s;">☁️</div>
+    
+    <div class="game-container">
+        <h1>L4 U1-10 單字挑戰無極限</h1>
+        
+        <div class="game-content">
+            <div class="start-screen">
+                <div class="screen-content">
+                    <div class="character-container">
+                        <div class="pig">🐷</div>
+                        <div class="bomb">💣</div>
+                        <div class="fuse"></div>
+                        <div class="flame">🔥</div>
+                        <div class="farm-decoration" style="bottom: 15px; left: 15px;">🌻</div>
+                        <div class="farm-decoration" style="bottom: 15px; right: 15px;">🌽</div>
+                    </div>
+                    <button id="start-btn">開始挑戰！</button>
+                </div>
+            </div>
+            
+            <div class="game-screen hidden">
+                <div class="screen-content">
+                    <div class="score-display">得分: <span id="score">0</span></div>
+                    <div class="countdown" id="countdown">8</div>
+                    <div class="timer-container">
+                        <div class="timer-bar" id="timer-bar"></div>
+                    </div>
+                    <div class="word-display" id="word"></div>
+                    <div class="pos-display" id="pos"></div>
+                    
+                    <div class="options-container" id="options-container">
+                        <!-- 選項將由JavaScript動態生成 -->
+                    </div>
+                    
+                    <div class="character-container">
+                        <div class="pig" id="pig">🐷</div>
+                        <div class="bomb">💣</div>
+                        <div class="fuse" id="fuse"></div>
+                        <div class="flame" id="flame">🔥</div>
+                        <div class="explosion" id="explosion">💥</div>
+                        <div class="confetti" id="confetti"></div>
+                        <div class="farm-decoration" style="bottom: 15px; left: 15px;">🐔</div>
+                        <div class="farm-decoration" style="bottom: 15px; right: 15px;">🐄</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="end-screen">
+                <h2>遊戲結束！</h2>
+                <p>你的最終得分: <span id="final-score">0</span></p>
+                <p>用時: <span id="time-used">0</span>秒</p>
+                <button id="restart-btn">再玩一次</button>
+                <div class="farm-decoration" style="bottom: 40px; left: 40px; font-size: 35px;">🐑</div>
+                <div class="farm-decoration" style="bottom: 20px; right: 40px; font-size: 40px;">🚜</div>
+            </div>
+        </div>
+        
+        <!-- 單字庫區域 -->
+        <textarea id="word-database" style="display: none;">
+brutal, adj., 野蠻的;粗暴的
+civilian, adj., 百姓的;民用的
+courageous, adj., 英勇的;勇敢的
+intense, adj., 強烈的;劇烈的
+keen, adj., 熱心的;敏銳的;渴望的
+commit, v., 使作出保證;犯(罪);做(錯事等)
+cripple, v., 使成跛子;使殘廢
+curve, v., 使彎曲;使成曲線
+deserve, v., 應受;該得
+differ, v., 不同;相異
+grace, v., 使優美; 為...增色/錦上添花
+horrify, v., 使恐懼;使驚懼
+idle, v., 空轉; 混時間; 無所事事
+lighten, v., 使光明;照亮
+polish, v., 磨光;擦亮
+accuracy, n., 正確(性);準確(性)
+appliance, n., 用具;裝置;設備
+applicant, n., 申請人
+beak, n., 鳥嘴
+code, n., 法規;代碼;電碼
+craft, n., 工藝;手藝
+cue, n., 暗示;信號
+dormitory, n., 宿舍(=dorm)
+embassy, n., 大使館
+lotion, n., (化妝等用的)乳液;塗劑
+maximum, n., 最高極限
+penalty, n., 處罰;刑罰;罰款
+philosophy, n., 哲學
+quilt, n., 被(子);被褥
+seagull, n., 海鷗
+wreck, n., (船等的)失事;遇難; (車)遭嚴重毀壞
+artificial, adj., 人工的
+conservative, adj., 保守的;守舊的
+faithful, adj., 忠實的;忠誠的
+gigantic, adj., 巨大的;龐大的
+memorable, adj., 值得懷念的;難忘的
+needy, adj., 貧窮的
+overnight, adj., 一夜之間的;夜間的
+preferable, adj., 更可取的;更合意的
+senior, adj., 年資較深的;四年級生的
+severe, adj., 嚴重的;劇烈的
+analyze, v., 分析 (美式拼寫)
+cease, v., 停止;終止
+converse, v., 交談;談話
+glide, v., 滑動;滑行
+guarantee, v., 保證;擔保
+rescue, v., 援救;營救
+spear, v., 刺;戳
+wreck, v., 遇難;受到破壞
+blessing, n., 祈神賜福;祝福
+breed, n., 品種
+concept, n., 概念;觀念
+drill, n., 鑽;鑽頭;鑽床
+gaze, n., 凝視;注視
+hesitation, n., 躊躇;猶豫
+merit, n., 長處;優點;法律依據
+messenger, n., 送信人
+mineral, n., 礦物
+operation, n., 手術;操作
+pregnancy, n., 懷孕
+registration, n., 登記;註冊;掛號
+scenery, n., 風景
+sculpture, n., 雕刻品;雕塑品;雕
+telegram, n., 電報
+aggressive, adj., 好鬥的;挑釁的;有進取精神的
+passive, adj., 被動的;消極的
+pessimistic, adj., 悲觀的
+cherish, v., 撫育;愛護
+construct, v., 建造;構成
+contest, v., 競爭;角逐;爭辯
+cube, v., 使成立方形;切成小方塊
+disconnect, v., 切斷(電話電源等)
+illustrate, v., (用圖;實例等)說明
+negotiate, v., 談判;協商
+site, v., 為...選址;設置
+split, v., 劈開;切開
+cease, n., 停息
+enlargement, n., 放大
+grace, n., 優雅;(票據等到期後的)寬限
+impression, n., 印象
+isolation, n., 隔離
+literature, n., 文學;文學作品
+neglect, n., 忽略;疏忽;疏漏
+noun, n., 名詞
+syrup, n., 糖漿
+tomb, n., 墓;墓碑
+transfer, n., 移交;轉讓
+dependable, adj., 可靠的;可信任的
+guilty, adj., 有罪的
+idle, adj., 無所事事的
+intensive, adj., 加強的;密集的
+learned, adj., 有學問的;博學的;精通的
+leisurely, adj., 從容不迫的;悠閒的
+contrast, v., 使對比;使對照
+embarrass, v., 使困窘
+frame, v., 給...裝框子; 制定; 擬定
+route, v., 給...定路線
+highly, adv., 非常;很;高度地
+assignment, n., (分派的)任務;工作;(課外)作業
+bounce, n., 彈;反彈
+commander, n., 指揮官;司令官
+conscience, n., 良心;道義心
+contentment, n., 知足;滿意
+facility, n., 能力;技能;設備; 設施; 工具;(供特定用途的)場所
+fragrance, n., 芬芳;香味
+glide, n., 滑翔;下滑
+gratitude, n., 感激之情;感恩;感謝
+idiom, n., 成語
+information, n., 資訊
+luxury, n., 奢侈品;奢華;享受;樂趣
+peer, n., 同輩;同事
+possession, n., 擁有;佔有;所有物
+profession, n., 職業同行
+recovery, n., 恢復;復甦;復元;痊癒
+reflection, n., 反射;回響
+reputation, n., 名譽;名聲
+saleswoman, n., 女店員;售貨員
+twinkle, n., 閃爍;閃耀
+dependent, adj., 依靠的;依賴的
+thorough, adj., 徹底的;完全的
+virgin, adj., 未玷污的; 未開發的; 貞潔的
+blink, v., 眨眼睛;閃爍
+email, v.n., electronic mail (發)電子郵件
+endanger, v., 危及;使遭到危險
+foam, v., 起泡沫
+hasten, v., 催促;加速;趕緊
+labor, v., 勞動;努力 (美式拼寫)
+launch, v., 發射;開始
+mow, v., 刈(草坪等)上的草
+orbit, v., 繞軌道運行
+witness, v., 目擊;為...作證
+largely, adv., 大部分;主要地;大量地
+cinema, n., 電影院;電影;電影業
+damp, n., 濕氣;潮濕
+digest, n., 摘要;文摘
+equality, n., 相等;平等
+fulfillment, n., 完成;履行;實現;成就(感) (美式拼寫)
+guarantee, n., 保證;保證書
+hook, n., 鉤;掛鉤
+incident, n., 事件;事變
+launch, n., (船的)下水;發射
+pace, n., 步速;速度;進度
+publisher, n., 出版商
+refusal, n., 拒絕
+remark, n., 言辭;談論;評論
+resignation, n., 辭職;放棄
+greasy, adj., 油膩的
+calculate, v., 計算
+flee, v., 逃離;逃避
+fuel, v., 加燃料;加油
+loan, v., 借出;貸與
+rhyme, v., 押韻
+sleigh, v., 駕雪橇;用雪橇運輸
+upload, v., [電腦]上載
+association, n., 協會;公會;社團
+campaign, n., 運動;活動
+candidate, n., 候選人;候補者
+celebration, n., 慶祝
+explanation, n., 說明;解釋
+illustration, n., 說明;圖解
+objective, n., 目的;目標
+pirate, n., 海盜;劫掠者
+remedy, n., 治療;治療法;藥物
+salary, n., 薪資;薪水
+status, n., 狀況;狀態
+adequate, adj., 足夠的
+atomic, adj., 原子的
+fundamental, adj., 基礎的;根本的
+imaginable, adj., 能想像的
+peculiar, adj., 奇怪的;乖癖的
+adapt, v., 使適應;使適合; 改編;改寫
+blush, v., 臉紅
+consult, v., 與...商量
+depress, v., 使沮喪
+honeymoon, v., 度蜜月
+overcome, v., 戰勝;克服
+acre, n., 英畝
+amusement, n., 樂趣;消遣
+catalogue, n., 目錄;大學概況一覽;登記;記載 (英式拼寫)
+chemistry, n., 化學
+contest, n., 爭奪;競爭
+curiosity, n., 好奇心
+departure, n., 離開;出發;起程
+formation, n., 形成;構成物; 形態; 結構
+gear, n., 齒輪;工具;設備
+grammar, n., 文法
+impact, n., 衝擊;撞擊;影響
+Internet, n., 網際網路
+protest, n., 抗議;異議
+representation, n., 代表;代理
+scold, n., 責罵
+shrug, n., 聳肩
+shuttle, n., (織機的)梭;短程運行的車輛
+urge, n., 強烈的慾望
+accidental, adj., 偶然的;意外的
+distinguished, adj., 卓越的;著名的
+magnetic, adj., 磁鐵的;磁性的
+primitive, adj., 原始的;遠古的;早期的
+universal, adj., 宇宙的;通用的
+abandon, v., 放棄
+attach, v., 裝上;貼上;使附屬
+crush, v., 壓碎;壓壞
+devise, v., 設計;發明
+discipline, v., 懲戒
+doze, v., 打瞌睡;打盹
+dread, v., 懼怕;擔心
+exhaust, v., 使精疲力盡
+forbid, v., 禁止;不許
+forecast, v., 預測
+initial, v., 簽姓名的首字母於;草簽
+intend, v., 想要;打算
+intensify, v., 加強;增強
+reflect, v., 反射;照出;映出
+resign, v., 放棄;辭去
+resolve, v., 解決;解答;使分解
+despite, prep., 不管;儘管;任憑
+allowance, n., 津貼;零用錢
+capacity, n., 容量;容積
+clash, n., 碰撞聲;鏗鏘聲
+comment, n., 評論
+conductor, n., 指揮; 列車長; 檢票員; 導體
+doctor, n., 醫生
+dread, n., 畏懼;恐怖
+greeting, n., 問候;迎接;招呼;賀詞;問候語
+learning, n., 學習;學問;學識
+quotation, n., 引用;引證;引文
+screwdriver, n., 螺絲刀;螺絲起子
+sleigh, n., (輕便) 雪橇
+surgeon, n., 外科醫生
+telescope, n., 望遠鏡
+usage, n., 使用;用法
+abstract, adj., 抽象的
+continuous, adj., 連續的;不斷的
+minimum, adj., 最小的;最少的
+urban, adj., 城市的
+adjust, v., 校準;調整;適應
+campaign, v., 參加競選
+depart, v., 起程;出發;離開;離去
+mostly, adv., 一般地;通常
+admiration, n., 欽佩;羨慕
+delight, n., 欣喜;愉快
+essay, n., 論說文;散文
+eve, n., 前夕
+observation, n., 觀察;觀測
+reception, n., 接待;接見;接待處
+retreat, n., 撤退
+sketch, n., 速寫;素描
+sophomore, n., (大學;高中的)二年級學生
+damp, adj., 有濕氣的;潮濕的
+enormous, adj., 巨大的
+remarkable, adj., 非凡的;卓越的
+comment, v., 評論
+interpret, v., 解釋
+offend, v., 冒犯;觸怒
+sneeze, v. n., (打) 噴嚏
+urge, v., 催促;力勸
+violate, v., 違犯;擾亂
+cabinet, n., 櫥;櫃;內閣
+cement, n., 水泥
+deadline, n., 最後限期
+fantasy, n., 空想;幻想
+forecast, n., 預測
+generosity, n., 寬宏大量;慷慨
+invasion, n., 入侵;侵略
+manufacturer, n., 製造業者;廠商
+modesty, n., 謙遜;虛心
+nylon, n., 尼龍
+opera, n., 歌劇
+persuasion, n., 說服;勸說
+syllable, n., 音節
+unique, n., 獨一無二的人(或事物)
+violation, n., 違反;違背
+        </textarea>
+    </div>
+
+    <script>
+        // 遊戲變數
+        let score = 0;
+        let currentQuestionIndex = 0;
+        let timer;
+        let timeLeft = 8;
+        let startTime;
+        let questions = [];
+        let usedIndices = [];
+        let lastCountdownNumber = 8;
+        let isAnswering = false;
+        
+        // DOM元素
+        const startScreen = document.querySelector('.start-screen');
+        const gameScreen = document.querySelector('.game-screen');
+        const endScreen = document.querySelector('.end-screen');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const wordDisplay = document.getElementById('word');
+        const posDisplay = document.getElementById('pos');
+        const optionsContainer = document.getElementById('options-container');
+        const scoreDisplay = document.getElementById('score');
+        const timerBar = document.getElementById('timer-bar');
+        const countdownDisplay = document.getElementById('countdown');
+        const pig = document.getElementById('pig');
+        const fuse = document.getElementById('fuse');
+        const flame = document.getElementById('flame');
+        const explosion = document.getElementById('explosion');
+        const confettiContainer = document.getElementById('confetti');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const timeUsedDisplay = document.getElementById('time-used');
+        const wordDatabase = document.getElementById('word-database');
+        
+        // 初始化遊戲
+        function initGame() {
+            // 解析單字庫
+            const wordData = wordDatabase.value.trim().split('\n');
+            questions = wordData.map(line => {
+                const parts = line.trim().split(',');
+                if (parts.length >= 3) {
+                    return {
+                        word: parts[0].trim(),
+                        pos: parts[1].trim(),
+                        meaning: parts.slice(2).join(',').trim()
+                    };
+                }
+                return null;
+            }).filter(q => q !== null && q.word && q.pos && q.meaning);
+            
+            // 重置遊戲狀態
+            score = 0;
+            currentQuestionIndex = 0;
+            usedIndices = [];
+            lastCountdownNumber = 8;
+            isAnswering = false;
+            scoreDisplay.textContent = score;
+            
+            // 重置視覺元素
+            pig.textContent = '🐷';
+            pig.className = 'pig';
+            flame.style.opacity = '0';
+            flame.style.transform = 'scale(0)';
+            fuse.style.width = '80px';
+            explosion.style.opacity = '0';
+            explosion.style.transform = 'scale(0)';
+            confettiContainer.innerHTML = '';
+            countdownDisplay.className = 'countdown';
+            
+            // 顯示開始畫面
+            startScreen.classList.remove('hidden');
+            gameScreen.classList.add('hidden');
+            endScreen.classList.remove('active');
+        }
+        
+        function startGame() {
+            if (questions.length === 0) {
+                alert('單字庫解析錯誤，請檢查單字格式！');
+                return;
+            }
+            
+            startScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            startTime = new Date().getTime();
+            loadQuestion();
+        }
+        
+        // 載入問題
+        function loadQuestion() {
+            // 重置計時器
+            clearInterval(timer);
+            timeLeft = 8;
+            lastCountdownNumber = 8;
+            countdownDisplay.textContent = timeLeft;
+            timerBar.style.width = '100%';
+            timerBar.style.backgroundColor = '#ff8b94';
+            flame.style.opacity = '0';
+            flame.style.transform = 'scale(0)';
+            fuse.style.width = '80px';
+            explosion.style.opacity = '0';
+            explosion.style.transform = 'scale(0)';
+            confettiContainer.innerHTML = '';
+            countdownDisplay.style.color = '#ff8b94';
+            countdownDisplay.style.fontSize = '1.5rem';
+            countdownDisplay.className = 'countdown';
+            
+            // 重置回答狀態
+            isAnswering = false;
+            
+            // 隨機選擇一個未使用過的問題
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * questions.length);
+            } while (usedIndices.includes(randomIndex) && usedIndices.length < questions.length);
+            
+            usedIndices.push(randomIndex);
+            currentQuestionIndex = randomIndex;
+            
+            const question = questions[currentQuestionIndex];
+            wordDisplay.textContent = question.word;
+            posDisplay.textContent = question.pos;
+            
+            // 生成選項
+            generateOptions(question);
+            
+            // 開始計時
+            timer = setInterval(updateTimer, 100);
+        }
+        
+        // 生成選項
+        function generateOptions(correctQuestion) {
+            optionsContainer.innerHTML = '';
+            
+            // 收集所有可能的中文意思
+            const allMeanings = questions.map(q => q.meaning);
+            
+            // 隨機選擇3個不重複且與正確答案不同的選項
+            const options = [correctQuestion.meaning];
+            while (options.length < 4) {
+                const randomIndex = Math.floor(Math.random() * allMeanings.length);
+                const randomMeaning = allMeanings[randomIndex];
+                
+                if (!options.includes(randomMeaning)) {
+                    options.push(randomMeaning);
+                }
+            }
+            
+            // 打亂選項順序
+            shuffleArray(options);
+            
+            // 創建選項按鈕
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option';
+                button.textContent = option;
+                button.addEventListener('click', () => {
+                    // 防止連續點擊
+                    if (!isAnswering) {
+                        isAnswering = true;
+                        checkAnswer(option, correctQuestion.meaning);
+                    }
+                });
+                optionsContainer.appendChild(button);
+            });
+        }
+        
+        // 檢查答案
+        function checkAnswer(selectedOption, correctAnswer) {
+            clearInterval(timer);
+            
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.disabled = true;
+                if (option.textContent === correctAnswer) {
+                    option.classList.add('correct');
+                } else if (option.textContent === selectedOption && selectedOption !== correctAnswer) {
+                    option.classList.add('wrong');
+                }
+            });
+            
+            if (selectedOption === correctAnswer) {
+                // 答對
+                score += 5;
+                scoreDisplay.textContent = score;
+                pig.textContent = '🐷🎉';
+                createConfetti();
+                
+                // 播放答對音效
+                playSound('correct');
+                
+                // 減少延遲時間
+                setTimeout(() => {
+                    pig.textContent = '🐷';
+                    loadQuestion();
+                }, 800);
+            } else {
+                // 答錯
+                flame.style.opacity = '1';
+                flame.style.transform = 'scale(1)';
+                explosion.style.opacity = '1';
+                explosion.style.transform = 'scale(1.5)';
+                
+                // 豬叫聲和翻倒動畫
+                pig.className = 'pig fall-over';
+                
+                // 播放爆炸音效
+                playSound('explosion');
+                
+                // 顯示結束畫面，減少延遲時間
+                setTimeout(() => {
+                    const endTime = new Date().getTime();
+                    const timeUsed = Math.floor((endTime - startTime) / 1000);
+                    
+                    finalScoreDisplay.textContent = score;
+                    timeUsedDisplay.textContent = timeUsed;
+                    
+                    gameScreen.classList.add('hidden');
+                    endScreen.classList.add('active');
+                }, 800);
+            }
+        }
+        
+        // 播放音效
+        function playSound(type) {
+            if (type === 'correct') {
+                // 答對音效 - 歡呼聲
+                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3');
+                audio.volume = 0.5;
+                audio.play().catch(e => console.log('音效播放失敗:', e));
+            } else if (type === 'explosion') {
+                // 爆炸音效
+                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-bomb-explosion-1680.mp3');
+                audio.volume = 0.5;
+                audio.play().catch(e => console.log('音效播放失敗:', e));
+            }
+        }
+        
+        // 創建彩色紙花效果
+        function createConfetti() {
+            const colors = ['#ff8b94', '#ffaaa5', '#a8e6cf', '#dcedc1', '#6b5b95', '#ffd3b6'];
+            const confettiCount = 50;
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti-piece';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = -10 + 'px';
+                confetti.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+                
+                const animationDuration = Math.random() * 2 + 1;
+                confetti.style.animation = `fall ${animationDuration}s linear forwards`;
+                
+                confettiContainer.appendChild(confetti);
+                
+                // 設置動畫
+                setTimeout(() => {
+                    confetti.style.top = '100%';
+                    confetti.style.opacity = '1';
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg) translateX(${Math.random() * 100 - 50}px)`;
+                }, 10);
+                
+                // 移除元素
+                setTimeout(() => {
+                    confetti.remove();
+                }, animationDuration * 1000);
+            }
+            
+            // 添加動畫樣式
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fall {
+                    to {
+                        top: 100%;
+                        opacity: 0;
+                        transform: rotate(360deg) translateX(${Math.random() * 100 - 50}px);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // 更新計時器
+        function updateTimer() {
+            timeLeft -= 0.1;
+            const percentage = (timeLeft / 8) * 100;
+            timerBar.style.width = `${percentage}%`;
+            
+            // 更新倒計時數字
+            const currentNumber = Math.ceil(timeLeft);
+            countdownDisplay.textContent = currentNumber;
+            
+            // 數字跳動效果
+            if (currentNumber !== lastCountdownNumber) {
+                lastCountdownNumber = currentNumber;
+                countdownDisplay.className = 'countdown pulse';
+                
+                setTimeout(() => {
+                    countdownDisplay.className = 'countdown';
+                }, 500);
+            }
+            
+            // 引線燃燒效果
+            fuse.style.width = `${percentage * 0.8}px`;
+            
+            // 根據剩餘時間改變顏色和火焰效果
+            if (percentage < 20) {
+                timerBar.style.background = 'linear-gradient(to right, #ff0000, #ff6600)';
+                countdownDisplay.style.color = '#ff0000';
+                countdownDisplay.style.fontSize = '1.7rem';
+                flame.style.opacity = '1';
+                flame.style.transform = 'scale(1)';
+            } else if (percentage < 50) {
+                timerBar.style.background = 'linear-gradient(to right, #ff6600, #ff8b94)';
+                countdownDisplay.style.color = '#ff6600';
+                countdownDisplay.style.fontSize = '1.6rem';
+                flame.style.opacity = '0.7';
+                flame.style.transform = 'scale(0.7)';
+            } else {
+                countdownDisplay.style.color = '#ff8b94';
+                countdownDisplay.style.fontSize = '1.5rem';
+            }
+            
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                // 時間到，自動檢查一個錯誤答案
+                const options = document.querySelectorAll('.option');
+                const correctAnswer = questions[currentQuestionIndex].meaning;
+                
+                // 找到一個錯誤選項
+                let wrongOption;
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].textContent !== correctAnswer) {
+                        wrongOption = options[i].textContent;
+                        break;
+                    }
+                }
+                
+                if (wrongOption) {
+                    // 設置回答狀態為true，防止連續點擊
+                    isAnswering = true;
+                    checkAnswer(wrongOption, correctAnswer);
+                }
+            }
+        }
+        
+        // 輔助函數：打亂數組
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // 事件監聽器
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', initGame);
+        
+        // 初始化遊戲
+        initGame();
+    </script>
+</body>
+</html>
