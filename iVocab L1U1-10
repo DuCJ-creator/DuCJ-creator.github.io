@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>單字挑戰 - 手機版</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+            background-color: #a8e6cf;
+            text-align: center;
+            color: #333;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            background-image: linear-gradient(to bottom, #a8e6cf, #88d4ba);
+        }
+        
+        .game-container {
+            width: 100%;
+            max-width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            border: 8px solid #ffaaa5;
+            display: flex;
+            flex-direction: column;
+            height: 95vh;
+            max-height: 95vh;
+        }
+        
+        h1 {
+            color: #ff8b94;
+            margin: 5px 0;
+            font-size: 1.5rem;
+            text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        
+        .game-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .start-screen, .game-screen, .end-screen {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+        
+        .screen-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            justify-content: space-around;
+        }
+        
+        .start-screen button, .option, .end-screen button {
+            background-color: #ffaaa5;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin: 8px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 0 #d46a6a;
+            font-family: 'Comic Sans MS', cursive;
+            flex-shrink: 0;
+        }
+        
+        .start-screen button:hover, .option:hover, .end-screen button:hover {
+            background-color: #ff8b94;
+            transform: translateY(-2px);
+        }
+        
+        .start-screen button:active, .option:active, .end-screen button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #d46a6a;
+        }
+        
+        .word-display {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #6b5b95;
+            min-height: 2.2rem;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        
+        .pos-display {
+            font-size: 1.1rem;
+            color: #a8e6cf;
+            margin-bottom: 10px;
+            background-color: #6b5b95;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex: 1;
+            overflow-y: auto;
+            padding: 5px;
+        }
+        
+        .option {
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s;
+            font-size: 1rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #a8e6cf;
+            color: #333;
+            box-shadow: 0 4px 0 #86c7b8;
+            border-radius: 15px;
+            word-break: break-word;
+        }
+        
+        .timer-container {
+            height: 12px;
+            background-color: #dcedc1;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        
+        .timer-bar {
+            height: 100%;
+            background: linear-gradient(to right, #ff8b94, #ffaaa5);
+            width: 100%;
+            transition: width 0.1s linear;
+            border-radius: 10px;
+        }
+        
+        .countdown {
+            position: absolute;
+            top: -30px;
+            left: 0;
+            right: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff8b94;
+            text-shadow: 0 0 5px rgba(0,0,0,0.2);
+            z-index: 10;
+            transition: all 0.3s;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        
+        .countdown.pulse {
+            animation: pulse 0.5s;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        
+        .score-display {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #6b5b95;
+            background-color: #dcedc1;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            box-shadow: 0 4px 0 #b7d1a0;
+            flex-shrink: 0;
+        }
+        
+        .character-container {
+            height: 120px;
+            margin: 10px 0;
+            position: relative;
+            background-color: #f0f8ff;
+            border-radius: 15px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .pig {
+            font-size: 70px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 10px;
+            transition: all 0.3s;
+            animation: bounce 0.5s infinite alternate;
+            filter: drop-shadow(2px 4px 0 rgba(0,0,0,0.2));
+        }
+        
+        .pig.fall-over {
+            animation: fallOver 0.6s forwards;
+        }
+        
+        @keyframes bounce {
+            from { transform: translateX(-50%) translateY(0); }
+            to { transform: translateX(-50%) translateY(-10px); }
+        }
+        
+        @keyframes fallOver {
+            0% { transform: translateX(-50%) rotate(0deg); }
+            100% { transform: translateX(-50%) rotate(90deg); bottom: -20px; }
+        }
+        
+        .bomb {
+            position: absolute;
+            right: 30%;
+            bottom: 80px;
+            font-size: 35px;
+            z-index: 5;
+            transform: rotate(-20deg);
+        }
+        
+        .fuse {
+            position: absolute;
+            right: calc(30% + 8px);
+            bottom: 115px;
+            width: 70px;
+            height: 6px;
+            background: linear-gradient(to right, #f39c12, #e74c3c);
+            transform-origin: right center;
+            z-index: 4;
+            transition: width 0.1s linear;
+            border-radius: 3px;
+        }
+        
+        .flame {
+            position: absolute;
+            right: calc(30% - 8px);
+            bottom: 110px;
+            font-size: 20px;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s;
+            z-index: 6;
+            animation: flicker 0.1s infinite alternate;
+        }
+        
+        @keyframes flicker {
+            0% { opacity: 0.8; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1.1); }
+        }
+        
+        .explosion {
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            font-size: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 90;
+        }
+        
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+            border-radius: 50%;
+        }
+        
+        .end-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+            padding: 20px;
+            overflow: auto;
+        }
+        
+        .end-screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .end-screen h2 {
+            color: #ff8b94;
+            margin-bottom: 15px;
+            font-size: 2rem;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.5s;
+            text-shadow: 2px 2px 0 #fff;
+        }
+        
+        .end-screen p {
+            font-size: 1.3rem;
+            margin: 8px 0;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.5s 0.2s;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: #6b5b95;
+        }
+        
+        .end-screen button {
+            margin-top: 20px;
+            background-color: #a8e6cf;
+            color: #333;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.5s 0.4s;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            min-width: 180px;
+            box-shadow: 0 6px 0 #86c7b8;
+            border-radius: 50px;
+        }
+        
+        .end-screen.active h2,
+        .end-screen.active p,
+        .end-screen.active button {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .end-screen button:hover {
+            background-color: #86c7b8;
+        }
+        
+        .correct {
+            background-color: #a8e6cf !important;
+            color: #333 !important;
+            transform: scale(1.05);
+            box-shadow: 0 4px 0 #86c7b8;
+            animation: correctBounce 0.3s;
+        }
+        
+        @keyframes correctBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1.05); }
+        }
+        
+        .wrong {
+            background-color: #ffaaa5 !important;
+            color: white !important;
+            transform: scale(1.05);
+            box-shadow: 0 4px 0 #d46a6a;
+            animation: shake 0.3s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* 農場裝飾元素 */
+        .farm-decoration {
+            position: absolute;
+            font-size: 25px;
+            z-index: 1;
+        }
+        
+        .sun {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 40px;
+            color: #ffd700;
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .cloud {
+            position: absolute;
+            font-size: 30px;
+            color: white;
+            animation: float 15s linear infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateX(-100px); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateX(calc(100vw + 100px)); opacity: 0; }
+        }
+        
+        /* 橫屏專用樣式 */
+        @media (orientation: landscape) {
+            .game-container {
+                height: 98vh;
+                max-height: 98vh;
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+                margin: 3px 0;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+                margin-bottom: 5px;
+            }
+            
+            .option {
+                min-height: 50px;
+                font-size: 0.9rem;
+                padding: 8px;
+            }
+            
+            .character-container {
+                height: 80px;
+                margin: 5px 0;
+            }
+            
+            .pig {
+                font-size: 50px;
+            }
+            
+            .bomb {
+                font-size: 25px;
+                bottom: 50px;
+            }
+            
+            .fuse {
+                bottom: 75px;
+                width: 50px;
+            }
+            
+            .flame {
+                bottom: 70px;
+                font-size: 15px;
+            }
+            
+            .word-display {
+                font-size: 1.5rem;
+                margin: 5px 0;
+            }
+            
+            .pos-display {
+                font-size: 1rem;
+                margin-bottom: 5px;
+            }
+            
+            .score-display {
+                font-size: 1.1rem;
+                margin-bottom: 5px;
+            }
+            
+            .timer-container {
+                margin: 5px 0;
+            }
+            
+            .countdown {
+                top: -25px;
+                font-size: 1.3rem;
+            }
+            
+            .start-screen button, .end-screen button {
+                padding: 10px 15px;
+                font-size: 1rem;
+                margin: 5px;
+            }
+            
+            .end-screen h2 {
+                font-size: 1.8rem;
+                margin-bottom: 10px;
+            }
+            
+            .end-screen p {
+                font-size: 1.1rem;
+                margin: 5px 0;
+            }
+            
+            .end-screen button {
+                padding: 10px 20px;
+                font-size: 1rem;
+                min-width: 150px;
+            }
+        }
+        
+        /* 超小螢幕橫屏優化 */
+        @media (orientation: landscape) and (max-height: 400px) {
+            .character-container {
+                height: 60px;
+            }
+            
+            .pig {
+                font-size: 40px;
+            }
+            
+            .bomb {
+                font-size: 20px;
+                bottom: 40px;
+            }
+            
+            .fuse {
+                bottom: 60px;
+                width: 40px;
+            }
+            
+            .flame {
+                bottom: 55px;
+                font-size: 12px;
+            }
+            
+            .word-display {
+                font-size: 1.3rem;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+            
+            .option {
+                min-height: 40px;
+                font-size: 0.8rem;
+                padding: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sun">☀️</div>
+    <div class="cloud" style="top: 20px; animation-delay: 0s;">☁️</div>
+    <div class="cloud" style="top: 60px; animation-delay: 5s;">☁️</div>
+    <div class="cloud" style="top: 40px; animation-delay: 10s;">☁️</div>
+    
+    <div class="game-container">
+        <h1>L1 U1-10 單字挑戰無極限</h1>
+        
+        <div class="game-content">
+            <div class="start-screen">
+                <div class="screen-content">
+                    <div class="character-container">
+                        <div class="pig">🐷</div>
+                        <div class="bomb">💣</div>
+                        <div class="fuse"></div>
+                        <div class="flame">🔥</div>
+                        <div class="farm-decoration" style="bottom: 15px; left: 15px;">🌻</div>
+                        <div class="farm-decoration" style="bottom: 15px; right: 15px;">🌽</div>
+                    </div>
+                    <button id="start-btn">開始挑戰！</button>
+                </div>
+            </div>
+            
+            <div class="game-screen hidden">
+                <div class="screen-content">
+                    <div class="score-display">得分: <span id="score">0</span></div>
+                    <div class="countdown" id="countdown">8</div>
+                    <div class="timer-container">
+                        <div class="timer-bar" id="timer-bar"></div>
+                    </div>
+                    <div class="word-display" id="word"></div>
+                    <div class="pos-display" id="pos"></div>
+                    
+                    <div class="options-container" id="options-container">
+                        <!-- 選項將由JavaScript動態生成 -->
+                    </div>
+                    
+                    <div class="character-container">
+                        <div class="pig" id="pig">🐷</div>
+                        <div class="bomb">💣</div>
+                        <div class="fuse" id="fuse"></div>
+                        <div class="flame" id="flame">🔥</div>
+                        <div class="explosion" id="explosion">💥</div>
+                        <div class="confetti" id="confetti"></div>
+                        <div class="farm-decoration" style="bottom: 15px; left: 15px;">🐔</div>
+                        <div class="farm-decoration" style="bottom: 15px; right: 15px;">🐄</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="end-screen">
+                <h2>遊戲結束！</h2>
+                <p>你的最終得分: <span id="final-score">0</span></p>
+                <p>用時: <span id="time-used">0</span>秒</p>
+                <button id="restart-btn">再玩一次</button>
+                <div class="farm-decoration" style="bottom: 40px; left: 40px; font-size: 35px;">🐑</div>
+                <div class="farm-decoration" style="bottom: 20px; right: 40px; font-size: 40px;">🚜</div>
+            </div>
+        </div>
+        
+        <!-- 單字庫區域 -->
+        <textarea id="word-database" style="display: none;">
+action,n,動作  
+afternoon,n,下午;午後  
+air,n,空氣  
+banana,n,香蕉  
+brown,adj,褐色的;棕色的  
+brown,n,棕色  
+card,n,卡片  
+eat,v,吃  
+farm,n,農場  
+fifteen,n,十五  
+fifteen,adj,十五的  
+first,adv,先;首先;第一;首次  
+hand,v,面交;給;傳遞  
+idea,n,主意  
+large,adj,大的  
+make,v,製造;使得  
+many,adj,很多的  
+May,n,五月  
+outside,n,外面;外部;外側;外表  
+please,v,請;取悅  
+question,v,詢問  
+radio,v,用無線電傳送  
+room,n,房間  
+room,v,居住;為...提供住處  
+shall,v,將;應該  
+shot,n,射擊;開槍;投籃;拍攝  
+soil,n,土;泥土;土壤  
+study,v,學習;讀書  
+time,v,記錄...的時間;使合拍子  
+too,adv,也是;過於  
+toward,prep,向;對  
+welcome,n,歡迎;款待;歡迎辭  
+yes,n,肯定的回答;同意;贊成票  
+almost,adv,幾乎  
+animal,n,動物  
+begin,v,開始  
+cost,v,花費  
+fight,n,打架;戰鬥  
+finish,n,結束;(傢具等)末道漆  
+funny,adj,可笑的;滑稽的  
+haircut,n,理髮  
+home,adv,在家;回家;到家  
+hurt,v,傷害;使疼痛  
+level,n,水平線  
+mail,v,寄信  
+nine,n,九  
+nine,adj,九的  
+on,prep,在…上面  
+only,conj,可是;不過;要不是;若非  
+plant,n,植物;農作物;工廠  
+soda,n,蘇打;汽水  
+sound,v,聽起來  
+strong,adj,強壯的  
+ticket,v,加標籤於;開違規罰單  
+touch,n,觸;碰;接觸;潤色;特長;才能;少許  
+town,n,城市  
+up,prep,向...上  
+win,v,贏得  
+world,n,世界  
+come,v,到來  
+country,n,國家;鄉下  
+cowboy,n,牛仔  
+every,adj,每一個的  
+examination,n,檢查;調查;考試 (=exam)  
+except,v,把...除外;反對  
+frog,n,青蛙  
+glad,adj,高興的  
+goodbye,n,告別  
+inside,prep,在…裡面  
+laugh,v,笑  
+lion,n,獅子  
+never,adv,永不  
+paint,v,畫圖;油漆  
+pencil,v,草擬;起草  
+piano,n,鋼琴  
+right,adv,向右地;馬上;正好  
+sand,n,沙  
+second,adj,第二的;次要的;副的;從屬的  
+seesaw,n,蹺蹺板  
+seesaw,v,(玩) 蹺蹺板  
+sometimes,adv,有時候  
+still,adj,靜止的  
+stop,v,停止  
+wear,v,穿著;磨損;使力竭  
+Wednesday,n,星期三  
+well,adv,很好地;充分地  
+will,n,意志;決心;遺囑  
+yellow,n,黃色  
+yellow,adj,黃色的  
+yesterday,adv,昨天  
+        </textarea>
+    </div>
+
+    <script>
+        // 遊戲變數
+        let score = 0;
+        let currentQuestionIndex = 0;
+        let timer;
+        let timeLeft = 8;
+        let startTime;
+        let questions = [];
+        let usedIndices = [];
+        let lastCountdownNumber = 8;
+        let isAnswering = false;
+        
+        // DOM元素
+        const startScreen = document.querySelector('.start-screen');
+        const gameScreen = document.querySelector('.game-screen');
+        const endScreen = document.querySelector('.end-screen');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const wordDisplay = document.getElementById('word');
+        const posDisplay = document.getElementById('pos');
+        const optionsContainer = document.getElementById('options-container');
+        const scoreDisplay = document.getElementById('score');
+        const timerBar = document.getElementById('timer-bar');
+        const countdownDisplay = document.getElementById('countdown');
+        const pig = document.getElementById('pig');
+        const fuse = document.getElementById('fuse');
+        const flame = document.getElementById('flame');
+        const explosion = document.getElementById('explosion');
+        const confettiContainer = document.getElementById('confetti');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const timeUsedDisplay = document.getElementById('time-used');
+        const wordDatabase = document.getElementById('word-database');
+        
+        // 初始化遊戲
+        function initGame() {
+            // 解析單字庫
+            const wordData = wordDatabase.value.trim().split('\n');
+            questions = wordData.map(line => {
+                const parts = line.trim().split(',');
+                if (parts.length >= 3) {
+                    return {
+                        word: parts[0].trim(),
+                        pos: parts[1].trim(),
+                        meaning: parts.slice(2).join(',').trim()
+                    };
+                }
+                return null;
+            }).filter(q => q !== null && q.word && q.pos && q.meaning);
+            
+            // 重置遊戲狀態
+            score = 0;
+            currentQuestionIndex = 0;
+            usedIndices = [];
+            lastCountdownNumber = 8;
+            isAnswering = false;
+            scoreDisplay.textContent = score;
+            
+            // 重置視覺元素
+            pig.textContent = '🐷';
+            pig.className = 'pig';
+            flame.style.opacity = '0';
+            flame.style.transform = 'scale(0)';
+            fuse.style.width = '80px';
+            explosion.style.opacity = '0';
+            explosion.style.transform = 'scale(0)';
+            confettiContainer.innerHTML = '';
+            countdownDisplay.className = 'countdown';
+            
+            // 顯示開始畫面
+            startScreen.classList.remove('hidden');
+            gameScreen.classList.add('hidden');
+            endScreen.classList.remove('active');
+        }
+        
+        function startGame() {
+            if (questions.length === 0) {
+                alert('單字庫解析錯誤，請檢查單字格式！');
+                return;
+            }
+            
+            startScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            startTime = new Date().getTime();
+            loadQuestion();
+        }
+        
+        // 載入問題
+        function loadQuestion() {
+            // 重置計時器
+            clearInterval(timer);
+            timeLeft = 8;
+            lastCountdownNumber = 8;
+            countdownDisplay.textContent = timeLeft;
+            timerBar.style.width = '100%';
+            timerBar.style.backgroundColor = '#ff8b94';
+            flame.style.opacity = '0';
+            flame.style.transform = 'scale(0)';
+            fuse.style.width = '80px';
+            explosion.style.opacity = '0';
+            explosion.style.transform = 'scale(0)';
+            confettiContainer.innerHTML = '';
+            countdownDisplay.style.color = '#ff8b94';
+            countdownDisplay.style.fontSize = '1.5rem';
+            countdownDisplay.className = 'countdown';
+            
+            // 重置回答狀態
+            isAnswering = false;
+            
+            // 隨機選擇一個未使用過的問題
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * questions.length);
+            } while (usedIndices.includes(randomIndex) && usedIndices.length < questions.length);
+            
+            usedIndices.push(randomIndex);
+            currentQuestionIndex = randomIndex;
+            
+            const question = questions[currentQuestionIndex];
+            wordDisplay.textContent = question.word;
+            posDisplay.textContent = question.pos;
+            
+            // 生成選項
+            generateOptions(question);
+            
+            // 開始計時
+            timer = setInterval(updateTimer, 100);
+        }
+        
+        // 生成選項
+        function generateOptions(correctQuestion) {
+            optionsContainer.innerHTML = '';
+            
+            // 收集所有可能的中文意思
+            const allMeanings = questions.map(q => q.meaning);
+            
+            // 隨機選擇3個不重複且與正確答案不同的選項
+            const options = [correctQuestion.meaning];
+            while (options.length < 4) {
+                const randomIndex = Math.floor(Math.random() * allMeanings.length);
+                const randomMeaning = allMeanings[randomIndex];
+                
+                if (!options.includes(randomMeaning)) {
+                    options.push(randomMeaning);
+                }
+            }
+            
+            // 打亂選項順序
+            shuffleArray(options);
+            
+            // 創建選項按鈕
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option';
+                button.textContent = option;
+                button.addEventListener('click', () => {
+                    // 防止連續點擊
+                    if (!isAnswering) {
+                        isAnswering = true;
+                        checkAnswer(option, correctQuestion.meaning);
+                    }
+                });
+                optionsContainer.appendChild(button);
+            });
+        }
+        
+        // 檢查答案
+        function checkAnswer(selectedOption, correctAnswer) {
+            clearInterval(timer);
+            
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.disabled = true;
+                if (option.textContent === correctAnswer) {
+                    option.classList.add('correct');
+                } else if (option.textContent === selectedOption && selectedOption !== correctAnswer) {
+                    option.classList.add('wrong');
+                }
+            });
+            
+            if (selectedOption === correctAnswer) {
+                // 答對
+                score += 5;
+                scoreDisplay.textContent = score;
+                pig.textContent = '🐷🎉';
+                createConfetti();
+                
+                // 播放答對音效
+                playSound('correct');
+                
+                // 減少延遲時間
+                setTimeout(() => {
+                    pig.textContent = '🐷';
+                    loadQuestion();
+                }, 800);
+            } else {
+                // 答錯
+                flame.style.opacity = '1';
+                flame.style.transform = 'scale(1)';
+                explosion.style.opacity = '1';
+                explosion.style.transform = 'scale(1.5)';
+                
+                // 豬叫聲和翻倒動畫
+                pig.className = 'pig fall-over';
+                
+                // 播放爆炸音效
+                playSound('explosion');
+                
+                // 顯示結束畫面，減少延遲時間
+                setTimeout(() => {
+                    const endTime = new Date().getTime();
+                    const timeUsed = Math.floor((endTime - startTime) / 1000);
+                    
+                    finalScoreDisplay.textContent = score;
+                    timeUsedDisplay.textContent = timeUsed;
+                    
+                    gameScreen.classList.add('hidden');
+                    endScreen.classList.add('active');
+                }, 800);
+            }
+        }
+        
+        // 播放音效
+        function playSound(type) {
+            if (type === 'correct') {
+                // 答對音效 - 歡呼聲
+                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3');
+                audio.volume = 0.5;
+                audio.play().catch(e => console.log('音效播放失敗:', e));
+            } else if (type === 'explosion') {
+                // 爆炸音效
+                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-bomb-explosion-1680.mp3');
+                audio.volume = 0.5;
+                audio.play().catch(e => console.log('音效播放失敗:', e));
+            }
+        }
+        
+        // 創建彩色紙花效果
+        function createConfetti() {
+            const colors = ['#ff8b94', '#ffaaa5', '#a8e6cf', '#dcedc1', '#6b5b95', '#ffd3b6'];
+            const confettiCount = 50;
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti-piece';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = -10 + 'px';
+                confetti.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+                
+                const animationDuration = Math.random() * 2 + 1;
+                confetti.style.animation = `fall ${animationDuration}s linear forwards`;
+                
+                confettiContainer.appendChild(confetti);
+                
+                // 設置動畫
+                setTimeout(() => {
+                    confetti.style.top = '100%';
+                    confetti.style.opacity = '1';
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg) translateX(${Math.random() * 100 - 50}px)`;
+                }, 10);
+                
+                // 移除元素
+                setTimeout(() => {
+                    confetti.remove();
+                }, animationDuration * 1000);
+            }
+            
+            // 添加動畫樣式
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fall {
+                    to {
+                        top: 100%;
+                        opacity: 0;
+                        transform: rotate(360deg) translateX(${Math.random() * 100 - 50}px);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // 更新計時器
+        function updateTimer() {
+            timeLeft -= 0.1;
+            const percentage = (timeLeft / 8) * 100;
+            timerBar.style.width = `${percentage}%`;
+            
+            // 更新倒計時數字
+            const currentNumber = Math.ceil(timeLeft);
+            countdownDisplay.textContent = currentNumber;
+            
+            // 數字跳動效果
+            if (currentNumber !== lastCountdownNumber) {
+                lastCountdownNumber = currentNumber;
+                countdownDisplay.className = 'countdown pulse';
+                
+                setTimeout(() => {
+                    countdownDisplay.className = 'countdown';
+                }, 500);
+            }
+            
+            // 引線燃燒效果
+            fuse.style.width = `${percentage * 0.8}px`;
+            
+            // 根據剩餘時間改變顏色和火焰效果
+            if (percentage < 20) {
+                timerBar.style.background = 'linear-gradient(to right, #ff0000, #ff6600)';
+                countdownDisplay.style.color = '#ff0000';
+                countdownDisplay.style.fontSize = '1.7rem';
+                flame.style.opacity = '1';
+                flame.style.transform = 'scale(1)';
+            } else if (percentage < 50) {
+                timerBar.style.background = 'linear-gradient(to right, #ff6600, #ff8b94)';
+                countdownDisplay.style.color = '#ff6600';
+                countdownDisplay.style.fontSize = '1.6rem';
+                flame.style.opacity = '0.7';
+                flame.style.transform = 'scale(0.7)';
+            } else {
+                countdownDisplay.style.color = '#ff8b94';
+                countdownDisplay.style.fontSize = '1.5rem';
+            }
+            
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                // 時間到，自動檢查一個錯誤答案
+                const options = document.querySelectorAll('.option');
+                const correctAnswer = questions[currentQuestionIndex].meaning;
+                
+                // 找到一個錯誤選項
+                let wrongOption;
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].textContent !== correctAnswer) {
+                        wrongOption = options[i].textContent;
+                        break;
+                    }
+                }
+                
+                if (wrongOption) {
+                    // 設置回答狀態為true，防止連續點擊
+                    isAnswering = true;
+                    checkAnswer(wrongOption, correctAnswer);
+                }
+            }
+        }
+        
+        // 輔助函數：打亂數組
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // 事件監聽器
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', initGame);
+        
+        // 初始化遊戲
+        initGame();
+    </script>
+</body>
+</html>
