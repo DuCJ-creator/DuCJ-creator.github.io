@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CAP2000 Clothing 單字挑戰無極限 - 萬聖節特別版</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            background-size: cover;
+            background-attachment: fixed;
+            overflow: hidden;
+            padding: 10px;
+        }
+        
+        .game-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            width: 100%;
+            max-width: 100%;
+            text-align: center;
+            position: relative;
+            border: 5px solid #f05454;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 95vh;
+            max-height: 95vh;
+        }
+        
+        h1 {
+            color: #f05454;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+            text-shadow: 2px 2px 0px #fff, 0 0 5px #ff9f43;
+            flex-shrink: 0;
+        }
+        
+        .game-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .screen {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+        
+        .screen-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            justify-content: space-around;
+        }
+        
+        .word-display {
+            font-size: 2rem;
+            margin: 15px 0;
+            color: #f05454;
+            font-weight: bold;
+            text-shadow: 2px 2px 0px #fff;
+            transition: opacity 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .pos-display {
+            font-size: 1.3rem;
+            color: #f05454;
+            margin-bottom: 20px;
+            font-style: italic;
+            text-shadow: 1px 1px 0px #fff;
+            transition: opacity 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+            flex: 1;
+            overflow-y: auto;
+            padding: 5px;
+        }
+        
+        .pumpkin-option {
+            width: 100%;
+            height: 140px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+        }
+        
+        .pumpkin-option:active {
+            transform: translateY(-5px) scale(1.05);
+        }
+        
+        .pumpkin-text {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #fff;
+            font-weight: bold;
+            padding: 8px;
+            background-color: rgba(0,0,0,0.8);
+            border-radius: 10px;
+            margin: 0 10px;
+            text-shadow: 1px 1px 0 #000;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            word-break: break-word;
+        }
+        
+        .timer-container {
+            width: 100%;
+            height: 15px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+            border: 2px solid #f05454;
+            flex-shrink: 0;
+        }
+        
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to right, #f05454, #ff9f43);
+            transition: width 0.1s linear;
+            border-radius: 8px;
+        }
+        
+        .ghost {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="%23f0f0f0" d="M40.1 467.1l-11.2 9c-3.2 2.5-7.1 3.9-11.1 3.9-8.3 0-15.8-6-15.8-16.1c0-5.5 2.5-10.5 6.9-14.1C40.5 439.8 76.6 384 76.6 256c0-168.3-17.7-208-76.6-208C0 48 0 48 0 32C0 14.3 14.3 0 32 0h320c17.7 0 32 14.3 32 32c0 16 0 16-76.6 0c-58.9 0-76.6 39.7-76.6 208c0 128 36.1 183.8 66.3 209.8c4.4 3.6 6.9 8.6 6.9 14.1c0 10.1-7.5 16.1-15.8 16.1c-4 0-7.9-1.4-11.1-3.9l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0l-11.2-9c-6.9-5.5-17.1-5.5-24 0zM128 128c-17.7 0-32 14.3-32 32s14.3 32 32 32s32-14.3 32-32s-14.3-32-32-32zm128 0c-17.7 0-32 14.3-32 32s14.3 32 32 32s32-14.3 32-32s-14.3-32-32-32z"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: float 2s infinite alternate ease-in-out;
+            z-index: 10;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+            flex-shrink: 0;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(-50%, 0); }
+            100% { transform: translate(-50%, -10px); }
+        }
+        
+        .score-display {
+            font-size: 1.3rem;
+            color: #f05454;
+            margin: 10px 0;
+            font-weight: bold;
+            text-shadow: 1px 1px 0px #fff;
+            flex-shrink: 0;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            flex-direction: column;
+            color: white;
+            font-size: 1.5rem;
+            display: none;
+            text-shadow: 2px 2px 0px #000;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .game-over h2 {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            color: #f05454;
+        }
+        
+        .restart-btn, .start-btn {
+            padding: 12px 25px;
+            background-color: #f05454;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+            text-shadow: 1px 1px 0px #000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+        
+        .restart-btn:active, .start-btn:active {
+            background-color: #ff9f43;
+            transform: scale(1.05);
+        }
+        
+        .bats {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .bat {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="%23f05454" d="M320 160c28.7 0 54.9 10 75.4 26.6 5.1 4.2 11.3 5.3 17 3.1 18.8-7.2 39.7-10.6 60.9-10.6 8.3 0 16.8.7 25.1 2.1 5.9.9 11.6-2 14.3-7.3 9.5-19 15.3-40.6 15.3-63.9 0-61.9-50.1-112-112-112-16.7 0-32.8 3.7-47.4 10.5-4.5 2.1-9.8 1.3-13.8-1.9-11.1-8.9-24.6-14.6-39.2-14.6s-28.1 5.7-39.2 14.6c-4 3.2-9.3 4-13.8 1.9-14.6-6.8-30.7-10.5-47.4-10.5-61.9 0-112 50.1-112 112 0 23.3 5.8 44.9 15.3 63.9 2.7 5.3 8.4 8.2 14.3 7.3 8.3-1.4 16.8-2.1 25.1-2.1 21.2 0 42.1 3.4 60.9 10.6 5.7 2.2 11.9 1.1 17-3.1C265.1 170 291.3 160 320 160zm0-48c13.2 0 24 10.8 24 24s-10.8 24-24 24-24-10.8-24-24 10.8-24 24-24zm-144 56c-28.7 0-54.9 10-75.4 26.6-5.1 4.2-11.3 5.3-17 3.1-18.8-7.2-39.7-10.6-60.9-10.6-8.3 0-16.8.7-25.1 2.1-5.9.9-11.6-2-14.3-7.3C2.8 172.9 0 150.7 0 128 0 66.1 50.1 16 112 16c16.7 0 32.8 3.7 47.4 10.5 4.5 2.1 9.8 1.3 13.8-1.9 11.1-8.9 24.6-14.6 39.2-14.6s28.1 5.7 39.2 14.6c4 3.2 9.3 4 13.8 1.9 14.6-6.8 30.7-10.5 47.4-10.5 61.9 0 112 50.1 112 112 0 22.7-2.8 44.9-8.3 65.5-2.7 5.3-8.4 8.2-14.3 7.3-8.3-1.4-16.8-2.1-25.1-2.1-21.2 0-42.1 3.4-60.9 10.6-5.7 2.2-11.9 1.1-17-3.1-20.5-16.6-46.7-26.6-75.4-26.6zm-24 80c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24zm256 0c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24zm-224 32c-119 0-216 96.9-216 216 0 57.3 22.5 109.4 59 148 3.1 3.3 7.9 4.1 11.9 2 17.8-9.2 37.6-14 58.1-14 8.3 0 16.5.7 24.6 1.9 5.1.8 10-1.9 12-6.7 7.1-17.3 20.6-31.8 37.9-38.9 1.3-.5 2.7-.8 4-1.1V320c0-52.9 43.1-96 96-96s96 43.1 96 96v56.2c1.3.4 2.7.7 4 1.1 17.3 7.1 30.8 21.6 37.9 38.9 2 4.8 6.9 7.5 12 6.7 8.1-1.2 16.3-1.9 24.6-1.9 20.5 0 40.3 4.8 58.1 14 4 2.1 8.8 1.3 11.9-2 36.5-38.6 59-90.7 59-148 0-119.1-97-216-216-216z"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0;
+        }
+        
+        /* 四種不同顏色的南瓜燈 */
+        .pumpkin-1 { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23f05454" d="M352 0c-27.8 0-53.3 8.6-74.5 23.1C256.5 8.6 231 0 203.2 0 91 0 0 91 0 203.2c0 132.4 125.8 200.5 203.4 308.8 11 15.4 28.4 25.6 48.4 25.6h8.4c20 0 37.4-10.2 48.4-25.6C386.2 403.7 512 335.6 512 203.2 512 91 421 0 352 0zm-96 480c-3.5 0-6.8-1.8-9.1-4.8-4.1-5.8-102.3-145.7-102.3-272 0-81.9 66.6-148.5 148.5-148.5S441 121.3 441 203.2c0 126.3-98.2 266.2-102.3 272-2.3 3-5.6 4.8-9.1 4.8h-83.2z"/><path fill="%23ff9f43" d="M203.4 308.8C125.8 200.5 0 132.4 0 203.2 0 91 91 0 203.2 0c27.8 0 53.3 8.6 74.5 23.1 21.2-14.5 46.7-23.1 74.5-23.1 69 0 160 91 160 203.2 0 132.4-125.8 200.5-203.4 308.8-11 15.4-28.4 25.6-48.4 25.6h-8.4c-20 0-37.4-10.2-48.4-25.6zM352 56c-16.5 0-32.3 3.3-46.8 9.2 5.3 5.1 10.4 10.4 15.2 16.1C338.3 70.8 345 68 352 68c74.9 0 136 61.1 136 136 0 28.9-9.3 56.3-25.4 78.9 5.8-16.5 9.4-34.2 9.4-52.6C472 121.3 405.4 56 352 56zM203.2 56c-16.5 0-32.3 3.3-46.8 9.2 5.3 5.1 10.4 10.4 15.2 16.1 19.9-10.3 42.4-16.1 66.4-16.1 53.4 0 99.5 30.7 120.9 75.4 10.1-16.4 16.2-35.1 16.2-55.4 0-16.5-3.3-32.3-9.2-46.8C293.5 59.3 268 56 240.2 56h-37z"/><circle fill="%23000" cx="160" cy="160" r="16"/><circle fill="%23000" cx="352" cy="160" r="16"/><path fill="%23000" d="M256 240c-35.3 0-64 28.7-64 64s28.7 64 64 64 64-28.7 64-64-28.7-64-64-64zm0 96c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32z"/></svg>'); }
+        .pumpkin-2 { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23ff9f43" d="M352 0c-27.8 0-53.3 8.6-74.5 23.1C256.5 8.6 231 0 203.2 0 91 0 0 91 0 203.2c0 132.4 125.8 200.5 203.4 308.8 11 15.4 28.4 25.6 48.4 25.6h8.4c20 0 37.4-10.2 48.4-25.6C386.2 403.7 512 335.6 512 203.2 512 91 421 0 352 0zm-96 480c-3.5 0-6.8-1.8-9.1-4.8-4.1-5.8-102.3-145.7-102.3-272 0-81.9 66.6-148.5 148.5-148.5S441 121.3 441 203.2c0 126.3-98.2 266.2-102.3 272-2.3 3-5.6 4.8-9.1 4.8h-83.2z"/><path fill="%23f05454" d="M203.4 308.8C125.8 200.5 0 132.4 0 203.2 0 91 91 0 203.2 0c27.8 0 53.3 8.6 74.5 23.1 21.2-14.5 46.7-23.1 74.5-23.1 69 0 160 91 160 203.2 0 132.4-125.8 200.5-203.4 308.8-11 15.4-28.4 25.6-48.4 25.6h-8.4c-20 0-37.4-10.2-48.4-25.6zM352 56c-16.5 0-32.3 3.3-46.8 9.2 5.3 5.1 10.4 10.4 15.2 16.1C338.3 70.8 345 68 352 68c74.9 0 136 61.1 136 136 0 28.9-9.3 56.3-25.4 78.9 5.8-16.5 9.4-34.2 9.4-52.6C472 121.3 405.4 56 352 56zM203.2 56c-16.5 0-32.3 3.3-46.8 9.2 5.3 5.1 10.4 10.4 15.2 16.1 19.9-10.3 42.4-16.1 66.4-16.1 53.4 0 99.5 30.7 120.9 75.4 10.1-16.4 16.2-35.1 16.2-55.4 0-16.5-3.3-32.3-9.2-46.8C293.5 59.3 268 56 240.2 56h-37z"/><circle fill="%23000" cx="160" cy="160" r="16"/><circle fill="%23000" cx="352" cy="160" r="16"/><path fill="%23000" d="M256 240c-35.3 0-64 28.7-64 64s28.7 64 64 64 64-28.7 64-64-28.7-64-64-64zm0 96c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32z"/></svg>'); }
+        .pumpkin-3 { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23e67e22" d="M352 0c-27.8 0-53.3 8.6-74.5 23.1C256.5 8.6 231 0 203.2 0 91 0 0 91 0 203.2c0 132.4 125.8 200.5 203.4 308.8 11 15.4 28.4 25.6 48.4 25.6h8.4c20 0 37.4-10.2 48.4-25.6C386.2 403.7 512 335.6 512 203.2 512 91 421 0 352 0zm-96 480c-3.5 0-6.8-1.8-9.1-4.8-4.1-5.8-102.3-145.7-102.3-272 0-81.9 66.6-148.5 148.5-148.5S441 121.3 441 203.2c0 126.3-98.2 266.2-102.3 272-2.3 3-5.6 4.8-9.1 4.8h-83.2z"/><path fill="%23d35400" d="M203.4 308.8C125.8 200.5 0 132.4 0 203.2 0 91 91 0 203.2 0c27.8 0 53.3 8.6 74.5 23.1 21.2-14.5 46.7-23.1 74.5-23.1 69 0 160 91 160 203.2 0 132.4-125.8 200.5-203.4 308.8-11 15.4-28.4 25.6-48.4 25.6h-8.4c-20 0-37.4-10.2-48.4-25.6zM352 56c-16.5 0-32.3 3.3-46.8 9.2 5.3 5.1 10.4 10.4 15.2 16.1C338.3 70.8 345 68 352 68c74.9 0 136 61.1 136 136 0 28.9-9.3 56.3-25.4 78.9 5.8-16.5 9.4-34.2 9.4-52.6C472 121.3 405.4 56 352 56zM203.2 56c-16.5 0-32.3 3.3-46.8 9.2 5.3 5.1 10.4 10.4 15.2 16.1 19.9-10.3 42.4-16.1 66.4-16.1 53.4 0 99.5 30.7 120.9 75.4 10.1-16.4 16.2-35.1 16.2-55.4 0-16.5-3.3-32.3-9.2-46.8C293.5 59.3 268 56 240.2 56h-37z"/><circle fill="%23000" cx="160" cy="160" r="16"/><circle fill="%23000" cx="352" cy="160" r="16"/><path fill="%23000" d="M256 240c-35.3 0-64 28.7-64 64s28.7 64 64 64 64-28.7 64-64-28.7-64-64-64zm0 96c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32z"/></svg>'); }
+        .pumpkin-4 { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23d35400" d="M352 0c-27.8 0-53.3 8.6-74.5 23.1C256.5 8.6 231 0 203.2 0 91 0 0 91 0 203.2c0 132.4 125.8 200.5 203.4 308.8 11 15.4 28.4 25.6 48.4 25.6h8.4c20 0 37.4-10.2 48.4-25.6C386.2 403.7 512 335.6 512 203.2 512 91 421 0 352 0zm-96 480c-3.5 0-6.8-1.8-9.1-4.8-4.1-5.8-102.3-145.7-102.3-272 0-81.9 66.6-148.5 148.5-148.5S441 121.3 441 203.2c0 126.3-98.2 266.2-102.3 272-2.3 3-5.6 4.8-9.1 4.8h-83.2z"/><path fill="%23e67e22" d="M203.4 308.8C125.8 200.5 0 132.4 0 203.2 0 91 91 0 203.2 0c27.8 0 53.3 8.6 74.5 23.1 21.2-14.5 46.7-23.1 74.5-23.1 69 0 160 91 160 203.2 0 132.4-125.8 200.5-203.4 308.8-11 15.4-28.4 25.6-48.4 25.6h-8.4c-20 0-37.4-10.2-48.4-25.6zM352 56c-16.5 0-32.3 3.3-46.8 9.2 5.3 5.1 10.4 10.4 15.2 16.1C338.3 70.8 345 68 352 68c74.9 0 136 61.1 136 136 0 28.9-9.3 56.3-25.4 78.9 5.8-16.5 9.4-34.2 9.4-52.6C472 121.3 405.4 56 352 56zM203.2 56c-16.5 0-32.3 3.3-46.8 9.2 5.3 5.1 10.4 10.4 15.2 16.1 19.9-10.3 42.4-16.1 66.4-16.1 53.4 0 99.5 30.7 120.9 75.4 10.1-16.4 16.2-35.1 16.2-55.4 0-16.5-3.3-32.3-9.2-46.8C293.5 59.3 268 56 240.2 56h-37z"/><circle fill="%23000" cx="160" cy="160" r="16"/><circle fill="%23000" cx="352" cy="160" r="16"/><path fill="%23000" d="M256 240c-35.3 0-64 28.7-64 64s28.7 64 64 64 64-28.7 64-64-28.7-64-64-64zm0 96c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32z"/></svg>'); }
+        
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        
+        @keyframes batFly {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translate(100vw, -100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        /* 禁用狀態的南瓜燈 */
+        .pumpkin-option.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+            filter: grayscale(50%);
+        }
+        
+        /* 題目切換動畫 */
+        .fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+        
+        .fade-in {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+        
+        /* 計時器警告效果 */
+        .timer-warning {
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
+        }
+        
+        /* 橫屏專用樣式 */
+        @media (orientation: landscape) {
+            .game-container {
+                height: 98vh;
+                max-height: 98vh;
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 10px;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                margin: 15px 0;
+            }
+            
+            .pumpkin-option {
+                height: 120px;
+            }
+            
+            .pumpkin-text {
+                font-size: 0.8rem;
+                margin: 0 8px;
+                min-height: 35px;
+            }
+            
+            .word-display {
+                font-size: 1.7rem;
+                margin: 10px 0;
+            }
+            
+            .pos-display {
+                font-size: 1.1rem;
+                margin-bottom: 15px;
+            }
+            
+            .score-display {
+                font-size: 1.1rem;
+                margin: 8px 0;
+            }
+            
+            .timer-container {
+                margin: 10px 0;
+            }
+            
+            .ghost {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .restart-btn, .start-btn {
+                padding: 10px 20px;
+                font-size: 1.1rem;
+                margin-top: 10px;
+            }
+            
+            .game-over h2 {
+                font-size: 1.8rem;
+                margin-bottom: 10px;
+            }
+        }
+        
+        /* 超小螢幕橫屏優化 */
+        @media (orientation: landscape) and (max-height: 400px) {
+            .pumpkin-option {
+                height: 100px;
+            }
+            
+            .pumpkin-text {
+                font-size: 0.7rem;
+                min-height: 30px;
+            }
+            
+            .word-display {
+                font-size: 1.5rem;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+        }
+        
+        /* 隱藏類 */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>L1 U11-20 單字挑戰無極限</h1>
+        <div class="score-display">Score: <span id="score">0</span></div>
+        
+        <div class="game-content">
+            <div class="screen" id="setup-screen">
+                <div class="screen-content">
+                    <p>準備好挑戰你的單字能力了嗎？點擊開始！</p>
+                    <button class="start-btn" id="start-game">Start Game</button>
+                </div>
+            </div>
+            
+            <div class="screen hidden" id="game-screen">
+                <div class="screen-content">
+                    <div class="word-display" id="current-word">單字</div>
+                    <div class="pos-display" id="current-pos">詞性</div>
+                    <div class="timer-container">
+                        <div class="timer-bar" id="timer-bar"></div>
+                    </div>
+                    <div class="options-container">
+                        <div class="pumpkin-option pumpkin-1" data-option="1">
+                            <div class="pumpkin-text" id="option-1">選項1</div>
+                        </div>
+                        <div class="pumpkin-option pumpkin-2" data-option="2">
+                            <div class="pumpkin-text" id="option-2">選項2</div>
+                        </div>
+                        <div class="pumpkin-option pumpkin-3" data-option="3">
+                            <div class="pumpkin-text" id="option-3">選項3</div>
+                        </div>
+                        <div class="pumpkin-option pumpkin-4" data-option="4">
+                            <div class="pumpkin-text" id="option-4">選項4</div>
+                        </div>
+                    </div>
+                    <div class="ghost"></div>
+                    <div class="bats" id="bats-container"></div>
+                </div>
+            </div>
+            
+            <div class="game-over" id="game-over">
+                <h2 id="result-message">Game Over!</h2>
+                <div>Final Score: <span id="final-score">0</span></div>
+                <button class="restart-btn" id="restart-btn">再玩一次</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 遊戲變數
+        let vocabulary = [];
+        let currentWord = null;
+        let score = 0;
+        let timer = null;
+        let timeLeft = 8;
+        let gameActive = false;
+        let batInterval = null;
+        let canAnswer = true;
+        
+        // DOM元素
+        const setupScreen = document.getElementById('setup-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over');
+        const startGameBtn = document.getElementById('start-game');
+        const restartBtn = document.getElementById('restart-btn');
+        const currentWordDisplay = document.getElementById('current-word');
+        const currentPosDisplay = document.getElementById('current-pos');
+        const optionDisplays = [
+            document.getElementById('option-1'),
+            document.getElementById('option-2'),
+            document.getElementById('option-3'),
+            document.getElementById('option-4')
+        ];
+        const scoreDisplay = document.getElementById('score');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+        const timerBar = document.getElementById('timer-bar');
+        const batsContainer = document.getElementById('bats-container');
+        const pumpkinOptions = document.querySelectorAll('.pumpkin-option');
+        
+        // 單字庫
+        const wordList = `backpack,n.,後背包
+bag,n.,袋子
+beautiful,adj.,漂亮的
+belt,n.,皮帶
+black,adj.,黑色的
+blouse,n.,(女用)襯衫
+blue,adj.,藍色的
+brown,adj.,棕色的
+button,n.,鈕扣;按鈕
+cap,n.,鴨舌帽
+clothes,n.,衣服
+coat,n.,大衣
+color,n.,顏色
+colorful,adj.,多采多姿的
+contact lens,n.,隱形眼鏡
+dress,n.,洋裝
+earrings,n.,耳環(複數)
+fancy,adj.,花俏的;高級的
+fashionable,adj.,時尚的
+fit,v.,合身;適合
+glasses,n.,眼鏡
+glove,n.,手套
+golden,adj.,金色的
+gray,adj.,灰色的
+green,adj.,綠色的
+handkerchief,n.,手帕
+hanger,n.,衣架;掛勾
+hat,n.,帽子
+iron,v.,熨燙
+iron,n.,鐵;熨斗
+jeans,n.,牛仔褲
+mask,n.,口罩
+necklace,n.,項鍊
+pajamas,n.,睡衣
+pants,n.,長褲
+pink,adj.,粉紅色的
+pocket,n.,口袋
+pretty,adj.,漂亮的
+purple,adj.,紫色的
+purse,n.,錢包
+red,adj.,紅色的
+ring,n.,戒指
+scarf,n.,圍巾
+shirt,n.,襯衫
+shoes,n.,鞋子
+shorts,n.,短褲
+silver,n./adj.,銀(的);銀白的
+skinny,adj.,瘦到皮包骨的
+skirt,n.,裙子
+slippers,n.,拖鞋(複數)
+sneakers,n.,球鞋(複數)
+socks,n.,襪子
+suit,v.,使適合
+suit,n.,套裝;訴訟
+sweater,n.,毛衣
+swimsuit,n.,泳裝
+T-shirt,n.,T 恤衫
+tie,n.,領帶
+trousers,n.,長褲(英式說法)
+underwear,n.,內衣
+uniform,n.,制服
+vest,n.,背心
+wallet,n.,皮夾
+watch,n.,錶
+wear,v.,穿著;戴著
+white,adj.,白色的
+yellow,adj.,黃色的
+action,n.,活動;行動
+address,n.,地址;演講
+advice,n.,忠告;勸告
+all,n./adj.,全部(的)
+army,n.,軍隊;大群
+attention,n.,注意;專心
+beginning,n.,開始
+bomb,n.,炸彈
+both,n.,兩方
+bottom,n.,底部
+branch,n.,樹枝;分店
+brick,n.,磚頭
+care,n.,關心;看護
+case,n.,案件
+cause,n.,原因
+center,n.,中心;中央
+chance,n.,運氣;機會
+choice,n.,抉擇
+command,n.,命令
+courage,n.,勇氣
+crime,n.,罪;犯罪行為
+current,n.,水流;電流
+danger,n.,危險
+decision,n.,決定
+desire,n.,渴望
+difference,n.,差別
+difficulty,n.,難處
+edge,n.,邊緣;優勢
+effort,n.,努力
+end,n.,末端;極束
+energy,n.,精力;能量
+engine,n.,引擎
+error,n.,錯誤;差錯
+event,n.,事件
+example,n.,例子
+excuse,n.,藉口
+experience,n.,經驗
+express,n.,快遞
+fact,n.,事實
+fair,n.,展覽會
+fault,n.,過錯
+freedom,n.,自由
+friendship,n.,友誼
+front,n.,前面;正面
+general,n.,將軍
+gesture,n.,姿勢;手勢
+goal,n.,目標;球門
+habit,n.,習慣
+handle,n.,把手
+hole,n.,洞
+hunger,n.,饑餓
+idea,n.,主意
+importance,n.,重要性
+influence,n.,影響
+invitation,n.,邀請
+item,n.,項目
+jam,n.,果醬;擁塞
+joke,n.,笑話
+kiss,n.,親吻
+law,n.,法律
+level,n.,程度
+liquid,n.,液體
+machine,n.,極器
+manner,n.,方法;態度
+mark,n.,記極
+mass,n.,團;塊
+meaning,n.,意思;意涵
+memory,n.,記憶
+metal,n.,金屬
+mistake,n.,錯誤;過失
+moment,n.,瞬間;片刻
+motion,n.,動作
+noise,n.,噪音
+object,n.,物體
+opinion,n.,意見
+order,n.,命令;秩序
+part,n.,一部份
+pattern,n.,格式;花樣
+peace,n.,和平
+point,n.,看法;點
+poison,n.,毒藥
+powder,n.,粉
+power,n.,力量
+pressure,n.,壓力
+principle,n.,原則;(行為)準則
+prize,n.,獎賞;獎品
+production,n.,產品
+progress,n.,進步
+purpose,n.,目的
+puzzle,n.,猜謎
+question,n.,問題
+race,n.,賽跑
+reason,n.,原因
+result,n.,結果
+right,n.,權利
+robot,n.,機器人
+rubber,n.,橡膠
+rule,n.,規則;規定
+safety,n.,安全性
+sale,n.,出售
+sample,n.,樣本
+secret,n.,秘密
+section,n.,節;段
+service,n.,服務
+side,n.,旁邊
+silence,n.,寂靜
+smoke,n.,煙霧
+society,n.,社會
+soul,n.,靈魂
+sound,n.,聲音
+sound,v.,聽起來
+speaker,n.,演講者;擴音器
+speech,n.,演講
+spirit,n.,精神;心靈
+step,n.,步;臺階
+strike,n.,攻擊;罷工
+success,n.,成功
+symbol,n.,符號;象徵
+system,n.,系統
+tank,n.,槽;坦克
+tear,n.,眼淚
+thought,n.,想法
+title,n.,標題;頭銜
+tool,n.,工具
+top,n.,頂部;頭頂;陀螺
+topic,n.,主題
+tower,n.,塔
+trace,n.,蹤跡
+tradition,n.,傳統
+trick,n.,詭計;騙局
+trouble,n.,麻煩
+truth,n.,事實;真相
+type,n.,類型
+value,n.,價值
+victory,n.,勝利
+war,n.,戰爭
+will,n.,意志
+accept,v.,接受
+act,v.,主演;行動
+add,v.,添加
+advise,v.,建議;規勸
+affect,v.,影響;感染
+agree,v.,同意
+aim,v./n.,瞄準;目標
+allow,v.,允許
+apologize,v.,道歉
+appear,v.,出現
+appreciate,v.,感謝;賞識
+argue,v.,爭論
+arrange,v.,安排;整理
+ask,v.,問
+assume,v.,假設
+attack,v.,進攻;襲擊
+avoid,v.,避免
+base,v.,以…為基礎、根據
+beat,v.,擊敗;敲打
+become,v.,成為;變得
+begin,v.,開始
+behave,v.,表現;守規矩
+believe,v.,相信
+belong,v.,屬於
+blame,v.,責備;歸咎
+blow,v.,吹
+borrow,v.,借(入)
+bother,v.,打擾
+bow,v.,鞠躬
+break,v.,弄壞
+bring,v.,帶來
+burn,v.,燃燒
+burst,v.,爆裂;闖入
+calm,v.,使平靜
+cancel,v.,取消
+carry,v.,運載;帶著
+catch,v.,抓住;趕上
+change,v.,改變
+chase,v.,追逐
+cheat,v.,詐欺;作弊;欺騙
+check,v.,檢查
+choose,v.,選擇
+close,v.,關上
+come,v.,來
+comment,v./n.,評論
+compare,v.,比較
+complain,v.,抱怨
+complete,v.,完成
+continue,v.,繼續
+control,v.,控制
+correct,v.,改正
+cover,v.,覆蓋
+cross,v.,過(河、街)
+cry,v.,哭泣
+cut,v.,切割
+damage,v./n.,損害
+deal,v.,處理
+debate,v./n.,辯論
+decide,v.,決定
+decrease,v.,減少
+define,v.,定義
+deliver,v.,遞送;發表
+depend,v.,依賴;取決於
+describe,v.,描述
+desert,v.,遺棄;
+detect,v.,察覺
+develop,v.,發展
+dig,v.,掘(土);挖(洞)
+direct,v.,指揮
+disappear,v.,消失
+discover,v.,發現
+discuss,v.,討論
+doubt,v./n.,懷疑
+download,v.,下載
+dream,v./极.,作夢;夢想
+dry,v.,曬乾;烘乾;變乾
+earn,v.,賺到
+ease,v.,使放鬆(舒緩)
+embarrass,v.,使困窘
+emphasize,v.,強調
+enter,v.,進入
+excite,v.,使興奮
+exist,v.,存在
+expect,v.,期望
+explain,v.,解釋;說明
+express,v.,表示
+fail,v.,失敗
+fall,v.,落下;跌倒
+feed,v.,餵食;飼養
+fight,v.,打架;奮鬥
+fill,v.,充滿
+find,v.,發現
+finish,v.,結束;完成
+fix,v.,固定;修理
+fly,v.,飛
+focus,v./n.,專注;焦點
+follow,v.,遵守;跟隨
+forget,v.,忘記
+forgive,v.,原諒
+frighten,v.,使害怕
+gain,v.,獲得;贏得
+gather,v.,聚集
+get,v.,得到
+give,v.,送給;給
+go,v.,去
+greet,v.,問候;迎接
+guard,v.,保衛;看守
+guess,v.,猜測
+guide,v.,引導
+hammer,v./n.,敲打;鎚子
+handle,v.,處理;控制
+hang,v.,把…掛起
+happen,v.,發生
+have,v.,有;擁有
+help,v.,幫助
+hide,v.,把…藏起來
+hit,v.,打擊;襲擊
+hold,v.,舉行;抓住
+hop,v極.,跳過;躍過
+hope,v.,希望
+hug,v.,擁抱
+hunt,v.,狩獵
+hurry,v.,急忙;倉極
+ignore,v.,忽視
+imagine,v.,想像
+improve,v.,改善
+include,v.,包含
+increase,v.,增加
+indicate,v.,指出
+insist,v.,堅持
+inspire,v.,激勵
+introduce,v.,介紹
+invent,v.,發明
+invite,v.,邀請;招待
+join,v.,加入;連結
+jump,v.,跳
+keep,v.,保持;保留
+kick,v.,踢
+kill,v.,殺害
+knock,v.,敲;擊;打
+know,v.,知道
+lack,v./n.,缺乏
+laugh,v.,笑
+lay,v.,放置;產卵
+lead,v.,領導
+leave,v.,離開
+lend,v.,借(出)
+let,v.,讓
+lie,v.,說謊
+lift,v.,舉起
+limit,v./n.,限制;限度
+lock,v./n.,鎖住;鎖
+lose,v.,失去;喪失
+make,v.,製做;泡(茶)
+master,v.,精通
+match,v.,相配
+mean,v.,表示…的意思
+meet,v.,遇見
+mind,v.,留意;介意
+miss,v.,錯過
+mix,v.,混合
+move,v.,行動;移動
+need,v.,需要
+nod,v.,點頭
+notice,v.,注意到;告知
+obey,v.,服從
+object,v.,反對
+offer,v.,提供
+omit,v.,省略;刪去
+open,v./adj.,打開;開放的;開著的
+own,v./n.,擁有;自己
+pardon,v.,原諒;寬恕
+pass,v.,通過
+pause,v.,暫停;中斷
+pick,v.,摘取;挑選
+please,v.,取悅;請
+practice,v.,練習
+praise,v.,讚美
+pray,v.,祈禱;祈求
+prepare,v.,準備
+print,v.,印刷
+produce,v.,製造;出產
+promise,v.,承諾
+protect,v.,保護
+provide,v.,提供;供給
+pull,v.,拉回;推著
+pump,v./n.,抽送; 打氣筒;抽水機
+punish,v.,處罰
+push,v.,推;推動
+put,v.,投入;放置
+puzzle,v.,使困惑
+raise,v.,舉起;抬起
+reach,v.,抵達;達到
+read,v.,閱讀
+realize,v.,明白;了解
+receive,v.,收到
+recover,v.,恢復
+recycle,v.,回收
+refuse,v.,拒絕
+reject,v.,拒絕
+remember,v.,記得;想起
+remind,v.,提醒
+repair,v./n.,修理
+repeat,v.,重複
+rest,v.,休息
+return,v.,返回
+revise,v.,修訂;改編
+rise,v.,(太陽)升起
+rob,v.,搶劫
+roll,v.,滾動;打滾
+rub,v.,磨擦
+ruin,v.,毀壞(滅)
+rush,v.,催促;衝
+satisfy,v.,使滿意
+save,v.,節省;拯救;保存
+search,v.,搜尋
+seek,v.,尋找
+seem,v.,似乎
+select,v.,挑選
+send,v.,發送;寄出
+set,v.,設置;安裝
+shake,v.,握(手);搖動
+share,v.,分擔;分享
+shoot,v.,注射;射擊;拍攝
+shout,v.,大叫
+show,v.,顯示;露出
+shut,v.,關閉
+sign,v.,簽名
+sit,v.,坐
+slow,v.,放慢
+smile,v./n.,微笑
+solve,v.,解決
+spell,v.,拼寫
+spot,v.,看到
+spread,v.,蔓延;擴散
+stand,v.,站
+start,v.,開始
+state,v.,陳述
+stay,v.,停留;留下
+steal,v.,偷竊
+strike,v.,打擊;敲響(鐘);
+succeed,v.,成功
+suggest,v.,建議
+support,v./n.,支持
+surprise,v.,令…驚訝
+survive,v.,倖存
+take,v.,拿取
+teach,v.,教
+tear,v.,撕裂
+thank,v.,謝謝
+think,v.,認為
+throw,v.,投擲;丟出
+t极e,v.,綁住
+trace,v.,追蹤;描繪
+trap,n./v.,(設)陷阱
+travel,v./n.,旅行
+treasure,v./n.,珍愛;寶藏
+trust,v.,信任
+try,v.,嘗試
+turn,v.,轉動
+upload,v.,上傳
+use,v.,使用
+visit,v.,拜訪;參觀
+wait,v.,等待
+wake,v.,醒來
+walk,v.,走路
+want,v.,想要
+wash,v.,洗
+waste,v./n.,浪費; 廢棄物
+water,v.,澆水
+wave,v.,揮舞;揮動
+win,v.,獲勝;贏
+wish,v.,希望
+yell,v.,吼叫
+activity,n.,活動
+badminton,n.,羽毛球
+ball,n.,球
+band,n.,樂隊;樂團
+baseball,n.,棒球
+basketball,n.,籃球
+bowling,n.,保齡球
+camp,v.,露營
+classical,adj.,古典的
+climb,v.,攀登;攀爬
+collect,v.,收集
+create,v.,創造
+dance,v.,跳舞
+dodge ball,n.,躲避球
+draw,v.,畫畫
+drum,n.,鼓
+enjoy,v.,喜愛;享受;欣賞
+exercise,v.,運動
+flute,n.,長笛
+football,n.,美式足球
+frisbee,n.,飛盤
+fun,n.,樂趣;娛樂
+game,n.,遊戲
+golf,n.,高爾夫球
+guitar,n.,吉他
+hike,v./n.,健行; 遠足
+hobby,n.,嗜好
+instrument,n.,樂器
+interest,n.,興趣
+jazz,n.,爵士樂
+jog,v.,慢跑
+love,n.,愛
+movement,n.,運動;活動
+movie,n.,電影
+music,n.,音樂
+paint,v.,畫圖
+piano,n.,鋼琴
+play,v.,玩(彈奏)
+pop music,n.,流行音樂
+roller blade,n.,直排輪
+roller skate,n.,輪式溜冰鞋
+run,v.,跑
+seesaw,n.,蹺蹺板
+sing,v.,唱歌
+skate,v.,溜冰
+ski,v.,滑雪
+slide,n.,滑梯
+soccer,n.,足球
+softball,n.,壘球
+song,n.,歌曲
+sports,n.,運動
+string,n.,細線;(樂器的)弦
+surf,v.,衝浪
+swim,n.,游泳
+swing,n.,鞦韆
+table tennis,n.,乒乓球
+talent,n.,天份;才藝
+tennis,n.,網球
+tent,n.,帳篷
+trip,n.,旅程
+trumpet,n.,小喇叭
+vacation,n.,假期
+violin,n.,小提琴
+volleyball,n.,排球
+watch,v.,看(電視)  `;
+        
+        // 初始化遊戲
+        function initGame() {
+            console.log("開始遊戲");
+            // 解析單字列表
+            vocabulary = parseWordList(wordList);
+            
+            if (vocabulary.length === 0) {
+                alert('單字庫載入失敗！');
+                return;
+            }
+            
+            // 重置遊戲狀態
+            score = 0;
+            scoreDisplay.textContent = score;
+            
+            // 切換到遊戲畫面
+            setupScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            gameOverScreen.style.display = 'none';
+            
+            // 開始遊戲
+            gameActive = true;
+            canAnswer = true;
+            
+            // 開始蝙蝠動畫
+            startBatAnimation();
+            
+            nextQuestion();
+        }
+        
+        // 開始蝙蝠動畫
+        function startBatAnimation() {
+            batInterval = setInterval(() => {
+                createBat();
+            }, 2000);
+        }
+        
+        // 創建蝙蝠
+        function createBat() {
+            const bat = document.createElement('div');
+            bat.className = 'bat';
+            
+            // 隨機位置和大小
+            const size = Math.random() * 20 + 10;
+            bat.style.width = `${size}px`;
+            bat.style.height = `${size}px`;
+            bat.style.left = `-${size}px`;
+            bat.style.top = `${Math.random() * 80 + 10}%`;
+            
+            // 隨機動畫時間
+            const duration = Math.random() * 5 + 5;
+            
+            // 添加到容器
+            batsContainer.appendChild(bat);
+            
+            // 開始動畫
+            setTimeout(() => {
+                bat.style.animation = `batFly ${duration}s linear forwards`;
+            }, 10);
+            
+            // 動畫結束後移除
+            setTimeout(() => {
+                bat.remove();
+            }, duration * 1000);
+        }
+        
+        // 停止蝙蝠動畫
+        function stopBatAnimation() {
+            clearInterval(batInterval);
+            batsContainer.innerHTML = '';
+        }
+        
+        // 解析單字列表
+        function parseWordList(text) {
+            const lines = text.split('\n');
+            const words = [];
+            
+            for (const line of lines) {
+                const trimmedLine = line.trim();
+                if (!trimmedLine) continue;
+                
+                const parts = trimmedLine.split(',');
+                if (parts.length < 3) continue;
+                
+                const word = parts[0].trim();
+                const pos = parts[1].trim();
+                const meanings = parts[2].split(';').map(m => m.trim()).filter(m => m);
+                
+                for (const meaning of meanings) {
+                    words.push({
+                        word: word,
+                        pos: pos,
+                        meaning: meaning
+                    });
+                }
+            }
+            
+            return words;
+        }
+        
+        // 下一題
+        function nextQuestion() {
+            if (!gameActive) return;
+            
+            // 清除之前的計時器
+            if (timer) {
+                clearInterval(timer);
+            }
+            
+            // 啟用所有選項
+            canAnswer = true;
+            pumpkinOptions.forEach(option => {
+                option.classList.remove('disabled');
+            });
+            
+            // 添加淡入效果
+            currentWordDisplay.classList.add('fade-out');
+            currentPosDisplay.classList.add('fade-out');
+            
+            // 短暫延遲後更新內容
+            setTimeout(() => {
+                // 隨機選擇一個單字
+                currentWord = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+                
+                // 顯示單字和詞性
+                currentWordDisplay.textContent = currentWord.word;
+                currentPosDisplay.textContent = currentWord.pos;
+                
+                // 準備選項
+                prepareOptions();
+                
+                // 淡入效果
+                currentWordDisplay.classList.remove('fade-out');
+                currentPosDisplay.classList.remove('fade-out');
+                currentWordDisplay.classList.add('fade-in');
+                currentPosDisplay.classList.add('fade-in');
+                
+                // 重置計時器
+                timeLeft = 8;
+                timerBar.style.width = '100%';
+                timerBar.classList.remove('timer-warning');
+                
+                // 開始倒計時
+                timer = setInterval(() => {
+                    timeLeft -= 0.1;
+                    timerBar.style.width = `${(timeLeft / 8) * 100}%`;
+                    
+                    // 時間不足時添加警告效果
+                    if (timeLeft <= 3 && !timerBar.classList.contains('timer-warning')) {
+                        timerBar.classList.add('timer-warning');
+                    }
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        endGame(false);
+                    }
+                }, 100);
+                
+                // 移除淡入效果
+                setTimeout(() => {
+                    currentWordDisplay.classList.remove('fade-in');
+                    currentPosDisplay.classList.remove('fade-in');
+                }, 300);
+            }, 200);
+        }
+        
+        // 準備選項
+        function prepareOptions() {
+            // 正確答案
+            const correctAnswer = currentWord.meaning;
+            
+            // 收集其他可能的選項
+            const otherMeanings = vocabulary
+                .filter(item => item.meaning !== correctAnswer)
+                .map(item => item.meaning);
+            
+            // 隨機選擇3個不重複的錯誤選項
+            const wrongAnswers = [];
+            while (wrongAnswers.length < 3 && otherMeanings.length > 0) {
+                const randomIndex = Math.floor(Math.random() * otherMeanings.length);
+                const selectedMeaning = otherMeanings[randomIndex];
+                
+                // 確保選項不重複
+                if (!wrongAnswers.includes(selectedMeaning)) {
+                    wrongAnswers.push(selectedMeaning);
+                    otherMeanings.splice(randomIndex, 1);
+                }
+            }
+            
+            // 合併所有選項並打亂順序
+            const allOptions = [correctAnswer, ...wrongAnswers];
+            shuffleArray(allOptions);
+            
+            // 更新選項顯示
+            for (let i = 0; i < 4; i++) {
+                if (i < allOptions.length) {
+                    optionDisplays[i].textContent = allOptions[i];
+                    optionDisplays[i].parentElement.dataset.meaning = allOptions[i];
+                } else {
+                    optionDisplays[i].textContent = '無選項';
+                    optionDisplays[i].parentElement.dataset.meaning = '';
+                }
+            }
+        }
+        
+        // 打亂陣列順序
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // 檢查答案
+        function checkAnswer(selectedOption) {
+            if (!gameActive || !canAnswer) return;
+            
+            // 禁用所有選項，防止多次點擊
+            canAnswer = false;
+            pumpkinOptions.forEach(option => {
+                option.classList.add('disabled');
+            });
+            
+            const selectedMeaning = selectedOption.dataset.meaning;
+            const isCorrect = selectedMeaning === currentWord.meaning;
+            
+            if (isCorrect) {
+                // 正確答案 - 每題5分
+                score += 5;
+                scoreDisplay.textContent = score;
+                
+                // 顯示正確效果
+                showCorrectEffect(selectedOption);
+                
+                // 縮短延遲後進入下一題
+                setTimeout(() => {
+                    nextQuestion();
+                }, 500);
+            } else {
+                // 錯誤答案
+                endGame(false);
+            }
+        }
+        
+        // 顯示正確效果
+        function showCorrectEffect(correctOption) {
+            correctOption.style.transform = 'scale(1.1)';
+            correctOption.style.filter = 'drop-shadow(0 0 10px #ff9f43)';
+            
+            // 創建蝙蝠效果
+            createBatsEffect();
+            
+            setTimeout(() => {
+                correctOption.style.transform = '';
+                correctOption.style.filter = '';
+            }, 500);
+        }
+        
+        // 創建蝙蝠效果
+        function createBatsEffect() {
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    createBat();
+                }, i * 100);
+            }
+        }
+        
+        // 結束遊戲
+        function endGame(isWin) {
+            gameActive = false;
+            canAnswer = false;
+            clearInterval(timer);
+            stopBatAnimation();
+            
+            // 更新結束畫面
+            finalScoreDisplay.textContent = score;
+            resultMessage.textContent = isWin ? '恭喜你贏了!' : 'Game Over!';
+            
+            // 顯示結束畫面
+            gameOverScreen.style.display = 'flex';
+            
+            // 如果不是勝利，添加震動效果
+            if (!isWin) {
+                gameScreen.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    gameScreen.style.animation = '';
+                }, 500);
+            }
+        }
+        
+        // 重新開始遊戲
+        function restartGame() {
+            gameOverScreen.style.display = 'none';
+            setupScreen.classList.remove('hidden');
+            gameScreen.classList.add('hidden');
+        }
+        
+        // 事件監聽器
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM已載入");
+            startGameBtn.addEventListener('click', initGame);
+            restartBtn.addEventListener('click', restartGame);
+            
+            // 選項點擊事件
+            document.querySelectorAll('.pumpkin-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    checkAnswer(option);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
