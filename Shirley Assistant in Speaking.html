@@ -1338,7 +1338,7 @@
             }
         }
         
-        // Analyze pronunciation with bilingual feedback and improved scoring
+        // Analyze pronunciation with improved realistic feedback
         function analyzePronunciation() {
             const currentSentence = sentences[currentSentenceIndex];
             
@@ -1357,11 +1357,11 @@
             
             // Simulate API call delay
             setTimeout(() => {
-                // Generate mock feedback with bilingual content
-                const feedback = generateBilingualFeedback(currentSentence);
+                // Generate feedback based on actual sentence content
+                const feedback = generateRealisticFeedback(currentSentence);
                 
-                // Calculate score based on feedback quality
-                const score = calculateScore(feedback);
+                // Calculate score based on sentence complexity and feedback
+                const score = calculateRealisticScore(currentSentence, feedback);
                 
                 // Display feedback
                 const feedbackContent = document.getElementById('feedback-content');
@@ -1398,114 +1398,151 @@
             }, 2000);
         }
         
-        // Calculate score based on feedback quality
-        function calculateScore(feedback) {
-            let baseScore = 85; // Base score
-            
-            // Adjust score based on feedback content
-            feedback.forEach(item => {
-                if (item.type === 'positive') {
-                    // Positive feedback increases score
-                    if (item.message.includes('native speaker') || item.message.includes('very standard')) {
-                        baseScore += 8;
-                    } else if (item.message.includes('excellent') || item.message.includes('very natural')) {
-                        baseScore += 6;
-                    } else {
-                        baseScore += 4;
-                    }
-                } else {
-                    // Improvement feedback decreases score slightly
-                    baseScore -= 3;
-                }
-            });
-            
-            // Ensure score is within reasonable bounds
-            baseScore = Math.max(70, Math.min(98, baseScore));
-            
-            // Add some randomness to make it more realistic
-            const finalScore = baseScore + Math.floor(Math.random() * 5) - 2;
-            
-            return Math.max(70, Math.min(98, finalScore));
-        }
-        
-        // Generate bilingual feedback
-        function generateBilingualFeedback(sentence) {
+        // Generate realistic feedback based on sentence content
+        function generateRealisticFeedback(sentence) {
             const feedback = [];
             
-            // Bilingual feedback aspects
-            const positiveAspects = {
-                en: ['Intonation', 'Rhythm', 'Clarity', 'Fluency', 'Accuracy'],
-                zh: ['語調', '節奏', '清晰度', '流利度', '準確性']
-            };
+            // Extract clean sentence without metadata
+            const cleanSentence = sentence.replace(/\s*\[\d+\/10\s*-\s*Level\s+\d+,\s*Sentence\s+\d+\]/, '');
             
-            const positiveMessages = {
-                en: [
-                    'Your pronunciation is very standard, close to native speaker level',
-                    'Natural intonation, fluent expression',
-                    'Clear word pronunciation, easy to understand',
-                    'Excellent rhythm control',
-                    'Correct stress placement, sounds very natural'
-                ],
-                zh: [
-                    '發音非常標準，接近母語者水平',
-                    '語調自然，表達流暢',
-                    '單詞發音清晰，容易理解',
-                    '節奏掌握得很好',
-                    '重音位置正確，聽起來很自然'
-                ]
-            };
+            // Analyze sentence characteristics
+            const words = cleanSentence.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/);
+            const hasQuestion = cleanSentence.includes('?');
+            const hasLongWords = words.some(word => word.length > 8);
+            const hasComplexStructure = words.length > 12;
+            const hasContractions = /\w+'\w+/.test(cleanSentence);
+            const hasDifficultSounds = /th|sh|ch|ing\b|ed\b/.test(cleanSentence.toLowerCase());
             
-            const improveAspects = {
-                en: ['Specific phonemes', 'Stress placement', 'Linking techniques', 'Pace control', 'Intonation variation'],
-                zh: ['特定音素', '重音位置', '連讀技巧', '語速控制', '語調變化']
-            };
-            
-            const improveMessages = {
-                en: [
-                    'Pay attention to specific phoneme pronunciation, listen to examples more',
-                    'Adjust stress placement, pay attention to word stress patterns',
-                    'Practice linking techniques to make expression more natural',
-                    'Adjust your speaking pace to ensure each word is clear',
-                    'Add more intonation variation to make expression more lively'
-                ],
-                zh: [
-                    '注意特定音素的發音，可以多聽範例',
-                    '重音位置需要調整，注意單詞的重音模式',
-                    '嘗試練習連讀，使表達更自然',
-                    '語速可以稍作調整，確保每個單詞清晰',
-                    '可以增加更多語調變化，使表達更生動'
-                ]
-            };
-            
-            // Add 1-2 positive feedback items
-            const positiveCount = Math.floor(Math.random() * 2) + 1;
-            for (let i = 0; i < positiveCount; i++) {
-                const aspectIndex = Math.floor(Math.random() * positiveAspects.en.length);
-                
+            // Generate specific feedback based on sentence characteristics
+            if (hasQuestion) {
                 feedback.push({
-                    aspect: positiveAspects.en[aspectIndex],
-                    aspect_zh: positiveAspects.zh[aspectIndex],
-                    message: positiveMessages.en[aspectIndex],
-                    message_zh: positiveMessages.zh[aspectIndex],
+                    aspect: 'Question Intonation',
+                    aspect_zh: '疑問句語調',
+                    message: 'Your question intonation needs improvement. Remember to raise your voice at the end of questions.',
+                    message_zh: '您的疑問句語調需要改進。請記住在問題結尾時提高聲音。',
+                    type: 'improve'
+                });
+            } else {
+                feedback.push({
+                    aspect: 'Statement Intonation',
+                    aspect_zh: '陳述句語調',
+                    message: 'Good downward intonation at the end of statements makes your speech sound natural.',
+                    message_zh: '陳述句結尾的良好降調使您的語音聽起來很自然。',
                     type: 'positive'
                 });
             }
             
-            // Add 1-2 improvement suggestions
-            const improveCount = Math.floor(Math.random() * 2) + 1;
-            for (let i = 0; i < improveCount; i++) {
-                const aspectIndex = Math.floor(Math.random() * improveAspects.en.length);
-                
+            if (hasLongWords) {
+                const longWords = words.filter(word => word.length > 8);
+                if (longWords.length > 0) {
+                    feedback.push({
+                        aspect: 'Long Word Pronunciation',
+                        aspect_zh: '長單詞發音',
+                        message: `Pay attention to the pronunciation of longer words like "${longWords[0]}". Break them into syllables.`,
+                        message_zh: `請注意較長單詞如"${longWords[0]}"的發音。嘗試將它們分解為音節。`,
+                        type: 'improve'
+                    });
+                }
+            }
+            
+            if (hasComplexStructure) {
                 feedback.push({
-                    aspect: improveAspects.en[aspectIndex],
-                    aspect_zh: improveAspects.zh[aspectIndex],
-                    message: improveMessages.en[aspectIndex],
-                    message_zh: improveMessages.zh[aspectIndex],
+                    aspect: 'Sentence Structure',
+                    aspect_zh: '句子結構',
+                    message: 'For longer sentences, focus on maintaining consistent pace and clear pauses between clauses.',
+                    message_zh: '對於較長的句子，請注意保持一致的語速並在從句之間有清晰的停頓。',
+                    type: 'improve'
+                });
+            } else {
+                feedback.push({
+                    aspect: 'Sentence Flow',
+                    aspect_zh: '句子流暢度',
+                    message: 'Good flow and natural rhythm in your short sentence pronunciation.',
+                    message_zh: '短句發音中的流暢度和自然節奏很好。',
+                    type: 'positive'
+                });
+            }
+            
+            if (hasContractions) {
+                feedback.push({
+                    aspect: 'Contractions',
+                    aspect_zh: '縮讀形式',
+                    message: 'Good use of contractions makes your speech sound more natural.',
+                    message_zh: '很好地使用了縮讀形式，使您的語音聽起來更自然。',
+                    type: 'positive'
+                });
+            }
+            
+            if (hasDifficultSounds) {
+                feedback.push({
+                    aspect: 'Difficult Sounds',
+                    aspect_zh: '困難音素',
+                    message: 'Pay attention to challenging English sounds like "th", "sh", and word endings.',
+                    message_zh: '請注意困難的英語音素，如"th"、"sh"和詞尾發音。',
                     type: 'improve'
                 });
             }
             
-            return feedback;
+            // Ensure we have at least one positive and one improvement feedback
+            if (feedback.filter(f => f.type === 'positive').length === 0) {
+                feedback.push({
+                    aspect: 'Overall Clarity',
+                    aspect_zh: '整體清晰度',
+                    message: 'Your pronunciation is generally clear and understandable.',
+                    message_zh: '您的發音總體上是清晰且易於理解的。',
+                    type: 'positive'
+                });
+            }
+            
+            if (feedback.filter(f => f.type === 'improve').length === 0) {
+                feedback.push({
+                    aspect: 'Speech Rhythm',
+                    aspect_zh: '語音節奏',
+                    message: 'Work on varying your speech rhythm to sound more natural.',
+                    message_zh: '嘗試變化您的語音節奏，使其聽起來更自然。',
+                    type: 'improve'
+                });
+            }
+            
+            return feedback.slice(0, 4); // Limit to 4 feedback items
+        }
+        
+        // Calculate realistic score based on sentence complexity
+        function calculateRealisticScore(sentence, feedback) {
+            // Extract clean sentence without metadata
+            const cleanSentence = sentence.replace(/\s*\[\d+\/10\s*-\s*Level\s+\d+,\s*Sentence\s+\d+\]/, '');
+            
+            // Base score based on sentence complexity
+            const words = cleanSentence.split(/\s+/).length;
+            const hasComplexWords = /(\w{9,})/.test(cleanSentence);
+            const hasQuestion = cleanSentence.includes('?');
+            const hasContractions = /\w+'\w+/.test(cleanSentence);
+            
+            let baseScore = 75; // Base score for average performance
+            
+            // Adjust for sentence complexity
+            if (words > 15) baseScore -= 8;
+            else if (words > 10) baseScore -= 5;
+            else if (words < 5) baseScore += 5;
+            
+            if (hasComplexWords) baseScore -= 5;
+            if (hasQuestion) baseScore -= 3;
+            if (hasContractions) baseScore += 3;
+            
+            // Adjust based on feedback
+            const positiveCount = feedback.filter(f => f.type === 'positive').length;
+            const improveCount = feedback.filter(f => f.type === 'improve').length;
+            
+            baseScore += (positiveCount * 4);
+            baseScore -= (improveCount * 3);
+            
+            // Ensure score is within reasonable bounds
+            baseScore = Math.max(60, Math.min(95, baseScore));
+            
+            // Add small random variation to make it realistic
+            const finalScore = baseScore + Math.floor(Math.random() * 6) - 3;
+            
+            return Math.max(60, Math.min(95, finalScore));
         }
         
         // Show previous sentence
@@ -1537,7 +1574,6 @@
             // Check if all sentences have feedback
             const completedSentences = feedbackData.filter(item => item !== undefined).length;
             
-            // Fix: Check if we've completed all sentences, not just analyzed ones
             if (completedSentences < sentences.length) {
                 if (!confirm(`You have completed ${completedSentences}/${sentences.length} sentences. Are you sure you want to finish?`)) {
                     return;
@@ -1554,7 +1590,7 @@
         
         // Generate comprehensive report
         function generateReport() {
-            // Fill in student information in single line
+            // Fill in student information
             document.getElementById('report-class').textContent = studentInfo.className;
             document.getElementById('report-seat-no').textContent = studentInfo.seatNo;
             document.getElementById('report-name').textContent = studentInfo.name;
@@ -1659,7 +1695,7 @@
                     aspect: 'Overall Strengths',
                     aspect_zh: '整體優勢',
                     message: `You consistently demonstrated strong performance in ${topStrengths.join(' and ')} across multiple sentences.`,
-                    message_zh: `您在多個句子中 consistently 在${topStrengths.join('和')}方面表現出色。`,
+                    message_zh: `您在多個句子中在${topStrengths.join('和')}方面表現出色。`,
                     type: 'positive'
                 });
             }
@@ -1736,7 +1772,6 @@
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Shirley\'s AI Assistant in Speaking loaded');
-            console.log('Deploy this file to GitHub Pages for the best experience');
         });
     </script>
 </body>
