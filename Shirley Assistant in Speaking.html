@@ -173,6 +173,24 @@
             transform: translateY(-2px);
         }
         
+        .sentence-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .sentence-number {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .sentence-source {
+            font-size: 14px;
+            color: #666;
+        }
+        
         .sentence-container {
             display: flex;
             align-items: center;
@@ -187,13 +205,6 @@
             font-size: 18px;
             font-weight: 500;
             color: var(--dark-color);
-        }
-        
-        .sentence-info {
-            font-size: 14px;
-            color: #666;
-            margin-top: 5px;
-            font-style: italic;
         }
         
         .audio-btn {
@@ -356,6 +367,24 @@
             margin-top: 30px;
         }
         
+        .sentence-list {
+            margin: 20px 0;
+        }
+        
+        .sentence-score-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .sentence-score {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-top: 5px;
+        }
+        
         .print-btn {
             display: block;
             margin: 30px auto 0;
@@ -463,6 +492,20 @@
             background: var(--primary-color);
             color: white;
             border-color: var(--primary-color);
+        }
+
+        .feedback-bilingual {
+            margin-bottom: 10px;
+        }
+        
+        .feedback-english {
+            font-weight: 500;
+        }
+        
+        .feedback-chinese {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
         }
 
         /* 手機適配 */
@@ -665,8 +708,15 @@
                     Overall Pronunciation Score: <span id="overall-score">85</span>/100
                 </div>
                 
+                <div class="sentence-list">
+                    <h3>Practice Sentences & Scores</h3>
+                    <div id="sentence-scores-content">
+                        <!-- Sentence scores will be dynamically generated here -->
+                    </div>
+                </div>
+                
                 <div class="report-feedback">
-                    <h3>Pronunciation Feedback Summary</h3>
+                    <h3>Comprehensive Feedback</h3>
                     <div id="report-feedback-content">
                         <!-- Feedback content will be dynamically generated here -->
                     </div>
@@ -691,6 +741,7 @@
         let sentenceSource = 'manual'; // 'manual' or 'level'
         let selectedLevel = null;
         let usedSentences = {}; // Track used sentences per level
+        let currentStream = null; // Keep track of current media stream
         
         // DOM elements
         const studentInfoPage = document.getElementById('student-info-page');
@@ -792,8 +843,8 @@
                 usedSentences[levelKey] = [...(usedSentences[levelKey] || []), ...selectedData.map(item => item.number)];
                 
                 // Format sentences with numbering information
-                const formattedSentences = selectedData.map(item => 
-                    `${item.sentence} [Level ${selectedLevel}, Sentence ${item.number}]`
+                const formattedSentences = selectedData.map((item, index) => 
+                    `${item.sentence} [${index + 1}/10 - Level ${selectedLevel}, Sentence ${item.number}]`
                 );
                 
                 // Display the selected sentences
@@ -1016,16 +1067,18 @@
             practiceItem.className = 'practice-item';
             
             // Check if this is a sentence bank sentence (contains level info in brackets)
-            const sentenceMatch = sentence.match(/^(.+?)\s*\[(Level\s+\d+,\s*Sentence\s+\d+)\]$/);
+            const sentenceMatch = sentence.match(/^(.+?)\s*\[(\d+\/10)\s*-\s*(Level\s+\d+,\s*Sentence\s+\d+)\]$/);
             const displaySentence = sentenceMatch ? sentenceMatch[1] : sentence;
-            const sentenceInfo = sentenceMatch ? sentenceMatch[2] : null;
+            const practiceNumber = sentenceMatch ? sentenceMatch[2] : `${currentSentenceIndex + 1}/10`;
+            const sentenceInfo = sentenceMatch ? sentenceMatch[3] : null;
             
             practiceItem.innerHTML = `
+                <div class="sentence-header">
+                    <div class="sentence-number">Sentence ${practiceNumber}</div>
+                    ${sentenceInfo ? `<div class="sentence-source">${sentenceInfo}</div>` : ''}
+                </div>
                 <div class="sentence-container">
-                    <div>
-                        <div class="sentence-text">${displaySentence}</div>
-                        ${sentenceInfo ? `<div class="sentence-info">${sentenceInfo}</div>` : ''}
-                    </div>
+                    <div class="sentence-text">${displaySentence}</div>
                     <button class="audio-btn" data-sentence="${displaySentence}" title="Listen to original">🔊</button>
                 </div>
                 
@@ -1065,13 +1118,7 @@
             analyzeBtn.addEventListener('click', analyzePronunciation);
         }
         
-        // [The rest of the functions remain the same as in the previous implementation]
-        // Request microphone permission, play sentence, toggle recording, start recording, 
-        // stop recording, analyze pronunciation, generate mock feedback, show previous/next sentence, 
-        // update progress, finish practice, generate report, print report, and start new practice
-        // functions remain unchanged from the previous implementation
-        
-        // Request microphone permission
+        // Request microphone permission (only once per session)
         async function requestMicrophonePermission() {
             if (hasRequestedPermission) return;
             
@@ -1084,17 +1131,14 @@
                 
                 showStatusMessage('Requesting microphone permission...', 'info');
                 
-                // Try to get microphone permission
-                const stream = await navigator.mediaDevices.getUserMedia({ 
+                // Try to get microphone permission and keep the stream
+                currentStream = await navigator.mediaDevices.getUserMedia({ 
                     audio: {
                         echoCancellation: true,
                         noiseSuppression: true,
                         sampleRate: 44100
                     } 
                 });
-                
-                // Immediately stop the stream, we're just testing permission
-                stream.getTracks().forEach(track => track.stop());
                 
                 hasRequestedPermission = true;
                 showStatusMessage('✅ Microphone permission granted, you can start recording', 'info');
@@ -1127,16 +1171,13 @@
             try {
                 showStatusMessage('Requesting microphone permission...', 'info');
                 
-                const stream = await navigator.mediaDevices.getUserMedia({ 
+                currentStream = await navigator.mediaDevices.getUserMedia({ 
                     audio: {
                         echoCancellation: true,
                         noiseSuppression: true,
                         sampleRate: 44100
                     } 
                 });
-                
-                // Immediately stop the stream, we're just testing permission
-                stream.getTracks().forEach(track => track.stop());
                 
                 hasRequestedPermission = true;
                 
@@ -1158,27 +1199,28 @@
             }
         }
         
-        // Play sentence audio
-        function playSentence(sentence) {
-            // Stop any currently playing audio
-            speechSynthesis.cancel();
-            
-            // Use Web Speech API to synthesize speech
-            const utterance = new SpeechSynthesisUtterance(sentence);
-            utterance.lang = 'en-US';
-            utterance.rate = 0.9;
-            utterance.pitch = 1;
-            
-            // Ensure audio is ready
-            utterance.onstart = function() {
-                console.log('Started playing audio');
-            };
-            
-            utterance.onerror = function(event) {
-                console.error('Audio playback error:', event);
-                showStatusMessage('❌ Audio playback failed, please try again', 'error');
-            };
-            
+        // Play sentence audio (only the sentence, not the metadata)function playSentence(sentence) {
+    // Stop any currently playing audio
+    speechSynthesis.cancel();
+    
+    // Remove everything inside square brackets including the brackets
+    const cleanSentence = sentence.replace(/\s*\[.*?\]/g, '').trim();
+    
+    // Use Web Speech API to synthesize speech
+    const utterance = new SpeechSynthesisUtterance(cleanSentence);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    
+    // Ensure audio is ready
+    utterance.onstart = function() {
+        console.log('Started playing audio:', cleanSentence);
+    };
+    
+    utterance.onerror = function(event) {
+        console.error('Audio playback error:', event);
+        showStatusMessage('❌ Audio playback failed, please try again', 'error');
+    };
             speechSynthesis.speak(utterance);
         }
         
@@ -1191,36 +1233,27 @@
             }
         }
         
-        // Start recording
+        // Start recording using the existing stream
         async function startRecording() {
             try {
-                if (!hasRequestedPermission) {
+                if (!hasRequestedPermission || !currentStream) {
                     await requestMicrophonePermission();
-                    return;
+                    if (!currentStream) return;
                 }
                 
                 showStatusMessage('🎤 Preparing to record...', 'info');
                 
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        sampleRate: 44100,
-                        channelCount: 1
-                    } 
-                });
-                
-                // Create MediaRecorder
+                // Create MediaRecorder using the existing stream
                 const options = { 
                     mimeType: 'audio/webm;codecs=opus',
                     audioBitsPerSecond: 128000
                 };
                 
                 try {
-                    mediaRecorder = new MediaRecorder(stream, options);
+                    mediaRecorder = new MediaRecorder(currentStream, options);
                 } catch (e) {
                     console.warn('Using default MIME type');
-                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder = new MediaRecorder(currentStream);
                 }
                 
                 audioChunks = [];
@@ -1239,9 +1272,6 @@
                     
                     // Show playback section
                     document.getElementById('playback-section').classList.remove('hidden');
-                    
-                    // Stop all tracks
-                    stream.getTracks().forEach(track => track.stop());
                 };
                 
                 mediaRecorder.onerror = (event) => {
@@ -1291,7 +1321,7 @@
             }
         }
         
-        // Analyze pronunciation
+        // Analyze pronunciation with bilingual feedback
         function analyzePronunciation() {
             const currentSentence = sentences[currentSentenceIndex];
             
@@ -1310,8 +1340,8 @@
             
             // Simulate API call delay
             setTimeout(() => {
-                // Generate mock feedback
-                const feedback = generateMockFeedback(currentSentence);
+                // Generate mock feedback with bilingual content
+                const feedback = generateBilingualFeedback(currentSentence);
                 
                 // Display feedback
                 const feedbackContent = document.getElementById('feedback-content');
@@ -1320,8 +1350,15 @@
                 feedback.forEach(item => {
                     const feedbackItem = document.createElement('div');
                     feedbackItem.className = `feedback-item ${item.type === 'positive' ? 'feedback-positive' : 'feedback-improve'}`;
-                    const icon = item.type === 'positive' ? '✅' : '💡';
-                    feedbackItem.innerHTML = `<strong>${icon} ${item.aspect}:</strong> ${item.message}`;
+                    
+                    const feedbackBilingual = document.createElement('div');
+                    feedbackBilingual.className = 'feedback-bilingual';
+                    feedbackBilingual.innerHTML = `
+                        <div class="feedback-english"><strong>${item.aspect}:</strong> ${item.message}</div>
+                        <div class="feedback-chinese"><strong>${item.aspect_zh}:</strong> ${item.message_zh}</div>
+                    `;
+                    
+                    feedbackItem.appendChild(feedbackBilingual);
                     feedbackContent.appendChild(feedbackItem);
                 });
                 
@@ -1341,40 +1378,65 @@
             }, 2000);
         }
         
-        // Generate mock feedback
-        function generateMockFeedback(sentence) {
+        // Generate bilingual feedback
+        function generateBilingualFeedback(sentence) {
             const feedback = [];
-            const words = sentence.toLowerCase().split(' ');
             
-            // Randomly generate positive feedback
-            const positiveAspects = ['Intonation', 'Rhythm', 'Clarity', 'Fluency', 'Accuracy'];
-            const positiveMessages = [
-                'Your pronunciation is very standard, close to native speaker level',
-                'Natural intonation, fluent expression',
-                'Clear word pronunciation, easy to understand',
-                'Excellent rhythm control',
-                'Correct stress placement, sounds very natural'
-            ];
+            // Bilingual feedback aspects
+            const positiveAspects = {
+                en: ['Intonation', 'Rhythm', 'Clarity', 'Fluency', 'Accuracy'],
+                zh: ['語調', '節奏', '清晰度', '流利度', '準確性']
+            };
             
-            // Randomly generate improvement suggestions
-            const improveAspects = ['Specific phonemes', 'Stress placement', 'Linking techniques', 'Pace control', 'Intonation variation'];
-            const improveMessages = [
-                'Pay attention to specific phoneme pronunciation, listen to examples more',
-                'Adjust stress placement, pay attention to word stress patterns',
-                'Practice linking techniques to make expression more natural',
-                'Adjust your speaking pace to ensure each word is clear',
-                'Add more intonation variation to make expression more lively'
-            ];
+            const positiveMessages = {
+                en: [
+                    'Your pronunciation is very standard, close to native speaker level',
+                    'Natural intonation, fluent expression',
+                    'Clear word pronunciation, easy to understand',
+                    'Excellent rhythm control',
+                    'Correct stress placement, sounds very natural'
+                ],
+                zh: [
+                    '發音非常標準，接近母語者水平',
+                    '語調自然，表達流暢',
+                    '單詞發音清晰，容易理解',
+                    '節奏掌握得很好',
+                    '重音位置正確，聽起來很自然'
+                ]
+            };
+            
+            const improveAspects = {
+                en: ['Specific phonemes', 'Stress placement', 'Linking techniques', 'Pace control', 'Intonation variation'],
+                zh: ['特定音素', '重音位置', '連讀技巧', '語速控制', '語調變化']
+            };
+            
+            const improveMessages = {
+                en: [
+                    'Pay attention to specific phoneme pronunciation, listen to examples more',
+                    'Adjust stress placement, pay attention to word stress patterns',
+                    'Practice linking techniques to make expression more natural',
+                    'Adjust your speaking pace to ensure each word is clear',
+                    'Add more intonation variation to make expression more lively'
+                ],
+                zh: [
+                    '注意特定音素的發音，可以多聽範例',
+                    '重音位置需要調整，注意單詞的重音模式',
+                    '嘗試練習連讀，使表達更自然',
+                    '語速可以稍作調整，確保每個單詞清晰',
+                    '可以增加更多語調變化，使表達更生動'
+                ]
+            };
             
             // Add 1-2 positive feedback items
             const positiveCount = Math.floor(Math.random() * 2) + 1;
             for (let i = 0; i < positiveCount; i++) {
-                const aspectIndex = Math.floor(Math.random() * positiveAspects.length);
-                const messageIndex = Math.floor(Math.random() * positiveMessages.length);
+                const aspectIndex = Math.floor(Math.random() * positiveAspects.en.length);
                 
                 feedback.push({
-                    aspect: positiveAspects[aspectIndex],
-                    message: positiveMessages[messageIndex],
+                    aspect: positiveAspects.en[aspectIndex],
+                    aspect_zh: positiveAspects.zh[aspectIndex],
+                    message: positiveMessages.en[aspectIndex],
+                    message_zh: positiveMessages.zh[aspectIndex],
                     type: 'positive'
                 });
             }
@@ -1382,12 +1444,13 @@
             // Add 1-2 improvement suggestions
             const improveCount = Math.floor(Math.random() * 2) + 1;
             for (let i = 0; i < improveCount; i++) {
-                const aspectIndex = Math.floor(Math.random() * improveAspects.length);
-                const messageIndex = Math.floor(Math.random() * improveMessages.length);
+                const aspectIndex = Math.floor(Math.random() * improveAspects.en.length);
                 
                 feedback.push({
-                    aspect: improveAspects[aspectIndex],
-                    message: improveMessages[messageIndex],
+                    aspect: improveAspects.en[aspectIndex],
+                    aspect_zh: improveAspects.zh[aspectIndex],
+                    message: improveMessages.en[aspectIndex],
+                    message_zh: improveMessages.zh[aspectIndex],
                     type: 'improve'
                 });
             }
@@ -1424,6 +1487,7 @@
             // Check if all sentences have feedback
             const completedSentences = feedbackData.filter(item => item !== undefined).length;
             
+            // Fix: Check if we've completed all sentences, not just analyzed ones
             if (completedSentences < sentences.length) {
                 if (!confirm(`You have completed ${completedSentences}/${sentences.length} sentences. Are you sure you want to finish?`)) {
                     return;
@@ -1438,7 +1502,7 @@
             generateReport();
         }
         
-        // Generate report
+        // Generate comprehensive report
         function generateReport() {
             // Fill in student information
             document.getElementById('report-class').textContent = studentInfo.className;
@@ -1453,7 +1517,29 @@
             
             document.getElementById('overall-score').textContent = averageScore;
             
-            // Generate feedback summary
+            // Generate sentence scores list
+            const sentenceScoresContent = document.getElementById('sentence-scores-content');
+            sentenceScoresContent.innerHTML = '';
+            
+            sentences.forEach((sentence, index) => {
+                const feedback = feedbackData[index];
+                const score = feedback ? feedback.score : 'Not analyzed';
+                
+                const sentenceItem = document.createElement('div');
+                sentenceItem.className = 'sentence-score-item';
+                
+                // Extract clean sentence without metadata for display
+                const cleanSentence = sentence.replace(/\s*\[\d+\/10\s*-\s*Level\s+\d+,\s*Sentence\s+\d+\]/, '');
+                
+                sentenceItem.innerHTML = `
+                    <div><strong>Sentence ${index + 1}:</strong> ${cleanSentence}</div>
+                    <div class="sentence-score">Score: ${score}/100</div>
+                `;
+                
+                sentenceScoresContent.appendChild(sentenceItem);
+            });
+            
+            // Generate comprehensive feedback summary
             const feedbackContent = document.getElementById('report-feedback-content');
             feedbackContent.innerHTML = '';
             
@@ -1462,52 +1548,97 @@
                 return;
             }
             
-            // Summarize positive feedback
-            const positiveFeedback = [];
+            // Generate comprehensive bilingual feedback
+            const comprehensiveFeedback = generateComprehensiveFeedback();
+            
+            comprehensiveFeedback.forEach(item => {
+                const feedbackItem = document.createElement('div');
+                feedbackItem.className = `feedback-item ${item.type === 'positive' ? 'feedback-positive' : 'feedback-improve'}`;
+                
+                const feedbackBilingual = document.createElement('div');
+                feedbackBilingual.className = 'feedback-bilingual';
+                feedbackBilingual.innerHTML = `
+                    <div class="feedback-english"><strong>${item.aspect}:</strong> ${item.message}</div>
+                    <div class="feedback-chinese"><strong>${item.aspect_zh}:</strong> ${item.message_zh}</div>
+                `;
+                
+                feedbackItem.appendChild(feedbackBilingual);
+                feedbackContent.appendChild(feedbackItem);
+            });
+        }
+        
+        // Generate comprehensive feedback based on all sentences
+        function generateComprehensiveFeedback() {
+            const comprehensiveFeedback = [];
+            
+            // Analyze all feedback to generate comprehensive suggestions
+            const allPositiveAspects = [];
+            const allImproveAspects = [];
+            
             feedbackData.forEach(item => {
                 if (item && item.feedback) {
                     item.feedback.forEach(fb => {
-                        if (fb.type === 'positive' && !positiveFeedback.includes(fb.aspect)) {
-                            positiveFeedback.push(fb.aspect);
+                        if (fb.type === 'positive') {
+                            allPositiveAspects.push(fb.aspect);
+                        } else {
+                            allImproveAspects.push(fb.aspect);
                         }
                     });
                 }
             });
             
-            if (positiveFeedback.length > 0) {
-                const positiveItem = document.createElement('div');
-                positiveItem.className = 'feedback-item feedback-positive';
-                positiveItem.innerHTML = `<strong>✅ Strengths:</strong> Good performance in ${positiveFeedback.join(', ')}`;
-                feedbackContent.appendChild(positiveItem);
-            }
-            
-            // Summarize improvement suggestions
-            const improveFeedback = [];
-            feedbackData.forEach(item => {
-                if (item && item.feedback) {
-                    item.feedback.forEach(fb => {
-                        if (fb.type === 'improve' && !improveFeedback.includes(fb.aspect)) {
-                            improveFeedback.push(fb.aspect);
-                        }
-                    });
-                }
+            // Get most common positive aspects
+            const positiveCounts = {};
+            allPositiveAspects.forEach(aspect => {
+                positiveCounts[aspect] = (positiveCounts[aspect] || 0) + 1;
             });
             
-            if (improveFeedback.length > 0) {
-                const improveItem = document.createElement('div');
-                improveItem.className = 'feedback-item feedback-improve';
-                improveItem.innerHTML = `<strong>💡 Areas for Improvement:</strong> Suggested practice for ${improveFeedback.join(', ')}`;
-                feedbackContent.appendChild(improveItem);
+            // Get most common improvement areas
+            const improveCounts = {};
+            allImproveAspects.forEach(aspect => {
+                improveCounts[aspect] = (improveCounts[aspect] || 0) + 1;
+            });
+            
+            // Add top strengths
+            const topStrengths = Object.keys(positiveCounts)
+                .sort((a, b) => positiveCounts[b] - positiveCounts[a])
+                .slice(0, 2);
+            
+            if (topStrengths.length > 0) {
+                comprehensiveFeedback.push({
+                    aspect: 'Overall Strengths',
+                    aspect_zh: '整體優勢',
+                    message: `You consistently demonstrated strong performance in ${topStrengths.join(' and ')} across multiple sentences.`,
+                    message_zh: `您在多個句子中 consistently 在${topStrengths.join('和')}方面表現出色。`,
+                    type: 'positive'
+                });
             }
             
-            // Add detailed feedback
-            const detailsItem = document.createElement('div');
-            detailsItem.style.marginTop = '20px';
-            detailsItem.style.padding = '15px';
-            detailsItem.style.background = '#f8f9fa';
-            detailsItem.style.borderRadius = '8px';
-            detailsItem.innerHTML = `<p>📊 Completed pronunciation analysis for ${feedbackData.filter(item => item).length}/${sentences.length} sentences.</p>`;
-            feedbackContent.appendChild(detailsItem);
+            // Add main areas for improvement
+            const mainImprovements = Object.keys(improveCounts)
+                .sort((a, b) => improveCounts[b] - improveCounts[a])
+                .slice(0, 2);
+            
+            if (mainImprovements.length > 0) {
+                comprehensiveFeedback.push({
+                    aspect: 'Key Areas for Improvement',
+                    aspect_zh: '主要改進領域',
+                    message: `Focus on improving ${mainImprovements.join(' and ')} to enhance your overall pronunciation accuracy.`,
+                    message_zh: `專注於改進${mainImprovements.join('和')}以提高您的整體發音準確性。`,
+                    type: 'improve'
+                });
+            }
+            
+            // Add general advice
+            comprehensiveFeedback.push({
+                aspect: 'Practice Recommendation',
+                aspect_zh: '練習建議',
+                message: 'Continue practicing with varied sentence structures and pay attention to native speaker pronunciation patterns.',
+                message_zh: '繼續練習不同句子結構，並注意母語者的發音模式。',
+                type: 'improve'
+            });
+            
+            return comprehensiveFeedback;
         }
         
         // Print report
@@ -1517,6 +1648,12 @@
         
         // Start new practice
         function startNewPractice() {
+            // Stop and release any existing media stream
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            
             // Reset all data
             studentInfo = {};
             sentences = [];
@@ -1554,3 +1691,4 @@
     </script>
 </body>
 </html>
+
