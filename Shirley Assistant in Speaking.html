@@ -1118,6 +1118,33 @@
             analyzeBtn.addEventListener('click', analyzePronunciation);
         }
         
+        // Play sentence audio (only the sentence, not the metadata)
+        function playSentence(sentence) {
+            // Stop any currently playing audio
+            speechSynthesis.cancel();
+            
+            // Remove everything inside square brackets including the brackets
+            const cleanSentence = sentence.replace(/\s*\[.*?\]/g, '').trim();
+            
+            // Use Web Speech API to synthesize speech
+            const utterance = new SpeechSynthesisUtterance(cleanSentence);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            
+            // Ensure audio is ready
+            utterance.onstart = function() {
+                console.log('Started playing audio:', cleanSentence);
+            };
+            
+            utterance.onerror = function(event) {
+                console.error('Audio playback error:', event);
+                showStatusMessage('❌ Audio playback failed, please try again', 'error');
+            };
+            
+            speechSynthesis.speak(utterance);
+        }
+        
         // Request microphone permission (only once per session)
         async function requestMicrophonePermission() {
             if (hasRequestedPermission) return;
@@ -1197,31 +1224,6 @@
                     showStatusMessage('❌ Unable to get microphone permission: ' + error.message, 'error');
                 }
             }
-        }
-        
-        // Play sentence audio (only the sentence, not the metadata)function playSentence(sentence) {
-    // Stop any currently playing audio
-    speechSynthesis.cancel();
-    
-    // Remove everything inside square brackets including the brackets
-    const cleanSentence = sentence.replace(/\s*\[.*?\]/g, '').trim();
-    
-    // Use Web Speech API to synthesize speech
-    const utterance = new SpeechSynthesisUtterance(cleanSentence);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    
-    // Ensure audio is ready
-    utterance.onstart = function() {
-        console.log('Started playing audio:', cleanSentence);
-    };
-    
-    utterance.onerror = function(event) {
-        console.error('Audio playback error:', event);
-        showStatusMessage('❌ Audio playback failed, please try again', 'error');
-    };
-            speechSynthesis.speak(utterance);
         }
         
         // Toggle recording state
@@ -1691,4 +1693,3 @@
     </script>
 </body>
 </html>
-
