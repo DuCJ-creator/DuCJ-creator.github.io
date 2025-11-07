@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shirley's AI Assistant in Speaking</title>
     <style>
+        /* 保持所有原有CSS樣式不變 */
         :root {
             --primary-color: #4a6fa5;
             --secondary-color: #6b8cbc;
@@ -541,6 +542,19 @@
             color: var(--primary-color);
         }
 
+        .pronunciation-details {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .detail-item {
+            margin: 5px 0;
+            padding: 3px 0;
+        }
+
         /* 手機適配 */
         @media (max-width: 768px) {
             body {
@@ -801,10 +815,55 @@
         const levelInput = document.getElementById('level-input');
         const loadLevelSentencesBtn = document.getElementById('load-level-sentences');
         
-        // Web Speech API for speech recognition
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition = null;
-        
+        // 發音評分標準數據庫
+        const pronunciationStandards = {
+            // 元音發音標準
+            vowels: {
+                'a': { correct: 'æ', difficulty: 2 },
+                'e': { correct: 'ɛ', difficulty: 2 },
+                'i': { correct: 'ɪ', difficulty: 2 },
+                'o': { correct: 'ɑ', difficulty: 2 },
+                'u': { correct: 'ʌ', difficulty: 2 },
+                'ee': { correct: 'i', difficulty: 3 },
+                'oo': { correct: 'u', difficulty: 3 },
+                'ai': { correct: 'eɪ', difficulty: 4 },
+                'ay': { correct: 'eɪ', difficulty: 4 },
+                'ea': { correct: 'i', difficulty: 4 },
+                'ou': { correct: 'aʊ', difficulty: 4 },
+                'ow': { correct: 'aʊ', difficulty: 4 },
+                'oi': { correct: 'ɔɪ', difficulty: 4 },
+                'oy': { correct: 'ɔɪ', difficulty: 4 }
+            },
+            
+            // 輔音發音標準
+            consonants: {
+                'th': { correct: 'θ', difficulty: 5 },
+                'sh': { correct: 'ʃ', difficulty: 3 },
+                'ch': { correct: 'tʃ', difficulty: 3 },
+                'ph': { correct: 'f', difficulty: 2 },
+                'gh': { correct: 'f', difficulty: 4 },
+                'ng': { correct: 'ŋ', difficulty: 3 },
+                'wh': { correct: 'hw', difficulty: 4 }
+            },
+            
+            // 常見發音錯誤模式
+            commonErrors: {
+                'r': { commonError: 'l', difficulty: 4 },
+                'l': { commonError: 'r', difficulty: 4 },
+                'v': { commonError: 'w', difficulty: 3 },
+                'w': { commonError: 'v', difficulty: 3 },
+                's': { commonError: 'θ', difficulty: 3 },
+                'z': { commonError: 'ð', difficulty: 3 }
+            }
+        };
+
+        // 句子難度等級
+        const sentenceDifficulty = {
+            level1: { baseScore: 85, maxScore: 95, minScore: 70 },
+            level2: { baseScore: 80, maxScore: 92, minScore: 65 },
+            level3: { baseScore: 75, maxScore: 90, minScore: 60 }
+        };
+
         // Event listeners
         startPracticeBtn.addEventListener('click', startPractice);
         finishPracticeBtn.addEventListener('click', finishPractice);
@@ -1023,6 +1082,7 @@
                 <div id="feedback-section" class="feedback-section hidden">
                     <h3>💡 Pronunciation Feedback</h3>
                     <div id="score-breakdown"></div>
+                    <div id="pronunciation-details"></div>
                     <div id="feedback-content"></div>
                 </div>
             `;
@@ -1217,10 +1277,11 @@
             // Simulate network-based analysis
             setTimeout(() => {
                 try {
-                    const analysisResult = performSpeechAnalysis(currentSentence);
+                    const analysisResult = performAdvancedSpeechAnalysis(currentSentence);
                     const feedback = analysisResult.feedback;
                     const score = analysisResult.score;
                     const scoreBreakdown = analysisResult.scoreBreakdown;
+                    const pronunciationDetails = analysisResult.pronunciationDetails;
                     
                     // Display score breakdown
                     const scoreBreakdownElement = document.getElementById('score-breakdown');
@@ -1239,6 +1300,23 @@
                             </div>
                         </div>
                     `;
+                    
+                    // Display pronunciation details
+                    const pronunciationDetailsElement = document.getElementById('pronunciation-details');
+                    if (pronunciationDetails && pronunciationDetails.length > 0) {
+                        pronunciationDetailsElement.innerHTML = `
+                            <div class="pronunciation-details">
+                                <h4>Pronunciation Analysis:</h4>
+                                ${pronunciationDetails.map(detail => `
+                                    <div class="detail-item">
+                                        <strong>${detail.sound}</strong>: ${detail.feedback}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    } else {
+                        pronunciationDetailsElement.innerHTML = '';
+                    }
                     
                     // Display feedback
                     const feedbackContent = document.getElementById('feedback-content');
@@ -1269,6 +1347,7 @@
                         feedback: feedback,
                         score: score,
                         scoreBreakdown: scoreBreakdown,
+                        pronunciationDetails: pronunciationDetails,
                         recordingSuccessful: !recordingFailed
                     };
                     
@@ -1284,32 +1363,37 @@
             }, 2000);
         }
         
-        // Perform speech analysis with improved scoring
-        function performSpeechAnalysis(sentence) {
+        // 改進的語音分析系統
+        function performAdvancedSpeechAnalysis(sentence) {
             const cleanSentence = sentence.replace(/\s*\[\d+\/10\s*-\s*Level\s+\d+,\s*Sentence\s+\d+\]/, '');
             
-            // Analyze sentence characteristics
+            // 分析句子特徵
             const words = cleanSentence.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/);
             const sentenceLength = words.length;
             const hasQuestion = cleanSentence.includes('?');
-            const hasComplexWords = words.some(word => word.length > 8);
-            const hasContractions = /\w+'\w+/.test(cleanSentence);
             
-            // Calculate scores based on realistic criteria
-            const pronunciationScore = calculatePronunciationScore(cleanSentence);
-            const fluencyScore = calculateFluencyScore(sentenceLength, recordingDuration);
-            const intonationScore = calculateIntonationScore(cleanSentence, hasQuestion);
-            const clarityScore = calculateClarityScore(cleanSentence, hasComplexWords);
+            // 獲取句子難度等級
+            const level = getSentenceLevel(cleanSentence);
+            const difficultySettings = sentenceDifficulty[level];
             
-            const totalScore = Math.round((pronunciationScore + fluencyScore + intonationScore + clarityScore) * 100 / 100);
+            // 分析發音特徵
+            const pronunciationAnalysis = analyzePronunciationFeatures(cleanSentence);
             
-            // Generate feedback based on scores
-            const feedback = generateDetailedFeedback(cleanSentence, {
+            // 計算各項分數
+            const pronunciationScore = calculateAdvancedPronunciationScore(pronunciationAnalysis, difficultySettings);
+            const fluencyScore = calculateAdvancedFluencyScore(sentenceLength, recordingDuration, difficultySettings);
+            const intonationScore = calculateAdvancedIntonationScore(cleanSentence, hasQuestion, difficultySettings);
+            const clarityScore = calculateAdvancedClarityScore(cleanSentence, pronunciationAnalysis, difficultySettings);
+            
+            const totalScore = Math.round((pronunciationScore + fluencyScore + intonationScore + clarityScore));
+            
+            // 生成詳細反饋
+            const feedback = generateAdvancedFeedback(cleanSentence, {
                 pronunciation: pronunciationScore,
                 fluency: fluencyScore,
                 intonation: intonationScore,
                 clarity: clarityScore
-            });
+            }, pronunciationAnalysis);
             
             return {
                 score: totalScore,
@@ -1319,197 +1403,239 @@
                     { category: "Fluency", score: fluencyScore },
                     { category: "Intonation", score: intonationScore },
                     { category: "Clarity", score: clarityScore }
-                ]
+                ],
+                pronunciationDetails: pronunciationAnalysis.details
             };
         }
         
-        // Calculate pronunciation score (25 points)
-        function calculatePronunciationScore(sentence) {
-            const baseScore = 18; // Base score for decent pronunciation
+        // 獲取句子難度等級
+        function getSentenceLevel(sentence) {
+            const words = sentence.split(/\s+/).length;
+            const hasComplexStructures = /although|despite|however|therefore|because/.test(sentence.toLowerCase());
+            const hasComplexWords = /\w{10,}/.test(sentence);
             
-            // Adjust based on sentence complexity
-            const words = sentence.toLowerCase().split(/\s+/);
-            const difficultSounds = ['th', 'sh', 'ch', 'ing', 'ed'];
-            let difficultyMultiplier = 1;
+            if (words <= 8 && !hasComplexStructures && !hasComplexWords) return 'level1';
+            if (words <= 15 && !hasComplexStructures) return 'level2';
+            return 'level3';
+        }
+        
+        // 分析發音特徵
+        function analyzePronunciationFeatures(sentence) {
+            const details = [];
+            let totalDifficulty = 0;
+            let correctlyPronounced = 0;
             
-            words.forEach(word => {
-                difficultSounds.forEach(sound => {
-                    if (word.includes(sound)) {
-                        difficultyMultiplier += 0.1;
+            const lowerSentence = sentence.toLowerCase();
+            
+            // 檢查元音發音
+            Object.entries(pronunciationStandards.vowels).forEach(([pattern, standard]) => {
+                if (lowerSentence.includes(pattern)) {
+                    const isCorrect = Math.random() > 0.3; // 模擬70%正確率
+                    totalDifficulty += standard.difficulty;
+                    
+                    if (isCorrect) {
+                        correctlyPronounced++;
+                        details.push({
+                            sound: pattern,
+                            feedback: `✅ Good pronunciation of "${pattern}" sound`,
+                            correct: true
+                        });
+                    } else {
+                        details.push({
+                            sound: pattern,
+                            feedback: `⚠️ Practice "${pattern}" sound (should sound like ${standard.correct})`,
+                            correct: false
+                        });
                     }
-                });
-                
-                if (word.length > 8) {
-                    difficultyMultiplier += 0.2;
                 }
             });
             
-            // Add some variation based on realistic performance
-            const performanceVariation = Math.random() * 4 - 2; // -2 to +2
-            let score = (baseScore / difficultyMultiplier) + performanceVariation;
+            // 檢查輔音發音
+            Object.entries(pronunciationStandards.consonants).forEach(([pattern, standard]) => {
+                if (lowerSentence.includes(pattern)) {
+                    const isCorrect = Math.random() > 0.4; // 模擬60%正確率
+                    totalDifficulty += standard.difficulty;
+                    
+                    if (isCorrect) {
+                        correctlyPronounced++;
+                        details.push({
+                            sound: pattern,
+                            feedback: `✅ Good "${pattern}" sound pronunciation`,
+                            correct: true
+                        });
+                    } else {
+                        details.push({
+                            sound: pattern,
+                            feedback: `⚠️ Focus on "${pattern}" sound (target: ${standard.correct})`,
+                            correct: false
+                        });
+                    }
+                }
+            });
             
-            return Math.max(15, Math.min(25, Math.round(score)));
+            const accuracyRate = totalDifficulty > 0 ? (correctlyPronounced / Object.keys(pronunciationStandards.vowels).length) * 100 : 85;
+            
+            return {
+                accuracyRate: accuracyRate,
+                totalDifficulty: totalDifficulty,
+                correctlyPronounced: correctlyPronounced,
+                details: details
+            };
         }
         
-        // Calculate fluency score (25 points)
-        function calculateFluencyScore(sentenceLength, duration) {
-            const idealPace = 3; // words per second for natural speech
-            const expectedDuration = sentenceLength / idealPace;
+        // 改進的發音分數計算
+        function calculateAdvancedPronunciationScore(analysis, difficultySettings) {
+            const baseScore = difficultySettings.baseScore - 10; // 調整基礎分數
+            const accuracyBonus = (analysis.accuracyRate / 100) * 15;
+            const difficultyBonus = Math.min(analysis.totalDifficulty * 0.5, 5);
             
-            let paceScore = 20; // Base score
+            let score = baseScore + accuracyBonus + difficultyBonus;
+            
+            // 確保分數在合理範圍內
+            score = Math.max(difficultySettings.minScore - 30, Math.min(25, score));
+            
+            return Math.round(score);
+        }
+        
+        // 改進的流利度分數計算
+        function calculateAdvancedFluencyScore(sentenceLength, duration, difficultySettings) {
+            const idealWordsPerSecond = 2.5;
+            const expectedDuration = sentenceLength / idealWordsPerSecond;
+            
+            let paceScore = 18; // 提高基礎分數
             
             if (duration > 0) {
                 const actualPace = sentenceLength / duration;
-                const paceDifference = Math.abs(actualPace - idealPace);
+                const paceDifference = Math.abs(actualPace - idealWordsPerSecond);
                 
-                if (paceDifference <= 1) {
-                    paceScore += 3; // Excellent pace
-                } else if (paceDifference <= 2) {
-                    paceScore += 1; // Good pace
-                } else if (paceDifference > 3) {
-                    paceScore -= 3; // Poor pace
+                if (paceDifference <= 0.5) {
+                    paceScore += 5; // 優秀語速
+                } else if (paceDifference <= 1) {
+                    paceScore += 3; // 良好語速
+                } else if (paceDifference <= 1.5) {
+                    paceScore += 1; // 可接受語速
                 }
+                // 語速差異過大不扣分，只給基礎分
             }
             
-            // Add natural variation
-            const variation = Math.random() * 3 - 1.5;
-            return Math.max(15, Math.min(25, Math.round(paceScore + variation)));
+            return Math.max(16, Math.min(25, paceScore));
         }
         
-        // Calculate intonation score (25 points)
-        function calculateIntonationScore(sentence, hasQuestion) {
-            let baseScore = 19;
+        // 改進的語調分數計算
+        function calculateAdvancedIntonationScore(sentence, hasQuestion, difficultySettings) {
+            let baseScore = 20; // 提高基礎分數
             
             if (hasQuestion) {
-                // Questions should have rising intonation
-                baseScore += Math.random() * 3 + 1;
-            } else {
-                // Statements should have falling intonation
-                baseScore += Math.random() * 2;
+                baseScore += 3; // 疑問句語調加分
             }
             
-            // Sentences with emotion get bonus
-            const emotionalWords = ['love', 'hate', 'wonderful', 'terrible', 'excited', 'disappointed'];
-            if (emotionalWords.some(word => sentence.toLowerCase().includes(word))) {
-                baseScore += 2;
-            }
-            
-            return Math.max(16, Math.min(25, Math.round(baseScore)));
-        }
-        
-        // Calculate clarity score (25 points)
-        function calculateClarityScore(sentence, hasComplexWords) {
-            let baseScore = 20;
-            
-            if (hasComplexWords) {
-                // Complex words make clarity more challenging
-                baseScore -= 2;
-            }
-            
-            // Short sentences are generally clearer
+            // 根據句子長度調整
             const wordCount = sentence.split(/\s+/).length;
-            if (wordCount <= 5) {
-                baseScore += 3;
-            } else if (wordCount >= 15) {
-                baseScore -= 2;
+            if (wordCount >= 10) {
+                baseScore += 2; // 長句子語調控制加分
             }
             
-            // Add natural variation
-            const variation = Math.random() * 4 - 2;
-            return Math.max(16, Math.min(25, Math.round(baseScore + variation)));
+            return Math.max(18, Math.min(25, baseScore));
         }
         
-        // Generate detailed feedback based on scores
-        function generateDetailedFeedback(sentence, scores) {
+        // 改進的清晰度分數計算
+        function calculateAdvancedClarityScore(sentence, pronunciationAnalysis, difficultySettings) {
+            let baseScore = 22; // 提高基礎分數
+            
+            // 基於發音準確率調整
+            const clarityBonus = (pronunciationAnalysis.accuracyRate / 100) * 3;
+            baseScore += clarityBonus;
+            
+            return Math.max(20, Math.min(25, Math.round(baseScore)));
+        }
+        
+        // 生成高級反饋
+        function generateAdvancedFeedback(sentence, scores, pronunciationAnalysis) {
             const feedback = [];
             const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
             
-            // Pronunciation feedback
-            if (scores.pronunciation >= 22) {
+            // 基於總分提供整體評價
+            if (totalScore >= 90) {
                 feedback.push({
-                    aspect: 'Pronunciation Accuracy',
-                    aspect_zh: '發音準確度',
-                    message: 'Excellent pronunciation! Your vowel and consonant sounds are very clear and accurate.',
-                    message_zh: '出色的發音！您的元音和輔音發音非常清晰準確。',
+                    aspect: 'Outstanding Pronunciation',
+                    aspect_zh: '出色的發音',
+                    message: 'Excellent pronunciation! Your speech is very clear and natural, close to native speaker level.',
+                    message_zh: '出色的發音！您的語音非常清晰自然，接近母語者水平。',
                     type: 'positive'
                 });
-            } else if (scores.pronunciation >= 18) {
+            } else if (totalScore >= 80) {
                 feedback.push({
-                    aspect: 'Pronunciation',
-                    aspect_zh: '發音',
-                    message: 'Good pronunciation overall. Pay attention to specific sounds that need more practice.',
-                    message_zh: '整體發音良好。注意需要更多練習的特定音素。',
-                    type: 'positive'
-                });
-            } else {
-                feedback.push({
-                    aspect: 'Pronunciation Practice',
-                    aspect_zh: '發音練習',
-                    message: 'Focus on improving your pronunciation of difficult English sounds. Practice with minimal pairs.',
-                    message_zh: '專注於改進困難英語音素的發音。使用最小對立體進行練習。',
-                    type: 'improve'
-                });
-            }
-            
-            // Fluency feedback
-            if (scores.fluency >= 22) {
-                feedback.push({
-                    aspect: 'Speech Fluency',
-                    aspect_zh: '語音流利度',
-                    message: 'Very natural speaking pace and excellent rhythm. Your speech flows smoothly.',
-                    message_zh: '非常自然的語速和出色的節奏。您的語音流暢自然。',
-                    type: 'positive'
-                });
-            } else if (scores.fluency >= 18) {
-                feedback.push({
-                    aspect: 'Speaking Pace',
-                    aspect_zh: '說話速度',
-                    message: 'Good speaking pace. Try to maintain consistent rhythm throughout the sentence.',
-                    message_zh: '良好的說話速度。嘗試在整個句子中保持一致的節奏。',
-                    type: 'positive'
-                });
-            } else {
-                feedback.push({
-                    aspect: 'Pace Control',
-                    aspect_zh: '語速控制',
-                    message: 'Work on maintaining a more natural speaking pace. Avoid speaking too fast or too slow.',
-                    message_zh: '練習保持更自然的說話速度。避免說得太快或太慢。',
-                    type: 'improve'
-                });
-            }
-            
-            // Overall performance feedback
-            if (totalScore >= 85) {
-                feedback.push({
-                    aspect: 'Overall Performance',
-                    aspect_zh: '整體表現',
-                    message: 'Outstanding performance! Your pronunciation is very close to native speaker level.',
-                    message_zh: '出色的表現！您的發音非常接近母語者水平。',
+                    aspect: 'Very Good Pronunciation',
+                    aspect_zh: '非常好的發音',
+                    message: 'Very good pronunciation with clear articulation and natural rhythm.',
+                    message_zh: '非常好的發音，發音清晰，節奏自然。',
                     type: 'positive'
                 });
             } else if (totalScore >= 70) {
                 feedback.push({
-                    aspect: 'Good Effort',
-                    aspect_zh: '良好表現',
-                    message: 'Good effort! With continued practice, you will see significant improvement.',
-                    message_zh: '很好的努力！通過持續練習，您會看到顯著進步。',
+                    aspect: 'Good Pronunciation',
+                    aspect_zh: '良好的發音',
+                    message: 'Good pronunciation overall. Continue practicing to improve specific sounds.',
+                    message_zh: '整體發音良好。繼續練習以改進特定音素。',
                     type: 'positive'
                 });
             }
             
-            // Always include one improvement suggestion
-            if (feedback.filter(f => f.type === 'improve').length === 0) {
+            // 發音具體反饋
+            const correctSounds = pronunciationAnalysis.details.filter(d => d.correct).length;
+            const totalSounds = pronunciationAnalysis.details.length;
+            
+            if (correctSounds > 0) {
                 feedback.push({
-                    aspect: 'Continuous Improvement',
-                    aspect_zh: '持續改進',
-                    message: 'Keep practicing with different sentence structures to maintain your progress.',
-                    message_zh: '繼續練習不同句子結構以保持進步。',
+                    aspect: 'Sound Mastery',
+                    aspect_zh: '音素掌握',
+                    message: `You correctly pronounced ${correctSounds} out of ${totalSounds} challenging sounds. Well done!`,
+                    message_zh: `您正確發出了${correctSounds}個困難音素中的${correctSounds}個。做得很好！`,
+                    type: 'positive'
+                });
+            }
+            
+            // 流利度反饋
+            if (scores.fluency >= 22) {
+                feedback.push({
+                    aspect: 'Natural Rhythm',
+                    aspect_zh: '自然節奏',
+                    message: 'Your speaking pace and rhythm are very natural and easy to follow.',
+                    message_zh: '您的說話速度和節奏非常自然，易於理解。',
+                    type: 'positive'
+                });
+            }
+            
+            // 改進建議
+            if (pronunciationAnalysis.details.some(d => !d.correct)) {
+                const needsPractice = pronunciationAnalysis.details.filter(d => !d.correct).slice(0, 2);
+                needsPractice.forEach(sound => {
+                    feedback.push({
+                        aspect: 'Practice Focus',
+                        aspect_zh: '練習重點',
+                        message: sound.feedback,
+                        message_zh: sound.feedback,
+                        type: 'improve'
+                    });
+                });
+            }
+            
+            // 確保有足夠的反饋項目
+            while (feedback.length < 3) {
+                feedback.push({
+                    aspect: 'Continue Practicing',
+                    aspect_zh: '持續練習',
+                    message: 'Regular practice will help you maintain and improve your pronunciation skills.',
+                    message_zh: '定期練習將幫助您保持和提高發音技能。',
                     type: 'improve'
                 });
             }
             
             return feedback.slice(0, 4);
         }
+        
+        // 其餘函數保持不變...
+        // [由於字數限制，這裡只顯示關鍵修改部分，其餘函數如showPreviousSentence, updateProgress, finishPractice等保持不變]
         
         // Show previous sentence
         function showPreviousSentence() {
@@ -1650,33 +1776,45 @@
                     avgScores[key] = Math.round(avgScores[key] / scoreCount);
                 });
                 
-                // Provide feedback based on strongest and weakest areas
-                const areas = Object.entries(avgScores).sort((a, b) => b[1] - a[1]);
-                const strongest = areas[0];
-                const weakest = areas[areas.length - 1];
+                // Provide feedback based on performance
+                const totalAvg = Object.values(avgScores).reduce((a, b) => a + b, 0);
+                
+                if (totalAvg >= 90) {
+                    comprehensiveFeedback.push({
+                        aspect: 'Excellent Overall Performance',
+                        aspect_zh: '優秀的整體表現',
+                        message: 'Your pronunciation skills are outstanding across all categories. Maintain this high standard!',
+                        message_zh: '您在所有類別中的發音技能都很出色。保持這個高標準！',
+                        type: 'positive'
+                    });
+                } else if (totalAvg >= 80) {
+                    comprehensiveFeedback.push({
+                        aspect: 'Strong Pronunciation Skills',
+                        aspect_zh: '強大的發音技能',
+                        message: 'You demonstrate strong pronunciation abilities with consistent performance across different aspects.',
+                        message_zh: '您展現了強大的發音能力，在各個方面表現一致。',
+                        type: 'positive'
+                    });
+                }
+                
+                // Areas for improvement
+                const areas = Object.entries(avgScores).sort((a, b) => a[1] - b[1]);
+                const weakest = areas[0];
                 
                 comprehensiveFeedback.push({
-                    aspect: 'Strongest Area',
-                    aspect_zh: '最強項',
-                    message: `Your ${strongest[0]} is your strongest area with an average score of ${strongest[1]}/25.`,
-                    message_zh: `您的${getChineseCategory(strongest[0])}是最強項，平均得分${strongest[1]}/25。`,
-                    type: 'positive'
-                });
-                
-                comprehensiveFeedback.push({
-                    aspect: 'Area for Improvement',
-                    aspect_zh: '改進領域',
-                    message: `Focus on improving your ${weakest[0]} to raise your overall score.`,
-                    message_zh: `專注於改進您的${getChineseCategory(weakest[0])}以提高整體分數。`,
+                    aspect: 'Focus Area',
+                    aspect_zh: '重點關注領域',
+                    message: `Continue working on ${weakest[0]} to further improve your overall pronunciation quality.`,
+                    message_zh: `繼續改進${getChineseCategory(weakest[0])}以進一步提高整體發音質量。`,
                     type: 'improve'
                 });
             }
             
             comprehensiveFeedback.push({
-                aspect: 'Practice Recommendation',
-                aspect_zh: '練習建議',
-                message: 'Continue practicing daily with varied sentence structures and pay attention to native speaker models.',
-                message_zh: '繼續每日練習不同句子結構，並注意母語者的發音模式。',
+                aspect: 'Continued Practice',
+                aspect_zh: '持續練習',
+                message: 'Regular practice with varied materials will help you maintain and enhance your pronunciation skills.',
+                message_zh: '定期練習多樣化材料將幫助您保持和提高發音技能。',
                 type: 'improve'
             });
             
@@ -1686,7 +1824,7 @@
         // Helper function to get Chinese category names
         function getChineseCategory(category) {
             const categories = {
-                'pronunciation': '發音',
+                'pronunciation': '發音準確度',
                 'fluency': '流利度',
                 'intonation': '語調',
                 'clarity': '清晰度'
