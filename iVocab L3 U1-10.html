@@ -930,7 +930,7 @@ wander, n., 遊蕩;徘徊
         let timeLeft = 8;
         let startTime;
         let questions = [];
-        let usedIndices = [];
+        let usedInCurrentSession = []; // ✅ 本局已使用的單字索引
         let lastCountdownNumber = 8;
         let isAnswering = false;
         
@@ -974,7 +974,7 @@ wander, n., 遊蕩;徘徊
             // 重置遊戲狀態
             score = 0;
             currentQuestionIndex = 0;
-            usedIndices = [];
+            usedInCurrentSession = []; // ✅ 每次重新開始都清空本局記錄
             lastCountdownNumber = 8;
             isAnswering = false;
             scoreDisplay.textContent = score;
@@ -1008,7 +1008,7 @@ wander, n., 遊蕩;徘徊
             loadQuestion();
         }
         
-        // 載入問題
+        // 載入問題（✅ 已重寫）
         function loadQuestion() {
             // 重置計時器
             clearInterval(timer);
@@ -1030,15 +1030,28 @@ wander, n., 遊蕩;徘徊
             // 重置回答狀態
             isAnswering = false;
             
+            // 如果本局已用完所有單字，清空記錄以開始新一輪
+            if (usedInCurrentSession.length >= questions.length) {
+                usedInCurrentSession = [];
+            }
+            
+            // 找出尚未使用的索引
+            const availableIndices = questions
+                .map((_, i) => i)
+                .filter(i => !usedInCurrentSession.includes(i));
+            
+            // 安全防護：避免空陣列
+            if (availableIndices.length === 0) {
+                usedInCurrentSession = [];
+                loadQuestion();
+                return;
+            }
+            
             // 隨機選擇一個未使用過的問題
-            let randomIndex;
-            do {
-                randomIndex = Math.floor(Math.random() * questions.length);
-            } while (usedIndices.includes(randomIndex) && usedIndices.length < questions.length);
+            const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+            usedInCurrentSession.push(randomIndex); // 記錄本局已使用
             
-            usedIndices.push(randomIndex);
             currentQuestionIndex = randomIndex;
-            
             const question = questions[currentQuestionIndex];
             wordDisplay.textContent = question.word;
             posDisplay.textContent = question.pos;
@@ -1050,14 +1063,12 @@ wander, n., 遊蕩;徘徊
             timer = setInterval(updateTimer, 100);
         }
         
-        // 生成選項
+        // 生成選項（保持不變）
         function generateOptions(correctQuestion) {
             optionsContainer.innerHTML = '';
             
-            // 收集所有可能的中文意思
             const allMeanings = questions.map(q => q.meaning);
             
-            // 隨機選擇3個不重複且與正確答案不同的選項
             const options = [correctQuestion.meaning];
             while (options.length < 4) {
                 const randomIndex = Math.floor(Math.random() * allMeanings.length);
@@ -1068,16 +1079,13 @@ wander, n., 遊蕩;徘徊
                 }
             }
             
-            // 打亂選項順序
             shuffleArray(options);
             
-            // 創建選項按鈕
             options.forEach(option => {
                 const button = document.createElement('button');
                 button.className = 'option';
                 button.textContent = option;
                 button.addEventListener('click', () => {
-                    // 防止連續點擊
                     if (!isAnswering) {
                         isAnswering = true;
                         checkAnswer(option, correctQuestion.meaning);
@@ -1087,7 +1095,7 @@ wander, n., 遊蕩;徘徊
             });
         }
         
-        // 檢查答案
+        // 檢查答案（保持不變）
         function checkAnswer(selectedOption, correctAnswer) {
             clearInterval(timer);
             
@@ -1102,34 +1110,24 @@ wander, n., 遊蕩;徘徊
             });
             
             if (selectedOption === correctAnswer) {
-                // 答對
                 score += 5;
                 scoreDisplay.textContent = score;
                 pig.textContent = '🐷🎉';
                 createConfetti();
-                
-                // 播放答對音效
                 playSound('correct');
                 
-                // 減少延遲時間
                 setTimeout(() => {
                     pig.textContent = '🐷';
                     loadQuestion();
                 }, 800);
             } else {
-                // 答錯
                 flame.style.opacity = '1';
                 flame.style.transform = 'scale(1)';
                 explosion.style.opacity = '1';
                 explosion.style.transform = 'scale(1.5)';
-                
-                // 豬叫聲和翻倒動畫
                 pig.className = 'pig fall-over';
-                
-                // 播放爆炸音效
                 playSound('explosion');
                 
-                // 顯示結束畫面，減少延遲時間
                 setTimeout(() => {
                     const endTime = new Date().getTime();
                     const timeUsed = Math.floor((endTime - startTime) / 1000);
@@ -1143,22 +1141,20 @@ wander, n., 遊蕩;徘徊
             }
         }
         
-        // 播放音效
+        // 播放音效（保持不變）
         function playSound(type) {
             if (type === 'correct') {
-                // 答對音效 - 歡呼聲
                 const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3');
                 audio.volume = 0.5;
                 audio.play().catch(e => console.log('音效播放失敗:', e));
             } else if (type === 'explosion') {
-                // 爆炸音效
                 const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-bomb-explosion-1680.mp3');
                 audio.volume = 0.5;
                 audio.play().catch(e => console.log('音效播放失敗:', e));
             }
         }
         
-        // 創建彩色紙花效果
+        // 創建彩色紙花效果（保持不變）
         function createConfetti() {
             const colors = ['#ff8b94', '#ffaaa5', '#a8e6cf', '#dcedc1', '#6b5b95', '#ffd3b6'];
             const confettiCount = 50;
@@ -1176,20 +1172,17 @@ wander, n., 遊蕩;徘徊
                 
                 confettiContainer.appendChild(confetti);
                 
-                // 設置動畫
                 setTimeout(() => {
                     confetti.style.top = '100%';
                     confetti.style.opacity = '1';
                     confetti.style.transform = `rotate(${Math.random() * 360}deg) translateX(${Math.random() * 100 - 50}px)`;
                 }, 10);
                 
-                // 移除元素
                 setTimeout(() => {
                     confetti.remove();
                 }, animationDuration * 1000);
             }
             
-            // 添加動畫樣式
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes fall {
@@ -1203,17 +1196,15 @@ wander, n., 遊蕩;徘徊
             document.head.appendChild(style);
         }
         
-        // 更新計時器
+        // 更新計時器（保持不變）
         function updateTimer() {
             timeLeft -= 0.1;
             const percentage = (timeLeft / 8) * 100;
             timerBar.style.width = `${percentage}%`;
             
-            // 更新倒計時數字
             const currentNumber = Math.ceil(timeLeft);
             countdownDisplay.textContent = currentNumber;
             
-            // 數字跳動效果
             if (currentNumber !== lastCountdownNumber) {
                 lastCountdownNumber = currentNumber;
                 countdownDisplay.className = 'countdown pulse';
@@ -1223,10 +1214,8 @@ wander, n., 遊蕩;徘徊
                 }, 500);
             }
             
-            // 引線燃燒效果
             fuse.style.width = `${percentage * 0.8}px`;
             
-            // 根據剩餘時間改變顏色和火焰效果
             if (percentage < 20) {
                 timerBar.style.background = 'linear-gradient(to right, #ff0000, #ff6600)';
                 countdownDisplay.style.color = '#ff0000';
@@ -1246,11 +1235,8 @@ wander, n., 遊蕩;徘徊
             
             if (timeLeft <= 0) {
                 clearInterval(timer);
-                // 時間到，自動檢查一個錯誤答案
                 const options = document.querySelectorAll('.option');
                 const correctAnswer = questions[currentQuestionIndex].meaning;
-                
-                // 找到一個錯誤選項
                 let wrongOption;
                 for (let i = 0; i < options.length; i++) {
                     if (options[i].textContent !== correctAnswer) {
@@ -1258,16 +1244,14 @@ wander, n., 遊蕩;徘徊
                         break;
                     }
                 }
-                
                 if (wrongOption) {
-                    // 設置回答狀態為true，防止連續點擊
                     isAnswering = true;
                     checkAnswer(wrongOption, correctAnswer);
                 }
             }
         }
         
-        // 輔助函數：打亂數組
+        // 輔助函數：打亂數組（保持不變）
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -1285,3 +1269,4 @@ wander, n., 遊蕩;徘徊
     </script>
 </body>
 </html>
+
