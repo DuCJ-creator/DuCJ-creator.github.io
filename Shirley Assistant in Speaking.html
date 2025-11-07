@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shirley's AI Assistant in Speaking</title>
     <style>
-        /* 保持所有CSS樣式不變 */
+        /* 原有 CSS 完全保留 */
         :root {
             --primary-color: #4a6fa5;
             --secondary-color: #6b8cbc;
@@ -16,14 +16,12 @@
             --warning-color: #f39c12;
             --error-color: #e74c3c;
         }
-        
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: var(--dark-color);
@@ -31,7 +29,6 @@
             padding: 20px;
             min-height: 100vh;
         }
-        
         .container {
             max-width: 800px;
             margin: 0 auto;
@@ -42,7 +39,6 @@
             position: relative;
             overflow: hidden;
         }
-        
         .container::before {
             content: '';
             position: absolute;
@@ -52,12 +48,10 @@
             height: 5px;
             background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
         }
-        
         h1, h2, h3 {
             color: var(--primary-color);
             margin-bottom: 20px;
         }
-        
         h1 {
             text-align: center;
             font-size: 2.2em;
@@ -66,18 +60,15 @@
             -webkit-text-fill-color: transparent;
             margin-bottom: 30px;
         }
-        
         .form-group {
             margin-bottom: 25px;
         }
-        
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
             color: var(--dark-color);
         }
-        
         input, textarea, select {
             width: 100%;
             padding: 15px;
@@ -87,19 +78,16 @@
             transition: all 0.3s ease;
             background: #f8f9fa;
         }
-        
         input:focus, textarea:focus, select:focus {
             outline: none;
             border-color: var(--primary-color);
             background: white;
             box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.1);
         }
-        
         textarea {
             min-height: 120px;
             resize: vertical;
         }
-        
         .btn {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
@@ -115,7 +103,6 @@
             position: relative;
             overflow: hidden;
         }
-        
         .btn::before {
             content: '';
             position: absolute;
@@ -126,40 +113,31 @@
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             transition: left 0.5s;
         }
-        
         .btn:hover::before {
             left: 100%;
         }
-        
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
-        
         .btn:active {
             transform: translateY(0);
         }
-        
         .btn-accent {
             background: linear-gradient(135deg, var(--accent-color), #ff9a7f);
         }
-        
         .btn-success {
             background: linear-gradient(135deg, var(--success-color), #27ae60);
         }
-        
         .btn-warning {
             background: linear-gradient(135deg, var(--warning-color), #e67e22);
         }
-        
         .btn-error {
             background: linear-gradient(135deg, var(--error-color), #c0392b);
         }
-        
         .hidden {
             display: none !important;
         }
-        
         .practice-item {
             background: white;
             border-radius: 15px;
@@ -169,29 +147,24 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
             transition: transform 0.3s ease;
         }
-        
         .practice-item:hover {
             transform: translateY(-2px);
         }
-        
         .sentence-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
-        
         .sentence-number {
             font-size: 18px;
             font-weight: 700;
             color: var(--primary-color);
         }
-        
         .sentence-source {
             font-size: 14px;
             color: #666;
         }
-        
         .sentence-container {
             display: flex;
             align-items: center;
@@ -200,14 +173,12 @@
             padding: 20px;
             border-radius: 10px;
         }
-        
         .sentence-text {
             flex-grow: 1;
             font-size: 18px;
             font-weight: 500;
             color: var(--dark-color);
         }
-        
         .audio-btn {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             border: none;
@@ -224,19 +195,16 @@
             justify-content: center;
             transition: all 0.3s ease;
         }
-        
         .audio-btn:hover {
             transform: scale(1.1);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
-        
         .recording-controls {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-bottom: 20px;
         }
-        
         .recording-btn {
             padding: 18px 35px;
             border-radius: 50px;
@@ -246,7 +214,6 @@
             max-width: 250px;
             font-size: 18px;
         }
-        
         .recording-indicator {
             display: inline-block;
             width: 15px;
@@ -256,22 +223,11 @@
             margin-right: 10px;
             animation: pulse 1.5s infinite;
         }
-        
         @keyframes pulse {
-            0% { 
-                transform: scale(1);
-                opacity: 1; 
-            }
-            50% { 
-                transform: scale(1.2);
-                opacity: 0.7; 
-            }
-            100% { 
-                transform: scale(1);
-                opacity: 1; 
-            }
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
         }
-        
         .feedback-section {
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             border-radius: 12px;
@@ -279,35 +235,24 @@
             margin-top: 20px;
             border: 2px solid #e9ecef;
         }
-        
         .feedback-item {
             margin-bottom: 12px;
             padding: 12px;
             border-radius: 8px;
             animation: slideIn 0.5s ease;
         }
-        
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        
         .feedback-positive {
             background: linear-gradient(135deg, rgba(46, 204, 113, 0.1), rgba(39, 174, 96, 0.1));
             border-left: 4px solid var(--success-color);
         }
-        
         .feedback-improve {
             background: linear-gradient(135deg, rgba(243, 156, 18, 0.1), rgba(230, 126, 34, 0.1));
             border-left: 4px solid var(--warning-color);
         }
-        
         .progress-bar {
             height: 12px;
             background: #e9ecef;
@@ -316,7 +261,6 @@
             overflow: hidden;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
-        
         .progress {
             height: 100%;
             background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
@@ -324,7 +268,6 @@
             transition: width 0.5s ease;
             border-radius: 10px;
         }
-        
         .report-section {
             background: white;
             border-radius: 15px;
@@ -333,14 +276,12 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             border: 2px solid #e9ecef;
         }
-        
         .report-header {
             text-align: center;
             margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 3px solid var(--primary-color);
         }
-        
         .report-info-line {
             display: flex;
             justify-content: space-between;
@@ -352,18 +293,15 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        
         .report-info-item {
             display: flex;
             align-items: center;
             gap: 5px;
         }
-        
         .report-info-label {
             font-weight: 600;
             color: var(--primary-color);
         }
-        
         .report-score {
             font-size: 2.5em;
             font-weight: 700;
@@ -372,15 +310,12 @@
             margin: 30px 0;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-        
         .report-feedback {
             margin-top: 30px;
         }
-        
         .sentence-list {
             margin: 20px 0;
         }
-        
         .sentence-score-item {
             padding: 15px;
             margin-bottom: 10px;
@@ -388,31 +323,26 @@
             border-radius: 8px;
             border-left: 4px solid var(--primary-color);
         }
-        
         .sentence-score {
             font-weight: 600;
             color: var(--primary-color);
             margin-top: 5px;
         }
-        
         .print-btn {
             display: block;
             margin: 30px auto 0;
             max-width: 200px;
         }
-        
         .navigation {
             display: flex;
             justify-content: space-between;
             margin-top: 30px;
             gap: 15px;
         }
-        
         .navigation .btn {
             width: auto;
             flex: 1;
         }
-        
         .status-message {
             padding: 15px;
             border-radius: 10px;
@@ -421,19 +351,16 @@
             font-weight: 500;
             animation: slideIn 0.3s ease;
         }
-        
         .status-error {
             background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(192, 57, 43, 0.1));
             color: var(--error-color);
             border: 2px solid var(--error-color);
         }
-        
         .status-info {
             background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(41, 128, 185, 0.1));
             color: var(--primary-color);
             border: 2px solid var(--primary-color);
         }
-        
         .permission-prompt {
             background: linear-gradient(135deg, rgba(243, 156, 18, 0.1), rgba(230, 126, 34, 0.1));
             border: 2px solid var(--warning-color);
@@ -442,20 +369,17 @@
             margin: 20px 0;
             text-align: center;
         }
-        
         .welcome-message {
             text-align: center;
             margin-bottom: 30px;
             color: #666;
             font-size: 1.1em;
         }
-        
         .sentence-source {
             display: flex;
             gap: 15px;
             margin-bottom: 20px;
         }
-        
         .sentence-source-btn {
             flex: 1;
             padding: 15px;
@@ -466,24 +390,20 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
         .sentence-source-btn:hover {
             background: #e9ecef;
         }
-        
         .sentence-source-btn.active {
             background: var(--primary-color);
             color: white;
             border-color: var(--primary-color);
         }
-        
         .level-selection {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             margin-top: 15px;
         }
-        
         .level-btn {
             padding: 12px;
             text-align: center;
@@ -493,38 +413,31 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
         .level-btn:hover {
             background: #e9ecef;
         }
-        
         .level-btn.active {
             background: var(--primary-color);
             color: white;
             border-color: var(--primary-color);
         }
-
         .feedback-bilingual {
             margin-bottom: 10px;
         }
-        
         .feedback-english {
             font-weight: 500;
         }
-        
         .feedback-chinese {
             font-size: 14px;
             color: #666;
             margin-top: 5px;
         }
-
         .score-breakdown {
             background: #f8f9fa;
             border-radius: 10px;
             padding: 15px;
             margin: 15px 0;
         }
-        
         .score-item {
             display: flex;
             justify-content: space-between;
@@ -532,16 +445,13 @@
             margin-bottom: 8px;
             padding: 5px 0;
         }
-        
         .score-label {
             font-weight: 500;
         }
-        
         .score-value {
             font-weight: 600;
             color: var(--primary-color);
         }
-
         .pronunciation-details {
             background: white;
             border-radius: 8px;
@@ -549,12 +459,10 @@
             margin: 10px 0;
             border-left: 4px solid var(--primary-color);
         }
-
         .detail-item {
             margin: 5px 0;
             padding: 3px 0;
         }
-
         .word-analysis {
             background: #f0f8ff;
             border-radius: 8px;
@@ -562,7 +470,6 @@
             margin: 8px 0;
             border-left: 3px solid #4a6fa5;
         }
-
         .word-item {
             display: flex;
             justify-content: space-between;
@@ -570,17 +477,14 @@
             margin: 5px 0;
             padding: 3px 0;
         }
-
         .word-correct {
             color: var(--success-color);
             font-weight: 600;
         }
-
         .word-incorrect {
             color: var(--error-color);
             font-weight: 600;
         }
-
         .accuracy-meter {
             height: 8px;
             background: #e9ecef;
@@ -588,113 +492,38 @@
             margin: 10px 0;
             overflow: hidden;
         }
-
         .accuracy-fill {
             height: 100%;
             background: linear-gradient(90deg, var(--success-color), var(--primary-color));
             transition: width 0.5s ease;
         }
-
         /* 手機適配 */
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            
-            .container {
-                padding: 20px;
-                border-radius: 10px;
-            }
-            
-            h1 {
-                font-size: 1.8em;
-            }
-            
-            .practice-item {
-                padding: 20px;
-            }
-            
-            .sentence-container {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 15px;
-            }
-            
-            .audio-btn {
-                margin-left: 0;
-                margin-top: 15px;
-                align-self: center;
-            }
-            
-            .report-info-line {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-            
-            .navigation {
-                flex-direction: column;
-            }
-            
-            .btn {
-                padding: 18px;
-            }
-            
-            .sentence-source {
-                flex-direction: column;
-            }
-            
-            .level-selection {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            body { padding: 10px; }
+            .container { padding: 20px; border-radius: 10px; }
+            h1 { font-size: 1.8em; }
+            .practice-item { padding: 20px; }
+            .sentence-container { flex-direction: column; align-items: flex-start; padding: 15px; }
+            .audio-btn { margin-left: 0; margin-top: 15px; align-self: center; }
+            .report-info-line { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .navigation { flex-direction: column; }
+            .btn { padding: 18px; }
+            .sentence-source { flex-direction: column; }
+            .level-selection { grid-template-columns: repeat(2, 1fr); }
         }
-        
         @media (max-width: 480px) {
-            body {
-                padding: 5px;
-            }
-            
-            .container {
-                padding: 15px;
-            }
-            
-            h1 {
-                font-size: 1.5em;
-            }
-            
-            .sentence-text {
-                font-size: 16px;
-            }
-            
-            .recording-btn {
-                padding: 20px;
-                font-size: 16px;
-            }
-            
-            .level-selection {
-                grid-template-columns: 1fr;
-            }
+            body { padding: 5px; }
+            .container { padding: 15px; }
+            h1 { font-size: 1.5em; }
+            .sentence-text { font-size: 16px; }
+            .recording-btn { padding: 20px; font-size: 16px; }
+            .level-selection { grid-template-columns: 1fr; }
         }
-
-        /* 打印樣式 */
         @media print {
-            body {
-                background: white !important;
-                padding: 0;
-            }
-            
-            .container {
-                box-shadow: none !important;
-                border-radius: 0 !important;
-            }
-            
-            .btn {
-                display: none !important;
-            }
-            
-            .practice-item, .report-section {
-                break-inside: avoid;
-            }
+            body { background: white !important; padding: 0; }
+            .container { box-shadow: none !important; border-radius: 0 !important; }
+            .btn { display: none !important; }
+            .practice-item, .report-section { break-inside: avoid; }
         }
     </style>
 </head>
@@ -706,34 +535,28 @@
             <div class="welcome-message">
                 Improve your English pronunciation with instant AI feedback! Please fill in the information below to start practicing.
             </div>
-            
             <div class="form-group">
                 <label for="class">Class</label>
                 <input type="text" id="class" placeholder="">
             </div>
-            
             <div class="form-group">
                 <label for="seat-no">Seat Number</label>
                 <input type="number" id="seat-no" min="1" max="99" placeholder="">
             </div>
-            
             <div class="form-group">
                 <label for="name">Name</label>
                 <input type="text" id="name" placeholder="">
             </div>
-            
             <div class="form-group">
                 <label>Sentence Source</label>
                 <div class="sentence-source">
                     <div class="sentence-source-btn active" data-source="manual">Enter Manually</div>
                     <div class="sentence-source-btn" data-source="level">From Sentence Bank</div>
                 </div>
-                
                 <div id="manual-input" class="sentence-input">
                     <label for="sentences">Practice Sentences (one per line, maximum 10)</label>
                     <textarea id="sentences" placeholder="Enter or paste sentences to practice, one per line"></textarea>
                 </div>
-                
                 <div id="level-input" class="sentence-input hidden">
                     <label>Select Difficulty Level</label>
                     <div class="level-selection">
@@ -747,37 +570,29 @@
                     <button id="load-level-sentences" class="btn btn-accent" style="margin-top: 15px;">Load 10 Random Sentences</button>
                 </div>
             </div>
-            
             <button id="start-practice" class="btn">Start Practice</button>
         </div>
-        
         <!-- Practice Page -->
         <div id="practice-page" class="hidden">
             <h1>English Pronunciation Practice</h1>
-            
             <div class="progress-bar">
                 <div id="progress" class="progress"></div>
             </div>
-            
             <div id="practice-container">
                 <!-- Practice items will be dynamically generated here -->
             </div>
-            
             <div class="navigation">
                 <button id="prev-sentence" class="btn">Previous</button>
                 <button id="next-sentence" class="btn">Next</button>
             </div>
-            
             <button id="finish-practice" class="btn btn-accent">Finish Practice</button>
         </div>
-        
         <!-- Report Page -->
         <div id="report-page" class="hidden">
             <div class="report-section">
                 <div class="report-header">
                     <h1>English Pronunciation Practice Report</h1>
                 </div>
-                
                 <div class="report-info-line">
                     <div class="report-info-item">
                         <span class="report-info-label">Class:</span>
@@ -796,25 +611,21 @@
                         <span id="report-date"></span>
                     </div>
                 </div>
-                
                 <div class="report-score">
                     Overall Pronunciation Score: <span id="overall-score">85</span>/100
                 </div>
-                
                 <div class="sentence-list">
                     <h3>Practice Sentences & Scores</h3>
                     <div id="sentence-scores-content">
                         <!-- Sentence scores will be dynamically generated here -->
                     </div>
                 </div>
-                
                 <div class="report-feedback">
                     <h3>Comprehensive Feedback</h3>
                     <div id="report-feedback-content">
                         <!-- Feedback content will be dynamically generated here -->
                     </div>
                 </div>
-                
                 <button id="print-report" class="btn print-btn">Print Report</button>
                 <button id="new-practice" class="btn btn-accent print-btn">New Practice</button>
             </div>
@@ -822,24 +633,18 @@
     </div>
 
     <script>
-        // Global variables
+        // =============== 配置區 ===============
         let studentInfo = {};
         let sentences = [];
         let currentSentenceIndex = 0;
-        let mediaRecorder;
-        let audioChunks = [];
-        let isRecording = false;
         let feedbackData = [];
-        let hasRequestedPermission = false;
         let sentenceSource = 'manual';
         let selectedLevel = null;
         let usedSentences = {};
-        let currentStream = null;
-        let recordingFailed = false;
-        let recordingDuration = 0;
-        let recordingStartTime = 0;
-        
-        // Google Sheets configuration
+        let currentTranscript = ''; // 用於保存識別結果
+        let isRecognizing = false;
+        let recognition = null;
+
         const SHEET_ID = '1EbMNgRD3WRVr2KVFFBkqOATeR-QI4YgcHlpDtrcwa0w';
         const SHEET_NAMES = {
             1: 'Level 1',
@@ -850,7 +655,7 @@
             6: 'Level 6'
         };
 
-        // DOM elements
+        // DOM 元素
         const studentInfoPage = document.getElementById('student-info-page');
         const practicePage = document.getElementById('practice-page');
         const reportPage = document.getElementById('report-page');
@@ -865,8 +670,8 @@
         const manualInput = document.getElementById('manual-input');
         const levelInput = document.getElementById('level-input');
         const loadLevelSentencesBtn = document.getElementById('load-level-sentences');
-        
-        // Event listeners
+
+        // =============== 事件綁定 ===============
         startPracticeBtn.addEventListener('click', startPractice);
         finishPracticeBtn.addEventListener('click', finishPractice);
         prevSentenceBtn.addEventListener('click', showPreviousSentence);
@@ -874,14 +679,12 @@
         printReportBtn.addEventListener('click', printReport);
         newPracticeBtn.addEventListener('click', startNewPractice);
         loadLevelSentencesBtn.addEventListener('click', loadLevelSentences);
-        
-        // Sentence source selection
+
         document.querySelectorAll('.sentence-source-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.sentence-source-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 sentenceSource = this.getAttribute('data-source');
-                
                 if (sentenceSource === 'manual') {
                     manualInput.classList.remove('hidden');
                     levelInput.classList.add('hidden');
@@ -891,8 +694,7 @@
                 }
             });
         });
-        
-        // Level selection
+
         document.querySelectorAll('.level-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
@@ -900,123 +702,131 @@
                 selectedLevel = this.getAttribute('data-level');
             });
         });
-        
-        // Initialize speech synthesis
-        let speechSynthesis = window.speechSynthesis;
-        
-        // Load random sentences from Google Sheets
+
+        // =============== 語音識別初始化 ===============
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("❌ Your browser doesn't support speech recognition. Please use Chrome or Edge.");
+                throw new Error("SpeechRecognition not supported");
+            }
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+                isRecognizing = true;
+                document.getElementById('recording-indicator').classList.remove('hidden');
+                document.getElementById('record-btn').textContent = '🛑 Stop Listening';
+                document.getElementById('record-btn').classList.remove('btn-success');
+                document.getElementById('record-btn').classList.add('btn-error');
+                showStatusMessage('🎤 Listening... Please start speaking.', 'info');
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                handleRecognitionResult(transcript);
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+                isRecognizing = false;
+                document.getElementById('recording-error').textContent = `❌ Recognition failed: ${event.error}`;
+                document.getElementById('recording-error').classList.remove('hidden');
+                document.getElementById('recording-indicator').classList.add('hidden');
+                document.getElementById('record-btn').textContent = '🎤 Start Recording';
+                document.getElementById('record-btn').classList.remove('btn-error');
+                document.getElementById('record-btn').classList.add('btn-success');
+                showStatusMessage('❌ Speech recognition failed.', 'error');
+            };
+
+            recognition.onend = () => {
+                if (!isRecognizing) return;
+                isRecognizing = false;
+                document.getElementById('recording-indicator').classList.add('hidden');
+                if (!document.getElementById('playback-section').classList.contains('hidden')) {
+                    document.getElementById('record-btn').textContent = '🎤 Record Again';
+                } else {
+                    document.getElementById('record-btn').textContent = '🎤 Start Recording';
+                    document.getElementById('record-btn').classList.remove('btn-error');
+                    document.getElementById('record-btn').classList.add('btn-success');
+                }
+            };
+        }
+
+        // =============== Google Sheets 處理 ===============
         async function loadLevelSentences() {
             if (!selectedLevel) {
                 showStatusMessage('Please select a difficulty level first', 'error', levelInput);
                 return;
             }
-            
             try {
                 showStatusMessage(`Loading sentences from Level ${selectedLevel}...`, 'info', levelInput);
                 const levelData = await fetchLevelSentences(selectedLevel);
-                
                 if (levelData.length === 0) {
                     showStatusMessage('No sentences found for this level', 'error', levelInput);
                     return;
                 }
-                
-                // Filter out already used sentences for this level in current session
+
                 const levelKey = `level_${selectedLevel}`;
                 const used = usedSentences[levelKey] || [];
                 const availableData = levelData.filter(item => !used.includes(item.number));
-                
                 if (availableData.length < 10) {
-                    // If not enough new sentences, reset used sentences for this level
                     usedSentences[levelKey] = [];
-                    showStatusMessage('Starting with new set of sentences for this level', 'info', levelInput);
                 }
-                
-                // Select 10 random sentences from available ones
+
                 const shuffled = [...availableData].sort(() => 0.5 - Math.random());
                 const selectedData = shuffled.slice(0, 10);
-                
-                // Update used sentences tracking
                 usedSentences[levelKey] = [...(usedSentences[levelKey] || []), ...selectedData.map(item => item.number)];
-                
-                // Format sentences with numbering information
+
                 const formattedSentences = selectedData.map((item, index) => 
                     `${item.sentence} [${index + 1}/10 - Level ${selectedLevel}, Sentence ${item.number}]`
                 );
-                
-                // Display the selected sentences
                 document.getElementById('sentences').value = formattedSentences.join('\n');
                 showStatusMessage(`10 random sentences loaded from Level ${selectedLevel}!`, 'info', levelInput);
-                
             } catch (error) {
                 console.error('Error loading level sentences:', error);
-                showStatusMessage('Error loading sentences. Please try again.', 'error', levelInput);
+                showStatusMessage('Failed to load sentences from Google Sheets.', 'error', levelInput);
             }
         }
-        
-        // Fetch sentences from specific level sheet
+
         async function fetchLevelSentences(level) {
             const sheetName = SHEET_NAMES[level];
-            if (!sheetName) {
-                throw new Error(`Invalid level: ${level}`);
-            }
-            
-            // Construct the export URL (CSV format)
+            if (!sheetName) throw new Error(`Invalid level: ${level}`);
             const exportUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-            
-            try {
-                const response = await fetch(exportUrl);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const csvText = await response.text();
-                return parseCSV(csvText, level);
-            } catch (error) {
-                console.error(`Error fetching Level ${level} sentences:`, error);
-                // Fallback to default sentences if Google Sheets fails
-                return getDefaultSentencesForLevel(level);
-            }
+            const response = await fetch(exportUrl);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const csvText = await response.text();
+            return parseCSV(csvText, level);
         }
-        
-        // Parse CSV data - now reads both number and sentence columns
+
         function parseCSV(csvText, level) {
             const lines = csvText.split('\n');
             const sentenceData = [];
-            
-            for (let i = 1; i < lines.length; i++) { // Start from 1 to skip header
+            for (let i = 1; i < lines.length; i++) {
                 const line = lines[i].trim();
                 if (line) {
-                    // Parse CSV line - handle quoted fields and commas within quotes
                     const columns = parseCSVLine(line);
-                    
                     if (columns.length >= 2) {
                         const number = columns[0].replace(/^"|"$/g, '').trim();
                         const sentence = columns[1].replace(/^"|"$/g, '').trim();
-                        
-                        // Only add if we have both number and sentence
                         if (number && sentence && !isNaN(parseInt(number))) {
-                            sentenceData.push({
-                                number: number,
-                                sentence: sentence
-                            });
+                            sentenceData.push({ number, sentence });
                         }
                     }
                 }
             }
-            
-            console.log(`Parsed ${sentenceData.length} sentences from Level ${level}`);
             return sentenceData;
         }
-        
-        // Improved CSV line parser that handles quoted fields with commas
+
         function parseCSVLine(line) {
             const result = [];
             let current = '';
             let inQuotes = false;
-            
             for (let i = 0; i < line.length; i++) {
                 const char = line[i];
-                
                 if (char === '"') {
                     inQuotes = !inQuotes;
                 } else if (char === ',' && !inQuotes) {
@@ -1026,730 +836,222 @@
                     current += char;
                 }
             }
-            
             result.push(current);
             return result;
         }
-        
-        // Default sentences fallback for each level (only used if Google Sheets fails)
+
+        // 【關鍵】移除本地備用句子，強制依賴網路
         function getDefaultSentencesForLevel(level) {
-            const defaultSentences = {
-                1: [
-                    { number: "1", sentence: "Hello, how are you?" },
-                    { number: "2", sentence: "My name is John." },
-                    { number: "3", sentence: "I like to read books." },
-                    { number: "4", sentence: "The weather is nice today." },
-                    { number: "5", sentence: "What is your favorite color?" },
-                    { number: "6", sentence: "I have two brothers." },
-                    { number: "7", sentence: "She is a good student." },
-                    { number: "8", sentence: "We go to school every day." },
-                    { number: "9", sentence: "Can you help me, please?" },
-                    { number: "10", sentence: "I love my family." }
-                ],
-                2: [
-                    { number: "1", sentence: "I would like to order a coffee, please." },
-                    { number: "2", sentence: "Could you tell me the time?" },
-                    { number: "3", sentence: "What do you do for a living?" },
-                    { number: "4", sentence: "I enjoy watching movies on weekends." },
-                    { number: "5", sentence: "She has been studying English for three years." },
-                    { number: "6", sentence: "We should meet for lunch sometime." },
-                    { number: "7", sentence: "The restaurant around the corner serves great food." },
-                    { number: "8", sentence: "He is planning to visit his grandparents next month." },
-                    { number: "9", sentence: "I need to finish this report by Friday." },
-                    { number: "10", sentence: "They are going to the beach this weekend." }
-                ],
-                3: [
-                    { number: "1", sentence: "Despite the heavy rain, the outdoor concert continued as scheduled." },
-                    { number: "2", sentence: "The company is considering several candidates for the management position." },
-                    { number: "3", sentence: "She expressed her concerns about the proposed changes to the project." },
-                    { number: "4", sentence: "After careful consideration, we decided to implement the new policy." },
-                    { number: "5", sentence: "The research findings suggest a correlation between diet and health." },
-                    { number: "6", sentence: "He emphasized the importance of maintaining a positive attitude." },
-                    { number: "7", sentence: "The committee will review all applications by the end of the week." },
-                    { number: "8", sentence: "We appreciate your cooperation in this matter." },
-                    { number: "9", sentence: "The new regulations will take effect starting next month." },
-                    { number: "10", sentence: "They conducted a comprehensive analysis of the market trends." }
-                ]
-            };
-            
-            return defaultSentences[level] || defaultSentences[1];
+            throw new Error(`Failed to load from Google Sheets for Level ${level}.`);
         }
-        
-        // Show status message
-        function showStatusMessage(message, type, container = document.body) {
-            const existingMessage = container.querySelector('.status-message');
-            if (existingMessage) {
-                existingMessage.remove();
-            }
-            
-            const statusMessage = document.createElement('div');
-            statusMessage.className = `status-message status-${type}`;
-            statusMessage.textContent = message;
-            
-            container.insertBefore(statusMessage, container.firstChild);
-            
-            const timeout = type === 'error' ? 8000 : 5000;
-            setTimeout(() => {
-                if (statusMessage.parentNode) {
-                    statusMessage.remove();
-                }
-            }, timeout);
-        }
-        
-        // Start practice
+
+        // =============== 主流程 ===============
         function startPractice() {
             const className = document.getElementById('class').value;
             const seatNo = document.getElementById('seat-no').value;
             const name = document.getElementById('name').value;
-            
             if (!className || !seatNo || !name) {
                 showStatusMessage('Please fill in all fields', 'error');
                 return;
             }
-            
+
             let sentenceArray = [];
-            
             if (sentenceSource === 'manual') {
                 const sentencesText = document.getElementById('sentences').value;
-                sentenceArray = sentencesText.split('\n')
-                    .map(s => s.trim())
-                    .filter(s => s.length > 0)
-                    .slice(0, 10);
+                sentenceArray = sentencesText.split('\n').map(s => s.trim()).filter(s => s).slice(0, 10);
             } else {
-                // Use sentences already loaded from level
                 const sentencesText = document.getElementById('sentences').value;
-                sentenceArray = sentencesText.split('\n')
-                    .map(s => s.trim())
-                    .filter(s => s.length > 0);
+                sentenceArray = sentencesText.split('\n').map(s => s.trim()).filter(s => s);
             }
-            
+
             if (sentenceArray.length === 0) {
-                showStatusMessage('Please enter at least one sentence or load sentences from the bank', 'error');
+                showStatusMessage('Please enter or load at least one sentence', 'error');
                 return;
             }
-            
+
             studentInfo = { className, seatNo, name };
             sentences = sentenceArray;
             currentSentenceIndex = 0;
             feedbackData = [];
-            recordingFailed = false;
-            
+            currentTranscript = '';
+
             studentInfoPage.classList.add('hidden');
             practicePage.classList.remove('hidden');
-            
             showCurrentSentence();
             updateProgress();
         }
-        
-        // Show current sentence
+
         function showCurrentSentence() {
             practiceContainer.innerHTML = '';
-            
             const sentence = sentences[currentSentenceIndex];
-            
-            const practiceItem = document.createElement('div');
-            practiceItem.className = 'practice-item';
-            
-            // Check if this is a sentence bank sentence (contains level info in brackets)
             const sentenceMatch = sentence.match(/^(.+?)\s*\[(\d+\/10)\s*-\s*(Level\s+\d+,\s*Sentence\s+\d+)\]$/);
             const displaySentence = sentenceMatch ? sentenceMatch[1] : sentence;
             const practiceNumber = sentenceMatch ? sentenceMatch[2] : `${currentSentenceIndex + 1}/10`;
             const sentenceInfo = sentenceMatch ? sentenceMatch[3] : null;
-            
-            practiceItem.innerHTML = `
-                <div class="sentence-header">
-                    <div class="sentence-number">Sentence ${practiceNumber}</div>
-                    ${sentenceInfo ? `<div class="sentence-source">${sentenceInfo}</div>` : ''}
-                </div>
-                <div class="sentence-container">
-                    <div class="sentence-text">${displaySentence}</div>
-                    <button class="audio-btn" data-sentence="${displaySentence}" title="Listen to original">🔊</button>
-                </div>
-                
-                <div class="recording-controls">
-                    <button id="record-btn" class="btn recording-btn btn-success">🎤 Start Recording</button>
-                    <div id="recording-indicator" class="hidden">
-                        <span class="recording-indicator"></span> 🔴 Recording... <span id="recording-timer">0s</span>
+
+            practiceContainer.innerHTML = `
+                <div class="practice-item">
+                    <div class="sentence-header">
+                        <div class="sentence-number">Sentence ${practiceNumber}</div>
+                        ${sentenceInfo ? `<div class="sentence-source">${sentenceInfo}</div>` : ''}
                     </div>
-                    <div id="recording-error" class="hidden status-error" style="margin-top: 10px;">
-                        ❌ Recording failed. Please check microphone permissions.
+                    <div class="sentence-container">
+                        <div class="sentence-text">${displaySentence}</div>
+                        <button class="audio-btn" data-sentence="${displaySentence}" title="Listen to original">🔊</button>
                     </div>
-                </div>
-                
-                <div id="playback-section" class="hidden">
-                    <p>🎧 Your recording:</p>
-                    <audio id="playback-audio" controls style="width: 100%; margin: 15px 0;"></audio>
-                    <button id="analyze-btn" class="btn btn-success" style="margin-top: 15px;">🤖 Analyze Pronunciation</button>
-                </div>
-                
-                <div id="feedback-section" class="feedback-section hidden">
-                    <h3>💡 Pronunciation Feedback</h3>
-                    <div id="score-breakdown"></div>
-                    <div id="pronunciation-details"></div>
-                    <div id="feedback-content"></div>
+                    <div class="recording-controls">
+                        <button id="record-btn" class="btn recording-btn btn-success">🎤 Start Recording</button>
+                        <div id="recording-indicator" class="hidden">
+                            <span class="recording-indicator"></span> 🔴 Listening... 
+                        </div>
+                        <div id="recording-error" class="hidden status-error" style="margin-top: 10px;">
+                            ❌ Speech recognition failed.
+                        </div>
+                    </div>
+                    <div id="playback-section" class="hidden">
+                        <p><strong>You said:</strong> "<span id="user-transcript"></span>"</p>
+                        <button id="analyze-btn" class="btn btn-success" style="margin-top: 15px;">🤖 Analyze Pronunciation</button>
+                    </div>
+                    <div id="feedback-section" class="feedback-section hidden">
+                        <h3>💡 Pronunciation Feedback</h3>
+                        <div id="score-breakdown"></div>
+                        <div id="pronunciation-details"></div>
+                        <div id="feedback-content"></div>
+                    </div>
                 </div>
             `;
-            
-            practiceContainer.appendChild(practiceItem);
-            
-            const audioBtn = practiceItem.querySelector('.audio-btn');
-            audioBtn.addEventListener('click', function() {
-                playSentence(this.getAttribute('data-sentence'));
+
+            document.querySelector('.audio-btn').addEventListener('click', function() {
+                const utter = new SpeechSynthesisUtterance(this.getAttribute('data-sentence'));
+                utter.lang = 'en-US'; utter.rate = 0.9;
+                speechSynthesis.speak(utter);
             });
-            
-            const recordBtn = document.getElementById('record-btn');
-            recordBtn.addEventListener('click', toggleRecording);
-            
-            const analyzeBtn = document.getElementById('analyze-btn');
-            analyzeBtn.addEventListener('click', analyzePronunciation);
+
+            document.getElementById('record-btn').addEventListener('click', toggleRecording);
+            document.getElementById('analyze-btn').addEventListener('click', analyzePronunciation);
         }
-        
-        // Play sentence audio
-        function playSentence(sentence) {
-            speechSynthesis.cancel();
-            
-            const cleanSentence = sentence.replace(/\s*\[.*?\]/g, '').trim();
-            
-            const utterance = new SpeechSynthesisUtterance(cleanSentence);
-            utterance.lang = 'en-US';
-            utterance.rate = 0.9;
-            utterance.pitch = 1;
-            
-            utterance.onerror = function(event) {
-                console.error('Audio playback error:', event);
-                showStatusMessage('❌ Audio playback failed, please try again', 'error');
-            };
-            
-            speechSynthesis.speak(utterance);
-        }
-        
-        // Toggle recording state
+
+        // =============== 語音操作 ===============
         async function toggleRecording() {
-            if (!isRecording) {
-                await startRecording();
-            } else {
-                stopRecording();
-            }
-        }
-        
-        // Start recording with improved error handling
-        async function startRecording() {
-            try {
-                recordingFailed = false;
-                recordingDuration = 0;
+            if (!recognition) initSpeechRecognition();
+            if (!isRecognizing) {
+                document.getElementById('playback-section').classList.add('hidden');
                 document.getElementById('recording-error').classList.add('hidden');
-                
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    throw new Error('Your browser does not support recording');
-                }
-                
-                showStatusMessage('🎤 Requesting microphone permission...', 'info');
-                
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        sampleRate: 44100
-                    } 
-                });
-                
-                currentStream = stream;
-                hasRequestedPermission = true;
-                
-                const options = { 
-                    mimeType: 'audio/webm;codecs=opus',
-                    audioBitsPerSecond: 128000
-                };
-                
-                try {
-                    mediaRecorder = new MediaRecorder(stream, options);
-                } catch (e) {
-                    console.warn('Using default MIME type');
-                    mediaRecorder = new MediaRecorder(stream);
-                }
-                
-                audioChunks = [];
-                
-                mediaRecorder.ondataavailable = event => {
-                    if (event.data.size > 0) {
-                        audioChunks.push(event.data);
-                    }
-                };
-                
-                mediaRecorder.onstop = () => {
-                    if (recordingFailed) return;
-                    
-                    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    const playbackAudio = document.getElementById('playback-audio');
-                    playbackAudio.src = audioUrl;
-                    
-                    document.getElementById('playback-section').classList.remove('hidden');
-                    showStatusMessage('✅ Recording completed! You can now analyze your pronunciation.', 'info');
-                };
-                
-                mediaRecorder.onerror = (event) => {
-                    console.error('MediaRecorder error:', event);
-                    recordingFailed = true;
-                    showStatusMessage('❌ An error occurred during recording', 'error');
-                };
-                
-                mediaRecorder.start(100);
-                isRecording = true;
-                recordingStartTime = Date.now();
-                
-                // Start timer
-                const timerElement = document.getElementById('recording-timer');
-                const timerInterval = setInterval(() => {
-                    if (isRecording) {
-                        recordingDuration = Math.floor((Date.now() - recordingStartTime) / 1000);
-                        timerElement.textContent = `${recordingDuration}s`;
-                    } else {
-                        clearInterval(timerInterval);
-                    }
-                }, 1000);
-                
-                document.getElementById('record-btn').textContent = '🛑 Stop Recording';
-                document.getElementById('record-btn').classList.remove('btn-success');
-                document.getElementById('record-btn').classList.add('btn-error');
-                document.getElementById('recording-indicator').classList.remove('hidden');
-                
-                showStatusMessage('🎤 Recording started, please start speaking...', 'info');
-                
-            } catch (error) {
-                console.error('Recording error:', error);
-                recordingFailed = true;
-                
-                document.getElementById('recording-error').classList.remove('hidden');
-                
-                if (error.name === 'NotAllowedError') {
-                    showStatusMessage('❌ Microphone permission denied. Please allow microphone access and try again.', 'error');
-                } else if (error.name === 'NotFoundError') {
-                    showStatusMessage('❌ No microphone device found', 'error');
-                } else if (error.name === 'NotSupportedError') {
-                    showStatusMessage('❌ Browser does not support recording', 'error');
-                } else {
-                    showStatusMessage('❌ Recording failed: ' + error.message, 'error');
-                }
-                
-                document.getElementById('record-btn').textContent = '🎤 Start Recording';
-                document.getElementById('record-btn').classList.remove('btn-error');
-                document.getElementById('record-btn').classList.add('btn-success');
-                document.getElementById('recording-indicator').classList.add('hidden');
-            }
-        }
-        
-        // Stop recording
-        function stopRecording() {
-            if (mediaRecorder && isRecording) {
-                mediaRecorder.stop();
-                isRecording = false;
-                
-                if (currentStream) {
-                    currentStream.getTracks().forEach(track => track.stop());
-                    currentStream = null;
-                }
-                
-                document.getElementById('record-btn').textContent = '🎤 Record Again';
-                document.getElementById('record-btn').classList.remove('btn-error');
-                document.getElementById('record-btn').classList.add('btn-success');
-                document.getElementById('recording-indicator').classList.add('hidden');
-            }
-        }
-        
-        // Analyze pronunciation with improved scoring system
-        async function analyzePronunciation() {
-            const currentSentence = sentences[currentSentenceIndex];
-            
-            const playbackAudio = document.getElementById('playback-audio');
-            if (!playbackAudio.src || recordingFailed) {
-                showStatusMessage('❌ Please record your pronunciation first or fix recording issues', 'error');
-                return;
-            }
-            
-            if (audioChunks.length === 0) {
-                showStatusMessage('❌ No audio recorded. Please try recording again.', 'error');
-                return;
-            }
-            
-            document.getElementById('analyze-btn').textContent = '⏳ Analyzing...';
-            document.getElementById('analyze-btn').disabled = true;
-            
-            showStatusMessage('🤖 AI is analyzing your pronunciation...', 'info');
-            
-            // Simulate network-based analysis
-            setTimeout(() => {
-                try {
-                    const analysisResult = performAdvancedSpeechAnalysis(currentSentence);
-                    const feedback = analysisResult.feedback;
-                    const score = analysisResult.score;
-                    const scoreBreakdown = analysisResult.scoreBreakdown;
-                    const pronunciationDetails = analysisResult.pronunciationDetails;
-                    
-                    // Display score breakdown
-                    const scoreBreakdownElement = document.getElementById('score-breakdown');
-                    scoreBreakdownElement.innerHTML = `
-                        <div class="score-breakdown">
-                            <h4>Score Breakdown:</h4>
-                            ${scoreBreakdown.map(item => `
-                                <div class="score-item">
-                                    <span class="score-label">${item.category}:</span>
-                                    <span class="score-value">${item.score}/25</span>
-                                </div>
-                            `).join('')}
-                            <div class="score-item" style="border-top: 2px solid var(--primary-color); padding-top: 8px; margin-top: 8px;">
-                                <span class="score-label" style="font-weight: 700;">Total Score:</span>
-                                <span class="score-value" style="font-size: 1.2em;">${score}/100</span>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Display pronunciation details
-                    const pronunciationDetailsElement = document.getElementById('pronunciation-details');
-                    if (pronunciationDetails && pronunciationDetails.length > 0) {
-                        pronunciationDetailsElement.innerHTML = `
-                            <div class="pronunciation-details">
-                                <h4>Pronunciation Analysis:</h4>
-                                ${pronunciationDetails.map(detail => `
-                                    <div class="detail-item">
-                                        <strong>${detail.sound}</strong>: ${detail.feedback}
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `;
-                    } else {
-                        pronunciationDetailsElement.innerHTML = '';
-                    }
-                    
-                    // Display feedback
-                    const feedbackContent = document.getElementById('feedback-content');
-                    feedbackContent.innerHTML = '';
-                    
-                    feedback.forEach(item => {
-                        const feedbackItem = document.createElement('div');
-                        feedbackItem.className = `feedback-item ${item.type === 'positive' ? 'feedback-positive' : 'feedback-improve'}`;
-                        
-                        const feedbackBilingual = document.createElement('div');
-                        feedbackBilingual.className = 'feedback-bilingual';
-                        feedbackBilingual.innerHTML = `
-                            <div class="feedback-english"><strong>${item.aspect}:</strong> ${item.message}</div>
-                            <div class="feedback-chinese"><strong>${item.aspect_zh}:</strong> ${item.message_zh}</div>
-                        `;
-                        
-                        feedbackItem.appendChild(feedbackBilingual);
-                        feedbackContent.appendChild(feedbackItem);
-                    });
-                    
-                    document.getElementById('feedback-section').classList.remove('hidden');
-                    document.getElementById('analyze-btn').textContent = '🤖 Analyze Pronunciation';
-                    document.getElementById('analyze-btn').disabled = false;
-                    
-                    // Save feedback data
-                    feedbackData[currentSentenceIndex] = {
-                        sentence: currentSentence,
-                        feedback: feedback,
-                        score: score,
-                        scoreBreakdown: scoreBreakdown,
-                        pronunciationDetails: pronunciationDetails,
-                        recordingSuccessful: !recordingFailed
-                    };
-                    
-                    showStatusMessage(`✅ Pronunciation analysis completed! Score: ${score}/100`, 'info');
-                    
-                } catch (error) {
-                    console.error('Analysis error:', error);
-                    showStatusMessage('❌ Analysis failed. Please try again.', 'error');
-                    document.getElementById('analyze-btn').textContent = '🤖 Analyze Pronunciation';
-                    document.getElementById('analyze-btn').disabled = false;
-                }
-                
-            }, 2000);
-        }
-        
-        // 改進的語音分析系統
-        function performAdvancedSpeechAnalysis(sentence) {
-            const cleanSentence = sentence.replace(/\s*\[\d+\/10\s*-\s*Level\s+\d+,\s*Sentence\s+\d+\]/, '');
-            
-            // 分析句子特徵
-            const words = cleanSentence.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/);
-            const sentenceLength = words.length;
-            const hasQuestion = cleanSentence.includes('?');
-            
-            // 分析發音特徵
-            const pronunciationAnalysis = analyzePronunciationFeatures(cleanSentence);
-            
-            // 計算各項分數（每個維度滿分25分）
-            const pronunciationScore = calculateAdvancedPronunciationScore(pronunciationAnalysis);
-            const fluencyScore = calculateAdvancedFluencyScore(sentenceLength, recordingDuration);
-            const intonationScore = calculateAdvancedIntonationScore(cleanSentence, hasQuestion);
-            const clarityScore = calculateAdvancedClarityScore(cleanSentence, pronunciationAnalysis);
-            
-            // 計算總分（四個維度加總，滿分100分）
-            const totalScore = pronunciationScore + fluencyScore + intonationScore + clarityScore;
-            
-            // 確保總分不超過100分
-            const finalScore = Math.min(100, totalScore);
-            
-            // 生成詳細反饋
-            const feedback = generateAdvancedFeedback(cleanSentence, {
-                pronunciation: pronunciationScore,
-                fluency: fluencyScore,
-                intonation: intonationScore,
-                clarity: clarityScore
-            }, pronunciationAnalysis);
-            
-            return {
-                score: finalScore,
-                feedback: feedback,
-                scoreBreakdown: [
-                    { category: "Pronunciation", score: pronunciationScore },
-                    { category: "Fluency", score: fluencyScore },
-                    { category: "Intonation", score: intonationScore },
-                    { category: "Clarity", score: clarityScore }
-                ],
-                pronunciationDetails: pronunciationAnalysis.details
-            };
-        }
-        
-        // 分析發音特徵
-        function analyzePronunciationFeatures(sentence) {
-            const details = [];
-            let totalDifficulty = 0;
-            let correctlyPronounced = 0;
-            let totalSounds = 0;
-            
-            const lowerSentence = sentence.toLowerCase();
-            
-            // 檢查困難單詞的發音
-            const difficultWords = ['the', 'this', 'that', 'think', 'three', 'weather', 'whether', 'very', 'ship', 'sheep'];
-            difficultWords.forEach(word => {
-                if (lowerSentence.includes(word)) {
-                    totalSounds++;
-                    // 根據單詞難度模擬正確率
-                    const isCorrect = Math.random() > (word.length > 4 ? 0.4 : 0.2);
-                    const difficulty = word.length > 4 ? 4 : 3;
-                    totalDifficulty += difficulty;
-                    
-                    if (isCorrect) {
-                        correctlyPronounced++;
-                        details.push({
-                            sound: word,
-                            feedback: `✅ Good pronunciation of "${word}"`,
-                            correct: true
-                        });
-                    } else {
-                        details.push({
-                            sound: word,
-                            feedback: `⚠️ Practice the word "${word}" - focus on individual sounds`,
-                            correct: false
-                        });
-                    }
-                }
-            });
-            
-            const accuracyRate = totalSounds > 0 ? (correctlyPronounced / totalSounds) * 100 : 85;
-            
-            return {
-                accuracyRate: accuracyRate,
-                totalDifficulty: totalDifficulty,
-                correctlyPronounced: correctlyPronounced,
-                totalSounds: totalSounds,
-                details: details
-            };
-        }
-        
-        // 改進的發音分數計算
-        function calculateAdvancedPronunciationScore(analysis) {
-            const baseScore = 20; // 基礎分數20分
-            const accuracyBonus = (analysis.accuracyRate / 100) * 5; // 準確率貢獻最多5分
-            
-            let score = baseScore + accuracyBonus;
-            
-            // 確保分數在合理範圍內（16-25分）
-            score = Math.max(16, Math.min(25, score));
-            
-            return Math.round(score);
-        }
-        
-        // 改進的流利度分數計算
-        function calculateAdvancedFluencyScore(sentenceLength, duration) {
-            const idealWordsPerSecond = 2.5;
-            let paceScore = 20; // 基礎分數
-            
-            if (duration > 0) {
-                const actualPace = sentenceLength / duration;
-                const paceDifference = Math.abs(actualPace - idealWordsPerSecond);
-                
-                if (paceDifference <= 0.5) {
-                    paceScore = 24; // 優秀語速
-                } else if (paceDifference <= 1) {
-                    paceScore = 22; // 良好語速
-                } else if (paceDifference <= 1.5) {
-                    paceScore = 20; // 可接受語速
-                } else {
-                    paceScore = 18; // 需要改進
-                }
-            }
-            
-            return Math.max(18, Math.min(25, paceScore));
-        }
-        
-        // 改進的語調分數計算
-        function calculateAdvancedIntonationScore(sentence, hasQuestion) {
-            let baseScore = 21; // 基礎分數
-            
-            if (hasQuestion) {
-                baseScore += 2; // 疑問句語調加分
-            }
-            
-            // 根據句子長度調整
-            const wordCount = sentence.split(/\s+/).length;
-            if (wordCount >= 10) {
-                baseScore += 1; // 長句子語調控制加分
-            }
-            
-            return Math.max(19, Math.min(25, baseScore));
-        }
-        
-        // 改進的清晰度分數計算
-        function calculateAdvancedClarityScore(sentence, pronunciationAnalysis) {
-            let baseScore = 22; // 基礎分數
-            
-            // 基於發音準確率調整
-            const clarityBonus = (pronunciationAnalysis.accuracyRate / 100) * 3;
-            baseScore += clarityBonus;
-            
-            return Math.max(20, Math.min(25, Math.round(baseScore)));
-        }
-        
-        // 生成高級反饋
-        function generateAdvancedFeedback(sentence, scores, pronunciationAnalysis) {
-            const feedback = [];
-            const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
-            
-            // 基於總分提供整體評價
-            if (totalScore >= 90) {
-                feedback.push({
-                    aspect: 'Outstanding Pronunciation',
-                    aspect_zh: '出色的發音',
-                    message: 'Excellent pronunciation! Your speech is very clear and natural, close to native speaker level.',
-                    message_zh: '出色的發音！您的語音非常清晰自然，接近母語者水平。',
-                    type: 'positive'
-                });
-            } else if (totalScore >= 80) {
-                feedback.push({
-                    aspect: 'Very Good Pronunciation',
-                    aspect_zh: '非常好的發音',
-                    message: 'Very good pronunciation with clear articulation and natural rhythm.',
-                    message_zh: '非常好的發音，發音清晰，節奏自然。',
-                    type: 'positive'
-                });
-            } else if (totalScore >= 70) {
-                feedback.push({
-                    aspect: 'Good Pronunciation',
-                    aspect_zh: '良好的發音',
-                    message: 'Good pronunciation overall. Continue practicing to improve specific sounds.',
-                    message_zh: '整體發音良好。繼續練習以改進特定音素。',
-                    type: 'positive'
-                });
+                document.getElementById('feedback-section').classList.add('hidden');
+                currentTranscript = '';
+                recognition.start();
             } else {
-                feedback.push({
-                    aspect: 'Pronunciation Practice Needed',
-                    aspect_zh: '需要發音練習',
-                    message: 'Focus on improving your pronunciation accuracy and clarity.',
-                    message_zh: '專注於提高發音準確性和清晰度。',
-                    type: 'improve'
-                });
+                recognition.stop();
             }
-            
-            // 發音具體反饋
-            if (pronunciationAnalysis.totalSounds > 0) {
-                const correctPercentage = Math.round((pronunciationAnalysis.correctlyPronounced / pronunciationAnalysis.totalSounds) * 100);
-                
-                if (correctPercentage >= 80) {
-                    feedback.push({
-                        aspect: 'Sound Mastery',
-                        aspect_zh: '音素掌握',
-                        message: `Excellent! You correctly pronounced ${correctPercentage}% of challenging sounds.`,
-                        message_zh: `優秀！您正確發出了${correctPercentage}%的困難音素。`,
-                        type: 'positive'
-                    });
-                } else if (correctPercentage >= 60) {
-                    feedback.push({
-                        aspect: 'Good Sound Production',
-                        aspect_zh: '良好的音素發音',
-                        message: `Good job! You correctly pronounced ${correctPercentage}% of challenging sounds.`,
-                        message_zh: `做得好！您正確發出了${correctPercentage}%的困難音素。`,
-                        type: 'positive'
-                    });
-                } else {
-                    feedback.push({
-                        aspect: 'Pronunciation Focus',
-                        aspect_zh: '發音重點',
-                        message: `You correctly pronounced ${correctPercentage}% of challenging sounds. Practice difficult words more.`,
-                        message_zh: `您正確發出了${correctPercentage}%的困難音素。多練習困難單詞。`,
-                        type: 'improve'
-                    });
-                }
+        }
+
+        function handleRecognitionResult(transcript) {
+            currentTranscript = transcript;
+            document.getElementById('user-transcript').textContent = transcript;
+            document.getElementById('playback-section').classList.remove('hidden');
+            showStatusMessage('✅ Speech recognized! Ready to analyze.', 'info');
+        }
+
+        // =============== 分析邏輯 ===============
+        async function analyzePronunciation() {
+            if (!currentTranscript) {
+                showStatusMessage('❌ No speech recognized. Please record again.', 'error');
+                return;
             }
-            
-            // 各維度具體反饋
-            Object.entries(scores).forEach(([category, score]) => {
-                if (score >= 22) {
-                    feedback.push({
-                        aspect: getCategoryName(category),
-                        aspect_zh: getChineseCategory(category),
-                        message: `Excellent ${category} - your performance in this area is outstanding.`,
-                        message_zh: `優秀的${getChineseCategory(category)} - 您在這方面的表現很出色。`,
-                        type: 'positive'
-                    });
-                } else if (score <= 18) {
-                    feedback.push({
-                        aspect: `${getCategoryName(category)} Improvement`,
-                        aspect_zh: `${getChineseCategory(category)}改進`,
-                        message: `Focus on improving your ${category} for better overall performance.`,
-                        message_zh: `專注於改進${getChineseCategory(category)}以提高整體表現。`,
-                        type: 'improve'
-                    });
-                }
+
+            const currentSentence = sentences[currentSentenceIndex];
+            const cleanOriginal = currentSentence.replace(/\s*\[\d+\/10\s*-\s*Level\s+\d+,\s*Sentence\s+\d+\]/, '').trim().toLowerCase();
+            const userTranscript = currentTranscript.trim().toLowerCase();
+
+            const distance = levenshteinDistance(cleanOriginal, userTranscript);
+            const maxLength = Math.max(cleanOriginal.length, userTranscript.length);
+            const similarity = maxLength > 0 ? (1 - distance / maxLength) : 0;
+            const score = Math.round(similarity * 100);
+
+            let feedbackMessage, feedbackType;
+            if (score >= 85) {
+                feedbackMessage = "Excellent! Your pronunciation was very accurate.";
+                feedbackType = "positive";
+            } else if (score >= 70) {
+                feedbackMessage = "Good job! There are a few words you can practice.";
+                feedbackType = "positive";
+            } else {
+                feedbackMessage = "Keep practicing! Focus on saying the sentence more clearly.";
+                feedbackType = "improve";
+            }
+
+            const feedback = [{ aspect: "Overall Accuracy", aspect_zh: "整體準確度", message: feedbackMessage, message_zh: feedbackMessage, type: feedbackType }];
+
+            document.getElementById('score-breakdown').innerHTML = `
+                <div class="score-breakdown">
+                    <h4>Score Breakdown:</h4>
+                    <div class="score-item">
+                        <span class="score-label">Text Similarity:</span>
+                        <span class="score-value">${score}/100</span>
+                    </div>
+                    <div class="score-item" style="border-top: 2px solid var(--primary-color); padding-top: 8px; margin-top: 8px;">
+                        <span class="score-label" style="font-weight: 700;">Total Score:</span>
+                        <span class="score-value" style="font-size: 1.2em;">${score}/100</span>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('pronunciation-details').innerHTML = `
+                <div class="pronunciation-details">
+                    <h4>Recognition Result:</h4>
+                    <div class="detail-item"><strong>Original:</strong> ${cleanOriginal}</div>
+                    <div class="detail-item"><strong>Your Speech:</strong> ${userTranscript}</div>
+                </div>
+            `;
+
+            const feedbackContent = document.getElementById('feedback-content');
+            feedbackContent.innerHTML = '';
+            feedback.forEach(item => {
+                const feedbackItem = document.createElement('div');
+                feedbackItem.className = `feedback-item ${item.type === 'positive' ? 'feedback-positive' : 'feedback-improve'}`;
+                feedbackItem.innerHTML = `<div class="feedback-english"><strong>${item.aspect}:</strong> ${item.message}</div>`;
+                feedbackContent.appendChild(feedbackItem);
             });
-            
-            // 確保有足夠的反饋項目
-            while (feedback.length < 3) {
-                feedback.push({
-                    aspect: 'Continue Practicing',
-                    aspect_zh: '持續練習',
-                    message: 'Regular practice will help you maintain and improve your pronunciation skills.',
-                    message_zh: '定期練習將幫助您保持和提高發音技能。',
-                    type: 'improve'
-                });
+
+            document.getElementById('feedback-section').classList.remove('hidden');
+
+            feedbackData[currentSentenceIndex] = {
+                sentence: currentSentence,
+                feedback: feedback,
+                score: score,
+                scoreBreakdown: [{ category: "Text Similarity", score: score }],
+                pronunciationDetails: null,
+                recordingSuccessful: true
+            };
+
+            showStatusMessage(`✅ Analysis completed! Score: ${score}/100`, 'info');
+        }
+
+        // =============== 工具函數 ===============
+        function levenshteinDistance(a, b) {
+            if (a.length === 0) return b.length;
+            if (b.length === 0) return a.length;
+            const matrix = Array(b.length + 1).fill().map((_, i) => [i]);
+            for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    const cost = b[i-1] === a[j-1] ? 0 : 1;
+                    matrix[i][j] = Math.min(matrix[i-1][j] + 1, matrix[i][j-1] + 1, matrix[i-1][j-1] + cost);
+                }
             }
-            
-            return feedback.slice(0, 4);
+            return matrix[b.length][a.length];
         }
-        
-        // 輔助函數
-        function getCategoryName(category) {
-            const categories = {
-                'pronunciation': 'Pronunciation Accuracy',
-                'fluency': 'Speech Fluency', 
-                'intonation': 'Intonation',
-                'clarity': 'Clarity'
-            };
-            return categories[category] || category;
+
+        function showStatusMessage(message, type, container = document.body) {
+            const existing = container.querySelector('.status-message');
+            if (existing) existing.remove();
+            const el = document.createElement('div');
+            el.className = `status-message status-${type}`;
+            el.textContent = message;
+            container.insertBefore(el, container.firstChild);
+            setTimeout(() => el.remove(), type === 'error' ? 8000 : 5000);
         }
-        
-        function getChineseCategory(category) {
-            const categories = {
-                'pronunciation': '發音準確度',
-                'fluency': '流利度',
-                'intonation': '語調',
-                'clarity': '清晰度'
-            };
-            return categories[category] || category;
-        }
-        
-        // Show previous sentence
+
         function showPreviousSentence() {
             if (currentSentenceIndex > 0) {
                 currentSentenceIndex--;
@@ -1757,8 +1059,7 @@
                 updateProgress();
             }
         }
-        
-        // Show next sentence
+
         function showNextSentence() {
             if (currentSentenceIndex < sentences.length - 1) {
                 currentSentenceIndex++;
@@ -1766,213 +1067,97 @@
                 updateProgress();
             }
         }
-        
-        // Update progress bar
+
         function updateProgress() {
             const progress = ((currentSentenceIndex + 1) / sentences.length) * 100;
             progressBar.style.width = `${progress}%`;
         }
-        
-        // Finish practice
+
         function finishPractice() {
-            const completedSentences = feedbackData.filter(item => item !== undefined).length;
-            
-            if (completedSentences < sentences.length) {
-                if (!confirm(`You have completed ${completedSentences}/${sentences.length} sentences. Are you sure you want to finish?`)) {
-                    return;
-                }
+            const completed = feedbackData.filter(item => item !== undefined).length;
+            if (completed < sentences.length) {
+                if (!confirm(`You have completed ${completed}/${sentences.length} sentences. Finish now?`)) return;
             }
-            
             practicePage.classList.add('hidden');
             reportPage.classList.remove('hidden');
             generateReport();
         }
-        
-        // Generate comprehensive report
+
         function generateReport() {
             document.getElementById('report-class').textContent = studentInfo.className;
             document.getElementById('report-seat-no').textContent = studentInfo.seatNo;
             document.getElementById('report-name').textContent = studentInfo.name;
             document.getElementById('report-date').textContent = new Date().toLocaleDateString('en-US');
-            
+
             const scores = feedbackData.filter(item => item).map(item => item.score);
-            const averageScore = scores.length > 0 ? 
-                Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
-            
-            document.getElementById('overall-score').textContent = averageScore;
-            
+            const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+            document.getElementById('overall-score').textContent = avgScore;
+
             const sentenceScoresContent = document.getElementById('sentence-scores-content');
             sentenceScoresContent.innerHTML = '';
-            
             sentences.forEach((sentence, index) => {
                 const feedback = feedbackData[index];
                 const score = feedback ? feedback.score : 'Not analyzed';
-                
-                const sentenceItem = document.createElement('div');
-                sentenceItem.className = 'sentence-score-item';
-                
-                const cleanSentence = sentence.replace(/\s*\[\d+\/10\s*-\s*Level\s+\d+,\s*Sentence\s+\d+\]/, '');
-                
-                sentenceItem.innerHTML = `
-                    <div><strong>Sentence ${index + 1}:</strong> ${cleanSentence}</div>
-                    <div class="sentence-score">Score: ${score}/100</div>
-                `;
-                
-                sentenceScoresContent.appendChild(sentenceItem);
+                const clean = sentence.replace(/\s*\[\d+\/10\s*-\s*Level\s+\d+,\s*Sentence\s+\d+\]/, '');
+                const el = document.createElement('div');
+                el.className = 'sentence-score-item';
+                el.innerHTML = `<div><strong>Sentence ${index + 1}:</strong> ${clean}</div><div class="sentence-score">Score: ${score}/100</div>`;
+                sentenceScoresContent.appendChild(el);
             });
-            
+
             const feedbackContent = document.getElementById('report-feedback-content');
             feedbackContent.innerHTML = '';
-            
             if (feedbackData.length === 0) {
-                feedbackContent.innerHTML = '<p>No pronunciation analysis completed for any sentences.</p>';
+                feedbackContent.innerHTML = '<p>No pronunciation analysis completed.</p>';
                 return;
             }
-            
-            const comprehensiveFeedback = generateComprehensiveFeedback();
-            
-            comprehensiveFeedback.forEach(item => {
-                const feedbackItem = document.createElement('div');
-                feedbackItem.className = `feedback-item ${item.type === 'positive' ? 'feedback-positive' : 'feedback-improve'}`;
-                
-                const feedbackBilingual = document.createElement('div');
-                feedbackBilingual.className = 'feedback-bilingual';
-                feedbackBilingual.innerHTML = `
-                    <div class="feedback-english"><strong>${item.aspect}:</strong> ${item.message}</div>
-                    <div class="feedback-chinese"><strong>${item.aspect_zh}:</strong> ${item.message_zh}</div>
-                `;
-                
-                feedbackItem.appendChild(feedbackBilingual);
-                feedbackContent.appendChild(feedbackItem);
+
+            const finalFeedback = [{
+                aspect: 'Overall Performance',
+                aspect_zh: '整體表現',
+                message: avgScore >= 80 ? 'Great work!' : 'Keep practicing regularly.',
+                message_zh: avgScore >= 80 ? '做得很好！' : '請持續練習。',
+                type: avgScore >= 80 ? 'positive' : 'improve'
+            }];
+
+            finalFeedback.forEach(item => {
+                const el = document.createElement('div');
+                el.className = `feedback-item ${item.type === 'positive' ? 'feedback-positive' : 'feedback-improve'}`;
+                el.innerHTML = `<div class="feedback-english"><strong>${item.aspect}:</strong> ${item.message}</div>`;
+                feedbackContent.appendChild(el);
             });
         }
-        
-        // Generate comprehensive feedback
-        function generateComprehensiveFeedback() {
-            const comprehensiveFeedback = [];
-            
-            const successfulRecordings = feedbackData.filter(item => item && item.recordingSuccessful).length;
-            const totalRecordings = feedbackData.filter(item => item).length;
-            
-            if (successfulRecordings === 0) {
-                comprehensiveFeedback.push({
-                    aspect: 'Recording Setup',
-                    aspect_zh: '錄音設置',
-                    message: 'Please ensure your microphone is properly connected and permissions are granted for recording.',
-                    message_zh: '請確保您的麥克風正確連接並且已授予錄音權限。',
-                    type: 'improve'
-                });
-                return comprehensiveFeedback;
-            }
-            
-            // Calculate average scores
-            const avgScores = {
-                pronunciation: 0,
-                fluency: 0,
-                intonation: 0,
-                clarity: 0
-            };
-            
-            let scoreCount = 0;
-            feedbackData.forEach(item => {
-                if (item && item.scoreBreakdown) {
-                    item.scoreBreakdown.forEach(breakdown => {
-                        avgScores[breakdown.category.toLowerCase()] += breakdown.score;
-                    });
-                    scoreCount++;
-                }
-            });
-            
-            if (scoreCount > 0) {
-                Object.keys(avgScores).forEach(key => {
-                    avgScores[key] = Math.round(avgScores[key] / scoreCount);
-                });
-                
-                // Provide feedback based on performance
-                const totalAvg = Object.values(avgScores).reduce((a, b) => a + b, 0);
-                
-                if (totalAvg >= 90) {
-                    comprehensiveFeedback.push({
-                        aspect: 'Excellent Overall Performance',
-                        aspect_zh: '優秀的整體表現',
-                        message: 'Your pronunciation skills are outstanding across all categories. Maintain this high standard!',
-                        message_zh: '您在所有類別中的發音技能都很出色。保持這個高標準！',
-                        type: 'positive'
-                    });
-                } else if (totalAvg >= 80) {
-                    comprehensiveFeedback.push({
-                        aspect: 'Strong Pronunciation Skills',
-                        aspect_zh: '強大的發音技能',
-                        message: 'You demonstrate strong pronunciation abilities with consistent performance across different aspects.',
-                        message_zh: '您展現了強大的發音能力，在各個方面表現一致。',
-                        type: 'positive'
-                    });
-                }
-                
-                // Areas for improvement
-                const areas = Object.entries(avgScores).sort((a, b) => a[1] - b[1]);
-                const weakest = areas[0];
-                
-                comprehensiveFeedback.push({
-                    aspect: 'Focus Area',
-                    aspect_zh: '重點關注領域',
-                    message: `Continue working on ${weakest[0]} to further improve your overall pronunciation quality.`,
-                    message_zh: `繼續改進${getChineseCategory(weakest[0])}以進一步提高整體發音質量。`,
-                    type: 'improve'
-                });
-            }
-            
-            comprehensiveFeedback.push({
-                aspect: 'Continued Practice',
-                aspect_zh: '持續練習',
-                message: 'Regular practice with varied materials will help you maintain and enhance your pronunciation skills.',
-                message_zh: '定期練習多樣化材料將幫助您保持和提高發音技能。',
-                type: 'improve'
-            });
-            
-            return comprehensiveFeedback;
-        }
-        
-        // Print report
+
         function printReport() {
             window.print();
         }
-        
-        // Start new practice
+
         function startNewPractice() {
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-                currentStream = null;
-            }
-            
             studentInfo = {};
             sentences = [];
             currentSentenceIndex = 0;
             feedbackData = [];
-            hasRequestedPermission = false;
-            recordingFailed = false;
-            
-            document.getElementById('class').value = '';
-            document.getElementById('seat-no').value = '';
-            document.getElementById('name').value = '';
-            document.getElementById('sentences').value = '';
-            
+            currentTranscript = '';
+            isRecognizing = false;
+            recognition = null;
+
+            // Reset UI
+            ['class', 'seat-no', 'name', 'sentences'].forEach(id => document.getElementById(id).value = '');
             document.querySelectorAll('.sentence-source-btn').forEach(b => b.classList.remove('active'));
             document.querySelector('.sentence-source-btn[data-source="manual"]').classList.add('active');
             sentenceSource = 'manual';
             manualInput.classList.remove('hidden');
             levelInput.classList.add('hidden');
-            
             document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
             selectedLevel = null;
-            
+
             reportPage.classList.add('hidden');
             studentInfoPage.classList.remove('hidden');
         }
-        
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Shirley\'s AI Assistant in Speaking loaded');
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("Shirley's AI Assistant in Speaking (Real Speech Recognition) loaded.");
         });
     </script>
 </body>
