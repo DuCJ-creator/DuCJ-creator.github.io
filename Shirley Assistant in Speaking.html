@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shirley's AI Assistant in Speaking</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cbc;
+            --accent-color: #ff7e5f;
+            --light-color: #f5f7fa;
+            --dark-color: #2c3e50;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+        
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.2em;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.1);
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-accent {
+            background: linear-gradient(135deg, var(--accent-color), #ff9a7f);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #27ae60);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color), #e67e22);
+        }
+        
+        .btn-error {
+            background: linear-gradient(135deg, var(--error-color), #c0392b);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .practice-item {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid var(--primary-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+        
+        .practice-item:hover {
+            transform: translateY(-2px);
+        }
+        
+        .sentence-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .sentence-text {
+            flex-grow: 1;
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        .audio-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: white;
+            margin-left: 15px;
+            padding: 12px;
+            border-radius: 50%;
+            min-width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .audio-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .recording-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .recording-btn {
+            padding: 18px 35px;
+            border-radius: 50px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 250px;
+            font-size: 18px;
+        }
+        
+        .recording-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            background-color: var(--error-color);
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { 
+                transform: scale(1);
+                opacity: 1; 
+            }
+            50% { 
+                transform: scale(1.2);
+                opacity: 0.7; 
+            }
+            100% { 
+                transform: scale(1);
+                opacity: 1; 
+            }
+        }
+        
+        .feedback-section {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .feedback-item {
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .feedback-positive {
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.1), rgba(39, 174, 96, 0.1));
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .feedback-improve {
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.1), rgba(230, 126, 34, 0.1));
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background: #e9ecef;
+            border-radius: 10px;
+            margin: 25px 0;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+        
+        .report-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e9ecef;
+        }
+        
+        .report-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid var(--primary-color);
+        }
+        
+        .report-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .report-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .report-score {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-align: center;
+            margin: 30px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .report-feedback {
+            margin-top: 30px;
+        }
+        
+        .print-btn {
+            display: block;
+            margin: 30px auto 0;
+            max-width: 200px;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+        }
+        
+        .navigation .btn {
+            width: auto;
+            flex: 1;
+        }
+        
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .status-error {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(192, 57, 43, 0.1));
+            color: var(--error-color);
+            border: 2px solid var(--error-color);
+        }
+        
+        .status-info {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(41, 128, 185, 0.1));
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        
+        .permission-prompt {
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.1), rgba(230, 126, 34, 0.1));
+            border: 2px solid var(--warning-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        /* 手機適配 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 20px;
+                border-radius: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .practice-item {
+                padding: 20px;
+            }
+            
+            .sentence-container {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 15px;
+            }
+            
+            .audio-btn {
+                margin-left: 0;
+                margin-top: 15px;
+                align-self: center;
+            }
+            
+            .report-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .navigation {
+                flex-direction: column;
+            }
+            
+            .btn {
+                padding: 18px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .sentence-text {
+                font-size: 16px;
+            }
+            
+            .recording-btn {
+                padding: 20px;
+                font-size: 16px;
+            }
+        }
+
+        /* 打印樣式 */
+        @media print {
+            body {
+                background: white !important;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+            }
+            
+            .btn {
+                display: none !important;
+            }
+            
+            .practice-item, .report-section {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Student Information Input Page -->
+        <div id="student-info-page">
+            <h1>Shirley's AI Assistant in Speaking</h1>
+            <div class="welcome-message">
+                Improve your English pronunciation with instant AI feedback! Please fill in the information below to start practicing.
+            </div>
+            
+            <div class="form-group">
+                <label for="class">Class</label>
+                <input type="text" id="class" placeholder="">
+            </div>
+            
+            <div class="form-group">
+                <label for="seat-no">Seat Number</label>
+                <input type="number" id="seat-no" min="1" max="99" placeholder="">
+            </div>
+            
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" placeholder="">
+            </div>
+            
+            <div class="form-group">
+                <label for="sentences">Practice Sentences (one per line, maximum 10)</label>
+                <textarea id="sentences" placeholder="Enter or paste sentences to practice, one per line"></textarea>
+            </div>
+            
+            <button id="start-practice" class="btn">Start Practice</button>
+        </div>
+        
+        <!-- Practice Page -->
+        <div id="practice-page" class="hidden">
+            <h1>English Pronunciation Practice</h1>
+            
+            <div class="progress-bar">
+                <div id="progress" class="progress"></div>
+            </div>
+            
+            <div id="practice-container">
+                <!-- Practice items will be dynamically generated here -->
+            </div>
+            
+            <div class="navigation">
+                <button id="prev-sentence" class="btn">Previous</button>
+                <button id="next-sentence" class="btn">Next</button>
+            </div>
+            
+            <button id="finish-practice" class="btn btn-accent">Finish Practice</button>
+        </div>
+        
+        <!-- Report Page -->
+        <div id="report-page" class="hidden">
+            <div class="report-section">
+                <div class="report-header">
+                    <h1>English Pronunciation Practice Report</h1>
+                </div>
+                
+                <div class="report-details">
+                    <div class="report-item">
+                        <strong>Class:</strong> <span id="report-class"></span>
+                    </div>
+                    <div class="report-item">
+                        <strong>Seat Number:</strong> <span id="report-seat-no"></span>
+                    </div>
+                    <div class="report-item">
+                        <strong>Name:</strong> <span id="report-name"></span>
+                    </div>
+                    <div class="report-item">
+                        <strong>Practice Date:</strong> <span id="report-date"></span>
+                    </div>
+                </div>
+                
+                <div class="report-score">
+                    Overall Pronunciation Score: <span id="overall-score">85</span>/100
+                </div>
+                
+                <div class="report-feedback">
+                    <h3>Pronunciation Feedback Summary</h3>
+                    <div id="report-feedback-content">
+                        <!-- Feedback content will be dynamically generated here -->
+                    </div>
+                </div>
+                
+                <button id="print-report" class="btn print-btn">Print Report</button>
+                <button id="new-practice" class="btn btn-accent print-btn">New Practice</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let studentInfo = {};
+        let sentences = [];
+        let currentSentenceIndex = 0;
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        let feedbackData = [];
+        let hasRequestedPermission = false;
+        
+        // DOM elements
+        const studentInfoPage = document.getElementById('student-info-page');
+        const practicePage = document.getElementById('practice-page');
+        const reportPage = document.getElementById('report-page');
+        const startPracticeBtn = document.getElementById('start-practice');
+        const finishPracticeBtn = document.getElementById('finish-practice');
+        const prevSentenceBtn = document.getElementById('prev-sentence');
+        const nextSentenceBtn = document.getElementById('next-sentence');
+        const printReportBtn = document.getElementById('print-report');
+        const newPracticeBtn = document.getElementById('new-practice');
+        const practiceContainer = document.getElementById('practice-container');
+        const progressBar = document.getElementById('progress');
+        
+        // Event listeners
+        startPracticeBtn.addEventListener('click', startPractice);
+        finishPracticeBtn.addEventListener('click', finishPractice);
+        prevSentenceBtn.addEventListener('click', showPreviousSentence);
+        nextSentenceBtn.addEventListener('click', showNextSentence);
+        printReportBtn.addEventListener('click', printReport);
+        newPracticeBtn.addEventListener('click', startNewPractice);
+        
+        // Initialize speech synthesis
+        let speechSynthesis = window.speechSynthesis;
+        
+        // Start practice
+        function startPractice() {
+            // Get student information
+            const className = document.getElementById('class').value;
+            const seatNo = document.getElementById('seat-no').value;
+            const name = document.getElementById('name').value;
+            const sentencesText = document.getElementById('sentences').value;
+            
+            // Validate input
+            if (!className || !seatNo || !name || !sentencesText) {
+                showStatusMessage('Please fill in all fields', 'error');
+                return;
+            }
+            
+            // Process sentences
+            const sentenceArray = sentencesText.split('\n')
+                .map(s => s.trim())
+                .filter(s => s.length > 0)
+                .slice(0, 10); // Limit to 10 sentences
+            
+            if (sentenceArray.length === 0) {
+                showStatusMessage('Please enter at least one sentence', 'error');
+                return;
+            }
+            
+            // Save information
+            studentInfo = { className, seatNo, name };
+            sentences = sentenceArray;
+            currentSentenceIndex = 0;
+            feedbackData = [];
+            
+            // Switch to practice page
+            studentInfoPage.classList.add('hidden');
+            practicePage.classList.remove('hidden');
+            
+            // Show first sentence
+            showCurrentSentence();
+            updateProgress();
+            
+            // Pre-request microphone permission
+            requestMicrophonePermission();
+        }
+        
+        // Request microphone permission
+        async function requestMicrophonePermission() {
+            if (hasRequestedPermission) return;
+            
+            try {
+                // Check browser support
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    showStatusMessage('Your browser does not support recording', 'error');
+                    return;
+                }
+                
+                showStatusMessage('Requesting microphone permission...', 'info');
+                
+                // Try to get microphone permission
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 44100
+                    } 
+                });
+                
+                // Immediately stop the stream, we're just testing permission
+                stream.getTracks().forEach(track => track.stop());
+                
+                hasRequestedPermission = true;
+                showStatusMessage('✅ Microphone permission granted, you can start recording', 'info');
+                
+            } catch (error) {
+                console.error('Microphone permission error:', error);
+                showPermissionPrompt();
+            }
+        }
+        
+        // Show permission prompt
+        function showPermissionPrompt() {
+            const permissionPrompt = document.createElement('div');
+            permissionPrompt.className = 'permission-prompt';
+            permissionPrompt.innerHTML = `
+                <h3>🎤 Microphone Permission Required</h3>
+                <p>To use the recording feature, please allow this website to access your microphone.</p>
+                <p><small>Tip: The browser usually shows a permission request popup at the top of the page or in the address bar</small></p>
+                <button id="request-permission-btn" class="btn btn-accent" style="margin-top: 15px;">🎤 Allow Microphone Access</button>
+            `;
+            
+            practiceContainer.insertBefore(permissionPrompt, practiceContainer.firstChild);
+            
+            // Set up permission request button event
+            document.getElementById('request-permission-btn').addEventListener('click', requestPermissionAgain);
+        }
+        
+        // Request permission again
+        async function requestPermissionAgain() {
+            try {
+                showStatusMessage('Requesting microphone permission...', 'info');
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 44100
+                    } 
+                });
+                
+                // Immediately stop the stream, we're just testing permission
+                stream.getTracks().forEach(track => track.stop());
+                
+                hasRequestedPermission = true;
+                
+                // Remove permission prompt
+                const permissionPrompt = document.querySelector('.permission-prompt');
+                if (permissionPrompt) {
+                    permissionPrompt.remove();
+                }
+                
+                showStatusMessage('✅ Microphone permission granted, you can start recording', 'info');
+                
+            } catch (error) {
+                console.error('Microphone permission error:', error);
+                if (error.name === 'NotAllowedError') {
+                    showStatusMessage('❌ Microphone permission denied, please manually allow permission', 'error');
+                } else {
+                    showStatusMessage('❌ Unable to get microphone permission: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        // Show current sentence
+        function showCurrentSentence() {
+            practiceContainer.innerHTML = '';
+            
+            const sentence = sentences[currentSentenceIndex];
+            
+            const practiceItem = document.createElement('div');
+            practiceItem.className = 'practice-item';
+            
+            practiceItem.innerHTML = `
+                <div class="sentence-container">
+                    <div class="sentence-text">${sentence}</div>
+                    <button class="audio-btn" data-sentence="${sentence}" title="Listen to original">🔊</button>
+                </div>
+                
+                <div class="recording-controls">
+                    <button id="record-btn" class="btn recording-btn btn-success">🎤 Start Recording</button>
+                    <div id="recording-indicator" class="hidden">
+                        <span class="recording-indicator"></span> 🔴 Recording...
+                    </div>
+                </div>
+                
+                <div id="playback-section" class="hidden">
+                    <p>🎧 Your recording:</p>
+                    <audio id="playback-audio" controls style="width: 100%; margin: 15px 0;"></audio>
+                    <button id="analyze-btn" class="btn btn-success" style="margin-top: 15px;">🤖 Analyze Pronunciation</button>
+                </div>
+                
+                <div id="feedback-section" class="feedback-section hidden">
+                    <h3>💡 Pronunciation Feedback</h3>
+                    <div id="feedback-content"></div>
+                </div>
+            `;
+            
+            practiceContainer.appendChild(practiceItem);
+            
+            // Set up audio playback event
+            const audioBtn = practiceItem.querySelector('.audio-btn');
+            audioBtn.addEventListener('click', function() {
+                playSentence(this.getAttribute('data-sentence'));
+            });
+            
+            // Set up recording button event
+            const recordBtn = document.getElementById('record-btn');
+            recordBtn.addEventListener('click', toggleRecording);
+            
+            // Set up analysis button event
+            const analyzeBtn = document.getElementById('analyze-btn');
+            analyzeBtn.addEventListener('click', analyzePronunciation);
+        }
+        
+        // Play sentence audio
+        function playSentence(sentence) {
+            // Stop any currently playing audio
+            speechSynthesis.cancel();
+            
+            // Use Web Speech API to synthesize speech
+            const utterance = new SpeechSynthesisUtterance(sentence);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            
+            // Ensure audio is ready
+            utterance.onstart = function() {
+                console.log('Started playing audio');
+            };
+            
+            utterance.onerror = function(event) {
+                console.error('Audio playback error:', event);
+                showStatusMessage('❌ Audio playback failed, please try again', 'error');
+            };
+            
+            speechSynthesis.speak(utterance);
+        }
+        
+        // Toggle recording state
+        function toggleRecording() {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+        
+        // Start recording
+        async function startRecording() {
+            try {
+                if (!hasRequestedPermission) {
+                    await requestMicrophonePermission();
+                    return;
+                }
+                
+                showStatusMessage('🎤 Preparing to record...', 'info');
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 44100,
+                        channelCount: 1
+                    } 
+                });
+                
+                // Create MediaRecorder
+                const options = { 
+                    mimeType: 'audio/webm;codecs=opus',
+                    audioBitsPerSecond: 128000
+                };
+                
+                try {
+                    mediaRecorder = new MediaRecorder(stream, options);
+                } catch (e) {
+                    console.warn('Using default MIME type');
+                    mediaRecorder = new MediaRecorder(stream);
+                }
+                
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const playbackAudio = document.getElementById('playback-audio');
+                    playbackAudio.src = audioUrl;
+                    
+                    // Show playback section
+                    document.getElementById('playback-section').classList.remove('hidden');
+                    
+                    // Stop all tracks
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                
+                mediaRecorder.onerror = (event) => {
+                    console.error('MediaRecorder error:', event);
+                    showStatusMessage('❌ An error occurred during recording', 'error');
+                };
+                
+                mediaRecorder.start(100); // Collect data every 100ms
+                isRecording = true;
+                
+                // Update UI
+                document.getElementById('record-btn').textContent = '🛑 Stop Recording';
+                document.getElementById('record-btn').classList.remove('btn-success');
+                document.getElementById('record-btn').classList.add('btn-error');
+                document.getElementById('recording-indicator').classList.remove('hidden');
+                
+                showStatusMessage('🎤 Recording started, please start speaking...', 'info');
+                
+            } catch (error) {
+                console.error('Recording error:', error);
+                if (error.name === 'NotAllowedError') {
+                    showStatusMessage('❌ Microphone permission denied, please click "Allow Microphone Access"', 'error');
+                    showPermissionPrompt();
+                } else if (error.name === 'NotFoundError') {
+                    showStatusMessage('❌ No microphone device found', 'error');
+                } else if (error.name === 'NotSupportedError') {
+                    showStatusMessage('❌ Browser does not support recording', 'error');
+                } else {
+                    showStatusMessage('❌ Recording failed: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        // Stop recording
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                
+                // Update UI
+                document.getElementById('record-btn').textContent = '🎤 Record Again';
+                document.getElementById('record-btn').classList.remove('btn-error');
+                document.getElementById('record-btn').classList.add('btn-success');
+                document.getElementById('recording-indicator').classList.add('hidden');
+                
+                showStatusMessage('✅ Recording completed, you can play it back or analyze it', 'info');
+            }
+        }
+        
+        // Show status message
+        function showStatusMessage(message, type) {
+            // Remove existing status message
+            const existingMessage = document.querySelector('.status-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            // Create new message
+            const statusMessage = document.createElement('div');
+            statusMessage.className = `status-message status-${type}`;
+            statusMessage.textContent = message;
+            
+            // Insert into practice container
+            practiceContainer.insertBefore(statusMessage, practiceContainer.firstChild);
+            
+            // Automatically remove after 5 seconds (error messages stay longer)
+            const timeout = type === 'error' ? 8000 : 5000;
+            setTimeout(() => {
+                if (statusMessage.parentNode) {
+                    statusMessage.remove();
+                }
+            }, timeout);
+        }
+        
+        // Analyze pronunciation
+        function analyzePronunciation() {
+            const currentSentence = sentences[currentSentenceIndex];
+            
+            // Check if there's a recording
+            const playbackAudio = document.getElementById('playback-audio');
+            if (!playbackAudio.src) {
+                showStatusMessage('❌ Please record your pronunciation first', 'error');
+                return;
+            }
+            
+            // Simulate AI analysis process
+            document.getElementById('analyze-btn').textContent = '⏳ Analyzing...';
+            document.getElementById('analyze-btn').disabled = true;
+            
+            showStatusMessage('🤖 AI is analyzing your pronunciation...', 'info');
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                // Generate mock feedback
+                const feedback = generateMockFeedback(currentSentence);
+                
+                // Display feedback
+                const feedbackContent = document.getElementById('feedback-content');
+                feedbackContent.innerHTML = '';
+                
+                feedback.forEach(item => {
+                    const feedbackItem = document.createElement('div');
+                    feedbackItem.className = `feedback-item ${item.type === 'positive' ? 'feedback-positive' : 'feedback-improve'}`;
+                    const icon = item.type === 'positive' ? '✅' : '💡';
+                    feedbackItem.innerHTML = `<strong>${icon} ${item.aspect}:</strong> ${item.message}`;
+                    feedbackContent.appendChild(feedbackItem);
+                });
+                
+                document.getElementById('feedback-section').classList.remove('hidden');
+                document.getElementById('analyze-btn').textContent = '🤖 Analyze Pronunciation';
+                document.getElementById('analyze-btn').disabled = false;
+                
+                // Save feedback data
+                feedbackData[currentSentenceIndex] = {
+                    sentence: currentSentence,
+                    feedback: feedback,
+                    score: Math.floor(Math.random() * 20) + 80 // Mock score 80-100
+                };
+                
+                showStatusMessage('✅ Pronunciation analysis completed!', 'info');
+                
+            }, 2000);
+        }
+        
+        // Generate mock feedback
+        function generateMockFeedback(sentence) {
+            const feedback = [];
+            const words = sentence.toLowerCase().split(' ');
+            
+            // Randomly generate positive feedback
+            const positiveAspects = ['Intonation', 'Rhythm', 'Clarity', 'Fluency', 'Accuracy'];
+            const positiveMessages = [
+                'Your pronunciation is very standard, close to native speaker level',
+                'Natural intonation, fluent expression',
+                'Clear word pronunciation, easy to understand',
+                'Excellent rhythm control',
+                'Correct stress placement, sounds very natural'
+            ];
+            
+            // Randomly generate improvement suggestions
+            const improveAspects = ['Specific phonemes', 'Stress placement', 'Linking techniques', 'Pace control', 'Intonation variation'];
+            const improveMessages = [
+                'Pay attention to specific phoneme pronunciation, listen to examples more',
+                'Adjust stress placement, pay attention to word stress patterns',
+                'Practice linking techniques to make expression more natural',
+                'Adjust your speaking pace to ensure each word is clear',
+                'Add more intonation variation to make expression more lively'
+            ];
+            
+            // Add 1-2 positive feedback items
+            const positiveCount = Math.floor(Math.random() * 2) + 1;
+            for (let i = 0; i < positiveCount; i++) {
+                const aspectIndex = Math.floor(Math.random() * positiveAspects.length);
+                const messageIndex = Math.floor(Math.random() * positiveMessages.length);
+                
+                feedback.push({
+                    aspect: positiveAspects[aspectIndex],
+                    message: positiveMessages[messageIndex],
+                    type: 'positive'
+                });
+            }
+            
+            // Add 1-2 improvement suggestions
+            const improveCount = Math.floor(Math.random() * 2) + 1;
+            for (let i = 0; i < improveCount; i++) {
+                const aspectIndex = Math.floor(Math.random() * improveAspects.length);
+                const messageIndex = Math.floor(Math.random() * improveMessages.length);
+                
+                feedback.push({
+                    aspect: improveAspects[aspectIndex],
+                    message: improveMessages[messageIndex],
+                    type: 'improve'
+                });
+            }
+            
+            return feedback;
+        }
+        
+        // Show previous sentence
+        function showPreviousSentence() {
+            if (currentSentenceIndex > 0) {
+                currentSentenceIndex--;
+                showCurrentSentence();
+                updateProgress();
+            }
+        }
+        
+        // Show next sentence
+        function showNextSentence() {
+            if (currentSentenceIndex < sentences.length - 1) {
+                currentSentenceIndex++;
+                showCurrentSentence();
+                updateProgress();
+            }
+        }
+        
+        // Update progress bar
+        function updateProgress() {
+            const progress = ((currentSentenceIndex + 1) / sentences.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+        
+        // Finish practice
+        function finishPractice() {
+            // Check if all sentences have feedback
+            const completedSentences = feedbackData.filter(item => item !== undefined).length;
+            
+            if (completedSentences < sentences.length) {
+                if (!confirm(`You have completed ${completedSentences}/${sentences.length} sentences. Are you sure you want to finish?`)) {
+                    return;
+                }
+            }
+            
+            // Switch to report page
+            practicePage.classList.add('hidden');
+            reportPage.classList.remove('hidden');
+            
+            // Generate report
+            generateReport();
+        }
+        
+        // Generate report
+        function generateReport() {
+            // Fill in student information
+            document.getElementById('report-class').textContent = studentInfo.className;
+            document.getElementById('report-seat-no').textContent = studentInfo.seatNo;
+            document.getElementById('report-name').textContent = studentInfo.name;
+            document.getElementById('report-date').textContent = new Date().toLocaleDateString('en-US');
+            
+            // Calculate average score
+            const scores = feedbackData.filter(item => item).map(item => item.score);
+            const averageScore = scores.length > 0 ? 
+                Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+            
+            document.getElementById('overall-score').textContent = averageScore;
+            
+            // Generate feedback summary
+            const feedbackContent = document.getElementById('report-feedback-content');
+            feedbackContent.innerHTML = '';
+            
+            if (feedbackData.length === 0) {
+                feedbackContent.innerHTML = '<p>No pronunciation analysis completed for any sentences.</p>';
+                return;
+            }
+            
+            // Summarize positive feedback
+            const positiveFeedback = [];
+            feedbackData.forEach(item => {
+                if (item && item.feedback) {
+                    item.feedback.forEach(fb => {
+                        if (fb.type === 'positive' && !positiveFeedback.includes(fb.aspect)) {
+                            positiveFeedback.push(fb.aspect);
+                        }
+                    });
+                }
+            });
+            
+            if (positiveFeedback.length > 0) {
+                const positiveItem = document.createElement('div');
+                positiveItem.className = 'feedback-item feedback-positive';
+                positiveItem.innerHTML = `<strong>✅ Strengths:</strong> Good performance in ${positiveFeedback.join(', ')}`;
+                feedbackContent.appendChild(positiveItem);
+            }
+            
+            // Summarize improvement suggestions
+            const improveFeedback = [];
+            feedbackData.forEach(item => {
+                if (item && item.feedback) {
+                    item.feedback.forEach(fb => {
+                        if (fb.type === 'improve' && !improveFeedback.includes(fb.aspect)) {
+                            improveFeedback.push(fb.aspect);
+                        }
+                    });
+                }
+            });
+            
+            if (improveFeedback.length > 0) {
+                const improveItem = document.createElement('div');
+                improveItem.className = 'feedback-item feedback-improve';
+                improveItem.innerHTML = `<strong>💡 Areas for Improvement:</strong> Suggested practice for ${improveFeedback.join(', ')}`;
+                feedbackContent.appendChild(improveItem);
+            }
+            
+            // Add detailed feedback
+            const detailsItem = document.createElement('div');
+            detailsItem.style.marginTop = '20px';
+            detailsItem.style.padding = '15px';
+            detailsItem.style.background = '#f8f9fa';
+            detailsItem.style.borderRadius = '8px';
+            detailsItem.innerHTML = `<p>📊 Completed pronunciation analysis for ${feedbackData.filter(item => item).length}/${sentences.length} sentences.</p>`;
+            feedbackContent.appendChild(detailsItem);
+        }
+        
+        // Print report
+        function printReport() {
+            window.print();
+        }
+        
+        // Start new practice
+        function startNewPractice() {
+            // Reset all data
+            studentInfo = {};
+            sentences = [];
+            currentSentenceIndex = 0;
+            feedbackData = [];
+            hasRequestedPermission = false;
+            
+            // Clear form
+            document.getElementById('class').value = '';
+            document.getElementById('seat-no').value = '';
+            document.getElementById('name').value = '';
+            document.getElementById('sentences').value = '';
+            
+            // Switch to student info page
+            reportPage.classList.add('hidden');
+            studentInfoPage.classList.remove('hidden');
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Shirley\'s AI Assistant in Speaking loaded');
+            console.log('Deploy this file to GitHub Pages for the best experience');
+        });
+    </script>
+</body>
+</html>
