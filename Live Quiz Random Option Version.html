@@ -725,89 +725,6 @@ Participant2"></textarea>
             questionStats: {}
         };
 
-        // ====== Audience View（新視窗）======
-        let audienceWin = null;
-
-        function openAudienceWindow() {
-            const w = screen.availWidth;
-            const h = screen.availHeight;
-            const left = 0, top = 0;
-            audienceWin = window.open('', 'AudienceView',
-                \`width=\${w},height=\${h},left=\${left},top=\${top},resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,status=no\`);
-
-            if (!audienceWin) {
-                alert('瀏覽器阻擋了彈出視窗，請允許彈出視窗再按一次「開始遊戲」。');
-                return;
-            }
-
-            const faLink = document.querySelector('link[href*="font-awesome"]')?.outerHTML || '';
-            const inlineStyle = Array.from(document.querySelectorAll('head style')).map(s => s.outerHTML).join('\n');
-
-            const shell = \`<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Audience View - Shirley's Live Quiz Show</title>
-\${faLink}
-\${inlineStyle}
-<style>
-body { background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%); color: white; margin: 0; }
-.container { max-width: 1600px; margin: 0 auto; padding: 20px; }
-.host-control-area { display: none !important; }
-.game-area { min-height: 85vh; }
-.fullscreen-tip {
-  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
-  background: rgba(0,0,0,.35); padding: 8px 12px; border-radius: 8px; font-size: 12px;
-}
-</style>
-</head>
-<body class="game-started">
-  <div class="container">
-    <header>
-      <h1>Shirley's Live Quiz Show — Audience View</h1>
-      <p class="subtitle">現場投影 / 螢幕顯示專用</p>
-    </header>
-    <div id="audienceGameArea"></div>
-  </div>
-  <div class="fullscreen-tip">若未自動全螢幕，請按 F11 或點兩下畫面。</div>
-  <script>
-    (function tryFS(){
-      const el = document.documentElement;
-      if (el.requestFullscreen) el.requestFullscreen().catch(()=>{});
-    })();
-    document.addEventListener('dblclick', () => {
-      const el = document.documentElement;
-      if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen().catch(()=>{});
-    });
-  </script>
-</body>
-</html>\`;
-            audienceWin.document.open();
-            audienceWin.document.write(shell);
-            audienceWin.document.close();
-
-            // 初次同步
-            syncAudience();
-        }
-
-        function syncAudience() {
-            if (!audienceWin || audienceWin.closed) return;
-            const mount = audienceWin.document.getElementById('audienceGameArea');
-            if (!mount) return;
-
-            const source = document.querySelector('.game-area');
-            if (!source) return;
-
-            mount.innerHTML = source.outerHTML;
-
-            // 觀眾端禁止互動
-            Array.from(mount.querySelectorAll('button,.option')).forEach(el => {
-                el.style.pointerEvents = 'none';
-                el.style.cursor = 'default';
-            });
-        }
-
         // DOM elements
         const gameThemeInput = document.getElementById('gameTheme');
         const questionsInput = document.getElementById('questionsInput');
@@ -829,24 +746,33 @@ body { background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%); color: whi
         const currentPlayerEl = document.getElementById('currentPlayer');
         const podiumEl = document.getElementById('podium');
         const playersListEl = document.getElementById('playersList');
+        const hostControlArea = document.querySelector('.host-control-area');
+        const gameLayout = document.querySelector('.game-layout');
 
         // Audio context for generating sounds
         let audioContext;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            try { audioContext = new (window.AudioContext || window.webkitAudioContext)(); } 
-            catch (e) { console.log('Web Audio API is not supported in this browser'); }
+            // Initialize audio context
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Web Audio API is not supported in this browser');
+            }
             
+            // Event listeners
             startGameBtn.addEventListener('click', startGame);
             nextQuestionBtn.addEventListener('click', nextQuestion);
             endGameBtn.addEventListener('click', endGame);
             showReportBtn.addEventListener('click', showReport);
             soundControl.addEventListener('click', toggleSound);
             
+            // Add a user interaction to unlock audio
             document.body.addEventListener('click', unlockAudio, { once: true });
         });
         
+        // Unlock audio context on user interaction
         function unlockAudio() {
             if (audioContext && audioContext.state === 'suspended') {
                 audioContext.resume();
@@ -855,101 +781,175 @@ body { background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%); color: whi
 
         // Start game
         function startGame() {
+            // Get game theme
             gameState.gameTheme = gameThemeInput.value.trim();
             if (!gameState.gameTheme) {
                 alert('Please enter a game theme!');
                 return;
             }
             
+            // Load questions
             if (!loadQuestions()) {
                 alert('Please enter questions and answers correctly!');
                 return;
             }
             
+            // Load participants
             if (!loadPlayers()) {
                 alert('Please enter at least one participant!');
                 return;
             }
             
+            // Set game mode and time
             gameState.gameMode = gameModeSelect.value;
             gameState.answerTime = parseInt(answerTimeInput.value);
             
+            // Check team mode minimum players
             if (gameState.gameMode === 'team' && gameState.players.length < 3) {
                 alert('Team mode requires at least 3 players!');
                 return;
             }
             
+            // Assign team names for team mode
             if (gameState.gameMode === 'team') {
                 assignTeamNames();
             }
             
+            // Initialize game state
             gameState.currentQuestionIndex = 0;
             gameState.currentPlayerIndex = 0;
             gameState.isGameActive = true;
             
+            // Randomize questions and players
             shuffleQuestions();
             shufflePlayers();
             
+            // Show game theme
             gameThemeDisplay.textContent = gameState.gameTheme;
+            
+            // Update participant list
             updatePlayersList();
+            
+            // Show first question
             displayQuestion();
+            
+            // Show game controls
             gameControls.style.display = 'flex';
+            
+            // Hide start button
             startGameBtn.style.display = 'none';
+            
+            // Add game-started class to body for layout changes
             document.body.classList.add('game-started');
+            
+            // Play background music
             playBackgroundMusic();
-
-            // 打開觀眾視窗 & 同步
-            openAudienceWindow();
-            syncAudience();
-
+            
             alert('Game started!');
         }
 
         // Load questions
         function loadQuestions() {
             const input = questionsInput.value.trim();
-            if (!input) return false;
+            if (!input) {
+                return false;
+            }
+            
             const lines = input.split('\n');
             gameState.questions = [];
+            
+            // Collect all correct answers for generating distractors
             const allAnswers = [];
+            
             for (let line of lines) {
                 line = line.trim();
                 if (!line) continue;
+                
+                // Use tab or spaces to separate question and answer
                 const parts = line.split(/\t| {2,}/);
-                if (parts.length < 2) { console.warn('Question format error, skip: ' + line); continue; }
-                const question = { text: parts[0].trim(), correctAnswer: parts[1].trim() };
+                if (parts.length < 2) {
+                    console.warn('Question format error, skip: ' + line);
+                    continue;
+                }
+                
+                const question = {
+                    text: parts[0].trim(),
+                    correctAnswer: parts[1].trim()
+                };
+                
                 gameState.questions.push(question);
                 allAnswers.push(question.correctAnswer);
+                
+                // Initialize question stats
                 if (!gameState.questionStats[question.text]) {
-                    gameState.questionStats[question.text] = { correct: 0, incorrect: 0, correctAnswer: question.correctAnswer };
+                    gameState.questionStats[question.text] = {
+                        correct: 0,
+                        incorrect: 0,
+                        correctAnswer: question.correctAnswer
+                    };
                 }
             }
-            if (gameState.questions.length === 0) return false;
-            gameState.questions.forEach(q => { q.options = generateOptions(q.correctAnswer, allAnswers); });
+            
+            if (gameState.questions.length === 0) {
+                return false;
+            }
+            
+            // Generate options for each question
+            gameState.questions.forEach(question => {
+                question.options = generateOptions(question.correctAnswer, allAnswers);
+            });
+            
             return true;
         }
 
+        // Generate options (include correct answer and three random distractors)
         function generateOptions(correctAnswer, allAnswers) {
-            const answerPool = allAnswers.filter(a => a !== correctAnswer);
+            // Create answer pool without correct answer
+            const answerPool = allAnswers.filter(answer => answer !== correctAnswer);
+            
+            // Randomly select three distractors
             const shuffledPool = [...answerPool].sort(() => Math.random() - 0.5);
             const distractors = shuffledPool.slice(0, 3);
+            
+            // Combine correct answer and distractors
             const options = [correctAnswer, ...distractors];
+            
+            // Randomly sort options
             return options.sort(() => Math.random() - 0.5);
         }
 
         // Load participants
         function loadPlayers() {
             const input = playersInput.value.trim();
-            if (!input) return false;
+            if (!input) {
+                return false;
+            }
+            
             const lines = input.split('\n');
             gameState.players = [];
+            
             for (let line of lines) {
                 line = line.trim();
                 if (!line) continue;
-                const player = { id: Date.now().toString() + Math.random(), name: line, score: 0, answers: 0, correctAnswers: 0, team: null };
+                
+                const player = {
+                    id: Date.now().toString() + Math.random(),
+                    name: line,
+                    score: 0,
+                    answers: 0,
+                    correctAnswers: 0,
+                    team: null
+                };
+                
                 gameState.players.push(player);
-                gameState.playerStats[player.name] = { answers: 0, correctAnswers: 0 };
+                
+                // Initialize player stats
+                gameState.playerStats[player.name] = {
+                    answers: 0,
+                    correctAnswers: 0
+                };
             }
+            
             return gameState.players.length > 0;
         }
 
@@ -957,9 +957,13 @@ body { background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%); color: whi
         function assignTeamNames() {
             gameState.usedTeamNames = [];
             const shuffledTeamNames = [...gameState.teamNames].sort(() => Math.random() - 0.5);
+            
+            // Calculate players per team (minimum 3 per team)
             const minPlayersPerTeam = 3;
             const teamCount = Math.ceil(gameState.players.length / minPlayersPerTeam);
             const playersPerTeam = Math.ceil(gameState.players.length / teamCount);
+            
+            // Assign team names to each player
             gameState.players.forEach((player, index) => {
                 const teamIndex = Math.floor(index / playersPerTeam);
                 if (teamIndex < shuffledTeamNames.length) {
@@ -971,6 +975,7 @@ body { background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%); color: whi
             });
         }
 
+        // Shuffle questions for random order
         function shuffleQuestions() {
             for (let i = gameState.questions.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -978,6 +983,7 @@ body { background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%); color: whi
             }
         }
 
+        // Shuffle players for random order
         function shufflePlayers() {
             for (let i = gameState.players.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -991,44 +997,67 @@ body { background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%); color: whi
                 endGame();
                 return;
             }
+            
             const question = gameState.questions[gameState.currentQuestionIndex];
             currentQuestionEl.textContent = question.text;
-            questionNumber.textContent = \`問題 \${gameState.currentQuestionIndex + 1} / \${gameState.questions.length} Question \${gameState.currentQuestionIndex + 1} of \${gameState.questions.length}\`;
+            
+            // Update question number
+            questionNumber.textContent = `問題 ${gameState.currentQuestionIndex + 1} / ${gameState.questions.length} Question ${gameState.currentQuestionIndex + 1} of ${gameState.questions.length}`;
+            
+            // Clear correct answer display
             correctAnswerEl.textContent = '';
+            
+            // Generate options with letters A, B, C, D
             optionsContainer.innerHTML = '';
             const letters = ['A', 'B', 'C', 'D'];
             question.options.forEach((option, index) => {
                 const optionEl = document.createElement('div');
                 optionEl.className = 'option';
-                optionEl.innerHTML = \`
-                    <div class="option-letter">\${letters[index]}</div>
-                    <div class="option-text">\${option}</div>
-                \`;
+                optionEl.innerHTML = `
+                    <div class="option-letter">${letters[index]}</div>
+                    <div class="option-text">${option}</div>
+                `;
                 optionEl.addEventListener('click', () => checkAnswer(option, question.correctAnswer, optionEl));
                 optionsContainer.appendChild(optionEl);
             });
+            
+            // Select current answerer (random order)
             selectCurrentPlayer();
+            
+            // Start timer
             startTimer();
+            
+            // Play question sound
             playQuestionSound();
-
-            // 同步觀眾視窗
-            syncAudience();
         }
 
+        // Select current answerer (random order)
         function selectCurrentPlayer() {
+            // Ensure each participant has a chance to answer
+            // In this random version, we simply cycle through the shuffled player list
             const player = gameState.players[gameState.currentPlayerIndex % gameState.players.length];
-            const teamDisplay = player.team ? \` (\${player.team.en} / \${player.team.zh})\` : '';
-            currentPlayerEl.textContent = \`當前玩家: \${player.name}\${teamDisplay}\`;
+            const teamDisplay = player.team ? ` (${player.team.en} / ${player.team.zh})` : '';
+            currentPlayerEl.textContent = `當前玩家: ${player.name}${teamDisplay}`;
+            
+            // Update player list highlight
             updatePlayersList();
         }
 
+        // Start timer
         function startTimer() {
             let timeLeft = gameState.answerTime;
             timerEl.textContent = timeLeft;
-            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+            
+            // Clear previous timer
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+            
             gameState.timerInterval = setInterval(() => {
                 timeLeft--;
                 timerEl.textContent = timeLeft;
+                
+                // Time's up
                 if (timeLeft <= 0) {
                     clearInterval(gameState.timerInterval);
                     timeUp();
@@ -1036,26 +1065,55 @@ body { background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%); color: whi
             }, 1000);
         }
 
+        // Check answer
         function checkAnswer(selected, correct, optionEl) {
+            // Clear timer
             clearInterval(gameState.timerInterval);
+            
+            // Play answer sound
             playAnswerSound();
+            
             const isCorrect = selected === correct;
             const currentPlayer = gameState.players[gameState.currentPlayerIndex % gameState.players.length];
+            
+            // Update player stats
             currentPlayer.answers++;
             gameState.playerStats[currentPlayer.name].answers++;
+            
+            // Update question stats
             gameState.questionStats[gameState.questions[gameState.currentQuestionIndex].text][isCorrect ? 'correct' : 'incorrect']++;
-            correctAnswerEl.textContent = \`正確答案: \${correct} Correct Answer: \${correct}\`;
+            
+            // Show correct answer
+            correctAnswerEl.textContent = `正確答案: ${correct} Correct Answer: ${correct}`;
+            
+            // Handle scoring logic
             if (isCorrect) {
+                // Correct answer: +10 points
                 currentPlayer.score += 10;
                 currentPlayer.correctAnswers++;
                 gameState.playerStats[currentPlayer.name].correctAnswers++;
+                
+                // Play correct sound
                 playCorrectSound();
-                if (Math.random() < 0.3) { setTimeout(() => applyBonus(currentPlayer), 1500); }
+                
+                // Random bonus
+                if (Math.random() < 0.3) { // 30% chance to trigger bonus
+                    setTimeout(() => applyBonus(currentPlayer), 1500);
+                }
             } else {
-                currentPlayer.score = Math.max(-100, currentPlayer.score - 5);
+                // Wrong answer: -5 points
+                currentPlayer.score = Math.max(-100, currentPlayer.score - 5); // Allow negative scores with a limit
+                
+                // Play incorrect sound
                 playIncorrectSound();
-                if (Math.random() < 0.3) { setTimeout(() => applyPenalty(currentPlayer), 1500); }
+                
+                // Random penalty
+                if (Math.random() < 0.3) { // 30% chance to trigger penalty
+                    setTimeout(() => applyPenalty(currentPlayer), 1500);
+                }
             }
+            
+            // Highlight options
             const options = document.querySelectorAll('.option');
             options.forEach(opt => {
                 if (opt.querySelector('.option-text').textContent === correct) {
@@ -1063,72 +1121,112 @@ body { background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%); color: whi
                 } else if (opt.querySelector('.option-text').textContent === selected && !isCorrect) {
                     opt.classList.add('incorrect');
                 }
+                
+                // Disable all options
                 opt.style.pointerEvents = 'none';
             });
+            
+            // Update player list
             updatePlayersList();
+            
+            // Move to next answerer
             gameState.currentPlayerIndex++;
         }
 
+        // Time's up
         function timeUp() {
             const question = gameState.questions[gameState.currentQuestionIndex];
-            correctAnswerEl.textContent = \`正確答案: \${question.correctAnswer} Correct Answer: \${question.correctAnswer}\`;
+            
+            // Show correct answer
+            correctAnswerEl.textContent = `正確答案: ${question.correctAnswer} Correct Answer: ${question.correctAnswer}`;
+            
+            // Highlight correct answer
             const options = document.querySelectorAll('.option');
             options.forEach(opt => {
                 if (opt.querySelector('.option-text').textContent === question.correctAnswer) {
                     opt.classList.add('correct');
                 }
+                
+                // Disable all options
                 opt.style.pointerEvents = 'none';
             });
+            
+            // Play time up sound
             playTimeUpSound();
+            
+            // Move to next answerer
             gameState.currentPlayerIndex++;
         }
 
+        // Next question
         function nextQuestion() {
-            if (!gameState.isGameActive) { alert('Game has not started!'); return; }
+            if (!gameState.isGameActive) {
+                alert('Game has not started!');
+                return;
+            }
+            
             gameState.currentQuestionIndex++;
             displayQuestion();
         }
 
+        // End game
         function endGame() {
             gameState.isGameActive = false;
             clearInterval(gameState.timerInterval);
+            
             currentQuestionEl.textContent = '遊戲結束! Game Over!';
             optionsContainer.innerHTML = '';
             correctAnswerEl.textContent = '';
             timerEl.textContent = '0';
             currentPlayerEl.textContent = '';
+            
+            // Hide game controls
             gameControls.style.display = 'none';
+            
+            // Show report button
             showReportBtn.style.display = 'block';
+            
+            // Play game over sound
             playGameOverSound();
+            
+            // Show podium
             showPodium();
-
-            // 同步觀眾視窗
-            syncAudience();
         }
 
+        // Apply bonus
         function applyBonus(player) {
             const bonuses = [
                 { type: 'double', text: '分數加倍! Score doubled!' },
                 { type: 'steal', text: '從其他玩家偷取分數! Steal points from another player!' },
                 { type: 'swap', text: '與其他玩家交換分數! Swap scores with another player!' }
             ];
+            
             const bonus = bonuses[Math.floor(Math.random() * bonuses.length)];
+            
+            // Play confetti sound and applause
             playConfettiSound();
             playApplauseSound();
+            
+            // Create confetti effect
             createConfetti();
+            
+            // Show bonus notification
             const notification = document.createElement('div');
             notification.className = 'bonus-notification';
-            notification.innerHTML = \`
+            notification.innerHTML = `
                 <div style="font-size: 2.5rem; margin-bottom: 15px;">🎉 🎊</div>
-                <div>\${player.name} 獲得加分! got bonus!</div>
-                <div style="font-size: 1.5rem; margin-top: 10px;">\${bonus.text}</div>
-            \`;
+                <div>${player.name} 獲得加分! got bonus!</div>
+                <div style="font-size: 1.5rem; margin-top: 10px;">${bonus.text}</div>
+            `;
+            
             document.body.appendChild(notification);
+            
             switch (bonus.type) {
                 case 'double':
                     player.score *= 2;
                     break;
                 case 'steal':
+                    // Randomly select another player
                     const otherPlayers = gameState.players.filter(p => p.id !== player.id);
                     if (otherPlayers.length > 0) {
                         const target = otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
@@ -1139,40 +1237,57 @@ body { background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%); color: whi
                     }
                     break;
                 case 'swap':
+                    // Swap with highest scoring player
                     const sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
                     const highestPlayer = sortedPlayers[0];
                     if (highestPlayer.id !== player.id) {
                         const tempScore = player.score;
                         player.score = highestPlayer.score;
                         highestPlayer.score = tempScore;
-                        notification.innerHTML = \`
+                        notification.innerHTML = `
                             <div style="font-size: 2.5rem; margin-bottom: 15px;">🎉 🎊</div>
-                            <div>\${player.name} 獲得加分! got bonus!</div>
-                            <div style="font-size: 1.5rem; margin-top: 10px;">與 \${highestPlayer.name} 交換分數! Swapped scores with \${highestPlayer.name}!</div>
-                        \`;
+                            <div>${player.name} 獲得加分! got bonus!</div>
+                            <div style="font-size: 1.5rem; margin-top: 10px;">與 ${highestPlayer.name} 交換分數! Swapped scores with ${highestPlayer.name}!</div>
+                        `;
                     }
                     break;
             }
+            
+            // Update player list
             updatePlayersList();
-            setTimeout(() => { notification.remove(); }, 5000);
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
         }
 
+        // Apply penalty
         function applyPenalty(player) {
             const penalties = [
                 { type: 'losePercentage', text: '失去部分分數! Lost some points!' },
                 { type: 'zero', text: '分數歸零! Score reset to zero!' }
             ];
+            
             const penalty = penalties[Math.floor(Math.random() * penalties.length)];
+            
+            // Play explosion sound
             playExplosionSound();
+            
+            // Create explosion effect
             createExplosion();
+            
+            // Show penalty notification
             const notification = document.createElement('div');
             notification.className = 'penalty-notification';
-            notification.innerHTML = \`
+            notification.innerHTML = `
                 <div style="font-size: 2.5rem; margin-bottom: 15px;">💥 💣</div>
-                <div>\${player.name} 受到處罰! got penalty!</div>
-                <div style="font-size: 1.5rem; margin-top: 10px;">\${penalty.text}</div>
-            \`;
+                <div>${player.name} 受到處罰! got penalty!</div>
+                <div style="font-size: 1.5rem; margin-top: 10px;">${penalty.text}</div>
+            `;
+            
             document.body.appendChild(notification);
+            
             switch (penalty.type) {
                 case 'losePercentage':
                     const losePercentage = [0.1, 0.2, 0.5][Math.floor(Math.random() * 3)];
@@ -1180,35 +1295,51 @@ body { background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%); color: whi
                     break;
                 case 'zero':
                     player.score = 0;
-                    notification.innerHTML = \`
+                    notification.innerHTML = `
                         <div style="font-size: 2.5rem; margin-bottom: 15px;">💥 💣</div>
-                        <div>\${player.name} 受到處罰! got penalty!</div>
+                        <div>${player.name} 受到處罰! got penalty!</div>
                         <div style="font-size: 1.5rem; margin-top: 10px;">分數歸零! Score ZEROED!</div>
-                    \`;
+                    `;
                     break;
             }
+            
+            // Update player list
             updatePlayersList();
-            setTimeout(() => { notification.remove(); }, 5000);
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
         }
 
+        // Create confetti effect
         function createConfetti() {
             const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
+            
             for (let i = 0; i < 150; i++) {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
                 confetti.style.left = Math.random() * 100 + 'vw';
                 confetti.style.top = '-10px';
                 confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.transform = \`rotate(\${Math.random() * 360}deg)\`;
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
                 document.body.appendChild(confetti);
+                
+                // Animate confetti
                 const animation = confetti.animate([
-                    { transform: \`translate(0, 0) rotate(0deg)\`, opacity: 1 },
-                    { transform: \`translate(\${Math.random() * 200 - 100}px, \${window.innerHeight}px) rotate(\${Math.random() * 720}deg)\`, opacity: 0 }
-                ], { duration: 3000 + Math.random() * 2000, easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)' });
+                    { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
+                    { transform: `translate(${Math.random() * 200 - 100}px, ${window.innerHeight}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+                ], {
+                    duration: 3000 + Math.random() * 2000,
+                    easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)'
+                });
+                
+                // Remove confetti after animation
                 animation.onfinish = () => confetti.remove();
             }
         }
 
+        // Create explosion effect
         function createExplosion() {
             for (let i = 0; i < 50; i++) {
                 const explosion = document.createElement('div');
@@ -1216,269 +1347,436 @@ body { background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%); color: whi
                 explosion.style.left = Math.random() * 100 + 'vw';
                 explosion.style.top = Math.random() * 100 + 'vh';
                 document.body.appendChild(explosion);
+                
+                // Animate explosion
                 const animation = explosion.animate([
                     { transform: 'scale(0)', opacity: 1 },
                     { transform: 'scale(1)', opacity: 0 }
-                ], { duration: 1000 + Math.random() * 500, easing: 'ease-out' });
+                ], {
+                    duration: 1000 + Math.random() * 500,
+                    easing: 'ease-out'
+                });
+                
+                // Remove explosion after animation
                 animation.onfinish = () => explosion.remove();
             }
         }
 
-        // Sound functions
+        // Sound functions using Web Audio API
         function playBackgroundMusic() {
             if (!gameState.isSoundEnabled || !audioContext) return;
+            
+            // Create background music with multiple oscillators
             const oscillator1 = audioContext.createOscillator();
             const oscillator2 = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
+            
             oscillator1.connect(gainNode);
             oscillator2.connect(gainNode);
             gainNode.connect(audioContext.destination);
+            
             oscillator1.frequency.setValueAtTime(330, audioContext.currentTime);
             oscillator2.frequency.setValueAtTime(440, audioContext.currentTime);
             oscillator1.type = 'sine';
             oscillator2.type = 'sine';
+            
             gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+            
             oscillator1.start(audioContext.currentTime);
             oscillator2.start(audioContext.currentTime);
-            setTimeout(() => { oscillator1.stop(); oscillator2.stop(); }, 10000);
+            
+            // Stop after 10 seconds
+            setTimeout(() => {
+                oscillator1.stop();
+                oscillator2.stop();
+            }, 10000);
         }
+        
         function playQuestionSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            const o = audioContext.createOscillator(); const g = audioContext.createGain();
-            o.connect(g); g.connect(audioContext.destination);
-            o.frequency.setValueAtTime(523.25, audioContext.currentTime); o.type = 'sine';
-            g.gain.setValueAtTime(0.1, audioContext.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
-            o.start(audioContext.currentTime); o.stop(audioContext.currentTime + 1);
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 1);
         }
+        
         function playAnswerSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            const o = audioContext.createOscillator(); const g = audioContext.createGain();
-            o.connect(g); g.connect(audioContext.destination);
-            o.frequency.setValueAtTime(659.25, audioContext.currentTime); o.type = 'triangle';
-            g.gain.setValueAtTime(0.1, audioContext.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-            o.start(audioContext.currentTime); o.stop(audioContext.currentTime + 0.5);
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime); // E5
+            oscillator.type = 'triangle';
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
         }
+        
         function playCorrectSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            const o = audioContext.createOscillator(); const g = audioContext.createGain();
-            o.connect(g); g.connect(audioContext.destination);
-            o.frequency.setValueAtTime(523.25, audioContext.currentTime);
-            o.frequency.exponentialRampToValueAtTime(1046.50, audioContext.currentTime + 0.5);
-            o.type = 'sine'; g.gain.setValueAtTime(0.1, audioContext.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-            o.start(audioContext.currentTime); o.stop(audioContext.currentTime + 0.5);
+            
+            // Play a rising tone for correct answers
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+            oscillator.frequency.exponentialRampToValueAtTime(1046.50, audioContext.currentTime + 0.5); // C6
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
         }
+        
         function playIncorrectSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            const o = audioContext.createOscillator(); const g = audioContext.createGain();
-            o.connect(g); g.connect(audioContext.destination);
-            o.frequency.setValueAtTime(523.25, audioContext.currentTime);
-            o.frequency.exponentialRampToValueAtTime(261.63, audioContext.currentTime + 0.5);
-            o.type = 'sawtooth'; g.gain.setValueAtTime(0.1, audioContext.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-            o.start(audioContext.currentTime); o.stop(audioContext.currentTime + 0.5);
+            
+            // Play a falling tone for incorrect answers
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+            oscillator.frequency.exponentialRampToValueAtTime(261.63, audioContext.currentTime + 0.5); // C4
+            oscillator.type = 'sawtooth';
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
         }
+        
         function playTimeUpSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            const o = audioContext.createOscillator(); const g = audioContext.createGain();
-            o.connect(g); g.connect(audioContext.destination);
-            o.frequency.setValueAtTime(220, audioContext.currentTime); o.type = 'square';
-            g.gain.setValueAtTime(0.1, audioContext.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
-            o.start(audioContext.currentTime); o.stop(audioContext.currentTime + 1);
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+            oscillator.type = 'square';
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 1);
         }
+        
         function playGameOverSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            const o = audioContext.createOscillator(); const g = audioContext.createGain();
-            o.connect(g); g.connect(audioContext.destination);
-            o.frequency.setValueAtTime(523.25, audioContext.currentTime);
-            o.frequency.exponentialRampToValueAtTime(130.81, audioContext.currentTime + 2);
-            o.type = 'sawtooth'; g.gain.setValueAtTime(0.2, audioContext.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
-            o.start(audioContext.currentTime); o.stop(audioContext.currentTime + 2);
+            
+            // Play a dramatic descending tone
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+            oscillator.frequency.exponentialRampToValueAtTime(130.81, audioContext.currentTime + 2); // C3
+            oscillator.type = 'sawtooth';
+            
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 2);
         }
+        
         function playConfettiSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
+            
+            // Create a festive sound with multiple oscillators
             for (let i = 0; i < 5; i++) {
                 setTimeout(() => {
-                    const o = audioContext.createOscillator(); const g = audioContext.createGain();
-                    o.connect(g); g.connect(audioContext.destination);
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
                     const freq = 500 + Math.random() * 500;
-                    o.frequency.setValueAtTime(freq, audioContext.currentTime); o.type = 'sine';
-                    g.gain.setValueAtTime(0.1, audioContext.currentTime);
-                    g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-                    o.start(audioContext.currentTime); o.stop(audioContext.currentTime + 0.5);
+                    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
                 }, i * 100);
             }
         }
+        
         function playApplauseSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
+            
+            // Create applause-like noise
             for (let i = 0; i < 20; i++) {
                 setTimeout(() => {
-                    const o = audioContext.createOscillator(); const g = audioContext.createGain();
-                    o.connect(g); g.connect(audioContext.destination);
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
                     const freq = 100 + Math.random() * 1000;
-                    o.frequency.setValueAtTime(freq, audioContext.currentTime); o.type = 'square';
+                    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                    oscillator.type = 'square';
+                    
                     const volume = 0.05 + Math.random() * 0.1;
-                    g.gain.setValueAtTime(volume, audioContext.currentTime);
-                    g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1 + Math.random() * 0.2);
-                    o.start(audioContext.currentTime);
-                    o.stop(audioContext.currentTime + 0.1 + Math.random() * 0.2);
+                    gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1 + Math.random() * 0.2);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.1 + Math.random() * 0.2);
                 }, i * 50);
             }
         }
+        
         function playExplosionSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            const o = audioContext.createOscillator(); const g = audioContext.createGain();
-            o.connect(g); g.connect(audioContext.destination);
-            o.frequency.setValueAtTime(100, audioContext.currentTime);
-            o.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.5);
-            o.type = 'sawtooth'; g.gain.setValueAtTime(0.5, audioContext.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-            o.start(audioContext.currentTime); o.stop(audioContext.currentTime + 0.5);
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(100, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.5);
+            oscillator.type = 'sawtooth';
+            
+            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
         }
+        
         function playPodiumSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            const notes = [523.25, 659.25, 783.99, 1046.50];
+            
+            // Play a triumphant fanfare
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
             const durations = [0.3, 0.3, 0.3, 0.6];
-            let t = audioContext.currentTime;
-            notes.forEach((note, i) => {
-                const o = audioContext.createOscillator(); const g = audioContext.createGain();
-                o.connect(g); g.connect(audioContext.destination);
-                o.frequency.setValueAtTime(note, t); o.type = 'sine';
-                g.gain.setValueAtTime(0.1, t);
-                g.gain.exponentialRampToValueAtTime(0.01, t + durations[i]);
-                o.start(t); o.stop(t + durations[i]);
-                t += durations[i];
+            
+            let currentTime = audioContext.currentTime;
+            
+            notes.forEach((note, index) => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(note, currentTime);
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.1, currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + durations[index]);
+                
+                oscillator.start(currentTime);
+                oscillator.stop(currentTime + durations[index]);
+                
+                currentTime += durations[index];
             });
         }
+        
         function toggleSound() {
             gameState.isSoundEnabled = !gameState.isSoundEnabled;
             const icon = soundControl.querySelector('i');
-            icon.className = gameState.isSoundEnabled ? 'fas fa-volume-up' : 'fas fa-volume-mute';
-            if (gameState.isSoundEnabled && audioContext && audioContext.state === 'suspended') audioContext.resume();
+            
+            if (gameState.isSoundEnabled) {
+                icon.className = 'fas fa-volume-up';
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            } else {
+                icon.className = 'fas fa-volume-mute';
+            }
         }
 
         // Show podium
         function showPodium() {
+            // Sort players by score
             let sortedPlayers;
             if (gameState.gameMode === 'team') {
+                // Team mode: sort by team total score first, then by individual score
                 const teamScores = {};
-                gameState.players.forEach(p => {
-                    if (!teamScores[p.team.en]) teamScores[p.team.en] = 0;
-                    teamScores[p.team.en] += p.score;
+                gameState.players.forEach(player => {
+                    if (!teamScores[player.team.en]) {
+                        teamScores[player.team.en] = 0;
+                    }
+                    teamScores[player.team.en] += player.score;
                 });
+                
                 sortedPlayers = [...gameState.players].sort((a, b) => {
-                    if (teamScores[a.team.en] !== teamScores[b.team.en]) return teamScores[b.team.en] - teamScores[a.team.en];
+                    if (teamScores[a.team.en] !== teamScores[b.team.en]) {
+                        return teamScores[b.team.en] - teamScores[a.team.en];
+                    }
                     return b.score - a.score;
                 });
             } else {
+                // Individual mode: sort directly by score
                 sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
             }
+            
             podiumEl.innerHTML = '';
             podiumEl.style.display = 'flex';
+            
+            // Play podium sound
             playPodiumSound();
+            
+            // Show top three
             for (let i = 0; i < Math.min(3, sortedPlayers.length); i++) {
                 const player = sortedPlayers[i];
                 const placeClass = i === 0 ? 'first-place' : i === 1 ? 'second-place' : 'third-place';
                 const rankText = i === 0 ? '第1名 1st' : i === 1 ? '第2名 2nd' : '第3名 3rd';
+                
                 const podiumPlace = document.createElement('div');
-                podiumPlace.className = \`podium-place \${placeClass}\`;
-                podiumPlace.innerHTML = \`
-                    <div class="podium-rank">\${rankText}</div>
-                    <div class="podium-name">\${player.name}</div>
-                    <div class="podium-score">\${player.score} 分 pts</div>
-                    \${player.team ? \`<div class="player-group">\${player.team.en} / \${player.team.zh}</div>\` : ''}
-                \`;
+                podiumPlace.className = `podium-place ${placeClass}`;
+                podiumPlace.innerHTML = `
+                    <div class="podium-rank">${rankText}</div>
+                    <div class="podium-name">${player.name}</div>
+                    <div class="podium-score">${player.score} 分 pts</div>
+                    ${player.team ? `<div class="player-group">${player.team.en} / ${player.team.zh}</div>` : ''}
+                `;
+                
                 podiumEl.appendChild(podiumPlace);
             }
+            
+            // Show remaining players
             playersListEl.innerHTML = '';
             for (let i = 3; i < sortedPlayers.length; i++) {
                 const player = sortedPlayers[i];
-                const el = document.createElement('li');
-                el.className = 'player';
-                el.innerHTML = \`
+                const playerEl = document.createElement('li');
+                playerEl.className = 'player';
+                playerEl.innerHTML = `
                     <div>
-                        <div class="player-name">\${i+1}. \${player.name}</div>
-                        \${player.team ? \`<div class="player-group">\${player.team.en} / \${player.team.zh}</div>\` : ''}
+                        <div class="player-name">${i+1}. ${player.name}</div>
+                        ${player.team ? `<div class="player-group">${player.team.en} / ${player.team.zh}</div>` : ''}
                     </div>
-                    <div class="player-score">\${player.score} 分 pts</div>
-                \`;
-                playersListEl.appendChild(el);
+                    <div class="player-score">${player.score} 分 pts</div>
+                `;
+                playersListEl.appendChild(playerEl);
             }
-
-            // 同步觀眾視窗
-            syncAudience();
         }
 
         // Update player list
         function updatePlayersList() {
             playersListEl.innerHTML = '';
+            
+            let sortedPlayers;
             if (gameState.gameMode === 'team') {
+                // Team mode: group by team first, then sort by individual score
                 const teams = {};
-                gameState.players.forEach(p => {
-                    if (!teams[p.team.en]) teams[p.team.en] = [];
-                    teams[p.team.en].push(p);
+                gameState.players.forEach(player => {
+                    if (!teams[player.team.en]) {
+                        teams[player.team.en] = [];
+                    }
+                    teams[player.team.en].push(player);
                 });
+                
+                // Calculate team total scores and sort
                 const teamScores = {};
                 Object.keys(teams).forEach(team => {
-                    teamScores[team] = teams[team].reduce((sum, p) => sum + p.score, 0);
+                    teamScores[team] = teams[team].reduce((sum, player) => sum + player.score, 0);
                 });
+                
                 const sortedTeams = Object.keys(teams).sort((a, b) => teamScores[b] - teamScores[a]);
+                
                 sortedTeams.forEach(team => {
+                    // Add team header
                     const teamHeader = document.createElement('li');
                     teamHeader.className = 'player';
                     teamHeader.style.background = 'rgba(255, 255, 255, 0.2)';
                     const teamObj = gameState.teamNames.find(t => t.en === team);
-                    teamHeader.innerHTML = \`
-                        <div><div class="player-name">\${team} / \${teamObj.zh}</div></div>
-                        <div class="player-score">\${teamScores[team]} 分 pts</div>
-                    \`;
+                    teamHeader.innerHTML = `
+                        <div>
+                            <div class="player-name">${team} / ${teamObj.zh}</div>
+                        </div>
+                        <div class="player-score">${teamScores[team]} 分 pts</div>
+                    `;
                     playersListEl.appendChild(teamHeader);
+                    
+                    // Add team members
                     const teamPlayers = teams[team].sort((a, b) => b.score - a.score);
-                    teamPlayers.forEach(p => {
-                        const isCurrent = gameState.players[gameState.currentPlayerIndex % gameState.players.length].id === p.id;
-                        const li = document.createElement('li');
-                        li.className = \`player \${isCurrent ? 'current-player' : ''}\`;
-                        li.innerHTML = \`
-                            <div><div class="player-name">\${p.name}</div></div>
-                            <div class="player-score">\${p.score} 分 pts</div>
-                        \`;
-                        playersListEl.appendChild(li);
+                    teamPlayers.forEach((player, index) => {
+                        const isCurrentPlayer = gameState.players[gameState.currentPlayerIndex % gameState.players.length].id === player.id;
+                        const playerEl = document.createElement('li');
+                        playerEl.className = `player ${isCurrentPlayer ? 'current-player' : ''}`;
+                        playerEl.innerHTML = `
+                            <div>
+                                <div class="player-name">${player.name}</div>
+                            </div>
+                            <div class="player-score">${player.score} 分 pts</div>
+                        `;
+                        playersListEl.appendChild(playerEl);
                     });
                 });
             } else {
-                const sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
-                sortedPlayers.forEach((p, idx) => {
-                    const isCurrent = gameState.players[gameState.currentPlayerIndex % gameState.players.length].id === p.id;
-                    const li = document.createElement('li');
-                    li.className = \`player \${isCurrent ? 'current-player' : ''}\`;
-                    li.innerHTML = \`
-                        <div><div class="player-name">\${idx+1}. \${p.name}</div></div>
-                        <div class="player-score">\${p.score} 分 pts</div>
-                    \`;
-                    playersListEl.appendChild(li);
+                // Individual mode: sort directly by score
+                sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
+                
+                sortedPlayers.forEach((player, index) => {
+                    const isCurrentPlayer = gameState.players[gameState.currentPlayerIndex % gameState.players.length].id === player.id;
+                    const playerEl = document.createElement('li');
+                    playerEl.className = `player ${isCurrentPlayer ? 'current-player' : ''}`;
+                    playerEl.innerHTML = `
+                        <div>
+                            <div class="player-name">${index+1}. ${player.name}</div>
+                        </div>
+                        <div class="player-score">${player.score} 分 pts</div>
+                    `;
+                    playersListEl.appendChild(playerEl);
                 });
             }
-
-            // 同步觀眾視窗
-            syncAudience();
         }
 
-        // View report（覆蓋版）
+        // View report
         function showReport() {
             // Calculate overall accuracy
             let totalAnswers = 0;
             let totalCorrect = 0;
+            
             for (const playerName in gameState.playerStats) {
                 totalAnswers += gameState.playerStats[playerName].answers;
                 totalCorrect += gameState.playerStats[playerName].correctAnswers;
             }
+            
             const overallAccuracy = totalAnswers > 0 ? (totalCorrect / totalAnswers * 100).toFixed(2) : 0;
-
-            // Questions with high error rate
+            
+            // Find questions with error rate over 50%
             const problematicQuestions = [];
             for (const questionText in gameState.questionStats) {
                 const stats = gameState.questionStats[questionText];
@@ -1494,88 +1792,18 @@ body { background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%); color: whi
                     }
                 }
             }
-
-            // Individual sorted
-            const playersSortedByScore = [...gameState.players].sort((a, b) => b.score - a.score);
-
-            // Team aggregation
-            const teamsMap = {};
-            if (gameState.gameMode === 'team') {
-                gameState.players.forEach(p => {
-                    const key = p.team.en;
-                    if (!teamsMap[key]) teamsMap[key] = { zh: p.team.zh, members: [], total: 0 };
-                    teamsMap[key].members.push(p);
-                    teamsMap[key].total += p.score;
-                });
-            }
-
-            let reportHTML = \`
+            
+            // Create report HTML
+            let reportHTML = `
                 <h2 class="panel-title"><i class="fas fa-chart-bar"></i> 遊戲報告 Game Report</h2>
                 <div style="margin-bottom: 20px;">
                     <h3>總體統計 Overall Statistics</h3>
-                    <p>總答題數: \${totalAnswers} Total Answers: \${totalAnswers}</p>
-                    <p>答對題數: \${totalCorrect} Correct Answers: \${totalCorrect}</p>
-                    <p>總體準確率: \${overallAccuracy}% Overall Accuracy: \${overallAccuracy}%</p>
+                    <p>總答題數: ${totalAnswers} Total Answers: ${totalAnswers}</p>
+                    <p>答對題數: ${totalCorrect} Correct Answers: ${totalCorrect}</p>
+                    <p>總體準確率: ${overallAccuracy}% Overall Accuracy: ${overallAccuracy}%</p>
                 </div>
-            \`;
-
-            if (gameState.gameMode === 'team') {
-                const teamEntries = Object.entries(teamsMap).sort((a, b) => b[1].total - a[1].total);
-                reportHTML += \`
-                    <div style="margin-bottom: 24px;">
-                        <h3>團隊總表 Team Ranking</h3>
-                        <table class="report-table">
-                            <thead>
-                                <tr><th>團隊 Team</th><th>團隊總分 Team Total</th></tr>
-                            </thead>
-                            <tbody>
-                                \${teamEntries.map(([en, t]) => \`
-                                    <tr><td>\${en} / \${t.zh}</td><td>\${t.total}</td></tr>
-                                \`).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                \`;
-                reportHTML += \`<div style="margin-bottom: 24px;"><h3>團隊成員表 Team Members</h3>\`;
-                teamEntries.forEach(([en, t]) => {
-                    const membersSorted = [...t.members].sort((a, b) => b.score - a.score);
-                    reportHTML += \`
-                        <h4 style="margin: 12px 0;">\${en} / \${t.zh}（總分 \${t.total}）</h4>
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>玩家 Player</th>
-                                    <th>分數 Score</th>
-                                    <th>答題數 Answers</th>
-                                    <th>正確數 Correct</th>
-                                    <th>準確率 Accuracy</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                \${membersSorted.map(m => {
-                                    const stats = gameState.playerStats[m.name];
-                                    const acc = stats.answers > 0 ? (stats.correctAnswers / stats.answers * 100).toFixed(2) : 0;
-                                    return \`
-                                        <tr>
-                                            <td>\${m.name}</td>
-                                            <td>\${m.score}</td>
-                                            <td>\${stats.answers}</td>
-                                            <td>\${stats.correctAnswers}</td>
-                                            <td>\${acc}%</td>
-                                        </tr>
-                                    \`;
-                                }).join('')}
-                            </tbody>
-                        </table>
-                    \`;
-                });
-                reportHTML += \`</div>\`;
-            }
-
-            // Individual table (both modes)
-            reportHTML += \`
                 <div style="margin-bottom: 20px;">
-                    <h3>\${gameState.gameMode === 'team' ? '個人總排行榜 Overall Individual Ranking' : '玩家表現 Player Performance'}</h3>
+                    <h3>玩家表現 Player Performance</h3>
                     <table class="report-table">
                         <thead>
                             <tr>
@@ -1587,27 +1815,55 @@ body { background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%); color: whi
                             </tr>
                         </thead>
                         <tbody>
-                            \${playersSortedByScore.map(player => {
-                                const stats = gameState.playerStats[player.name];
-                                const acc = stats.answers > 0 ? (stats.correctAnswers / stats.answers * 100).toFixed(2) : 0;
-                                const teamDisplay = player.team ? \` (\${player.team.en} / \${player.team.zh})\` : '';
-                                return \`
-                                    <tr>
-                                        <td>\${player.name}\${teamDisplay}</td>
-                                        <td>\${player.score}</td>
-                                        <td>\${stats.answers}</td>
-                                        <td>\${stats.correctAnswers}</td>
-                                        <td>\${acc}%</td>
-                                    </tr>
-                                \`;
-                            }).join('')}
+            `;
+            
+            // Sort players (by team in team mode)
+            let sortedPlayersForReport;
+            if (gameState.gameMode === 'team') {
+                // Team mode: sort by team total score first, then by individual score
+                const teamScores = {};
+                gameState.players.forEach(player => {
+                    if (!teamScores[player.team.en]) {
+                        teamScores[player.team.en] = 0;
+                    }
+                    teamScores[player.team.en] += player.score;
+                });
+                
+                sortedPlayersForReport = [...gameState.players].sort((a, b) => {
+                    if (teamScores[a.team.en] !== teamScores[b.team.en]) {
+                        return teamScores[b.team.en] - teamScores[a.team.en];
+                    }
+                    return b.score - a.score;
+                });
+            } else {
+                // Individual mode: sort directly by score
+                sortedPlayersForReport = [...gameState.players].sort((a, b) => b.score - a.score);
+            }
+            
+            sortedPlayersForReport.forEach(player => {
+                const stats = gameState.playerStats[player.name];
+                const accuracy = stats.answers > 0 ? (stats.correctAnswers / stats.answers * 100).toFixed(2) : 0;
+                const teamDisplay = player.team ? ` (${player.team.en} / ${player.team.zh})` : '';
+                
+                reportHTML += `
+                    <tr>
+                        <td>${player.name}${teamDisplay}</td>
+                        <td>${player.score}</td>
+                        <td>${stats.answers}</td>
+                        <td>${stats.correctAnswers}</td>
+                        <td>${accuracy}%</td>
+                    </tr>
+                `;
+            });
+            
+            reportHTML += `
                         </tbody>
                     </table>
                 </div>
-            \`;
-
+            `;
+            
             if (problematicQuestions.length > 0) {
-                reportHTML += \`
+                reportHTML += `
                     <div>
                         <h3>高錯誤率問題 Questions with High Error Rate</h3>
                         <table class="report-table">
@@ -1619,24 +1875,28 @@ body { background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%); color: whi
                                 </tr>
                             </thead>
                             <tbody>
-                                \${problematicQuestions.map(q => \`
-                                    <tr>
-                                        <td>\${q.text}</td>
-                                        <td>\${q.incorrectRate}%</td>
-                                        <td>\${q.correctAnswer}</td>
-                                    </tr>
-                                \`).join('')}
+                `;
+                
+                problematicQuestions.forEach(q => {
+                    reportHTML += `
+                        <tr>
+                            <td>${q.text}</td>
+                            <td>${q.incorrectRate}%</td>
+                            <td>${q.correctAnswer}</td>
+                        </tr>
+                    `;
+                });
+                
+                reportHTML += `
                             </tbody>
                         </table>
                     </div>
-                \`;
+                `;
             }
-
+            
+            // Show report
             const reportPanel = document.querySelector('.question-area');
             reportPanel.innerHTML = reportHTML;
-
-            // 同步觀眾視窗
-            syncAudience();
         }
     </script>
 </body>
