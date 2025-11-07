@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shirley's Live Quiz Show (Fixed Option + Sound)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #5b8c85;
+            --secondary-color: #74a69a;
+            --accent-color: #8fbc8f;
+            --light-color: #f8f9fa;
+            --dark-color: #4a5c5a;
+            --success-color: #7cb342;
+            --warning-color: #ffb74d;
+            --danger-color: #e57373;
+            --correct-color: #7cb342;
+            --incorrect-color: #e57373;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #e0f2f1 0%, #f1f8e9 100%);
+            color: var(--dark-color);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        h1 {
+            font-size: 3.2rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            font-weight: 700;
+        }
+        .subtitle {
+            font-size: 1.4rem;
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+        .game-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .host-control-area {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+        .game-area {
+            display: flex;
+            gap: 20px;
+            min-height: 600px;
+        }
+        .question-area {
+            flex: 2;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .players-area {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary-color);
+            border-bottom: 2px solid rgba(91, 140, 133, 0.3);
+            padding-bottom: 10px;
+        }
+        .panel-title i {
+            color: var(--accent-color);
+        }
+        .admin-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(91, 140, 133, 0.3);
+            background: rgba(255, 255, 255, 0.8);
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            resize: vertical;
+            transition: all 0.3s ease;
+            color: var(--dark-color);
+        }
+        textarea::placeholder {
+            color: rgba(91, 140, 133, 0.7);
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(143, 188, 143, 0.3);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(91, 140, 133, 0.3);
+            background: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            color: var(--dark-color);
+        }
+        select option {
+            background: #f8f9fa;
+            color: var(--dark-color);
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(143, 188, 143, 0.3);
+        }
+        button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background: #7da97d;
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(0, 0, 0, 0.15);
+        }
+        button.secondary {
+            background: var(--secondary-color);
+        }
+        button.secondary:hover {
+            background: #659187;
+        }
+        .question {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .option {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            border: 1px solid rgba(91, 140, 133, 0.3);
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            color: var(--dark-color);
+        }
+        .option:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: scale(1.03);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .timer {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 15px 0;
+            color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(143, 188, 143, 0.5);
+        }
+        .players-list {
+            list-style-type: none;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        .player {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--accent-color);
+            font-size: 0.9rem;
+        }
+        .player:hover {
+            background: rgba(255, 255, 255, 0.7);
+        }
+        .player-name {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .player-score {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        .player-group {
+            font-size: 0.75rem;
+            color: var(--secondary-color);
+            margin-top: 2px;
+        }
+        .correct {
+            background: var(--correct-color) !important;
+            color: white;
+            box-shadow: 0 0 15px rgba(124, 179, 66, 0.5);
+        }
+        .incorrect {
+            background: var(--incorrect-color) !important;
+            color: white;
+            box-shadow: 0 0 15px rgba(229, 115, 115, 0.5);
+        }
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin: 25px 0;
+            gap: 15px;
+        }
+        .podium-place {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            max-width: 180px;
+            backdrop-filter: blur(5px);
+        }
+        .first-place {
+            background: linear-gradient(135deg, #FFD700, #FFF9C4);
+            order: 2;
+            height: 160px;
+        }
+        .second-place {
+            background: linear-gradient(135deg, #C0C0C0, #F5F5F5);
+            order: 1;
+            height: 130px;
+        }
+        .third-place {
+            background: linear-gradient(135deg, #CD7F32, #FFE0B2);
+            order: 3;
+            height: 100px;
+        }
+        .podium-rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--dark-color);
+        }
+        .podium-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--dark-color);
+        }
+        .podium-score {
+            font-size: 1rem;
+            color: var(--dark-color);
+        }
+        .bonus-notification, .penalty-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 30px 40px;
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: popIn 0.5s ease;
+            text-align: center;
+            font-size: 1.8rem;
+            min-width: 400px;
+            backdrop-filter: blur(10px);
+        }
+        .bonus-notification {
+            background: rgba(124, 179, 66, 0.9);
+            border: 3px solid var(--correct-color);
+        }
+        .penalty-notification {
+            background: rgba(229, 115, 115, 0.9);
+            border: 3px solid var(--incorrect-color);
+        }
+        @keyframes popIn {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+            70% {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        .report-table th, .report-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(91, 140, 133, 0.3);
+        }
+        .report-table th {
+            background: rgba(255, 255, 255, 0.5);
+            color: var(--primary-color);
+        }
+        .report-table tr:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .current-player {
+            background: rgba(143, 188, 143, 0.3) !important;
+            border-left: 4px solid var(--accent-color);
+        }
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+        }
+        .game-theme {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        .question-number {
+            font-size: 1rem;
+            color: var(--secondary-color);
+        }
+        .correct-answer {
+            font-size: 1.5rem;
+            color: var(--correct-color);
+            font-weight: bold;
+            margin: 15px 0;
+            text-shadow: 0 0 10px rgba(124, 179, 66, 0.5);
+        }
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent-color);
+            opacity: 0;
+            z-index: 999;
+        }
+        .explosion {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffcc80, var(--incorrect-color));
+            box-shadow: 0 0 20px #ffcc80;
+            opacity: 0;
+            z-index: 999;
+        }
+        .sound-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            border: 1px solid rgba(91, 140, 133, 0.3);
+        }
+        .sound-control i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        .game-started .host-control-area {
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            overflow: hidden;
+            opacity: 0;
+        }
+        .game-started .game-area {
+            min-height: 800px;
+        }
+        @media (max-width: 768px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+            .game-area {
+                flex-direction: column;
+            }
+            .podium {
+                flex-direction: column;
+                align-items: center;
+            }
+            .podium-place {
+                max-width: 100%;
+                height: auto !important;
+            }
+            .game-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            .bonus-notification, .penalty-notification {
+                min-width: 300px;
+                font-size: 1.4rem;
+                padding: 20px 25px;
+            }
+            .admin-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Shirley's Live Quiz Show</h1>
+            <p class="subtitle">Fixed Option Version</p>
+        </header>
+        <div class="game-layout">
+            <div class="host-control-area">
+                <h2 class="panel-title"><i class="fas fa-user-cog"></i> 主控台 Host Control</h2>
+                <div class="admin-controls">
+                    <div>
+                        <div class="form-group">
+                            <label for="gameTheme">遊戲主題 Game Theme</label>
+                            <input type="text" id="gameTheme" placeholder="輸入遊戲主題 Enter game theme">
+                        </div>
+                        <div class="form-group">
+                            <label for="questionsInput">問題與選項 (一行一題，用tab分隔) Questions & Options (one per line, separate with tab)</label>
+                            <textarea id="questionsInput" placeholder="問題1	選項A	選項B	選項C	選項D	正確答案
+Question2	Option A	Option B	Option C		Correct Answer"></textarea>
+                            <small style="color: var(--secondary-color);">格式: 問題 [tab] 選項A [tab] 選項B [tab] 選項C [tab] 選項D [tab] 正確答案<br>Format: Question [tab] Option A [tab] Option B [tab] Option C [tab] Option D [tab] Correct Answer</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="playersInput">參與者 (一行一個名字) Participants (one name per line)</label>
+                            <textarea id="playersInput" placeholder="參與者1
+Participant2"></textarea>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <label for="gameMode">遊戲模式 Game Mode</label>
+                            <select id="gameMode">
+                                <option value="individual">個人 Individual</option>
+                                <option value="team">團隊 Team</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="answerTime">每題答題時間 (秒) Time per Question (seconds)</label>
+                            <input type="number" id="answerTime" min="5" max="120" value="30">
+                        </div>
+                        <button id="startGame"><i class="fas fa-play"></i> 開始遊戲 Start Game</button>
+                        <button id="showReport" style="display:none;"><i class="fas fa-chart-bar"></i> 查看報告 View Report</button>
+                    </div>
+                </div>
+            </div>
+            <div class="game-area">
+                <div class="question-area">
+                    <h2 class="panel-title"><i class="fas fa-gamepad"></i> 答題區 Question Area</h2>
+                    <div class="game-info">
+                        <div class="game-theme" id="gameThemeDisplay">遊戲主題 Game Theme</div>
+                        <div class="question-number" id="questionNumber">問題 0 / 0 Question 0 of 0</div>
+                    </div>
+                    <div class="question" id="currentQuestion">等待遊戲開始... Waiting for game to start...</div>
+                    <div class="options" id="optionsContainer">
+                    </div>
+                    <div class="correct-answer" id="correctAnswer"></div>
+                    <div class="timer" id="timer">30</div>
+                    <div id="currentPlayer" style="font-size: 1.5rem; margin: 15px 0; color: var(--accent-color);"></div>
+                    <div class="game-controls" id="gameControls" style="display: none;">
+                        <button id="nextQuestion" class="secondary"><i class="fas fa-forward"></i> 下一題 Next Question</button>
+                        <button id="endGame"><i class="fas fa-stop"></i> 結束遊戲 End Game</button>
+                    </div>
+                    <div class="podium" id="podium" style="display: none;">
+                    </div>
+                </div>
+                <div class="players-area">
+                    <h2 class="panel-title"><i class="fas fa-users"></i> 玩家狀態 Player Status</h2>
+                    <div class="players-list" id="playersList">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="sound-control" id="soundControl">
+        <i class="fas fa-volume-up"></i>
+    </div>
+    <script>
+        let gameState = {
+            questions: [],
+            players: [],
+            currentQuestionIndex: 0,
+            currentPlayerIndex: 0,
+            answerTime: 30,
+            timerInterval: null,
+            isGameActive: false,
+            isSoundEnabled: true,
+            gameMode: 'individual',
+            gameTheme: '',
+            teamNames: [
+                { en: "Azure Alpacas", zh: "天藍色羊駝" },
+                { en: "Blissful Baboons", zh: "幸福的狒狒" },
+                { en: "Calm Cats", zh: "冷靜的貓" },
+                { en: "Dewy Deer", zh: "露水的鹿" },
+                { en: "Ethereal Eagles", zh: "飄渺的老鷹" },
+                { en: "Fragrant Falcons", zh: "芳香的獵鷹" },
+                { en: "Gentle Geese", zh: "溫和的鵝" },
+                { en: "Harmonious Horses", zh: "和諧的馬" },
+                { en: "Iridescent Ibises", zh: "彩虹色的朱鷺" },
+                { en: "Jovial Jaguars", zh: "快樂的美洲虎" },
+                { en: "Kind Koalas", zh: "善良的無尾熊" },
+                { en: "Luminous Lions", zh: "明亮的獅子" },
+                { en: "Misty Moose", zh: "朦朧的駝鹿" },
+                { en: "Nurturing Newts", zh: "培育的蠑螈" },
+                { en: "Opalescent Owls", zh: "乳白色的貓頭鷹" },
+                { en: "Peaceful Pumas", zh: "和平的美洲獅" },
+                { en: "Quiet Quokkas", zh: "安靜的短尾矮袋鼠" },
+                { en: "Radiant Rhinos", zh: "光芒四射的犀牛" },
+                { en: "Serene Sharks", zh: "寧靜的鯊魚" },
+                { en: "Tranquil Turkeys", zh: "平靜的火雞" },
+                { en: "Unified Urchins", zh: "統一的海膽" },
+                { en: "Velvet Vultures", zh: "天鵝絨禿鷲" },
+                { en: "Whispering Wolves", zh: "低語的狼" },
+                { en: "Xanadu Xenops", zh: "世外桃源翹嘴雀" },
+                { en: "Yielding Yaks", zh: "柔順的氂牛" },
+                { en: "Zen Zebras", zh: "禪意斑馬" }
+            ],
+            usedTeamNames: [],
+            playerStats: {},
+            questionStats: {}
+        };
+        const gameThemeInput = document.getElementById('gameTheme');
+        const questionsInput = document.getElementById('questionsInput');
+        const playersInput = document.getElementById('playersInput');
+        const gameModeSelect = document.getElementById('gameMode');
+        const answerTimeInput = document.getElementById('answerTime');
+        const startGameBtn = document.getElementById('startGame');
+        const nextQuestionBtn = document.getElementById('nextQuestion');
+        const endGameBtn = document.getElementById('endGame');
+        const showReportBtn = document.getElementById('showReport');
+        const soundControl = document.getElementById('soundControl');
+        const gameControls = document.getElementById('gameControls');
+        const gameThemeDisplay = document.getElementById('gameThemeDisplay');
+        const questionNumber = document.getElementById('questionNumber');
+        const currentQuestionEl = document.getElementById('currentQuestion');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const correctAnswerEl = document.getElementById('correctAnswer');
+        const timerEl = document.getElementById('timer');
+        const currentPlayerEl = document.getElementById('currentPlayer');
+        const podiumEl = document.getElementById('podium');
+        const playersListEl = document.getElementById('playersList');
+        let audioContext;
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Web Audio API not supported');
+            }
+            startGameBtn.addEventListener('click', startGame);
+            nextQuestionBtn.addEventListener('click', nextQuestion);
+            endGameBtn.addEventListener('click', endGame);
+            showReportBtn.addEventListener('click', showReport);
+            soundControl.addEventListener('click', toggleSound);
+            document.body.addEventListener('click', unlockAudio, { once: true });
+        });
+        function unlockAudio() {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }
+
+        // === 音效函數 ===
+        function playCorrectSound() {
+            if (!gameState.isSoundEnabled || !audioContext) return;
+            const o = audioContext.createOscillator();
+            const g = audioContext.createGain();
+            o.connect(g);
+            g.connect(audioContext.destination);
+            o.type = 'sine';
+            o.frequency.setValueAtTime(800, audioContext.currentTime);
+            o.frequency.setValueAtTime(1200, audioContext.currentTime + 0.2);
+            g.gain.setValueAtTime(0.2, audioContext.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            o.start();
+            o.stop(audioContext.currentTime + 0.5);
+        }
+        function playIncorrectSound() {
+            if (!gameState.isSoundEnabled || !audioContext) return;
+            const o = audioContext.createOscillator();
+            const g = audioContext.createGain();
+            o.connect(g);
+            g.connect(audioContext.destination);
+            o.type = 'sawtooth';
+            o.frequency.setValueAtTime(200, audioContext.currentTime);
+            o.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.3);
+            g.gain.setValueAtTime(0.15, audioContext.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            o.start();
+            o.stop(audioContext.currentTime + 0.3);
+        }
+        function playTimeUpSound() {
+            if (!gameState.isSoundEnabled || !audioContext) return;
+            const o = audioContext.createOscillator();
+            const g = audioContext.createGain();
+            o.connect(g);
+            g.connect(audioContext.destination);
+            o.type = 'square';
+            o.frequency.setValueAtTime(150, audioContext.currentTime);
+            g.gain.setValueAtTime(0.1, audioContext.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+            o.start();
+            o.stop(audioContext.currentTime + 0.4);
+        }
+
+        // 已有函數：playConfettiSound / playApplauseSound / playExplosionSound 保留不變
+        function playConfettiSound() {
+            if (!gameState.isSoundEnabled || !audioContext) return;
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const o = audioContext.createOscillator();
+                    const g = audioContext.createGain();
+                    o.connect(g);
+                    g.connect(audioContext.destination);
+                    o.frequency.setValueAtTime(500 + Math.random() * 500, audioContext.currentTime);
+                    o.type = 'sine';
+                    g.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    o.start();
+                    o.stop(audioContext.currentTime + 0.5);
+                }, i * 100);
+            }
+        }
+        function playApplauseSound() {
+            if (!gameState.isSoundEnabled || !audioContext) return;
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const o = audioContext.createOscillator();
+                    const g = audioContext.createGain();
+                    o.connect(g);
+                    g.connect(audioContext.destination);
+                    o.frequency.setValueAtTime(100 + Math.random() * 1000, audioContext.currentTime);
+                    o.type = 'square';
+                    const vol = 0.05 + Math.random() * 0.1;
+                    g.gain.setValueAtTime(vol, audioContext.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1 + Math.random() * 0.2);
+                    o.start();
+                    o.stop(audioContext.currentTime + 0.1 + Math.random() * 0.2);
+                }, i * 50);
+            }
+        }
+        function playExplosionSound() {
+            if (!gameState.isSoundEnabled || !audioContext) return;
+            const o = audioContext.createOscillator();
+            const g = audioContext.createGain();
+            o.connect(g);
+            g.connect(audioContext.destination);
+            o.frequency.setValueAtTime(100, audioContext.currentTime);
+            o.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.5);
+            o.type = 'sawtooth';
+            g.gain.setValueAtTime(0.5, audioContext.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            o.start();
+            o.stop(audioContext.currentTime + 0.5);
+        }
+
+        function toggleSound() {
+            gameState.isSoundEnabled = !gameState.isSoundEnabled;
+            const icon = soundControl.querySelector('i');
+            icon.className = gameState.isSoundEnabled ? 'fas fa-volume-up' : 'fas fa-volume-mute';
+            if (gameState.isSoundEnabled && audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }
+
+        // === 遊戲邏輯 ===
+        function startGame() {
+            gameState.gameTheme = gameThemeInput.value.trim();
+            if (!gameState.gameTheme) {
+                alert('Please enter a game theme!');
+                return;
+            }
+            if (!loadQuestions()) {
+                alert('Please enter questions correctly!');
+                return;
+            }
+            if (!loadPlayers()) {
+                alert('Please enter at least one participant!');
+                return;
+            }
+            gameState.gameMode = gameModeSelect.value;
+            gameState.answerTime = parseInt(answerTimeInput.value);
+            if (gameState.gameMode === 'team' && gameState.players.length < 3) {
+                alert('Team mode requires at least 3 players!');
+                return;
+            }
+            if (gameState.gameMode === 'team') {
+                assignTeamNames();
+            }
+            gameState.currentQuestionIndex = 0;
+            gameState.currentPlayerIndex = 0;
+            gameState.isGameActive = true;
+            shuffleQuestions();
+            shufflePlayers();
+            gameThemeDisplay.textContent = gameState.gameTheme;
+            updatePlayersList();
+            displayQuestion();
+            gameControls.style.display = 'flex';
+            startGameBtn.style.display = 'none';
+            document.body.classList.add('game-started');
+            alert('Game started!');
+        }
+
+        function loadQuestions() {
+            const input = questionsInput.value.trim();
+            if (!input) return false;
+            const lines = input.split('\n');
+            gameState.questions = [];
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+                const parts = line.split('\t');
+                if (parts.length < 3) continue;
+                const question = {
+                    text: parts[0].trim(),
+                    options: [],
+                    correctAnswer: parts[parts.length - 1].trim()
+                };
+                for (let i = 1; i < Math.min(5, parts.length - 1); i++) {
+                    if (parts[i].trim()) {
+                        question.options.push(parts[i].trim());
+                    }
+                }
+                if (question.options.length < 2) continue;
+                gameState.questions.push(question);
+                if (!gameState.questionStats[question.text]) {
+                    gameState.questionStats[question.text] = {
+                        correct: 0,
+                        incorrect: 0,
+                        correctAnswer: question.correctAnswer
+                    };
+                }
+            }
+            return gameState.questions.length > 0;
+        }
+
+        function loadPlayers() {
+            const input = playersInput.value.trim();
+            if (!input) return false;
+            const lines = input.split('\n');
+            gameState.players = [];
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+                const player = {
+                    id: Date.now() + Math.random(),
+                    name: line,
+                    score: 0,
+                    answers: 0,
+                    correctAnswers: 0,
+                    team: null
+                };
+                gameState.players.push(player);
+                gameState.playerStats[player.name] = { answers: 0, correctAnswers: 0 };
+            }
+            return gameState.players.length > 0;
+        }
+
+        function assignTeamNames() {
+            gameState.usedTeamNames = [];
+            const shuffled = [...gameState.teamNames].sort(() => Math.random() - 0.5);
+            const teamCount = Math.ceil(gameState.players.length / 3);
+            const perTeam = Math.ceil(gameState.players.length / teamCount);
+            gameState.players.forEach((p, i) => {
+                const teamIndex = Math.floor(i / perTeam);
+                if (teamIndex < shuffled.length) {
+                    p.team = shuffled[teamIndex];
+                    if (!gameState.usedTeamNames.includes(shuffled[teamIndex])) {
+                        gameState.usedTeamNames.push(shuffled[teamIndex]);
+                    }
+                }
+            });
+        }
+
+        function shuffleQuestions() {
+            for (let i = gameState.questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [gameState.questions[i], gameState.questions[j]] = [gameState.questions[j], gameState.questions[i]];
+            }
+        }
+
+        function shufflePlayers() {
+            for (let i = gameState.players.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [gameState.players[i], gameState.players[j]] = [gameState.players[j], gameState.players[i]];
+            }
+        }
+
+        function displayQuestion() {
+            if (gameState.currentQuestionIndex >= gameState.questions.length) {
+                endGame();
+                return;
+            }
+            const q = gameState.questions[gameState.currentQuestionIndex];
+            currentQuestionEl.textContent = q.text;
+            questionNumber.textContent = `問題 ${gameState.currentQuestionIndex + 1} / ${gameState.questions.length} Question ${gameState.currentQuestionIndex + 1} of ${gameState.questions.length}`;
+            correctAnswerEl.textContent = '';
+            optionsContainer.innerHTML = '';
+            q.options.forEach((opt, idx) => {
+                const el = document.createElement('div');
+                el.className = 'option';
+                const letter = ['A', 'B', 'C', 'D'][idx];
+                el.innerHTML = `<strong>${letter}. </strong>${opt}`;
+                el.addEventListener('click', () => checkAnswer(opt, q.correctAnswer, el));
+                optionsContainer.appendChild(el);
+            });
+            selectCurrentPlayer();
+            startTimer();
+        }
+
+        function selectCurrentPlayer() {
+            const player = gameState.players[gameState.currentPlayerIndex % gameState.players.length];
+            const teamStr = player.team ? ` (${player.team.en} / ${player.team.zh})` : '';
+            currentPlayerEl.textContent = `當前玩家: ${player.name}${teamStr}`;
+            updatePlayersList();
+        }
+
+        function startTimer() {
+            let t = gameState.answerTime;
+            timerEl.textContent = t;
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+            gameState.timerInterval = setInterval(() => {
+                t--;
+                timerEl.textContent = t;
+                if (t <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    timeUp();
+                }
+            }, 1000);
+        }
+
+        function checkAnswer(selected, correct, el) {
+            clearInterval(gameState.timerInterval);
+            const isCorrect = selected === correct;
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex % gameState.players.length];
+            currentPlayer.answers++;
+            gameState.playerStats[currentPlayer.name].answers++;
+            gameState.questionStats[gameState.questions[gameState.currentQuestionIndex].text][isCorrect ? 'correct' : 'incorrect']++;
+            correctAnswerEl.textContent = `正確答案: ${correct} Correct Answer: ${correct}`;
+            if (isCorrect) {
+                playCorrectSound(); // ✅ 新增音效
+                currentPlayer.score += 10;
+                currentPlayer.correctAnswers++;
+                gameState.playerStats[currentPlayer.name].correctAnswers++;
+                if (Math.random() < 0.3) {
+                    setTimeout(() => applyBonus(currentPlayer), 1500);
+                }
+            } else {
+                playIncorrectSound(); // ✅ 新增音效
+                currentPlayer.score = Math.max(-100, currentPlayer.score - 5);
+                if (Math.random() < 0.3) {
+                    setTimeout(() => applyPenalty(currentPlayer), 1500);
+                }
+            }
+            document.querySelectorAll('.option').forEach(opt => {
+                if (opt.textContent.replace(/^[A-D]\.\s*/, '') === correct) {
+                    opt.classList.add('correct');
+                } else if (opt === el && !isCorrect) {
+                    opt.classList.add('incorrect');
+                }
+                opt.style.pointerEvents = 'none';
+            });
+            updatePlayersList();
+            gameState.currentPlayerIndex++;
+        }
+
+        function timeUp() {
+            playTimeUpSound(); // ✅ 新增時間到音效
+            const q = gameState.questions[gameState.currentQuestionIndex];
+            correctAnswerEl.textContent = `正確答案: ${q.correctAnswer} Correct Answer: ${q.correctAnswer}`;
+            document.querySelectorAll('.option').forEach(opt => {
+                if (opt.textContent.replace(/^[A-D]\.\s*/, '') === q.correctAnswer) {
+                    opt.classList.add('correct');
+                }
+                opt.style.pointerEvents = 'none';
+            });
+            gameState.currentPlayerIndex++;
+        }
+
+        function nextQuestion() {
+            if (!gameState.isGameActive) return;
+            gameState.currentQuestionIndex++;
+            displayQuestion();
+        }
+
+        function endGame() {
+            gameState.isGameActive = false;
+            clearInterval(gameState.timerInterval);
+            currentQuestionEl.textContent = '遊戲結束! Game Over!';
+            optionsContainer.innerHTML = '';
+            correctAnswerEl.textContent = '';
+            timerEl.textContent = '0';
+            currentPlayerEl.textContent = '';
+            gameControls.style.display = 'none';
+            showReportBtn.style.display = 'block';
+            showPodium();
+        }
+
+        function applyBonus(player) {
+            playConfettiSound(); // 已有音效，保留
+            playApplauseSound(); // 已有音效，保留
+            createConfetti();
+            // ... (bonus logic unchanged) ...
+            const bonuses = [
+                { type: 'double', text: '分數加倍! Score doubled!' },
+                { type: 'steal', text: '從其他玩家偷取分數! Steal points from another player!' },
+                { type: 'swap', text: '與其他玩家交換分數! Swap scores with another player!' }
+            ];
+            const bonus = bonuses[Math.floor(Math.random() * bonuses.length)];
+            const notification = document.createElement('div');
+            notification.className = 'bonus-notification';
+            notification.innerHTML = `<div style="font-size: 2.5rem; margin-bottom: 15px;">🎉 🎊</div><div>${player.name} 獲得加分! got bonus!</div><div style="font-size: 1.5rem; margin-top: 10px;">${bonus.text}</div>`;
+            document.body.appendChild(notification);
+            switch (bonus.type) {
+                case 'double': player.score *= 2; break;
+                case 'steal':
+                    const others = gameState.players.filter(p => p.id !== player.id);
+                    if (others.length > 0) {
+                        const target = others[Math.floor(Math.random() * others.length)];
+                        const amt = Math.floor(target.score * [0.1, 0.2, 0.5][Math.floor(Math.random() * 3)]);
+                        target.score = Math.max(-100, target.score - amt);
+                        player.score += amt;
+                    }
+                    break;
+                case 'swap':
+                    const top = [...gameState.players].sort((a, b) => b.score - a.score)[0];
+                    if (top.id !== player.id) {
+                        const tmp = player.score;
+                        player.score = top.score;
+                        top.score = tmp;
+                        notification.innerHTML = `<div style="font-size: 2.5rem; margin-bottom: 15px;">🎉 🎊</div><div>${player.name} 獲得加分! got bonus!</div><div style="font-size: 1.5rem; margin-top: 10px;">與 ${top.name} 交換分數! Swapped scores with ${top.name}!</div>`;
+                    }
+                    break;
+            }
+            updatePlayersList();
+            setTimeout(() => notification.remove(), 5000);
+        }
+
+        function applyPenalty(player) {
+            playExplosionSound(); // 已有音效，保留
+            createExplosion();
+            // ... (penalty logic unchanged) ...
+            const penalties = [
+                { type: 'losePercentage', text: '失去部分分數! Lost some points!' },
+                { type: 'zero', text: '分數歸零! Score reset to zero!' }
+            ];
+            const penalty = penalties[Math.floor(Math.random() * penalties.length)];
+            const notification = document.createElement('div');
+            notification.className = 'penalty-notification';
+            notification.innerHTML = `<div style="font-size: 2.5rem; margin-bottom: 15px;">💥 💣</div><div>${player.name} 受到處罰! got penalty!</div><div style="font-size: 1.5rem; margin-top: 10px;">${penalty.text}</div>`;
+            document.body.appendChild(notification);
+            switch (penalty.type) {
+                case 'losePercentage':
+                    player.score = Math.floor(player.score * (1 - [0.1, 0.2, 0.5][Math.floor(Math.random() * 3)]));
+                    break;
+                case 'zero':
+                    player.score = 0;
+                    notification.innerHTML = `<div style="font-size: 2.5rem; margin-bottom: 15px;">💥 💣</div><div>${player.name} 受到處罰! got penalty!</div><div style="font-size: 1.5rem; margin-top: 10px;">分數歸零! Score ZEROED!</div>`;
+                    break;
+            }
+            updatePlayersList();
+            setTimeout(() => notification.remove(), 5000);
+        }
+
+        function createConfetti() {
+            const colors = ['#5b8c85', '#74a69a', '#8fbc8f', '#a8d5ba', '#c8e6c9', '#e8f5e8'];
+            for (let i = 0; i < 150; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                c.style.left = Math.random() * 100 + 'vw';
+                c.style.top = '-10px';
+                c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                c.style.transform = `rotate(${Math.random() * 360}deg)`;
+                document.body.appendChild(c);
+                const anim = c.animate([
+                    { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
+                    { transform: `translate(${Math.random() * 200 - 100}px, ${window.innerHeight}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+                ], { duration: 3000 + Math.random() * 2000, easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)' });
+                anim.onfinish = () => c.remove();
+            }
+        }
+
+        function createExplosion() {
+            for (let i = 0; i < 50; i++) {
+                const e = document.createElement('div');
+                e.className = 'explosion';
+                e.style.left = Math.random() * 100 + 'vw';
+                e.style.top = Math.random() * 100 + 'vh';
+                document.body.appendChild(e);
+                const anim = e.animate([
+                    { transform: 'scale(0)', opacity: 1 },
+                    { transform: 'scale(1)', opacity: 0 }
+                ], { duration: 1000 + Math.random() * 500, easing: 'ease-out' });
+                anim.onfinish = () => e.remove();
+            }
+        }
+
+        function showPodium() {
+            let sorted = gameState.gameMode === 'team'
+                ? [...gameState.players].sort((a, b) => {
+                    const teamA = gameState.players.filter(p => p.team?.en === a.team?.en).reduce((s, p) => s + p.score, 0);
+                    const teamB = gameState.players.filter(p => p.team?.en === b.team?.en).reduce((s, p) => s + p.score, 0);
+                    return teamB - teamA || b.score - a.score;
+                  })
+                : [...gameState.players].sort((a, b) => b.score - a.score);
+            podiumEl.innerHTML = '';
+            podiumEl.style.display = 'flex';
+            for (let i = 0; i < Math.min(3, sorted.length); i++) {
+                const p = sorted[i];
+                const cls = i === 0 ? 'first-place' : i === 1 ? 'second-place' : 'third-place';
+                const rank = i === 0 ? '第1名 1st' : i === 1 ? '第2名 2nd' : '第3名 3rd';
+                const div = document.createElement('div');
+                div.className = `podium-place ${cls}`;
+                div.innerHTML = `<div class="podium-rank">${rank}</div><div class="podium-name">${p.name}</div><div class="podium-score">${p.score} 分 pts</div>${p.team ? `<div class="player-group">${p.team.en} / ${p.team.zh}</div>` : ''}`;
+                podiumEl.appendChild(div);
+            }
+            playersListEl.innerHTML = '';
+            for (let i = 3; i < sorted.length; i++) {
+                const p = sorted[i];
+                const li = document.createElement('li');
+                li.className = 'player';
+                li.innerHTML = `<div><div class="player-name">${i+1}. ${p.name}</div>${p.team ? `<div class="player-group">${p.team.en} / ${p.team.zh}</div>` : ''}</div><div class="player-score">${p.score} 分 pts</div>`;
+                playersListEl.appendChild(li);
+            }
+        }
+
+        function updatePlayersList() {
+            playersListEl.innerHTML = '';
+            if (gameState.gameMode === 'team') {
+                const teams = {};
+                gameState.players.forEach(p => {
+                    if (!teams[p.team?.en]) teams[p.team?.en] = [];
+                    teams[p.team?.en].push(p);
+                });
+                const scores = {};
+                Object.keys(teams).forEach(t => {
+                    scores[t] = teams[t].reduce((sum, p) => sum + p.score, 0);
+                });
+                const sortedTeams = Object.keys(teams).sort((a, b) => scores[b] - scores[a]);
+                sortedTeams.forEach(t => {
+                    const header = document.createElement('li');
+                    header.className = 'player';
+                    header.style.background = 'rgba(255, 255, 255, 0.5)';
+                    const teamObj = gameState.teamNames.find(x => x.en === t);
+                    header.innerHTML = `<div><div class="player-name">${t} / ${teamObj?.zh || ''}</div></div><div class="player-score">${scores[t]} 分 pts</div>`;
+                    playersListEl.appendChild(header);
+                    teams[t].sort((a, b) => b.score - a.score).forEach(p => {
+                        const isCurrent = gameState.players[gameState.currentPlayerIndex % gameState.players.length].id === p.id;
+                        const el = document.createElement('li');
+                        el.className = `player ${isCurrent ? 'current-player' : ''}`;
+                        el.innerHTML = `<div><div class="player-name">${p.name}</div></div><div class="player-score">${p.score} 分 pts</div>`;
+                        playersListEl.appendChild(el);
+                    });
+                });
+            } else {
+                const sorted = [...gameState.players].sort((a, b) => b.score - a.score);
+                sorted.forEach((p, i) => {
+                    const isCurrent = gameState.players[gameState.currentPlayerIndex % gameState.players.length].id === p.id;
+                    const el = document.createElement('li');
+                    el.className = `player ${isCurrent ? 'current-player' : ''}`;
+                    el.innerHTML = `<div><div class="player-name">${i+1}. ${p.name}</div></div><div class="player-score">${p.score} 分 pts</div>`;
+                    playersListEl.appendChild(el);
+                });
+            }
+        }
+
+        function showReport() {
+            let totalAns = 0, totalCor = 0;
+            for (let name in gameState.playerStats) {
+                totalAns += gameState.playerStats[name].answers;
+                totalCor += gameState.playerStats[name].correctAnswers;
+            }
+            const acc = totalAns > 0 ? (totalCor / totalAns * 100).toFixed(2) : 0;
+            const badQs = [];
+            for (let q in gameState.questionStats) {
+                const s = gameState.questionStats[q];
+                const total = s.correct + s.incorrect;
+                if (total > 0 && (s.incorrect / total) > 0.5) {
+                    badQs.push({ text: q, rate: ((s.incorrect / total) * 100).toFixed(2), ans: s.correctAnswer });
+                }
+            }
+            let html = `<h2 class="panel-title"><i class="fas fa-chart-bar"></i> 遊戲報告 Game Report</h2>
+                <div style="margin-bottom:20px;"><h3>總體統計 Overall Statistics</h3><p>總答題數: ${totalAns} Total Answers: ${totalAns}</p><p>總體準確率: ${acc}% Overall Accuracy: ${acc}%</p></div>
+                <div style="margin-bottom:20px;"><h3>玩家表現 Player Performance</h3><table class="report-table"><thead><tr><th>玩家 Player</th><th>分數 Score</th><th>答題數 Answers</th><th>正確數 Correct</th><th>準確率 Accuracy</th></tr></thead><tbody>`;
+            let sorted = gameState.gameMode === 'team'
+                ? [...gameState.players].sort((a, b) => {
+                    const tsA = gameState.players.filter(p => p.team?.en === a.team?.en).reduce((s, p) => s + p.score, 0);
+                    const tsB = gameState.players.filter(p => p.team?.en === b.team?.en).reduce((s, p) => s + p.score, 0);
+                    return tsB - tsA || b.score - a.score;
+                  })
+                : [...gameState.players].sort((a, b) => b.score - a.score);
+            sorted.forEach(p => {
+                const s = gameState.playerStats[p.name];
+                const accP = s.answers > 0 ? (s.correctAnswers / s.answers * 100).toFixed(2) : 0;
+                const teamStr = p.team ? ` (${p.team.en} / ${p.team.zh})` : '';
+                html += `<tr><td>${p.name}${teamStr}</td><td>${p.score}</td><td>${s.answers}</td><td>${s.correctAnswers}</td><td>${accP}%</td></tr>`;
+            });
+            html += `</tbody></table></div>`;
+            if (badQs.length > 0) {
+                html += `<div><h3>高錯誤率問題 Questions with High Error Rate</h3><table class="report-table"><thead><tr><th>問題 Question</th><th>錯誤率 Error Rate</th><th>正確答案 Correct Answer</th></tr></thead><tbody>`;
+                badQs.forEach(q => {
+                    html += `<tr><td>${q.text}</td><td>${q.rate}%</td><td>${q.ans}</td></tr>`;
+                });
+                html += `</tbody></table></div>`;
+            }
+            document.querySelector('.question-area').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
