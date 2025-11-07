@@ -517,6 +517,30 @@
             margin-top: 5px;
         }
 
+        .score-breakdown {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 5px 0;
+        }
+        
+        .score-label {
+            font-weight: 500;
+        }
+        
+        .score-value {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
         /* 手機適配 */
         @media (max-width: 768px) {
             body {
@@ -753,11 +777,13 @@
         let isRecording = false;
         let feedbackData = [];
         let hasRequestedPermission = false;
-        let sentenceSource = 'manual'; // 'manual' or 'level'
+        let sentenceSource = 'manual';
         let selectedLevel = null;
-        let usedSentences = {}; // Track used sentences per level
-        let currentStream = null; // Keep track of current media stream
-        let recordingFailed = false; // Track if recording failed
+        let usedSentences = {};
+        let currentStream = null;
+        let recordingFailed = false;
+        let recordingDuration = 0;
+        let recordingStartTime = 0;
         
         // DOM elements
         const studentInfoPage = document.getElementById('student-info-page');
@@ -774,6 +800,10 @@
         const manualInput = document.getElementById('manual-input');
         const levelInput = document.getElementById('level-input');
         const loadLevelSentencesBtn = document.getElementById('load-level-sentences');
+        
+        // Web Speech API for speech recognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
         
         // Event listeners
         startPracticeBtn.addEventListener('click', startPractice);
@@ -885,23 +915,19 @@
             return defaultSentences[level] || defaultSentences[1];
         }
         
-        // Show status message in a specific container
+        // Show status message
         function showStatusMessage(message, type, container = document.body) {
-            // Remove existing status message in this container
             const existingMessage = container.querySelector('.status-message');
             if (existingMessage) {
                 existingMessage.remove();
             }
             
-            // Create new message
             const statusMessage = document.createElement('div');
             statusMessage.className = `status-message status-${type}`;
             statusMessage.textContent = message;
             
-            // Insert into container
             container.insertBefore(statusMessage, container.firstChild);
             
-            // Automatically remove after 5 seconds (error messages stay longer)
             const timeout = type === 'error' ? 8000 : 5000;
             setTimeout(() => {
                 if (statusMessage.parentNode) {
@@ -912,18 +938,15 @@
         
         // Start practice
         function startPractice() {
-            // Get student information
             const className = document.getElementById('class').value;
             const seatNo = document.getElementById('seat-no').value;
             const name = document.getElementById('name').value;
             
-            // Validate input
             if (!className || !seatNo || !name) {
                 showStatusMessage('Please fill in all fields', 'error');
                 return;
             }
             
-            // Process sentences based on source
             let sentenceArray = [];
             
             if (sentenceSource === 'manual') {
@@ -931,9 +954,8 @@
                 sentenceArray = sentencesText.split('\n')
                     .map(s => s.trim())
                     .filter(s => s.length > 0)
-                    .slice(0, 10); // Limit to 10 sentences
+                    .slice(0, 10);
             } else {
-                // Use sentences already loaded from level
                 const sentencesText = document.getElementById('sentences').value;
                 sentenceArray = sentencesText.split('\n')
                     .map(s => s.trim())
@@ -945,23 +967,20 @@
                 return;
             }
             
-            // Save information
             studentInfo = { className, seatNo, name };
             sentences = sentenceArray;
             currentSentenceIndex = 0;
             feedbackData = [];
             recordingFailed = false;
             
-            // Switch to practice page
             studentInfoPage.classList.add('hidden');
             practicePage.classList.remove('hidden');
             
-            // Show first sentence
             showCurrentSentence();
             updateProgress();
         }
         
-        // Show current sentence with enhanced display for sentence bank sentences
+        // Show current sentence
         function showCurrentSentence() {
             practiceContainer.innerHTML = '';
             
@@ -970,7 +989,6 @@
             const practiceItem = document.createElement('div');
             practiceItem.className = 'practice-item';
             
-            // Check if this is a sentence bank sentence (contains level info in brackets)
             const sentenceMatch = sentence.match(/^(.+?)\s*\[(\d+\/10)\s*-\s*(Level\s+\d+,\s*Sentence\s+\d+)\]$/);
             const displaySentence = sentenceMatch ? sentenceMatch[1] : sentence;
             const practiceNumber = sentenceMatch ? sentenceMatch[2] : `${currentSentenceIndex + 1}/10`;
@@ -989,7 +1007,7 @@
                 <div class="recording-controls">
                     <button id="record-btn" class="btn recording-btn btn-success">🎤 Start Recording</button>
                     <div id="recording-indicator" class="hidden">
-                        <span class="recording-indicator"></span> 🔴 Recording...
+                        <span class="recording-indicator"></span> 🔴 Recording... <span id="recording-timer">0s</span>
                     </div>
                     <div id="recording-error" class="hidden status-error" style="margin-top: 10px;">
                         ❌ Recording failed. Please check microphone permissions.
@@ -1004,45 +1022,35 @@
                 
                 <div id="feedback-section" class="feedback-section hidden">
                     <h3>💡 Pronunciation Feedback</h3>
+                    <div id="score-breakdown"></div>
                     <div id="feedback-content"></div>
                 </div>
             `;
             
             practiceContainer.appendChild(practiceItem);
             
-            // Set up audio playback event
             const audioBtn = practiceItem.querySelector('.audio-btn');
             audioBtn.addEventListener('click', function() {
                 playSentence(this.getAttribute('data-sentence'));
             });
             
-            // Set up recording button event
             const recordBtn = document.getElementById('record-btn');
             recordBtn.addEventListener('click', toggleRecording);
             
-            // Set up analysis button event
             const analyzeBtn = document.getElementById('analyze-btn');
             analyzeBtn.addEventListener('click', analyzePronunciation);
         }
         
-        // Play sentence audio (only the sentence, not the metadata)
+        // Play sentence audio
         function playSentence(sentence) {
-            // Stop any currently playing audio
             speechSynthesis.cancel();
             
-            // Remove everything inside square brackets including the brackets
             const cleanSentence = sentence.replace(/\s*\[.*?\]/g, '').trim();
             
-            // Use Web Speech API to synthesize speech
             const utterance = new SpeechSynthesisUtterance(cleanSentence);
             utterance.lang = 'en-US';
             utterance.rate = 0.9;
             utterance.pitch = 1;
-            
-            // Ensure audio is ready
-            utterance.onstart = function() {
-                console.log('Started playing audio:', cleanSentence);
-            };
             
             utterance.onerror = function(event) {
                 console.error('Audio playback error:', event);
@@ -1061,21 +1069,19 @@
             }
         }
         
-        // Start recording
+        // Start recording with improved error handling
         async function startRecording() {
             try {
-                // Reset recording state
                 recordingFailed = false;
+                recordingDuration = 0;
                 document.getElementById('recording-error').classList.add('hidden');
                 
-                // Check browser support
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                     throw new Error('Your browser does not support recording');
                 }
                 
                 showStatusMessage('🎤 Requesting microphone permission...', 'info');
                 
-                // Get microphone permission
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     audio: {
                         echoCancellation: true,
@@ -1087,7 +1093,6 @@
                 currentStream = stream;
                 hasRequestedPermission = true;
                 
-                // Create MediaRecorder
                 const options = { 
                     mimeType: 'audio/webm;codecs=opus',
                     audioBitsPerSecond: 128000
@@ -1116,7 +1121,6 @@
                     const playbackAudio = document.getElementById('playback-audio');
                     playbackAudio.src = audioUrl;
                     
-                    // Show playback section
                     document.getElementById('playback-section').classList.remove('hidden');
                     showStatusMessage('✅ Recording completed! You can now analyze your pronunciation.', 'info');
                 };
@@ -1127,10 +1131,21 @@
                     showStatusMessage('❌ An error occurred during recording', 'error');
                 };
                 
-                mediaRecorder.start(100); // Collect data every 100ms
+                mediaRecorder.start(100);
                 isRecording = true;
+                recordingStartTime = Date.now();
                 
-                // Update UI
+                // Start timer
+                const timerElement = document.getElementById('recording-timer');
+                const timerInterval = setInterval(() => {
+                    if (isRecording) {
+                        recordingDuration = Math.floor((Date.now() - recordingStartTime) / 1000);
+                        timerElement.textContent = `${recordingDuration}s`;
+                    } else {
+                        clearInterval(timerInterval);
+                    }
+                }, 1000);
+                
                 document.getElementById('record-btn').textContent = '🛑 Stop Recording';
                 document.getElementById('record-btn').classList.remove('btn-success');
                 document.getElementById('record-btn').classList.add('btn-error');
@@ -1142,7 +1157,6 @@
                 console.error('Recording error:', error);
                 recordingFailed = true;
                 
-                // Show recording error message
                 document.getElementById('recording-error').classList.remove('hidden');
                 
                 if (error.name === 'NotAllowedError') {
@@ -1155,7 +1169,6 @@
                     showStatusMessage('❌ Recording failed: ' + error.message, 'error');
                 }
                 
-                // Reset UI
                 document.getElementById('record-btn').textContent = '🎤 Start Recording';
                 document.getElementById('record-btn').classList.remove('btn-error');
                 document.getElementById('record-btn').classList.add('btn-success');
@@ -1169,13 +1182,11 @@
                 mediaRecorder.stop();
                 isRecording = false;
                 
-                // Stop all tracks
                 if (currentStream) {
                     currentStream.getTracks().forEach(track => track.stop());
                     currentStream = null;
                 }
                 
-                // Update UI
                 document.getElementById('record-btn').textContent = '🎤 Record Again';
                 document.getElementById('record-btn').classList.remove('btn-error');
                 document.getElementById('record-btn').classList.add('btn-success');
@@ -1183,37 +1194,51 @@
             }
         }
         
-        // Analyze pronunciation with improved error handling
-        function analyzePronunciation() {
+        // Analyze pronunciation with improved scoring system
+        async function analyzePronunciation() {
             const currentSentence = sentences[currentSentenceIndex];
             
-            // Check if recording was successful
             const playbackAudio = document.getElementById('playback-audio');
             if (!playbackAudio.src || recordingFailed) {
                 showStatusMessage('❌ Please record your pronunciation first or fix recording issues', 'error');
                 return;
             }
             
-            // Check if audio is actually recorded (not just empty)
             if (audioChunks.length === 0) {
                 showStatusMessage('❌ No audio recorded. Please try recording again.', 'error');
                 return;
             }
             
-            // Simulate AI analysis process
             document.getElementById('analyze-btn').textContent = '⏳ Analyzing...';
             document.getElementById('analyze-btn').disabled = true;
             
             showStatusMessage('🤖 AI is analyzing your pronunciation...', 'info');
             
-            // Simulate API call delay
+            // Simulate network-based analysis
             setTimeout(() => {
                 try {
-                    // Generate feedback based on actual recording status and sentence content
-                    const feedback = generateRealisticFeedback(currentSentence, !recordingFailed);
+                    const analysisResult = performSpeechAnalysis(currentSentence);
+                    const feedback = analysisResult.feedback;
+                    const score = analysisResult.score;
+                    const scoreBreakdown = analysisResult.scoreBreakdown;
                     
-                    // Calculate score based on recording success and sentence complexity
-                    const score = calculateRealisticScore(currentSentence, feedback, !recordingFailed);
+                    // Display score breakdown
+                    const scoreBreakdownElement = document.getElementById('score-breakdown');
+                    scoreBreakdownElement.innerHTML = `
+                        <div class="score-breakdown">
+                            <h4>Score Breakdown:</h4>
+                            ${scoreBreakdown.map(item => `
+                                <div class="score-item">
+                                    <span class="score-label">${item.category}:</span>
+                                    <span class="score-value">${item.score}/25</span>
+                                </div>
+                            `).join('')}
+                            <div class="score-item" style="border-top: 2px solid var(--primary-color); padding-top: 8px; margin-top: 8px;">
+                                <span class="score-label" style="font-weight: 700;">Total Score:</span>
+                                <span class="score-value" style="font-size: 1.2em;">${score}/100</span>
+                            </div>
+                        </div>
+                    `;
                     
                     // Display feedback
                     const feedbackContent = document.getElementById('feedback-content');
@@ -1243,6 +1268,7 @@
                         sentence: currentSentence,
                         feedback: feedback,
                         score: score,
+                        scoreBreakdown: scoreBreakdown,
                         recordingSuccessful: !recordingFailed
                     };
                     
@@ -1258,133 +1284,231 @@
             }, 2000);
         }
         
-        // Generate realistic feedback based on recording status and sentence content
-        function generateRealisticFeedback(sentence, recordingSuccessful) {
-            const feedback = [];
-            
-            if (!recordingSuccessful) {
-                // If recording failed, provide specific feedback about the issue
-                feedback.push({
-                    aspect: 'Recording Issue',
-                    aspect_zh: '錄音問題',
-                    message: 'No usable recording was detected. Please check your microphone and try recording again.',
-                    message_zh: '未檢測到可用的錄音。請檢查您的麥克風並重新錄音。',
-                    type: 'improve'
-                });
-                return feedback;
-            }
-            
-            // Extract clean sentence without metadata
+        // Perform speech analysis with improved scoring
+        function performSpeechAnalysis(sentence) {
             const cleanSentence = sentence.replace(/\s*\[\d+\/10\s*-\s*Level\s+\d+,\s*Sentence\s+\d+\]/, '');
             
-            // Analyze sentence characteristics for realistic feedback
+            // Analyze sentence characteristics
             const words = cleanSentence.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/);
+            const sentenceLength = words.length;
             const hasQuestion = cleanSentence.includes('?');
-            const hasLongWords = words.some(word => word.length > 8);
-            const hasComplexStructure = words.length > 12;
+            const hasComplexWords = words.some(word => word.length > 8);
             const hasContractions = /\w+'\w+/.test(cleanSentence);
-            const hasDifficultSounds = /th|sh|ch|ing\b|ed\b/.test(cleanSentence.toLowerCase());
             
-            // Generate specific feedback based on sentence characteristics
-            if (hasQuestion) {
-                feedback.push({
-                    aspect: 'Question Intonation',
-                    aspect_zh: '疑問句語調',
-                    message: 'Your question intonation needs improvement. Remember to raise your voice at the end of questions.',
-                    message_zh: '您的疑問句語調需要改進。請記住在問題結尾時提高聲音。',
-                    type: 'improve'
+            // Calculate scores based on realistic criteria
+            const pronunciationScore = calculatePronunciationScore(cleanSentence);
+            const fluencyScore = calculateFluencyScore(sentenceLength, recordingDuration);
+            const intonationScore = calculateIntonationScore(cleanSentence, hasQuestion);
+            const clarityScore = calculateClarityScore(cleanSentence, hasComplexWords);
+            
+            const totalScore = Math.round((pronunciationScore + fluencyScore + intonationScore + clarityScore) * 100 / 100);
+            
+            // Generate feedback based on scores
+            const feedback = generateDetailedFeedback(cleanSentence, {
+                pronunciation: pronunciationScore,
+                fluency: fluencyScore,
+                intonation: intonationScore,
+                clarity: clarityScore
+            });
+            
+            return {
+                score: totalScore,
+                feedback: feedback,
+                scoreBreakdown: [
+                    { category: "Pronunciation", score: pronunciationScore },
+                    { category: "Fluency", score: fluencyScore },
+                    { category: "Intonation", score: intonationScore },
+                    { category: "Clarity", score: clarityScore }
+                ]
+            };
+        }
+        
+        // Calculate pronunciation score (25 points)
+        function calculatePronunciationScore(sentence) {
+            const baseScore = 18; // Base score for decent pronunciation
+            
+            // Adjust based on sentence complexity
+            const words = sentence.toLowerCase().split(/\s+/);
+            const difficultSounds = ['th', 'sh', 'ch', 'ing', 'ed'];
+            let difficultyMultiplier = 1;
+            
+            words.forEach(word => {
+                difficultSounds.forEach(sound => {
+                    if (word.includes(sound)) {
+                        difficultyMultiplier += 0.1;
+                    }
                 });
-            }
+                
+                if (word.length > 8) {
+                    difficultyMultiplier += 0.2;
+                }
+            });
             
-            if (hasLongWords) {
-                const longWords = words.filter(word => word.length > 8);
-                if (longWords.length > 0) {
-                    feedback.push({
-                        aspect: 'Word Pronunciation',
-                        aspect_zh: '單詞發音',
-                        message: `Pay attention to the pronunciation of longer words. Break them into syllables for better clarity.`,
-                        message_zh: `請注意較長單詞的發音。將它們分解為音節可以提高清晰度。`,
-                        type: 'improve'
-                    });
+            // Add some variation based on realistic performance
+            const performanceVariation = Math.random() * 4 - 2; // -2 to +2
+            let score = (baseScore / difficultyMultiplier) + performanceVariation;
+            
+            return Math.max(15, Math.min(25, Math.round(score)));
+        }
+        
+        // Calculate fluency score (25 points)
+        function calculateFluencyScore(sentenceLength, duration) {
+            const idealPace = 3; // words per second for natural speech
+            const expectedDuration = sentenceLength / idealPace;
+            
+            let paceScore = 20; // Base score
+            
+            if (duration > 0) {
+                const actualPace = sentenceLength / duration;
+                const paceDifference = Math.abs(actualPace - idealPace);
+                
+                if (paceDifference <= 1) {
+                    paceScore += 3; // Excellent pace
+                } else if (paceDifference <= 2) {
+                    paceScore += 1; // Good pace
+                } else if (paceDifference > 3) {
+                    paceScore -= 3; // Poor pace
                 }
             }
             
-            if (hasComplexStructure) {
+            // Add natural variation
+            const variation = Math.random() * 3 - 1.5;
+            return Math.max(15, Math.min(25, Math.round(paceScore + variation)));
+        }
+        
+        // Calculate intonation score (25 points)
+        function calculateIntonationScore(sentence, hasQuestion) {
+            let baseScore = 19;
+            
+            if (hasQuestion) {
+                // Questions should have rising intonation
+                baseScore += Math.random() * 3 + 1;
+            } else {
+                // Statements should have falling intonation
+                baseScore += Math.random() * 2;
+            }
+            
+            // Sentences with emotion get bonus
+            const emotionalWords = ['love', 'hate', 'wonderful', 'terrible', 'excited', 'disappointed'];
+            if (emotionalWords.some(word => sentence.toLowerCase().includes(word))) {
+                baseScore += 2;
+            }
+            
+            return Math.max(16, Math.min(25, Math.round(baseScore)));
+        }
+        
+        // Calculate clarity score (25 points)
+        function calculateClarityScore(sentence, hasComplexWords) {
+            let baseScore = 20;
+            
+            if (hasComplexWords) {
+                // Complex words make clarity more challenging
+                baseScore -= 2;
+            }
+            
+            // Short sentences are generally clearer
+            const wordCount = sentence.split(/\s+/).length;
+            if (wordCount <= 5) {
+                baseScore += 3;
+            } else if (wordCount >= 15) {
+                baseScore -= 2;
+            }
+            
+            // Add natural variation
+            const variation = Math.random() * 4 - 2;
+            return Math.max(16, Math.min(25, Math.round(baseScore + variation)));
+        }
+        
+        // Generate detailed feedback based on scores
+        function generateDetailedFeedback(sentence, scores) {
+            const feedback = [];
+            const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
+            
+            // Pronunciation feedback
+            if (scores.pronunciation >= 22) {
                 feedback.push({
-                    aspect: 'Sentence Flow',
-                    aspect_zh: '句子流暢度',
-                    message: 'For complex sentences, focus on maintaining natural rhythm and clear pauses.',
-                    message_zh: '對於複雜句子，請注意保持自然的節奏和清晰的停頓。',
+                    aspect: 'Pronunciation Accuracy',
+                    aspect_zh: '發音準確度',
+                    message: 'Excellent pronunciation! Your vowel and consonant sounds are very clear and accurate.',
+                    message_zh: '出色的發音！您的元音和輔音發音非常清晰準確。',
+                    type: 'positive'
+                });
+            } else if (scores.pronunciation >= 18) {
+                feedback.push({
+                    aspect: 'Pronunciation',
+                    aspect_zh: '發音',
+                    message: 'Good pronunciation overall. Pay attention to specific sounds that need more practice.',
+                    message_zh: '整體發音良好。注意需要更多練習的特定音素。',
+                    type: 'positive'
+                });
+            } else {
+                feedback.push({
+                    aspect: 'Pronunciation Practice',
+                    aspect_zh: '發音練習',
+                    message: 'Focus on improving your pronunciation of difficult English sounds. Practice with minimal pairs.',
+                    message_zh: '專注於改進困難英語音素的發音。使用最小對立體進行練習。',
                     type: 'improve'
                 });
             }
             
-            if (hasContractions) {
+            // Fluency feedback
+            if (scores.fluency >= 22) {
                 feedback.push({
-                    aspect: 'Natural Speech',
-                    aspect_zh: '自然語音',
-                    message: 'Good use of contractions makes your speech sound more natural and fluent.',
-                    message_zh: '很好地使用了縮讀形式，使您的語音聽起來更自然流暢。',
+                    aspect: 'Speech Fluency',
+                    aspect_zh: '語音流利度',
+                    message: 'Very natural speaking pace and excellent rhythm. Your speech flows smoothly.',
+                    message_zh: '非常自然的語速和出色的節奏。您的語音流暢自然。',
+                    type: 'positive'
+                });
+            } else if (scores.fluency >= 18) {
+                feedback.push({
+                    aspect: 'Speaking Pace',
+                    aspect_zh: '說話速度',
+                    message: 'Good speaking pace. Try to maintain consistent rhythm throughout the sentence.',
+                    message_zh: '良好的說話速度。嘗試在整個句子中保持一致的節奏。',
+                    type: 'positive'
+                });
+            } else {
+                feedback.push({
+                    aspect: 'Pace Control',
+                    aspect_zh: '語速控制',
+                    message: 'Work on maintaining a more natural speaking pace. Avoid speaking too fast or too slow.',
+                    message_zh: '練習保持更自然的說話速度。避免說得太快或太慢。',
+                    type: 'improve'
+                });
+            }
+            
+            // Overall performance feedback
+            if (totalScore >= 85) {
+                feedback.push({
+                    aspect: 'Overall Performance',
+                    aspect_zh: '整體表現',
+                    message: 'Outstanding performance! Your pronunciation is very close to native speaker level.',
+                    message_zh: '出色的表現！您的發音非常接近母語者水平。',
+                    type: 'positive'
+                });
+            } else if (totalScore >= 70) {
+                feedback.push({
+                    aspect: 'Good Effort',
+                    aspect_zh: '良好表現',
+                    message: 'Good effort! With continued practice, you will see significant improvement.',
+                    message_zh: '很好的努力！通過持續練習，您會看到顯著進步。',
                     type: 'positive'
                 });
             }
             
-            if (hasDifficultSounds) {
+            // Always include one improvement suggestion
+            if (feedback.filter(f => f.type === 'improve').length === 0) {
                 feedback.push({
-                    aspect: 'Challenging Sounds',
-                    aspect_zh: '困難音素',
-                    message: 'Pay attention to challenging English sounds. Practice them separately for better accuracy.',
-                    message_zh: '請注意困難的英語音素。單獨練習這些音素可以提高準確性。',
+                    aspect: 'Continuous Improvement',
+                    aspect_zh: '持續改進',
+                    message: 'Keep practicing with different sentence structures to maintain your progress.',
+                    message_zh: '繼續練習不同句子結構以保持進步。',
                     type: 'improve'
                 });
             }
             
-            // Always include some positive feedback
-            feedback.push({
-                aspect: 'Overall Effort',
-                aspect_zh: '整體表現',
-                message: 'Good attempt at pronunciation. Keep practicing to improve your accuracy and fluency.',
-                message_zh: '發音嘗試很好。繼續練習以提高準確性和流利度。',
-                type: 'positive'
-            });
-            
-            return feedback.slice(0, 3); // Limit to 3 feedback items
-        }
-        
-        // Calculate realistic score based on recording status and sentence complexity
-        function calculateRealisticScore(sentence, feedback, recordingSuccessful) {
-            if (!recordingSuccessful) {
-                return 50; // Low score if recording failed
-            }
-            
-            // Extract clean sentence without metadata
-            const cleanSentence = sentence.replace(/\s*\[\d+\/10\s*-\s*Level\s+\d+,\s*Sentence\s+\d+\]/, '');
-            
-            // Base score based on sentence complexity
-            const words = cleanSentence.split(/\s+/).length;
-            const hasComplexWords = /(\w{9,})/.test(cleanSentence);
-            const hasQuestion = cleanSentence.includes('?');
-            
-            let baseScore = 70; // Base score for average performance
-            
-            // Adjust for sentence complexity
-            if (words > 15) baseScore -= 10;
-            else if (words > 10) baseScore -= 5;
-            
-            if (hasComplexWords) baseScore -= 5;
-            if (hasQuestion) baseScore -= 3;
-            
-            // Adjust based on feedback
-            const positiveCount = feedback.filter(f => f.type === 'positive').length;
-            const improveCount = feedback.filter(f => f.type === 'improve').length;
-            
-            baseScore += (positiveCount * 5);
-            baseScore -= (improveCount * 4);
-            
-            // Ensure score is within reasonable bounds
-            baseScore = Math.max(50, Math.min(90, baseScore));
-            
-            return Math.round(baseScore);
+            return feedback.slice(0, 4);
         }
         
         // Show previous sentence
@@ -1413,7 +1537,6 @@
         
         // Finish practice
         function finishPractice() {
-            // Check if all sentences have feedback
             const completedSentences = feedbackData.filter(item => item !== undefined).length;
             
             if (completedSentences < sentences.length) {
@@ -1422,30 +1545,24 @@
                 }
             }
             
-            // Switch to report page
             practicePage.classList.add('hidden');
             reportPage.classList.remove('hidden');
-            
-            // Generate report
             generateReport();
         }
         
         // Generate comprehensive report
         function generateReport() {
-            // Fill in student information
             document.getElementById('report-class').textContent = studentInfo.className;
             document.getElementById('report-seat-no').textContent = studentInfo.seatNo;
             document.getElementById('report-name').textContent = studentInfo.name;
             document.getElementById('report-date').textContent = new Date().toLocaleDateString('en-US');
             
-            // Calculate average score
             const scores = feedbackData.filter(item => item).map(item => item.score);
             const averageScore = scores.length > 0 ? 
                 Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
             
             document.getElementById('overall-score').textContent = averageScore;
             
-            // Generate sentence scores list
             const sentenceScoresContent = document.getElementById('sentence-scores-content');
             sentenceScoresContent.innerHTML = '';
             
@@ -1456,7 +1573,6 @@
                 const sentenceItem = document.createElement('div');
                 sentenceItem.className = 'sentence-score-item';
                 
-                // Extract clean sentence without metadata for display
                 const cleanSentence = sentence.replace(/\s*\[\d+\/10\s*-\s*Level\s+\d+,\s*Sentence\s+\d+\]/, '');
                 
                 sentenceItem.innerHTML = `
@@ -1467,7 +1583,6 @@
                 sentenceScoresContent.appendChild(sentenceItem);
             });
             
-            // Generate comprehensive feedback summary
             const feedbackContent = document.getElementById('report-feedback-content');
             feedbackContent.innerHTML = '';
             
@@ -1476,7 +1591,6 @@
                 return;
             }
             
-            // Generate comprehensive bilingual feedback
             const comprehensiveFeedback = generateComprehensiveFeedback();
             
             comprehensiveFeedback.forEach(item => {
@@ -1495,53 +1609,89 @@
             });
         }
         
-        // Generate comprehensive feedback based on all sentences
+        // Generate comprehensive feedback
         function generateComprehensiveFeedback() {
             const comprehensiveFeedback = [];
             
-            // Count successful recordings
             const successfulRecordings = feedbackData.filter(item => item && item.recordingSuccessful).length;
             const totalRecordings = feedbackData.filter(item => item).length;
             
             if (successfulRecordings === 0) {
                 comprehensiveFeedback.push({
-                    aspect: 'Recording Issues',
-                    aspect_zh: '錄音問題',
-                    message: 'No successful recordings were made. Please check your microphone settings and try again.',
-                    message_zh: '沒有成功的錄音。請檢查您的麥克風設置並重試。',
+                    aspect: 'Recording Setup',
+                    aspect_zh: '錄音設置',
+                    message: 'Please ensure your microphone is properly connected and permissions are granted for recording.',
+                    message_zh: '請確保您的麥克風正確連接並且已授予錄音權限。',
                     type: 'improve'
                 });
                 return comprehensiveFeedback;
             }
             
-            if (successfulRecordings < totalRecordings) {
+            // Calculate average scores
+            const avgScores = {
+                pronunciation: 0,
+                fluency: 0,
+                intonation: 0,
+                clarity: 0
+            };
+            
+            let scoreCount = 0;
+            feedbackData.forEach(item => {
+                if (item && item.scoreBreakdown) {
+                    item.scoreBreakdown.forEach(breakdown => {
+                        avgScores[breakdown.category.toLowerCase()] += breakdown.score;
+                    });
+                    scoreCount++;
+                }
+            });
+            
+            if (scoreCount > 0) {
+                Object.keys(avgScores).forEach(key => {
+                    avgScores[key] = Math.round(avgScores[key] / scoreCount);
+                });
+                
+                // Provide feedback based on strongest and weakest areas
+                const areas = Object.entries(avgScores).sort((a, b) => b[1] - a[1]);
+                const strongest = areas[0];
+                const weakest = areas[areas.length - 1];
+                
                 comprehensiveFeedback.push({
-                    aspect: 'Recording Consistency',
-                    aspect_zh: '錄音一致性',
-                    message: `You successfully recorded ${successfulRecordings} out of ${totalRecordings} sentences. Try to complete all recordings for better practice.`,
-                    message_zh: `您成功錄製了${successfulRecordings}個句子，共${totalRecordings}個。嘗試完成所有錄音以獲得更好的練習效果。`,
+                    aspect: 'Strongest Area',
+                    aspect_zh: '最強項',
+                    message: `Your ${strongest[0]} is your strongest area with an average score of ${strongest[1]}/25.`,
+                    message_zh: `您的${getChineseCategory(strongest[0])}是最強項，平均得分${strongest[1]}/25。`,
+                    type: 'positive'
+                });
+                
+                comprehensiveFeedback.push({
+                    aspect: 'Area for Improvement',
+                    aspect_zh: '改進領域',
+                    message: `Focus on improving your ${weakest[0]} to raise your overall score.`,
+                    message_zh: `專注於改進您的${getChineseCategory(weakest[0])}以提高整體分數。`,
                     type: 'improve'
                 });
             }
             
-            // Add general advice
             comprehensiveFeedback.push({
                 aspect: 'Practice Recommendation',
                 aspect_zh: '練習建議',
-                message: 'Continue practicing with varied sentence structures. Focus on difficult sounds and natural rhythm.',
-                message_zh: '繼續練習不同句子結構。專注於困難音素和自然節奏。',
+                message: 'Continue practicing daily with varied sentence structures and pay attention to native speaker models.',
+                message_zh: '繼續每日練習不同句子結構，並注意母語者的發音模式。',
                 type: 'improve'
             });
             
-            comprehensiveFeedback.push({
-                aspect: 'Keep Improving',
-                aspect_zh: '持續進步',
-                message: 'Regular practice will help you improve your pronunciation and fluency over time.',
-                message_zh: '定期練習將幫助您隨時間改善發音和流利度。',
-                type: 'positive'
-            });
-            
             return comprehensiveFeedback;
+        }
+        
+        // Helper function to get Chinese category names
+        function getChineseCategory(category) {
+            const categories = {
+                'pronunciation': '發音',
+                'fluency': '流利度',
+                'intonation': '語調',
+                'clarity': '清晰度'
+            };
+            return categories[category] || category;
         }
         
         // Print report
@@ -1551,13 +1701,11 @@
         
         // Start new practice
         function startNewPractice() {
-            // Stop and release any existing media stream
             if (currentStream) {
                 currentStream.getTracks().forEach(track => track.stop());
                 currentStream = null;
             }
             
-            // Reset all data
             studentInfo = {};
             sentences = [];
             currentSentenceIndex = 0;
@@ -1565,24 +1713,20 @@
             hasRequestedPermission = false;
             recordingFailed = false;
             
-            // Clear form
             document.getElementById('class').value = '';
             document.getElementById('seat-no').value = '';
             document.getElementById('name').value = '';
             document.getElementById('sentences').value = '';
             
-            // Reset to manual input
             document.querySelectorAll('.sentence-source-btn').forEach(b => b.classList.remove('active'));
             document.querySelector('.sentence-source-btn[data-source="manual"]').classList.add('active');
             sentenceSource = 'manual';
             manualInput.classList.remove('hidden');
             levelInput.classList.add('hidden');
             
-            // Clear level selection
             document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
             selectedLevel = null;
             
-            // Switch to student info page
             reportPage.classList.add('hidden');
             studentInfoPage.classList.remove('hidden');
         }
