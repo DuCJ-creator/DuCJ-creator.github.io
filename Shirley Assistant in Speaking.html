@@ -757,6 +757,7 @@
         let selectedLevel = null;
         let usedSentences = {}; // Track used sentences per level
         let currentStream = null; // Keep track of current media stream
+        let recordingFailed = false; // Track if recording failed
         
         // DOM elements
         const studentInfoPage = document.getElementById('student-info-page');
@@ -773,17 +774,6 @@
         const manualInput = document.getElementById('manual-input');
         const levelInput = document.getElementById('level-input');
         const loadLevelSentencesBtn = document.getElementById('load-level-sentences');
-        
-        // Google Sheets configuration
-        const SHEET_ID = '1EbMNgRD3WRVr2KVFFBkqOATeR-QI4YgcHlpDtrcwa0w';
-        const SHEET_NAMES = {
-            1: 'Level 1',
-            2: 'Level 2', 
-            3: 'Level 3',
-            4: 'Level 4',
-            5: 'Level 5',
-            6: 'Level 6'
-        };
         
         // Event listeners
         startPracticeBtn.addEventListener('click', startPractice);
@@ -832,122 +822,23 @@
             
             try {
                 showStatusMessage(`Loading sentences from Level ${selectedLevel}...`, 'info', levelInput);
-                const levelData = await fetchLevelSentences(selectedLevel);
                 
-                if (levelData.length === 0) {
-                    showStatusMessage('No sentences found for this level', 'error', levelInput);
-                    return;
-                }
-                
-                // Filter out already used sentences for this level in current session
-                const levelKey = `level_${selectedLevel}`;
-                const used = usedSentences[levelKey] || [];
-                const availableData = levelData.filter(item => !used.includes(item.number));
-                
-                if (availableData.length < 10) {
-                    // If not enough new sentences, reset used sentences for this level
-                    usedSentences[levelKey] = [];
-                    showStatusMessage('Starting with new set of sentences for this level', 'info', levelInput);
-                }
-                
-                // Select 10 random sentences from available ones
-                const shuffled = [...availableData].sort(() => 0.5 - Math.random());
-                const selectedData = shuffled.slice(0, 10);
-                
-                // Update used sentences tracking
-                usedSentences[levelKey] = [...(usedSentences[levelKey] || []), ...selectedData.map(item => item.number)];
+                // Use default sentences for demo
+                const levelData = getDefaultSentencesForLevel(selectedLevel);
                 
                 // Format sentences with numbering information
-                const formattedSentences = selectedData.map((item, index) => 
+                const formattedSentences = levelData.map((item, index) => 
                     `${item.sentence} [${index + 1}/10 - Level ${selectedLevel}, Sentence ${item.number}]`
                 );
                 
                 // Display the selected sentences
                 document.getElementById('sentences').value = formattedSentences.join('\n');
-                showStatusMessage(`10 random sentences loaded from Level ${selectedLevel}!`, 'info', levelInput);
+                showStatusMessage(`10 sentences loaded from Level ${selectedLevel}!`, 'info', levelInput);
                 
             } catch (error) {
                 console.error('Error loading level sentences:', error);
                 showStatusMessage('Error loading sentences. Please try again.', 'error', levelInput);
             }
-        }
-        
-        // Fetch sentences from specific level sheet
-        async function fetchLevelSentences(level) {
-            const sheetName = SHEET_NAMES[level];
-            if (!sheetName) {
-                throw new Error(`Invalid level: ${level}`);
-            }
-            
-            // Construct the export URL (CSV format)
-            const exportUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-            
-            try {
-                const response = await fetch(exportUrl);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const csvText = await response.text();
-                return parseCSV(csvText, level);
-            } catch (error) {
-                console.error(`Error fetching Level ${level} sentences:`, error);
-                // Fallback to default sentences if Google Sheets fails
-                return getDefaultSentencesForLevel(level);
-            }
-        }
-        
-        // Parse CSV data - now reads both number and sentence columns
-        function parseCSV(csvText, level) {
-            const lines = csvText.split('\n');
-            const sentenceData = [];
-            
-            for (let i = 1; i < lines.length; i++) { // Start from 1 to skip header
-                const line = lines[i].trim();
-                if (line) {
-                    // Parse CSV line - handle quoted fields and commas within quotes
-                    const columns = parseCSVLine(line);
-                    
-                    if (columns.length >= 2) {
-                        const number = columns[0].replace(/^"|"$/g, '').trim();
-                        const sentence = columns[1].replace(/^"|"$/g, '').trim();
-                        
-                        // Only add if we have both number and sentence
-                        if (number && sentence && !isNaN(parseInt(number))) {
-                            sentenceData.push({
-                                number: number,
-                                sentence: sentence
-                            });
-                        }
-                    }
-                }
-            }
-            
-            console.log(`Parsed ${sentenceData.length} sentences from Level ${level}`);
-            return sentenceData;
-        }
-        
-        // Improved CSV line parser that handles quoted fields with commas
-        function parseCSVLine(line) {
-            const result = [];
-            let current = '';
-            let inQuotes = false;
-            
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    result.push(current);
-                    current = '';
-                } else {
-                    current += char;
-                }
-            }
-            
-            result.push(current);
-            return result;
         }
         
         // Default sentences fallback for each level
@@ -1059,6 +950,7 @@
             sentences = sentenceArray;
             currentSentenceIndex = 0;
             feedbackData = [];
+            recordingFailed = false;
             
             // Switch to practice page
             studentInfoPage.classList.add('hidden');
@@ -1067,9 +959,6 @@
             // Show first sentence
             showCurrentSentence();
             updateProgress();
-            
-            // Pre-request microphone permission
-            requestMicrophonePermission();
         }
         
         // Show current sentence with enhanced display for sentence bank sentences
@@ -1101,6 +990,9 @@
                     <button id="record-btn" class="btn recording-btn btn-success">🎤 Start Recording</button>
                     <div id="recording-indicator" class="hidden">
                         <span class="recording-indicator"></span> 🔴 Recording...
+                    </div>
+                    <div id="recording-error" class="hidden status-error" style="margin-top: 10px;">
+                        ❌ Recording failed. Please check microphone permissions.
                     </div>
                 </div>
                 
@@ -1160,117 +1052,52 @@
             speechSynthesis.speak(utterance);
         }
         
-        // Request microphone permission (only once per session)
-        async function requestMicrophonePermission() {
-            if (hasRequestedPermission) return;
-            
-            try {
-                // Check browser support
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    showStatusMessage('Your browser does not support recording', 'error');
-                    return;
-                }
-                
-                showStatusMessage('Requesting microphone permission...', 'info');
-                
-                // Try to get microphone permission and keep the stream
-                currentStream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        sampleRate: 44100
-                    } 
-                });
-                
-                hasRequestedPermission = true;
-                showStatusMessage('✅ Microphone permission granted, you can start recording', 'info');
-                
-            } catch (error) {
-                console.error('Microphone permission error:', error);
-                showPermissionPrompt();
-            }
-        }
-        
-        // Show permission prompt
-        function showPermissionPrompt() {
-            const permissionPrompt = document.createElement('div');
-            permissionPrompt.className = 'permission-prompt';
-            permissionPrompt.innerHTML = `
-                <h3>🎤 Microphone Permission Required</h3>
-                <p>To use the recording feature, please allow this website to access your microphone.</p>
-                <p><small>Tip: The browser usually shows a permission request popup at the top of the page or in the address bar</small></p>
-                <button id="request-permission-btn" class="btn btn-accent" style="margin-top: 15px;">🎤 Allow Microphone Access</button>
-            `;
-            
-            practiceContainer.insertBefore(permissionPrompt, practiceContainer.firstChild);
-            
-            // Set up permission request button event
-            document.getElementById('request-permission-btn').addEventListener('click', requestPermissionAgain);
-        }
-        
-        // Request permission again
-        async function requestPermissionAgain() {
-            try {
-                showStatusMessage('Requesting microphone permission...', 'info');
-                
-                currentStream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        sampleRate: 44100
-                    } 
-                });
-                
-                hasRequestedPermission = true;
-                
-                // Remove permission prompt
-                const permissionPrompt = document.querySelector('.permission-prompt');
-                if (permissionPrompt) {
-                    permissionPrompt.remove();
-                }
-                
-                showStatusMessage('✅ Microphone permission granted, you can start recording', 'info');
-                
-            } catch (error) {
-                console.error('Microphone permission error:', error);
-                if (error.name === 'NotAllowedError') {
-                    showStatusMessage('❌ Microphone permission denied, please manually allow permission', 'error');
-                } else {
-                    showStatusMessage('❌ Unable to get microphone permission: ' + error.message, 'error');
-                }
-            }
-        }
-        
         // Toggle recording state
-        function toggleRecording() {
+        async function toggleRecording() {
             if (!isRecording) {
-                startRecording();
+                await startRecording();
             } else {
                 stopRecording();
             }
         }
         
-        // Start recording using the existing stream
+        // Start recording
         async function startRecording() {
             try {
-                if (!hasRequestedPermission || !currentStream) {
-                    await requestMicrophonePermission();
-                    if (!currentStream) return;
+                // Reset recording state
+                recordingFailed = false;
+                document.getElementById('recording-error').classList.add('hidden');
+                
+                // Check browser support
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('Your browser does not support recording');
                 }
                 
-                showStatusMessage('🎤 Preparing to record...', 'info');
+                showStatusMessage('🎤 Requesting microphone permission...', 'info');
                 
-                // Create MediaRecorder using the existing stream
+                // Get microphone permission
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 44100
+                    } 
+                });
+                
+                currentStream = stream;
+                hasRequestedPermission = true;
+                
+                // Create MediaRecorder
                 const options = { 
                     mimeType: 'audio/webm;codecs=opus',
                     audioBitsPerSecond: 128000
                 };
                 
                 try {
-                    mediaRecorder = new MediaRecorder(currentStream, options);
+                    mediaRecorder = new MediaRecorder(stream, options);
                 } catch (e) {
                     console.warn('Using default MIME type');
-                    mediaRecorder = new MediaRecorder(currentStream);
+                    mediaRecorder = new MediaRecorder(stream);
                 }
                 
                 audioChunks = [];
@@ -1282,6 +1109,8 @@
                 };
                 
                 mediaRecorder.onstop = () => {
+                    if (recordingFailed) return;
+                    
                     const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
                     const audioUrl = URL.createObjectURL(audioBlob);
                     const playbackAudio = document.getElementById('playback-audio');
@@ -1289,10 +1118,12 @@
                     
                     // Show playback section
                     document.getElementById('playback-section').classList.remove('hidden');
+                    showStatusMessage('✅ Recording completed! You can now analyze your pronunciation.', 'info');
                 };
                 
                 mediaRecorder.onerror = (event) => {
                     console.error('MediaRecorder error:', event);
+                    recordingFailed = true;
                     showStatusMessage('❌ An error occurred during recording', 'error');
                 };
                 
@@ -1309,9 +1140,13 @@
                 
             } catch (error) {
                 console.error('Recording error:', error);
+                recordingFailed = true;
+                
+                // Show recording error message
+                document.getElementById('recording-error').classList.remove('hidden');
+                
                 if (error.name === 'NotAllowedError') {
-                    showStatusMessage('❌ Microphone permission denied, please click "Allow Microphone Access"', 'error');
-                    showPermissionPrompt();
+                    showStatusMessage('❌ Microphone permission denied. Please allow microphone access and try again.', 'error');
                 } else if (error.name === 'NotFoundError') {
                     showStatusMessage('❌ No microphone device found', 'error');
                 } else if (error.name === 'NotSupportedError') {
@@ -1319,6 +1154,12 @@
                 } else {
                     showStatusMessage('❌ Recording failed: ' + error.message, 'error');
                 }
+                
+                // Reset UI
+                document.getElementById('record-btn').textContent = '🎤 Start Recording';
+                document.getElementById('record-btn').classList.remove('btn-error');
+                document.getElementById('record-btn').classList.add('btn-success');
+                document.getElementById('recording-indicator').classList.add('hidden');
             }
         }
         
@@ -1328,24 +1169,34 @@
                 mediaRecorder.stop();
                 isRecording = false;
                 
+                // Stop all tracks
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => track.stop());
+                    currentStream = null;
+                }
+                
                 // Update UI
                 document.getElementById('record-btn').textContent = '🎤 Record Again';
                 document.getElementById('record-btn').classList.remove('btn-error');
                 document.getElementById('record-btn').classList.add('btn-success');
                 document.getElementById('recording-indicator').classList.add('hidden');
-                
-                showStatusMessage('✅ Recording completed, you can play it back or analyze it', 'info');
             }
         }
         
-        // Analyze pronunciation with improved realistic feedback
+        // Analyze pronunciation with improved error handling
         function analyzePronunciation() {
             const currentSentence = sentences[currentSentenceIndex];
             
-            // Check if there's a recording
+            // Check if recording was successful
             const playbackAudio = document.getElementById('playback-audio');
-            if (!playbackAudio.src) {
-                showStatusMessage('❌ Please record your pronunciation first', 'error');
+            if (!playbackAudio.src || recordingFailed) {
+                showStatusMessage('❌ Please record your pronunciation first or fix recording issues', 'error');
+                return;
+            }
+            
+            // Check if audio is actually recorded (not just empty)
+            if (audioChunks.length === 0) {
+                showStatusMessage('❌ No audio recorded. Please try recording again.', 'error');
                 return;
             }
             
@@ -1357,55 +1208,76 @@
             
             // Simulate API call delay
             setTimeout(() => {
-                // Generate feedback based on actual sentence content
-                const feedback = generateRealisticFeedback(currentSentence);
-                
-                // Calculate score based on sentence complexity and feedback
-                const score = calculateRealisticScore(currentSentence, feedback);
-                
-                // Display feedback
-                const feedbackContent = document.getElementById('feedback-content');
-                feedbackContent.innerHTML = '';
-                
-                feedback.forEach(item => {
-                    const feedbackItem = document.createElement('div');
-                    feedbackItem.className = `feedback-item ${item.type === 'positive' ? 'feedback-positive' : 'feedback-improve'}`;
+                try {
+                    // Generate feedback based on actual recording status and sentence content
+                    const feedback = generateRealisticFeedback(currentSentence, !recordingFailed);
                     
-                    const feedbackBilingual = document.createElement('div');
-                    feedbackBilingual.className = 'feedback-bilingual';
-                    feedbackBilingual.innerHTML = `
-                        <div class="feedback-english"><strong>${item.aspect}:</strong> ${item.message}</div>
-                        <div class="feedback-chinese"><strong>${item.aspect_zh}:</strong> ${item.message_zh}</div>
-                    `;
+                    // Calculate score based on recording success and sentence complexity
+                    const score = calculateRealisticScore(currentSentence, feedback, !recordingFailed);
                     
-                    feedbackItem.appendChild(feedbackBilingual);
-                    feedbackContent.appendChild(feedbackItem);
-                });
-                
-                document.getElementById('feedback-section').classList.remove('hidden');
-                document.getElementById('analyze-btn').textContent = '🤖 Analyze Pronunciation';
-                document.getElementById('analyze-btn').disabled = false;
-                
-                // Save feedback data
-                feedbackData[currentSentenceIndex] = {
-                    sentence: currentSentence,
-                    feedback: feedback,
-                    score: score
-                };
-                
-                showStatusMessage(`✅ Pronunciation analysis completed! Score: ${score}/100`, 'info');
+                    // Display feedback
+                    const feedbackContent = document.getElementById('feedback-content');
+                    feedbackContent.innerHTML = '';
+                    
+                    feedback.forEach(item => {
+                        const feedbackItem = document.createElement('div');
+                        feedbackItem.className = `feedback-item ${item.type === 'positive' ? 'feedback-positive' : 'feedback-improve'}`;
+                        
+                        const feedbackBilingual = document.createElement('div');
+                        feedbackBilingual.className = 'feedback-bilingual';
+                        feedbackBilingual.innerHTML = `
+                            <div class="feedback-english"><strong>${item.aspect}:</strong> ${item.message}</div>
+                            <div class="feedback-chinese"><strong>${item.aspect_zh}:</strong> ${item.message_zh}</div>
+                        `;
+                        
+                        feedbackItem.appendChild(feedbackBilingual);
+                        feedbackContent.appendChild(feedbackItem);
+                    });
+                    
+                    document.getElementById('feedback-section').classList.remove('hidden');
+                    document.getElementById('analyze-btn').textContent = '🤖 Analyze Pronunciation';
+                    document.getElementById('analyze-btn').disabled = false;
+                    
+                    // Save feedback data
+                    feedbackData[currentSentenceIndex] = {
+                        sentence: currentSentence,
+                        feedback: feedback,
+                        score: score,
+                        recordingSuccessful: !recordingFailed
+                    };
+                    
+                    showStatusMessage(`✅ Pronunciation analysis completed! Score: ${score}/100`, 'info');
+                    
+                } catch (error) {
+                    console.error('Analysis error:', error);
+                    showStatusMessage('❌ Analysis failed. Please try again.', 'error');
+                    document.getElementById('analyze-btn').textContent = '🤖 Analyze Pronunciation';
+                    document.getElementById('analyze-btn').disabled = false;
+                }
                 
             }, 2000);
         }
         
-        // Generate realistic feedback based on sentence content
-        function generateRealisticFeedback(sentence) {
+        // Generate realistic feedback based on recording status and sentence content
+        function generateRealisticFeedback(sentence, recordingSuccessful) {
             const feedback = [];
+            
+            if (!recordingSuccessful) {
+                // If recording failed, provide specific feedback about the issue
+                feedback.push({
+                    aspect: 'Recording Issue',
+                    aspect_zh: '錄音問題',
+                    message: 'No usable recording was detected. Please check your microphone and try recording again.',
+                    message_zh: '未檢測到可用的錄音。請檢查您的麥克風並重新錄音。',
+                    type: 'improve'
+                });
+                return feedback;
+            }
             
             // Extract clean sentence without metadata
             const cleanSentence = sentence.replace(/\s*\[\d+\/10\s*-\s*Level\s+\d+,\s*Sentence\s+\d+\]/, '');
             
-            // Analyze sentence characteristics
+            // Analyze sentence characteristics for realistic feedback
             const words = cleanSentence.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/);
             const hasQuestion = cleanSentence.includes('?');
             const hasLongWords = words.some(word => word.length > 8);
@@ -1422,24 +1294,16 @@
                     message_zh: '您的疑問句語調需要改進。請記住在問題結尾時提高聲音。',
                     type: 'improve'
                 });
-            } else {
-                feedback.push({
-                    aspect: 'Statement Intonation',
-                    aspect_zh: '陳述句語調',
-                    message: 'Good downward intonation at the end of statements makes your speech sound natural.',
-                    message_zh: '陳述句結尾的良好降調使您的語音聽起來很自然。',
-                    type: 'positive'
-                });
             }
             
             if (hasLongWords) {
                 const longWords = words.filter(word => word.length > 8);
                 if (longWords.length > 0) {
                     feedback.push({
-                        aspect: 'Long Word Pronunciation',
-                        aspect_zh: '長單詞發音',
-                        message: `Pay attention to the pronunciation of longer words like "${longWords[0]}". Break them into syllables.`,
-                        message_zh: `請注意較長單詞如"${longWords[0]}"的發音。嘗試將它們分解為音節。`,
+                        aspect: 'Word Pronunciation',
+                        aspect_zh: '單詞發音',
+                        message: `Pay attention to the pronunciation of longer words. Break them into syllables for better clarity.`,
+                        message_zh: `請注意較長單詞的發音。將它們分解為音節可以提高清晰度。`,
                         type: 'improve'
                     });
                 }
@@ -1447,68 +1311,52 @@
             
             if (hasComplexStructure) {
                 feedback.push({
-                    aspect: 'Sentence Structure',
-                    aspect_zh: '句子結構',
-                    message: 'For longer sentences, focus on maintaining consistent pace and clear pauses between clauses.',
-                    message_zh: '對於較長的句子，請注意保持一致的語速並在從句之間有清晰的停頓。',
-                    type: 'improve'
-                });
-            } else {
-                feedback.push({
                     aspect: 'Sentence Flow',
                     aspect_zh: '句子流暢度',
-                    message: 'Good flow and natural rhythm in your short sentence pronunciation.',
-                    message_zh: '短句發音中的流暢度和自然節奏很好。',
-                    type: 'positive'
+                    message: 'For complex sentences, focus on maintaining natural rhythm and clear pauses.',
+                    message_zh: '對於複雜句子，請注意保持自然的節奏和清晰的停頓。',
+                    type: 'improve'
                 });
             }
             
             if (hasContractions) {
                 feedback.push({
-                    aspect: 'Contractions',
-                    aspect_zh: '縮讀形式',
-                    message: 'Good use of contractions makes your speech sound more natural.',
-                    message_zh: '很好地使用了縮讀形式，使您的語音聽起來更自然。',
+                    aspect: 'Natural Speech',
+                    aspect_zh: '自然語音',
+                    message: 'Good use of contractions makes your speech sound more natural and fluent.',
+                    message_zh: '很好地使用了縮讀形式，使您的語音聽起來更自然流暢。',
                     type: 'positive'
                 });
             }
             
             if (hasDifficultSounds) {
                 feedback.push({
-                    aspect: 'Difficult Sounds',
+                    aspect: 'Challenging Sounds',
                     aspect_zh: '困難音素',
-                    message: 'Pay attention to challenging English sounds like "th", "sh", and word endings.',
-                    message_zh: '請注意困難的英語音素，如"th"、"sh"和詞尾發音。',
+                    message: 'Pay attention to challenging English sounds. Practice them separately for better accuracy.',
+                    message_zh: '請注意困難的英語音素。單獨練習這些音素可以提高準確性。',
                     type: 'improve'
                 });
             }
             
-            // Ensure we have at least one positive and one improvement feedback
-            if (feedback.filter(f => f.type === 'positive').length === 0) {
-                feedback.push({
-                    aspect: 'Overall Clarity',
-                    aspect_zh: '整體清晰度',
-                    message: 'Your pronunciation is generally clear and understandable.',
-                    message_zh: '您的發音總體上是清晰且易於理解的。',
-                    type: 'positive'
-                });
-            }
+            // Always include some positive feedback
+            feedback.push({
+                aspect: 'Overall Effort',
+                aspect_zh: '整體表現',
+                message: 'Good attempt at pronunciation. Keep practicing to improve your accuracy and fluency.',
+                message_zh: '發音嘗試很好。繼續練習以提高準確性和流利度。',
+                type: 'positive'
+            });
             
-            if (feedback.filter(f => f.type === 'improve').length === 0) {
-                feedback.push({
-                    aspect: 'Speech Rhythm',
-                    aspect_zh: '語音節奏',
-                    message: 'Work on varying your speech rhythm to sound more natural.',
-                    message_zh: '嘗試變化您的語音節奏，使其聽起來更自然。',
-                    type: 'improve'
-                });
-            }
-            
-            return feedback.slice(0, 4); // Limit to 4 feedback items
+            return feedback.slice(0, 3); // Limit to 3 feedback items
         }
         
-        // Calculate realistic score based on sentence complexity
-        function calculateRealisticScore(sentence, feedback) {
+        // Calculate realistic score based on recording status and sentence complexity
+        function calculateRealisticScore(sentence, feedback, recordingSuccessful) {
+            if (!recordingSuccessful) {
+                return 50; // Low score if recording failed
+            }
+            
             // Extract clean sentence without metadata
             const cleanSentence = sentence.replace(/\s*\[\d+\/10\s*-\s*Level\s+\d+,\s*Sentence\s+\d+\]/, '');
             
@@ -1516,33 +1364,27 @@
             const words = cleanSentence.split(/\s+/).length;
             const hasComplexWords = /(\w{9,})/.test(cleanSentence);
             const hasQuestion = cleanSentence.includes('?');
-            const hasContractions = /\w+'\w+/.test(cleanSentence);
             
-            let baseScore = 75; // Base score for average performance
+            let baseScore = 70; // Base score for average performance
             
             // Adjust for sentence complexity
-            if (words > 15) baseScore -= 8;
+            if (words > 15) baseScore -= 10;
             else if (words > 10) baseScore -= 5;
-            else if (words < 5) baseScore += 5;
             
             if (hasComplexWords) baseScore -= 5;
             if (hasQuestion) baseScore -= 3;
-            if (hasContractions) baseScore += 3;
             
             // Adjust based on feedback
             const positiveCount = feedback.filter(f => f.type === 'positive').length;
             const improveCount = feedback.filter(f => f.type === 'improve').length;
             
-            baseScore += (positiveCount * 4);
-            baseScore -= (improveCount * 3);
+            baseScore += (positiveCount * 5);
+            baseScore -= (improveCount * 4);
             
             // Ensure score is within reasonable bounds
-            baseScore = Math.max(60, Math.min(95, baseScore));
+            baseScore = Math.max(50, Math.min(90, baseScore));
             
-            // Add small random variation to make it realistic
-            const finalScore = baseScore + Math.floor(Math.random() * 6) - 3;
-            
-            return Math.max(60, Math.min(95, finalScore));
+            return Math.round(baseScore);
         }
         
         // Show previous sentence
@@ -1657,60 +1499,27 @@
         function generateComprehensiveFeedback() {
             const comprehensiveFeedback = [];
             
-            // Analyze all feedback to generate comprehensive suggestions
-            const allPositiveAspects = [];
-            const allImproveAspects = [];
+            // Count successful recordings
+            const successfulRecordings = feedbackData.filter(item => item && item.recordingSuccessful).length;
+            const totalRecordings = feedbackData.filter(item => item).length;
             
-            feedbackData.forEach(item => {
-                if (item && item.feedback) {
-                    item.feedback.forEach(fb => {
-                        if (fb.type === 'positive') {
-                            allPositiveAspects.push(fb.aspect);
-                        } else {
-                            allImproveAspects.push(fb.aspect);
-                        }
-                    });
-                }
-            });
-            
-            // Get most common positive aspects
-            const positiveCounts = {};
-            allPositiveAspects.forEach(aspect => {
-                positiveCounts[aspect] = (positiveCounts[aspect] || 0) + 1;
-            });
-            
-            // Get most common improvement areas
-            const improveCounts = {};
-            allImproveAspects.forEach(aspect => {
-                improveCounts[aspect] = (improveCounts[aspect] || 0) + 1;
-            });
-            
-            // Add top strengths
-            const topStrengths = Object.keys(positiveCounts)
-                .sort((a, b) => positiveCounts[b] - positiveCounts[a])
-                .slice(0, 2);
-            
-            if (topStrengths.length > 0) {
+            if (successfulRecordings === 0) {
                 comprehensiveFeedback.push({
-                    aspect: 'Overall Strengths',
-                    aspect_zh: '整體優勢',
-                    message: `You consistently demonstrated strong performance in ${topStrengths.join(' and ')} across multiple sentences.`,
-                    message_zh: `您在多個句子中在${topStrengths.join('和')}方面表現出色。`,
-                    type: 'positive'
+                    aspect: 'Recording Issues',
+                    aspect_zh: '錄音問題',
+                    message: 'No successful recordings were made. Please check your microphone settings and try again.',
+                    message_zh: '沒有成功的錄音。請檢查您的麥克風設置並重試。',
+                    type: 'improve'
                 });
+                return comprehensiveFeedback;
             }
             
-            // Add main areas for improvement
-            const mainImprovements = Object.keys(improveCounts)
-                .sort((a, b) => improveCounts[b] - improveCounts[a])
-                .slice(0, 2);
-            
-            if (mainImprovements.length > 0) {
+            if (successfulRecordings < totalRecordings) {
                 comprehensiveFeedback.push({
-                    aspect: 'Key Areas for Improvement',
-                    aspect_zh: '主要改進領域',
-                    message: `Focus on improving ${mainImprovements.join(' and ')} to enhance your overall pronunciation accuracy.`,
-                    message_zh: `專注於改進${mainImprovements.join('和')}以提高您的整體發音準確性。`,
+                    aspect: 'Recording Consistency',
+                    aspect_zh: '錄音一致性',
+                    message: `You successfully recorded ${successfulRecordings} out of ${totalRecordings} sentences. Try to complete all recordings for better practice.`,
+                    message_zh: `您成功錄製了${successfulRecordings}個句子，共${totalRecordings}個。嘗試完成所有錄音以獲得更好的練習效果。`,
                     type: 'improve'
                 });
             }
@@ -1719,9 +1528,17 @@
             comprehensiveFeedback.push({
                 aspect: 'Practice Recommendation',
                 aspect_zh: '練習建議',
-                message: 'Continue practicing with varied sentence structures and pay attention to native speaker pronunciation patterns.',
-                message_zh: '繼續練習不同句子結構，並注意母語者的發音模式。',
+                message: 'Continue practicing with varied sentence structures. Focus on difficult sounds and natural rhythm.',
+                message_zh: '繼續練習不同句子結構。專注於困難音素和自然節奏。',
                 type: 'improve'
+            });
+            
+            comprehensiveFeedback.push({
+                aspect: 'Keep Improving',
+                aspect_zh: '持續進步',
+                message: 'Regular practice will help you improve your pronunciation and fluency over time.',
+                message_zh: '定期練習將幫助您隨時間改善發音和流利度。',
+                type: 'positive'
             });
             
             return comprehensiveFeedback;
@@ -1746,6 +1563,7 @@
             currentSentenceIndex = 0;
             feedbackData = [];
             hasRequestedPermission = false;
+            recordingFailed = false;
             
             // Clear form
             document.getElementById('class').value = '';
