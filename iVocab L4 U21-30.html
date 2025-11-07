@@ -2,16 +2,9 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>L1 U21-30 單字挑戰無極限</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>  U21-30 單字挑戰無極限</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
         body {
             font-family: 'Arial', sans-serif;
             background-color: #0a2e38;
@@ -25,57 +18,27 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 10px;
-            overflow: hidden;
         }
         
         .container {
             background-color: rgba(0, 0, 0, 0.7);
             border-radius: 15px;
-            padding: 15px;
+            padding: 20px;
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-            width: 100%;
-            max-width: 100%;
-            margin: 10px;
+            max-width: 800px;
+            margin: 20px;
             border: 3px solid #d4af37;
-            display: flex;
-            flex-direction: column;
-            height: 95vh;
-            max-height: 95vh;
-        }
-        
-        .game-content {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            overflow: hidden;
-        }
-        
-        .screen {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            justify-content: space-between;
-            transition: all 0.3s ease;
-        }
-        
-        .screen-content {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            justify-content: space-around;
         }
         
         h1 {
             color: #d4af37;
             text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
-            font-size: 1.8rem;
-            margin-bottom: 15px;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
             background: linear-gradient(to right, #ff8a00, #e52e71, #b24592);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: rainbow 5s linear infinite;
-            flex-shrink: 0;
         }
         
         @keyframes rainbow {
@@ -84,20 +47,19 @@
         }
         
         .question-container {
-            margin: 15px 0;
-            padding: 12px;
+            margin: 20px 0;
+            padding: 15px;
             background-color: rgba(0, 50, 30, 0.7);
             border-radius: 10px;
             border: 2px solid #ff0000;
             position: relative;
-            min-height: 80px;
+            min-height: 100px;
             transition: opacity 0.3s ease;
-            flex-shrink: 0;
         }
         
         .question {
-            font-size: 1.5rem;
-            margin-bottom: 8px;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
             color: #fff;
             text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
         }
@@ -105,34 +67,31 @@
         .options-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
             gap: 15px;
-            margin: 15px 0;
-            flex: 1;
-            padding: 10px;
-            min-height: 300px;
+            margin: 20px 0;
+            transition: opacity 0.3s ease;
         }
         
         .option {
             background-color: #f0f8ff;
             border: 2px solid #d4af37;
             border-radius: 50%;
+            padding: 15px;
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 1rem;
+            font-size: 1.2rem;
             color: black;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             overflow: hidden;
-            word-break: break-word;
-            padding: 15px;
-            text-align: center;
-            min-height: 120px;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
         }
         
-        .option:active {
+        .option:hover {
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
             background-color: #e6f7ff;
@@ -160,7 +119,7 @@
             100% { background-position: 0% 50%; }
         }
         
-        .option:active::before {
+        .option:hover::before {
             opacity: 0.3;
         }
         
@@ -177,52 +136,49 @@
         }
         
         .score-container {
-            margin: 15px 0;
-            font-size: 1.3rem;
+            margin: 20px 0;
+            font-size: 1.5rem;
             color: #d4af37;
             display: flex;
             justify-content: space-between;
             width: 100%;
-            flex-shrink: 0;
         }
         
         .controls {
-            margin: 15px 0;
-            flex-shrink: 0;
+            margin: 20px 0;
         }
         
         button {
             background-color: #d4af37;
             color: #0a2e38;
             border: none;
-            padding: 12px 20px;
+            padding: 10px 20px;
             font-size: 1.2rem;
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s;
-            margin: 0 5px;
+            margin: 0 10px;
             font-weight: bold;
         }
         
-        button:active {
+        button:hover {
             background-color: #ffd700;
-            transform: scale(1.05);
+            transform: scale(1.1);
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
         }
         
         .feedback {
-            font-size: 1.3rem;
-            margin: 15px 0;
-            min-height: 25px;
+            font-size: 1.5rem;
+            margin: 20px 0;
+            min-height: 30px;
             color: #d4af37;
             text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
             transition: opacity 0.3s ease;
-            flex-shrink: 0;
         }
         
         .moose {
             position: absolute;
-            font-size: 2.5rem;
+            font-size: 3rem;
             animation: jump 1s infinite alternate;
             z-index: 10;
             left: 50%;
@@ -231,13 +187,13 @@
         
         @keyframes jump {
             0% { transform: translate(-50%, 0); }
-            100% { transform: translate(-50%, -10px); }
+            100% { transform: translate(-50%, -20px); }
         }
         
         .snowflake {
             position: absolute;
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             animation: fall linear infinite;
             z-index: -1;
         }
@@ -247,37 +203,35 @@
         }
         
         .hidden {
-            display: none !important;
+            display: none;
         }
         
         .result-container {
             background-color: rgba(0, 0, 0, 0.8);
-            padding: 15px;
+            padding: 20px;
             border-radius: 15px;
-            margin-top: 15px;
+            margin-top: 20px;
             border: 3px solid #d4af37;
-            flex-shrink: 0;
         }
         
         .result-title {
             color: #d4af37;
-            font-size: 1.8rem;
-            margin-bottom: 15px;
+            font-size: 2rem;
+            margin-bottom: 20px;
         }
         
         .result-score {
-            font-size: 1.3rem;
-            margin-bottom: 15px;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
         }
         
         .timer-container {
             width: 100%;
-            height: 8px;
+            height: 10px;
             background-color: #333;
             border-radius: 5px;
-            margin: 15px 0;
+            margin: 20px 0;
             overflow: hidden;
-            flex-shrink: 0;
         }
         
         .timer-bar {
@@ -289,16 +243,15 @@
         
         .start-container {
             text-align: center;
-            padding: 15px;
-            flex-shrink: 0;
+            padding: 20px;
         }
         
         .start-btn {
             background-color: #e52e71;
             color: white;
-            font-size: 1.3rem;
-            padding: 12px 25px;
-            margin-top: 15px;
+            font-size: 1.5rem;
+            padding: 15px 30px;
+            margin-top: 20px;
         }
         
         .urgent {
@@ -310,163 +263,61 @@
             to { opacity: 0.7; }
         }
         
-        /* 橫屏專用樣式 */
-        @media (orientation: landscape) {
-            .container {
-                height: 98vh;
-                max-height: 98vh;
-                padding: 10px;
+        @media (max-width: 600px) {
+            .options-container {
+                grid-template-columns: 1fr;
             }
             
             h1 {
-                font-size: 1.5rem;
-                margin-bottom: 10px;
-            }
-            
-            .options-container {
-                grid-template-columns: 1fr 1fr;
-                grid-template-rows: 1fr 1fr;
-                gap: 10px;
-                margin: 10px 0;
-                min-height: 200px;
-            }
-            
-            .option {
-                font-size: 0.9rem;
-                padding: 10px;
-                min-height: 80px;
+                font-size: 1.8rem;
             }
             
             .question {
-                font-size: 1.3rem;
+                font-size: 1.4rem;
             }
             
-            .score-container {
-                font-size: 1.1rem;
-                margin: 10px 0;
-            }
-            
-            .timer-container {
-                margin: 10px 0;
-            }
-            
-            .moose {
-                font-size: 2rem;
-            }
-            
-            .feedback {
-                font-size: 1.1rem;
-                margin: 10px 0;
-            }
-            
-            .result-title {
-                font-size: 1.5rem;
-            }
-            
-            .result-score {
-                font-size: 1.1rem;
-            }
-            
-            button {
-                padding: 10px 15px;
+            .option {
                 font-size: 1rem;
-            }
-            
-            .start-btn {
-                font-size: 1.1rem;
-                padding: 10px 20px;
-            }
-        }
-        
-        /* 超小螢幕橫屏優化 */
-        @media (orientation: landscape) and (max-height: 400px) {
-            .options-container {
-                grid-template-columns: 1fr 1fr;
-                grid-template-rows: 1fr 1fr;
-                gap: 8px;
-                min-height: 150px;
-            }
-            
-            .option {
-                font-size: 0.8rem;
-                padding: 8px;
-                min-height: 60px;
-            }
-            
-            .question {
-                font-size: 1.1rem;
-            }
-        }
-        
-        /* 確保選項容器有足夠高度顯示4個選項 */
-        @media (max-height: 700px) {
-            .options-container {
-                min-height: 250px;
-            }
-        }
-        
-        @media (max-height: 600px) {
-            .options-container {
-                min-height: 200px;
-            }
-            
-            .option {
-                min-height: 80px;
-            }
-        }
-        
-        @media (max-height: 500px) {
-            .options-container {
-                min-height: 150px;
-            }
-            
-            .option {
-                min-height: 60px;
+                padding: 10px;
+                width: 80px;
+                height: 80px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎄 L4 U21-30 單字挑戰無極限 🎄</h1>
+        <h1>🎄 L4  U21-30 單字挑戰無極限 🎄</h1>
         
-        <div class="game-content">
-            <div class="screen" id="start-container">
-                <div class="screen-content">
-                    <p>Ready for the Challenge？</p>
-                    <button class="start-btn" id="start-btn">Start</button>
-                </div>
+        <div class="start-container" id="start-container">
+            <p>Ready for the Challenge？</p>
+            <button class="start-btn" id="start-btn">Start</button>
+        </div>
+        
+        <div id="game-container" class="hidden">
+            <div class="score-container">
+                <div>分數: <span id="score">0</span></div>
+                <div>題目: <span id="question-count">0</span></div>
             </div>
             
-            <div class="screen hidden" id="game-container">
-                <div class="screen-content">
-                    <div class="score-container">
-                        <div>分數: <span id="score">0</span></div>
-                        <div>題目: <span id="question-count">0</span></div>
-                    </div>
-                    
-                    <div class="timer-container">
-                        <div class="timer-bar" id="timer-bar"></div>
-                    </div>
-                    
-                    <div class="question-container" id="question-container">
-                        <div class="question" id="question"></div>
-                        <div id="moose-container"></div>
-                    </div>
-                    
-                    <div class="options-container" id="options-container">
-                        <!-- 這裡會動態生成4個選項 -->
-                    </div>
-                    
-                    <div class="feedback" id="feedback"></div>
-                    
-                    <div class="result-container hidden" id="result-container">
-                        <div class="result-title">Game Over!</div>
-                        <div class="result-score">Final Score: <span id="final-score">0</span></div>
-                        <div id="result-message"></div>
-                        <button id="restart-btn-end">One More Challenge</button>
-                    </div>
-                </div>
+            <div class="timer-container">
+                <div class="timer-bar" id="timer-bar"></div>
+            </div>
+            
+            <div class="question-container" id="question-container">
+                <div class="question" id="question"></div>
+                <div id="moose-container"></div>
+            </div>
+            
+            <div class="options-container" id="options-container"></div>
+            
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="result-container hidden" id="result-container">
+                <div class="result-title">Game Over!</div>
+                <div class="result-score">Final Score: <span id="final-score">0</span></div>
+                <div id="result-message"></div>
+                <button id="restart-btn-end">One More Challenge</button>
             </div>
         </div>
     </div>
@@ -753,6 +604,7 @@ wit,n,機智;風趣
         let timer;
         let timeLeft = 8;
         let tickSound;
+        let usedInCurrentSession = []; // ✅ 新增：本局已使用單字索引
         
         // DOM 元素
         const questionElement = document.getElementById('question');
@@ -805,6 +657,7 @@ wit,n,機智;風趣
         function initGame() {
             currentQuestionIndex = 0;
             score = 0;
+            usedInCurrentSession = []; // ✅ 每次重新開始都清空本局記錄
             
             // 清除之前的計時器
             clearInterval(timer);
@@ -828,10 +681,28 @@ wit,n,機智;風趣
             createSnowflakes();
         }
         
-        // 生成新問題
+        // 生成新問題（✅ 已重寫）
         function generateQuestion() {
-            // 隨機選擇一個單字
-            const randomIndex = Math.floor(Math.random() * vocabulary.length);
+            // 如果本局已用完所有單字，清空記錄以開始新一輪
+            if (usedInCurrentSession.length >= vocabulary.length) {
+                usedInCurrentSession = [];
+            }
+            
+            // 找出尚未使用的索引
+            const availableIndices = vocabulary
+                .map((_, i) => i)
+                .filter(i => !usedInCurrentSession.includes(i));
+            
+            // 安全防護
+            if (availableIndices.length === 0) {
+                usedInCurrentSession = [];
+                generateQuestion();
+                return;
+            }
+            
+            // 隨機選擇一個未使用過的單字
+            const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+            usedInCurrentSession.push(randomIndex);
             const selectedWord = vocabulary[randomIndex];
             
             // 創建問題
@@ -851,13 +722,16 @@ wit,n,機智;風趣
             const options = [correctMeaning];
             
             // 從單字庫中隨機選擇3個不同的意思作為錯誤選項
-            while (options.length < 4) {
-                const randomIndex = Math.floor(Math.random() * vocabulary.length);
-                const randomMeaning = vocabulary[randomIndex].meaning;
-                
-                // 確保選項不重複且不與正確答案相同
+            const otherMeanings = vocabulary
+                .map(item => item.meaning)
+                .filter(meaning => meaning !== correctMeaning);
+            
+            while (options.length < 4 && otherMeanings.length > 0) {
+                const randomIndex = Math.floor(Math.random() * otherMeanings.length);
+                const randomMeaning = otherMeanings[randomIndex];
                 if (!options.includes(randomMeaning)) {
                     options.push(randomMeaning);
+                    otherMeanings.splice(randomIndex, 1);
                 }
             }
             
@@ -888,7 +762,7 @@ wit,n,機智;風趣
             // 清除之前的選項
             optionsContainer.innerHTML = '';
             
-            // 添加新的選項 - 確保總是4個選項
+            // 添加新的選項
             currentQuestion.options.forEach((option, index) => {
                 const optionElement = document.createElement('div');
                 optionElement.classList.add('option');
@@ -1072,14 +946,14 @@ wit,n,機智;風趣
             oldSnowflakes.forEach(snowflake => snowflake.remove());
             
             // 創建新雪花
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 50; i++) {
                 const snowflake = document.createElement('div');
                 snowflake.classList.add('snowflake');
                 snowflake.innerHTML = '❄';
                 
                 // 隨機位置和大小
                 snowflake.style.left = `${Math.random() * 100}%`;
-                snowflake.style.fontSize = `${Math.random() * 8 + 8}px`;
+                snowflake.style.fontSize = `${Math.random() * 10 + 10}px`;
                 snowflake.style.opacity = Math.random();
                 snowflake.style.animationDuration = `${Math.random() * 5 + 5}s`;
                 snowflake.style.animationDelay = `${Math.random() * 5}s`;
@@ -1091,8 +965,8 @@ wit,n,機智;風趣
         // 事件監聽器
         function setupEventListeners() {
             restartButtonEnd.addEventListener('click', () => {
-                startContainer.classList.remove('hidden');
-                gameContainer.classList.add('hidden');
+                startContainer.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
                 initGame();
             });
             
