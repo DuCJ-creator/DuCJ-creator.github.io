@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Shirley's Stop Watch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #e0e0ff;
+            touch-action: manipulation;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .track-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        
+        .track {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .track-bg, .track-progress {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+        
+        .track-bg {
+            background: conic-gradient(#2c2c54 0%, #2c2c54 100%);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        
+        .track-progress {
+            background: conic-gradient(#ff6b6b 0deg, #ff6b6b 0deg);
+            clip-path: inset(0);
+            transition: background 0.1s linear;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.6);
+        }
+        
+        .track-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px;
+            height: 140px;
+            background: rgba(15, 52, 96, 0.7);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid rgba(255, 107, 107, 0.4);
+        }
+        
+        h1 {
+            color: #ff9e80;
+            margin-bottom: 10px;
+            font-weight: 300;
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 158, 128, 0.5);
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #a9a9ff;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+        
+        .stopwatch-display {
+            font-size: 3.8rem;
+            font-weight: 300;
+            color: #ffffff;
+            margin: 15px 0;
+            text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+            letter-spacing: 2px;
+            font-variant-numeric: tabular-nums;
+            text-align: center;
+        }
+        
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            padding: 13px 24px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            font-weight: 600;
+            min-width: 100px;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        
+        .start-btn {
+            background: linear-gradient(to right, #ff6b6b, #ff8e8e);
+            color: white;
+        }
+        
+        .start-btn:hover {
+            background: linear-gradient(to right, #ff8e8e, #ffaaaa);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
+        }
+        
+        .start-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .lap-btn {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ff9e80;
+            border: 1px solid rgba(255, 158, 128, 0.3);
+        }
+        
+        .lap-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+        
+        .lap-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .lap-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .reset-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0ff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+        
+        .reset-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .laps-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .laps-header {
+            color: #ff9e80;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .lap-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 1.05rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .lap-number {
+            color: #a9a9ff;
+            font-weight: 500;
+        }
+        
+        .lap-time {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+        
+        .laps-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .laps-container::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 3px;
+        }
+        .laps-container::-webkit-scrollbar-thumb {
+            background: #ff6b6b;
+            border-radius: 3px;
+        }
+        
+        /* 响应式设计优化 */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 500px;
+                padding: 25px;
+                gap: 20px;
+            }
+            
+            .stopwatch-display {
+                font-size: 3.2rem;
+                margin: 10px 0;
+            }
+            
+            .control-btn {
+                padding: 14px 20px;
+                font-size: 1.1rem;
+                min-width: 90px;
+            }
+            
+            .track-container {
+                width: 160px;
+                height: 160px;
+            }
+            
+            .track-center {
+                width: 110px;
+                height: 110px;
+            }
+            
+            h1 {
+                font-size: 1.9rem;
+            }
+            
+            .laps-container {
+                max-height: 180px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                gap: 15px;
+            }
+            
+            .stopwatch-display {
+                font-size: 2.6rem;
+            }
+            
+            .control-buttons {
+                gap: 10px;
+            }
+            
+            .control-btn {
+                padding: 12px 16px;
+                font-size: 1rem;
+                min-width: 80px;
+            }
+            
+            .track-container {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .track-center {
+                width: 95px;
+                height: 95px;
+            }
+            
+            h1 {
+                font-size: 1.7rem;
+            }
+            
+            .laps-container {
+                max-height: 150px;
+                padding: 12px;
+            }
+            
+            .lap-item {
+                font-size: 0.95rem;
+            }
+        }
+        
+        /* 平板优化 */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                max-width: 700px;
+            }
+        }
+        
+        /* 触摸设备优化 */
+        @media (pointer: coarse) {
+            .control-btn {
+                min-height: 50px;
+                padding-top: 16px;
+                padding-bottom: 16px;
+            }
+        }
+        
+        /* 横屏优化 */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .container {
+                flex-direction: row;
+                align-items: center;
+                max-width: 90%;
+                gap: 20px;
+            }
+            
+            .track-container {
+                margin: 0;
+                width: 150px;
+                height: 150px;
+            }
+            
+            .track-center {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .stopwatch-display {
+                font-size: 2.5rem;
+            }
+            
+            .laps-container {
+                max-height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Shirley's Stop Watch</h1>
+        <div class="subtitle">with lap timing</div>
+        
+        <div class="track-container">
+            <div class="track">
+                <div class="track-bg"></div>
+                <div class="track-progress" id="trackProgress"></div>
+                <div class="track-center">
+                    <div class="stopwatch-display" id="stopwatchDisplay">00:00.00</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="control-btn start-btn" id="startBtn">Start</button>
+            <button class="control-btn lap-btn" id="lapBtn" disabled>Lap</button>
+            <button class="control-btn reset-btn" id="resetBtn">Reset</button>
+        </div>
+        
+        <div class="laps-container">
+            <div class="laps-header">Lap Times</div>
+            <div id="lapsList"></div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stopwatchDisplay = document.getElementById('stopwatchDisplay');
+            const trackProgress = document.getElementById('trackProgress');
+            const startBtn = document.getElementById('startBtn');
+            const lapBtn = document.getElementById('lapBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const lapsList = document.getElementById('lapsList');
+            
+            let startTime = 0;
+            let elapsedTime = 0;
+            let lastLapTimestamp = 0; // 上次 Lap 的「總時間」
+            let isRunning = false;
+            let intervalId = null;
+            let lapCount = 0;
+            
+            function formatTime(ms) {
+                const totalSeconds = ms / 1000;
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = Math.floor(totalSeconds % 60);
+                const centiseconds = Math.floor((ms % 1000) / 10);
+                return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
+            }
+            
+            function updateDisplay() {
+                if (!isRunning) return;
+                const currentTime = Date.now();
+                const displayTime = currentTime - startTime + elapsedTime;
+                stopwatchDisplay.textContent = formatTime(displayTime);
+                
+                const progressSeconds = (displayTime / 1000) % 10;
+                const angle = (progressSeconds / 10) * 360;
+                trackProgress.style.background = `conic-gradient(#ff6b6b 0deg, #ff6b6b ${angle}deg, #2c2c54 ${angle}deg, #2c2c54 360deg)`;
+            }
+            
+            function startStopwatch() {
+                if (!isRunning) {
+                    if (elapsedTime === 0) {
+                        startTime = Date.now();
+                        lastLapTimestamp = 0; // 重置 Lap 基準
+                    }
+                    intervalId = setInterval(updateDisplay, 10);
+                    isRunning = true;
+                    startBtn.textContent = 'Pause';
+                    lapBtn.disabled = false;
+                    resetBtn.disabled = true;
+                } else {
+                    clearInterval(intervalId);
+                    elapsedTime += Date.now() - startTime;
+                    isRunning = false;
+                    startBtn.textContent = 'Resume';
+                    lapBtn.disabled = true;
+                    resetBtn.disabled = false;
+                }
+            }
+            
+            function recordLap() {
+                if (!isRunning) return;
+                
+                lapCount++;
+                const currentTime = Date.now() - startTime + elapsedTime;
+                const lapTime = lapCount === 1 
+                    ? currentTime 
+                    : currentTime - lastLapTimestamp;
+                
+                lastLapTimestamp = currentTime;
+                
+                const lapItem = document.createElement('div');
+                lapItem.className = 'lap-item';
+                lapItem.innerHTML = `
+                    <span class="lap-number">Lap ${lapCount}</span>
+                    <span class="lap-time">${formatTime(lapTime)}</span>
+                `;
+                lapsList.appendChild(lapItem);
+                lapsList.scrollTop = lapsList.scrollHeight;
+            }
+            
+            function resetStopwatch() {
+                clearInterval(intervalId);
+                isRunning = false;
+                elapsedTime = 0;
+                lastLapTimestamp = 0;
+                lapCount = 0;
+                startTime = 0;
+                
+                stopwatchDisplay.textContent = '00:00.00';
+                trackProgress.style.background = 'conic-gradient(#ff6b6b 0deg, #ff6b6b 0deg, #2c2c54 0deg, #2c2c54 360deg)';
+                lapsList.innerHTML = '';
+                
+                startBtn.textContent = 'Start';
+                lapBtn.disabled = true;
+                resetBtn.disabled = false;
+            }
+            
+            startBtn.addEventListener('click', startStopwatch);
+            lapBtn.addEventListener('click', recordLap);
+            resetBtn.addEventListener('click', resetStopwatch);
+            
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(e) {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) e.preventDefault();
+                lastTouchEnd = now;
+            }, { passive: false });
+            
+            resetStopwatch();
+        });
+    </script>
+</body>
+</html>
