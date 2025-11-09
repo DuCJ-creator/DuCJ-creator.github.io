@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>單字挑戰 - 手機版</title>
+    <title>單字挑戰 U1-10</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -24,6 +25,19 @@
             align-items: center;
             padding: 10px;
             background-image: linear-gradient(to bottom, #a8e6cf, #88d4ba);
+            touch-action: manipulation;
+        }
+        
+        .device-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
         }
         
         .game-container {
@@ -85,6 +99,9 @@
             box-shadow: 0 4px 0 #d46a6a;
             font-family: 'Comic Sans MS', cursive;
             flex-shrink: 0;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
         }
         
         .start-screen button:hover, .option:hover, .end-screen button:hover {
@@ -446,8 +463,394 @@
             90% { opacity: 1; }
             100% { transform: translateX(calc(100vw + 100px)); opacity: 0; }
         }
+
+        /* 设备检测和自适应样式 */
+        .desktop-view {
+            /* 桌面设备样式 */
+        }
+
+        .tablet-view {
+            /* 平板设备样式 */
+        }
+
+        .mobile-view {
+            /* 手机设备样式 */
+        }
+
+        /* 响应式设计优化 */
+        @media (max-width: 768px) {
+            .game-container {
+                height: 98vh;
+                max-height: 98vh;
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+                margin: 3px 0;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+                margin-bottom: 5px;
+            }
+            
+            .option {
+                min-height: 50px;
+                font-size: 0.9rem;
+                padding: 8px;
+            }
+            
+            .character-container {
+                height: 80px;
+                margin: 5px 0;
+            }
+            
+            .pig {
+                font-size: 50px;
+            }
+            
+            .bomb {
+                font-size: 25px;
+                bottom: 50px;
+            }
+            
+            .fuse {
+                bottom: 75px;
+                width: 50px;
+            }
+            
+            .flame {
+                bottom: 70px;
+                font-size: 15px;
+            }
+            
+            .word-display {
+                font-size: 1.5rem;
+                margin: 5px 0;
+            }
+            
+            .pos-display {
+                font-size: 1rem;
+                margin-bottom: 5px;
+            }
+            
+            .score-display {
+                font-size: 1.1rem;
+                margin-bottom: 5px;
+            }
+            
+            .timer-container {
+                margin: 5px 0;
+            }
+            
+            .countdown {
+                top: -25px;
+                font-size: 1.3rem;
+            }
+            
+            .start-screen button, .end-screen button {
+                padding: 10px 15px;
+                font-size: 1rem;
+                margin: 5px;
+            }
+            
+            .end-screen h2 {
+                font-size: 1.8rem;
+                margin-bottom: 10px;
+            }
+            
+            .end-screen p {
+                font-size: 1.1rem;
+                margin: 5px 0;
+            }
+            
+            .end-screen button {
+                padding: 10px 20px;
+                font-size: 1rem;
+                min-width: 150px;
+            }
+        }
         
-        /* 橫屏專用樣式 */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 10px;
+                height: 96vh;
+                max-height: 96vh;
+            }
+            
+            h1 {
+                font-size: 1.2rem;
+                margin: 2px 0;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr;
+                gap: 5px;
+                margin-bottom: 5px;
+            }
+            
+            .option {
+                min-height: 45px;
+                font-size: 0.85rem;
+                padding: 6px;
+            }
+            
+            .character-container {
+                height: 70px;
+                margin: 5px 0;
+            }
+            
+            .pig {
+                font-size: 40px;
+            }
+            
+            .bomb {
+                font-size: 20px;
+                bottom: 45px;
+            }
+            
+            .fuse {
+                bottom: 65px;
+                width: 40px;
+            }
+            
+            .flame {
+                bottom: 60px;
+                font-size: 12px;
+            }
+            
+            .word-display {
+                font-size: 1.3rem;
+                margin: 5px 0;
+            }
+            
+            .pos-display {
+                font-size: 0.9rem;
+                margin-bottom: 5px;
+                padding: 4px 12px;
+            }
+            
+            .score-display {
+                font-size: 1rem;
+                margin-bottom: 5px;
+                padding: 4px 12px;
+            }
+            
+            .timer-container {
+                margin: 5px 0;
+                height: 10px;
+            }
+            
+            .countdown {
+                top: -20px;
+                font-size: 1.1rem;
+            }
+            
+            .start-screen button, .end-screen button {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+                margin: 4px;
+            }
+            
+            .end-screen h2 {
+                font-size: 1.5rem;
+                margin-bottom: 8px;
+            }
+            
+            .end-screen p {
+                font-size: 1rem;
+                margin: 4px 0;
+                padding: 8px 15px;
+            }
+            
+            .end-screen button {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+                min-width: 120px;
+                margin-top: 15px;
+            }
+            
+            .sun {
+                font-size: 30px;
+            }
+            
+            .cloud {
+                font-size: 25px;
+            }
+        }
+        
+        /* 平板优化 */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .game-container {
+                max-width: 700px;
+                height: 90vh;
+                max-height: 90vh;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            
+            .option {
+                min-height: 70px;
+                font-size: 1rem;
+            }
+            
+            .character-container {
+                height: 100px;
+            }
+            
+            .pig {
+                font-size: 60px;
+            }
+        }
+        
+        /* 桌面设备优化 - 大幅增加字体大小 */
+        @media (min-width: 1025px) {
+            .game-container {
+                max-width: 900px;
+                height: 85vh;
+                max-height: 85vh;
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2.8rem !important;
+                margin: 15px 0;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .option {
+                min-height: 100px !important;
+                font-size: 1.4rem !important;
+                padding: 20px !important;
+                border-radius: 20px !important;
+            }
+            
+            .character-container {
+                height: 160px;
+                margin: 20px 0;
+            }
+            
+            .pig {
+                font-size: 100px !important;
+            }
+            
+            .bomb {
+                font-size: 50px !important;
+                bottom: 110px;
+            }
+            
+            .fuse {
+                bottom: 160px;
+                width: 100px;
+                height: 8px;
+            }
+            
+            .flame {
+                bottom: 150px;
+                font-size: 30px !important;
+            }
+            
+            .word-display {
+                font-size: 2.5rem !important;
+                margin: 20px 0;
+            }
+            
+            .pos-display {
+                font-size: 1.5rem !important;
+                margin-bottom: 15px;
+                padding: 10px 25px;
+            }
+            
+            .score-display {
+                font-size: 1.8rem !important;
+                margin-bottom: 15px;
+                padding: 10px 25px;
+            }
+            
+            .timer-container {
+                margin: 15px 0;
+                height: 15px;
+            }
+            
+            .countdown {
+                top: -35px;
+                font-size: 2rem !important;
+            }
+            
+            .start-screen button, .end-screen button {
+                padding: 18px 35px !important;
+                font-size: 1.5rem !important;
+                margin: 15px;
+                border-radius: 60px;
+            }
+            
+            .end-screen h2 {
+                font-size: 3rem !important;
+                margin-bottom: 25px;
+            }
+            
+            .end-screen p {
+                font-size: 1.8rem !important;
+                margin: 15px 0;
+                padding: 15px 30px;
+            }
+            
+            .end-screen button {
+                padding: 18px 35px !important;
+                font-size: 1.5rem !important;
+                min-width: 250px;
+                margin-top: 30px;
+            }
+            
+            .sun {
+                font-size: 60px;
+            }
+            
+            .cloud {
+                font-size: 45px;
+            }
+            
+            .farm-decoration {
+                font-size: 35px;
+            }
+        }
+        
+        /* 大屏幕桌面设备优化 */
+        @media (min-width: 1440px) {
+            .game-container {
+                max-width: 1100px;
+                padding: 30px;
+            }
+            
+            h1 {
+                font-size: 3.2rem !important;
+            }
+            
+            .option {
+                min-height: 120px !important;
+                font-size: 1.6rem !important;
+            }
+            
+            .word-display {
+                font-size: 3rem !important;
+            }
+        }
+        
+        /* 横屏專用樣式 */
         @media (orientation: landscape) {
             .game-container {
                 height: 98vh;
@@ -583,9 +986,19 @@
                 padding: 6px;
             }
         }
+        
+        /* 触摸设备优化 */
+        @media (pointer: coarse) {
+            .start-screen button, .option, .end-screen button {
+                min-height: 50px;
+                padding-top: 14px;
+                padding-bottom: 14px;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="device-info" id="deviceInfo">检测设备中...</div>
     <div class="sun">☀️</div>
     <div class="cloud" style="top: 20px; animation-delay: 0s;">☁️</div>
     <div class="cloud" style="top: 60px; animation-delay: 5s;">☁️</div>
@@ -648,167 +1061,361 @@
         
         <!-- 單字庫區域 -->
         <textarea id="word-database" style="display: none;">
-compact, adj., 緊密的;結實的;小型的  
-heavenly, adj., 天堂般的  
-horizontal, adj., 水平的;橫的  
-infinite, adj., 無限的  
-naive, adj., 天真的;幼稚的;輕信的  
-wholesale, adj., 批發的  
-alternate, v., 輪流  
-braid, v., 編成辮子;編成穗帶;編結  
-bulge, v., 膨脹;凸起;裝滿  
-commission, v., 委任;委託  
-compliment, v., 讚美;恭維  
-dispense, v., 分配;執行;配(藥)  
-exclaim, v., 呼喊;驚叫  
-freight, v., 裝貨於;運輸(貨物)  
-issue, v., 發行;發佈  
-shatter, v., 粉碎;砸碎  
-whirl, v., 旋轉;迴旋  
-communism, n., 共產主義  
-fiancée, n., 未婚妻  
-majesty, n., 雄偉;壯麗;(帝王的)威嚴  
-migrant, n., 移民;候鳥  
-oatmeal, n., 燕麥片;燕麥粥  
-packet, n., 小包(裹);小捆;小袋  
-pimple, n., 丘疹;面皰  
-refuge, n., 躲避;避難;避難所  
-scorn, n., 輕蔑;嘲笑  
-spectator, n., 旁觀者;目擊者  
-statistic, n., 統計量;統計數值  
-tavern, n., 小酒館;小客棧  
-temptation, n., 引誘;誘惑;誘惑物  
-torture, n., 拷打;酷刑;折磨  
-veil, n., 面紗;帷幕;託詞  
-warrior, n., 武士;戰士;勇士  
-abrupt, adj., 突然的;意外的  
-carefree, adj., 無憂無慮的;輕鬆愉快的  
-solemn, adj., 嚴肅的;莊嚴的;鄭重的  
-worthy, adj., 值得的  
-acknowledge, v., 承認  
-applaud, v., 向...鼓掌;稱讚  
-conceal, v., 隱蔽;隱藏  
-dispose, v., 配置;處置  
-inherit, v., 繼承(傳統;遺產等)  
-modernize, v., 使現代化 (美式拼寫)  
-revolt, v., 反叛;起義;使反感  
-stink, v., 發惡臭;名聲臭  
-tangle, v., 使糾結;使混亂  
-thrust, v., 用力推;刺;插  
-trifle, v., 戲弄;輕視  
-tiptoe, v., 踮著腳  
-blues, n., 藍調;憂鬱  
-bosom, n., 胸;乳房;(衣服的)襟;胸懷  
-caretaker, n., 照顧者;管理人  
-circuit, n., 環道;一圈;巡迴路線;電路  
-consent, n., 同意;贊成  
-convict, n., (服刑的)囚犯  
-eyelash, n., (一根)睫毛  
-flip, n., 輕彈;輕擊  
-framework, n., 架構;組織  
-fuse, n., 保險絲;引信  
-gloom, n., 陰暗;暗處;沮喪的氣氛  
-hiss, n., 嘶嘶聲;噓聲  
-initiate, n., 初學者;新加入者  
-league, n., 同盟;聯盟  
-octopus, n., 章魚  
-orient, n., 亞洲國家(尤指東亞)  
-parlor, n., 客廳;接待室  
-plantation, n., 大農園;造林地  
-plow, n., 犁;除雪機 (=plough)  
-revolt, n., 反叛;起義;反感  
-rifle, n., 步槍;來福槍  
-shred, n., 碎片;碎條;破布
-absurd, adj., 荒謬的;愚蠢的  
-ample, adj., 大量的;充裕的  
-beloved, adj., 心愛的  
-inland, adj., 內地的;內陸的  
-worthwhile, adj., 值得花費時間(或金錢)  
-beware, v., 當心;提防  
-bolt, v., 閂上;用螺栓拴緊;吞吃;衝出  
-compass, v., 圖謀;計劃;包圍;達到;理解  
-condemn, v., 責備;譴責;判刑  
-despise, v., 鄙視  
-penetrate, v., 穿過;透過;識破;滲透入  
-quiver, v., 顫抖;抖動(翅膀等)  
-recommend, v., 推薦;介紹  
-suppress, v., 鎮壓;壓制;抑制  
-tan, v., 曬成棕褐色;鞣(皮)  
-tilt, v., 使傾斜;使翹起;偏向  
-astonishment, n., 驚訝;驚愕  
-auxiliary, n., 輔助者;助動詞  
-bog, n., 沼澤;泥塘  
-breadth, n., 寬度;幅度;寬宏  
-bribe, n., 賄賂  
-calligraphy, n., 書法;筆跡  
-checkup, n., 檢查;體檢  
-chimpanzee, n., 黑猩猩  
-guideline, n., 指南;指導方針  
-lawmaker, n., 立法者  
-legislation, n., 立法;法規  
-massage, n., 按摩(術);推拿  
-olive, n. adj., 橄欖(的);橄欖色  
-particle, n., 微粒;顆粒  
-sculptor, n., 雕刻家  
-solo, n. adj., 獨奏(曲);獨唱(曲);單飛  
-stain, n., 污點;色斑;染色劑  
-tempo, n., 速度;拍子  
-traitor, n., 叛徒;賣國賊;背叛者  
-wade, n., 跋涉;艱難的行走  
-wharf, n., 碼頭;停泊處  
-barren, adj., 貧瘠的;荒蕪的;不妊的  
-superficial, adj., 外表的;粗略的;膚淺的  
-verbal, adj., 言辭上的;動詞的  
-contemplate, v., 凝視;思忖;仔細考慮  
-curb, v., 控制;遏止;勒住  
-quack, v., (鴨) 嘎嘎叫  
-soften, v., 使變柔軟;使變和藹  
-supervise, v., 監督;管理;指導  
-thrill, v., 使興奮;使激動;使毛骨悚然;顫抖  
-whine, v., 發哀鳴聲;發牢騷  
-inwards, adv., 向內  
-altitude, n., 高度;海拔  
-belongings, n., 財產;攜帶物品  
-bleach, n., 漂白;漂白劑  
-coastline, n., 海岸線  
-crystal, n., 水晶  
-fertilizer, n., 肥料 (美式拼寫)  
-freight, n., (船運的) 貨物;運費  
-lotus, n., 蓮花  
-mode, n., 方式;型;模式  
-motherhood, n., 母性;(總稱)母親們  
-paddle, n., 槳;(桌球的)球拍  
-reel, n., 捲軸;捲筒;一捲  
-slap, n., 摑;侮辱  
-stutter, n., 結巴;口吃  
-swarm, n., (密集的)一大群  
-vertical, n., 垂直線;垂直面 
-accustom,v,使習慣
-flourish,v,茂盛;興旺;揮舞
-indulge,v,沉溺於;縱容
-lodge,v,投宿;寄宿;提出(申訴);容納
-manifest,v,表明;顯示;證明
-orient,v,使朝向;使熟悉;定方位
-plead,v,辯護;懇求
-reverse,v,顛倒;倒轉;推翻
-shield,v,保護;遮蔽
-tuck,v,塞進;把...打褶
-venture,v,冒險;大膽嘗試
-ward,v,避開;擋開;守護
+compact,adj,緊密的;結實的;小型的
+heavenly,adj,天堂般的
+horizontal,adj,水平的;橫的
+infinite,adj,無限的
+naive,adj,天真的;幼稚的;輕信的
+wholesale,adj,批發的
+alternate,v,輪流
+braid,v,編成辮子;編成穗帶;編結
+bulge,v,膨脹;凸起;裝滿
+commission,v,委任;委託
+compliment,v,讚美;恭維
+dispense,v,分配;執行;配(藥)
+exclaim,v,呼喊;驚叫
+freight,v,裝貨於;運輸(貨物)
+issue,v,發行;發佈
+shatter,v,粉碎;砸碎
+whirl,v,旋轉;迴旋
+communism,n,共產主義
+fiancée,n,未婚妻
+majesty,n,雄偉;壯麗;(帝王的)威嚴
+migrant,n,移民;候鳥
+oatmeal,n,燕麥片;燕麥粥
+packet,n,小包(裹);小捆;小袋
+pimple,n,丘疹;面皰
+refuge,n,躲避;避難;避難所
+scorn,n,輕蔑;嘲笑
+spectator,n,旁觀者;目擊者
+statistic,n,統計量;統計數值
+tavern,n,小酒館;小客棧
+temptation,n,引誘;誘惑;誘惑物
+torture,n,拷打;酷刑;折磨
+veil,n,面紗;帷幕;託詞
+warrior,n,武士;戰士;勇士
+abrupt,adj,突然的;意外的
+carefree,adj,無憂無慮的;輕鬆愉快的
+solemn,adj,嚴肅的;莊嚴的;鄭重的
+worthy,adj,值得的
+acknowledge,v,承認
+applaud,v,向...鼓掌;稱讚
+conceal,v,隱蔽;隱藏
+dispose,v,配置;處置
+inherit,v,繼承(傳統;遺產等)
+modernize,v,使現代化 (美式拼寫)
+revolt,v,反叛;起義;使反感
+stink,v,發惡臭;名聲臭
+tangle,v,使糾結;使混亂
+thrust,v,用力推;刺;插
+trifle,v,戲弄;輕視
+tiptoe,v,踮著腳
+blues,n,藍調;憂鬱
+bosom,n,胸;乳房;(衣服的)襟;胸懷
+caretaker,n,照顧者;管理人
+circuit,n,環道;一圈;巡迴路線;電路
+consent,n,同意;贊成
+convict,n,(服刑的)囚犯
+eyelash,n,(一根)睫毛;
+flip,n,輕彈;輕擊
+framework,n,架構;組織
+fuse,n,保險絲;引信
+gloom,n,陰暗;暗處;沮喪的氣氛
+hiss,n,嘶嘶聲;噓聲
+initiate,n,初學者;新加入者
+league,n,同盟;聯盟
+octopus,n,章魚
+orient,n,亞洲國家(尤指東亞)
+parlor,n,客廳;接待室
+plantation,n,大農園;造林地
+plow,n,犁;除雪機 (=plough)
+revolt,n,反叛;起義;反感
+rifle,n,步槍;來福槍
+shred,n,碎片;碎條;破布
+allergic,adj,過敏的
+extraordinary,adj,異常的;特別的
+marginal,adj,頁邊的;邊緣的;不重要的
+ensure,v,保證;擔保
+impose,v,徵(稅);加(負擔等)於
+jaywalk,v,不守交通規則橫穿馬路
+pulse,v,搏動;跳動;振動
+steer,v,掌(船)
+surge,v,(海浪) 湧動
+AI,n,人工智慧 (artificial intelligence)
+boulevard,n,林蔭大道;大馬路
+bound,n,跳躍;領域;界限
+clause,n,(文件的)條款;子句
+courtyard,n,庭院;天井
+crib,n,嬰兒床
+devotion,n,奉獻
+flap,n,薄片;(信封的)蓋口;拍動
+isle,n,小島
+landlord,n,房東
+mansion,n,大廈;大樓
+maple,n,槭樹;楓樹
+mint,n,薄荷;薄荷糖;造幣廠
+procession,n,一(長)列;一(長)排;隊伍
+sneaker,n,運動鞋
+trout,n,鱒魚;鮭鱒魚
+worship,n,崇拜;敬神;禮拜
+elaborate,adj,精心製作的;煞費苦心的;辛勤的
+poetic,adj,詩的;韻文的
+conduct,v,引導;帶領
+convict,v,證明...有罪;判...有罪
+discard,v,拋棄;摒棄;丟棄
+mash,v,把...搗成糊狀;壓碎
+piss,v,小便
+prey,v,捕食;掠奪
+stump,v,砍去...的幹;作巡迴政治演說; 把...難住
+beforehand,adv,事先;提前地
+underneath,adv,在下面;在底下
+backbone,n,脊柱;支柱;骨幹
+blacksmith,n,鐵匠
+blur,n,模糊;模糊不清的事物
+briefcase,n,公事包
+brotherhood,n,兄弟關係;同志關係
+cannon,n,大砲;榴彈砲
+crocodile,n,鱷魚
+foil,n,箔;花劍劍術
+fraction,n,小部分;片段;碎片
+interpreter,n,通譯員
+nibble,n,細咬;啃;少量
+notable,n,名人;顯要人物
+notion,n,概念;想法;打算
+orchard,n,果樹園;果樹林
+purchase,n,所購之物
+rib,n,肋骨;排骨
+robin,n,知更鳥
+snore,n,打鼾;鼾聲
+tin,n,錫;罐頭
+colonial,adj,殖民地的;殖民的
+contemporary,adj,當代的
+enthusiastic,adj,熱情的;熱烈的
+falter,v,踉蹌;搖晃;結巴地說話
+gleam,v,發微光;閃現
+ornament,v,裝飾;美化
+ripple,v,起漣漪;(頭髮等)波浪式
+rival,v,與...競爭;比得上
+squash,v,把...壓扁(壓碎)
+startle,v,使驚嚇;使驚奇
+ace,n,(紙牌)A;么點牌;專家;發球得分
+algebra,n,代數
+alien,n,外國人;外星人
+allergy,n,過敏症
+bachelor,n,單身漢; 學士學位
+coral,n. adj,珊瑚(色的)
+crossing,n,交叉;交叉點;橫穿;雜交
+flake,n,小薄片
+geometry,n,幾何學
+hostage,n,人質;抵押品
+lash,n,鞭打;(風浪等的)猛烈打擊;斥責
+overflow,n,溢出;過剩;泛濫
+ranch,n,大牧場
+saddle,n,馬鞍;(自行車摩托車的)車座
+snort,n,噴鼻息;噴氣聲
+toil,n,辛苦;勞累;苦工
+absurd,adj,荒謬的;愚蠢的
+ample,adj,大量的;充裕的
+beloved,adj,心愛的
+inland,adj,內地的;內陸的
+worthwhile,adj,值得花費時間(或金錢)
+beware,v,當心;提防
+bolt,v,閂上;用螺栓拴緊;吞吃;衝出
+compass,v,圖謀;計劃;包圍;達到;理解
+condemn,v,責備;譴責;判刑
+despise,v,鄙視
+penetrate,v,穿過;透過;識破;滲透入
+quiver,v,顫抖;抖動(翅膀等)
+recommend,v,推薦;介紹
+suppress,v,鎮壓;壓制;抑制
+tan,v,曬成棕褐色;鞣(皮)
+tilt,v,使傾斜;使翹起;偏向
+astonishment,n,驚訝;驚愕
+auxiliary,n,輔助者;助動詞
+bog,n,沼澤;泥塘
+breadth,n,寬度;幅度;寬宏
+bribe,n,賄賂
+calligraphy,n,書法;筆跡
+checkup,n,檢查;體檢
+chimpanzee,n,黑猩猩
+guideline,n,指南;指導方針
+lawmaker,n,立法者
+legislation,n,立法;法規
+massage,n,按摩(術);推拿
+olive,n. adj,橄欖(的);橄欖色
+particle,n,微粒;顆粒
+sculptor,n,雕刻家
+solo,n. adj,獨奏(曲);獨唱(曲);單飛
+stain,n,污點;色斑;染色劑
+tempo,n,速度;拍子
+traitor,n,叛徒;賣國賊;背叛者
+wade,n,跋涉;艱難的行走
+wharf,n,碼頭;停泊處
+barren,adj,貧瘠的;荒蕪的;不妊的
+superficial,adj,外表的;粗略的;膚淺的
+verbal,adj,言辭上的;動詞的
+contemplate,v,凝視;思忖;仔細考慮
+curb,v,控制;遏止;勒住
+quack,v,(鴨) 嘎嘎叫
+soften,v,使變柔軟;使變和藹
+supervise,v,監督;管理;指導
+thrill,v,使興奮;使激動;使毛骨悚然;顫抖
+whine,v,發哀鳴聲;發牢騷
+inwards,adv,向內
+altitude,n,高度;海拔
+belongings,n,財產;攜帶物品
+bleach,n,漂白;漂白劑
+coastline,n,海岸線
+crystal,n,水晶
+fertilizer,n,肥料 (美式拼寫)
+freight,n,(船運的) 貨物;運費
+lotus,n,蓮花
+mode,n,方式;型;模式
+motherhood,n,母性;(總稱)母親們
+paddle,n,槳;(桌球的)球拍
+reel,n,捲軸;捲筒;一捲
+slap,n,摑;侮辱
+stutter,n,結巴;口吃
+swarm,n,(密集的)一大群
+vertical,n,垂直線;垂直面
+cowardly,adj,膽小的;懦怯的
+erect,adj,豎起的
+immense,adj,巨大的;廣大的
+overall,adj,總的;全部的;全面的
+prehistoric,adj,史前的;舊式的
+astonish,v,使吃驚;使驚訝
+foul,v,污染;玷污;犯規;塞住
+justify,v,證明...是正當的;辯解
+patrol,v,巡邏;巡查
+slump,v,(沈重地)倒下;(經濟)衰落
+snort,v,噴鼻息;輕蔑(或憤怒)
+soak,v,浸泡;使濕透
+stroll,v,散步;溜達
+hence,adv,因此;由此
+solo,adv,單獨地
+underneath,prep,在...下面
+abortion,n,墮胎
+brace,n,支柱;大括號;(牙齒)矯正器
+category,n,種類;類別
+cathedral,n,大教堂
+chairman,n,主席
+commodity,n,商品;日用品
+crunch,n,嘎吱吱(咬嚼)聲音;關鍵時刻
+molecule,n,分子;微小顆粒
+rally,n,大集會;重整旗鼓
+shortage,n,缺少;不足;匱乏
+shrine,n,聖壇;神殿
+sovereign,n,君主;元首;主權國家
+constitutional,adj,憲法的;生來的
+kin,adj. n,有親屬關係的;同類的;類似的; 親屬
+fuss,v,忙亂;小題大作;爭辯
+linger,v,繼續逗留;持續;磨蹭
+sprint,v,奮力而跑;衝刺
+stray,v,迷路;流浪;分心;入歧途
+vacuum,v,吸塵
+astray,adv,迷路;離開正道
+outward,adv,向外;出海;出港
+advertiser,n,刊登廣告者;廣告客戶
+commonplace,n. adj,司空見慣的(事);老生常談(的); 平凡的
+compromise,n,妥協;危及;(原則等的)放棄
+drape,n,簾(尤指窗簾);幔
+herb,n,草本植物;藥草
+hijack,n,劫持事件
+jack,n,千斤頂;(紙牌中的)J牌;杰克;水手
+ratio,n,比率;比例
+salute,n,敬禮;致敬;致意
+spur,n,踢馬刺;激勵;(雞等的)距;骨刺
+stall,n,廄;攤位;(汽車的)拋錨
+stink,n,臭氣
+vacuum,n,真空;空白;吸塵器
+adolescent,adj,青少年的;未成熟的
+chestnut,adj.n,栗子; 栗數; 栗色(的)
+extinct,adj,(火等)熄滅的; 滅絕的; 消亡的
+interior,adj,內的;內部的
+lofty,adj,高聳的;極高的;高傲的
+ragged,adj,破爛的;不整潔的;參差不齊的
+vertical,adj,垂直的;豎的
+accustom,v,使習慣於
+flourish,v,茂盛;繁茂;興旺
+indulge,v,沈迷於;滿足(慾望等)
+lodge,v,租房間給...住;申訴;暫住;投宿
+manifest,v,表明;顯示
+orient,v,使...朝東;定方位;使熟悉情況
+plead,v,為(案件) 辯護; 懇求; 聲援
+reverse,v,翻轉;倒退;反向
+shield,v,保護;庇護;掩蓋
+tuck,v,把...塞進;使有褶襉
+venture,v,冒險;大膽行事
+ward,v,避開;擋開
 astronomer,n,天文學家
 awe,n,敬畏;畏怯
-chairwoman,n,女主席
+chairwoman,n,女主席;女議長
 hymn,n,讚美詩;聖歌
-index,n,索引;標誌;指數
-peek,n,偷看
-perch,n,棲息處;高處;鱸魚
-pinch,n,捏;掐;少量
-vanity,n,虛榮心;空虛
-workshop,n,工場;研討會
+index,n,索引;標誌;指示符號
+peek,n,偷偷看;一瞥
+perch,n,(鳥類的)棲息處
+pinch,n,擰;夾;(一)撮
+vanity,n,自負;虛榮;梳妝臺
+workshop,n,作坊;研討會
         </textarea>
     </div>
 
     <script>
+        // 设备检测函数
+        function detectDevice() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            const deviceInfo = document.getElementById('deviceInfo');
+            let deviceType = 'desktop';
+            let screenInfo = '';
+            
+            // 检测设备类型
+            if (/mobile|android|iphone|ipad/.test(userAgent)) {
+                if (/ipad|tablet/.test(userAgent) || (window.innerWidth >= 768 && window.innerWidth <= 1024)) {
+                    deviceType = 'tablet';
+                    screenInfo = '平板设备';
+                } else {
+                    deviceType = 'mobile';
+                    screenInfo = '手机设备';
+                }
+            } else {
+                deviceType = 'desktop';
+                screenInfo = '桌面设备';
+            }
+            
+            // 添加设备类到body
+            document.body.classList.add(deviceType + '-view');
+            
+            // 显示设备信息
+            const screenSize = `屏幕: ${window.innerWidth} × ${window.innerHeight}`;
+            const dpr = `像素比: ${window.devicePixelRatio}`;
+            deviceInfo.textContent = `${screenInfo} | ${screenSize} | ${dpr}`;
+            
+            // 根据设备类型调整游戏参数
+            adjustForDevice(deviceType);
+            
+            return deviceType;
+        }
+        
+        // 根据设备类型调整参数
+        function adjustForDevice(deviceType) {
+            const gameContainer = document.querySelector('.game-container');
+            
+            switch(deviceType) {
+                case 'desktop':
+                    // 桌面设备 - 使用更大的字体和间距
+                    gameContainer.style.maxWidth = '1000px';
+                    break;
+                case 'tablet':
+                    // 平板设备 - 中等大小
+                    gameContainer.style.maxWidth = '800px';
+                    break;
+                case 'mobile':
+                    // 手机设备 - 保持原有设置
+                    gameContainer.style.maxWidth = '100%';
+                    break;
+            }
+        }
+        
         // 遊戲變數
         let score = 0;
         let currentQuestionIndex = 0;
@@ -1150,8 +1757,22 @@ workshop,n,工場;研討會
         startBtn.addEventListener('click', startGame);
         restartBtn.addEventListener('click', initGame);
         
-        // 初始化遊戲
+        // 防止双击缩放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) e.preventDefault();
+            lastTouchEnd = now;
+        }, { passive: false });
+        
+        // 窗口大小改变时重新检测设备
+        window.addEventListener('resize', function() {
+            setTimeout(detectDevice, 100);
+        });
+        
+        // 初始化遊戲和设备检测
         initGame();
+        detectDevice();
     </script>
 </body>
 </html>
