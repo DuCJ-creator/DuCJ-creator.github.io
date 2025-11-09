@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英文單字練習工具</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+            background: linear-gradient(90deg, #2575fc, #6a11cb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .input-section {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 180px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            resize: vertical;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        textarea:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            gap: 15px;
+        }
+        button {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+            flex: 1;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+        button:active {
+            transform: translateY(1px);
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .mode-button {
+            background: linear-gradient(135deg, #2196F3, #21CBF3);
+        }
+        .mode-button:hover {
+            background: linear-gradient(135deg, #0b7dda, #00b0ff);
+        }
+        .quiz-section {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .question {
+            font-size: 28px;
+            margin-bottom: 25px;
+            font-weight: bold;
+            color: #333;
+        }
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .option {
+            padding: 18px;
+            background-color: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 18px;
+        }
+        .option:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .timer {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #ff5722;
+            font-weight: bold;
+            background: #fff3e0;
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .result-section {
+            display: none;
+        }
+        .word-list {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .word-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        .word-item:hover {
+            background-color: #f9f9f9;
+        }
+        .word-info {
+            flex: 1;
+            text-align: left;
+        }
+        .user-answer {
+            color: #ff5722;
+            margin-left: 10px;
+            font-style: italic;
+        }
+        .correct {
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        .incorrect {
+            color: #f44336;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        .spelling-input {
+            font-size: 20px;
+            padding: 15px;
+            width: 100%;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .spelling-input:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        .hint {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 18px;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .progress {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #666;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .result-message {
+            font-size: 20px;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .correct-message {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-left: 5px solid #4CAF50;
+        }
+        .incorrect-message {
+            background-color: #ffebee;
+            color: #c62828;
+            border-left: 5px solid #f44336;
+        }
+        .section-title {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 12px;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+        }
+        
+        /* 輸出選項樣式 */
+        .export-options {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .export-modal {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .export-title {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.5rem;
+        }
+        
+        .export-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .export-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #2196F3, #21CBF3);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .export-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+        
+        .close-export {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .button-group {
+                flex-direction: column;
+            }
+            .options {
+                grid-template-columns: 1fr;
+            }
+            .question {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Shirley's Vocab Online Self-Practice </h1>
+        
+        <!-- 輸入區域 -->
+        <div class="input-section">
+            <h2 class="section-title">Words Input 輸入單字列表</h2>
+            <p>請輸入單字，格式：word 英文單字 POS 詞性縮寫 Meaning 中文意思 (每行一個單字)</p>
+            <textarea id="wordInput" placeholder="例如：
+apple n. 蘋果
+run v. 跑步
+beautiful adj. 美麗的
+computer n. 電腦
+student n. 學生"></textarea>
+            <div class="button-group">
+                <button class="mode-button" id="cognitionMode">認知模式</button>
+                <button class="mode-button" id="spellingMode">拼寫模式</button>
+                <button class="mode-button" id="dictationMode">聽寫模式</button>
+            </div>
+        </div>
+        
+        <!-- 單字認知練習區域 -->
+        <div class="quiz-section" id="cognitionQuiz">
+            <h2 class="section-title">認知模式</h2>
+            <div class="timer" id="cognitionTimer">剩餘時間: 8秒</div>
+            <div class="question" id="cognitionQuestion"></div>
+            <div class="options" id="cognitionOptions"></div>
+            <div id="cognitionResult"></div>
+        </div>
+        
+        <!-- 拼寫練習區域 -->
+        <div class="quiz-section" id="spellingQuiz">
+            <h2 class="section-title">拼寫練習</h2>
+            <div class="question" id="spellingQuestion"></div>
+            <div class="hint" id="spellingHint"></div>
+            <input type="text" class="spelling-input" id="spellingInput" placeholder="請輸入英文單字">
+            <button id="spellingNext">下一題</button>
+            <div id="spellingResult"></div>
+        </div>
+        
+        <!-- 聽寫練習區域 -->
+        <div class="quiz-section" id="dictationQuiz">
+            <h2 class="section-title">聽寫練習</h2>
+            <div class="question" id="dictationQuestion"></div>
+            <div class="hint" id="dictationHint"></div>
+            <button id="playAudio">播放語音</button>
+            <input type="text" class="spelling-input" id="dictationInput" placeholder="請輸入聽到的英文單字">
+            <button id="dictationNext">下一題</button>
+            <div id="dictationResult"></div>
+        </div>
+        
+        <!-- 結果區域 -->
+        <div class="result-section" id="resultSection">
+            <h2 class="section-title">練習結果</h2>
+            <div class="progress" id="progressStats"></div>
+            <div class="word-list" id="wordList"></div>
+            <div class="button-group">
+                <button id="exportResults">輸出結果</button>
+                <button id="retryWrong">再次練習錯誤單字</button>
+                <button id="backToInput">返回輸入</button>
+            </div>
+        </div>
+        
+        <!-- 輸出選項模態框 -->
+        <div class="export-options" id="exportOptions">
+            <div class="export-modal">
+                <h2 class="export-title">選擇輸出方式</h2>
+                <p>請選擇您想要使用的輸出方式：</p>
+                <div class="export-buttons">
+                    <button class="export-btn" id="copyToClipboard">複製到剪貼簿</button>
+                    <button class="export-btn" id="downloadText">下載為文字檔</button>
+                    <button class="export-btn" id="showPrintable">顯示可列印版本</button>
+                </div>
+                <button class="close-export" id="closeExport">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局變量
+        let wordList = [];
+        let currentMode = '';
+        let currentIndex = 0;
+        let correctAnswers = 0;
+        let wrongAnswers = [];
+        let timer;
+        let timeLeft = 8;
+        let audioContext;
+        let audioQueue = [];
+        let isPlayingAudio = false;
+        let userAnswers = {}; // 存儲用戶的答案
+
+        // DOM 元素
+        const wordInput = document.getElementById('wordInput');
+        const cognitionModeBtn = document.getElementById('cognitionMode');
+        const spellingModeBtn = document.getElementById('spellingMode');
+        const dictationModeBtn = document.getElementById('dictationMode');
+        
+        const inputSection = document.querySelector('.input-section');
+        const cognitionQuiz = document.getElementById('cognitionQuiz');
+        const spellingQuiz = document.getElementById('spellingQuiz');
+        const dictationQuiz = document.getElementById('dictationQuiz');
+        const resultSection = document.getElementById('resultSection');
+        
+        const cognitionQuestion = document.getElementById('cognitionQuestion');
+        const cognitionOptions = document.getElementById('cognitionOptions');
+        const cognitionTimer = document.getElementById('cognitionTimer');
+        const cognitionResult = document.getElementById('cognitionResult');
+        
+        const spellingQuestion = document.getElementById('spellingQuestion');
+        const spellingHint = document.getElementById('spellingHint');
+        const spellingInput = document.getElementById('spellingInput');
+        const spellingNext = document.getElementById('spellingNext');
+        const spellingResult = document.getElementById('spellingResult');
+        
+        const dictationQuestion = document.getElementById('dictationQuestion');
+        const dictationHint = document.getElementById('dictationHint');
+        const dictationInput = document.getElementById('dictationInput');
+        const dictationNext = document.getElementById('dictationNext');
+        const playAudio = document.getElementById('playAudio');
+        const dictationResult = document.getElementById('dictationResult');
+        
+        const progressStats = document.getElementById('progressStats');
+        const wordListElement = document.getElementById('wordList');
+        const exportResultsBtn = document.getElementById('exportResults');
+        const retryWrongBtn = document.getElementById('retryWrong');
+        const backToInputBtn = document.getElementById('backToInput');
+        
+        // 輸出相關元素
+        const exportOptions = document.getElementById('exportOptions');
+        const copyToClipboardBtn = document.getElementById('copyToClipboard');
+        const downloadTextBtn = document.getElementById('downloadText');
+        const showPrintableBtn = document.getElementById('showPrintable');
+        const closeExportBtn = document.getElementById('closeExport');
+
+        // 事件監聽器
+        cognitionModeBtn.addEventListener('click', () => startQuiz('cognition'));
+        spellingModeBtn.addEventListener('click', () => startQuiz('spelling'));
+        dictationModeBtn.addEventListener('click', () => startQuiz('dictation'));
+        spellingNext.addEventListener('click', checkSpellingAnswer);
+        dictationNext.addEventListener('click', checkDictationAnswer);
+        playAudio.addEventListener('click', playDictationAudio);
+        exportResultsBtn.addEventListener('click', showExportOptions);
+        retryWrongBtn.addEventListener('click', retryWrongWords);
+        backToInputBtn.addEventListener('click', backToInput);
+        
+        // 輸出選項事件
+        copyToClipboardBtn.addEventListener('click', copyToClipboard);
+        downloadTextBtn.addEventListener('click', downloadAsText);
+        showPrintableBtn.addEventListener('click', showPrintableVersion);
+        closeExportBtn.addEventListener('click', closeExportOptions);
+
+        // 處理拼寫輸入的Enter鍵
+        spellingInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkSpellingAnswer();
+            }
+        });
+
+        // 處理聽寫輸入的Enter鍵
+        dictationInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkDictationAnswer();
+            }
+        });
+
+        // 開始練習
+        function startQuiz(mode) {
+            const input = wordInput.value.trim();
+            if (!input) {
+                alert('請輸入單字列表！');
+                return;
+            }
+            
+            // 解析輸入的單字
+            wordList = parseWordInput(input);
+            if (wordList.length === 0) {
+                alert('請輸入有效的單字格式！');
+                return;
+            }
+            
+            currentMode = mode;
+            currentIndex = 0;
+            correctAnswers = 0;
+            wrongAnswers = [];
+            userAnswers = {};
+            
+            // 隱藏輸入區域，顯示對應的練習區域
+            inputSection.style.display = 'none';
+            cognitionQuiz.style.display = 'none';
+            spellingQuiz.style.display = 'none';
+            dictationQuiz.style.display = 'none';
+            resultSection.style.display = 'none';
+            
+            if (mode === 'cognition') {
+                cognitionQuiz.style.display = 'block';
+                startCognitionQuiz();
+            } else if (mode === 'spelling') {
+                spellingQuiz.style.display = 'block';
+                startSpellingQuiz();
+            } else if (mode === 'dictation') {
+                dictationQuiz.style.display = 'block';
+                startDictationQuiz();
+            }
+        }
+
+        // 解析單字輸入
+        function parseWordInput(input) {
+            const lines = input.split('\n');
+            const words = [];
+            
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+                
+                // 簡單解析：英文單字 詞性 中文意思
+                const parts = line.split(/\s+/);
+                if (parts.length >= 3) {
+                    const word = parts[0];
+                    const pos = parts[1];
+                    const meaning = parts.slice(2).join(' ');
+                    words.push({ word, pos, meaning });
+                }
+            }
+            
+            return words;
+        }
+
+        // 開始單字認知練習
+        function startCognitionQuiz() {
+            if (currentIndex >= wordList.length) {
+                showResults();
+                return;
+            }
+            
+            const currentWord = wordList[currentIndex];
+            cognitionQuestion.textContent = `${currentWord.word} (${currentWord.pos})`;
+            cognitionResult.textContent = '';
+            
+            // 生成選項
+            const options = generateOptions(currentIndex);
+            cognitionOptions.innerHTML = '';
+            
+            options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.addEventListener('click', () => checkCognitionAnswer(option));
+                cognitionOptions.appendChild(optionElement);
+            });
+            
+            // 開始計時
+            timeLeft = 8;
+            cognitionTimer.textContent = `剩餘時間: ${timeLeft}秒`;
+            
+            if (timer) clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                cognitionTimer.textContent = `剩餘時間: ${timeLeft}秒`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        // 生成選項
+        function generateOptions(correctIndex) {
+            const options = [wordList[correctIndex].meaning];
+            
+            // 隨機選擇其他三個選項
+            while (options.length < 4) {
+                const randomIndex = Math.floor(Math.random() * wordList.length);
+                if (randomIndex !== correctIndex && !options.includes(wordList[randomIndex].meaning)) {
+                    options.push(wordList[randomIndex].meaning);
+                }
+            }
+            
+            // 隨機排序選項
+            return shuffleArray(options);
+        }
+
+        // 洗牌算法
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // 檢查單字認知答案
+        function checkCognitionAnswer(selectedAnswer) {
+            clearInterval(timer);
+            
+            const currentWord = wordList[currentIndex];
+            const isCorrect = selectedAnswer === currentWord.meaning;
+            
+            // 記錄用戶答案
+            userAnswers[currentIndex] = selectedAnswer;
+            
+            if (isCorrect) {
+                cognitionResult.innerHTML = '<div class="result-message correct-message">正確！</div>';
+                correctAnswers++;
+            } else {
+                cognitionResult.innerHTML = `<div class="result-message incorrect-message">錯誤！正確答案是：${currentWord.meaning}</div>`;
+                wrongAnswers.push(currentIndex);
+            }
+            
+            currentIndex++;
+            setTimeout(startCognitionQuiz, 1500);
+        }
+
+        // 處理超時
+        function handleTimeout() {
+            const currentWord = wordList[currentIndex];
+            cognitionResult.innerHTML = `<div class="result-message incorrect-message">時間到！正確答案是：${currentWord.meaning}</div>`;
+            wrongAnswers.push(currentIndex);
+            
+            currentIndex++;
+            setTimeout(startCognitionQuiz, 1500);
+        }
+
+        // 開始拼寫練習
+        function startSpellingQuiz() {
+            if (currentIndex >= wordList.length) {
+                showResults();
+                return;
+            }
+            
+            const currentWord = wordList[currentIndex];
+            spellingQuestion.textContent = `中文意思：${currentWord.meaning}`;
+            spellingHint.textContent = `詞性：${currentWord.pos} | 首字母：${currentWord.word[0].toUpperCase()}`;
+            spellingInput.value = '';
+            spellingResult.textContent = '';
+            spellingInput.focus();
+        }
+
+        // 檢查拼寫答案
+        function checkSpellingAnswer() {
+            const currentWord = wordList[currentIndex];
+            const userAnswer = spellingInput.value.trim();
+            const isCorrect = userAnswer.toLowerCase() === currentWord.word.toLowerCase();
+            
+            // 記錄用戶答案
+            userAnswers[currentIndex] = userAnswer;
+            
+            if (isCorrect) {
+                spellingResult.innerHTML = '<div class="result-message correct-message">正確！</div>';
+                correctAnswers++;
+            } else {
+                spellingResult.innerHTML = `<div class="result-message incorrect-message">錯誤！正確答案是：${currentWord.word}</div>`;
+                wrongAnswers.push(currentIndex);
+            }
+            
+            currentIndex++;
+            setTimeout(startSpellingQuiz, 1500);
+        }
+
+        // 開始聽寫練習
+        function startDictationQuiz() {
+            if (currentIndex >= wordList.length) {
+                showResults();
+                return;
+            }
+            
+            const currentWord = wordList[currentIndex];
+            dictationQuestion.textContent = `中文意思：${currentWord.meaning}`;
+            dictationHint.textContent = `詞性：${currentWord.pos}`;
+            dictationInput.value = '';
+            dictationResult.textContent = '';
+            
+            // 準備語音
+            audioQueue = [currentWord.word, currentWord.word];
+            isPlayingAudio = false;
+            playDictationAudio();
+            
+            // 清除之前的計時器
+            if (window.autoNextTimer) {
+                clearTimeout(window.autoNextTimer);
+            }
+            
+            // 5秒後自動進入下一題
+            window.autoNextTimer = setTimeout(() => {
+                if (currentIndex < wordList.length) {
+                    checkDictationAnswer();
+                }
+            }, 5000);
+        }
+
+        // 播放聽寫語音
+        function playDictationAudio() {
+            if (isPlayingAudio || audioQueue.length === 0) return;
+            
+            isPlayingAudio = true;
+            const word = audioQueue.shift();
+            
+            // 使用Web Speech API合成語音
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8;
+                
+                utterance.onend = () => {
+                    isPlayingAudio = false;
+                    if (audioQueue.length > 0) {
+                        setTimeout(() => playDictationAudio(), 1000);
+                    }
+                };
+                
+                speechSynthesis.speak(utterance);
+            } else {
+                alert('您的瀏覽器不支持語音合成功能，請使用Chrome或Edge瀏覽器。');
+                isPlayingAudio = false;
+            }
+        }
+
+        // 檢查聽寫答案
+        function checkDictationAnswer() {
+            // 清除自動下一題的計時器
+            if (window.autoNextTimer) {
+                clearTimeout(window.autoNextTimer);
+            }
+            
+            const currentWord = wordList[currentIndex];
+            const userAnswer = dictationInput.value.trim();
+            const isCorrect = userAnswer.toLowerCase() === currentWord.word.toLowerCase();
+            
+            // 記錄用戶答案
+            userAnswers[currentIndex] = userAnswer;
+            
+            if (isCorrect) {
+                dictationResult.innerHTML = '<div class="result-message correct-message">正確！</div>';
+                correctAnswers++;
+            } else {
+                dictationResult.innerHTML = `<div class="result-message incorrect-message">錯誤！正確答案是：${currentWord.word}</div>`;
+                wrongAnswers.push(currentIndex);
+            }
+            
+            currentIndex++;
+            setTimeout(startDictationQuiz, 1500);
+        }
+
+        // 顯示結果
+        function showResults() {
+            cognitionQuiz.style.display = 'none';
+            spellingQuiz.style.display = 'none';
+            dictationQuiz.style.display = 'none';
+            resultSection.style.display = 'block';
+            
+            // 更新統計信息
+            progressStats.textContent = `總共 ${wordList.length} 個單字，正確 ${correctAnswers} 個，錯誤 ${wrongAnswers.length} 個`;
+            
+            // 顯示單字列表
+            wordListElement.innerHTML = '';
+            wordList.forEach((word, index) => {
+                const wordItem = document.createElement('div');
+                wordItem.className = 'word-item';
+                
+                const wordInfo = document.createElement('div');
+                wordInfo.className = 'word-info';
+                wordInfo.innerHTML = `<strong>${word.word}</strong> (${word.pos}) - ${word.meaning}`;
+                
+                // 如果是拼寫或聽寫模式，顯示用戶輸入的答案
+                if ((currentMode === 'spelling' || currentMode === 'dictation') && userAnswers[index]) {
+                    const userAnswerSpan = document.createElement('span');
+                    userAnswerSpan.className = 'user-answer';
+                    userAnswerSpan.textContent = `你的答案: ${userAnswers[index]}`;
+                    wordInfo.appendChild(userAnswerSpan);
+                }
+                
+                const resultMark = document.createElement('span');
+                if (wrongAnswers.includes(index)) {
+                    resultMark.textContent = '✗';
+                    resultMark.className = 'incorrect';
+                } else {
+                    resultMark.textContent = '✓';
+                    resultMark.className = 'correct';
+                }
+                
+                wordItem.appendChild(wordInfo);
+                wordItem.appendChild(resultMark);
+                wordListElement.appendChild(wordItem);
+            });
+        }
+
+        // 顯示輸出選項
+        function showExportOptions() {
+            exportOptions.style.display = 'flex';
+        }
+
+        // 關閉輸出選項
+        function closeExportOptions() {
+            exportOptions.style.display = 'none';
+        }
+
+        // 複製到剪貼簿
+        function copyToClipboard() {
+            let text = `英文單字練習結果\n`;
+            text += `練習日期: ${new Date().toLocaleDateString('zh-TW')}\n`;
+            text += `模式: ${getModeName(currentMode)}\n`;
+            text += `總共 ${wordList.length} 個單字，正確 ${correctAnswers} 個，錯誤 ${wrongAnswers.length} 個\n\n`;
+            
+            wordList.forEach((word, index) => {
+                const isWrong = wrongAnswers.includes(index);
+                text += `${word.word} (${word.pos}) - ${word.meaning}`;
+                if (currentMode === 'spelling' || currentMode === 'dictation') {
+                    text += ` | 你的答案: ${userAnswers[index] || ''}`;
+                }
+                text += ` | ${isWrong ? '✗ 錯誤' : '✓ 正確'}\n`;
+            });
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('結果已複製到剪貼簿！您可以貼到任何文檔處理軟體中進行列印。');
+                closeExportOptions();
+            }).catch(() => {
+                // 如果clipboard API不可用，使用傳統方法
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('結果已複製到剪貼簿！');
+                closeExportOptions();
+            });
+        }
+
+        // 下載為文字檔
+        function downloadAsText() {
+            let text = `英文單字練習結果\n`;
+            text += `練習日期: ${new Date().toLocaleDateString('zh-TW')}\n`;
+            text += `模式: ${getModeName(currentMode)}\n`;
+            text += `總共 ${wordList.length} 個單字，正確 ${correctAnswers} 個，錯誤 ${wrongAnswers.length} 個\n\n`;
+            
+            wordList.forEach((word, index) => {
+                const isWrong = wrongAnswers.includes(index);
+                text += `${word.word} (${word.pos}) - ${word.meaning}`;
+                if (currentMode === 'spelling' || currentMode === 'dictation') {
+                    text += ` | 你的答案: ${userAnswers[index] || ''}`;
+                }
+                text += ` | ${isWrong ? '✗ 錯誤' : '✓ 正確'}\n`;
+            });
+            
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `單字練習結果_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            closeExportOptions();
+        }
+
+        // 顯示可列印版本
+        function showPrintableVersion() {
+            // 創建一個新的視窗來顯示可列印版本
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>英文單字練習結果</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        h1 { color: #333; text-align: center; }
+                        .stats { text-align: center; margin: 20px 0; font-size: 18px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+                        th { background-color: #f5f5f5; }
+                        .correct { color: green; }
+                        .incorrect { color: red; }
+                        @media print {
+                            body { margin: 0; }
+                            button { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>英文單字練習結果</h1>
+                    <div class="stats">
+                        <p>練習日期: ${new Date().toLocaleDateString('zh-TW')}</p>
+                        <p>模式: ${getModeName(currentMode)}</p>
+                        <p>總共 ${wordList.length} 個單字，正確 ${correctAnswers} 個，錯誤 ${wrongAnswers.length} 個</p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>英文單字</th>
+                                <th>詞性</th>
+                                <th>中文意思</th>
+                                ${(currentMode === 'spelling' || currentMode === 'dictation') ? '<th>你的答案</th>' : ''}
+                                <th>結果</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${wordList.map((word, index) => {
+                                const isWrong = wrongAnswers.includes(index);
+                                return `
+                                    <tr>
+                                        <td>${word.word}</td>
+                                        <td>${word.pos}</td>
+                                        <td>${word.meaning}</td>
+                                        ${(currentMode === 'spelling' || currentMode === 'dictation') ? 
+                                          `<td>${userAnswers[index] || ''}</td>` : ''}
+                                        <td class="${isWrong ? 'incorrect' : 'correct'}">
+                                            ${isWrong ? '✗ 錯誤' : '✓ 正確'}
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    <br>
+                    <button onclick="window.print()">列印</button>
+                    <button onclick="window.close()">關閉</button>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            closeExportOptions();
+        }
+
+        // 獲取模式名稱
+        function getModeName(mode) {
+            const modeNames = {
+                'cognition': '認知模式',
+                'spelling': '拼寫模式', 
+                'dictation': '聽寫模式'
+            };
+            return modeNames[mode] || mode;
+        }
+
+        // 再次練習錯誤單字
+        function retryWrongWords() {
+            if (wrongAnswers.length === 0) {
+                alert('沒有錯誤單字可以再次練習！');
+                return;
+            }
+            
+            // 只保留錯誤的單字
+            wordList = wrongAnswers.map(index => wordList[index]);
+            currentIndex = 0;
+            correctAnswers = 0;
+            wrongAnswers = [];
+            userAnswers = {};
+            
+            // 根據當前模式重新開始練習
+            if (currentMode === 'cognition') {
+                startCognitionQuiz();
+                cognitionQuiz.style.display = 'block';
+                resultSection.style.display = 'none';
+            } else if (currentMode === 'spelling') {
+                startSpellingQuiz();
+                spellingQuiz.style.display = 'block';
+                resultSection.style.display = 'none';
+            } else if (currentMode === 'dictation') {
+                startDictationQuiz();
+                dictationQuiz.style.display = 'block';
+                resultSection.style.display = 'none';
+            }
+        }
+
+        // 返回輸入
+        function backToInput() {
+            resultSection.style.display = 'none';
+            inputSection.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
