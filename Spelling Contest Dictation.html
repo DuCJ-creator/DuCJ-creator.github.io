@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高中六級易錯字聽寫練習</title>
+  <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
+  <style>
+    * { box-sizing: border-box; font-family: 'Microsoft JhengHei', sans-serif; }
+    body { 
+      background: #f8f9fa; 
+      padding: 20px; 
+      max-width: 900px; 
+      margin: 0 auto; 
+    }
+    h1 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
+    .category-buttons { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+      gap: 10px; 
+      margin-bottom: 20px; 
+    }
+    .btn { 
+      padding: 10px; 
+      background: #3498db; 
+      color: white; 
+      border: none; 
+      border-radius: 5px; 
+      cursor: pointer; 
+      font-weight: bold; 
+      font-size: 14px;
+      transition: background 0.3s; 
+    }
+    .btn:hover { background: #2980b9; }
+    .mixed-section { 
+      background: #fff; 
+      padding: 15px; 
+      border-radius: 8px; 
+      margin: 20px 0; 
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
+      font-size: 14px;
+    }
+    #practiceArea { display: none; }
+    .word-list { 
+      background: white; 
+      padding: 20px; 
+      border-radius: 8px; 
+      margin: 20px 0; 
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
+    }
+    .word-item { 
+      display: flex; 
+      align-items: center; 
+      margin: 12px 0; 
+      padding: 8px; 
+      background: #f8f9fa; 
+      border-radius: 5px; 
+    }
+    .word-number { 
+      width: 30px; 
+      font-weight: bold; 
+      color: #2c3e50; 
+    }
+    .word-input { 
+      flex: 1; 
+      padding: 8px 12px; 
+      font-size: 16px; 
+      border: 1px solid #bdc3c7; 
+      border-radius: 4px; 
+      margin: 0 10px; 
+    }
+    .word-input:focus { 
+      border-color: #3498db; 
+      outline: none; 
+    }
+    .controls { 
+      text-align: center; 
+      margin: 20px 0; 
+    }
+    .result { 
+      background: #fff; 
+      padding: 20px; 
+      border-radius: 8px; 
+      margin: 25px 0; 
+      display: none; 
+    }
+    .comparison { 
+      display: flex; 
+      gap: 20px; 
+      margin-top: 20px; 
+    }
+    .column { 
+      flex: 1; 
+    }
+    .column h3 { 
+      text-align: center; 
+      margin-bottom: 15px; 
+      color: #2c3e50; 
+    }
+    .answer-item { 
+      display: flex; 
+      align-items: center; 
+      margin: 10px 0; 
+      padding: 8px; 
+      background: #f8f9fa; 
+      border-radius: 5px; 
+    }
+    .answer-number { 
+      width: 30px; 
+      font-weight: bold; 
+    }
+    .user-answer { 
+      flex: 1; 
+      padding: 6px 10px; 
+      border-radius: 4px; 
+    }
+    .correct-answer { 
+      flex: 1; 
+      padding: 6px 10px; 
+      background: #e8f4e8; 
+      border-radius: 4px; 
+    }
+    .error { 
+      background: #ffeaea !important; 
+      border: 1px solid #e74c3c; 
+      color: #e74c3c; 
+    }
+    .status { 
+      text-align: center; 
+      font-size: 18px; 
+      margin: 15px 0; 
+      font-weight: bold; 
+    }
+    .timer { 
+      text-align: center; 
+      color: #7f8c8d; 
+      margin: 10px 0; 
+      font-size: 14px; 
+    }
+  </style>
+</head>
+<body>
+  <h1> Shirley's Spelling Contest Dictation </h1>
+  
+  <!-- 分類按鈕 -->
+  <div class="category-buttons" id="categoryButtons">
+    <button class="btn" data-category="DoubleLetters">雙字母遺漏型</button>
+    <button class="btn" data-category="ie_ei">ie/ei 混淆型</button>
+    <button class="btn" data-category="SilentLetters">靜音字母型</button>
+    <button class="btn" data-category="ough_Words">-ough 多音型</button>
+    <button class="btn" data-category="Verb_to_Noun">動詞→名詞型</button>
+    <button class="btn" data-category="Loanwords">外來語型</button>
+    <button class="btn" data-category="DailyTricky">日常易錯型</button>
+    <button class="btn" data-category="sc_Confusion">s/c 混淆型</button>
+    <button class="btn" data-category="LongAcademic">長難學術型</button>
+    <button class="btn" data-category="AcademicRare">學術非常用型</button>
+    <button class="btn" data-category="Others">其他易錯型</button>
+  </div>
+
+  <!-- 混合練習區 -->
+  <div class="mixed-section">
+    <h3 style="margin:5px 0;font-size:16px;">全部單字混合練習</h3>
+    <select id="mixedCount" style="margin-right:10px;">
+      <option value="10">10 個</option>
+      <option value="20">20 個</option>
+      <option value="30">30 個</option>
+      <option value="50">50 個</option>
+    </select>
+    <button class="btn" id="startMixed" style="padding:8px 12px;font-size:14px;">開始混合練習</button>
+  </div>
+
+  <!-- 練習區 -->
+  <div id="practiceArea">
+    <div class="timer" id="countdown">練習即將開始：<span id="timerValue">3</span> 秒</div>
+    <div class="word-list" id="wordList"></div>
+    <div class="controls">
+      <button class="btn" id="submitAllBtn">提交全部答案</button>
+    </div>
+  </div>
+
+  <!-- 結果區 -->
+  <div class="result" id="resultArea">
+    <div class="status" id="statusText"></div>
+    <div class="comparison">
+      <div class="column">
+        <h3>您的答案</h3>
+        <div id="userAnswers"></div>
+      </div>
+      <div class="column">
+        <h3>正確答案</h3>
+        <div id="correctAnswers"></div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:20px;">
+      <button class="btn" id="reviewErrors" style="display:none; background:#f39c12;">🔄 複習錯誤單字</button>
+      <button class="btn" id="restartBtn">重新開始</button>
+    </div>
+  </div>
+
+  <script>
+    // 所有單字資料（去重整合）
+    const wordData = {
+      DoubleLetters: [
+        "embarrass", "beginning", "necessary", "occurrence", "recommend", "harass", 
+        "hippopotamus", "kangaroo", "giraffe", "lettuce", "cabbage","agreement", "argument", "immediate", "sufficient",
+        "parallel", "dilemma", "exaggerate", "opportunity", "committee", "successful",
+        "address", "possession", "aggressive"
+      ],
+      ie_ei: [
+        "friend", "believe", "receive", "weird", "foreign", "leisure", "receipt", 
+        "perceive", "achieve", "curiosity", "privilege", "relieve", "chief", "field",
+        "shield", "piece", "priest", "forfeit", "convenient", "experience", "science",
+        "efficient", "deficient", "patience"
+      ],
+      SilentLetters: [
+        "Wednesday", "February", "restaurant", "mosquito", "vegetable", "chocolate",
+        "schedule", "colonel", "yacht", "rhythm", "dinosaur", "calendar", "cemetery",
+        "conscious", "athlete", "dedicate", "desperate", "grateful", "guarantee",
+        "mnemonic", "knee", "island", "aisle" , "doubt", "debt" 
+      ],
+      ough_Words: [
+        "though", "thought", "through", "thorough", "tough", "cough", "rough", "bough",
+        "dough", "drought", "fought", "bought", "sought", "slough", "hiccough"
+      ],
+      Verb_to_Noun: [
+        "explanation", "pronunciation", "description", "decision", "conclusion", 
+        "confusion", "permission", "admission", "competition", "imagination", 
+        "information", "negligence", "occurrence", "reference", "residence", 
+        "revision", "supervision", "transmission"
+      ],
+      Loanwords: [
+        "rhinoceros", "dinosaur", "psychology", "queue", "exotic", "reservoir",
+        "ballet", "genre", "cuisine", "depot", "facade", "rendezvous", "fiance",
+        "fiancee", "chaos", "phenomenon", "analysis", "crisis", "oasis"
+      ],
+      DailyTricky: [
+        "because", "beautiful", "different", "tomorrow", "business", "definitely",
+        "separate", "government", "environment", "library", "knowledgeable", 
+        "leisure", "nuisance", "relevant", "twelfth", "unanimous", "veterinarian",
+        "wherever", "withhold", "yield", "apparent", "disappoint", "judgment", 
+        "exaggerate"
+      ],
+      sc_Confusion: [
+        "science", "conscious", "conscience", "descend", "ascend", "discipline",
+        "scenario", "scent", "muscle", "corpuscle", "abscess", "rescind", "fascinate",
+        "miscellaneous", "schedule", "sincere", "scissors", "scene", "scenery",
+        "discern", "rescuer"
+      ],
+      LongAcademic: [
+        "superstition", "superstitious", "sophisticated", "bureaucratic",
+"hierarchical", "exaggeration", "pronunciation", "responsibility",
+"approximately", "particularly", "university", "curriculum",
+"perseverance", "conscientious", "simultaneous", "spontaneous",
+"harmonious", "miscellaneous", "exaggerate", "opportunity",
+"environment", "government", "necessary", "embarrass",
+"deliberate", "temperature", "analysis"
+      ],
+      AcademicRare: [
+        "asylum", "abdomen", "colonel", "debris", "facade", "heir", "isle", "mortgage",
+        "subtle", "sword", "indict", "pneumonia", "isthmus", "anemone", "epitome",
+        "receipt", "psychology", "rhythm"
+      ],
+      Others: [
+        "responsible", "edible", "sensible", "tolerable", "defensible", "appearance", "difference", "existence", "independent", "important", "brilliant", "patience",
+"pronunciation", "maintenance", "acknowledgment", "mnemonic", "knee", "island", "aisle", "foreign", "weird", "seize", "leisure", "height", "weight", "importance", "performance", "assistance", "resistance", "confidence", "intelligence", "conscience", "attendance", "dependence", "visible", "flexible", "compatible", "comfortable", "enjoyable", "dependable", "acceptable", "remarkable"
+      ]
+    };
+
+    const allWords = [...new Set(Object.values(wordData).flat())];
+
+    let currentWords = [];
+    let errorWords = [];
+    let isPlaying = false;
+
+    const categoryButtons = document.getElementById('categoryButtons');
+    const practiceArea = document.getElementById('practiceArea');
+    const wordList = document.getElementById('wordList');
+    const submitAllBtn = document.getElementById('submitAllBtn');
+    const resultArea = document.getElementById('resultArea');
+    const statusText = document.getElementById('statusText');
+    const userAnswersDiv = document.getElementById('userAnswers');
+    const correctAnswersDiv = document.getElementById('correctAnswers');
+    const reviewErrorsBtn = document.getElementById('reviewErrors');
+    const restartBtn = document.getElementById('restartBtn');
+    const startMixedBtn = document.getElementById('startMixed');
+    const mixedCountSelect = document.getElementById('mixedCount');
+    const countdownEl = document.getElementById('countdown');
+    const timerValueEl = document.getElementById('timerValue');
+
+    // 數字轉英文序數
+    function numberToOrdinal(n) {
+      const ordinals = [
+        "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+        "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty",
+        "twenty-one", "twenty-two", "twenty-three", "twenty-four", "twenty-five", "twenty-six", "twenty-seven", "twenty-eight", "twenty-nine", "thirty",
+        "thirty-one", "thirty-two", "thirty-three", "thirty-four", "thirty-five", "thirty-six", "thirty-seven", "thirty-eight", "thirty-nine", "forty",
+        "forty-one", "forty-two", "forty-three", "forty-four", "forty-five", "forty-six", "forty-seven", "forty-eight", "forty-nine", "fifty"
+      ];
+      return ordinals[n] || n.toString();
+    }
+
+    // 開始練習
+    function startPractice(words) {
+      currentWords = [...words];
+      practiceArea.style.display = 'block';
+      resultArea.style.display = 'none';
+      renderWordInputs();
+      startAutoPlay();
+    }
+
+    // 渲染所有輸入框
+    function renderWordInputs() {
+      wordList.innerHTML = '';
+      currentWords.forEach((word, index) => {
+        const div = document.createElement('div');
+        div.className = 'word-item';
+        div.innerHTML = `
+          <div class="word-number">${index + 1}.</div>
+          <input type="text" class="word-input" id="input-${index}" placeholder="請拼寫..." autocomplete="off">
+        `;
+        wordList.appendChild(div);
+      });
+    }
+
+    // 自動播放流程
+    function startAutoPlay() {
+      isPlaying = true;
+      let count = 3;
+      timerValueEl.textContent = count;
+      
+      const countdownInterval = setInterval(() => {
+        count--;
+        if (count >= 0) {
+          timerValueEl.textContent = count;
+        }
+        if (count < 0) {
+          clearInterval(countdownInterval);
+          countdownEl.style.display = 'none';
+          playAllWords();
+        }
+      }, 1000);
+    }
+
+    // 播放所有單字（含序數提示）
+    async function playAllWords() {
+      for (let i = 0; i < currentWords.length; i++) {
+        if (!isPlaying) break;
+        
+        // 播放 "Number one."
+        const ordinal = numberToOrdinal(i + 1);
+        await speakText(`Number ${ordinal}.`);
+        await sleep(800); // 短暫停頓
+        
+        // 第一遍單字
+        await speakWord(currentWords[i]);
+        await sleep(2000); // 等 2 秒
+        
+        // 第二遍單字
+        await speakWord(currentWords[i]);
+        
+        // 單字間隔 3 秒（最後一個不用等）
+        if (i < currentWords.length - 1) {
+          await sleep(3000);
+        }
+      }
+    }
+
+    // 播放文字
+    function speakText(text) {
+      return new Promise((resolve) => {
+        responsiveVoice.speak(text, "US English Male", {
+          rate: 0.9,
+          onend: resolve
+        });
+      });
+    }
+
+    // 播放單字
+    function speakWord(word) {
+      return new Promise((resolve) => {
+        responsiveVoice.speak(word, "US English Male", {
+          rate: 0.8,
+          onend: resolve
+        });
+      });
+    }
+
+    // 睡眠函數
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // 提交全部答案
+    submitAllBtn.addEventListener('click', () => {
+      isPlaying = false;
+      const userAnswers = [];
+      let correctCount = 0;
+      
+      currentWords.forEach((word, index) => {
+        const input = document.getElementById(`input-${index}`);
+        const answer = input.value.trim();
+        const isCorrect = answer.toLowerCase() === word.toLowerCase();
+        if (isCorrect) correctCount++;
+        userAnswers.push({ word, answer, isCorrect });
+      });
+      
+      showResults(userAnswers, correctCount);
+    });
+
+    // 顯示結果
+    function showResults(userAnswers, correctCount) {
+      practiceArea.style.display = 'none';
+      resultArea.style.display = 'block';
+      
+      statusText.innerHTML = `正確數：<strong>${correctCount}</strong> / ${currentWords.length}`;
+      
+      userAnswersDiv.innerHTML = '';
+      correctAnswersDiv.innerHTML = '';
+      errorWords = [];
+      
+      userAnswers.forEach((item, index) => {
+        // 左欄：使用者答案
+        const userDiv = document.createElement('div');
+        userDiv.className = 'answer-item';
+        const userAnswerSpan = document.createElement('span');
+        userAnswerSpan.className = 'user-answer';
+        userAnswerSpan.textContent = item.answer || '（未作答）';
+        if (!item.isCorrect) {
+          userAnswerSpan.classList.add('error');
+          errorWords.push(item.word);
+        }
+        userDiv.innerHTML = `<div class="answer-number">${index + 1}.</div>`;
+        userDiv.appendChild(userAnswerSpan);
+        userAnswersDiv.appendChild(userDiv);
+        
+        // 右欄：正確答案
+        const correctDiv = document.createElement('div');
+        correctDiv.className = 'answer-item';
+        correctDiv.innerHTML = `
+          <div class="answer-number">${index + 1}.</div>
+          <span class="correct-answer">${item.word}</span>
+        `;
+        correctAnswersDiv.appendChild(correctDiv);
+      });
+      
+      // 顯示複習按鈕
+      reviewErrorsBtn.style.display = errorWords.length > 0 ? 'inline-block' : 'none';
+    }
+
+    // 複習錯誤單字
+    reviewErrorsBtn.addEventListener('click', () => {
+      if (errorWords.length > 0) {
+        startPractice([...errorWords]);
+      }
+    });
+
+    // 重新開始
+    restartBtn.addEventListener('click', () => {
+      resultArea.style.display = 'none';
+      practiceArea.style.display = 'none';
+      countdownEl.style.display = 'block';
+    });
+
+    // 按鈕事件
+    categoryButtons.addEventListener('click', (e) => {
+      if (e.target.classList.contains('btn')) {
+        startPractice(wordData[e.target.dataset.category]);
+      }
+    });
+
+    startMixedBtn.addEventListener('click', () => {
+      const count = parseInt(mixedCountSelect.value);
+      const selectedWords = getRandomWords(allWords, count);
+      startPractice(selectedWords);
+    });
+
+    // 輔助函數
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function getRandomWords(array, count) {
+      const shuffled = shuffle([...array]);
+      return shuffled.slice(0, Math.min(count, shuffled.length));
+    }
+  </script>
+</body>
+</html>
