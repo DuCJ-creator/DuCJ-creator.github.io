@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>L1 U31-40 單字挑戰無極限 - 新年特別版</title>
+    <title> U31-40 單字挑戰無極限 - 新年特別版</title>
     <style>
         * {
             box-sizing: border-box;
@@ -26,6 +26,7 @@
             background-position: center;
             overflow-x: hidden;
             padding: 10px;
+            touch-action: manipulation;
         }
         
         .game-container {
@@ -74,6 +75,7 @@
             font-size: 1.8rem;
             text-shadow: 2px 2px 0px #ffd3d3;
             flex-shrink: 0;
+            line-height: 1.3;
         }
         
         .word-display {
@@ -82,6 +84,7 @@
             color: #0984e3;
             font-weight: bold;
             flex-shrink: 0;
+            line-height: 1.2;
         }
         
         .pos-display {
@@ -114,6 +117,7 @@
             position: relative;
             filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
             min-height: 120px;
+            touch-action: manipulation;
         }
         
         .firework-option:active {
@@ -138,6 +142,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
         
         .timer-container {
@@ -222,11 +232,13 @@
             margin-top: 15px;
             transition: all 0.3s;
             flex-shrink: 0;
+            touch-action: manipulation;
+            min-width: 160px;
         }
         
         .restart-btn:active, .start-btn:active {
             background-color: #ff7675;
-            transform: scale(1.05);
+            transform: scale(0.98);
         }
         
         .firework-effect {
@@ -306,6 +318,144 @@
             display: none !important;
         }
         
+        /* 計時器警告效果 */
+        .timer-warning {
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.7; }
+        }
+        
+        /* 響應式設計 - 平板 */
+        @media (min-width: 768px) {
+            .game-container {
+                height: 98vh;
+                max-height: 98vh;
+                padding: 25px;
+                max-width: 700px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+                margin-bottom: 20px;
+            }
+            
+            .options-container {
+                gap: 20px;
+                margin: 25px 0;
+                min-height: 350px;
+            }
+            
+            .firework-option {
+                min-height: 150px;
+            }
+            
+            .firework-text {
+                font-size: 1rem;
+                bottom: 25px;
+                margin: 0 15px;
+                min-height: 45px;
+            }
+            
+            .word-display {
+                font-size: 2.3rem;
+                margin: 20px 0;
+            }
+            
+            .pos-display {
+                font-size: 1.5rem;
+                margin-bottom: 25px;
+            }
+            
+            .score-display {
+                font-size: 1.5rem;
+                margin: 15px 0;
+            }
+            
+            .timer-container {
+                margin: 20px 0;
+            }
+            
+            .lion-dance {
+                width: 90px;
+                height: 90px;
+            }
+            
+            .restart-btn, .start-btn {
+                padding: 14px 28px;
+                font-size: 1.3rem;
+                margin-top: 20px;
+                min-width: 180px;
+            }
+            
+            .game-over h2 {
+                font-size: 2.5rem;
+                margin-bottom: 20px;
+            }
+        }
+        
+        /* 響應式設計 - 電腦 */
+        @media (min-width: 1024px) {
+            .game-container {
+                max-width: 800px;
+                padding: 30px;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .options-container {
+                min-height: 400px;
+            }
+            
+            .firework-option {
+                min-height: 180px;
+            }
+            
+            .firework-option:hover {
+                transform: translateY(-10px);
+            }
+            
+            .firework-text {
+                font-size: 1.1rem;
+            }
+            
+            .word-display {
+                font-size: 2.5rem;
+            }
+            
+            .pos-display {
+                font-size: 1.6rem;
+            }
+            
+            .score-display {
+                font-size: 1.6rem;
+            }
+            
+            .lion-dance {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .restart-btn, .start-btn {
+                padding: 16px 32px;
+                font-size: 1.4rem;
+                min-width: 200px;
+            }
+            
+            .restart-btn:hover, .start-btn:hover {
+                background-color: #ff7675;
+                transform: scale(1.05);
+            }
+            
+            .game-over h2 {
+                font-size: 2.8rem;
+            }
+        }
+        
         /* 橫屏專用樣式 */
         @media (orientation: landscape) {
             .game-container {
@@ -366,6 +516,7 @@
                 padding: 10px 20px;
                 font-size: 1.1rem;
                 margin-top: 10px;
+                min-width: 140px;
             }
             
             .game-over h2 {
@@ -394,6 +545,74 @@
             
             .word-display {
                 font-size: 1.5rem;
+            }
+        }
+        
+        /* 響應式設計 - 小手機 */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 15px;
+                height: 92vh;
+                max-height: 92vh;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .options-container {
+                gap: 10px;
+                margin: 15px 0;
+                min-height: 250px;
+            }
+            
+            .firework-option {
+                min-height: 100px;
+            }
+            
+            .firework-text {
+                font-size: 0.8rem;
+                bottom: 15px;
+                min-height: 35px;
+            }
+            
+            .word-display {
+                font-size: 1.7rem;
+            }
+            
+            .pos-display {
+                font-size: 1.1rem;
+            }
+            
+            .score-display {
+                font-size: 1.1rem;
+            }
+            
+            .lion-dance {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .restart-btn, .start-btn {
+                padding: 10px 20px;
+                font-size: 1.1rem;
+                min-width: 140px;
+            }
+        }
+        
+        /* 響應式設計 - 超小手機 */
+        @media (max-width: 360px) {
+            .firework-option {
+                min-height: 90px;
+            }
+            
+            .firework-text {
+                font-size: 0.75rem;
+            }
+            
+            .lion-dance {
+                width: 50px;
+                height: 50px;
             }
         }
         
@@ -487,6 +706,7 @@
         let timeLeft = 8;
         let gameActive = false;
         let canAnswer = true;
+        let usedInCurrentSession = []; // ✅ 新增：本局已使用單字索引
         
         // DOM元素
         const setupScreen = document.getElementById('setup-screen');
@@ -509,9 +729,8 @@
         const fireworkAnimation = document.getElementById('firework-animation');
         const optionElements = document.querySelectorAll('.firework-option');
         
-        // 單字庫 (簡化版本)
-        const wordList = `
-air conditioner,n.,冷氣機
+        // 完整單字庫
+        const wordList = `air conditioner,n.,冷氣機
 alarm,n.,鬧鐘;警鈴
 armchair,n.,扶手椅
 bake,v.,烤
@@ -958,8 +1177,7 @@ wet,adj.,潮濕的
 whole,adj.,完整的
 wide,adj.,寬的
 wonderful,adj.,極好的
-wrong,adj.,錯誤的
-`; 
+wrong,adj.,錯誤的`;
         
         // 初始化遊戲
         function initGame() {
@@ -974,6 +1192,7 @@ wrong,adj.,錯誤的
             // 重置遊戲狀態
             score = 0;
             scoreDisplay.textContent = score;
+            usedInCurrentSession = []; // ✅ 每次重新開始都清空本局記錄
             
             // 切換到遊戲畫面
             setupScreen.classList.add('hidden');
@@ -1021,13 +1240,33 @@ wrong,adj.,錯誤的
             // 清除之前的計時器
             if (timer) {
                 clearInterval(timer);
+                timer = null; // 重要：將計時器設為null
             }
             
             // 啟用所有選項
             enableOptions();
             
-            // 隨機選擇一個單字
-            currentWord = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+            // 如果本局已用完所有單字，清空記錄以開始新一輪
+            if (usedInCurrentSession.length >= vocabulary.length) {
+                usedInCurrentSession = [];
+            }
+            
+            // 找出尚未使用的索引
+            const availableIndices = vocabulary
+                .map((_, i) => i)
+                .filter(i => !usedInCurrentSession.includes(i));
+            
+            // 安全防護
+            if (availableIndices.length === 0) {
+                usedInCurrentSession = [];
+                nextQuestion();
+                return;
+            }
+            
+            // 隨機選擇一個未使用過的單字
+            const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+            usedInCurrentSession.push(randomIndex);
+            currentWord = vocabulary[randomIndex];
             
             // 顯示單字和詞性
             currentWordDisplay.textContent = currentWord.word;
@@ -1039,14 +1278,20 @@ wrong,adj.,錯誤的
             // 重置計時器
             timeLeft = 8;
             timerBar.style.width = '100%';
+            timerBar.classList.remove('timer-warning');
             
             // 開始倒計時
             timer = setInterval(() => {
                 timeLeft -= 0.1;
                 timerBar.style.width = `${(timeLeft / 8) * 100}%`;
                 
+                if (timeLeft <= 3 && !timerBar.classList.contains('timer-warning')) {
+                    timerBar.classList.add('timer-warning');
+                }
+                
                 if (timeLeft <= 0) {
                     clearInterval(timer);
+                    timer = null; // 重要：將計時器設為null
                     endGame(false);
                 }
             }, 100);
@@ -1124,6 +1369,12 @@ wrong,adj.,錯誤的
             // 立即禁用所有選項，防止多次點擊
             disableOptions();
             
+            // 清除計時器
+            if (timer) {
+                clearInterval(timer);
+                timer = null; // 重要：將計時器設為null
+            }
+            
             const selectedMeaning = selectedOption.dataset.meaning;
             const isCorrect = selectedMeaning === currentWord.meaning;
             
@@ -1192,7 +1443,12 @@ wrong,adj.,錯誤的
         // 結束遊戲
         function endGame(isWin) {
             gameActive = false;
-            clearInterval(timer);
+            
+            // 確保計時器被清除
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
             
             // 更新結束畫面
             finalScoreDisplay.textContent = score;
@@ -1232,3 +1488,4 @@ wrong,adj.,錯誤的
     </script>
 </body>
 </html>
+
