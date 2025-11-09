@@ -2,9 +2,10 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CAP2000 Clothing 單字挑戰無極限 - 萬聖節特別版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U11-20 單字挑戰無極限 - 萬聖節特別版</title>
     <style>
+        /* 基礎樣式重置 */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -23,25 +24,22 @@
             background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             background-size: cover;
             background-attachment: fixed;
-            overflow: hidden;
-            padding: 10px;
+            overflow-x: hidden;
+            touch-action: manipulation;
         }
         
         .game-container {
-            background-color: rgba(255, 255, 255, 0.95);
+            background-color: rgba(255, 255, 255, 0.9);
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
             padding: 20px;
-            width: 100%;
-            max-width: 100%;
+            width: 95%;
+            max-width: 800px;
             text-align: center;
             position: relative;
             border: 5px solid #f05454;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 95vh;
-            max-height: 95vh;
+            margin: 10px;
         }
         
         h1 {
@@ -49,29 +47,7 @@
             margin-bottom: 15px;
             font-size: 1.8rem;
             text-shadow: 2px 2px 0px #fff, 0 0 5px #ff9f43;
-            flex-shrink: 0;
-        }
-        
-        .game-content {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            overflow: hidden;
-        }
-        
-        .screen {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            justify-content: space-between;
-            transition: all 0.3s ease;
-        }
-        
-        .screen-content {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            justify-content: space-around;
+            line-height: 1.3;
         }
         
         .word-display {
@@ -81,31 +57,29 @@
             font-weight: bold;
             text-shadow: 2px 2px 0px #fff;
             transition: opacity 0.3s ease;
-            flex-shrink: 0;
+            line-height: 1.2;
         }
         
         .pos-display {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: #f05454;
             margin-bottom: 20px;
             font-style: italic;
             text-shadow: 1px 1px 0px #fff;
             transition: opacity 0.3s ease;
-            flex-shrink: 0;
         }
         
         .options-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             margin: 20px 0;
-            flex: 1;
-            overflow-y: auto;
-            padding: 5px;
+            gap: 10px;
         }
         
         .pumpkin-option {
-            width: 100%;
+            width: 45%;
+            max-width: 160px;
             height: 140px;
             background-size: contain;
             background-repeat: no-repeat;
@@ -113,7 +87,9 @@
             cursor: pointer;
             transition: all 0.3s;
             position: relative;
+            margin: 5px;
             filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+            touch-action: manipulation;
         }
         
         .pumpkin-option:active {
@@ -139,7 +115,12 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            word-break: break-word;
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
         
         .timer-container {
@@ -150,7 +131,6 @@
             margin: 15px 0;
             overflow: hidden;
             border: 2px solid #f05454;
-            flex-shrink: 0;
         }
         
         .timer-bar {
@@ -165,34 +145,32 @@
             position: absolute;
             width: 60px;
             height: 60px;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="%23f0f0f0" d="M40.1 467.1l-11.2 9c-3.2 2.5-7.1 3.9-11.1 3.9-8.3 0-15.8-6-15.8-16.1c0-5.5 2.5-10.5 6.9-14.1C40.5 439.8 76.6 384 76.6 256c0-168.3-17.7-208-76.6-208C0 48 0 48 0 32C0 14.3 14.3 0 32 0h320c17.7 0 32 14.3 32 32c0 16 0 16-76.6 0c-58.9 0-76.6 39.7-76.6 208c0 128 36.1 183.8 66.3 209.8c4.4 3.6 6.9 8.6 6.9 14.1c0 10.1-7.5 16.1-15.8 16.1c-4 0-7.9-1.4-11.1-3.9l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0l-11.2-9c-6.9-5.5-17.1-5.5-24 0zM128 128c-17.7 0-32 14.3-32 32s14.3 32 32 32s32-14.3 32-32s-14.3-32-32-32zm128 0c-17.7 0-32 14.3-32 32s14.3 32 32 32s32-14.3 32-32s-14.3-32-32-32z"/></svg>');
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="%23f0f0f0" d="M40.1 467.1l-11.2 9c-3.2 2.5-7.1 3.9-11.1 3.9-8.3 0-15.8-6-15.8-16.1c0-5.5 2.5-10.5 6.9-14.1C40.5 439.8 76.6 384 76.6 256c0-168.3-17.7-208-76.6-208C0 48 0 48 0 32C0 14.3 14.3 0 32 0h320c17.7 0 32 14.3 32 32c0 16 0 16-76.6 0c-58.9 0-76.6 39.7-76.6 208c0 128 36.1 183.8 66.3 209.8c4.4 3.6 6.9 8.6 6.9 14.1c0 10.1-7.5 16.1-15.8 16.1c-4 0-7.9-1.4-11.1-3.9l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0zM128 128c-17.7 0-32 14.3-32 32s14.3 32 32 32s32-14.3 32-32s-14.3-32-32-32zm128 0c-17.7 0-32 14.3-32 32s14.3 32 32 32s32-14.3 32-32s-14.3-32-32-32z"/></svg>');
             background-size: contain;
             background-repeat: no-repeat;
-            bottom: 20px;
+            bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
             animation: float 2s infinite alternate ease-in-out;
             z-index: 10;
             filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
-            flex-shrink: 0;
         }
         
         @keyframes float {
             0% { transform: translate(-50%, 0); }
-            100% { transform: translate(-50%, -10px); }
+            100% { transform: translate(-50%, -15px); }
         }
         
         .score-display {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: #f05454;
-            margin: 10px 0;
+            margin: 8px 0;
             font-weight: bold;
             text-shadow: 1px 1px 0px #fff;
-            flex-shrink: 0;
         }
         
         .game-over {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -218,23 +196,24 @@
         }
         
         .restart-btn, .start-btn {
-            padding: 12px 25px;
+            padding: 14px 28px;
             background-color: #f05454;
             color: white;
             border: none;
             border-radius: 50px;
             font-size: 1.2rem;
             cursor: pointer;
-            margin-top: 15px;
+            margin-top: 20px;
             transition: all 0.3s;
             text-shadow: 1px 1px 0px #000;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            flex-shrink: 0;
+            touch-action: manipulation;
+            min-width: 180px;
         }
         
         .restart-btn:active, .start-btn:active {
             background-color: #ff9f43;
-            transform: scale(1.05);
+            transform: scale(0.98);
         }
         
         .bats {
@@ -260,6 +239,19 @@
         .pumpkin-2 { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23ff9f43" d="M352 0c-27.8 0-53.3 8.6-74.5 23.1C256.5 8.6 231 0 203.2 0 91 0 0 91 0 203.2c0 132.4 125.8 200.5 203.4 308.8 11 15.4 28.4 25.6 48.4 25.6h8.4c20 0 37.4-10.2 48.4-25.6C386.2 403.7 512 335.6 512 203.2 512 91 421 0 352 0zm-96 480c-3.5 0-6.8-1.8-9.1-4.8-4.1-5.8-102.3-145.7-102.3-272 0-81.9 66.6-148.5 148.5-148.5S441 121.3 441 203.2c0 126.3-98.2 266.2-102.3 272-2.3 3-5.6 4.8-9.1 4.8h-83.2z"/><path fill="%23f05454" d="M203.4 308.8C125.8 200.5 0 132.4 0 203.2 0 91 91 0 203.2 0c27.8 0 53.3 8.6 74.5 23.1 21.2-14.5 46.7-23.1 74.5-23.1 69 0 160 91 160 203.2 0 132.4-125.8 200.5-203.4 308.8-11 15.4-28.4 25.6-48.4 25.6h-8.4c-20 0-37.4-10.2-48.4-25.6zM352 56c-16.5 0-32.3 3.3-46.8 9.2 5.3 5.1 10.4 10.4 15.2 16.1C338.3 70.8 345 68 352 68c74.9 0 136 61.1 136 136 0 28.9-9.3 56.3-25.4 78.9 5.8-16.5 9.4-34.2 9.4-52.6C472 121.3 405.4 56 352 56zM203.2 56c-16.5 0-32.3 3.3-46.8 9.2 5.3 5.1 10.4 10.4 15.2 16.1 19.9-10.3 42.4-16.1 66.4-16.1 53.4 0 99.5 30.7 120.9 75.4 10.1-16.4 16.2-35.1 16.2-55.4 0-16.5-3.3-32.3-9.2-46.8C293.5 59.3 268 56 240.2 56h-37z"/><circle fill="%23000" cx="160" cy="160" r="16"/><circle fill="%23000" cx="352" cy="160" r="16"/><path fill="%23000" d="M256 240c-35.3 0-64 28.7-64 64s28.7 64 64 64 64-28.7 64-64-28.7-64-64-64zm0 96c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32z"/></svg>'); }
         .pumpkin-3 { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23e67e22" d="M352 0c-27.8 0-53.3 8.6-74.5 23.1C256.5 8.6 231 0 203.2 0 91 0 0 91 0 203.2c0 132.4 125.8 200.5 203.4 308.8 11 15.4 28.4 25.6 48.4 25.6h8.4c20 0 37.4-10.2 48.4-25.6C386.2 403.7 512 335.6 512 203.2 512 91 421 0 352 0zm-96 480c-3.5 0-6.8-1.8-9.1-4.8-4.1-5.8-102.3-145.7-102.3-272 0-81.9 66.6-148.5 148.5-148.5S441 121.3 441 203.2c0 126.3-98.2 266.2-102.3 272-2.3 3-5.6 4.8-9.1 4.8h-83.2z"/><path fill="%23d35400" d="M203.4 308.8C125.8 200.5 0 132.4 0 203.2 0 91 91 0 203.2 0c27.8 0 53.3 8.6 74.5 23.1 21.2-14.5 46.7-23.1 74.5-23.1 69 0 160 91 160 203.2 0 132.4-125.8 200.5-203.4 308.8-11 15.4-28.4 25.6-48.4 25.6h-8.4c-20 0-37.4-10.2-48.4-25.6zM352 56c-16.5 0-32.3 3.3-46.8 9.2 5.3 5.1 10.4 10.4 15.2 16.1C338.3 70.8 345 68 352 68c74.9 0 136 61.1 136 136 0 28.9-9.3 56.3-25.4 78.9 5.8-16.5 9.4-34.2 9.4-52.6C472 121.3 405.4 56 352 56zM203.2 56c-16.5 0-32.3 3.3-46.8 9.2 5.3 5.1 10.4 10.4 15.2 16.1 19.9-10.3 42.4-16.1 66.4-16.1 53.4 0 99.5 30.7 120.9 75.4 10.1-16.4 16.2-35.1 16.2-55.4 0-16.5-3.3-32.3-9.2-46.8C293.5 59.3 268 56 240.2 56h-37z"/><circle fill="%23000" cx="160" cy="160" r="16"/><circle fill="%23000" cx="352" cy="160" r="16"/><path fill="%23000" d="M256 240c-35.3 0-64 28.7-64 64s28.7 64 64 64 64-28.7 64-64-28.7-64-64-64zm0 96c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32z"/></svg>'); }
         .pumpkin-4 { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23d35400" d="M352 0c-27.8 0-53.3 8.6-74.5 23.1C256.5 8.6 231 0 203.2 0 91 0 0 91 0 203.2c0 132.4 125.8 200.5 203.4 308.8 11 15.4 28.4 25.6 48.4 25.6h8.4c20 0 37.4-10.2 48.4-25.6C386.2 403.7 512 335.6 512 203.2 512 91 421 0 352 0zm-96 480c-3.5 0-6.8-1.8-9.1-4.8-4.1-5.8-102.3-145.7-102.3-272 0-81.9 66.6-148.5 148.5-148.5S441 121.3 441 203.2c0 126.3-98.2 266.2-102.3 272-2.3 3-5.6 4.8-9.1 4.8h-83.2z"/><path fill="%23e67e22" d="M203.4 308.8C125.8 200.5 0 132.4 0 203.2 0 91 91 0 203.2 0c27.8 0 53.3 8.6 74.5 23.1 21.2-14.5 46.7-23.1 74.5-23.1 69 0 160 91 160 203.2 0 132.4-125.8 200.5-203.4 308.8-11 15.4-28.4 25.6-48.4 25.6h-8.4c-20 0-37.4-10.2-48.4-25.6zM352 56c-16.5 0-32.3 3.3-46.8 9.2 5.3 5.1 10.4 10.4 15.2 16.1C338.3 70.8 345 68 352 68c74.9 0 136 61.1 136 136 0 28.9-9.3 56.3-25.4 78.9 5.8-16.5 9.4-34.2 9.4-52.6C472 121.3 405.4 56 352 56zM203.2 56c-16.5 0-32.3 3.3-46.8 9.2 5.3 5.1 10.4 10.4 15.2 16.1 19.9-10.3 42.4-16.1 66.4-16.1 53.4 0 99.5 30.7 120.9 75.4 10.1-16.4 16.2-35.1 16.2-55.4 0-16.5-3.3-32.3-9.2-46.8C293.5 59.3 268 56 240.2 56h-37z"/><circle fill="%23000" cx="160" cy="160" r="16"/><circle fill="%23000" cx="352" cy="160" r="16"/><path fill="%23000" d="M256 240c-35.3 0-64 28.7-64 64s28.7 64 64 64 64-28.7 64-64-28.7-64-64-64zm0 96c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32z"/></svg>'); }
+        
+        /* 南瓜燈上的花紋 */
+        .pumpkin-option::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23000" d="M256 0c-16.5 0-32.3 3.3-46.8 9.2 5.3 5.1 10.4 10.4 15.2 16.1 19.9-10.3 42.4-16.1 66.4-16.1 53.4 0 99.5 30.7 120.9 75.4 10.1-16.4 16.2-35.1 16.2-55.4 0-16.5-3.3-32.3-9.2-46.8C293.5 59.3 268 56 240.2 56h-37z"/></svg>');
+            background-size: 80%;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.2;
+        }
         
         @keyframes shake {
             0% { transform: translateX(0); }
@@ -306,52 +298,127 @@
             to { opacity: 0.5; }
         }
         
-        /* 橫屏專用樣式 */
-        @media (orientation: landscape) {
+        /* 響應式設計 - 平板 */
+        @media (min-width: 768px) {
             .game-container {
-                height: 98vh;
-                max-height: 98vh;
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .word-display {
+                font-size: 2.3rem;
+            }
+            
+            .pos-display {
+                font-size: 1.4rem;
+            }
+            
+            .pumpkin-option {
+                width: 22%;
+                height: 150px;
+            }
+            
+            .pumpkin-text {
+                font-size: 1rem;
+            }
+            
+            .ghost {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .score-display {
+                font-size: 1.4rem;
+            }
+            
+            .restart-btn, .start-btn {
+                font-size: 1.3rem;
+                padding: 16px 32px;
+            }
+        }
+        
+        /* 響應式設計 - 電腦 */
+        @media (min-width: 1024px) {
+            .game-container {
+                padding: 30px;
+                max-width: 900px;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .word-display {
+                font-size: 2.5rem;
+            }
+            
+            .pos-display {
+                font-size: 1.5rem;
+            }
+            
+            .pumpkin-option {
+                width: 22%;
+                height: 160px;
+                max-width: 180px;
+            }
+            
+            .pumpkin-option:hover {
+                transform: translateY(-10px) scale(1.1);
+            }
+            
+            .pumpkin-text {
+                font-size: 1.1rem;
+            }
+            
+            .ghost {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .score-display {
+                font-size: 1.5rem;
+            }
+            
+            .restart-btn, .start-btn {
+                font-size: 1.5rem;
+                padding: 18px 36px;
+            }
+            
+            .restart-btn:hover, .start-btn:hover {
+                background-color: #ff9f43;
+                transform: scale(1.1);
+            }
+        }
+        
+        /* 響應式設計 - 小手機 */
+        @media (max-width: 480px) {
+            .game-container {
                 padding: 15px;
             }
             
             h1 {
                 font-size: 1.5rem;
-                margin-bottom: 10px;
-            }
-            
-            .options-container {
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
-                margin: 15px 0;
-            }
-            
-            .pumpkin-option {
-                height: 120px;
-            }
-            
-            .pumpkin-text {
-                font-size: 0.8rem;
-                margin: 0 8px;
-                min-height: 35px;
             }
             
             .word-display {
-                font-size: 1.7rem;
-                margin: 10px 0;
+                font-size: 1.8rem;
             }
             
             .pos-display {
                 font-size: 1.1rem;
-                margin-bottom: 15px;
             }
             
-            .score-display {
-                font-size: 1.1rem;
-                margin: 8px 0;
+            .pumpkin-option {
+                width: 45%;
+                height: 130px;
             }
             
-            .timer-container {
-                margin: 10px 0;
+            .pumpkin-text {
+                font-size: 0.85rem;
+                bottom: 12px;
             }
             
             .ghost {
@@ -359,42 +426,32 @@
                 height: 50px;
             }
             
-            .restart-btn, .start-btn {
-                padding: 10px 20px;
+            .score-display {
                 font-size: 1.1rem;
-                margin-top: 10px;
             }
             
-            .game-over h2 {
-                font-size: 1.8rem;
-                margin-bottom: 10px;
+            .restart-btn, .start-btn {
+                font-size: 1.1rem;
+                padding: 12px 24px;
+                min-width: 160px;
             }
         }
         
-        /* 超小螢幕橫屏優化 */
-        @media (orientation: landscape) and (max-height: 400px) {
+        /* 響應式設計 - 超小手機 */
+        @media (max-width: 360px) {
             .pumpkin-option {
-                height: 100px;
+                width: 45%;
+                height: 120px;
             }
             
             .pumpkin-text {
-                font-size: 0.7rem;
-                min-height: 30px;
+                font-size: 0.8rem;
             }
             
-            .word-display {
-                font-size: 1.5rem;
+            .ghost {
+                width: 45px;
+                height: 45px;
             }
-            
-            .options-container {
-                grid-template-columns: 1fr;
-                gap: 5px;
-            }
-        }
-        
-        /* 隱藏類 */
-        .hidden {
-            display: none !important;
         }
     </style>
 </head>
@@ -402,46 +459,37 @@
     <div class="game-container">
         <h1>CAP2000 Clothing & Others 單字挑戰無極限</h1>
         <div class="score-display">Score: <span id="score">0</span></div>
-        
-        <div class="game-content">
-            <div class="screen" id="setup-screen">
-                <div class="screen-content">
-                    <p>準備好挑戰你的單字能力了嗎？點擊開始！</p>
-                    <button class="start-btn" id="start-game">Start Game</button>
+        <div id="setup-screen">
+            <p>準備好挑戰你的單字能力了嗎？點擊開始！</p>
+            <button class="start-btn" id="start-game">Start Game</button>
+        </div>
+        <div id="game-screen" style="display: none;">
+            <div class="word-display" id="current-word">單字</div>
+            <div class="pos-display" id="current-pos">詞性</div>
+            <div class="timer-container">
+                <div class="timer-bar" id="timer-bar"></div>
+            </div>
+            <div class="options-container">
+                <div class="pumpkin-option pumpkin-1" data-option="1">
+                    <div class="pumpkin-text" id="option-1">選項1</div>
+                </div>
+                <div class="pumpkin-option pumpkin-2" data-option="2">
+                    <div class="pumpkin-text" id="option-2">選項2</div>
+                </div>
+                <div class="pumpkin-option pumpkin-3" data-option="3">
+                    <div class="pumpkin-text" id="option-3">選項3</div>
+                </div>
+                <div class="pumpkin-option pumpkin-4" data-option="4">
+                    <div class="pumpkin-text" id="option-4">選項4</div>
                 </div>
             </div>
-            
-            <div class="screen hidden" id="game-screen">
-                <div class="screen-content">
-                    <div class="word-display" id="current-word">單字</div>
-                    <div class="pos-display" id="current-pos">詞性</div>
-                    <div class="timer-container">
-                        <div class="timer-bar" id="timer-bar"></div>
-                    </div>
-                    <div class="options-container">
-                        <div class="pumpkin-option pumpkin-1" data-option="1">
-                            <div class="pumpkin-text" id="option-1">選項1</div>
-                        </div>
-                        <div class="pumpkin-option pumpkin-2" data-option="2">
-                            <div class="pumpkin-text" id="option-2">選項2</div>
-                        </div>
-                        <div class="pumpkin-option pumpkin-3" data-option="3">
-                            <div class="pumpkin-text" id="option-3">選項3</div>
-                        </div>
-                        <div class="pumpkin-option pumpkin-4" data-option="4">
-                            <div class="pumpkin-text" id="option-4">選項4</div>
-                        </div>
-                    </div>
-                    <div class="ghost"></div>
-                    <div class="bats" id="bats-container"></div>
-                </div>
-            </div>
-            
-            <div class="game-over" id="game-over">
-                <h2 id="result-message">Game Over!</h2>
-                <div>Final Score: <span id="final-score">0</span></div>
-                <button class="restart-btn" id="restart-btn">再玩一次</button>
-            </div>
+            <div class="ghost"></div>
+            <div class="bats" id="bats-container"></div>
+        </div>
+        <div class="game-over" id="game-over">
+            <h2 id="result-message">Game Over!</h2>
+            <div>Final Score: <span id="final-score">0</span></div>
+            <button class="restart-btn" id="restart-btn">再玩一次</button>
         </div>
     </div>
 
@@ -455,6 +503,7 @@
         let gameActive = false;
         let batInterval = null;
         let canAnswer = true;
+        let usedInCurrentSession = [];
         
         // DOM元素
         const setupScreen = document.getElementById('setup-screen');
@@ -1020,11 +1069,10 @@ trumpet,n.,小喇叭
 vacation,n.,假期
 violin,n.,小提琴
 volleyball,n.,排球
-watch,v.,看(電視)  `;
+watch,v.,看(電視)    `;
         
         // 初始化遊戲
         function initGame() {
-            console.log("開始遊戲");
             // 解析單字列表
             vocabulary = parseWordList(wordList);
             
@@ -1036,10 +1084,11 @@ watch,v.,看(電視)  `;
             // 重置遊戲狀態
             score = 0;
             scoreDisplay.textContent = score;
+            usedInCurrentSession = [];
             
             // 切換到遊戲畫面
-            setupScreen.classList.add('hidden');
-            gameScreen.classList.remove('hidden');
+            setupScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
             gameOverScreen.style.display = 'none';
             
             // 開始遊戲
@@ -1129,6 +1178,7 @@ watch,v.,看(電視)  `;
             // 清除之前的計時器
             if (timer) {
                 clearInterval(timer);
+                timer = null; // 重要：將計時器設為null
             }
             
             // 啟用所有選項
@@ -1137,15 +1187,33 @@ watch,v.,看(電視)  `;
                 option.classList.remove('disabled');
             });
             
+            // 如果本局已用完所有單字，清空記錄以開始新一輪
+            if (usedInCurrentSession.length >= vocabulary.length) {
+                usedInCurrentSession = [];
+            }
+            
+            // 找出尚未使用的索引
+            const availableIndices = vocabulary
+                .map((_, i) => i)
+                .filter(i => !usedInCurrentSession.includes(i));
+            
+            // 安全防護
+            if (availableIndices.length === 0) {
+                usedInCurrentSession = [];
+                nextQuestion();
+                return;
+            }
+            
+            // 隨機選擇一個未使用過的問題
+            const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+            usedInCurrentSession.push(randomIndex);
+            currentWord = vocabulary[randomIndex];
+            
             // 添加淡入效果
             currentWordDisplay.classList.add('fade-out');
             currentPosDisplay.classList.add('fade-out');
             
-            // 短暫延遲後更新內容
             setTimeout(() => {
-                // 隨機選擇一個單字
-                currentWord = vocabulary[Math.floor(Math.random() * vocabulary.length)];
-                
                 // 顯示單字和詞性
                 currentWordDisplay.textContent = currentWord.word;
                 currentPosDisplay.textContent = currentWord.pos;
@@ -1169,18 +1237,17 @@ watch,v.,看(電視)  `;
                     timeLeft -= 0.1;
                     timerBar.style.width = `${(timeLeft / 8) * 100}%`;
                     
-                    // 時間不足時添加警告效果
                     if (timeLeft <= 3 && !timerBar.classList.contains('timer-warning')) {
                         timerBar.classList.add('timer-warning');
                     }
                     
                     if (timeLeft <= 0) {
                         clearInterval(timer);
+                        timer = null; // 重要：將計時器設為null
                         endGame(false);
                     }
                 }, 100);
                 
-                // 移除淡入效果
                 setTimeout(() => {
                     currentWordDisplay.classList.remove('fade-in');
                     currentPosDisplay.classList.remove('fade-in');
@@ -1190,32 +1257,24 @@ watch,v.,看(電視)  `;
         
         // 準備選項
         function prepareOptions() {
-            // 正確答案
             const correctAnswer = currentWord.meaning;
-            
-            // 收集其他可能的選項
             const otherMeanings = vocabulary
                 .filter(item => item.meaning !== correctAnswer)
                 .map(item => item.meaning);
             
-            // 隨機選擇3個不重複的錯誤選項
             const wrongAnswers = [];
             while (wrongAnswers.length < 3 && otherMeanings.length > 0) {
                 const randomIndex = Math.floor(Math.random() * otherMeanings.length);
                 const selectedMeaning = otherMeanings[randomIndex];
-                
-                // 確保選項不重複
                 if (!wrongAnswers.includes(selectedMeaning)) {
                     wrongAnswers.push(selectedMeaning);
                     otherMeanings.splice(randomIndex, 1);
                 }
             }
             
-            // 合併所有選項並打亂順序
             const allOptions = [correctAnswer, ...wrongAnswers];
             shuffleArray(allOptions);
             
-            // 更新選項顯示
             for (let i = 0; i < 4; i++) {
                 if (i < allOptions.length) {
                     optionDisplays[i].textContent = allOptions[i];
@@ -1240,7 +1299,6 @@ watch,v.,看(電視)  `;
         function checkAnswer(selectedOption) {
             if (!gameActive || !canAnswer) return;
             
-            // 禁用所有選項，防止多次點擊
             canAnswer = false;
             pumpkinOptions.forEach(option => {
                 option.classList.add('disabled');
@@ -1250,19 +1308,24 @@ watch,v.,看(電視)  `;
             const isCorrect = selectedMeaning === currentWord.meaning;
             
             if (isCorrect) {
-                // 正確答案 - 每題5分
+                // 清除計時器
+                if (timer) {
+                    clearInterval(timer);
+                    timer = null; // 重要：將計時器設為null
+                }
+                
                 score += 5;
                 scoreDisplay.textContent = score;
-                
-                // 顯示正確效果
                 showCorrectEffect(selectedOption);
-                
-                // 縮短延遲後進入下一題
                 setTimeout(() => {
                     nextQuestion();
                 }, 500);
             } else {
-                // 錯誤答案
+                // 清除計時器
+                if (timer) {
+                    clearInterval(timer);
+                    timer = null; // 重要：將計時器設為null
+                }
                 endGame(false);
             }
         }
@@ -1270,11 +1333,8 @@ watch,v.,看(電視)  `;
         // 顯示正確效果
         function showCorrectEffect(correctOption) {
             correctOption.style.transform = 'scale(1.1)';
-            correctOption.style.filter = 'drop-shadow(0 0 10px #ff9f43)';
-            
-            // 創建蝙蝠效果
+            correctOption.style.filter = 'drop-shadow(0 0 15px #ff9f43)';
             createBatsEffect();
-            
             setTimeout(() => {
                 correctOption.style.transform = '';
                 correctOption.style.filter = '';
@@ -1283,7 +1343,7 @@ watch,v.,看(電視)  `;
         
         // 創建蝙蝠效果
         function createBatsEffect() {
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < 5; i++) {
                 setTimeout(() => {
                     createBat();
                 }, i * 100);
@@ -1294,17 +1354,19 @@ watch,v.,看(電視)  `;
         function endGame(isWin) {
             gameActive = false;
             canAnswer = false;
-            clearInterval(timer);
+            
+            // 確保計時器被清除
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            
             stopBatAnimation();
             
-            // 更新結束畫面
             finalScoreDisplay.textContent = score;
             resultMessage.textContent = isWin ? '恭喜你贏了!' : 'Game Over!';
-            
-            // 顯示結束畫面
             gameOverScreen.style.display = 'flex';
             
-            // 如果不是勝利，添加震動效果
             if (!isWin) {
                 gameScreen.style.animation = 'shake 0.5s';
                 setTimeout(() => {
@@ -1316,17 +1378,15 @@ watch,v.,看(電視)  `;
         // 重新開始遊戲
         function restartGame() {
             gameOverScreen.style.display = 'none';
-            setupScreen.classList.remove('hidden');
-            gameScreen.classList.add('hidden');
+            setupScreen.style.display = 'block';
+            gameScreen.style.display = 'none';
         }
         
         // 事件監聽器
         document.addEventListener('DOMContentLoaded', function() {
-            console.log("DOM已載入");
             startGameBtn.addEventListener('click', initGame);
             restartBtn.addEventListener('click', restartGame);
             
-            // 選項點擊事件
             document.querySelectorAll('.pumpkin-option').forEach(option => {
                 option.addEventListener('click', () => {
                     checkAnswer(option);
