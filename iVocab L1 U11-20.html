@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> U11-20 單字挑戰無極限 - 萬聖節特別版</title>
+    <title>U11-20 單字挑戰無極限 - 萬聖節特別版</title>
     <style>
         /* 基礎樣式重置 */
         * {
@@ -956,6 +956,7 @@ year,n,年 `;
             // 清除之前的計時器
             if (timer) {
                 clearInterval(timer);
+                timer = null; // 重要：將計時器設為null
             }
             
             // 啟用所有選項
@@ -1020,6 +1021,7 @@ year,n,年 `;
                     
                     if (timeLeft <= 0) {
                         clearInterval(timer);
+                        timer = null; // 重要：將計時器設為null
                         endGame(false);
                     }
                 }, 100);
@@ -1084,6 +1086,12 @@ year,n,年 `;
             const isCorrect = selectedMeaning === currentWord.meaning;
             
             if (isCorrect) {
+                // 清除計時器
+                if (timer) {
+                    clearInterval(timer);
+                    timer = null; // 重要：將計時器設為null
+                }
+                
                 score += 5;
                 scoreDisplay.textContent = score;
                 showCorrectEffect(selectedOption);
@@ -1091,6 +1099,11 @@ year,n,年 `;
                     nextQuestion();
                 }, 500);
             } else {
+                // 清除計時器
+                if (timer) {
+                    clearInterval(timer);
+                    timer = null; // 重要：將計時器設為null
+                }
                 endGame(false);
             }
         }
@@ -1119,7 +1132,13 @@ year,n,年 `;
         function endGame(isWin) {
             gameActive = false;
             canAnswer = false;
-            clearInterval(timer);
+            
+            // 確保計時器被清除
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            
             stopBatAnimation();
             
             finalScoreDisplay.textContent = score;
