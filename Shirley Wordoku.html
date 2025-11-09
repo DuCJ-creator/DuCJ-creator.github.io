@@ -1,159 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Shirley's Wordoku</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-      -webkit-touch-callout: none;
-      user-select: none;
-    }
-
-    html {
-      font-size: clamp(14px, 2.5vw, 18px);
-    }
-
-    body {
-      background: #f8f4e5;
-      color: #5d4037;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 12px;
-      min-height: 100vh;
-    }
-
-    h1 {
-      font-size: clamp(1.2rem, 4vw, 1.8rem);
-      margin: 10px 0;
-      color: #3e2723;
-      text-align: center;
-    }
-
-    #msg {
-      min-height: 24px;
-      font-size: clamp(0.9rem, 3vw, 1.1rem);
-      font-weight: bold;
-      text-align: center;
-      margin: 6px 0;
-      opacity: 1;
-      transition: opacity 0.3s;
-    }
-
-    .ctrl {
-      display: flex;
-      gap: 6px;
-      margin: 6px 0;
-      flex-wrap: wrap;
-      justify-content: center;
-      max-width: 100%;
-    }
-
-    button {
-      padding: clamp(6px, 1.5vw, 8px) clamp(10px, 2.5vw, 14px);
-      border: none;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: clamp(0.8rem, 2.2vw, 0.95rem);
-      white-space: nowrap;
-      -webkit-appearance: none;
-      touch-action: manipulation;
-    }
-
-    .d-btn {
-      background: #ffecb3;
-      color: #5d4037;
-    }
-
-    .d-btn.a {
-      background: #ffb300;
-      color: white;
-    }
-
-    #r, #chk {
-      background: #ffd54f;
-      color: #3e2723;
-    }
-
-    .sc {
-      margin: 12px 0;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: center;
-      max-width: 100%;
-    }
-
-    .g {
-      display: grid;
-      gap: 1px;
-      background: #e65100;
-      padding: 2px;
-    }
-
-    .c {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: white;
-      font-weight: bold;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-
-    .c.given {
-      color: #3e2723;
-      background: #fff8e1 !important;
-    }
-
-    .c.user {
-      color: #e65100;
-    }
-
-    .c.err {
-      background: #ffcdd2 !important;
-      color: #c62828;
-    }
-
-    .c.sel {
-      background: #ffe0b2 !important;
-      outline: 2px solid #e65100;
-    }
-
-    .np {
-      display: grid;
-      gap: 6px;
-      margin-top: 14px;
-      width: 100%;
-      max-width: 520px;
-    }
-
-    .nb {
-      padding: clamp(8px, 2.5vw, 12px) 0;
-      background: #fff8e1;
-      color: #5d4037;
-      font-size: clamp(1rem, 3vw, 1.2rem);
-      font-weight: bold;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none;}
+    body{background:#f8f4e5;padding:12px;display:flex;flex-direction:column;align-items:center;color:#5d4037;}
+    h1{font-size:22px;margin:10px 0;color:#3e2723;text-align:center;}
+    #msg{min-height:24px;font-size:16px;font-weight:bold;text-align:center;margin:6px 0;transition:opacity 0.3s;}
+    .ctrl{display:flex;gap:8px;margin:6px 0;flex-wrap:wrap;justify-content:center;}
+    button{padding:7px 12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer;font-size:13px;}
+    .d-btn{background:#ffecb3;color:#5d4037;}
+    .d-btn.a{background:#ffb300;color:white;}
+    #r, #chk{background:#ffd54f;color:#3e2723;}
+    .sc{margin:12px 0;background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);display:flex;justify-content:center;}
+    .g{display:grid;gap:1px;background:#e65100;padding:2px;}
+    .c{display:flex;align-items:center;justify-content:center;background:white;font-weight:bold;cursor:pointer;}
+    .c.given{color:#3e2723;background:#fff8e1 !important;}
+    .c.user{color:#e65100;}
+    .c.err{background:#ffcdd2 !important;color:#c62828;}
+    .c.sel{background:#ffe0b2 !important;outline:2px solid #e65100;}
+    .np{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:14px;width:100%;max-width:520px;}
+    .nb{padding:10px 0;background:#fff8e1;color:#5d4037;font-size:16px;font-weight:bold;border-radius:8px;border:none;cursor:pointer;}
   </style>
 </head>
 <body>
   <h1>Shirley's Wordoku</h1>
   <div id="msg"></div>
   <div class="ctrl">
-    <button class="d-btn a" data-s="4">初學 (4×4)</button>
+    <button class="d-btn a" data-s="3">輕鬆 (3×3)</button>
     <button class="d-btn" data-s="6">挑戰 (6×6)</button>
     <button class="d-btn" data-s="9">燒腦 (9×9)</button>
     <button id="r">重置</button>
@@ -163,66 +38,33 @@
   <div class="np" id="np"></div>
 
   <script>
-    // 🔒 阻止縮放與滾動
-    document.documentElement.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
-    document.documentElement.addEventListener('touchstart', e => {
-      if (e.touches.length > 1) e.preventDefault();
-    }, { passive: false });
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', e => {
-      const now = Date.now();
-      if (now - lastTouchEnd <= 300) e.preventDefault();
-      lastTouchEnd = now;
+    var w3 = "ACT,AGE,AIR,ARK,ARM,ASK,AWE,BAG,BAN,BED,BOX,BUS,BUT,BUY,CAN,CAP,CAR,COT,CUP,CUT,DRY,DUE,EAT,END,FAR,FIT,FLY,FOG,FOX,FUN,GUM,HAD,HAM,HAP,HAS,HER,HIS,HUT,ICY,INK,NEW,NOW,OAR,ONE,OUR,OWL,OWN,PAD,PAN,PET";
+    var w6 = "ACTION,AMIDST,AUTHOR,BROWSE,COLUMN,CREDIT,CUSTOM,EDITOR,FOLDER,FOREST,GROUND,HUMBLE,IMPORT,ISLAND,JOURNAL,LENGTH,MAKING,METHOD,MOBILE,NOVELS,POLICY,RANDOM,RULING,SECRET,SOURCE,SPLASH,STYLED,TALKED,TIMBER,WEAPON";
+    var w9 = "IMPORTANT,EDUCATION,COPYRIGHT,BLOCKHEAD,ALGORITHM,FRAMEWORK,WORKPLACE,VULCANIZE,OUTBOUND,EQUATION,FORESIGHT";
+    
+    var bank = {3:w3.split(','), 6:w6.split(','), 9:w9.split(',')};
+    var total = {3:5, 6:8, 9:11};
+    var size = 3;
+    var bd = [], sol = [], gn = [], sc = null, sp = null, act = [], av = [];
+    var diff = {3:{h:1,w:3}, 6:{h:2,w:3}, 9:{h:3,w:3}};
+
+    document.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+    document.addEventListener('touchstart', function(e) { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+    var last = 0;
+    document.addEventListener('touchend', function(e) {
+      var now = Date.now();
+      if (now - last <= 300) e.preventDefault();
+      last = now;
     }, false);
 
-    // ✅ 嚴格驗證過的詞庫（長度精確匹配）
-    const w4 = [
-      "ACTS","AGED","AIRY","ARKS","ARMS","ASKS","AWES","BAGS","BAND","BEDS",
-      "BANK","BARK","BEAR","BIRD","CARS","CLAY","COAT","COLD","COOK","CUTE",
-      "DARK","DESK","DOGS","DUCK","EARS","EAST","EASY","EXIT","FARM","FIRE",
-      "FISH","FOOD","FORK","GIFT","GIRL","GOLD","GOOD","HAND","HATS","HEAD",
-      "HELP","HOME","IDEA","IRON","JUMP","JURY","KIND","KITE","LAMP","LAND",
-      "LATE","LEAF","LION","LOVE","MAIL","MASK","MILK","MIND","MOON","NAME",
-      "NEST","NEWS","NOSE","OPEN","OWLS","OVAL","PARK","PENS","PETS","PLAY",
-      "POST","QUAY","RACE","RAIN","RICE","ROAD","ROOM","ROSE","SAND","SEAL",
-      "SEAT","SHOP","SILK","SKIN","SOFA","SUIT","TALK","TEAM","TENT","TIED",
-      "TOYS","TREE","UNIT","USED","VANE","VASE","VISA","WALL","WIND","WOLF",
-      "WORD","WORK","YARD","YOGA","ZERO","ZOOM"
-    ];
-
-    const w6 = [
-      "ACTION","AMIDST","AUTHOR","BROWSE","COLUMN","CREDIT","CUSTOM",
-      "EDITOR","FOLDER","FOREST","GROUND","HUMBLE","IMPORT","ISLAND",
-      "LENGTH","MAKING","METHOD","MOBILE","NOVELS","POLICY","RANDOM",
-      "RULING","SECRET","SOURCE","SPLASH","STYLED","TALKED","TIMBER",
-      "WEAPON","WONDER","YELLOW","ZEPHYR"
-    ];
-
-    const w9 = [
-      "IMPORTANT","EDUCATION","COPYRIGHT","BLOCKHEAD","ALGORITHM",
-      "FRAMEWORK","WORKPLACE","VULCANIZE","FORESIGHT","BREAKFAST",
-      "CHOCOLATE","DINOSAURS","EARTHWORM","FIREPLACE","HIGHLIGHT",
-      "INVISIBLE","JACKFRUIT","KNOWLEDGE","LUNCHTIME","MOUNTAINS"
-    ];
-
-    const bank = {4: w4, 6: w6, 9: w9};
-    const diff = {
-      4: { h: 2, w: 2 },
-      6: { h: 2, w: 3 },
-      9: { h: 3, w: 3 }
-    };
-
-    let size = 4;
-    let board = [], solution = [], given = [], selectedCell = null, selectedPos = null;
-    let availableLetters = [];
-
-    function uniqLetters(word) {
-      const seen = new Set();
-      const res = [];
-      const upper = word.toUpperCase();
-      for (const c of upper) {
-        if (c >= 'A' && c <= 'Z' && !seen.has(c)) {
-          seen.add(c);
+    function uniq(s) {
+      var seen = {};
+      var res = [];
+      var up = s.toUpperCase();
+      for (var i = 0; i < up.length; i++) {
+        var c = up[i];
+        if (c >= 'A' && c <= 'Z' && !seen[c]) {
+          seen[c] = 1;
           res.push(c);
         }
       }
@@ -230,52 +72,64 @@
     }
 
     function supplement(base, n) {
-      const res = [...new Set(base)];
+      var res = [];
+      for (var i = 0; i < base.length; i++) res.push(base[i]);
       if (res.length >= n) {
-        for (let i = res.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [res[i], res[j]] = [res[j], res[i]];
+        for (var i = res.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = res[i]; res[i] = res[j]; res[j] = t;
         }
         return res.slice(0, n);
       }
-      const all = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      for (const c of all) {
-        if (res.length >= n) break;
-        if (!res.includes(c)) res.push(c);
+      var all = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      for (var i = 0; i < all.length && res.length < n; i++) {
+        var c = all[i];
+        var found = 0;
+        for (var j = 0; j < res.length; j++) {
+          if (res[j] == c) { found = 1; break; }
+        }
+        if (!found) res.push(c);
       }
-      for (let i = res.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [res[i], res[j]] = [res[j], res[i]];
+      for (var i = res.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = res[i]; res[i] = res[j]; res[j] = t;
       }
       return res.slice(0, n);
     }
 
-    function isValid(grid, row, col, letter, s) {
-      if (letter === '') return true;
-      for (let i = 0; i < s; i++) {
-        if (grid[row][i] === letter || grid[i][col] === letter) return false;
+    function valid(g, r, c, L, s) {
+      if (L === '') return true;
+      for (var i = 0; i < s; i++) {
+        if (g[r][i] === L || g[i][c] === L) return false;
       }
-      const { h, w } = diff[s];
-      const sr = row - (row % h);
-      const sc = col - (col % w);
-      for (let i = 0; i < h; i++) {
-        for (let j = 0; j < w; j++) {
-          if (grid[sr + i][sc + j] === letter) return false;
+      if (s > 3) {
+        var bh = diff[s].h, bw = diff[s].w;
+        var sr = r - (r % bh), scol = c - (c % bw);
+        for (var i = 0; i < bh; i++) {
+          for (var j = 0; j < bw; j++) {
+            if (g[sr + i][scol + j] === L) return false;
+          }
         }
       }
       return true;
     }
 
-    function solve(grid, s, letters) {
-      for (let r = 0; r < s; r++) {
-        for (let c = 0; c < s; c++) {
-          if (grid[r][c] === '') {
-            const shuffled = [...letters].sort(() => Math.random() - 0.5);
-            for (const L of shuffled) {
-              if (isValid(grid, r, c, L, s)) {
-                grid[r][c] = L;
-                if (solve(grid, s, letters)) return true;
-                grid[r][c] = '';
+    function solve(g, s, letters) {
+      for (var r = 0; r < s; r++) {
+        for (var c = 0; c < s; c++) {
+          if (g[r][c] === '') {
+            var sh = [];
+            for (var i = 0; i < letters.length; i++) sh.push(letters[i]);
+            for (var i = sh.length - 1; i > 0; i--) {
+              var j = Math.floor(Math.random() * (i + 1));
+              var t = sh[i]; sh[i] = sh[j]; sh[j] = t;
+            }
+            for (var k = 0; k < sh.length; k++) {
+              var L = sh[k];
+              if (valid(g, r, c, L, s)) {
+                g[r][c] = L;
+                if (solve(g, s, letters)) return true;
+                g[r][c] = '';
               }
             }
             return false;
@@ -285,126 +139,149 @@
       return true;
     }
 
-    function generatePuzzle(s) {
-      const words = bank[s];
-      const word = words[Math.floor(Math.random() * words.length)];
-      const unique = uniqLetters(word);
-      const activeLetters = supplement(unique, s);
-      availableLetters = [...activeLetters];
+    function gen(s) {
+      var list = bank[s];
+      var word = list[Math.floor(Math.random() * list.length)];
+      var ul = uniq(word);
+      act = supplement(ul, s);
+      av = supplement(ul, total[s]);
 
-      solution = Array(s).fill().map(() => Array(s).fill(''));
-      solve(solution, s, activeLetters);
-
-      board = solution.map(row => [...row]);
-      given = Array(s).fill().map(() => Array(s).fill(true));
-
-      const removeCount = s === 4 ? 6 : (s === 6 ? 18 : 40);
-      const cells = [];
-      for (let i = 0; i < s; i++) for (let j = 0; j < s; j++) cells.push([i, j]);
-      for (let i = cells.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [cells[i], cells[j]] = [cells[j], cells[i]];
+      sol = [];
+      for (var i = 0; i < s; i++) {
+        sol[i] = [];
+        for (var j = 0; j < s; j++) sol[i][j] = '';
       }
-      for (let k = 0; k < removeCount && k < cells.length; k++) {
-        const [r, c] = cells[k];
-        board[r][c] = '';
-        given[r][c] = false;
+      solve(sol, s, act);
+
+      bd = [];
+      gn = [];
+      for (var i = 0; i < s; i++) {
+        bd[i] = []; gn[i] = [];
+        for (var j = 0; j < s; j++) {
+          bd[i][j] = sol[i][j];
+          gn[i][j] = true;
+        }
+      }
+
+      var rc = (s == 3) ? 3 : (s == 6 ? 18 : 40);
+      var cells = [];
+      for (var i = 0; i < s; i++)
+        for (var j = 0; j < s; j++)
+          cells.push([i, j]);
+
+      for (var i = cells.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = cells[i]; cells[i] = cells[j]; cells[j] = t;
+      }
+
+      for (var k = 0; k < rc && k < cells.length; k++) {
+        var r = cells[k][0], c = cells[k][1];
+        bd[r][c] = '';
+        gn[r][c] = false;
       }
     }
 
-    function renderGrid() {
-      const gridEl = document.getElementById('g');
-      gridEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-      gridEl.innerHTML = '';
+    function render() {
+      var ge = document.getElementById('g');
+      ge.style.gridTemplateColumns = 'repeat(' + size + ', 1fr)';
+      ge.innerHTML = '';
 
-      const containerWidth = Math.min(500, window.innerWidth - 24);
-      const cellSize = Math.floor(containerWidth / size);
+      var mw = Math.min(500, window.innerWidth - 20);
+      var cs = Math.floor(mw / size);
 
-      for (let i = 0; i < size; i++) {
-        for (let j = 0; j < size; j++) {
-          const cell = document.createElement('div');
-          cell.className = 'c';
-          cell.style.width = cellSize + 'px';
-          cell.style.height = cellSize + 'px';
-          cell.style.fontSize = Math.max(10, Math.floor(cellSize * 0.4)) + 'px';
+      for (var i = 0; i < size; i++) {
+        for (var j = 0; j < size; j++) {
+          var c = document.createElement('div');
+          c.className = 'c';
+          c.style.width = cs + 'px';
+          c.style.height = cs + 'px';
+          c.style.fontSize = Math.max(12, Math.floor(cs * 0.4)) + 'px';
 
-          if (given[i][j] && board[i][j]) {
-            cell.textContent = board[i][j];
-            cell.classList.add('given');
-          } else if (board[i][j]) {
-            cell.textContent = board[i][j];
-            cell.classList.add('user');
+          if (gn[i][j] && bd[i][j]) {
+            c.textContent = bd[i][j];
+            c.classList.add('given');
+          } else if (bd[i][j]) {
+            c.textContent = bd[i][j];
+            c.classList.add('user');
           }
 
-          cell.dataset.r = i;
-          cell.dataset.c = j;
-          const handler = (e) => {
+          c.dataset.r = i;
+          c.dataset.c = j;
+          c.addEventListener('click', function(e) {
             e.preventDefault();
-            e.stopPropagation();
-            selectCell(i, j);
-          };
-          cell.addEventListener('click', handler);
-          cell.addEventListener('touchstart', handler, { passive: false });
-          gridEl.appendChild(cell);
+            var r = parseInt(this.dataset.r);
+            var c = parseInt(this.dataset.c);
+            sel(r, c);
+          });
+          c.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            var r = parseInt(this.dataset.r);
+            var c = parseInt(this.dataset.c);
+            sel(r, c);
+          });
+          ge.appendChild(c);
         }
       }
     }
 
     function renderPad() {
-      const pad = document.getElementById('np');
-      pad.innerHTML = '';
-      pad.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+      var p = document.getElementById('np');
+      p.innerHTML = '';
+      var rows = Math.ceil(av.length / 6);
+      p.style.gridTemplateRows = 'repeat(' + rows + ', 1fr)';
 
-      availableLetters.forEach(letter => {
-        const btn = document.createElement('button');
-        btn.className = 'nb';
-        btn.textContent = letter;
-        const handler = (e) => {
+      for (var i = 0; i < av.length; i++) {
+        var b = document.createElement('button');
+        b.className = 'nb';
+        b.textContent = av[i];
+        b.addEventListener('click', function(e) {
           e.preventDefault();
-          e.stopPropagation();
-          inputLetter(letter);
-        };
-        btn.addEventListener('click', handler);
-        btn.addEventListener('touchstart', handler, { passive: false });
-        pad.appendChild(btn);
-      });
+          inL(this.textContent);
+        });
+        b.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          inL(this.textContent);
+        });
+        p.appendChild(b);
+      }
     }
 
-    function selectCell(row, col) {
-      if (given[row][col]) return;
-      clearSelection();
-      selectedPos = { r: row, c: col };
-      selectedCell = document.querySelector(`.c[data-r="${row}"][data-c="${col}"]`);
-      if (selectedCell) selectedCell.classList.add('sel');
+    function clear() {
+      if (sc) sc.classList.remove('sel');
+      sc = null;
+      sp = null;
     }
 
-    function clearSelection() {
-      if (selectedCell) selectedCell.classList.remove('sel');
-      selectedCell = null;
-      selectedPos = null;
+    function sel(r, c) {
+      if (gn[r][c]) return;
+      clear();
+      sc = document.querySelector('.c[data-r="' + r + '"][data-c="' + c + '"]');
+      sp = {r: r, c: c};
+      if (sc) sc.classList.add('sel');
     }
 
-    function inputLetter(L) {
-      if (!selectedPos) return;
-      const { r, c } = selectedPos;
-      board[r][c] = L;
-      if (selectedCell) {
-        selectedCell.textContent = L;
-        selectedCell.classList.remove('err', 'user');
-        selectedCell.classList.add('user');
-        if (!isValid(board, r, c, L, size)) {
-          selectedCell.classList.add('err');
+    function inL(L) {
+      if (!sp) return;
+      var r = sp.r, c = sp.c;
+      bd[r][c] = L;
+      if (sc) {
+        sc.textContent = L;
+        sc.classList.remove('err', 'user');
+        sc.classList.add('user');
+        if (!valid(bd, r, c, L, size)) {
+          sc.classList.add('err');
         }
       }
     }
 
+    // ========== 修正版：使用正確答案比對 ==========
     function showMessage(text, isSuccess) {
-      const msg = document.getElementById('msg');
+      var msg = document.getElementById('msg');
       msg.textContent = text;
       msg.style.color = isSuccess ? '#2e7d32' : '#c62828';
-      setTimeout(() => {
+      setTimeout(function() {
         msg.style.opacity = '0';
-        setTimeout(() => {
+        setTimeout(function() {
           msg.textContent = '';
           msg.style.opacity = '1';
         }, 300);
@@ -412,79 +289,114 @@
     }
 
     function checkComplete() {
-      for (let i = 0; i < size; i++) {
-        for (let j = 0; j < size; j++) {
-          if (board[i][j] === '') {
+      // 檢查是否全部填滿
+      for (var i = 0; i < size; i++) {
+        for (var j = 0; j < size; j++) {
+          if (bd[i][j] === '') {
             showMessage("還有空格哦，請填滿再檢查！", false);
             return;
           }
         }
       }
-      for (let i = 0; i < size; i++) {
-        for (let j = 0; j < size; j++) {
-          if (board[i][j] !== solution[i][j]) {
-            showMessage("還有錯誤哦，加油！", false);
-            return;
+
+      // ✅ 關鍵修正：比對玩家答案與正確答案 sol
+      var allCorrect = true;
+      for (var i = 0; i < size; i++) {
+        for (var j = 0; j < size; j++) {
+          if (bd[i][j] !== sol[i][j]) {
+            allCorrect = false;
+            break;
           }
+        }
+        if (!allCorrect) break;
+      }
+
+      if (allCorrect) {
+        showMessage("🎉 恭喜！\n你是 ——\n獨孤求敗！", true);
+      } else {
+        showMessage("還有錯誤哦，加油！", false);
+      }
+    }
+
+    function reset() {
+      gen(size);
+      render();
+      renderPad();
+      clear();
+      document.getElementById('msg').textContent = '';
+    }
+
+    function init(s) {
+      size = s;
+      var btns = document.querySelectorAll('.d-btn');
+      for (var i = 0; i < btns.length; i++) {
+        if (btns[i].dataset.s == s) {
+          btns[i].classList.add('a');
+        } else {
+          btns[i].classList.remove('a');
         }
       }
-      showMessage("🎉 恭喜！\n你是 ——\n獨孤求敗！", true);
-    }
-
-    function resetGame() {
-      generatePuzzle(size);
-      renderGrid();
+      gen(s);
+      render();
       renderPad();
-      clearSelection();
+      clear();
       document.getElementById('msg').textContent = '';
     }
 
-    function initGame(s) {
-      size = s;
-      document.querySelectorAll('.d-btn').forEach(btn => {
-        btn.classList.toggle('a', parseInt(btn.dataset.s) === s);
-      });
-      generatePuzzle(s);
-      renderGrid();
-      renderPad();
-      clearSelection();
-      document.getElementById('msg').textContent = '';
-    }
-
-    window.addEventListener('keydown', e => {
-      if (!selectedPos || e.target.closest('input, textarea')) return;
-      const key = e.key;
-      if (['Delete', 'Backspace', ' '].includes(key)) {
-        const { r, c } = selectedPos;
-        if (!given[r][c]) {
-          board[r][c] = '';
-          if (selectedCell) {
-            selectedCell.textContent = '';
-            selectedCell.classList.remove('err', 'user');
+    window.addEventListener('keydown', function(e) {
+      if (!sp) return;
+      var k = e.key;
+      if (k == 'Delete' || k == 'Backspace' || k == ' ') {
+        var r = sp.r, c = sp.c;
+        if (!gn[r][c]) {
+          bd[r][c] = '';
+          if (sc) {
+            sc.textContent = '';
+            sc.classList.remove('err', 'user');
           }
         }
-        e.preventDefault();
         return;
       }
-      const up = key.toUpperCase();
-      if (availableLetters.includes(up)) {
-        inputLetter(up);
-        e.preventDefault();
+      var up = k.toUpperCase();
+      for (var i = 0; i < av.length; i++) {
+        if (av[i] == up) {
+          inL(up);
+          break;
+        }
       }
     });
 
-    function bind(el, fn) {
-      el.addEventListener('click', e => { e.preventDefault(); fn(); });
-      el.addEventListener('touchstart', e => { e.preventDefault(); fn(); }, { passive: false });
+    var btns = document.querySelectorAll('.d-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener('click', function(e) {
+        e.preventDefault();
+        init(parseInt(this.dataset.s));
+      });
+      btns[i].addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        init(parseInt(this.dataset.s));
+      });
     }
 
-    document.querySelectorAll('.d-btn').forEach(btn => {
-      bind(btn, () => initGame(parseInt(btn.dataset.s)));
+    document.getElementById('r').addEventListener('click', function(e) {
+      e.preventDefault();
+      reset();
     });
-    bind(document.getElementById('r'), resetGame);
-    bind(document.getElementById('chk'), checkComplete);
+    document.getElementById('r').addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      reset();
+    });
 
-    initGame(4);
+    document.getElementById('chk').addEventListener('click', function(e) {
+      e.preventDefault();
+      checkComplete();
+    });
+    document.getElementById('chk').addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      checkComplete();
+    });
+
+    init(3);
   </script>
 </body>
 </html>
