@@ -13,14 +13,14 @@
     .d-btn{background:#ffecb3;color:#5d4037;}
     .d-btn.a{background:#ffb300;color:white;}
     #r, #chk{background:#ffd54f;color:#3e2723;}
-    .sc{margin:12px 0;background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);display:flex;justify-content:center;}
+    .sc{margin:12px 0;background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);display:flex;justify-content:center;overflow:hidden;}
     .g{display:grid;gap:1px;background:#e65100;padding:2px;}
     .c{display:flex;align-items:center;justify-content:center;background:white;font-weight:bold;cursor:pointer;}
     .c.given{color:#3e2723;background:#fff8e1 !important;}
     .c.user{color:#e65100;}
     .c.err{background:#ffcdd2 !important;color:#c62828;}
     .c.sel{background:#ffe0b2 !important;outline:2px solid #e65100;}
-    .np{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:14px;width:100%;max-width:520px;}
+    .np{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:14px;width:100%;max-width:540px;}
     .nb{padding:10px 0;background:#fff8e1;color:#5d4037;font-size:16px;font-weight:bold;border-radius:8px;border:none;cursor:pointer;}
   </style>
 </head>
@@ -181,13 +181,20 @@
       }
     }
 
+    // ========== 修正版 render：固定容器寬度 ==========
     function render() {
       var ge = document.getElementById('g');
       ge.style.gridTemplateColumns = 'repeat(' + size + ', 1fr)';
       ge.innerHTML = '';
 
-      var mw = Math.min(500, window.innerWidth - 20);
-      var cs = Math.floor(mw / size);
+      var containerWidth;
+      if (size === 3) containerWidth = 300;
+      else if (size === 6) containerWidth = 480;
+      else containerWidth = 540; // size === 9
+
+      var cs = Math.floor(containerWidth / size);
+      var container = document.querySelector('.sc');
+      container.style.width = containerWidth + 'px';
 
       for (var i = 0; i < size; i++) {
         for (var j = 0; j < size; j++) {
@@ -195,7 +202,7 @@
           c.className = 'c';
           c.style.width = cs + 'px';
           c.style.height = cs + 'px';
-          c.style.fontSize = Math.max(12, Math.floor(cs * 0.4)) + 'px';
+          c.style.fontSize = Math.max(14, Math.floor(cs * 0.45)) + 'px';
 
           if (gn[i][j] && bd[i][j]) {
             c.textContent = bd[i][j];
@@ -274,7 +281,6 @@
       }
     }
 
-    // ========== 修正版：使用正確答案比對 ==========
     function showMessage(text, isSuccess) {
       var msg = document.getElementById('msg');
       msg.textContent = text;
@@ -289,7 +295,6 @@
     }
 
     function checkComplete() {
-      // 檢查是否全部填滿
       for (var i = 0; i < size; i++) {
         for (var j = 0; j < size; j++) {
           if (bd[i][j] === '') {
@@ -299,7 +304,6 @@
         }
       }
 
-      // ✅ 關鍵修正：比對玩家答案與正確答案 sol
       var allCorrect = true;
       for (var i = 0; i < size; i++) {
         for (var j = 0; j < size; j++) {
