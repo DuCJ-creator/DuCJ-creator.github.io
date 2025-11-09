@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>單字挑戰 - 手機版</title>
+    <title>單字挑戰 U1-10</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -24,6 +25,19 @@
             align-items: center;
             padding: 10px;
             background-image: linear-gradient(to bottom, #a8e6cf, #88d4ba);
+            touch-action: manipulation;
+        }
+        
+        .device-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
         }
         
         .game-container {
@@ -85,6 +99,9 @@
             box-shadow: 0 4px 0 #d46a6a;
             font-family: 'Comic Sans MS', cursive;
             flex-shrink: 0;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
         }
         
         .start-screen button:hover, .option:hover, .end-screen button:hover {
@@ -446,8 +463,394 @@
             90% { opacity: 1; }
             100% { transform: translateX(calc(100vw + 100px)); opacity: 0; }
         }
+
+        /* 设备检测和自适应样式 */
+        .desktop-view {
+            /* 桌面设备样式 */
+        }
+
+        .tablet-view {
+            /* 平板设备样式 */
+        }
+
+        .mobile-view {
+            /* 手机设备样式 */
+        }
+
+        /* 响应式设计优化 */
+        @media (max-width: 768px) {
+            .game-container {
+                height: 98vh;
+                max-height: 98vh;
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+                margin: 3px 0;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+                margin-bottom: 5px;
+            }
+            
+            .option {
+                min-height: 50px;
+                font-size: 0.9rem;
+                padding: 8px;
+            }
+            
+            .character-container {
+                height: 80px;
+                margin: 5px 0;
+            }
+            
+            .pig {
+                font-size: 50px;
+            }
+            
+            .bomb {
+                font-size: 25px;
+                bottom: 50px;
+            }
+            
+            .fuse {
+                bottom: 75px;
+                width: 50px;
+            }
+            
+            .flame {
+                bottom: 70px;
+                font-size: 15px;
+            }
+            
+            .word-display {
+                font-size: 1.5rem;
+                margin: 5px 0;
+            }
+            
+            .pos-display {
+                font-size: 1rem;
+                margin-bottom: 5px;
+            }
+            
+            .score-display {
+                font-size: 1.1rem;
+                margin-bottom: 5px;
+            }
+            
+            .timer-container {
+                margin: 5px 0;
+            }
+            
+            .countdown {
+                top: -25px;
+                font-size: 1.3rem;
+            }
+            
+            .start-screen button, .end-screen button {
+                padding: 10px 15px;
+                font-size: 1rem;
+                margin: 5px;
+            }
+            
+            .end-screen h2 {
+                font-size: 1.8rem;
+                margin-bottom: 10px;
+            }
+            
+            .end-screen p {
+                font-size: 1.1rem;
+                margin: 5px 0;
+            }
+            
+            .end-screen button {
+                padding: 10px 20px;
+                font-size: 1rem;
+                min-width: 150px;
+            }
+        }
         
-        /* 橫屏專用樣式 */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 10px;
+                height: 96vh;
+                max-height: 96vh;
+            }
+            
+            h1 {
+                font-size: 1.2rem;
+                margin: 2px 0;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr;
+                gap: 5px;
+                margin-bottom: 5px;
+            }
+            
+            .option {
+                min-height: 45px;
+                font-size: 0.85rem;
+                padding: 6px;
+            }
+            
+            .character-container {
+                height: 70px;
+                margin: 5px 0;
+            }
+            
+            .pig {
+                font-size: 40px;
+            }
+            
+            .bomb {
+                font-size: 20px;
+                bottom: 45px;
+            }
+            
+            .fuse {
+                bottom: 65px;
+                width: 40px;
+            }
+            
+            .flame {
+                bottom: 60px;
+                font-size: 12px;
+            }
+            
+            .word-display {
+                font-size: 1.3rem;
+                margin: 5px 0;
+            }
+            
+            .pos-display {
+                font-size: 0.9rem;
+                margin-bottom: 5px;
+                padding: 4px 12px;
+            }
+            
+            .score-display {
+                font-size: 1rem;
+                margin-bottom: 5px;
+                padding: 4px 12px;
+            }
+            
+            .timer-container {
+                margin: 5px 0;
+                height: 10px;
+            }
+            
+            .countdown {
+                top: -20px;
+                font-size: 1.1rem;
+            }
+            
+            .start-screen button, .end-screen button {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+                margin: 4px;
+            }
+            
+            .end-screen h2 {
+                font-size: 1.5rem;
+                margin-bottom: 8px;
+            }
+            
+            .end-screen p {
+                font-size: 1rem;
+                margin: 4px 0;
+                padding: 8px 15px;
+            }
+            
+            .end-screen button {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+                min-width: 120px;
+                margin-top: 15px;
+            }
+            
+            .sun {
+                font-size: 30px;
+            }
+            
+            .cloud {
+                font-size: 25px;
+            }
+        }
+        
+        /* 平板优化 */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .game-container {
+                max-width: 700px;
+                height: 90vh;
+                max-height: 90vh;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            
+            .option {
+                min-height: 70px;
+                font-size: 1rem;
+            }
+            
+            .character-container {
+                height: 100px;
+            }
+            
+            .pig {
+                font-size: 60px;
+            }
+        }
+        
+        /* 桌面设备优化 - 大幅增加字体大小 */
+        @media (min-width: 1025px) {
+            .game-container {
+                max-width: 900px;
+                height: 85vh;
+                max-height: 85vh;
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2.8rem !important;
+                margin: 15px 0;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .option {
+                min-height: 100px !important;
+                font-size: 1.4rem !important;
+                padding: 20px !important;
+                border-radius: 20px !important;
+            }
+            
+            .character-container {
+                height: 160px;
+                margin: 20px 0;
+            }
+            
+            .pig {
+                font-size: 100px !important;
+            }
+            
+            .bomb {
+                font-size: 50px !important;
+                bottom: 110px;
+            }
+            
+            .fuse {
+                bottom: 160px;
+                width: 100px;
+                height: 8px;
+            }
+            
+            .flame {
+                bottom: 150px;
+                font-size: 30px !important;
+            }
+            
+            .word-display {
+                font-size: 2.5rem !important;
+                margin: 20px 0;
+            }
+            
+            .pos-display {
+                font-size: 1.5rem !important;
+                margin-bottom: 15px;
+                padding: 10px 25px;
+            }
+            
+            .score-display {
+                font-size: 1.8rem !important;
+                margin-bottom: 15px;
+                padding: 10px 25px;
+            }
+            
+            .timer-container {
+                margin: 15px 0;
+                height: 15px;
+            }
+            
+            .countdown {
+                top: -35px;
+                font-size: 2rem !important;
+            }
+            
+            .start-screen button, .end-screen button {
+                padding: 18px 35px !important;
+                font-size: 1.5rem !important;
+                margin: 15px;
+                border-radius: 60px;
+            }
+            
+            .end-screen h2 {
+                font-size: 3rem !important;
+                margin-bottom: 25px;
+            }
+            
+            .end-screen p {
+                font-size: 1.8rem !important;
+                margin: 15px 0;
+                padding: 15px 30px;
+            }
+            
+            .end-screen button {
+                padding: 18px 35px !important;
+                font-size: 1.5rem !important;
+                min-width: 250px;
+                margin-top: 30px;
+            }
+            
+            .sun {
+                font-size: 60px;
+            }
+            
+            .cloud {
+                font-size: 45px;
+            }
+            
+            .farm-decoration {
+                font-size: 35px;
+            }
+        }
+        
+        /* 大屏幕桌面设备优化 */
+        @media (min-width: 1440px) {
+            .game-container {
+                max-width: 1100px;
+                padding: 30px;
+            }
+            
+            h1 {
+                font-size: 3.2rem !important;
+            }
+            
+            .option {
+                min-height: 120px !important;
+                font-size: 1.6rem !important;
+            }
+            
+            .word-display {
+                font-size: 3rem !important;
+            }
+        }
+        
+        /* 横屏專用樣式 */
         @media (orientation: landscape) {
             .game-container {
                 height: 98vh;
@@ -583,9 +986,19 @@
                 padding: 6px;
             }
         }
+        
+        /* 触摸设备优化 */
+        @media (pointer: coarse) {
+            .start-screen button, .option, .end-screen button {
+                min-height: 50px;
+                padding-top: 14px;
+                padding-bottom: 14px;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="device-info" id="deviceInfo">检测设备中...</div>
     <div class="sun">☀️</div>
     <div class="cloud" style="top: 20px; animation-delay: 0s;">☁️</div>
     <div class="cloud" style="top: 60px; animation-delay: 5s;">☁️</div>
@@ -924,6 +1337,61 @@ violation, n., 違反;違背
     </div>
 
     <script>
+        // 设备检测函数
+        function detectDevice() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            const deviceInfo = document.getElementById('deviceInfo');
+            let deviceType = 'desktop';
+            let screenInfo = '';
+            
+            // 检测设备类型
+            if (/mobile|android|iphone|ipad/.test(userAgent)) {
+                if (/ipad|tablet/.test(userAgent) || (window.innerWidth >= 768 && window.innerWidth <= 1024)) {
+                    deviceType = 'tablet';
+                    screenInfo = '平板设备';
+                } else {
+                    deviceType = 'mobile';
+                    screenInfo = '手机设备';
+                }
+            } else {
+                deviceType = 'desktop';
+                screenInfo = '桌面设备';
+            }
+            
+            // 添加设备类到body
+            document.body.classList.add(deviceType + '-view');
+            
+            // 显示设备信息
+            const screenSize = `屏幕: ${window.innerWidth} × ${window.innerHeight}`;
+            const dpr = `像素比: ${window.devicePixelRatio}`;
+            deviceInfo.textContent = `${screenInfo} | ${screenSize} | ${dpr}`;
+            
+            // 根据设备类型调整游戏参数
+            adjustForDevice(deviceType);
+            
+            return deviceType;
+        }
+        
+        // 根据设备类型调整参数
+        function adjustForDevice(deviceType) {
+            const gameContainer = document.querySelector('.game-container');
+            
+            switch(deviceType) {
+                case 'desktop':
+                    // 桌面设备 - 使用更大的字体和间距
+                    gameContainer.style.maxWidth = '1000px';
+                    break;
+                case 'tablet':
+                    // 平板设备 - 中等大小
+                    gameContainer.style.maxWidth = '800px';
+                    break;
+                case 'mobile':
+                    // 手机设备 - 保持原有设置
+                    gameContainer.style.maxWidth = '100%';
+                    break;
+            }
+        }
+        
         // 遊戲變數
         let score = 0;
         let currentQuestionIndex = 0;
@@ -1265,9 +1733,22 @@ violation, n., 違反;違背
         startBtn.addEventListener('click', startGame);
         restartBtn.addEventListener('click', initGame);
         
-        // 初始化遊戲
+        // 防止双击缩放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) e.preventDefault();
+            lastTouchEnd = now;
+        }, { passive: false });
+        
+        // 窗口大小改变时重新检测设备
+        window.addEventListener('resize', function() {
+            setTimeout(detectDevice, 100);
+        });
+        
+        // 初始化遊戲和设备检测
         initGame();
+        detectDevice();
     </script>
 </body>
 </html>
-
