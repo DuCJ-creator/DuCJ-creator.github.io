@@ -3,8 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L1 U11-20 單字挑戰無極限 - 萬聖節特別版</title>
+    <title> U11-20 單字挑戰無極限 - 萬聖節特別版</title>
     <style>
+        /* 基礎樣式重置 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
         body {
             font-family: 'Comic Sans MS', cursive, sans-serif;
             margin: 0;
@@ -17,41 +25,45 @@
             background-size: cover;
             background-attachment: fixed;
             overflow-x: hidden;
+            touch-action: manipulation;
         }
         
         .game-container {
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            padding: 30px;
-            width: 90%;
+            padding: 20px;
+            width: 95%;
             max-width: 800px;
             text-align: center;
             position: relative;
             border: 5px solid #f05454;
             overflow: hidden;
+            margin: 10px;
         }
         
         h1 {
             color: #f05454;
-            margin-bottom: 20px;
-            font-size: 2.5rem;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
             text-shadow: 2px 2px 0px #fff, 0 0 5px #ff9f43;
+            line-height: 1.3;
         }
         
         .word-display {
-            font-size: 2.5rem;
-            margin: 20px 0;
+            font-size: 2rem;
+            margin: 15px 0;
             color: #f05454;
             font-weight: bold;
             text-shadow: 2px 2px 0px #fff;
             transition: opacity 0.3s ease;
+            line-height: 1.2;
         }
         
         .pos-display {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             color: #f05454;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             font-style: italic;
             text-shadow: 1px 1px 0px #fff;
             transition: opacity 0.3s ease;
@@ -59,13 +71,15 @@
         
         .options-container {
             display: flex;
-            justify-content: space-around;
             flex-wrap: wrap;
-            margin: 30px 0;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 10px;
         }
         
         .pumpkin-option {
-            width: 120px;
+            width: 45%;
+            max-width: 160px;
             height: 140px;
             background-size: contain;
             background-repeat: no-repeat;
@@ -73,12 +87,13 @@
             cursor: pointer;
             transition: all 0.3s;
             position: relative;
-            margin: 10px;
+            margin: 5px;
             filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+            touch-action: manipulation;
         }
         
-        .pumpkin-option:hover {
-            transform: translateY(-10px) scale(1.1);
+        .pumpkin-option:active {
+            transform: translateY(-5px) scale(1.05);
         }
         
         .pumpkin-text {
@@ -87,27 +102,33 @@
             left: 0;
             right: 0;
             text-align: center;
-            font-size: 1rem;
+            font-size: 0.9rem;
             color: #fff;
             font-weight: bold;
             padding: 8px;
             background-color: rgba(0,0,0,0.8);
             border-radius: 10px;
-            margin: 0 15px;
+            margin: 0 10px;
             text-shadow: 1px 1px 0 #000;
             min-height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
         
         .timer-container {
             width: 100%;
-            height: 20px;
+            height: 15px;
             background-color: #f0f0f0;
             border-radius: 10px;
-            margin: 20px 0;
+            margin: 15px 0;
             overflow: hidden;
             border: 2px solid #f05454;
         }
@@ -122,12 +143,12 @@
         
         .ghost {
             position: absolute;
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="%23f0f0f0" d="M40.1 467.1l-11.2 9c-3.2 2.5-7.1 3.9-11.1 3.9-8.3 0-15.8-6-15.8-16.1c0-5.5 2.5-10.5 6.9-14.1C40.5 439.8 76.6 384 76.6 256c0-168.3-17.7-208-76.6-208C0 48 0 48 0 32C0 14.3 14.3 0 32 0h320c17.7 0 32 14.3 32 32c0 16 0 16-76.6 0c-58.9 0-76.6 39.7-76.6 208c0 128 36.1 183.8 66.3 209.8c4.4 3.6 6.9 8.6 6.9 14.1c0 10.1-7.5 16.1-15.8 16.1c-4 0-7.9-1.4-11.1-3.9l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0l-11.2-9c-6.9-5.5-17.1-5.5-24 0c-6.9 5.5-17.1 5.5-24 0zM128 128c-17.7 0-32 14.3-32 32s14.3 32 32 32s32-14.3 32-32s-14.3-32-32-32zm128 0c-17.7 0-32 14.3-32 32s14.3 32 32 32s32-14.3 32-32s-14.3-32-32-32z"/></svg>');
             background-size: contain;
             background-repeat: no-repeat;
-            bottom: 20px;
+            bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
             animation: float 2s infinite alternate ease-in-out;
@@ -137,13 +158,13 @@
         
         @keyframes float {
             0% { transform: translate(-50%, 0); }
-            100% { transform: translate(-50%, -20px); }
+            100% { transform: translate(-50%, -15px); }
         }
         
         .score-display {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             color: #f05454;
-            margin: 10px 0;
+            margin: 8px 0;
             font-weight: bold;
             text-shadow: 1px 1px 0px #fff;
         }
@@ -161,34 +182,38 @@
             z-index: 100;
             flex-direction: column;
             color: white;
-            font-size: 2rem;
+            font-size: 1.5rem;
             display: none;
             text-shadow: 2px 2px 0px #000;
+            padding: 20px;
+            text-align: center;
         }
         
         .game-over h2 {
-            font-size: 3rem;
-            margin-bottom: 20px;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
             color: #f05454;
         }
         
-        .restart-btn {
-            padding: 15px 30px;
+        .restart-btn, .start-btn {
+            padding: 14px 28px;
             background-color: #f05454;
             color: white;
             border: none;
             border-radius: 50px;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             cursor: pointer;
             margin-top: 20px;
             transition: all 0.3s;
             text-shadow: 1px 1px 0px #000;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            touch-action: manipulation;
+            min-width: 180px;
         }
         
-        .restart-btn:hover {
+        .restart-btn:active, .start-btn:active {
             background-color: #ff9f43;
-            transform: scale(1.1);
+            transform: scale(0.98);
         }
         
         .bats {
@@ -201,31 +226,12 @@
         
         .bat {
             position: absolute;
-            width: 30px;
-            height: 30px;
+            width: 25px;
+            height: 25px;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="%23f05454" d="M320 160c28.7 0 54.9 10 75.4 26.6 5.1 4.2 11.3 5.3 17 3.1 18.8-7.2 39.7-10.6 60.9-10.6 8.3 0 16.8.7 25.1 2.1 5.9.9 11.6-2 14.3-7.3 9.5-19 15.3-40.6 15.3-63.9 0-61.9-50.1-112-112-112-16.7 0-32.8 3.7-47.4 10.5-4.5 2.1-9.8 1.3-13.8-1.9-11.1-8.9-24.6-14.6-39.2-14.6s-28.1 5.7-39.2 14.6c-4 3.2-9.3 4-13.8 1.9-14.6-6.8-30.7-10.5-47.4-10.5-61.9 0-112 50.1-112 112 0 23.3 5.8 44.9 15.3 63.9 2.7 5.3 8.4 8.2 14.3 7.3 8.3-1.4 16.8-2.1 25.1-2.1 21.2 0 42.1 3.4 60.9 10.6 5.7 2.2 11.9 1.1 17-3.1C265.1 170 291.3 160 320 160zm0-48c13.2 0 24 10.8 24 24s-10.8 24-24 24-24-10.8-24-24 10.8-24 24-24zm-144 56c-28.7 0-54.9 10-75.4 26.6-5.1 4.2-11.3 5.3-17 3.1-18.8-7.2-39.7-10.6-60.9-10.6-8.3 0-16.8.7-25.1 2.1-5.9.9-11.6-2-14.3-7.3C2.8 172.9 0 150.7 0 128 0 66.1 50.1 16 112 16c16.7 0 32.8 3.7 47.4 10.5 4.5 2.1 9.8 1.3 13.8-1.9 11.1-8.9 24.6-14.6 39.2-14.6s28.1 5.7 39.2 14.6c4 3.2 9.3 4 13.8 1.9 14.6-6.8 30.7-10.5 47.4-10.5 61.9 0 112 50.1 112 112 0 22.7-2.8 44.9-8.3 65.5-2.7 5.3-8.4 8.2-14.3 7.3-8.3-1.4-16.8-2.1-25.1-2.1-21.2 0-42.1 3.4-60.9 10.6-5.7 2.2-11.9 1.1-17-3.1-20.5-16.6-46.7-26.6-75.4-26.6zm-24 80c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24zm256 0c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24zm-224 32c-119 0-216 96.9-216 216 0 57.3 22.5 109.4 59 148 3.1 3.3 7.9 4.1 11.9 2 17.8-9.2 37.6-14 58.1-14 8.3 0 16.5.7 24.6 1.9 5.1.8 10-1.9 12-6.7 7.1-17.3 20.6-31.8 37.9-38.9 1.3-.5 2.7-.8 4-1.1V320c0-52.9 43.1-96 96-96s96 43.1 96 96v56.2c1.3.4 2.7.7 4 1.1 17.3 7.1 30.8 21.6 37.9 38.9 2 4.8 6.9 7.5 12 6.7 8.1-1.2 16.3-1.9 24.6-1.9 20.5 0 40.3 4.8 58.1 14 4 2.1 8.8 1.3 11.9-2 36.5-38.6 59-90.7 59-148 0-119.1-97-216-216-216z"/></svg>');
             background-size: contain;
             background-repeat: no-repeat;
             opacity: 0;
-        }
-        
-        .start-btn {
-            padding: 15px 30px;
-            background-color: #f05454;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            margin: 20px 0;
-            transition: all 0.3s;
-            text-shadow: 1px 1px 0px #000;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        
-        .start-btn:hover {
-            background-color: #ff9f43;
-            transform: scale(1.1);
         }
         
         /* 四種不同顏色的南瓜燈 */
@@ -249,9 +255,9 @@
         
         @keyframes shake {
             0% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            50% { transform: translateX(10px); }
-            75% { transform: translateX(-10px); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
             100% { transform: translateX(0); }
         }
         
@@ -262,32 +268,17 @@
             100% { transform: translate(100vw, -100vh) rotate(360deg); opacity: 0; }
         }
         
-        /* 新增：禁用狀態的南瓜燈 */
+        /* 禁用狀態的南瓜燈 */
         .pumpkin-option.disabled {
             pointer-events: none;
             opacity: 0.7;
             filter: grayscale(50%);
         }
         
-        /* 新增：載入指示器 */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* 新增：題目切換動畫 */
+        /* 題目切換動畫 */
         .fade-out {
             opacity: 0;
-            transform: translateY(-20px);
+            transform: translateY(-10px);
             transition: all 0.3s ease;
         }
         
@@ -297,7 +288,7 @@
             transition: all 0.3s ease;
         }
         
-        /* 新增：計時器警告效果 */
+        /* 計時器警告效果 */
         .timer-warning {
             animation: pulse 0.5s infinite alternate;
         }
@@ -305,6 +296,162 @@
         @keyframes pulse {
             from { opacity: 1; }
             to { opacity: 0.5; }
+        }
+        
+        /* 響應式設計 - 平板 */
+        @media (min-width: 768px) {
+            .game-container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .word-display {
+                font-size: 2.3rem;
+            }
+            
+            .pos-display {
+                font-size: 1.4rem;
+            }
+            
+            .pumpkin-option {
+                width: 22%;
+                height: 150px;
+            }
+            
+            .pumpkin-text {
+                font-size: 1rem;
+            }
+            
+            .ghost {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .score-display {
+                font-size: 1.4rem;
+            }
+            
+            .restart-btn, .start-btn {
+                font-size: 1.3rem;
+                padding: 16px 32px;
+            }
+        }
+        
+        /* 響應式設計 - 電腦 */
+        @media (min-width: 1024px) {
+            .game-container {
+                padding: 30px;
+                max-width: 900px;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .word-display {
+                font-size: 2.5rem;
+            }
+            
+            .pos-display {
+                font-size: 1.5rem;
+            }
+            
+            .pumpkin-option {
+                width: 22%;
+                height: 160px;
+                max-width: 180px;
+            }
+            
+            .pumpkin-option:hover {
+                transform: translateY(-10px) scale(1.1);
+            }
+            
+            .pumpkin-text {
+                font-size: 1.1rem;
+            }
+            
+            .ghost {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .score-display {
+                font-size: 1.5rem;
+            }
+            
+            .restart-btn, .start-btn {
+                font-size: 1.5rem;
+                padding: 18px 36px;
+            }
+            
+            .restart-btn:hover, .start-btn:hover {
+                background-color: #ff9f43;
+                transform: scale(1.1);
+            }
+        }
+        
+        /* 響應式設計 - 小手機 */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .word-display {
+                font-size: 1.8rem;
+            }
+            
+            .pos-display {
+                font-size: 1.1rem;
+            }
+            
+            .pumpkin-option {
+                width: 45%;
+                height: 130px;
+            }
+            
+            .pumpkin-text {
+                font-size: 0.85rem;
+                bottom: 12px;
+            }
+            
+            .ghost {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .score-display {
+                font-size: 1.1rem;
+            }
+            
+            .restart-btn, .start-btn {
+                font-size: 1.1rem;
+                padding: 12px 24px;
+                min-width: 160px;
+            }
+        }
+        
+        /* 響應式設計 - 超小手機 */
+        @media (max-width: 360px) {
+            .pumpkin-option {
+                width: 45%;
+                height: 120px;
+            }
+            
+            .pumpkin-text {
+                font-size: 0.8rem;
+            }
+            
+            .ghost {
+                width: 45px;
+                height: 45px;
+            }
         }
     </style>
 </head>
@@ -356,7 +503,7 @@
         let gameActive = false;
         let batInterval = null;
         let canAnswer = true;
-        let usedInCurrentSession = []; // ✅ 新增：本局已使用的單字索引
+        let usedInCurrentSession = [];
         
         // DOM元素
         const setupScreen = document.getElementById('setup-screen');
@@ -379,7 +526,7 @@
         const batsContainer = document.getElementById('bats-container');
         const pumpkinOptions = document.querySelectorAll('.pumpkin-option');
         
-        // 單字庫 (直接嵌入程式碼中，用戶看不到)
+        // 單字庫
         const wordList = `common,n,公共用地;公有地  
 down,v,擊倒;一口氣喝下/吃下  
 ease,n,容易;不費力;舒適;悠閒;放鬆;緩和  
@@ -704,7 +851,6 @@ year,n,年 `;
         
         // 初始化遊戲
         function initGame() {
-            console.log("開始遊戲");
             // 解析單字列表
             vocabulary = parseWordList(wordList);
             
@@ -716,7 +862,7 @@ year,n,年 `;
             // 重置遊戲狀態
             score = 0;
             scoreDisplay.textContent = score;
-            usedInCurrentSession = []; // ✅ 每次重新開始都清空本局記錄
+            usedInCurrentSession = [];
             
             // 切換到遊戲畫面
             setupScreen.style.display = 'none';
@@ -803,7 +949,7 @@ year,n,年 `;
             return words;
         }
         
-        // 下一題（✅ 已重寫）
+        // 下一題
         function nextQuestion() {
             if (!gameActive) return;
             
@@ -885,7 +1031,7 @@ year,n,年 `;
             }, 200);
         }
         
-        // 準備選項（保持不變）
+        // 準備選項
         function prepareOptions() {
             const correctAnswer = currentWord.meaning;
             const otherMeanings = vocabulary
@@ -916,7 +1062,7 @@ year,n,年 `;
             }
         }
         
-        // 打亂陣列順序（保持不變）
+        // 打亂陣列順序
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -925,7 +1071,7 @@ year,n,年 `;
             return array;
         }
         
-        // 檢查答案（保持不變）
+        // 檢查答案
         function checkAnswer(selectedOption) {
             if (!gameActive || !canAnswer) return;
             
@@ -949,9 +1095,9 @@ year,n,年 `;
             }
         }
         
-        // 顯示正確效果（保持不變）
+        // 顯示正確效果
         function showCorrectEffect(correctOption) {
-            correctOption.style.transform = 'scale(1.2)';
+            correctOption.style.transform = 'scale(1.1)';
             correctOption.style.filter = 'drop-shadow(0 0 15px #ff9f43)';
             createBatsEffect();
             setTimeout(() => {
@@ -960,7 +1106,7 @@ year,n,年 `;
             }, 500);
         }
         
-        // 創建蝙蝠效果（保持不變）
+        // 創建蝙蝠效果
         function createBatsEffect() {
             for (let i = 0; i < 5; i++) {
                 setTimeout(() => {
@@ -969,7 +1115,7 @@ year,n,年 `;
             }
         }
         
-        // 結束遊戲（保持不變）
+        // 結束遊戲
         function endGame(isWin) {
             gameActive = false;
             canAnswer = false;
@@ -997,7 +1143,6 @@ year,n,年 `;
         
         // 事件監聽器
         document.addEventListener('DOMContentLoaded', function() {
-            console.log("DOM已載入");
             startGameBtn.addEventListener('click', initGame);
             restartBtn.addEventListener('click', restartGame);
             
