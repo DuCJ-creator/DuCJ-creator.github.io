@@ -315,6 +315,51 @@
                 font-size: 0.75rem;
             }
         }
+        
+        /* 平板專用樣式 */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .game-container {
+                max-width: 600px;
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 1.7rem;
+            }
+            
+            .word-display {
+                font-size: 2rem;
+            }
+            
+            .egg-option {
+                height: 160px;
+                max-width: 160px;
+            }
+            
+            .egg-text {
+                font-size: 0.95rem;
+            }
+        }
+        
+        /* 手機專用樣式 */
+        .mobile-device .egg-option {
+            height: 130px;
+        }
+        
+        .mobile-device .egg-text {
+            font-size: 0.8rem;
+            bottom: 15px;
+        }
+        
+        /* iOS 專用優化 */
+        .ios-device .egg-option {
+            -webkit-touch-callout: none;
+        }
+        
+        /* Android 專用優化 */
+        .android-device .egg-option {
+            -webkit-tap-highlight-color: transparent;
+        }
     </style>
 </head>
 <body>
@@ -354,6 +399,33 @@
     </div>
 
     <script>
+        // 設備檢測和響應式功能
+        function detectDevice() {
+            const userAgent = navigator.userAgent;
+            const body = document.body;
+            
+            // 移除可能已存在的設備類別
+            body.classList.remove('desktop-device', 'tablet-device', 'mobile-device', 'ios-device', 'android-device');
+            
+            // 檢測設備類型
+            if (/iPad|tablet/i.test(userAgent) || (window.innerWidth >= 768 && window.innerWidth <= 1024)) {
+                body.classList.add('tablet-device');
+            } else if (/iPhone|iPod|Android.*Mobile|Windows Phone|Mobile/i.test(userAgent) || window.innerWidth < 768) {
+                body.classList.add('mobile-device');
+                
+                // 檢測具體的移動設備平台
+                if (/iPhone|iPod|iPad/i.test(userAgent)) {
+                    body.classList.add('ios-device');
+                } else if (/Android/i.test(userAgent)) {
+                    body.classList.add('android-device');
+                }
+            } else {
+                body.classList.add('desktop-device');
+            }
+            
+            console.log('檢測到的設備類型:', body.classList.toString());
+        }
+        
         // 遊戲變數
         let vocabulary = [];
         let currentWord = null;
@@ -811,6 +883,7 @@ zoo,n,動物園`;
             // 清除之前的計時器
             if (timer) {
                 clearInterval(timer);
+                timer = null;
             }
             
             // 隨機選擇一個單字
@@ -830,7 +903,7 @@ zoo,n,動物園`;
             // 啟用選項
             enableOptions();
             
-            // 開始倒計時
+            // 開始倒計時 - 使用新的計時器，確保不會與之前的混在一起
             timer = setInterval(() => {
                 timeLeft -= 0.1;
                 timerBar.style.width = `${(timeLeft / 8) * 100}%`;
@@ -1003,6 +1076,12 @@ zoo,n,動物園`;
         
         // 事件監聽器
         document.addEventListener('DOMContentLoaded', function() {
+            // 檢測設備類型
+            detectDevice();
+            
+            // 監聽窗口大小變化，重新檢測設備
+            window.addEventListener('resize', detectDevice);
+            
             startGameBtn.addEventListener('click', initGame);
             restartBtn.addEventListener('click', restartGame);
             
