@@ -3,8 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>  U21-30 單字挑戰無極限</title>
+    <title> U21-30 單字挑戰無極限</title>
     <style>
+        /* 基礎樣式重置 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
         body {
             font-family: 'Arial', sans-serif;
             background-color: #0a2e38;
@@ -18,6 +26,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            touch-action: manipulation;
         }
         
         .container {
@@ -25,20 +34,22 @@
             border-radius: 15px;
             padding: 20px;
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            width: 95%;
             max-width: 800px;
-            margin: 20px;
+            margin: 10px;
             border: 3px solid #d4af37;
         }
         
         h1 {
             color: #d4af37;
             text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
-            font-size: 2.5rem;
-            margin-bottom: 20px;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
             background: linear-gradient(to right, #ff8a00, #e52e71, #b24592);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: rainbow 5s linear infinite;
+            line-height: 1.3;
         }
         
         @keyframes rainbow {
@@ -47,7 +58,7 @@
         }
         
         .question-container {
-            margin: 20px 0;
+            margin: 15px 0;
             padding: 15px;
             background-color: rgba(0, 50, 30, 0.7);
             border-radius: 10px;
@@ -58,17 +69,18 @@
         }
         
         .question {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             margin-bottom: 10px;
             color: #fff;
             text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            line-height: 1.3;
         }
         
         .options-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 20px 0;
+            gap: 10px;
+            margin: 15px 0;
             transition: opacity 0.3s ease;
         }
         
@@ -76,10 +88,10 @@
             background-color: #f0f8ff;
             border: 2px solid #d4af37;
             border-radius: 50%;
-            padding: 15px;
+            padding: 12px;
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: black;
             display: flex;
             align-items: center;
@@ -89,9 +101,10 @@
             width: 100px;
             height: 100px;
             margin: 0 auto;
+            touch-action: manipulation;
         }
         
-        .option:hover {
+        .option:active {
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
             background-color: #e6f7ff;
@@ -119,7 +132,7 @@
             100% { background-position: 0% 50%; }
         }
         
-        .option:hover::before {
+        .option:active::before {
             opacity: 0.3;
         }
         
@@ -136,8 +149,8 @@
         }
         
         .score-container {
-            margin: 20px 0;
-            font-size: 1.5rem;
+            margin: 15px 0;
+            font-size: 1.2rem;
             color: #d4af37;
             display: flex;
             justify-content: space-between;
@@ -145,31 +158,33 @@
         }
         
         .controls {
-            margin: 20px 0;
+            margin: 15px 0;
         }
         
         button {
             background-color: #d4af37;
             color: #0a2e38;
             border: none;
-            padding: 10px 20px;
-            font-size: 1.2rem;
+            padding: 12px 20px;
+            font-size: 1.1rem;
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s;
-            margin: 0 10px;
+            margin: 0 5px;
             font-weight: bold;
+            touch-action: manipulation;
+            min-width: 140px;
         }
         
-        button:hover {
+        button:active {
             background-color: #ffd700;
-            transform: scale(1.1);
+            transform: scale(0.98);
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
         }
         
         .feedback {
-            font-size: 1.5rem;
-            margin: 20px 0;
+            font-size: 1.2rem;
+            margin: 15px 0;
             min-height: 30px;
             color: #d4af37;
             text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
@@ -178,7 +193,7 @@
         
         .moose {
             position: absolute;
-            font-size: 3rem;
+            font-size: 2.5rem;
             animation: jump 1s infinite alternate;
             z-index: 10;
             left: 50%;
@@ -187,13 +202,13 @@
         
         @keyframes jump {
             0% { transform: translate(-50%, 0); }
-            100% { transform: translate(-50%, -20px); }
+            100% { transform: translate(-50%, -15px); }
         }
         
         .snowflake {
             position: absolute;
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             animation: fall linear infinite;
             z-index: -1;
         }
@@ -210,19 +225,19 @@
             background-color: rgba(0, 0, 0, 0.8);
             padding: 20px;
             border-radius: 15px;
-            margin-top: 20px;
+            margin-top: 15px;
             border: 3px solid #d4af37;
         }
         
         .result-title {
             color: #d4af37;
-            font-size: 2rem;
-            margin-bottom: 20px;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
         }
         
         .result-score {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
         }
         
         .timer-container {
@@ -230,7 +245,7 @@
             height: 10px;
             background-color: #333;
             border-radius: 5px;
-            margin: 20px 0;
+            margin: 15px 0;
             overflow: hidden;
         }
         
@@ -238,7 +253,7 @@
             height: 100%;
             background: linear-gradient(to right, #00ff00, #ff0000);
             width: 100%;
-            transition: width 1s linear;
+            transition: width 0.1s linear;
         }
         
         .start-container {
@@ -249,9 +264,9 @@
         .start-btn {
             background-color: #e52e71;
             color: white;
-            font-size: 1.5rem;
-            padding: 15px 30px;
-            margin-top: 20px;
+            font-size: 1.3rem;
+            padding: 14px 28px;
+            margin-top: 15px;
         }
         
         .urgent {
@@ -263,31 +278,142 @@
             to { opacity: 0.7; }
         }
         
-        @media (max-width: 600px) {
-            .options-container {
-                grid-template-columns: 1fr;
+        /* 響應式設計 - 平板 */
+        @media (min-width: 768px) {
+            .container {
+                padding: 25px;
             }
             
             h1 {
-                font-size: 1.8rem;
+                font-size: 2.2rem;
             }
             
             .question {
-                font-size: 1.4rem;
+                font-size: 1.7rem;
             }
             
             .option {
-                font-size: 1rem;
+                width: 110px;
+                height: 110px;
+                font-size: 1.1rem;
+            }
+            
+            .score-container {
+                font-size: 1.3rem;
+            }
+            
+            button {
+                font-size: 1.2rem;
+                padding: 14px 24px;
+            }
+        }
+        
+        /* 響應式設計 - 電腦 */
+        @media (min-width: 1024px) {
+            .container {
+                padding: 30px;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .question {
+                font-size: 1.8rem;
+            }
+            
+            .option {
+                width: 120px;
+                height: 120px;
+                font-size: 1.2rem;
+            }
+            
+            .option:hover {
+                transform: scale(1.05);
+                box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+                background-color: #e6f7ff;
+            }
+            
+            .option:hover::before {
+                opacity: 0.3;
+            }
+            
+            button:hover {
+                background-color: #ffd700;
+                transform: scale(1.1);
+                box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+            }
+            
+            .score-container {
+                font-size: 1.5rem;
+            }
+            
+            button {
+                font-size: 1.3rem;
+                padding: 16px 28px;
+            }
+        }
+        
+        /* 響應式設計 - 小手機 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .question {
+                font-size: 1.3rem;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .option {
+                width: 90px;
+                height: 90px;
+                font-size: 0.9rem;
                 padding: 10px;
+            }
+            
+            .score-container {
+                font-size: 1.1rem;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            button {
+                font-size: 1rem;
+                padding: 10px 16px;
+                min-width: 120px;
+            }
+            
+            .feedback {
+                font-size: 1.1rem;
+            }
+        }
+        
+        /* 響應式設計 - 超小手機 */
+        @media (max-width: 360px) {
+            .option {
                 width: 80px;
                 height: 80px;
+                font-size: 0.85rem;
+            }
+            
+            .moose {
+                font-size: 2rem;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎄 L4  U21-30 單字挑戰無極限 🎄</h1>
+        <h1>🎄 L4 U21-30 單字挑戰無極限 🎄</h1>
         
         <div class="start-container" id="start-container">
             <p>Ready for the Challenge？</p>
@@ -601,7 +727,7 @@ wit,n,機智;風趣
         let currentQuestionIndex = 0;
         let score = 0;
         let questions = [];
-        let timer;
+        let timer = null; // 確保計時器初始為null
         let timeLeft = 8;
         let tickSound;
         let usedInCurrentSession = []; // ✅ 新增：本局已使用單字索引
@@ -660,7 +786,10 @@ wit,n,機智;風趣
             usedInCurrentSession = []; // ✅ 每次重新開始都清空本局記錄
             
             // 清除之前的計時器
-            clearInterval(timer);
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
             
             // 重置遊戲狀態
             questions = [];
@@ -798,7 +927,12 @@ wit,n,機智;風趣
             timerBar.style.width = '100%';
             timerBar.style.backgroundColor = '#00ff00';
             
-            clearInterval(timer);
+            // 清除之前的計時器
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            
             timer = setInterval(() => {
                 timeLeft--;
                 timerBar.style.width = `${(timeLeft / 8) * 100}%`;
@@ -825,6 +959,7 @@ wit,n,機智;風趣
                 
                 if (timeLeft <= 0) {
                     clearInterval(timer);
+                    timer = null; // 重要：將計時器設為null
                     timeUp();
                 }
             }, 1000);
@@ -860,7 +995,10 @@ wit,n,機智;風趣
         // 選擇選項
         function selectOption(selectedOption, correctAnswer) {
             // 停止計時器
-            clearInterval(timer);
+            if (timer) {
+                clearInterval(timer);
+                timer = null; // 重要：將計時器設為null
+            }
             
             // 禁用所有選項
             const options = document.querySelectorAll('.option');
@@ -990,3 +1128,4 @@ wit,n,機智;風趣
     </script>
 </body>
 </html>
+
