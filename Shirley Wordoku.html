@@ -20,8 +20,10 @@
     .c.user{color:#e65100;}
     .c.err{background:#ffcdd2 !important;color:#c62828;}
     .c.sel{background:#ffe0b2 !important;outline:2px solid #e65100;}
+    .c.highlight{background:#e8f5e9 !important;color:#2e7d32 !important;font-weight:bold;}
     .np{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:14px;width:100%;max-width:540px;}
-    .nb{padding:10px 0;background:#fff8e1;color:#5d4037;font-size:16px;font-weight:bold;border-radius:8px;border:none;cursor:pointer;}
+    .nb{padding:10px 0;background:#fff8e1;color:#5d4037;font-size:16px;font-weight:bold;border-radius:8px;border:none;cursor:pointer;opacity:0.7;}
+    .nb:hover{opacity:1;}
   </style>
 </head>
 <body>
@@ -38,15 +40,17 @@
   <div class="np" id="np"></div>
 
   <script>
-    var w3 = "ACT,AGE,AIR,ARK,ARM,ASK,AWE,BAG,BAN,BED,BOX,BUS,BUT,BUY,CAN,CAP,CAR,COT,CUP,CUT,DRY,DUE,EAT,END,FAR,FIT,FLY,FOG,FOX,FUN,GUM,HAD,HAM,HAP,HAS,HER,HIS,HUT,ICY,INK,NEW,NOW,OAR,ONE,OUR,OWL,OWN,PAD,PAN,PET";
-    var w6 = "ACTION,AMIDST,AUTHOR,BROWSE,COLUMN,CREDIT,CUSTOM,EDITOR,FOLDER,FOREST,GROUND,HUMBLE,IMPORT,ISLAND,JOURNAL,LENGTH,MAKING,METHOD,MOBILE,NOVELS,POLICY,RANDOM,RULING,SECRET,SOURCE,SPLASH,STYLED,TALKED,TIMBER,WEAPON";
-    var w9 = "IMPORTANT,EDUCATION,COPYRIGHT,BLOCKHEAD,ALGORITHM,FRAMEWORK,WORKPLACE,VULCANIZE,OUTBOUND,EQUATION,FORESIGHT";
+    // ========== 嚴格篩選：字母數 = N 且無重複 ==========
+    var w3 = "ACT,AGE,AIR,ARK,ARM,ASK,ATE,AWE,BAG,BAN,BED,BIG,BOX,BUS,BUT,BUY,CAN,CAP,CAR,CAT,COT,CUP,CUT,DRY,DUE,EAT,END,FAR,FAT,FIT,FLY,FOG,FOX,FUN,GUM,HAD,HAM,HAT,HIP,HIS,HOP,ICY,INK,JAM,JET,KEY,KID,LAP,LEG,LOG,MAN,MAP,MAT,NEW,NOW,OAR,OIL,ONE,OUR,OWL,OWN,PAD,PAN,PET,PIG,POP,POT,PUT,RAT,RED,ROW,RUN,SAD,SEA,SEE,SET,SIT,SIX,SKI,SOX,SUN,TAG,TAX,TEA,TEN,THE,TIN,TIP,TOP,TOY,URN,USE,VAN,VET,WAX,WET,YAK,YAW,YUM,ZOO";
     
+    var w6 = "ACTION,AMIDST,AUTHOR,BLUELY,BRANCH,BREACH,BRIGHT,BUCKET,CANDID,CANYON,COLUMN,COMMIT,CONVEY,CREDIT,CUSTOM,CYCLER,DESERT,DESIGN,DIRECT,EDITOR,ENERGY,ENJOY,ENTIRE,FACTOR,FINITE,FOREST,FORMAT,FORTUNE,FRIGHT,FUTURE,GARDEN,GROUND,HARVEST,HONEST,IMPORT,ISLAND,JUNGLE,KIDNEY,KNIGHT,LABOUR,LEGACY,LENGTH,LESSON,MAKING,MANNER,MASTER,MEDIUM,MEMBER,METHOD,MINUTE,MOBILE,MODEL,MOMENT,MOTION,NOVELS,NUDGEY,ORANGE,OUTLET,PARADE,PENCIL,PEPPER,PERSON,PHRASE,PLASTIC,POCKET,POLICY,PRINCE,PROFIT,PROMPT,PROVIDE,PURPLE,PUTTER,QUARTZ,RATHER,REASON,RECENT,REFUND,REGION,REMOTE,RENDER,RESULT,RETAIL,REVIEW,ROLLER,SAFETY,SALUTE,SECRET,SENSOR,SERENE,SHAPE,SHADOW,SIGNET,SIMPLE,SINCERE,SIXTIES,SLIPPER,SOFTLY,SOLACE,SOURCE,SPHERE,SPLASH,SPRING,STATIC,STATUS,STEREO,STOCKY,STYLE,SUBMIT,SUCCESS,SUFFIX,SUMMER,SUPERB,SUPPLY,SURPRISE,SWITCH,SYMBOL,SYSTEM,TABOO,TACKLE,TAGGER,TALBOT,TANGLE,TARGET,TELEND,TEMPO,TENURE,THEORY,TONGUE,TOPAZ,TORQUE,TOXINS,TRANCE,TRANSLATE,TRAVEL,TRENCH,TRIAGE";
+    
+    var w9 = "EDUCATION,AMBULANCE,ABDUCTION,ABSOLUTELY,ADJUSTING,ALGORITHM,BLACKMAIL,BLUEPRINT,BRACKETS,BREWING,CHAMPIONS,COMPLAINS,CONFIDENT,COUGHING,CRACKLING,DESPERATE,DISCOVER,DOORBELL,DRAMATIC,EARTHLING,EMPATHIZE,ENCOUNTER,ENFORCED,ENGINEERS,EXEMPLARY,FACTORIZE,FAVORITES,FLAVORING,FORMULATE,FREIGHTER,GARNISHED,GLOWINGLY,GRACEFUL,GRATEFUL,HANDCUFFS,HARMONIZE,HOSPITAL,IMPOSTURE,INCENTIVE,INFORMANT,INTRIGUED,JUDGMENTS,JUNCTION,KALEIDOSCOPE,KILOBYTES,LANDSCAPE,LIGHTNING,LOGARITHM,MAGNIFIED,MALEFACTORS,MARATHONS,MENTALITY,MONKEYING,MOTHERLAND,MULTIFACED,MULTIPLAYER,MYSTIFIED,NEIGHBORS,NOTIFYING,NUTRITIVE,OBFUSCATED,OBSCURITY,OFFICIALS,OUTLINED,OVERHEARD,PACIFYING,PARALYZED,PARAMETERS,PASSIONATE,PERFECTLY,PHARMACIES,PHOTOGENIC,PLATINUM,PLAYGROUNDS,PLEADINGS,POETICALLY,POWERLESS,PROBLEMATIC,PROTECTIVE,QUADRUPLE,QUANTIZED,QUEASILY,QUESTIONED,QUICKLY,QUIVERING,RADIATION,REASONING,RECHARGED,RECOGNIZED,RECONCILED,REFORMING,REGISTERED,REGRETFUL,REJUVENATE,RELAXATION,REMARKABLY,RENDERING,REPLACEMENT,REPUBLICAN,RESPECTFUL,RESTORATION,REVERSIBLE,RIGHTFULLY,ROADBLOCKS,ROMANTIC,ROTUNDA,SAFEGUARD,SCANDALOUS,SCIENTIFIC,SCREENPLAY,SEAMANSHIP,SEGMENTED,SEMESTERS,SENSATION,SERIOUSLY,SHOCKWAVE,SHOWCASES,SIGNATURE,SIMPLIFIED,SKELETONS,SLAUGHTER,SLEEPWALK,SMOKESTACK,SOLITARY,SOUNDPROOF,SPECTACLE,SPHERICAL,STARGAZING,STEAMBOAT,STRAIGHTEN,STRATEGIC,STRENGTH,STRUCTURAL,SUBJECTED,SUBMARINE,SUCCESSFUL,SUFFERING,SUGGESTION,SUPERMARKET,SURPRISING,SWALLOWING,SYMMETRICAL,SYNCHRONIZE,SYNTHESIZE,TABLESPOON,TACTICALLY,TAILORED,TEACHABLE,TECHNICAL,TELEGRAPH,TELEPHONE,TEMPERATE,TENTACLES,TEXTBOOKS,THEORETICAL,TIGHTROPE,TIMBERLAND,TOLERANCE,TRANSLATE,TRIANGLE,TRIUMPHED,TRUSTWORTHY,TUNNELING,UNBELIEVABLE,UNCONSCIOUS,UNDERRATE,UNFRIENDLY,UNIQUELY,UPGRADED,VALIDATED,VALUABLE,VANDALIZED,VENTILATED,VERIFIABLE,VIRTUALLY,VOLATILITY,VOLUNTEERS,WANDERING,WARMLY,WEAPONIZED,WEIGHTLESS,WESTBOUND,WHEELCHAIR,WHISPERED,WILDFIRES,WILTING,WINDMILLS,WORKPLACE,YARDSTICK,YESTERDAY,ZEROGRAVITY";
+
     var bank = {3:w3.split(','), 6:w6.split(','), 9:w9.split(',')};
     var total = {3:5, 6:8, 9:11};
     var size = 3;
-    var bd = [], sol = [], gn = [], sc = null, sp = null, act = [], av = [];
-    var diff = {3:{h:1,w:3}, 6:{h:2,w:3}, 9:{h:3,w:3}};
+    var bd = [], sol = [], gn = [], sc = null, sp = null, act = [], av = [], chosenWord = "";
 
     document.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
     document.addEventListener('touchstart', function(e) { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
@@ -97,23 +101,6 @@
       return res.slice(0, n);
     }
 
-    function valid(g, r, c, L, s) {
-      if (L === '') return true;
-      for (var i = 0; i < s; i++) {
-        if (g[r][i] === L || g[i][c] === L) return false;
-      }
-      if (s > 3) {
-        var bh = diff[s].h, bw = diff[s].w;
-        var sr = r - (r % bh), scol = c - (c % bw);
-        for (var i = 0; i < bh; i++) {
-          for (var j = 0; j < bw; j++) {
-            if (g[sr + i][scol + j] === L) return false;
-          }
-        }
-      }
-      return true;
-    }
-
     function solve(g, s, letters) {
       for (var r = 0; r < s; r++) {
         for (var c = 0; c < s; c++) {
@@ -126,7 +113,22 @@
             }
             for (var k = 0; k < sh.length; k++) {
               var L = sh[k];
-              if (valid(g, r, c, L, s)) {
+              var canPlace = true;
+              for (var x = 0; x < s; x++) {
+                if (g[r][x] === L || g[x][c] === L) { canPlace = false; break; }
+              }
+              if (canPlace && s > 3) {
+                var bh = (s === 6) ? 2 : 3;
+                var bw = (s === 6) ? 3 : 3;
+                var sr = r - (r % bh), scol = c - (c % bw);
+                for (var i = 0; i < bh; i++) {
+                  for (var j = 0; j < bw; j++) {
+                    if (g[sr + i][scol + j] === L) { canPlace = false; break; }
+                  }
+                  if (!canPlace) break;
+                }
+              }
+              if (canPlace) {
                 g[r][c] = L;
                 if (solve(g, s, letters)) return true;
                 g[r][c] = '';
@@ -141,8 +143,17 @@
 
     function gen(s) {
       var list = bank[s];
-      var word = list[Math.floor(Math.random() * list.length)];
-      var ul = uniq(word);
+      // 確保選到的單字有足夠不重複字母
+      var validWords = [];
+      for (var i = 0; i < list.length; i++) {
+        var u = uniq(list[i]);
+        if (u.length >= s) {
+          validWords.push(list[i]);
+        }
+      }
+      if (validWords.length === 0) validWords = list; // fallback
+      chosenWord = validWords[Math.floor(Math.random() * validWords.length)];
+      var ul = uniq(chosenWord);
       act = supplement(ul, s);
       av = supplement(ul, total[s]);
 
@@ -159,29 +170,68 @@
         bd[i] = []; gn[i] = [];
         for (var j = 0; j < s; j++) {
           bd[i][j] = sol[i][j];
-          gn[i][j] = true;
+          if (Math.random() < (s === 3 ? 0.4 : (s === 6 ? 0.3 : 0.25))) {
+            gn[i][j] = true;
+          } else {
+            gn[i][j] = false;
+            bd[i][j] = '';
+          }
         }
-      }
-
-      var rc = (s == 3) ? 3 : (s == 6 ? 18 : 40);
-      var cells = [];
-      for (var i = 0; i < s; i++)
-        for (var j = 0; j < s; j++)
-          cells.push([i, j]);
-
-      for (var i = cells.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var t = cells[i]; cells[i] = cells[j]; cells[j] = t;
-      }
-
-      for (var k = 0; k < rc && k < cells.length; k++) {
-        var r = cells[k][0], c = cells[k][1];
-        bd[r][c] = '';
-        gn[r][c] = false;
       }
     }
 
-    // ========== 修正版 render：固定容器寬度 ==========
+    function arraysEqual(a, b) {
+      if (a.length !== b.length) return false;
+      for (var i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+      }
+      return true;
+    }
+
+    function checkHighlights() {
+      var grid = document.getElementById('g');
+      var cells = grid.querySelectorAll('.c');
+      cells.forEach(cell => cell.classList.remove('highlight'));
+
+      for (var i = 0; i < size; i++) {
+        var rowLetters = [];
+        var complete = true;
+        for (var j = 0; j < size; j++) {
+          var val = bd[i][j];
+          if (val === '') {
+            complete = false;
+            break;
+          }
+          rowLetters.push(val);
+        }
+        if (complete && arraysEqual(rowLetters, act)) {
+          for (var j = 0; j < size; j++) {
+            var cell = document.querySelector('.c[data-r="' + i + '"][data-c="' + j + '"]');
+            if (cell) cell.classList.add('highlight');
+          }
+        }
+      }
+
+      for (var j = 0; j < size; j++) {
+        var colLetters = [];
+        var complete = true;
+        for (var i = 0; i < size; i++) {
+          var val = bd[i][j];
+          if (val === '') {
+            complete = false;
+            break;
+          }
+          colLetters.push(val);
+        }
+        if (complete && arraysEqual(colLetters, act)) {
+          for (var i = 0; i < size; i++) {
+            var cell = document.querySelector('.c[data-r="' + i + '"][data-c="' + j + '"]');
+            if (cell) cell.classList.add('highlight');
+          }
+        }
+      }
+    }
+
     function render() {
       var ge = document.getElementById('g');
       ge.style.gridTemplateColumns = 'repeat(' + size + ', 1fr)';
@@ -190,7 +240,7 @@
       var containerWidth;
       if (size === 3) containerWidth = 300;
       else if (size === 6) containerWidth = 480;
-      else containerWidth = 540; // size === 9
+      else containerWidth = 540;
 
       var cs = Math.floor(containerWidth / size);
       var container = document.querySelector('.sc');
@@ -229,6 +279,7 @@
           ge.appendChild(c);
         }
       }
+      checkHighlights();
     }
 
     function renderPad() {
@@ -267,6 +318,41 @@
       if (sc) sc.classList.add('sel');
     }
 
+    function isInputValid(r, c, L, s) {
+      if (L === '') return true;
+      if (!/^[A-Z]$/.test(L)) return false;
+
+      for (var j = 0; j < s; j++) {
+        if (j !== c && bd[r][j] !== '' && bd[r][j] === L) {
+          return false;
+        }
+      }
+
+      for (var i = 0; i < s; i++) {
+        if (i !== r && bd[i][c] !== '' && bd[i][c] === L) {
+          return false;
+        }
+      }
+
+      if (s > 3) {
+        var bh = (s === 6) ? 2 : 3;
+        var bw = (s === 6) ? 3 : 3;
+        var sr = r - (r % bh);
+        var scol = c - (c % bw);
+        for (var i = 0; i < bh; i++) {
+          for (var j = 0; j < bw; j++) {
+            var rr = sr + i;
+            var cc = scol + j;
+            if ((rr !== r || cc !== c) && bd[rr][cc] !== '' && bd[rr][cc] === L) {
+              return false;
+            }
+          }
+        }
+      }
+
+      return true;
+    }
+
     function inL(L) {
       if (!sp) return;
       var r = sp.r, c = sp.c;
@@ -275,10 +361,11 @@
         sc.textContent = L;
         sc.classList.remove('err', 'user');
         sc.classList.add('user');
-        if (!valid(bd, r, c, L, size)) {
+        if (!isInputValid(r, c, L, size)) {
           sc.classList.add('err');
         }
       }
+      checkHighlights();
     }
 
     function showMessage(text, isSuccess) {
@@ -316,7 +403,7 @@
       }
 
       if (allCorrect) {
-        showMessage("🎉 恭喜！\n你是 ——\n獨孤求敗！", true);
+        showMessage("單字：" + chosenWord + "\n🎉 恭喜！\n你是 ——\n獨孤求敗！", true);
       } else {
         showMessage("還有錯誤哦，加油！", false);
       }
@@ -358,15 +445,13 @@
             sc.textContent = '';
             sc.classList.remove('err', 'user');
           }
+          checkHighlights();
         }
         return;
       }
       var up = k.toUpperCase();
-      for (var i = 0; i < av.length; i++) {
-        if (av[i] == up) {
-          inL(up);
-          break;
-        }
+      if (/^[A-Z]$/.test(up)) {
+        inL(up);
       }
     });
 
