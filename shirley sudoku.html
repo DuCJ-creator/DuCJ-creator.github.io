@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Shirley's Sudoku</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+
+    html {
+      font-size: clamp(14px, 2.5vw, 18px);
+    }
+
+    body {
+      background: #f0f9ff;
+      color: #01579b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      margin: 10px 0;
+      color: #0288d1;
+      text-align: center;
+    }
+
+    .controls {
+      display: flex;
+      gap: 6px;
+      margin: 10px 0;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 100%;
+    }
+
+    button {
+      padding: clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 12px);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: clamp(0.8rem, 2.2vw, 0.95rem);
+      white-space: nowrap;
+      -webkit-appearance: none;
+      touch-action: manipulation;
+    }
+
+    .difficulty-btn {
+      background: #b3e5fc;
+      color: #01579b;
+    }
+
+    .difficulty-btn.active {
+      background: #0288d1;
+      color: white;
+    }
+
+    #reset-btn {
+      background: #4fc3f7;
+      color: white;
+    }
+
+    #check-btn {
+      background: #66bb6a;
+      color: white;
+    }
+
+    .sudoku-container {
+      margin: 12px 0;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: center;
+      overflow: hidden;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1px;
+      background: #0288d1;
+      padding: 2px;
+    }
+
+    .cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      font-weight: bold;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .cell.given {
+      color: #01579b;
+      background: #e1f5fe !important;
+    }
+
+    .cell.user {
+      color: #0288d1;
+    }
+
+    .cell.error {
+      background: #ffcdd2 !important;
+      color: #c62828;
+    }
+
+    .cell.selected {
+      background: #b3e5fc !important;
+      outline: 2px solid #0288d1;
+    }
+
+    .number-pad {
+      display: grid;
+      gap: 6px;
+      margin-top: 14px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .num-btn {
+      padding: clamp(8px, 2.5vw, 12px) 0;
+      background: #e1f5fe;
+      color: #01579b;
+      font-size: clamp(1rem, 3vw, 1.2rem);
+      font-weight: bold;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .victory-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .victory-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .victory-content {
+      background: white;
+      border-radius: 20px;
+      padding: clamp(20px, 6vw, 30px);
+      text-align: center;
+      max-width: 90%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      transform: scale(0.8);
+      transition: transform 0.4s ease;
+    }
+
+    .victory-overlay.show .victory-content {
+      transform: scale(1);
+    }
+
+    .victory-title {
+      font-size: clamp(1.8rem, 8vw, 2.6rem);
+      font-weight: bold;
+      margin-bottom: clamp(15px, 4vw, 20px);
+      color: #0288d1;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .victory-message {
+      font-size: clamp(1.2rem, 5vw, 1.6rem);
+      margin-bottom: clamp(20px, 5vw, 30px);
+      color: #01579b;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: #f00;
+      opacity: 0.7;
+      animation: fall 5s linear forwards;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    #close-victory {
+      background: #0288d1;
+      color: white;
+      padding: clamp(8px, 2vw, 10px) clamp(16px, 4vw, 20px);
+      border-radius: 10px;
+      font-size: clamp(1rem, 3vw, 1.2rem);
+      cursor: pointer;
+      border: none;
+      touch-action: manipulation;
+    }
+
+    .message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 15px 30px;
+      border-radius: 10px;
+      font-size: clamp(1rem, 4vw, 1.4rem);
+      z-index: 1001;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .message.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <h1>Shirley's Sudoku</h1>
+
+  <div class="controls">
+    <button class="difficulty-btn" data-size="4">初學 (4×4)</button>
+    <button class="difficulty-btn active" data-size="6">輕鬆 (6×6)</button>
+    <button class="difficulty-btn" data-size="9">挑戰 (9×9)</button>
+    <button id="reset-btn">重置</button>
+    <button id="check-btn">完成確認</button>
+  </div>
+
+  <div class="sudoku-container">
+    <div class="grid" id="sudoku-grid"></div>
+  </div>
+
+  <div class="number-pad" id="number-pad"></div>
+
+  <div class="victory-overlay" id="victory-overlay">
+    <div class="victory-content">
+      <div class="victory-title" id="victory-title">數獨高手</div>
+      <div class="victory-message">恭喜您成功完成數獨！</div>
+      <button id="close-victory">繼續遊戲</button>
+    </div>
+  </div>
+
+  <div class="message" id="message">再看一下</div>
+
+  <audio id="victory-sound" preload="auto">
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // 🚫 阻止所有干扰操作
+    document.documentElement.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+    document.documentElement.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 1) e.preventDefault();
+    }, { passive: false });
+
+    // ✅ 防止双击缩放 (iOS)
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) e.preventDefault();
+      lastTouchEnd = now;
+    }, false);
+
+    // 全局状态
+    let currentSize = 6;
+    let board = [];
+    let solution = [];
+    let given = [];
+    let selectedCell = null;
+    let selectedPos = null;
+
+    // 标准数独区块定义
+    const difficulties = {
+      4: { boxH: 2, boxW: 2 },
+      6: { boxH: 2, boxW: 3 },
+      9: { boxH: 3, boxW: 3 }
+    };
+
+    function initGame(size) {
+      currentSize = size;
+      document.querySelectorAll('.difficulty-btn').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.size) === size);
+      });
+      generatePuzzle(size);
+      renderGrid();
+      renderNumberPad();
+      clearSelection();
+    }
+
+    function shuffle(arr) {
+      return [...arr].sort(() => Math.random() - 0.5);
+    }
+
+    function isValid(grid, row, col, num, size) {
+      if (num === 0) return true;
+      for (let x = 0; x < size; x++) {
+        if (grid[row][x] === num || grid[x][col] === num) return false;
+      }
+      const { boxH, boxW } = difficulties[size];
+      const startRow = row - (row % boxH);
+      const startCol = col - (col % boxW);
+      for (let i = 0; i < boxH; i++) {
+        for (let j = 0; j < boxW; j++) {
+          if (grid[startRow + i][startCol + j] === num) return false;
+        }
+      }
+      return true;
+    }
+
+    function solve(grid, size) {
+      for (let row = 0; row < size; row++) {
+        for (let col = 0; col < size; col++) {
+          if (grid[row][col] === 0) {
+            const nums = shuffle([...Array(size).keys()].map(n => n + 1));
+            for (const num of nums) {
+              if (isValid(grid, row, col, num, size)) {
+                grid[row][col] = num;
+                if (solve(grid, size)) return true;
+                grid[row][col] = 0;
+              }
+            }
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    function generatePuzzle(size) {
+      solution = Array(size).fill().map(() => Array(size).fill(0));
+      solve(solution, size);
+      board = solution.map(row => [...row]);
+      given = Array(size).fill().map(() => Array(size).fill(true));
+
+      const removeCount = size === 4 ? 8 : (size === 6 ? 14 : 42);
+      const allCells = [];
+      for (let i = 0; i < size; i++)
+        for (let j = 0; j < size; j++)
+          allCells.push([i, j]);
+
+      const shuffled = shuffle(allCells);
+      for (let k = 0; k < removeCount && k < shuffled.length; k++) {
+        const [i, j] = shuffled[k];
+        board[i][j] = 0;
+        given[i][j] = false;
+      }
+    }
+
+    function renderGrid() {
+      const gridEl = document.getElementById('sudoku-grid');
+      const size = currentSize;
+      gridEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+      gridEl.innerHTML = '';
+
+      const containerWidth = Math.min(500, window.innerWidth - 24);
+      const cellSize = Math.floor(containerWidth / size);
+
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.style.width = cellSize + 'px';
+          cell.style.height = cellSize + 'px';
+          cell.style.fontSize = Math.max(10, Math.floor(cellSize * 0.4)) + 'px';
+
+          if (given[i][j]) {
+            cell.textContent = board[i][j];
+            cell.classList.add('given');
+          } else if (board[i][j] !== 0) {
+            cell.textContent = board[i][j];
+            cell.classList.add('user');
+          }
+
+          cell.dataset.row = i;
+          cell.dataset.col = j;
+          const handler = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            selectCell(i, j);
+          };
+          cell.addEventListener('click', handler);
+          cell.addEventListener('touchstart', handler, { passive: false });
+          gridEl.appendChild(cell);
+        }
+      }
+    }
+
+    function renderNumberPad() {
+      const pad = document.getElementById('number-pad');
+      pad.innerHTML = '';
+      const size = currentSize;
+      const cols = size <= 6 ? size : 9; // 9x9 也用 9 列
+      pad.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+      for (let n = 1; n <= size; n++) {
+        const btn = document.createElement('button');
+        btn.className = 'num-btn';
+        btn.textContent = n;
+        const handler = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          inputNumber(n);
+        };
+        btn.addEventListener('click', handler);
+        btn.addEventListener('touchstart', handler, { passive: false });
+        pad.appendChild(btn);
+      }
+    }
+
+    function clearSelection() {
+      if (selectedCell) selectedCell.classList.remove('selected');
+      selectedCell = null;
+      selectedPos = null;
+    }
+
+    function selectCell(row, col) {
+      if (given[row][col]) return;
+      clearSelection();
+      selectedCell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+      selectedPos = { row, col };
+      if (selectedCell) {
+        selectedCell.classList.add('selected');
+      }
+    }
+
+    function inputNumber(num) {
+      if (!selectedPos) return;
+      const { row, col } = selectedPos;
+      board[row][col] = num;
+      if (selectedCell) {
+        selectedCell.textContent = num;
+        selectedCell.classList.remove('error', 'user');
+        selectedCell.classList.add('user');
+        if (!isValid(board, row, col, num, currentSize)) {
+          selectedCell.classList.add('error');
+        }
+      }
+    }
+
+    function handleKeyboardInput(key) {
+      if (!selectedPos) return;
+      if (['Delete', 'Backspace', ' '].includes(key)) {
+        const { row, col } = selectedPos;
+        if (!given[row][col]) {
+          board[row][col] = 0;
+          if (selectedCell) {
+            selectedCell.textContent = '';
+            selectedCell.classList.remove('error', 'user');
+          }
+        }
+        return;
+      }
+      const num = parseInt(key);
+      if (!isNaN(num) && num >= 1 && num <= currentSize) {
+        inputNumber(num);
+      }
+    }
+
+    function resetGame() {
+      generatePuzzle(currentSize);
+      renderGrid();
+      clearSelection();
+    }
+
+    function checkSolution() {
+      for (let i = 0; i < currentSize; i++) {
+        for (let j = 0; j < currentSize; j++) {
+          if (board[i][j] !== solution[i][j]) return false;
+        }
+      }
+      return true;
+    }
+
+    function showVictory() {
+      const overlay = document.getElementById('victory-overlay');
+      const title = document.getElementById('victory-title');
+      if (currentSize === 4) title.textContent = "數獨新手";
+      else if (currentSize === 6) title.textContent = "數獨高手";
+      else title.textContent = "數獨王者";
+
+      document.getElementById('victory-sound').play().catch(e => console.log("Audio play failed:", e));
+      overlay.classList.add('show');
+      createConfetti();
+    }
+
+    function createConfetti() {
+      const colors = ['#f44336','#e91e63','#9c27b0','#673ab7','#3f51b5','#2196f3','#03a9f4','#00bcd4','#009688','#4CAF50'];
+      const overlay = document.getElementById('victory-overlay');
+      for (let i = 0; i < 120; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.width = Math.random() * 10 + 5 + 'px';
+        confetti.style.height = Math.random() * 10 + 5 + 'px';
+        confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        overlay.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 6000);
+      }
+    }
+
+    function showMessage(text) {
+      const msg = document.getElementById('message');
+      msg.textContent = text;
+      msg.classList.add('show');
+      setTimeout(() => msg.classList.remove('show'), 1500);
+    }
+
+    // 全局键盘监听
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      handleKeyboardInput(e.key);
+      e.preventDefault();
+    });
+
+    // UI 事件绑定（统一处理 click + touchstart）
+    function bindButton(el, callback) {
+      el.addEventListener('click', (e) => { e.preventDefault(); callback(); });
+      el.addEventListener('touchstart', (e) => { e.preventDefault(); callback(); }, { passive: false });
+    }
+
+    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+      bindButton(btn, () => initGame(parseInt(btn.dataset.size)));
+    });
+
+    bindButton(document.getElementById('reset-btn'), resetGame);
+    bindButton(document.getElementById('check-btn'), () => {
+      if (checkSolution()) showVictory();
+      else showMessage("再看一下");
+    });
+    bindButton(document.getElementById('close-victory'), () => {
+      document.getElementById('victory-overlay').classList.remove('show');
+      resetGame();
+    });
+
+    // 初始化
+    initGame(6);
+  </script>
+</body>
+</html>
