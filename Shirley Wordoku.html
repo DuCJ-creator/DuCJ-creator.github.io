@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Shirley's Wordoku</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+
+    html {
+      font-size: clamp(14px, 2.5vw, 18px);
+    }
+
+    body {
+      background: #f8f4e5;
+      color: #5d4037;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      margin: 10px 0;
+      color: #3e2723;
+      text-align: center;
+    }
+
+    #msg {
+      min-height: 24px;
+      font-size: clamp(0.9rem, 3vw, 1.1rem);
+      font-weight: bold;
+      text-align: center;
+      margin: 6px 0;
+      opacity: 1;
+      transition: opacity 0.3s;
+    }
+
+    .ctrl {
+      display: flex;
+      gap: 6px;
+      margin: 6px 0;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 100%;
+    }
+
+    button {
+      padding: clamp(6px, 1.5vw, 8px) clamp(10px, 2.5vw, 14px);
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: clamp(0.8rem, 2.2vw, 0.95rem);
+      white-space: nowrap;
+      -webkit-appearance: none;
+      touch-action: manipulation;
+    }
+
+    .d-btn {
+      background: #ffecb3;
+      color: #5d4037;
+    }
+
+    .d-btn.a {
+      background: #ffb300;
+      color: white;
+    }
+
+    #r, #chk {
+      background: #ffd54f;
+      color: #3e2723;
+    }
+
+    .sc {
+      margin: 12px 0;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: center;
+      max-width: 100%;
+    }
+
+    .g {
+      display: grid;
+      gap: 1px;
+      background: #e65100;
+      padding: 2px;
+    }
+
+    .c {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      font-weight: bold;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .c.given {
+      color: #3e2723;
+      background: #fff8e1 !important;
+    }
+
+    .c.user {
+      color: #e65100;
+    }
+
+    .c.err {
+      background: #ffcdd2 !important;
+      color: #c62828;
+    }
+
+    .c.sel {
+      background: #ffe0b2 !important;
+      outline: 2px solid #e65100;
+    }
+
+    .np {
+      display: grid;
+      gap: 6px;
+      margin-top: 14px;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .nb {
+      padding: clamp(8px, 2.5vw, 12px) 0;
+      background: #fff8e1;
+      color: #5d4037;
+      font-size: clamp(1rem, 3vw, 1.2rem);
+      font-weight: bold;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body>
+  <h1>Shirley's Wordoku</h1>
+  <div id="msg"></div>
+  <div class="ctrl">
+    <button class="d-btn a" data-s="4">初學 (4×4)</button>
+    <button class="d-btn" data-s="6">挑戰 (6×6)</button>
+    <button class="d-btn" data-s="9">燒腦 (9×9)</button>
+    <button id="r">重置</button>
+    <button id="chk">完成檢查</button>
+  </div>
+  <div class="sc"><div class="g" id="g"></div></div>
+  <div class="np" id="np"></div>
+
+  <script>
+    // 🔒 阻止縮放與滾動
+    document.documentElement.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+    document.documentElement.addEventListener('touchstart', e => {
+      if (e.touches.length > 1) e.preventDefault();
+    }, { passive: false });
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', e => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) e.preventDefault();
+      lastTouchEnd = now;
+    }, false);
+
+    // ✅ 嚴格驗證過的詞庫（長度精確匹配）
+    const w4 = [
+      "ACTS","AGED","AIRY","ARKS","ARMS","ASKS","AWES","BAGS","BAND","BEDS",
+      "BANK","BARK","BEAR","BIRD","CARS","CLAY","COAT","COLD","COOK","CUTE",
+      "DARK","DESK","DOGS","DUCK","EARS","EAST","EASY","EXIT","FARM","FIRE",
+      "FISH","FOOD","FORK","GIFT","GIRL","GOLD","GOOD","HAND","HATS","HEAD",
+      "HELP","HOME","IDEA","IRON","JUMP","JURY","KIND","KITE","LAMP","LAND",
+      "LATE","LEAF","LION","LOVE","MAIL","MASK","MILK","MIND","MOON","NAME",
+      "NEST","NEWS","NOSE","OPEN","OWLS","OVAL","PARK","PENS","PETS","PLAY",
+      "POST","QUAY","RACE","RAIN","RICE","ROAD","ROOM","ROSE","SAND","SEAL",
+      "SEAT","SHOP","SILK","SKIN","SOFA","SUIT","TALK","TEAM","TENT","TIED",
+      "TOYS","TREE","UNIT","USED","VANE","VASE","VISA","WALL","WIND","WOLF",
+      "WORD","WORK","YARD","YOGA","ZERO","ZOOM"
+    ];
+
+    const w6 = [
+      "ACTION","AMIDST","AUTHOR","BROWSE","COLUMN","CREDIT","CUSTOM",
+      "EDITOR","FOLDER","FOREST","GROUND","HUMBLE","IMPORT","ISLAND",
+      "LENGTH","MAKING","METHOD","MOBILE","NOVELS","POLICY","RANDOM",
+      "RULING","SECRET","SOURCE","SPLASH","STYLED","TALKED","TIMBER",
+      "WEAPON","WONDER","YELLOW","ZEPHYR"
+    ];
+
+    const w9 = [
+      "IMPORTANT","EDUCATION","COPYRIGHT","BLOCKHEAD","ALGORITHM",
+      "FRAMEWORK","WORKPLACE","VULCANIZE","FORESIGHT","BREAKFAST",
+      "CHOCOLATE","DINOSAURS","EARTHWORM","FIREPLACE","HIGHLIGHT",
+      "INVISIBLE","JACKFRUIT","KNOWLEDGE","LUNCHTIME","MOUNTAINS"
+    ];
+
+    const bank = {4: w4, 6: w6, 9: w9};
+    const diff = {
+      4: { h: 2, w: 2 },
+      6: { h: 2, w: 3 },
+      9: { h: 3, w: 3 }
+    };
+
+    let size = 4;
+    let board = [], solution = [], given = [], selectedCell = null, selectedPos = null;
+    let availableLetters = [];
+
+    function uniqLetters(word) {
+      const seen = new Set();
+      const res = [];
+      const upper = word.toUpperCase();
+      for (const c of upper) {
+        if (c >= 'A' && c <= 'Z' && !seen.has(c)) {
+          seen.add(c);
+          res.push(c);
+        }
+      }
+      return res;
+    }
+
+    function supplement(base, n) {
+      const res = [...new Set(base)];
+      if (res.length >= n) {
+        for (let i = res.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [res[i], res[j]] = [res[j], res[i]];
+        }
+        return res.slice(0, n);
+      }
+      const all = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      for (const c of all) {
+        if (res.length >= n) break;
+        if (!res.includes(c)) res.push(c);
+      }
+      for (let i = res.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [res[i], res[j]] = [res[j], res[i]];
+      }
+      return res.slice(0, n);
+    }
+
+    function isValid(grid, row, col, letter, s) {
+      if (letter === '') return true;
+      for (let i = 0; i < s; i++) {
+        if (grid[row][i] === letter || grid[i][col] === letter) return false;
+      }
+      const { h, w } = diff[s];
+      const sr = row - (row % h);
+      const sc = col - (col % w);
+      for (let i = 0; i < h; i++) {
+        for (let j = 0; j < w; j++) {
+          if (grid[sr + i][sc + j] === letter) return false;
+        }
+      }
+      return true;
+    }
+
+    function solve(grid, s, letters) {
+      for (let r = 0; r < s; r++) {
+        for (let c = 0; c < s; c++) {
+          if (grid[r][c] === '') {
+            const shuffled = [...letters].sort(() => Math.random() - 0.5);
+            for (const L of shuffled) {
+              if (isValid(grid, r, c, L, s)) {
+                grid[r][c] = L;
+                if (solve(grid, s, letters)) return true;
+                grid[r][c] = '';
+              }
+            }
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    function generatePuzzle(s) {
+      const words = bank[s];
+      const word = words[Math.floor(Math.random() * words.length)];
+      const unique = uniqLetters(word);
+      const activeLetters = supplement(unique, s);
+      availableLetters = [...activeLetters];
+
+      solution = Array(s).fill().map(() => Array(s).fill(''));
+      solve(solution, s, activeLetters);
+
+      board = solution.map(row => [...row]);
+      given = Array(s).fill().map(() => Array(s).fill(true));
+
+      const removeCount = s === 4 ? 6 : (s === 6 ? 18 : 40);
+      const cells = [];
+      for (let i = 0; i < s; i++) for (let j = 0; j < s; j++) cells.push([i, j]);
+      for (let i = cells.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cells[i], cells[j]] = [cells[j], cells[i]];
+      }
+      for (let k = 0; k < removeCount && k < cells.length; k++) {
+        const [r, c] = cells[k];
+        board[r][c] = '';
+        given[r][c] = false;
+      }
+    }
+
+    function renderGrid() {
+      const gridEl = document.getElementById('g');
+      gridEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+      gridEl.innerHTML = '';
+
+      const containerWidth = Math.min(500, window.innerWidth - 24);
+      const cellSize = Math.floor(containerWidth / size);
+
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          const cell = document.createElement('div');
+          cell.className = 'c';
+          cell.style.width = cellSize + 'px';
+          cell.style.height = cellSize + 'px';
+          cell.style.fontSize = Math.max(10, Math.floor(cellSize * 0.4)) + 'px';
+
+          if (given[i][j] && board[i][j]) {
+            cell.textContent = board[i][j];
+            cell.classList.add('given');
+          } else if (board[i][j]) {
+            cell.textContent = board[i][j];
+            cell.classList.add('user');
+          }
+
+          cell.dataset.r = i;
+          cell.dataset.c = j;
+          const handler = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            selectCell(i, j);
+          };
+          cell.addEventListener('click', handler);
+          cell.addEventListener('touchstart', handler, { passive: false });
+          gridEl.appendChild(cell);
+        }
+      }
+    }
+
+    function renderPad() {
+      const pad = document.getElementById('np');
+      pad.innerHTML = '';
+      pad.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+
+      availableLetters.forEach(letter => {
+        const btn = document.createElement('button');
+        btn.className = 'nb';
+        btn.textContent = letter;
+        const handler = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          inputLetter(letter);
+        };
+        btn.addEventListener('click', handler);
+        btn.addEventListener('touchstart', handler, { passive: false });
+        pad.appendChild(btn);
+      });
+    }
+
+    function selectCell(row, col) {
+      if (given[row][col]) return;
+      clearSelection();
+      selectedPos = { r: row, c: col };
+      selectedCell = document.querySelector(`.c[data-r="${row}"][data-c="${col}"]`);
+      if (selectedCell) selectedCell.classList.add('sel');
+    }
+
+    function clearSelection() {
+      if (selectedCell) selectedCell.classList.remove('sel');
+      selectedCell = null;
+      selectedPos = null;
+    }
+
+    function inputLetter(L) {
+      if (!selectedPos) return;
+      const { r, c } = selectedPos;
+      board[r][c] = L;
+      if (selectedCell) {
+        selectedCell.textContent = L;
+        selectedCell.classList.remove('err', 'user');
+        selectedCell.classList.add('user');
+        if (!isValid(board, r, c, L, size)) {
+          selectedCell.classList.add('err');
+        }
+      }
+    }
+
+    function showMessage(text, isSuccess) {
+      const msg = document.getElementById('msg');
+      msg.textContent = text;
+      msg.style.color = isSuccess ? '#2e7d32' : '#c62828';
+      setTimeout(() => {
+        msg.style.opacity = '0';
+        setTimeout(() => {
+          msg.textContent = '';
+          msg.style.opacity = '1';
+        }, 300);
+      }, 3000);
+    }
+
+    function checkComplete() {
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          if (board[i][j] === '') {
+            showMessage("還有空格哦，請填滿再檢查！", false);
+            return;
+          }
+        }
+      }
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          if (board[i][j] !== solution[i][j]) {
+            showMessage("還有錯誤哦，加油！", false);
+            return;
+          }
+        }
+      }
+      showMessage("🎉 恭喜！\n你是 ——\n獨孤求敗！", true);
+    }
+
+    function resetGame() {
+      generatePuzzle(size);
+      renderGrid();
+      renderPad();
+      clearSelection();
+      document.getElementById('msg').textContent = '';
+    }
+
+    function initGame(s) {
+      size = s;
+      document.querySelectorAll('.d-btn').forEach(btn => {
+        btn.classList.toggle('a', parseInt(btn.dataset.s) === s);
+      });
+      generatePuzzle(s);
+      renderGrid();
+      renderPad();
+      clearSelection();
+      document.getElementById('msg').textContent = '';
+    }
+
+    window.addEventListener('keydown', e => {
+      if (!selectedPos || e.target.closest('input, textarea')) return;
+      const key = e.key;
+      if (['Delete', 'Backspace', ' '].includes(key)) {
+        const { r, c } = selectedPos;
+        if (!given[r][c]) {
+          board[r][c] = '';
+          if (selectedCell) {
+            selectedCell.textContent = '';
+            selectedCell.classList.remove('err', 'user');
+          }
+        }
+        e.preventDefault();
+        return;
+      }
+      const up = key.toUpperCase();
+      if (availableLetters.includes(up)) {
+        inputLetter(up);
+        e.preventDefault();
+      }
+    });
+
+    function bind(el, fn) {
+      el.addEventListener('click', e => { e.preventDefault(); fn(); });
+      el.addEventListener('touchstart', e => { e.preventDefault(); fn(); }, { passive: false });
+    }
+
+    document.querySelectorAll('.d-btn').forEach(btn => {
+      bind(btn, () => initGame(parseInt(btn.dataset.s)));
+    });
+    bind(document.getElementById('r'), resetGame);
+    bind(document.getElementById('chk'), checkComplete);
+
+    initGame(4);
+  </script>
+</body>
+</html>
