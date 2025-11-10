@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學生成績可視化分析系統 - 進階版</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: clamp(10px, 2vw, 20px);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+            color: white;
+            padding: clamp(20px, 4vw, 25px) clamp(15px, 3vw, 30px);
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: clamp(15px, 3vw, 20px);
+        }
+        
+        .input-section {
+            flex: 1;
+            min-width: min(350px, 100%);
+            padding: clamp(15px, 3vw, 20px);
+            border-right: 1px solid #eee;
+        }
+        
+        .output-section {
+            flex: 2;
+            min-width: min(600px, 100%);
+            padding: clamp(15px, 3vw, 20px);
+        }
+        
+        .form-group {
+            margin-bottom: clamp(15px, 3vw, 20px);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: clamp(10px, 2vw, 12px) clamp(12px, 2.5vw, 15px);
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: #2e7d32;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+        }
+        
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+            color: white;
+            border: none;
+            padding: clamp(12px, 2.5vw, 14px) clamp(20px, 3vw, 25px);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .button-group button {
+            flex: 1;
+        }
+        
+        .secondary-button {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%) !important;
+        }
+        
+        .tertiary-button {
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
+        }
+        
+        .chart-container {
+            margin-top: clamp(20px, 3vw, 30px);
+            position: relative;
+            height: clamp(250px, 35vw, 300px);
+        }
+        
+        .analysis-section {
+            margin-top: clamp(20px, 3vw, 30px);
+            padding: clamp(15px, 2.5vw, 20px);
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .suggestion-section {
+            margin-top: clamp(15px, 2.5vw, 20px);
+            padding: clamp(15px, 2.5vw, 20px);
+            background-color: #e8f5e9;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+        }
+        
+        h2 {
+            color: #444;
+            margin-bottom: 15px;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+        }
+        
+        h3 {
+            color: #555;
+            margin: clamp(12px, 2vw, 15px) 0 10px;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .student-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 10px;
+        }
+        
+        .student-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .student-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: clamp(12px, 2vw, 15px);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: clamp(1.5rem, 3vw, 1.8rem);
+            font-weight: 700;
+            color: #2e7d32;
+            margin: 5px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .input-example {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .exam-tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
+        }
+        
+        .exam-tab {
+            padding: clamp(8px, 1.5vw, 10px) clamp(12px, 2vw, 15px);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-size: clamp(0.85rem, 2vw, 1rem);
+        }
+        
+        .exam-tab.active {
+            border-bottom-color: #2e7d32;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        
+        .exam-content {
+            display: none;
+        }
+        
+        .exam-content.active {
+            display: block;
+        }
+        
+        .progress-indicator {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .progress-up {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .progress-down {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .progress-same {
+            background-color: #f5f5f5;
+            color: #616161;
+        }
+        
+        .student-detail {
+            margin-top: 15px;
+            padding: clamp(12px, 2vw, 15px);
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .student-progress-chart {
+            height: 200px;
+            margin-top: 15px;
+        }
+        
+        .comparison-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .comparison-controls select {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .student-selector {
+            margin-bottom: 15px;
+        }
+
+        .error-message {
+            color: #e53935;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .has-error {
+            border-color: #e53935 !important;
+        }
+        
+        .print-only {
+            display: none;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: clamp(0.85rem, 2vw, 1rem);
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: clamp(8px, 1.5vw, 10px);
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+        .comparison-table th {
+            background-color: #f5f7fa;
+            font-weight: 600;
+        }
+        
+        .performance-better {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        
+        .performance-worse {
+            background-color: #ffebee;
+            color: #c62828;
+            font-weight: 600;
+        }
+        
+        .performance-same {
+            background-color: #f5f5f5;
+            color: #616161;
+        }
+
+        .report-content {
+            margin-top: 20px;
+        }
+
+        .print-chart-container {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            page-break-inside: avoid;
+            background: white;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .print-chart-container canvas {
+            max-width: 100%;
+            height: 300px;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        /* 平板設備樣式 */
+        @media (max-width: 1024px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .input-section {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+                min-width: unset;
+            }
+            
+            .output-section {
+                min-width: unset;
+            }
+            
+            .comparison-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+        }
+        
+        /* 手機設備樣式 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .content {
+                padding: 10px;
+            }
+            
+            .input-section {
+                padding: 12px 10px;
+            }
+            
+            .output-section {
+                padding: 12px 10px;
+            }
+            
+            header {
+                padding: 15px 10px;
+            }
+            
+            .chart-container {
+                height: 220px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .analysis-section, .suggestion-section {
+                padding: 12px;
+                margin-top: 15px;
+            }
+            
+            input, select, textarea {
+                padding: 10px 12px;
+            }
+            
+            button {
+                padding: 12px 20px;
+            }
+            
+            .exam-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .exam-tab {
+                padding: 8px 12px;
+            }
+            
+            table {
+                font-size: 0.8rem;
+            }
+            
+            th, td {
+                padding: 8px 6px;
+            }
+        }
+
+        /* 小屏幕手機樣式 */
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 200px;
+            }
+            
+            .exam-tab {
+                font-size: 0.8rem;
+                padding: 6px 10px;
+            }
+            
+            .comparison-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .student-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .student-item span:last-child {
+                margin-top: 5px;
+                font-weight: bold;
+            }
+        }
+
+        /* 橫向手機樣式 */
+        @media (max-height: 500px) and (orientation: landscape) {
+            body {
+                padding: 10px;
+            }
+            
+            .content {
+                flex-direction: row;
+            }
+            
+            .input-section {
+                border-right: 1px solid #eee;
+                border-bottom: none;
+            }
+            
+            .chart-container {
+                height: 180px;
+            }
+            
+            textarea {
+                height: 80px;
+            }
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            .print-only {
+                display: block !important;
+            }
+            
+            .print-chart-container {
+                display: block !important;
+                background: white !important;
+                border: 1px solid #000 !important;
+            }
+            
+            .class-report-only {
+                display: block !important;
+            }
+            
+            .student-report-only {
+                display: block !important;
+            }
+            
+            .container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                max-width: none;
+            }
+            
+            .content {
+                padding: 0;
+                flex-direction: column;
+            }
+            
+            .input-section {
+                display: none !important;
+            }
+            
+            .output-section {
+                min-width: auto;
+                padding: 0;
+            }
+            
+            .chart-container {
+                display: none !important;
+            }
+            
+            .comparison-controls {
+                display: none !important;
+            }
+            
+            .student-selector {
+                display: none !important;
+            }
+            
+            .analysis-section, .suggestion-section {
+                page-break-inside: avoid;
+                margin: 15px 0;
+                padding: 15px;
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+            
+            .report-content {
+                margin-top: 0;
+            }
+            
+            body {
+                background-color: white;
+                padding: 10px;
+                font-size: 12px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+                margin-bottom: 10px;
+            }
+            
+            h2 {
+                font-size: 1.4rem;
+                margin-bottom: 10px;
+            }
+            
+            h3 {
+                font-size: 1.2rem;
+                margin: 10px 0 8px;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .stats-grid {
+                gap: 10px;
+                margin-top: 10px;
+            }
+            
+            .stat-card {
+                padding: 10px;
+            }
+
+            .print-chart-container canvas {
+                height: 250px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="no-print">
+            <h1>Shirley's 學生成績可視化分析系統(Multi Tests)</h1>
+            <p class="subtitle">追蹤最多五次考試成績，分析班級及個體進步/退步情況</p>
+        </header>
+        
+        <div class="content">
+            <div class="input-section no-print">
+                <div class="form-group">
+                    <label for="class">班級</label>
+                    <input type="text" id="class" placeholder="請輸入班級名稱">
+                    <div class="error-message" id="classError">請輸入班級名稱</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="subject">科目</label>
+                    <input type="text" id="subject" placeholder="請輸入科目名稱">
+                    <div class="error-message" id="subjectError">請輸入科目名稱</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>考試成績輸入</label>
+                    <div class="exam-tabs" id="examTabs">
+                        <div class="exam-tab active" data-exam="1">第一次考試</div>
+                        <div class="exam-tab" data-exam="2">第二次考試</div>
+                        <div class="exam-tab" data-exam="3">第三次考試</div>
+                        <div class="exam-tab" data-exam="4">第四次考試</div>
+                        <div class="exam-tab" data-exam="5">第五次考試</div>
+                    </div>
+                    
+                    <div class="exam-content active" id="examContent1">
+                        <label for="studentInfo1">學生資訊 (每行格式: 姓名,成績)</label>
+                        <textarea id="studentInfo1" placeholder="例如：
+張三,85
+李四,92
+王五,78"></textarea>
+                        <div class="input-example">每行輸入一個學生，格式為"姓名,成績"，姓名和成績之間用逗號分隔</div>
+                        <div class="error-message" id="exam1Error">請輸入至少一名學生的成績</div>
+                    </div>
+                    
+                    <div class="exam-content" id="examContent2">
+                        <label for="studentInfo2">學生資訊 (每行格式: 姓名,成績)</label>
+                        <textarea id="studentInfo2" placeholder="例如：
+張三,88
+李四,90
+王五,75"></textarea>
+                        <div class="input-example">每行輸入一個學生，格式為"姓名,成績"，姓名和成績之間用逗號分隔</div>
+                    </div>
+                    
+                    <div class="exam-content" id="examContent3">
+                        <label for="studentInfo3">學生資訊 (每行格式: 姓名,成績)</label>
+                        <textarea id="studentInfo3" placeholder="例如：
+張三,82
+李四,95
+王五,80"></textarea>
+                        <div class="input-example">每行輸入一個學生，格式為"姓名,成績"，姓名和成績之間用逗號分隔</div>
+                    </div>
+                    
+                    <div class="exam-content" id="examContent4">
+                        <label for="studentInfo4">學生資訊 (每行格式: 姓名,成績)</label>
+                        <textarea id="studentInfo4" placeholder="例如：
+張三,90
+李四,88
+王五,85"></textarea>
+                        <div class="input-example">每行輸入一個學生，格式為"姓名,成績"，姓名和成績之間用逗號分隔</div>
+                    </div>
+                    
+                    <div class="exam-content" id="examContent5">
+                        <label for="studentInfo5">學生資訊 (每行格式: 姓名,成績)</label>
+                        <textarea id="studentInfo5" placeholder="例如：
+張三,92
+李四,85
+王五,88"></textarea>
+                        <div class="input-example">每行輸入一個學生，格式為"姓名,成績"，姓名和成績之間用逗號分隔</div>
+                    </div>
+                </div>
+                
+                <button id="generateBtn">生成分析報告</button>
+                
+                <div class="button-group no-print">
+                    <button id="printClassReport" class="secondary-button" disabled>列印全班報告</button>
+                    <button id="printStudentReport" class="tertiary-button" disabled>列印個別學生報告</button>
+                </div>
+                
+                <div class="student-list" id="studentList">
+                    <!-- 學生列表將在這裡動態生成 -->
+                </div>
+            </div>
+            
+            <div class="output-section">
+                <div id="noDataMessage">
+                    <p>請先輸入班級、科目和學生成績資訊，然後點擊"生成分析報告"按鈕。</p>
+                </div>
+                
+                <div id="chartsSection" class="hidden">
+                    <div class="print-only">
+                        <h1 id="printTitle">學生成績分析報告</h1>
+                        <div id="printHeader"></div>
+                    </div>
+                    
+                    <!-- 列印用圖表容器 -->
+                    <div class="print-chart-container hidden" id="printProgressChartContainer">
+                        <h3>班級進步趨勢圖</h3>
+                        <canvas id="printProgressChart"></canvas>
+                    </div>
+                    
+                    <!-- 圖表部分 - 列印時隱藏 -->
+                    <div class="no-print">
+                        <h2>成績可視化圖表</h2>
+                        
+                        <div class="comparison-controls">
+                            <select id="exam1Select">
+                                <option value="1">第一次考試</option>
+                                <option value="2">第二次考試</option>
+                                <option value="3">第三次考試</option>
+                                <option value="4">第四次考試</option>
+                                <option value="5">第五次考試</option>
+                            </select>
+                            <span>與</span>
+                            <select id="exam2Select">
+                                <option value="2">第二次考試</option>
+                                <option value="1">第一次考試</option>
+                                <option value="3">第三次考試</option>
+                                <option value="4">第四次考試</option>
+                                <option value="5">第五次考試</option>
+                            </select>
+                            <span>比較</span>
+                            <button id="compareBtn">更新比較</button>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="progressChart"></canvas>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="comparisonChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- 報告內容部分 -->
+                    <div class="report-content">
+                        <!-- 班級報告內容 -->
+                        <div id="classReportContent">
+                            <div class="analysis-section">
+                                <h2>班級進步/退步分析</h2>
+                                <div id="progressAnalysis">
+                                    <!-- 進步分析內容將在這裡動態生成 -->
+                                </div>
+                            </div>
+                            
+                            <div id="allStudentsAnalysis" class="analysis-section">
+                                <!-- 全體學生分析表格將在這裡動態生成 -->
+                            </div>
+                            
+                            <div class="suggestion-section">
+                                <h2>教學改進建議</h2>
+                                <div id="suggestionContent">
+                                    <!-- 建議內容將在這裡動態生成 -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 個別學生報告內容 -->
+                        <div id="studentReportContent" class="hidden">
+                            <div class="student-selector no-print">
+                                <label for="studentSelect">選擇學生查看詳細進步情況：</label>
+                                <select id="studentSelect"></select>
+                            </div>
+                            
+                            <div class="student-detail" id="studentDetail">
+                                <!-- 學生詳細進步情況將在這裡動態生成 -->
+                            </div>
+                            
+                            <div id="studentSuggestionSection" class="suggestion-section">
+                                <h2>個別學習建議</h2>
+                                <div id="studentSuggestionContent">
+                                    <!-- 個別學生建議內容將在這裡動態生成 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 基本變數
+            const generateBtn = document.getElementById('generateBtn');
+            const printClassReportBtn = document.getElementById('printClassReport');
+            const printStudentReportBtn = document.getElementById('printStudentReport');
+            const examTabs = document.querySelectorAll('.exam-tab');
+            const examContents = document.querySelectorAll('.exam-content');
+            const noDataMessage = document.getElementById('noDataMessage');
+            const chartsSection = document.getElementById('chartsSection');
+            const classReportContent = document.getElementById('classReportContent');
+            const studentReportContent = document.getElementById('studentReportContent');
+            const progressAnalysis = document.getElementById('progressAnalysis');
+            const allStudentsAnalysis = document.getElementById('allStudentsAnalysis');
+            const suggestionContent = document.getElementById('suggestionContent');
+            const studentDetail = document.getElementById('studentDetail');
+            const studentSelect = document.getElementById('studentSelect');
+            const studentSuggestionSection = document.getElementById('studentSuggestionSection');
+            const studentSuggestionContent = document.getElementById('studentSuggestionContent');
+            const compareBtn = document.getElementById('compareBtn');
+            const exam1Select = document.getElementById('exam1Select');
+            const exam2Select = document.getElementById('exam2Select');
+            const printTitle = document.getElementById('printTitle');
+            const printHeader = document.getElementById('printHeader');
+            const printProgressChartContainer = document.getElementById('printProgressChartContainer');
+            
+            let allExamData = {};
+            let progressChart = null;
+            let comparisonChart = null;
+            let studentProgressChart = null;
+            let printProgressChart = null;
+            let currentClassName = '';
+            let currentSubject = '';
+            let classAverages = {};
+            
+            // 初始化考試標籤切換
+            examTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const examId = this.getAttribute('data-exam');
+                    
+                    examTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    examContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === `examContent${examId}`) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+            
+            // 生成分析報告
+            generateBtn.addEventListener('click', function() {
+                currentClassName = document.getElementById('class').value.trim();
+                currentSubject = document.getElementById('subject').value.trim();
+                
+                // 收集所有考試數據
+                allExamData = {};
+                let hasData = false;
+                
+                for (let i = 1; i <= 5; i++) {
+                    const textarea = document.getElementById(`studentInfo${i}`);
+                    if (textarea && textarea.value.trim()) {
+                        const students = parseStudentData(textarea.value);
+                        if (students.length > 0) {
+                            allExamData[i] = {
+                                name: `第${i}次考試`,
+                                students: students
+                            };
+                            hasData = true;
+                        }
+                    }
+                }
+                
+                if (!currentClassName || !currentSubject || !hasData) {
+                    alert('請填寫完整的班級、科目和至少一次考試的學生成績資訊！');
+                    return;
+                }
+                
+                // 顯示分析區域
+                noDataMessage.classList.add('hidden');
+                chartsSection.classList.remove('hidden');
+                classReportContent.classList.remove('hidden');
+                studentReportContent.classList.add('hidden');
+                
+                // 啟用列印按鈕
+                printClassReportBtn.disabled = false;
+                printStudentReportBtn.disabled = false;
+                
+                // 更新學生選擇下拉選單
+                updateStudentSelect();
+                
+                // 生成圖表和分析
+                generateCharts(currentClassName, currentSubject);
+                generateProgressAnalysis(currentClassName, currentSubject);
+                generateAllStudentsAnalysis();
+                generateSuggestions(currentClassName, currentSubject);
+                
+                // 更新列印標題
+                printTitle.textContent = `${currentClassName} ${currentSubject}成績分析報告`;
+                printHeader.innerHTML = `
+                    <p><strong>班級：</strong>${currentClassName}</p>
+                    <p><strong>科目：</strong>${currentSubject}</p>
+                    <p><strong>生成時間：</strong>${new Date().toLocaleString('zh-TW')}</p>
+                    <hr>
+                `;
+                
+                // 預先創建列印圖表
+                setTimeout(() => {
+                    generatePrintProgressChart();
+                }, 500);
+            });
+            
+            // 列印全班報告
+            printClassReportBtn.addEventListener('click', function() {
+                classReportContent.classList.remove('hidden');
+                studentReportContent.classList.add('hidden');
+                studentSuggestionSection.classList.add('hidden');
+                
+                // 顯示列印圖表
+                printProgressChartContainer.classList.remove('hidden');
+                
+                // 重新生成列印圖表以確保數據最新
+                generatePrintProgressChart();
+                
+                printTitle.textContent = `${currentClassName} ${currentSubject}班級成績分析報告`;
+                
+                // 給圖表時間渲染
+                setTimeout(() => {
+                    window.print();
+                }, 1000);
+            });
+            
+            // 列印個別學生報告
+            printStudentReportBtn.addEventListener('click', function() {
+                if (studentSelect.value) {
+                    classReportContent.classList.add('hidden');
+                    studentReportContent.classList.remove('hidden');
+                    studentSuggestionSection.classList.remove('hidden');
+                    
+                    // 隱藏列印圖表
+                    printProgressChartContainer.classList.add('hidden');
+                    
+                    showStudentDetail(studentSelect.value);
+                    generateStudentSuggestion(studentSelect.value);
+                    
+                    printTitle.textContent = `${currentClassName} ${currentSubject}個人學習報告 - ${studentSelect.value}`;
+                    
+                    window.print();
+                } else {
+                    alert('請先選擇一個學生');
+                }
+            });
+            
+            // 解析學生數據
+            function parseStudentData(input) {
+                const students = [];
+                const lines = input.trim().split('\n');
+                
+                for (let line of lines) {
+                    line = line.trim();
+                    if (line) {
+                        const parts = line.split(',');
+                        if (parts.length >= 2) {
+                            const name = parts[0].trim();
+                            const score = parseFloat(parts[1]);
+                            if (name && !isNaN(score)) {
+                                students.push({ name, score });
+                            }
+                        }
+                    }
+                }
+                return students;
+            }
+            
+            // 更新學生選擇下拉選單
+            function updateStudentSelect() {
+                const allStudents = new Set();
+                Object.values(allExamData).forEach(exam => {
+                    exam.students.forEach(student => {
+                        allStudents.add(student.name);
+                    });
+                });
+                
+                studentSelect.innerHTML = '';
+                allStudents.forEach(studentName => {
+                    const option = document.createElement('option');
+                    option.value = studentName;
+                    option.textContent = studentName;
+                    studentSelect.appendChild(option);
+                });
+                
+                studentSelect.addEventListener('change', function() {
+                    showStudentDetail(this.value);
+                    generateStudentSuggestion(this.value);
+                });
+            }
+            
+            // 生成圖表
+            function generateCharts(className, subject) {
+                generateProgressTrendChart(className, subject);
+                updateComparisonChart();
+            }
+            
+            // 生成班級進步趨勢圖
+            function generateProgressTrendChart(className, subject) {
+                const ctx = document.getElementById('progressChart').getContext('2d');
+                
+                const examLabels = [];
+                const examAverages = [];
+                
+                Object.keys(allExamData).sort().forEach(examId => {
+                    const exam = allExamData[examId];
+                    examLabels.push(exam.name);
+                    
+                    const scores = exam.students.map(s => s.score);
+                    const average = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+                    examAverages.push(average);
+                    classAverages[examId] = average;
+                });
+                
+                if (progressChart) progressChart.destroy();
+                progressChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: examLabels,
+                        datasets: [{
+                            label: '班級平均分',
+                            data: examAverages,
+                            borderColor: '#2e7d32',
+                            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#2e7d32',
+                            pointRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `${className} ${subject}班級進步趨勢`,
+                                font: { 
+                                    size: window.innerWidth < 768 ? 14 : 16 
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: Math.min(...examAverages) - 5,
+                                max: Math.max(...examAverages) + 5,
+                                title: {
+                                    display: true,
+                                    text: '平均分'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '考試次數'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 生成列印用班級進步趨勢圖
+            function generatePrintProgressChart() {
+                // 銷毀舊圖表
+                if (printProgressChart) {
+                    printProgressChart.destroy();
+                }
+                
+                const ctx = document.getElementById('printProgressChart').getContext('2d');
+                
+                const examLabels = [];
+                const examAverages = [];
+                
+                Object.keys(allExamData).sort().forEach(examId => {
+                    const exam = allExamData[examId];
+                    examLabels.push(exam.name);
+                    
+                    const scores = exam.students.map(s => s.score);
+                    const average = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+                    examAverages.push(average);
+                });
+                
+                // 設置canvas尺寸
+                const canvas = document.getElementById('printProgressChart');
+                canvas.width = 600;
+                canvas.height = 300;
+                
+                printProgressChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: examLabels,
+                        datasets: [{
+                            label: '班級平均分',
+                            data: examAverages,
+                            borderColor: '#2e7d32',
+                            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#2e7d32',
+                            pointRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `${currentClassName} ${currentSubject}班級進步趨勢`,
+                                font: { size: 16 }
+                            },
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: Math.min(...examAverages) - 5,
+                                max: Math.max(...examAverages) + 5,
+                                title: {
+                                    display: true,
+                                    text: '平均分'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '考試次數'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 更新考試比較圖
+            function updateComparisonChart() {
+                const exam1Id = parseInt(exam1Select.value);
+                const exam2Id = parseInt(exam2Select.value);
+                
+                if (!allExamData[exam1Id] || !allExamData[exam2Id]) {
+                    return;
+                }
+                
+                const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+                
+                // 獲取兩次考試的學生數據
+                const exam1 = allExamData[exam1Id];
+                const exam2 = allExamData[exam2Id];
+                
+                // 找出兩次考試中都有的學生
+                const commonStudents = [];
+                const exam1StudentsMap = new Map();
+                const exam2StudentsMap = new Map();
+                
+                exam1.students.forEach(student => {
+                    exam1StudentsMap.set(student.name, student.score);
+                });
+                
+                exam2.students.forEach(student => {
+                    exam2StudentsMap.set(student.name, student.score);
+                });
+                
+                // 找出共同學生
+                exam1StudentsMap.forEach((score, name) => {
+                    if (exam2StudentsMap.has(name)) {
+                        commonStudents.push({
+                            name: name,
+                            exam1Score: score,
+                            exam2Score: exam2StudentsMap.get(name),
+                            change: exam2StudentsMap.get(name) - score
+                        });
+                    }
+                });
+                
+                // 按變化排序
+                commonStudents.sort((a, b) => b.change - a.change);
+                
+                // 準備圖表數據
+                const studentNames = commonStudents.map(s => s.name);
+                const exam1Scores = commonStudents.map(s => s.exam1Score);
+                const exam2Scores = commonStudents.map(s => s.exam2Score);
+                
+                if (comparisonChart) comparisonChart.destroy();
+                comparisonChart = new Chart(comparisonCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: studentNames,
+                        datasets: [
+                            {
+                                label: exam1.name,
+                                data: exam1Scores,
+                                backgroundColor: 'rgba(46, 125, 50, 0.7)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: exam2.name,
+                                data: exam2Scores,
+                                backgroundColor: 'rgba(76, 175, 80, 0.7)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `學生成績比較: ${exam1.name} vs ${exam2.name}`,
+                                font: { 
+                                    size: window.innerWidth < 768 ? 14 : 16 
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: '分數'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '學生姓名'
+                                },
+                                ticks: {
+                                    maxRotation: window.innerWidth < 768 ? 45 : 0
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 顯示學生詳細進步情況
+            function showStudentDetail(studentName) {
+                // 收集該學生在所有考試中的成績
+                const studentScores = [];
+                const examLabels = [];
+                
+                Object.keys(allExamData).sort().forEach(examId => {
+                    const exam = allExamData[examId];
+                    const student = exam.students.find(s => s.name === studentName);
+                    
+                    if (student) {
+                        studentScores.push(student.score);
+                        examLabels.push(exam.name);
+                    } else {
+                        studentScores.push(null);
+                        examLabels.push(exam.name);
+                    }
+                });
+                
+                // 計算統計數據
+                const validScores = studentScores.filter(score => score !== null);
+                const maxScore = validScores.length > 0 ? Math.max(...validScores) : 0;
+                const minScore = validScores.length > 0 ? Math.min(...validScores) : 0;
+                
+                let improvements = 0;
+                let declines = 0;
+                let aboveAverageCount = 0;
+                
+                for (let i = 1; i < studentScores.length; i++) {
+                    if (studentScores[i] !== null && studentScores[i-1] !== null) {
+                        const change = studentScores[i] - studentScores[i-1];
+                        if (change > 0) improvements++;
+                        else if (change < 0) declines++;
+                    }
+                }
+                
+                // 計算與班級平均分的比較
+                studentScores.forEach((score, index) => {
+                    if (score !== null) {
+                        const examId = (index + 1).toString();
+                        if (classAverages[examId] && score > classAverages[examId]) {
+                            aboveAverageCount++;
+                        }
+                    }
+                });
+                
+                const aboveAverageRate = validScores.length > 0 ? (aboveAverageCount / validScores.length * 100).toFixed(1) : 0;
+                
+                // 生成學生詳細信息
+                studentDetail.innerHTML = `
+                    <h3>${studentName}的進步情況</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">${maxScore}</div>
+                            <div class="stat-label">最高分</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${minScore}</div>
+                            <div class="stat-label">最低分</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${aboveAverageRate}%</div>
+                            <div class="stat-label">超過平均比例</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${improvements}</div>
+                            <div class="stat-label">進步次數</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${declines}</div>
+                            <div class="stat-label">退步次數</div>
+                        </div>
+                    </div>
+                    
+                    <h4>詳細成績記錄：</h4>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>考試</th>
+                                <th>學生成績</th>
+                                <th>班級平均</th>
+                                <th>差異</th>
+                                <th>表現</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${examLabels.map((exam, index) => {
+                                const score = studentScores[index];
+                                const examId = (index + 1).toString();
+                                const classAvg = classAverages[examId];
+                                
+                                if (score === null || !classAvg) {
+                                    return `<tr>
+                                        <td>${exam}</td>
+                                        <td>${score !== null ? score + '分' : '缺考'}</td>
+                                        <td>${classAvg ? classAvg.toFixed(1) + '分' : '無數據'}</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                    </tr>`;
+                                }
+                                
+                                const difference = score - classAvg;
+                                let performanceClass = 'performance-same';
+                                let performanceText = '持平';
+                                
+                                if (difference > 5) {
+                                    performanceClass = 'performance-better';
+                                    performanceText = '優異';
+                                } else if (difference < -5) {
+                                    performanceClass = 'performance-worse';
+                                    performanceText = '待加強';
+                                } else if (difference > 0) {
+                                    performanceClass = 'performance-better';
+                                    performanceText = '良好';
+                                } else if (difference < 0) {
+                                    performanceClass = 'performance-worse';
+                                    performanceText = '需努力';
+                                }
+                                
+                                return `<tr>
+                                    <td>${exam}</td>
+                                    <td>${score}分</td>
+                                    <td>${classAvg.toFixed(1)}分</td>
+                                    <td>${difference > 0 ? '+' : ''}${difference.toFixed(1)}分</td>
+                                    <td class="${performanceClass}">${performanceText}</td>
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+            
+            // 生成全體學生分析表格
+            function generateAllStudentsAnalysis() {
+                // 獲取所有學生
+                const allStudents = new Set();
+                Object.values(allExamData).forEach(exam => {
+                    exam.students.forEach(student => {
+                        allStudents.add(student.name);
+                    });
+                });
+                
+                // 計算每個學生的統計數據
+                const studentStats = [];
+                
+                allStudents.forEach(studentName => {
+                    const scores = [];
+                    
+                    // 收集學生成績
+                    Object.keys(allExamData).sort().forEach(examId => {
+                        const exam = allExamData[examId];
+                        const student = exam.students.find(s => s.name === studentName);
+                        if (student) {
+                            scores.push(student.score);
+                        }
+                    });
+                    
+                    if (scores.length > 0) {
+                        const maxScore = Math.max(...scores);
+                        const minScore = Math.min(...scores);
+                        const avgScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+                        
+                        // 計算超過班級平均分的次數
+                        let aboveAverageCount = 0;
+                        scores.forEach((score, index) => {
+                            const examId = (index + 1).toString();
+                            if (classAverages[examId] && score > classAverages[examId]) {
+                                aboveAverageCount++;
+                            }
+                        });
+                        
+                        const aboveAverageRate = (aboveAverageCount / scores.length * 100).toFixed(1);
+                        
+                        studentStats.push({
+                            name: studentName,
+                            examCount: scores.length,
+                            avgScore: avgScore.toFixed(1),
+                            maxScore: maxScore,
+                            minScore: minScore,
+                            aboveAverageRate: aboveAverageRate
+                        });
+                    }
+                });
+                
+                // 按平均分排序
+                studentStats.sort((a, b) => b.avgScore - a.avgScore);
+                
+                // 生成表格
+                let analysisHTML = `
+                    <h2>全體學生成績分析</h2>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>排名</th>
+                                <th>學生姓名</th>
+                                <th>參加考試次數</th>
+                                <th>平均分數</th>
+                                <th>最高分</th>
+                                <th>最低分</th>
+                                <th>超過平均比例</th>
+                                <th>整體表現</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                studentStats.forEach((student, index) => {
+                    let performanceClass = 'performance-same';
+                    let performanceText = '中等';
+                    
+                    if (parseFloat(student.aboveAverageRate) >= 80) {
+                        performanceClass = 'performance-better';
+                        performanceText = '優異';
+                    } else if (parseFloat(student.aboveAverageRate) >= 60) {
+                        performanceClass = 'performance-better';
+                        performanceText = '良好';
+                    } else if (parseFloat(student.aboveAverageRate) <= 30) {
+                        performanceClass = 'performance-worse';
+                        performanceText = '待加強';
+                    } else if (parseFloat(student.aboveAverageRate) <= 50) {
+                        performanceClass = 'performance-worse';
+                        performanceText = '需努力';
+                    }
+                    
+                    analysisHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${student.name}</td>
+                            <td>${student.examCount}</td>
+                            <td>${student.avgScore}分</td>
+                            <td>${student.maxScore}分</td>
+                            <td>${student.minScore}分</td>
+                            <td>${student.aboveAverageRate}%</td>
+                            <td class="${performanceClass}">${performanceText}</td>
+                        </tr>
+                    `;
+                });
+                
+                analysisHTML += `
+                        </tbody>
+                    </table>
+                `;
+                
+                allStudentsAnalysis.innerHTML = analysisHTML;
+            }
+            
+            // 生成進步分析
+            function generateProgressAnalysis(className, subject) {
+                // 計算每次考試的統計數據
+                const examStats = {};
+                
+                Object.keys(allExamData).sort().forEach(examId => {
+                    const exam = allExamData[examId];
+                    const scores = exam.students.map(s => s.score);
+                    const average = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+                    const maxScore = Math.max(...scores);
+                    const minScore = Math.min(...scores);
+                    const passCount = scores.filter(score => score >= 60).length;
+                    const passRate = (passCount / scores.length) * 100;
+                    
+                    examStats[examId] = {
+                        average: average,
+                        maxScore: maxScore,
+                        minScore: minScore,
+                        passRate: passRate
+                    };
+                });
+                
+                // 計算班級整體進步情況
+                const examIds = Object.keys(examStats).sort();
+                let totalImprovement = 0;
+                let improvementCount = 0;
+                
+                for (let i = 1; i < examIds.length; i++) {
+                    const prevExam = examStats[examIds[i-1]];
+                    const currentExam = examStats[examIds[i]];
+                    
+                    const avgImprovement = currentExam.average - prevExam.average;
+                    totalImprovement += avgImprovement;
+                    improvementCount++;
+                }
+                
+                const overallImprovement = improvementCount > 0 ? totalImprovement / improvementCount : 0;
+                
+                // 生成分析內容
+                let analysisHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">${overallImprovement > 0 ? '+' : ''}${overallImprovement.toFixed(1)}</div>
+                            <div class="stat-label">平均進步分數</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${examIds.length}</div>
+                            <div class="stat-label">考試次數</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${Object.keys(allExamData[examIds[0]].students).length}</div>
+                            <div class="stat-label">學生人數</div>
+                        </div>
+                    </div>
+                    
+                    <h3>各次考試統計</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>考試</th>
+                                <th>平均分</th>
+                                <th>最高分</th>
+                                <th>最低分</th>
+                                <th>及格率</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                examIds.forEach(examId => {
+                    const stats = examStats[examId];
+                    analysisHTML += `
+                        <tr>
+                            <td>${allExamData[examId].name}</td>
+                            <td>${stats.average.toFixed(1)}</td>
+                            <td>${stats.maxScore}</td>
+                            <td>${stats.minScore}</td>
+                            <td>${stats.passRate.toFixed(1)}%</td>
+                        </tr>
+                    `;
+                });
+                
+                analysisHTML += `
+                        </tbody>
+                    </table>
+                    
+                    <h3>進步/退步分析</h3>
+                    <p>${getProgressAnalysisText(overallImprovement, examStats)}</p>
+                `;
+                
+                progressAnalysis.innerHTML = analysisHTML;
+            }
+            
+            function getProgressAnalysisText(overallImprovement, examStats) {
+                let analysis = `班級整體`;
+                
+                if (overallImprovement > 2) {
+                    analysis += `表現出強勁的進步趨勢，平均每次考試進步${overallImprovement.toFixed(1)}分，`;
+                } else if (overallImprovement > 0) {
+                    analysis += `有輕微進步，平均每次考試進步${overallImprovement.toFixed(1)}分，`;
+                } else if (overallImprovement < -2) {
+                    analysis += `出現明顯退步，平均每次考試退步${Math.abs(overallImprovement).toFixed(1)}分，`;
+                } else if (overallImprovement < 0) {
+                    analysis += `有輕微退步，平均每次考試退步${Math.abs(overallImprovement).toFixed(1)}分，`;
+                } else {
+                    analysis += `成績保持穩定，`;
+                }
+                
+                return analysis;
+            }
+            
+            // 生成改進建議
+            function generateSuggestions(className, subject) {
+                suggestionContent.innerHTML = `
+                    <h3>教學改進建議</h3>
+                    <ul>
+                        <li>根據學生成績分佈，調整教學進度和難度</li>
+                        <li>針對成績較差的學生提供個別輔導</li>
+                        <li>加強基礎知識的教學和練習</li>
+                        <li>定期進行小測驗，及時發現學習困難</li>
+                    </ul>
+                    
+                    <h3>學習建議</h3>
+                    <ul>
+                        <li>成績優秀的學生：繼續保持，挑戰更高難度</li>
+                        <li>成績中等的學生：加強基礎練習，找出薄弱環節</li>
+                        <li>成績較差的學生：從基礎開始複習，及時請教</li>
+                        <li>所有學生：養成定期複習和預習的習慣</li>
+                    </ul>
+                `;
+            }
+            
+            // 生成個別學生學習建議
+            function generateStudentSuggestion(studentName) {
+                studentSuggestionContent.innerHTML = `
+                    <h3>${studentName}的學習建議</h3>
+                    <p>根據您的成績表現，建議您：</p>
+                    <ul>
+                        <li>制定個人學習計劃，合理安排學習時間</li>
+                        <li>重點加強薄弱科目的練習</li>
+                        <li>定期複習錯題，避免重複犯錯</li>
+                        <li>積極參與課堂討論，及時請教老師</li>
+                        <li>保持良好的學習習慣和心態</li>
+                    </ul>
+                `;
+            }
+            
+            // 初始化比較按鈕
+            compareBtn.addEventListener('click', updateComparisonChart);
+            
+            // 窗口大小改變時重新調整圖表
+            window.addEventListener('resize', function() {
+                if (Object.keys(allExamData).length > 0) {
+                    generateProgressTrendChart(currentClassName, currentSubject);
+                    updateComparisonChart();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
