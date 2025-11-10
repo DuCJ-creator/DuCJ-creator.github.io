@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學生成績可視化分析系統</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        
+        .input-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            border-right: 1px solid #eee;
+        }
+        
+        .output-section {
+            flex: 2;
+            min-width: 500px;
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: #6a11cb;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(106, 17, 203, 0.2);
+        }
+        
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .chart-container {
+            margin-top: 30px;
+            position: relative;
+            height: 300px;
+        }
+        
+        .analysis-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .suggestion-section {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e8f4fd;
+            border-radius: 8px;
+            border-left: 4px solid #2575fc;
+        }
+        
+        h2 {
+            color: #444;
+            margin-bottom: 15px;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+        }
+        
+        h3 {
+            color: #555;
+            margin: 15px 0 10px;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .student-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 10px;
+        }
+        
+        .student-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .student-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: clamp(1.5rem, 4vw, 1.8rem);
+            font-weight: 700;
+            color: #2575fc;
+            margin: 5px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .input-example {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* 平板設備樣式 */
+        @media (max-width: 1024px) {
+            .content {
+                padding: 15px;
+            }
+            
+            .input-section, .output-section {
+                padding: 15px;
+            }
+            
+            .chart-container {
+                height: 280px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+        }
+        
+        /* 手機設備樣式 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .content {
+                flex-direction: column;
+                padding: 10px;
+            }
+            
+            .input-section {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+                padding: 15px 10px;
+            }
+            
+            .output-section {
+                padding: 15px 10px;
+            }
+            
+            header {
+                padding: 20px 15px;
+            }
+            
+            .chart-container {
+                height: 250px;
+                margin-top: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .analysis-section, .suggestion-section {
+                padding: 15px;
+                margin-top: 20px;
+            }
+            
+            .student-list {
+                max-height: 150px;
+            }
+            
+            input, select, textarea {
+                padding: 10px 12px;
+            }
+            
+            button {
+                padding: 12px 20px;
+            }
+        }
+        
+        /* 小屏幕手機樣式 */
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 220px;
+            }
+            
+            .student-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .student-item span:last-child {
+                margin-top: 5px;
+                font-weight: bold;
+            }
+        }
+        
+        /* 橫向手機樣式 */
+        @media (max-height: 500px) and (orientation: landscape) {
+            body {
+                padding: 10px;
+            }
+            
+            .content {
+                flex-direction: row;
+            }
+            
+            .input-section {
+                border-right: 1px solid #eee;
+                border-bottom: none;
+            }
+            
+            .chart-container {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Shirley's 學生成績可視化分析系統(Solo Class)</h1>
+            <p class="subtitle">輸入學生成績數據，獲取可視化圖表與學習建議</p>
+        </header>
+        
+        <div class="content">
+            <div class="input-section">
+                <div class="form-group">
+                    <label for="class">班級</label>
+                    <input type="text" id="class" placeholder="請輸入班級名稱">
+                </div>
+                
+                <div class="form-group">
+                    <label for="subject">科目</label>
+                    <input type="text" id="subject" placeholder="請輸入科目名稱">
+                </div>
+                
+                <div class="form-group">
+                    <label for="studentInfo">學生資訊 (每行格式: 姓名,成績)</label>
+                    <textarea id="studentInfo" placeholder="例如：
+張三,85
+李四,92
+王五,78"></textarea>
+                    <div class="input-example">每行輸入一個學生，格式為"姓名,成績"，姓名和成績之間用逗號分隔</div>
+                </div>
+                
+                <button id="generateBtn">生成分析報告</button>
+                
+                <div class="student-list" id="studentList">
+                    <!-- 學生列表將在這裡動態生成 -->
+                </div>
+            </div>
+            
+            <div class="output-section">
+                <div id="noDataMessage">
+                    <p>請先輸入班級、科目和學生成績資訊，然後點擊"生成分析報告"按鈕。</p>
+                </div>
+                
+                <div id="chartsSection" class="hidden">
+                    <h2>成績可視化圖表</h2>
+                    
+                    <div class="chart-container">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+                    
+                    <div class="analysis-section">
+                        <h2>數據分析</h2>
+                        <div id="analysisContent">
+                            <!-- 分析內容將在這裡動態生成 -->
+                        </div>
+                    </div>
+                    
+                    <div class="suggestion-section">
+                        <h2>改進建議</h2>
+                        <div id="suggestionContent">
+                            <!-- 建議內容將在這裡動態生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generateBtn');
+            const studentInfoInput = document.getElementById('studentInfo');
+            const studentList = document.getElementById('studentList');
+            const noDataMessage = document.getElementById('noDataMessage');
+            const chartsSection = document.getElementById('chartsSection');
+            const analysisContent = document.getElementById('analysisContent');
+            const suggestionContent = document.getElementById('suggestionContent');
+            
+            let students = [];
+            let pieChart = null;
+            let barChart = null;
+            let distributionChart = null;
+            
+            // 監聽學生信息輸入變化
+            studentInfoInput.addEventListener('input', function() {
+                updateStudentList();
+            });
+            
+            // 更新學生列表
+            function updateStudentList() {
+                const input = studentInfoInput.value.trim();
+                students = [];
+                
+                if (input) {
+                    const studentEntries = input.split('\n');
+                    
+                    studentEntries.forEach(entry => {
+                        const trimmedEntry = entry.trim();
+                        if (trimmedEntry) {
+                            const parts = trimmedEntry.split(',');
+                            if (parts.length >= 2) {
+                                const name = parts[0].trim();
+                                const score = parseFloat(parts[1]);
+                                
+                                if (name && !isNaN(score)) {
+                                    students.push({ name, score });
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // 更新學生列表顯示
+                studentList.innerHTML = '';
+                if (students.length > 0) {
+                    students.forEach(student => {
+                        const studentItem = document.createElement('div');
+                        studentItem.className = 'student-item';
+                        studentItem.innerHTML = `
+                            <span>${student.name}</span>
+                            <span>${student.score}分</span>
+                        `;
+                        studentList.appendChild(studentItem);
+                    });
+                } else {
+                    studentList.innerHTML = '<div class="student-item">暫無學生數據</div>';
+                }
+            }
+            
+            // 生成分析報告
+            generateBtn.addEventListener('click', function() {
+                const className = document.getElementById('class').value;
+                const subject = document.getElementById('subject').value;
+                
+                if (!className || !subject || students.length === 0) {
+                    alert('請填寫完整的班級、科目和學生成績資訊！');
+                    return;
+                }
+                
+                // 隱藏無數據消息，顯示圖表區域
+                noDataMessage.classList.add('hidden');
+                chartsSection.classList.remove('hidden');
+                
+                // 生成圖表
+                generateCharts(className, subject, students);
+                
+                // 生成數據分析
+                generateAnalysis(className, subject, students);
+                
+                // 生成改進建議
+                generateSuggestions(className, subject, students);
+            });
+            
+            // 生成圖表
+            function generateCharts(className, subject, students) {
+                const scores = students.map(s => s.score);
+                
+                // 餅圖 - 成績等級分佈
+                const gradeRanges = {
+                    '優秀(90-100)': 0,
+                    '良好(80-89)': 0,
+                    '中等(70-79)': 0,
+                    '及格(60-69)': 0,
+                    '不及格(<60)': 0
+                };
+                
+                scores.forEach(score => {
+                    if (score >= 90) gradeRanges['優秀(90-100)']++;
+                    else if (score >= 80) gradeRanges['良好(80-89)']++;
+                    else if (score >= 70) gradeRanges['中等(70-79)']++;
+                    else if (score >= 60) gradeRanges['及格(60-69)']++;
+                    else gradeRanges['不及格(<60)']++;
+                });
+                
+                const pieCtx = document.getElementById('pieChart').getContext('2d');
+                if (pieChart) pieChart.destroy();
+                pieChart = new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(gradeRanges),
+                        datasets: [{
+                            data: Object.values(gradeRanges),
+                            backgroundColor: [
+                                '#4CAF50', '#8BC34A', '#FFC107', '#FF9800', '#F44336'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `${className} ${subject}成績等級分佈`,
+                                font: { 
+                                    size: window.innerWidth < 768 ? 14 : 16 
+                                }
+                            },
+                            legend: {
+                                position: window.innerWidth < 768 ? 'bottom' : 'right'
+                            }
+                        }
+                    }
+                });
+                
+                // 柱狀圖 - 學生成績排名
+                const sortedStudents = [...students].sort((a, b) => b.score - a.score);
+                const barCtx = document.getElementById('barChart').getContext('2d');
+                if (barChart) barChart.destroy();
+                barChart = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedStudents.map(s => s.name),
+                        datasets: [{
+                            label: '成績',
+                            data: sortedStudents.map(s => s.score),
+                            backgroundColor: '#2196F3',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `${className} ${subject}學生成績排名`,
+                                font: { 
+                                    size: window.innerWidth < 768 ? 14 : 16 
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: '分數'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '學生姓名'
+                                },
+                                ticks: {
+                                    maxRotation: window.innerWidth < 768 ? 45 : 0
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // 分佈圖 - 成績分佈
+                const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+                if (distributionChart) distributionChart.destroy();
+                
+                // 計算每個分數段的人數
+                const distributionData = Array(10).fill(0);
+                scores.forEach(score => {
+                    const index = Math.floor(score / 10);
+                    if (index >= 0 && index < 10) {
+                        distributionData[index]++;
+                    }
+                });
+                
+                distributionChart = new Chart(distributionCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90-100'],
+                        datasets: [{
+                            label: '人數',
+                            data: distributionData,
+                            borderColor: '#9C27B0',
+                            backgroundColor: 'rgba(156, 39, 176, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `${className} ${subject}成績分佈`,
+                                font: { 
+                                    size: window.innerWidth < 768 ? 14 : 16 
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '人數'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '分數段'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 生成數據分析
+            function generateAnalysis(className, subject, students) {
+                const scores = students.map(s => s.score);
+                const total = scores.reduce((sum, score) => sum + score, 0);
+                const average = total / scores.length;
+                const maxScore = Math.max(...scores);
+                const minScore = Math.min(...scores);
+                
+                // 計算標準差
+                const squaredDiffs = scores.map(score => Math.pow(score - average, 2));
+                const avgSquaredDiff = squaredDiffs.reduce((sum, val) => sum + val, 0) / scores.length;
+                const stdDev = Math.sqrt(avgSquaredDiff);
+                
+                // 計算及格率
+                const passCount = scores.filter(score => score >= 60).length;
+                const passRate = (passCount / scores.length) * 100;
+                
+                // 計算各分數段人數
+                const excellentCount = scores.filter(score => score >= 90).length;
+                const goodCount = scores.filter(score => score >= 80 && score < 90).length;
+                const mediumCount = scores.filter(score => score >= 70 && score < 80).length;
+                const passCountOnly = scores.filter(score => score >= 60 && score < 70).length;
+                const failCount = scores.filter(score => score < 60).length;
+                
+                analysisContent.innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">${average.toFixed(1)}</div>
+                            <div class="stat-label">平均分</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${maxScore}</div>
+                            <div class="stat-label">最高分</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${minScore}</div>
+                            <div class="stat-label">最低分</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${stdDev.toFixed(1)}</div>
+                            <div class="stat-label">標準差</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${passRate.toFixed(1)}%</div>
+                            <div class="stat-label">及格率</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${students.length}</div>
+                            <div class="stat-label">總人數</div>
+                        </div>
+                    </div>
+                    
+                    <h3>成績分佈詳情</h3>
+                    <ul>
+                        <li>優秀(90-100分): ${excellentCount}人 (${(excellentCount/students.length*100).toFixed(1)}%)</li>
+                        <li>良好(80-89分): ${goodCount}人 (${(goodCount/students.length*100).toFixed(1)}%)</li>
+                        <li>中等(70-79分): ${mediumCount}人 (${(mediumCount/students.length*100).toFixed(1)}%)</li>
+                        <li>及格(60-69分): ${passCountOnly}人 (${(passCountOnly/students.length*100).toFixed(1)}%)</li>
+                        <li>不及格(60分以下): ${failCount}人 (${(failCount/students.length*100).toFixed(1)}%)</li>
+                    </ul>
+                    
+                    <h3>數據分析</h3>
+                    <p>${getAnalysisText(average, stdDev, passRate, className, subject)}</p>
+                `;
+            }
+            
+            // 生成改進建議
+            function generateSuggestions(className, subject, students) {
+                const scores = students.map(s => s.score);
+                const average = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+                const failCount = scores.filter(score => score < 60).length;
+                const excellentCount = scores.filter(score => score >= 90).length;
+                
+                suggestionContent.innerHTML = `
+                    <h3>教學改進建議</h3>
+                    <ul>
+                        ${failCount > 0 ? `<li>針對不及格學生(${failCount}人)開展個別輔導，幫助他們掌握基礎知識。</li>` : ''}
+                        ${excellentCount < students.length * 0.2 ? `<li>增加挑戰性題目，激發優秀學生的學習潛力。</li>` : ''}
+                        <li>根據成績分佈情況，調整教學進度和難度，確保大多數學生能跟上。</li>
+                        <li>定期進行小測驗，及時發現學生的學習困難並給予幫助。</li>
+                    </ul>
+                    
+                    <h3>學習建議</h3>
+                    <ul>
+                        <li>成績優秀的學生：繼續保持，可以嘗試更高難度的學習內容。</li>
+                        <li>成績中等的學生：加強基礎知識練習，找出薄弱環節進行針對性提高。</li>
+                        <li>成績較差的學生：從基礎概念開始複習，多做練習題，及時向老師請教。</li>
+                        <li>所有學生：養成良好的學習習慣，定期複習，做好課前預習。</li>
+                    </ul>
+                `;
+            }
+            
+            // 根據數據生成分析文本
+            function getAnalysisText(average, stdDev, passRate, className, subject) {
+                let analysis = `${className}的${subject}成績分析：`;
+                
+                if (average >= 85) {
+                    analysis += `整體表現優秀，平均分${average.toFixed(1)}分，`;
+                } else if (average >= 75) {
+                    analysis += `整體表現良好，平均分${average.toFixed(1)}分，`;
+                } else if (average >= 60) {
+                    analysis += `整體表現一般，平均分${average.toFixed(1)}分，`;
+                } else {
+                    analysis += `整體表現較差，平均分${average.toFixed(1)}分，`;
+                }
+                
+                if (stdDev < 10) {
+                    analysis += `學生成績差異較小(標準差${stdDev.toFixed(1)})，`;
+                } else if (stdDev < 15) {
+                    analysis += `學生成績有一定差異(標準差${stdDev.toFixed(1)})，`;
+                } else {
+                    analysis += `學生成績差異較大(標準差${stdDev.toFixed(1)})，`;
+                }
+                
+                if (passRate >= 95) {
+                    analysis += `及格率很高(${passRate.toFixed(1)}%)，教學效果顯著。`;
+                } else if (passRate >= 80) {
+                    analysis += `及格率較高(${passRate.toFixed(1)}%)，大部分學生掌握了基本知識。`;
+                } else if (passRate >= 60) {
+                    analysis += `及格率一般(${passRate.toFixed(1)}%)，需要關注不及格學生。`;
+                } else {
+                    analysis += `及格率較低(${passRate.toFixed(1)}%)，需要加強基礎教學。`;
+                }
+                
+                return analysis;
+            }
+            
+            // 窗口大小改變時重新調整圖表
+            window.addEventListener('resize', function() {
+                if (students.length > 0) {
+                    const className = document.getElementById('class').value;
+                    const subject = document.getElementById('subject').value;
+                    
+                    if (className && subject) {
+                        generateCharts(className, subject, students);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
