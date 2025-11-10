@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shirley's Self-designed Cross Word Maker</title>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-dark: #2980b9;
+            --secondary-color: #2c3e50;
+            --success-color: #27ae60;
+            --error-color: #c62828;
+            --light-bg: #f5f7fa;
+            --card-bg: #f8f9fa;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            --border-radius: 12px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: clamp(20px, 3vw, 30px);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eaeaea;
+        }
+        
+        h1 {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            font-size: clamp(1.8rem, 4vw, 2.2rem);
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .game-settings {
+            background: var(--card-bg);
+            padding: clamp(15px, 2vw, 20px);
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 900px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .game-settings h3 {
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+            text-align: center;
+            font-size: clamp(1.1rem, 3vw, 1.3rem);
+        }
+        
+        .word-input-container {
+            margin-bottom: 20px;
+        }
+        
+        .word-input-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+        
+        .word-input-container textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: clamp(0.9rem, 2vw, 0.95rem);
+            resize: vertical;
+            min-height: 150px;
+            font-family: monospace;
+        }
+        
+        .word-input-info {
+            font-size: clamp(0.8rem, 2vw, 0.85rem);
+            color: #666;
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+        
+        .crossword-container {
+            flex: 1;
+            min-width: min(500px, 100%);
+            max-width: 650px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .crossword-grid {
+            display: grid;
+            gap: 2px;
+            background-color: var(--secondary-color);
+            border: 2px solid var(--secondary-color);
+            margin: 0 auto;
+            max-width: 100%;
+        }
+        
+        .cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            font-family: "Times New Roman", serif;
+            font-size: clamp(14px, 3vw, 18px);
+            font-weight: bold;
+            user-select: none;
+            position: relative;
+        }
+        
+        .cell.filled {
+            background-color: var(--secondary-color);
+        }
+        
+        .cell.numbered::before {
+            content: attr(data-number);
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: clamp(8px, 2vw, 10px);
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        
+        .cell input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: clamp(14px, 3vw, 18px);
+            font-weight: bold;
+            text-transform: uppercase;
+            background: transparent;
+            outline: none;
+        }
+        
+        .clues-container {
+            flex: 1;
+            min-width: min(300px, 100%);
+            max-width: 450px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .clues-section {
+            margin-bottom: 25px;
+        }
+        
+        .clues-section h3 {
+            margin-bottom: 12px;
+            color: var(--secondary-color);
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+        }
+        
+        .clue-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-size: clamp(0.85rem, 2vw, 0.9rem);
+        }
+        
+        .clue-number {
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-right: 5px;
+        }
+        
+        .controls {
+            text-align: center;
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: clamp(10px, 2vw, 12px) clamp(20px, 3vw, 24px);
+            border: none;
+            border-radius: 6px;
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            transition: background 0.2s, transform 0.1s;
+            flex: 1;
+            min-width: 140px;
+        }
+        
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #download-pdf-btn {
+            background: var(--success-color);
+        }
+        
+        #download-pdf-btn:hover {
+            background: #219653;
+        }
+        
+        .alert {
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: clamp(0.85rem, 2vw, 0.9rem);
+        }
+        
+        .alert-error {
+            background: #ffebee;
+            color: var(--error-color);
+            border: 1px solid #ef9a9a;
+        }
+        
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+        
+        .stats {
+            text-align: center;
+            margin-top: 15px;
+            color: var(--secondary-color);
+            font-weight: bold;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+        
+        /* 學生資訊彈窗樣式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .student-info-modal {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .student-info-modal h3 {
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+            text-align: center;
+            font-size: 1.3rem;
+        }
+        
+        .info-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .info-input {
+            width: 100%;
+        }
+        
+        .info-input label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+            font-size: 0.9rem;
+        }
+        
+        .info-input input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .modal-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .modal-controls button {
+            flex: 1;
+        }
+        
+        /* PDF 報告樣式 */
+        .pdf-page {
+            width: 800px;
+            background: white;
+            padding: 25px;
+            font-family: Arial, sans-serif;
+            margin-bottom: 20px;
+        }
+        
+        .pdf-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .pdf-student-info, .pdf-game-info {
+            flex: 1;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        
+        .pdf-student-info {
+            margin-right: 10px;
+        }
+        
+        .pdf-game-info {
+            margin-left: 10px;
+        }
+        
+        .pdf-completion {
+            margin: 20px 0;
+            padding: 12px;
+            background: #e8f5e9;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .pdf-clues-section {
+            margin: 20px 0;
+        }
+        
+        .pdf-clues-section h3 {
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .pdf-clue-item {
+            margin-bottom: 8px;
+            padding: 6px;
+        }
+        
+        .pdf-word-item {
+            margin-bottom: 8px;
+            padding: 6px;
+            border-radius: 4px;
+        }
+        
+        .pdf-word-found {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .pdf-word-notfound {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .pdf-review-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        
+        .pdf-review-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .crossword-container, .clues-container {
+                min-width: 100%;
+                max-width: 100%;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .modal-overlay {
+                padding: 10px;
+            }
+            
+            .student-info-modal {
+                padding: 20px;
+            }
+            
+            .pdf-header {
+                flex-direction: column;
+            }
+            
+            .pdf-student-info, .pdf-game-info {
+                margin: 0 0 10px 0;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .word-input-info {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Shirley's Cross Word Maker</h1>
+            <p class="subtitle">輸入單字和提示，生成專屬填字遊戲！支援從Google Sheets或Excel貼上資料</p>
+        </header>
+        
+        <div class="game-settings">
+            <h3>填字遊戲設定</h3>
+            <div class="word-input-container">
+                <label for="word-input">輸入單字和提示（每行一組，單字和提示用Tab鍵分隔）</label>
+                <textarea id="word-input" placeholder="例如：
+apple   一種常見的紅色或綠色水果
+banana   黃色的彎曲水果
+computer   用於處理數據的電子設備
+..."></textarea>
+                <div class="word-input-info">
+                    <span id="word-count">0</span> 個單字 | 最長單字: <span id="max-length">0</span> 字母
+                    <span>提示：可以從Excel或Google Sheets直接複製貼上</span>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="generate-btn">生成Cross Word</button>
+                <button id="download-pdf-btn" disabled>下載學習報告</button>
+            </div>
+        </div>
+        
+        <div id="alert-area"></div>
+        
+        <div class="game-area">
+            <div class="crossword-container">
+                <h3 style="text-align: center; margin-bottom: 15px; color: #2c3e50;">填字遊戲</h3>
+                <div class="crossword-grid" id="crossword-grid">
+                    <!-- 填字遊戲網格將在這裡生成 -->
+                </div>
+                <div class="stats">
+                    完成進度: <span id="completion">0%</span> | 已找到: <span id="found-count">0</span>/<span id="total-count">0</span> 個單字
+                </div>
+            </div>
+            
+            <div class="clues-container">
+                <div class="clues-section">
+                    <h3>橫向提示</h3>
+                    <div id="across-clues">
+                        <!-- 橫向提示將在這裡生成 -->
+                    </div>
+                </div>
+                
+                <div class="clues-section">
+                    <h3>縱向提示</h3>
+                    <div id="down-clues">
+                        <!-- 縱向提示將在這裡生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 學生資訊彈窗 -->
+    <div id="student-info-modal" class="modal-overlay" style="display: none;">
+        <div class="student-info-modal">
+            <h3>請輸入學生資訊</h3>
+            <div class="info-form">
+                <div class="info-input">
+                    <label for="class-input">班級 (Class)</label>
+                    <input type="text" id="class-input" placeholder="">
+                </div>
+                <div class="info-input">
+                    <label for="name-input">姓名 (Name)</label>
+                    <input type="text" id="name-input" placeholder="" required>
+                </div>
+                <div class="info-input">
+                    <label for="seat-input">座號 (Seat No.)</label>
+                    <input type="text" id="seat-input" placeholder="">
+                </div>
+            </div>
+            <div class="modal-controls">
+                <button id="cancel-btn">取消</button>
+                <button id="confirm-btn">確認並下載PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF 報告模板 -->
+    <div id="pdf-report" class="pdf-page" style="display: none;">
+        <h2 style="text-align:center; color:#2c3e50; margin-bottom: 20px;">
+            <span id="pdf-student-name">學生姓名</span>'s Self-designed Cross Word 報告
+        </h2>
+        
+        <div class="pdf-header">
+            <div class="pdf-student-info">
+                <div style="font-weight:bold; margin-bottom:8px;">學生資訊</div>
+                <div>班級: <span id="pdf-class"></span></div>
+                <div>姓名: <span id="pdf-name"></span></div>
+                <div>座號: <span id="pdf-seat"></span></div>
+            </div>
+            <div class="pdf-game-info">
+                <div style="font-weight:bold; margin-bottom:8px;">遊戲資訊</div>
+                <div>生成時間: <span id="pdf-generation-time"></span></div>
+                <div>單字數量: <span id="pdf-word-count"></span></div>
+                <div>完成進度: <span id="pdf-completion"></span></div>
+            </div>
+        </div>
+        
+        <div style="margin:20px 0;">
+            <div style="font-weight:bold; margin-bottom:8px;">填字遊戲網格:</div>
+            <div class="crossword-grid" id="pdf-crossword-grid"></div>
+        </div>
+        
+        <div class="pdf-completion">
+            完成情況: <span id="pdf-completion-text"></span>
+        </div>
+        
+        <div class="pdf-clues-section">
+            <h3>單字完成狀態</h3>
+            <div id="pdf-word-status"></div>
+        </div>
+        
+        <div class="pdf-clues-section">
+            <h3>橫向提示</h3>
+            <div id="pdf-across-clues"></div>
+        </div>
+        
+        <div class="pdf-clues-section">
+            <h3>縱向提示</h3>
+            <div id="pdf-down-clues"></div>
+        </div>
+        
+        <div class="pdf-review-section">
+            <h3>未完成單字複習</h3>
+            <div id="pdf-review-words"></div>
+        </div>
+        
+        <div style="margin-top:30px; padding:15px; background:#f9f9f9; border-radius:5px;">
+            <div style="font-weight:bold; margin-bottom:8px;">學習建議：</div>
+            <div>1. 複習已完成的單字，確保理解其含義和用法</div>
+            <div>2. 針對未完成的單字，可以查閱字典或請教老師</div>
+            <div>3. 嘗試用這些單字造句，加深記憶</div>
+            <div>4. 與同學交換填字遊戲，互相挑戰</div>
+        </div>
+    </div>
+
+    <script>
+        // 遊戲配置
+        const GAME_CONFIG = {
+            minWords: 5,
+            maxWords: 30,
+            maxWordLength: 15,
+            gridSize: 15, // 初始網格大小，會根據單字自動調整
+            maxGridSize: 20
+        };
+
+        // 遊戲狀態
+        let gameState = {
+            words: [],
+            clues: {},
+            crossword: null,
+            grid: [],
+            numberedCells: {},
+            studentInfo: {
+                class: '',
+                name: '',
+                seat: ''
+            },
+            completion: 0,
+            foundWords: new Set(),
+            userInputs: {} // 存儲用戶輸入的字母
+        };
+
+        // ======================
+        // 工具函數
+        // ======================
+        function parseInput(input) {
+            if (!input.trim()) return { words: [], clues: {} };
+            
+            const lines = input.split('\n');
+            const words = [];
+            const clues = {};
+            
+            lines.forEach(line => {
+                if (line.trim()) {
+                    // 支援Tab鍵或空格分隔
+                    const parts = line.split(/\t| {2,}/);
+                    if (parts.length >= 2) {
+                        const word = parts[0].trim().toUpperCase();
+                        const clue = parts[1].trim();
+                        
+                        if (word && clue) {
+                            words.push(word);
+                            clues[word] = clue;
+                        }
+                    }
+                }
+            });
+            
+            return { words, clues };
+        }
+
+        function validateWords(words) {
+            if (words.length < GAME_CONFIG.minWords) {
+                return {
+                    valid: false,
+                    message: `單字數量太少！至少需要 ${GAME_CONFIG.minWords} 個單字，目前只有 ${words.length} 個。`
+                };
+            }
+            
+            if (words.length > GAME_CONFIG.maxWords) {
+                return {
+                    valid: false,
+                    message: `單字數量太多！最多允許 ${GAME_CONFIG.maxWords} 個單字，目前有 ${words.length} 個。`
+                };
+            }
+            
+            const longWords = words.filter(word => word.length > GAME_CONFIG.maxWordLength);
+            if (longWords.length > 0) {
+                return {
+                    valid: false,
+                    message: `以下單字長度超過限制（${GAME_CONFIG.maxWordLength}字母）：${longWords.join(', ')}`
+                };
+            }
+            
+            return { valid: true };
+        }
+
+        // ======================
+        // 填字遊戲生成算法 - 改進版，增加隨機性
+        // ======================
+        function generateCrossword(words, clues) {
+            // 隨機打亂單字順序，增加多樣性
+            const shuffledWords = [...words].sort(() => Math.random() - 0.5);
+            
+            // 初始化網格
+            const gridSize = Math.min(GAME_CONFIG.maxGridSize, 
+                Math.max(GAME_CONFIG.gridSize, 
+                    Math.max(...words.map(w => w.length)) + 5));
+            
+            const grid = Array(gridSize).fill().map(() => Array(gridSize).fill(''));
+            const numberedCells = {};
+            const placedWords = [];
+            
+            // 隨機選擇第一個單字和放置方向
+            const firstWordIndex = Math.floor(Math.random() * shuffledWords.length);
+            const firstWord = shuffledWords[firstWordIndex];
+            const firstDirection = Math.random() > 0.5 ? 'across' : 'down';
+            
+            // 隨機選擇起始位置，確保單字能完全放入網格
+            let startRow, startCol;
+            if (firstDirection === 'across') {
+                startRow = Math.floor(Math.random() * gridSize);
+                startCol = Math.floor(Math.random() * (gridSize - firstWord.length));
+            } else {
+                startRow = Math.floor(Math.random() * (gridSize - firstWord.length));
+                startCol = Math.floor(Math.random() * gridSize);
+            }
+            
+            placeWord(grid, firstWord, startRow, startCol, firstDirection, numberedCells);
+            placedWords.push({
+                word: firstWord,
+                row: startRow,
+                col: startCol,
+                direction: firstDirection,
+                number: 1
+            });
+            
+            // 為第一個單字設置編號
+            numberedCells[`${startRow},${startCol}`] = 1;
+            
+            // 嘗試放置其他單字
+            let numberCounter = 2;
+            
+            // 隨機打亂剩餘單字的順序
+            const remainingWords = shuffledWords.filter((_, index) => index !== firstWordIndex);
+            const randomizedWords = [...remainingWords].sort(() => Math.random() - 0.5);
+            
+            for (let i = 0; i < randomizedWords.length; i++) {
+                const word = randomizedWords[i];
+                let placed = false;
+                
+                // 隨機打亂已放置單字的順序，增加交叉點的隨機性
+                const randomizedPlacedWords = [...placedWords].sort(() => Math.random() - 0.5);
+                
+                // 嘗試與已放置的單字交叉
+                for (const placedWord of randomizedPlacedWords) {
+                    if (tryPlaceWord(grid, word, placedWord, numberedCells, numberCounter)) {
+                        placedWords.push({
+                            word: word,
+                            row: placedWord.crossRow,
+                            col: placedWord.crossCol,
+                            direction: placedWord.crossDirection,
+                            number: numberCounter
+                        });
+                        numberCounter++;
+                        placed = true;
+                        break;
+                    }
+                }
+                
+                // 如果無法交叉放置，嘗試在空閒位置放置
+                if (!placed) {
+                    const placement = findEmptyPlacement(grid, word);
+                    if (placement) {
+                        placeWord(grid, word, placement.row, placement.col, placement.direction, numberedCells);
+                        placedWords.push({
+                            word: word,
+                            row: placement.row,
+                            col: placement.col,
+                            direction: placement.direction,
+                            number: numberCounter
+                        });
+                        numberedCells[`${placement.row},${placement.col}`] = numberCounter;
+                        numberCounter++;
+                    }
+                }
+            }
+            
+            return {
+                grid,
+                placedWords,
+                numberedCells,
+                clues
+            };
+        }
+
+        function placeWord(grid, word, row, col, direction, numberedCells) {
+            if (direction === 'across') {
+                for (let i = 0; i < word.length; i++) {
+                    grid[row][col + i] = word[i];
+                }
+            } else { // down
+                for (let i = 0; i < word.length; i++) {
+                    grid[row + i][col] = word[i];
+                }
+            }
+        }
+
+        function tryPlaceWord(grid, word, placedWord, numberedCells, number) {
+            // 嘗試找到交叉點 - 隨機選擇交叉點
+            const possibleCrossings = [];
+            
+            for (let i = 0; i < word.length; i++) {
+                for (let j = 0; j < placedWord.word.length; j++) {
+                    if (word[i] === placedWord.word[j]) {
+                        possibleCrossings.push({ wordIndex: i, placedWordIndex: j });
+                    }
+                }
+            }
+            
+            // 隨機打亂可能的交叉點
+            const randomizedCrossings = [...possibleCrossings].sort(() => Math.random() - 0.5);
+            
+            for (const crossing of randomizedCrossings) {
+                const { wordIndex, placedWordIndex } = crossing;
+                
+                // 計算交叉位置
+                let crossRow, crossCol, crossDirection;
+                
+                if (placedWord.direction === 'across') {
+                    crossRow = placedWord.row - wordIndex;
+                    crossCol = placedWord.col + placedWordIndex;
+                    crossDirection = 'down';
+                } else {
+                    crossRow = placedWord.row + placedWordIndex;
+                    crossCol = placedWord.col - wordIndex;
+                    crossDirection = 'across';
+                }
+                
+                // 檢查是否可以放置
+                if (canPlaceWord(grid, word, crossRow, crossCol, crossDirection)) {
+                    // 放置單字
+                    placeWord(grid, word, crossRow, crossCol, crossDirection, numberedCells);
+                    
+                    // 設置編號
+                    numberedCells[`${crossRow},${crossCol}`] = number;
+                    
+                    // 保存交叉信息
+                    placedWord.crossRow = crossRow;
+                    placedWord.crossCol = crossCol;
+                    placedWord.crossDirection = crossDirection;
+                    
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        function canPlaceWord(grid, word, row, col, direction) {
+            if (direction === 'across') {
+                // 檢查是否超出邊界
+                if (col < 0 || col + word.length > grid.length) return false;
+                
+                // 檢查每個位置是否可用
+                for (let i = 0; i < word.length; i++) {
+                    const cell = grid[row][col + i];
+                    if (cell !== '' && cell !== word[i]) return false;
+                }
+                
+                // 檢查前後位置是否為空（避免單字相連）
+                if (col > 0 && grid[row][col - 1] !== '') return false;
+                if (col + word.length < grid.length && grid[row][col + word.length] !== '') return false;
+                
+                // 檢查垂直方向是否衝突
+                for (let i = 0; i < word.length; i++) {
+                    // 檢查上方
+                    if (row > 0 && grid[row - 1][col + i] !== '') {
+                        // 如果當前位置是空的，但上方有字母，則不能放置
+                        if (grid[row][col + i] === '') return false;
+                    }
+                    // 檢查下方
+                    if (row < grid.length - 1 && grid[row + 1][col + i] !== '') {
+                        // 如果當前位置是空的，但下方有字母，則不能放置
+                        if (grid[row][col + i] === '') return false;
+                    }
+                }
+            } else { // down
+                // 檢查是否超出邊界
+                if (row < 0 || row + word.length > grid.length) return false;
+                
+                // 檢查每個位置是否可用
+                for (let i = 0; i < word.length; i++) {
+                    const cell = grid[row + i][col];
+                    if (cell !== '' && cell !== word[i]) return false;
+                }
+                
+                // 檢查前後位置是否為空（避免單字相連）
+                if (row > 0 && grid[row - 1][col] !== '') return false;
+                if (row + word.length < grid.length && grid[row + word.length][col] !== '') return false;
+                
+                // 檢查水平方向是否衝突
+                for (let i = 0; i < word.length; i++) {
+                    // 檢查左方
+                    if (col > 0 && grid[row + i][col - 1] !== '') {
+                        // 如果當前位置是空的，但左方有字母，則不能放置
+                        if (grid[row + i][col] === '') return false;
+                    }
+                    // 檢查右方
+                    if (col < grid.length - 1 && grid[row + i][col + 1] !== '') {
+                        // 如果當前位置是空的，但右方有字母，則不能放置
+                        if (grid[row + i][col] === '') return false;
+                    }
+                }
+            }
+            
+            return true;
+        }
+
+        function findEmptyPlacement(grid, word) {
+            const gridSize = grid.length;
+            
+            // 嘗試在隨機位置放置
+            for (let attempt = 0; attempt < 100; attempt++) {
+                const direction = Math.random() > 0.5 ? 'across' : 'down';
+                let row, col;
+                
+                if (direction === 'across') {
+                    row = Math.floor(Math.random() * gridSize);
+                    col = Math.floor(Math.random() * (gridSize - word.length));
+                } else {
+                    row = Math.floor(Math.random() * (gridSize - word.length));
+                    col = Math.floor(Math.random() * gridSize);
+                }
+                
+                if (canPlaceWord(grid, word, row, col, direction)) {
+                    return { row, col, direction };
+                }
+            }
+            
+            return null;
+        }
+
+        // ======================
+        // 單字輸入處理
+        // ======================
+        function setupWordInput() {
+            const wordInput = document.getElementById('word-input');
+            wordInput.addEventListener('input', updateWordInputInfo);
+        }
+
+        function updateWordInputInfo() {
+            const wordInput = document.getElementById('word-input');
+            const { words } = parseInput(wordInput.value);
+            
+            const wordCount = words.length;
+            const maxLength = words.length > 0 ? Math.max(...words.map(w => w.length)) : 0;
+            
+            document.getElementById('word-count').textContent = wordCount;
+            document.getElementById('max-length').textContent = maxLength;
+            
+            // 檢查是否超過限制
+            const validation = validateWords(words);
+            
+            // 更新生成按鈕狀態
+            const generateBtn = document.getElementById('generate-btn');
+            generateBtn.disabled = !validation.valid;
+            
+            // 顯示警告
+            const alertArea = document.getElementById('alert-area');
+            alertArea.innerHTML = '';
+            
+            if (wordCount === 0) {
+                // 沒有單字時不顯示警告
+                return;
+            }
+            
+            if (!validation.valid) {
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-error';
+                alert.textContent = validation.message;
+                alertArea.appendChild(alert);
+            } else {
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-success';
+                alert.textContent = `單字輸入有效！可以生成填字遊戲。`;
+                alertArea.appendChild(alert);
+            }
+        }
+
+        // ======================
+        // 遊戲邏輯
+        // ======================
+        function initGame() {
+            setupWordInput();
+            updateWordInputInfo();
+        }
+
+        function generateCrosswordGame() {
+            const wordInput = document.getElementById('word-input');
+            const { words, clues } = parseInput(wordInput.value);
+            
+            // 驗證單字
+            const validation = validateWords(words);
+            if (!validation.valid) {
+                alert(validation.message);
+                return;
+            }
+            
+            // 生成填字遊戲
+            gameState.crossword = generateCrossword(words, clues);
+            gameState.grid = gameState.crossword.grid;
+            gameState.numberedCells = gameState.crossword.numberedCells;
+            gameState.words = words;
+            gameState.clues = clues;
+            gameState.completion = 0;
+            gameState.foundWords.clear();
+            gameState.userInputs = {};
+            
+            // 渲染填字遊戲
+            renderCrossword();
+            renderClues();
+            updateCompletion();
+            
+            // 啟用PDF下載按鈕
+            document.getElementById('download-pdf-btn').disabled = false;
+            
+            // 顯示成功消息
+            const alertArea = document.getElementById('alert-area');
+            alertArea.innerHTML = '';
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-success';
+            alert.textContent = `成功生成填字遊戲！包含 ${words.length} 個單字。`;
+            alertArea.appendChild(alert);
+        }
+
+        function renderCrossword() {
+            const gridEl = document.getElementById('crossword-grid');
+            gridEl.innerHTML = '';
+            
+            const gridSize = gameState.grid.length;
+            gridEl.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+            
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    
+                    if (gameState.grid[i][j] === '') {
+                        cell.classList.add('filled');
+                    } else {
+                        const cellKey = `${i},${j}`;
+                        if (gameState.numberedCells[cellKey]) {
+                            cell.classList.add('numbered');
+                            cell.setAttribute('data-number', gameState.numberedCells[cellKey]);
+                        }
+                        
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.maxLength = 1;
+                        input.dataset.row = i;
+                        input.dataset.col = j;
+                        
+                        // 如果有之前的輸入，恢復它
+                        if (gameState.userInputs[cellKey]) {
+                            input.value = gameState.userInputs[cellKey];
+                            if (input.value === gameState.grid[i][j]) {
+                                input.style.color = '#27ae60';
+                                input.style.fontWeight = 'bold';
+                            } else {
+                                input.style.color = '#e74c3c';
+                            }
+                        }
+                        
+                        input.addEventListener('input', (e) => {
+                            const value = e.target.value.toUpperCase();
+                            e.target.value = value;
+                            
+                            // 保存用戶輸入
+                            const row = parseInt(e.target.dataset.row);
+                            const col = parseInt(e.target.dataset.col);
+                            const cellKey = `${row},${col}`;
+                            gameState.userInputs[cellKey] = value;
+                            
+                            // 檢查輸入是否正確
+                            if (value === gameState.grid[row][col]) {
+                                e.target.style.color = '#27ae60';
+                                e.target.style.fontWeight = 'bold';
+                            } else {
+                                e.target.style.color = '#e74c3c';
+                            }
+                            
+                            updateCompletion();
+                        });
+                        
+                        input.addEventListener('keydown', (e) => {
+                            // 允許方向鍵導航
+                            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                                e.preventDefault();
+                                navigateGrid(e.key, i, j);
+                            }
+                        });
+                        
+                        cell.appendChild(input);
+                    }
+                    
+                    gridEl.appendChild(cell);
+                }
+            }
+        }
+
+        function navigateGrid(direction, row, col) {
+            let newRow = row;
+            let newCol = col;
+            
+            switch (direction) {
+                case 'ArrowUp':
+                    newRow = Math.max(0, row - 1);
+                    break;
+                case 'ArrowDown':
+                    newRow = Math.min(gameState.grid.length - 1, row + 1);
+                    break;
+                case 'ArrowLeft':
+                    newCol = Math.max(0, col - 1);
+                    break;
+                case 'ArrowRight':
+                    newCol = Math.min(gameState.grid.length - 1, col + 1);
+                    break;
+            }
+            
+            const newInput = document.querySelector(`input[data-row="${newRow}"][data-col="${newCol}"]`);
+            if (newInput) {
+                newInput.focus();
+            }
+        }
+
+        function renderClues() {
+            const acrossCluesEl = document.getElementById('across-clues');
+            const downCluesEl = document.getElementById('down-clues');
+            
+            acrossCluesEl.innerHTML = '';
+            downCluesEl.innerHTML = '';
+            
+            // 分類橫向和縱向單字
+            const acrossWords = [];
+            const downWords = [];
+            
+            gameState.crossword.placedWords.forEach(placedWord => {
+                if (placedWord.direction === 'across') {
+                    acrossWords.push(placedWord);
+                } else {
+                    downWords.push(placedWord);
+                }
+            });
+            
+            // 渲染橫向提示
+            acrossWords.forEach(placedWord => {
+                const clueItem = document.createElement('div');
+                clueItem.className = 'clue-item';
+                clueItem.innerHTML = `<span class="clue-number">${placedWord.number}.</span> ${gameState.clues[placedWord.word]}`;
+                acrossCluesEl.appendChild(clueItem);
+            });
+            
+            // 渲染縱向提示
+            downWords.forEach(placedWord => {
+                const clueItem = document.createElement('div');
+                clueItem.className = 'clue-item';
+                clueItem.innerHTML = `<span class="clue-number">${placedWord.number}.</span> ${gameState.clues[placedWord.word]}`;
+                downCluesEl.appendChild(clueItem);
+            });
+        }
+
+        function updateCompletion() {
+            let correctCells = 0;
+            let totalCells = 0;
+            gameState.foundWords.clear();
+            
+            // 計算正確輸入的單元格數量
+            document.querySelectorAll('#crossword-grid input').forEach(input => {
+                const row = parseInt(input.dataset.row);
+                const col = parseInt(input.dataset.col);
+                
+                if (gameState.grid[row][col] !== '') {
+                    totalCells++;
+                    if (input.value === gameState.grid[row][col]) {
+                        correctCells++;
+                    }
+                }
+            });
+            
+            // 檢查哪些單字已完成
+            gameState.crossword.placedWords.forEach(placedWord => {
+                let wordComplete = true;
+                const { word, row, col, direction } = placedWord;
+                
+                if (direction === 'across') {
+                    for (let i = 0; i < word.length; i++) {
+                        const cellKey = `${row},${col + i}`;
+                        if (gameState.userInputs[cellKey] !== word[i]) {
+                            wordComplete = false;
+                            break;
+                        }
+                    }
+                } else { // down
+                    for (let i = 0; i < word.length; i++) {
+                        const cellKey = `${row + i},${col}`;
+                        if (gameState.userInputs[cellKey] !== word[i]) {
+                            wordComplete = false;
+                            break;
+                        }
+                    }
+                }
+                
+                if (wordComplete) {
+                    gameState.foundWords.add(word);
+                }
+            });
+            
+            // 更新完成度
+            gameState.completion = totalCells > 0 ? Math.round((correctCells / totalCells) * 100) : 0;
+            document.getElementById('completion').textContent = `${gameState.completion}%`;
+            document.getElementById('found-count').textContent = gameState.foundWords.size;
+            document.getElementById('total-count').textContent = gameState.words.length;
+        }
+
+        // ======================
+        // 學生資訊彈窗處理
+        // ======================
+        function showStudentInfoModal() {
+            const modal = document.getElementById('student-info-modal');
+            modal.style.display = 'flex';
+            
+            // 從本地存儲加載已保存的學生資訊
+            const savedInfo = localStorage.getItem('crosswordStudentInfo');
+            if (savedInfo) {
+                const info = JSON.parse(savedInfo);
+                document.getElementById('class-input').value = info.class || '';
+                document.getElementById('name-input').value = info.name || '';
+                document.getElementById('seat-input').value = info.seat || '';
+            }
+            
+            // 聚焦到姓名輸入框
+            document.getElementById('name-input').focus();
+        }
+        
+        function hideStudentInfoModal() {
+            const modal = document.getElementById('student-info-modal');
+            modal.style.display = 'none';
+        }
+        
+        function saveStudentInfo() {
+            const classInput = document.getElementById('class-input').value.trim();
+            const nameInput = document.getElementById('name-input').value.trim();
+            const seatInput = document.getElementById('seat-input').value.trim();
+            
+            if (!nameInput) {
+                alert('請輸入姓名');
+                document.getElementById('name-input').focus();
+                return false;
+            }
+            
+            gameState.studentInfo = {
+                class: classInput,
+                name: nameInput,
+                seat: seatInput
+            };
+            
+            // 保存到本地存儲
+            localStorage.setItem('crosswordStudentInfo', JSON.stringify(gameState.studentInfo));
+            
+            return true;
+        }
+
+        // ======================
+        // PDF 報告生成
+        // ======================
+        async function generatePDF() {
+            // 檢查是否已生成遊戲
+            if (!gameState.crossword) {
+                alert('請先生成填字遊戲');
+                return;
+            }
+
+            // 顯示學生資訊彈窗
+            showStudentInfoModal();
+        }
+        
+        async function confirmAndGeneratePDF() {
+            // 保存學生資訊
+            if (!saveStudentInfo()) {
+                return;
+            }
+            
+            // 關閉彈窗
+            hideStudentInfoModal();
+            
+            // 生成PDF報告
+            await generatePDFReport();
+        }
+
+        async function generatePDFReport() {
+            // 更新PDF報告中的學生資訊
+            document.getElementById('pdf-student-name').textContent = gameState.studentInfo.name;
+            document.getElementById('pdf-class').textContent = gameState.studentInfo.class || '未填寫';
+            document.getElementById('pdf-name').textContent = gameState.studentInfo.name;
+            document.getElementById('pdf-seat').textContent = gameState.studentInfo.seat || '未填寫';
+            
+            document.getElementById('pdf-generation-time').textContent = new Date().toLocaleString('zh-CN');
+            document.getElementById('pdf-word-count').textContent = gameState.words.length;
+            document.getElementById('pdf-completion').textContent = `${gameState.completion}%`;
+            document.getElementById('pdf-completion-text').textContent = 
+                `已完成 ${gameState.completion}% 的填字遊戲 (${gameState.foundWords.size}/${gameState.words.length} 個單字)`;
+
+            // 更新PDF填字遊戲網格 - 顯示用戶輸入和未填出的單字
+            const pdfGrid = document.getElementById('pdf-crossword-grid');
+            pdfGrid.innerHTML = '';
+            
+            const gridSize = gameState.grid.length;
+            pdfGrid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+            
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    
+                    if (gameState.grid[i][j] === '') {
+                        cell.classList.add('filled');
+                    } else {
+                        const cellKey = `${i},${j}`;
+                        if (gameState.numberedCells[cellKey]) {
+                            cell.classList.add('numbered');
+                            cell.setAttribute('data-number', gameState.numberedCells[cellKey]);
+                        }
+                        
+                        // 顯示用戶輸入或正確答案
+                        const userInput = gameState.userInputs[cellKey];
+                        if (userInput) {
+                            cell.textContent = userInput;
+                            if (userInput === gameState.grid[i][j]) {
+                                cell.style.color = '#27ae60';
+                                cell.style.fontWeight = 'bold';
+                            } else {
+                                cell.style.color = '#e74c3c';
+                                cell.style.fontWeight = 'bold';
+                            }
+                        } else {
+                            // 未填出的單字用紅色標示
+                            cell.textContent = gameState.grid[i][j];
+                            cell.style.color = '#e74c3c';
+                            cell.style.fontWeight = 'bold';
+                        }
+                    }
+                    
+                    pdfGrid.appendChild(cell);
+                }
+            }
+
+            // 更新PDF單字狀態
+            const pdfWordStatus = document.getElementById('pdf-word-status');
+            pdfWordStatus.innerHTML = '';
+            
+            gameState.words.forEach(word => {
+                const wordItem = document.createElement('div');
+                wordItem.className = 'pdf-word-item';
+                
+                if (gameState.foundWords.has(word)) {
+                    wordItem.classList.add('pdf-word-found');
+                    wordItem.innerHTML = `<strong>${word}</strong> - ${gameState.clues[word]} ✓`;
+                } else {
+                    wordItem.classList.add('pdf-word-notfound');
+                    wordItem.innerHTML = `<strong>${word}</strong> - ${gameState.clues[word]} ✗`;
+                }
+                
+                pdfWordStatus.appendChild(wordItem);
+            });
+
+            // 更新PDF複習單字
+            const pdfReviewWords = document.getElementById('pdf-review-words');
+            pdfReviewWords.innerHTML = '';
+            
+            // 找出未完成的單字
+            const notFoundWords = gameState.words.filter(word => !gameState.foundWords.has(word));
+            
+            if (notFoundWords.length > 0) {
+                notFoundWords.forEach(word => {
+                    const reviewItem = document.createElement('div');
+                    reviewItem.className = 'pdf-review-item';
+                    reviewItem.innerHTML = `<strong>${word}</strong>: ${gameState.clues[word]}`;
+                    pdfReviewWords.appendChild(reviewItem);
+                });
+            } else {
+                const reviewItem = document.createElement('div');
+                reviewItem.className = 'pdf-review-item';
+                reviewItem.innerHTML = "恭喜！您已經完成了所有單字。";
+                pdfReviewWords.appendChild(reviewItem);
+            }
+
+            // 更新PDF提示
+            const pdfAcrossClues = document.getElementById('pdf-across-clues');
+            const pdfDownClues = document.getElementById('pdf-down-clues');
+            
+            pdfAcrossClues.innerHTML = '';
+            pdfDownClues.innerHTML = '';
+            
+            // 分類橫向和縱向單字
+            const acrossWords = [];
+            const downWords = [];
+            
+            gameState.crossword.placedWords.forEach(placedWord => {
+                if (placedWord.direction === 'across') {
+                    acrossWords.push(placedWord);
+                } else {
+                    downWords.push(placedWord);
+                }
+            });
+            
+            // 渲染橫向提示
+            acrossWords.forEach(placedWord => {
+                const clueItem = document.createElement('div');
+                clueItem.className = 'pdf-clue-item';
+                clueItem.innerHTML = `<span class="clue-number">${placedWord.number}.</span> ${gameState.clues[placedWord.word]}`;
+                pdfAcrossClues.appendChild(clueItem);
+            });
+            
+            // 渲染縱向提示
+            downWords.forEach(placedWord => {
+                const clueItem = document.createElement('div');
+                clueItem.className = 'pdf-clue-item';
+                clueItem.innerHTML = `<span class="clue-number">${placedWord.number}.</span> ${gameState.clues[placedWord.word]}`;
+                pdfDownClues.appendChild(clueItem);
+            });
+
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+
+            // 生成PDF
+            const pdfEl = document.getElementById('pdf-report');
+            pdfEl.style.display = 'block';
+            
+            const canvas = await html2canvas(pdfEl, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 210;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            
+            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+            
+            // 隱藏PDF元素
+            pdfEl.style.display = 'none';
+            
+            // 使用學生姓名作為PDF檔案名稱的一部分
+            const fileName = `${gameState.studentInfo.name}'s Self-designed Cross Word_${new Date().toISOString().slice(0,10)}.pdf`;
+            pdf.save(fileName);
+        }
+
+        // ======================
+        // 初始化
+        // ======================
+        document.addEventListener('DOMContentLoaded', () => {
+            initGame();
+            document.getElementById('generate-btn').addEventListener('click', generateCrosswordGame);
+            document.getElementById('download-pdf-btn').addEventListener('click', generatePDF);
+            
+            // 學生資訊彈窗事件
+            document.getElementById('cancel-btn').addEventListener('click', hideStudentInfoModal);
+            document.getElementById('confirm-btn').addEventListener('click', confirmAndGeneratePDF);
+            
+            // 點擊彈窗外部關閉彈窗
+            document.getElementById('student-info-modal').addEventListener('click', (e) => {
+                if (e.target.id === 'student-info-modal') {
+                    hideStudentInfoModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
