@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> U21-30 單字挑戰無極限</title>
+    <style>
+        /* 基礎樣式重置 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #0a2e38;
+            color: white;
+            text-align: center;
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            touch-action: manipulation;
+        }
+        
+        .container {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            width: 95%;
+            max-width: 800px;
+            margin: 10px;
+            border: 3px solid #d4af37;
+        }
+        
+        h1 {
+            color: #d4af37;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, #ff8a00, #e52e71, #b24592);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbow 5s linear infinite;
+            line-height: 1.3;
+        }
+        
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        
+        .question-container {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: rgba(0, 50, 30, 0.7);
+            border-radius: 10px;
+            border: 2px solid #ff0000;
+            position: relative;
+            min-height: 100px;
+            transition: opacity 0.3s ease;
+        }
+        
+        .question {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            line-height: 1.3;
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .option {
+            background-color: #f0f8ff;
+            border: 2px solid #d4af37;
+            border-radius: 50%;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+            touch-action: manipulation;
+        }
+        
+        .option:active {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+            background-color: #e6f7ff;
+        }
+        
+        .option::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, #ff8a00, #e52e71, #b24592, #f15f79);
+            background-size: 400% 400%;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 50%;
+            animation: christmasLight 4s linear infinite;
+        }
+        
+        @keyframes christmasLight {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .option:active::before {
+            opacity: 0.3;
+        }
+        
+        .correct {
+            background-color: rgba(0, 255, 0, 0.3);
+            border-color: #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.7);
+        }
+        
+        .incorrect {
+            background-color: rgba(255, 0, 0, 0.3);
+            border-color: #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+        }
+        
+        .score-container {
+            margin: 15px 0;
+            font-size: 1.2rem;
+            color: #d4af37;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        
+        .controls {
+            margin: 15px 0;
+        }
+        
+        button {
+            background-color: #d4af37;
+            color: #0a2e38;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 0 5px;
+            font-weight: bold;
+            touch-action: manipulation;
+            min-width: 140px;
+        }
+        
+        button:active {
+            background-color: #ffd700;
+            transform: scale(0.98);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+        
+        .feedback {
+            font-size: 1.2rem;
+            margin: 15px 0;
+            min-height: 30px;
+            color: #d4af37;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+            transition: opacity 0.3s ease;
+        }
+        
+        .moose {
+            position: absolute;
+            font-size: 2.5rem;
+            animation: jump 1s infinite alternate;
+            z-index: 10;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        @keyframes jump {
+            0% { transform: translate(-50%, 0); }
+            100% { transform: translate(-50%, -15px); }
+        }
+        
+        .snowflake {
+            position: absolute;
+            color: white;
+            font-size: 1.2rem;
+            animation: fall linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes fall {
+            to { transform: translateY(100vh); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .result-container {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 15px;
+            border: 3px solid #d4af37;
+        }
+        
+        .result-title {
+            color: #d4af37;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        .result-score {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+        
+        .timer-container {
+            width: 100%;
+            height: 10px;
+            background-color: #333;
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .timer-bar {
+            height: 100%;
+            background: linear-gradient(to right, #00ff00, #ff0000);
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+        
+        .start-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .start-btn {
+            background-color: #e52e71;
+            color: white;
+            font-size: 1.3rem;
+            padding: 14px 28px;
+            margin-top: 15px;
+        }
+        
+        .urgent {
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.7; }
+        }
+        
+        /* 響應式設計 - 平板 */
+        @media (min-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .question {
+                font-size: 1.7rem;
+            }
+            
+            .option {
+                width: 110px;
+                height: 110px;
+                font-size: 1.1rem;
+            }
+            
+            .score-container {
+                font-size: 1.3rem;
+            }
+            
+            button {
+                font-size: 1.2rem;
+                padding: 14px 24px;
+            }
+        }
+        
+        /* 響應式設計 - 電腦 */
+        @media (min-width: 1024px) {
+            .container {
+                padding: 30px;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .question {
+                font-size: 1.8rem;
+            }
+            
+            .option {
+                width: 120px;
+                height: 120px;
+                font-size: 1.2rem;
+            }
+            
+            .option:hover {
+                transform: scale(1.05);
+                box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+                background-color: #e6f7ff;
+            }
+            
+            .option:hover::before {
+                opacity: 0.3;
+            }
+            
+            button:hover {
+                background-color: #ffd700;
+                transform: scale(1.1);
+                box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+            }
+            
+            .score-container {
+                font-size: 1.5rem;
+            }
+            
+            button {
+                font-size: 1.3rem;
+                padding: 16px 28px;
+            }
+        }
+        
+        /* 響應式設計 - 小手機 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .question {
+                font-size: 1.3rem;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .option {
+                width: 90px;
+                height: 90px;
+                font-size: 0.9rem;
+                padding: 10px;
+            }
+            
+            .score-container {
+                font-size: 1.1rem;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            button {
+                font-size: 1rem;
+                padding: 10px 16px;
+                min-width: 120px;
+            }
+            
+            .feedback {
+                font-size: 1.1rem;
+            }
+        }
+        
+        /* 響應式設計 - 超小手機 */
+        @media (max-width: 360px) {
+            .option {
+                width: 80px;
+                height: 80px;
+                font-size: 0.85rem;
+            }
+            
+            .moose {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎄 L6 U21-30 單字挑戰無極限 🎄</h1>
+        
+        <div class="start-container" id="start-container">
+            <p>Ready for the Challenge？</p>
+            <button class="start-btn" id="start-btn">Start</button>
+        </div>
+        
+        <div id="game-container" class="hidden">
+            <div class="score-container">
+                <div>分數: <span id="score">0</span></div>
+                <div>題目: <span id="question-count">0</span></div>
+            </div>
+            
+            <div class="timer-container">
+                <div class="timer-bar" id="timer-bar"></div>
+            </div>
+            
+            <div class="question-container" id="question-container">
+                <div class="question" id="question"></div>
+                <div id="moose-container"></div>
+            </div>
+            
+            <div class="options-container" id="options-container"></div>
+            
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="result-container hidden" id="result-container">
+                <div class="result-title">Game Over!</div>
+                <div class="result-score">Final Score: <span id="final-score">0</span></div>
+                <div id="result-message"></div>
+                <button id="restart-btn-end">One More Challenge</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 耶誕節主題單字資料
+        const newVocabulary = `premier,adj,首位的;最早的
+rash,adj,輕率的;急躁的
+textile,adj,紡織的
+compile,v,匯編;收集(資料等);編譯(程式)
+facilitate,v,使容易;促進;幫助
+fragment,v,使成碎片
+merchandise,v,買賣;經營
+alliance,n,結盟;聯盟
+capsule,n,小盒;膠囊;太空艙
+collector,n,收集者;收藏家
+complement,n,補充物;補足物
+consensus,n,一致;合意;輿論
+discrimination,n,歧視;辨別力
+disposal,n,處理;(自由)處置權
+disregard,n,漠視
+diversity,n,差異;多樣性
+eccentric,n,古怪的人
+literate,n,能讀寫的人
+manuscript,n,手稿;打字稿;原稿
+outlet,n,出口;出路;商店
+rental,n,租金;租賃;出租
+spectacular,n,奇觀;壯觀
+warranty,n,保證書;保單
+crucial,adj,決定性的;重要的
+editorial,adj,社論的
+commence,v,開始;著手;得學位
+diagnose,v,診斷
+extract,v,取出;抽出;提煉;摘錄
+pension,v,發給...退休金(或養老金等); 准許退休
+prohibit,v,禁止
+sequence,v,排序
+shed,v,流出;毛髮等脫落;蛻(殼等)
+trek,v,艱苦跋涉或移居
+accessory,n,附件;配件;從犯
+assumption,n,假設;擔任
+hygiene,n,衛生;衛生學;保健法
+ingenuity,n,心靈手巧;獨創性;足智多謀
+layout,n,設計;佈局;版面設計
+lunatic,n,瘋子;瘋傻的人
+lure,n,誘惑物;魅力;誘餌
+pesticide,n,殺蟲劑
+purity,n,純淨;清潔;純潔
+simplicity,n,簡單;單純
+solitude,n,孤獨;隱居
+spiral,n,螺旋(形);盤旋
+staple,n,U形釘;釘書針;日常必需品; 主食
+subordinate,n,部下;下級職員
+transmission,n,傳送;傳染;傳播;變速器;播送
+absentminded,adj,心不在焉的;健忘的
+antarctic,adj,南極的;南極區的
+blunt,adj,鈍的;遲鈍的;直率的
+brisk,adj,輕快的;興旺的;寒冷而清新的
+foster,adj,收養的
+inclusive,adj,包含的;包括在內的
+versatile,adj,多才多藝的;多功能的
+vicious,adj,惡意的;惡毒的
+vulgar,adj,粗俗的;下流的
+abbreviate,v,縮寫
+diversify,v,使多樣化
+enact,v,制定(法律);扮演(角色)
+fortify,v,築防禦工事於;增強
+glisten,v,閃耀;閃亮
+lament,v,哀悼;悲痛;痛哭
+prejudice,v,使抱偏見;使懷成見; 有損於
+skim,v,去;去除;瀏覽;略讀
+trespass,v,擅自進入;侵入
+analyst,n,分析師
+cruiser,n,巡洋艦;遊艇;警察巡邏車
+graphic,n,畫像
+heritage,n,遺產;繼承物;傳統
+illusion,n,錯覺;假象;幻想
+liter,n,公升
+longevity,n,長壽;壽命
+meditation,n,沈思;默想;冥想
+monopoly,n,獨佔;專賣;壟斷
+obligation,n,(道義上或法律上的)義務
+squad,n,班;小隊;小組
+alternative,adj,兩者(或若干中擇一的)
+captive,adj,被俘的;被迷住的
+dual,adj,雙的;雙倍的;雙重的
+ingenious,adj,心靈手巧的;足智多謀的
+advocate,v,擁護;提倡
+covet,v,垂涎;貪圖; 覬覦
+detain,v,留住;扣留
+humiliate,v,羞辱;使丟臉
+stalk,v,偷偷靠近;追蹤
+strangle,v,勒死;扼住;悶住
+Arctic,n,北極地帶;北極圈
+fluid,n,液體
+mold,n,模子;鑄型;模製品;霉 (=mould)
+overhead,n,經常費用;天花板
+pension,n,退休金;養老金
+perspective,n,看法;遠景;前途;透視圖
+phase,n,階段;相
+productivity,n,生產力;生產率
+realism,n,現實性;現實主義
+seminar,n,專題討論(課或會議)
+shed,n,分水嶺;小屋;堆房
+spokesman,n,發言人;代言人
+tropic,n,回歸線;熱帶
+decisive,adj,決定性的;確定的;果斷的
+sociable,adj,好交際的;善交際的
+spiral,adj,螺旋(形)的;盤旋的
+thrifty,adj,節儉的;茂盛的
+coincide,v,同時發生;巧合;一致
+discomfort,v,使不舒服;使不安
+inject,v,注射(藥液等)
+outrage,v,激起義憤;激怒;施暴行
+raft,v,用筏子運送;划筏
+raid,v,襲擊;劫掠
+topple,v,使倒塌;推翻
+casualty,n,傷亡人員
+collision,n,相撞;衝突;抵觸
+controversy,n,爭論;爭議
+credibility,n,可信性;確實性
+directory,n,姓名住址簿;使用手冊
+editorial,n,社論
+emigration,n,(向外)移居;(總稱)移民
+fidelity,n,忠誠;忠貞
+lounge,n,(旅館等的)會客廳;候機室;躺椅
+materialism,n,唯物論;唯物主義
+option,n,選擇;選擇權
+pedestrian,n,步行者;行人
+prescription,n,指示;法規;處方
+raft,n,筏子;橡皮艇
+solidarity,n,團結一致
+synthetic,n,合成物;合成纖維
+tempest,n,暴風雨;暴風雪;騷動
+version,n,譯文;版本
+ambiguous,adj,含糊不清的
+discreet,adj,謹慎的;謙虛的;不引人注意的
+punctual,adj,準時的
+valiant,adj,勇敢的;英勇的
+abound,v,大量存在;富足;充滿
+donate,v,捐獻;捐贈
+hurdle,v,跨(欄);克服(困難)
+migrate,v,移居;定期移棲;回游
+nourish,v,養育;滋養
+reconcile,v,和解;使一致;使安於
+smuggle,v,走私
+acquisition,n,收購;取得
+antenna,n,觸角;觸鬚;天線
+attic,n,頂樓;閣樓
+constituent,n,成分;組成的要素;選民
+discomfort,n,不舒服;不安
+electron,n,電子
+expiration,n,失效;期滿;吐氣
+eyesight,n,視力;目力
+humanitarian,n,人道主義者;慈善家
+kernel,n,(果核或果殼內的)仁;核心;要點
+missionary,n,傳教士;鼓吹者;(外交)使節
+nomination,n,提名;任命
+spokeswoman,n,女發言人
+squash,n,擠壓;壓碎的東西;南瓜
+transplant,n,移植
+tread,n,踩;踏;樓梯踏板;輪胎面;鞋底
+vice,n,惡;罪行;惡習
+alcoholic,adj,含酒精的;酗酒的
+cosmetic,adj,化妝用的;裝飾性的;表面的
+documentary,adj,文件的;(電影電視等)記錄的
+progressive,adj,逐漸的
+cater,v,承辦宴席;迎合
+dissuade,v,勸阻
+incline,v,傾斜;屈身;有意
+ravage,v,蹂躪;使荒蕪
+shoplift,v,冒充顧客在商店內偷竊
+slot,v,開狹長的孔;把...納入序列中; 為...安排時間
+uncover,v,揭開...的蓋子;揭露
+usher,v,引領;迎接;當引座員
+acceleration,n,加速;促進
+closure,n,關閉;打烊;結束;終止
+counterpart,n,對應的人(或物)
+distrust,n,不信任;懷疑
+eternity,n,永遠;永恆;永世
+familiarity,n,熟悉;通曉
+hypocrite,n,偽善者;偽君子
+indignation,n,憤怒;憤慨;義憤
+injection,n,注射
+magnitude,n,巨大;重大;強度
+questionnaire,n,問卷;意見調查表
+renaissance,n,文藝復興
+script,n,筆跡;(戲劇廣播等的)腳本
+stock,n,(公司的)股票;存貨
+unemployment,n,失業;失業狀態
+utility,n,效用;實用;公用事業
+vocation,n,行業;天職
+vomit,n,嘔吐;嘔吐物
+comprehensive,adj,廣泛的;綜合的
+destined,adj,命中注定的;(場所)預定的
+diverse,adj,互異的;多變化的
+implicit,adj,不言明的;含蓄的
+vocational,adj,職業的
+vulnerable,adj,易受傷的;有弱點的
+depict,v,描畫;雕出;描述
+dispatch,v,派遣;發送
+ebb,v,退潮;衰退
+expel,v,驅逐;排出;開除
+harass,v,騷擾;使煩惱
+mimic,v,模仿;與...極相似
+outlaw,v,宣佈...為不合法;禁止
+precede,v,處在...之前;(地位等)高於
+soothe,v,安慰;哄;減輕
+barometer,n,晴雨表;顯示變化的事物
+contestant,n,參加競賽者;角逐者
+decline,n,下降;減少;衰退;傾斜
+dedication,n,奉獻;揭幕儀式;獻身
+dispatch,n,派遣;發送
+donation,n,捐獻;捐款
+equation,n,方程式;等式;相等
+guerrilla,n,游擊隊(員)
+melancholy,n,憂鬱;愁思
+motto,n,座右銘;格言
+preface,n,序言;緒言
+snare,n,(捕捉鳥獸的)陷阱;圈套
+spokesperson,n,發言人
+overhead,adj,在上頭的;高架的; 營運的
+stationary,adj,不動的;定居的
+subjective,adj,主觀的;個人的;主詞的
+subsequent,adj,隨後的;接著發生的
+victorious,adj,勝利的
+blunt,v,使鈍;使遲鈍;減弱
+deem,v,認為;視作
+divert,v,轉向;改道;使分心
+escalate,v,使逐步上升(增強或擴大)
+grope,v,觸摸;暗中摸;探索
+kidnap,v,綁架;劫持
+posture,v,擺出姿勢;故作姿態
+rotate,v,旋轉;輪流; 輪值
+subscribe,v,訂閱;認捐;簽名
+supplement,v,增補;為...補編附錄
+yearn,v,思念;渴望;嚮往
+advocate,n,提倡者;擁護者
+apprentice,n,學徒;生手
+auction,n,拍賣
+brochure,n,小冊子
+champagne,n,香檳酒;香檳酒色
+clarity,n,(思想文體等的)清楚;明晰
+conquest,n,征服;克服;佔領
+cosmopolitan,n,世界主義者;四海為家者
+coverage,n,覆蓋範圍;保險項目;新聞報導
+donor,n,贈送人;捐贈者
+drawback,n,缺點;不利條件;障礙
+ecstasy,n,狂喜;入迷
+lyric,n,抒情作品;歌詞
+oppression,n,壓迫;壓制
+pharmacy,n,製藥業;藥房
+provincial,n,地方居民;鄉下人
+rotation,n,旋轉;自轉;輪流
+spike,n,牆頭釘;尖鐵;釘鞋;細高跟
+texture,n,(織物的)結構;質地;紋理;肌理
+transformation,n,變化;轉變;變形;變質
+tumor,n,腫瘤;腫塊
+bulky,adj,體積大的;笨重的
+clinical,adj,臨床的;診所的
+naval,adj,海軍的
+ritual,adj,(宗教)儀式的;典禮的
+ambush,v,埋伏下;伏擊
+collide,v,相撞;衝突;抵觸
+coordinate,v,協調;調節; 協調一致
+expire,v,失效;滿期;吐氣
+oblige,v,使不得不;迫使;施恩於
+ponder,v,仔細考慮;衡量;回想
+truant,v,逃學;逃避責任;偷懶
+undo,v,解開;脫去(衣服等);取消
+regardless,adv,無論如何
+alternative,n,選擇的自由(或餘地)
+capability,n,能力;性能
+descent,n,下降;下傾;血統
+faculty,n,(學校的)全體教員;官能
+grope,n,觸摸;探索
+intellect,n,智力;理解力;有才智的人
+linguist,n,語言學者;通曉數種外語的人
+mastery,n,支配;統治;精通;掌握
+navigation,n,航海;航空;導航
+siege,n,圍攻;包圍;圍城
+`.trim().split('\n').map(line => {
+    const [word, type, meaning] = line.split(',');
+    return {
+        word: word.trim(),
+        type: type.trim(),
+        meaning: meaning.trim()
+    };
+});
+
+        const vocabulary = newVocabulary;
+
+        // 遊戲變數
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questions = [];
+        let timer = null; // 確保計時器初始為null
+        let timeLeft = 8;
+        let tickSound;
+        let usedInCurrentSession = []; // ✅ 新增：本局已使用單字索引
+        
+        // DOM 元素
+        const questionElement = document.getElementById('question');
+        const optionsContainer = document.getElementById('options-container');
+        const scoreElement = document.getElementById('score');
+        const questionCountElement = document.getElementById('question-count');
+        const feedbackElement = document.getElementById('feedback');
+        const resultContainer = document.getElementById('result-container');
+        const finalScoreElement = document.getElementById('final-score');
+        const resultMessageElement = document.getElementById('result-message');
+        const timerBar = document.getElementById('timer-bar');
+        const mooseContainer = document.getElementById('moose-container');
+        const restartButtonEnd = document.getElementById('restart-btn-end');
+        const startContainer = document.getElementById('start-container');
+        const gameContainer = document.getElementById('game-container');
+        const startButton = document.getElementById('start-btn');
+        const questionContainer = document.getElementById('question-container');
+        
+        // 創建音效
+        function createSound(frequency, type) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = type;
+                oscillator.frequency.value = frequency;
+                gainNode.gain.value = 0.1;
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start();
+                
+                return {
+                    stop: function() {
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+                        setTimeout(function() {
+                            oscillator.stop();
+                        }, 100);
+                    }
+                };
+            } catch (e) {
+                console.log('Web Audio API is not supported in this browser');
+                return { stop: function() {} };
+            }
+        }
+        
+        // 初始化遊戲
+        function initGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            usedInCurrentSession = []; // ✅ 每次重新開始都清空本局記錄
+            
+            // 清除之前的計時器
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            
+            // 重置遊戲狀態
+            questions = [];
+            
+            // 更新UI
+            updateScore();
+            
+            // 顯示遊戲元素
+            questionContainer.classList.remove('hidden');
+            optionsContainer.classList.remove('hidden');
+            feedbackElement.classList.remove('hidden');
+            resultContainer.classList.add('hidden');
+            
+            // 生成第一個問題
+            generateQuestion();
+            
+            // 開始雪花動畫
+            createSnowflakes();
+        }
+        
+        // 生成新問題（✅ 已重寫）
+        function generateQuestion() {
+            // 如果本局已用完所有單字，清空記錄以開始新一輪
+            if (usedInCurrentSession.length >= vocabulary.length) {
+                usedInCurrentSession = [];
+            }
+            
+            // 找出尚未使用的索引
+            const availableIndices = vocabulary
+                .map((_, i) => i)
+                .filter(i => !usedInCurrentSession.includes(i));
+            
+            // 安全防護
+            if (availableIndices.length === 0) {
+                usedInCurrentSession = [];
+                generateQuestion();
+                return;
+            }
+            
+            // 隨機選擇一個未使用過的單字
+            const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+            usedInCurrentSession.push(randomIndex);
+            const selectedWord = vocabulary[randomIndex];
+            
+            // 創建問題
+            const question = {
+                word: selectedWord.word,
+                type: selectedWord.type,
+                correctMeaning: selectedWord.meaning,
+                options: generateOptions(selectedWord.meaning)
+            };
+            
+            questions.push(question);
+            showQuestion();
+        }
+        
+        // 生成選項 (包含正確答案和3個隨機錯誤答案)
+        function generateOptions(correctMeaning) {
+            const options = [correctMeaning];
+            
+            // 從單字庫中隨機選擇3個不同的意思作為錯誤選項
+            const otherMeanings = vocabulary
+                .map(item => item.meaning)
+                .filter(meaning => meaning !== correctMeaning);
+            
+            while (options.length < 4 && otherMeanings.length > 0) {
+                const randomIndex = Math.floor(Math.random() * otherMeanings.length);
+                const randomMeaning = otherMeanings[randomIndex];
+                if (!options.includes(randomMeaning)) {
+                    options.push(randomMeaning);
+                    otherMeanings.splice(randomIndex, 1);
+                }
+            }
+            
+            // 打亂選項順序
+            return shuffleArray(options);
+        }
+        
+        // 打亂陣列順序
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+        
+        // 顯示當前問題
+        function showQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            
+            // 更新問題計數
+            questionCountElement.textContent = currentQuestionIndex + 1;
+            
+            // 顯示問題
+            questionElement.textContent = `${currentQuestion.word} (${currentQuestion.type})`;
+            
+            // 清除之前的選項
+            optionsContainer.innerHTML = '';
+            
+            // 添加新的選項
+            currentQuestion.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                optionElement.textContent = option;
+                optionElement.addEventListener('click', () => selectOption(option, currentQuestion.correctMeaning));
+                
+                // 為每個彩球添加不同顏色
+                const colors = ['#ffcce6', '#ccf2ff', '#e6ffcc', '#ffebcc'];
+                optionElement.style.backgroundColor = colors[index];
+                
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // 清除反饋
+            feedbackElement.textContent = '';
+            
+            // 清除之前的麋鹿
+            mooseContainer.innerHTML = '';
+            
+            // 添加一隻跳躍的麋鹿
+            const moose = document.createElement('div');
+            moose.classList.add('moose');
+            moose.textContent = '🫎';
+            mooseContainer.appendChild(moose);
+            
+            // 開始倒計時
+            startTimer();
+        }
+        
+        // 開始倒計時
+        function startTimer() {
+            timeLeft = 8;
+            timerBar.style.width = '100%';
+            timerBar.style.backgroundColor = '#00ff00';
+            
+            // 清除之前的計時器
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                timerBar.style.width = `${(timeLeft / 8) * 100}%`;
+                
+                // 根據剩餘時間改變顏色
+                if (timeLeft <= 3) {
+                    timerBar.style.backgroundColor = '#ff0000';
+                    // 添加緊急脈動效果
+                    timerBar.classList.add('urgent');
+                    
+                    // 播放滴答聲
+                    if (timeLeft > 0) {
+                        tickSound = createSound(800 + (3 - timeLeft) * 200, 'sine');
+                        setTimeout(() => {
+                            if (tickSound) tickSound.stop();
+                        }, 100);
+                    }
+                } else if (timeLeft <= 5) {
+                    timerBar.style.backgroundColor = '#ffff00';
+                    timerBar.classList.remove('urgent');
+                } else {
+                    timerBar.classList.remove('urgent');
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    timer = null; // 重要：將計時器設為null
+                    timeUp();
+                }
+            }, 1000);
+        }
+        
+        // 時間到
+        function timeUp() {
+            const currentQuestion = questions[currentQuestionIndex];
+            feedbackElement.textContent = `時間到! 正確答案是: ${currentQuestion.correctMeaning}`;
+            feedbackElement.style.color = '#ff0000';
+            
+            // 禁用所有選項
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.style.pointerEvents = 'none';
+                if (option.textContent === currentQuestion.correctMeaning) {
+                    option.classList.add('correct');
+                }
+            });
+            
+            // 播放錯誤音效
+            const errorSound = createSound(400, 'sawtooth');
+            setTimeout(() => {
+                if (errorSound) errorSound.stop();
+            }, 300);
+            
+            // 結束遊戲 - 縮短等待時間
+            setTimeout(() => {
+                endGame();
+            }, 1000);
+        }
+        
+        // 選擇選項
+        function selectOption(selectedOption, correctAnswer) {
+            // 停止計時器
+            if (timer) {
+                clearInterval(timer);
+                timer = null; // 重要：將計時器設為null
+            }
+            
+            // 禁用所有選項
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.style.pointerEvents = 'none';
+                if (option.textContent === correctAnswer) {
+                    option.classList.add('correct');
+                } else if (option.textContent === selectedOption && selectedOption !== correctAnswer) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // 檢查答案
+            if (selectedOption === correctAnswer) {
+                score += 5;
+                feedbackElement.textContent = '正確! 🎄';
+                feedbackElement.style.color = '#00ff00';
+                
+                // 播放正確音效
+                const correctSound = createSound(600, 'sine');
+                setTimeout(() => {
+                    if (correctSound) correctSound.stop();
+                }, 200);
+                
+                // 更新分數
+                updateScore();
+                
+                // 準備下一題 - 縮短等待時間
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    generateQuestion();
+                }, 500);
+            } else {
+                feedbackElement.textContent = `錯誤! 正確答案是: ${correctAnswer}`;
+                feedbackElement.style.color = '#ff0000';
+                
+                // 播放錯誤音效
+                const errorSound = createSound(400, 'sawtooth');
+                setTimeout(() => {
+                    if (errorSound) errorSound.stop();
+                }, 300);
+                
+                // 結束遊戲 - 縮短等待時間
+                setTimeout(() => {
+                    endGame();
+                }, 1000);
+            }
+        }
+        
+        // 更新分數顯示
+        function updateScore() {
+            scoreElement.textContent = score;
+        }
+        
+        // 結束遊戲
+        function endGame() {
+            finalScoreElement.textContent = score;
+            
+            // 根據分數顯示不同的訊息
+            if (score >= 20) {
+                resultMessageElement.textContent = '太棒了! 你是英文單字大師! 🎅';
+            } else if (score >= 10) {
+                resultMessageElement.textContent = '做得不錯! 繼續加油! ⛄';
+            } else if (score >= 5) {
+                resultMessageElement.textContent = '還可以，再多練習會更好! 🎄';
+            } else {
+                resultMessageElement.textContent = '繼續努力，你會越來越進步! 🦌';
+            }
+            
+            // 顯示結果容器
+            resultContainer.classList.remove('hidden');
+            
+            // 隱藏問題和選項容器
+            questionContainer.classList.add('hidden');
+            optionsContainer.classList.add('hidden');
+            feedbackElement.classList.add('hidden');
+        }
+        
+        // 創建雪花效果
+        function createSnowflakes() {
+            // 清除舊的雪花
+            const oldSnowflakes = document.querySelectorAll('.snowflake');
+            oldSnowflakes.forEach(snowflake => snowflake.remove());
+            
+            // 創建新雪花
+            for (let i = 0; i < 50; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                snowflake.innerHTML = '❄';
+                
+                // 隨機位置和大小
+                snowflake.style.left = `${Math.random() * 100}%`;
+                snowflake.style.fontSize = `${Math.random() * 10 + 10}px`;
+                snowflake.style.opacity = Math.random();
+                snowflake.style.animationDuration = `${Math.random() * 5 + 5}s`;
+                snowflake.style.animationDelay = `${Math.random() * 5}s`;
+                
+                document.body.appendChild(snowflake);
+            }
+        }
+        
+        // 事件監聽器
+        function setupEventListeners() {
+            restartButtonEnd.addEventListener('click', () => {
+                startContainer.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
+                initGame();
+            });
+            
+            startButton.addEventListener('click', () => {
+                startContainer.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
+                initGame();
+            });
+        }
+        
+        // 初始化遊戲
+        function initializeGame() {
+            gameContainer.classList.add('hidden');
+            startContainer.classList.remove('hidden');
+            createSnowflakes();
+            setupEventListeners();
+        }
+        
+        // 啟動遊戲
+        initializeGame();
+    </script>
+</body>
+</html>
