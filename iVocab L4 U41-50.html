@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>單字挑戰無極限 - 復活節特別版</title>
+    <style>
+        /* 基礎樣式重置 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('https://images.unsplash.com/photo-1680530240063-8e2cc1a9a2a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        
+        .game-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 95%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            border: 2px solid #a8d8ea;
+            overflow: hidden;
+            margin: 10px;
+        }
+        
+        h1 {
+            color: #6b8cae;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            line-height: 1.3;
+        }
+        
+        .word-display {
+            font-size: 1.8rem;
+            margin: 15px 0;
+            color: #4a6fa5;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+        
+        .pos-display {
+            font-size: 1.1rem;
+            color: #6b8cae;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 10px;
+        }
+        
+        .egg-option {
+            width: 45%;
+            max-width: 140px;
+            height: 140px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            margin: 5px;
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.1));
+            touch-action: manipulation;
+        }
+        
+        .egg-option:active {
+            transform: translateY(-3px);
+        }
+        
+        .egg-text {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #333;
+            font-weight: bold;
+            padding: 5px 8px;
+            background-color: rgba(255,255,255,0.9);
+            border-radius: 12px;
+            margin: 0 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        
+        .timer-container {
+            width: 100%;
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to right, #a8d8ea, #6b8cae);
+            transition: width 0.1s linear;
+            border-radius: 5px;
+        }
+        
+        .bunny {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23a8d8ea" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208zm96-208c0-53-43-96-96-96s-96 43-96 96 43 96 96 96 96-43 96-96zm-96-64c35.3 0 64 28.7 64 64s-28.7 64-64 64-64-28.7-64-64 28.7-64 64-64z"/><circle fill="%23a8d8ea" cx="160" cy="144" r="32"/><circle fill="%23a8d8ea" cx="352" cy="144" r="32"/><path fill="%23a8d8ea" d="M256 304c-35.3 0-64 28.7-64 64s28.7 64 64 64 64-28.7 64-64-28.7-64-64-64z"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 0.5s infinite alternate;
+            z-index: 10;
+        }
+        
+        @keyframes bounce {
+            from { bottom: 10px; }
+            to { bottom: 18px; }
+        }
+        
+        .score-display {
+            font-size: 1.1rem;
+            color: #6b8cae;
+            margin: 8px 0;
+            font-weight: bold;
+        }
+        
+        .game-over {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            flex-direction: column;
+            color: white;
+            font-size: 1.5rem;
+            display: none;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .game-over h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #a8d8ea;
+        }
+        
+        .restart-btn, .start-btn {
+            padding: 14px 28px;
+            background-color: #6b8cae;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+            touch-action: manipulation;
+            min-width: 180px;
+        }
+        
+        .restart-btn:active, .start-btn:active {
+            background-color: #a8d8ea;
+            transform: scale(0.98);
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: #a8d8ea;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        /* 四種不同顏色的復活節彩蛋 */
+        .egg-1 { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23a8d8ea" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208z"/></svg>'); }
+        .egg-2 { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23f6d5f7" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208z"/></svg>'); }
+        .egg-3 { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23f8c3cd" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208z"/></svg>'); }
+        .egg-4 { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23faf3dd" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208z"/></svg>'); }
+        
+        /* 復活節彩蛋上的花紋 */
+        .egg-option::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><circle fill="%23ffffff" cx="128" cy="128" r="16"/><circle fill="%23ffffff" cx="256" cy="256" r="12"/><circle fill="%23ffffff" cx="384" cy="128" r="16"/><circle fill="%23ffffff" cx="128" cy="384" r="12"/><circle fill="%23ffffff" cx="384" cy="384" r="12"/></svg>');
+            background-size: 80%;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.2;
+        }
+        
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        
+        .easter-flower {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23f8c3cd" d="M256 0c-70.7 0-128 57.3-128 128s57.3 128 128 128 128-57.3 128-128S326.7 0 256 0zm0 208c-44.2 0-80-35.8-80-80s35.8-80 80-80 80 35.8 80 80-35.8 80-80 80z"/><circle fill="%23faf3dd" cx="256" cy="128" r="32"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            z-index: -1;
+        }
+        
+        .easter-leaf {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23a8d8ea" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208z"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            z-index: -1;
+        }
+        
+        .option-disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        /* 答對效果 */
+        .correct-answer {
+            animation: correctPulse 0.4s;
+            filter: drop-shadow(0 0 10px rgba(168, 216, 234, 0.7));
+        }
+        
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* 響應式調整 */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .word-display {
+                font-size: 1.6rem;
+            }
+            
+            .egg-option {
+                width: 45%;
+                height: 120px;
+            }
+            
+            .egg-text {
+                font-size: 0.8rem;
+                bottom: 15px;
+            }
+            
+            .bunny {
+                width: 50px;
+                height: 50px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .egg-option {
+                width: 45%;
+                height: 110px;
+            }
+            
+            .egg-text {
+                font-size: 0.75rem;
+            }
+        }
+        
+        /* 平板專用樣式 */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .game-container {
+                max-width: 600px;
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 1.7rem;
+            }
+            
+            .word-display {
+                font-size: 2rem;
+            }
+            
+            .egg-option {
+                height: 160px;
+                max-width: 160px;
+            }
+            
+            .egg-text {
+                font-size: 0.95rem;
+            }
+        }
+        
+        /* 手機專用樣式 */
+        .mobile-device .egg-option {
+            height: 130px;
+        }
+        
+        .mobile-device .egg-text {
+            font-size: 0.8rem;
+            bottom: 15px;
+        }
+        
+        /* iOS 專用優化 */
+        .ios-device .egg-option {
+            -webkit-touch-callout: none;
+        }
+        
+        /* Android 專用優化 */
+        .android-device .egg-option {
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>L4 U41-50 單字挑戰無極限</h1>
+        <div class="score-display">Score: <span id="score">0</span></div>
+        <div id="setup-screen">
+            <button class="start-btn" id="start-game">Start</button>
+        </div>
+        <div id="game-screen" style="display: none;">
+            <div class="word-display" id="current-word">單字</div>
+            <div class="pos-display" id="current-pos">詞性</div>
+            <div class="timer-container">
+                <div class="timer-bar" id="timer-bar"></div>
+            </div>
+            <div class="options-container">
+                <div class="egg-option egg-1" data-option="1">
+                    <div class="egg-text" id="option-1">選項1</div>
+                </div>
+                <div class="egg-option egg-2" data-option="2">
+                    <div class="egg-text" id="option-2">選項2</div>
+                </div>
+                <div class="egg-option egg-3" data-option="3">
+                    <div class="egg-text" id="option-3">選項3</div>
+                </div>
+                <div class="egg-option egg-4" data-option="4">
+                    <div class="egg-text" id="option-4">選項4</div>
+                </div>
+            </div>
+            <div class="bunny"></div>
+        </div>
+        <div class="game-over" id="game-over">
+            <h2 id="result-message">Game Over!</h2>
+            <div>Final Score: <span id="final-score">0</span></div>
+            <button class="restart-btn" id="restart-btn">One More Challenge</button>
+        </div>
+    </div>
+
+    <script>
+        // 設備檢測和響應式功能
+        function detectDevice() {
+            const userAgent = navigator.userAgent;
+            const body = document.body;
+            
+            // 移除可能已存在的設備類別
+            body.classList.remove('desktop-device', 'tablet-device', 'mobile-device', 'ios-device', 'android-device');
+            
+            // 檢測設備類型
+            if (/iPad|tablet/i.test(userAgent) || (window.innerWidth >= 768 && window.innerWidth <= 1024)) {
+                body.classList.add('tablet-device');
+            } else if (/iPhone|iPod|Android.*Mobile|Windows Phone|Mobile/i.test(userAgent) || window.innerWidth < 768) {
+                body.classList.add('mobile-device');
+                
+                // 檢測具體的移動設備平台
+                if (/iPhone|iPod|iPad/i.test(userAgent)) {
+                    body.classList.add('ios-device');
+                } else if (/Android/i.test(userAgent)) {
+                    body.classList.add('android-device');
+                }
+            } else {
+                body.classList.add('desktop-device');
+            }
+            
+            console.log('檢測到的設備類型:', body.classList.toString());
+        }
+        
+        // 遊戲變數
+        let vocabulary = [];
+        let currentWord = null;
+        let score = 0;
+        let timer = null;
+        let timeLeft = 8;
+        let gameActive = false;
+        let canAnswer = true; // 新增：控制是否可回答
+        
+        // DOM元素
+        const setupScreen = document.getElementById('setup-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over');
+        const startGameBtn = document.getElementById('start-game');
+        const restartBtn = document.getElementById('restart-btn');
+        const currentWordDisplay = document.getElementById('current-word');
+        const currentPosDisplay = document.getElementById('current-pos');
+        const optionDisplays = [
+            document.getElementById('option-1'),
+            document.getElementById('option-2'),
+            document.getElementById('option-3'),
+            document.getElementById('option-4')
+        ];
+        const scoreDisplay = document.getElementById('score');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+        const timerBar = document.getElementById('timer-bar');
+        const eggOptions = document.querySelectorAll('.egg-option');
+        
+        // 單字庫 (簡化版本)
+        const wordList = `multiple,adj,複合的;多樣的
+shameful,adj,可恥的;丟臉的
+delight,v,使高興
+expand,v,展開;張開
+recite,v,背誦;朗誦;詳述
+overnight,adv,一整夜的
+scarcely,adv,幾乎不;幾乎沒有
+accountant,n,會計師
+aluminum,n,鋁
+blush,n,臉紅
+carrier,n,運送人;從事運輸業公司;帶菌者
+conservative,n,保守者;守舊者
+cunning,n,狡猾;奸詐;靈巧;熟練
+curve,n,曲線
+exhaust,n,排出;排氣
+funeral,n,喪葬;葬儀
+harmony,n,和諧;協調
+nursery,n,托兒所;兒童房; 苗圃
+orbit,n,運行軌道
+professor,n,教授
+shift,n,移動; 改變; 轉換; 輪班
+translator,n,譯者
+admirable,adj,值得讚揚的;絕妙的
+gifted,adj,有天資的;有天賦的
+numerous,adj,許多的;很多的
+divorce,v,與...離婚;使離婚
+establish,v,建立;設立
+gaze,v,凝視;注視;盯
+lecture,v,講課;訓斥
+motivate,v,給...動機;刺激
+murmur,v,私下抱怨;咕噥
+lately,adv,近來;最近;不久前
+crack,n,裂縫;爆裂聲
+decoration,n,裝飾;裝潢
+device,n,儀器;裝置
+doze,n,瞌睡;假寐
+labor,n,勞工;分娩;陣痛 (美式拼寫)
+participle,n,分詞
+percentage,n,百分率;百分比
+recall,n,回想;收回
+software,n,軟體
+sportswoman,n,女運動家
+vowel,n,母音字母
+bald,adj,禿頭的
+characteristic,adj,特有的;獨特的
+counter,adj,相反的;反對的;對立的
+genuine,adj,真的;非偽造的
+monthly,adj,每月的;每月一次的
+appoint,v,任命;指派
+consist,v,組成;構成
+criticize,v,批評;批判;苛求 (美式拼寫)
+expose,v,使暴露於
+hook,v,用鉤鉤住
+tolerate,v,忍受;寬恕;容許
+weekly,adv,每週
+amid,prep,在...之間;在...之中
+analysis,n,分析
+blink,n,眨眼睛;一瞬間
+bloom,n,開花
+career,n,職業;生涯;歷程
+comedy,n,喜劇
+consultant,n,顧問
+freeway,n,高速公路
+frost,n,霜
+orchestra,n,管弦樂隊
+reward,n,報答;報償;獎賞
+spark,n,火花;火星
+typist,n,打字員
+virus,n,病毒
+desperate,adj,極度渴望的
+dusty,adj,滿是灰塵的
+favorable,adj,適合的 (美式拼寫)
+relative,adj,有關的;相對的
+stingy,adj,小氣的
+absorb,v,吸收(液體;氣體;光;聲等)
+arise,v,升起
+blossom,v,開花;發展成
+counter,v,反對;反擊
+encounter,v,遭遇(敵人);遇到(困難;危險等
+input,v,將(資料等)輸入電腦
+manufacture,v,(大量)製造;加工
+overthrow,v,打倒;推翻;廢除
+ruin,v,毀滅
+tap,v,輕拍;輕叩
+wrinkle,v,起皺紋
+otherwise,adv,除此以外;否則;不然
+concentration,n,專心;濃縮
+determination,n,堅定;果斷
+diligence,n,勤勉;勤奮
+disguise,n,假扮;偽裝
+enthusiasm,n,熱心;熱情
+finance,n,財政;金融
+firecracker,n,爆竹;鞭炮
+flush,n,紅暈
+foundation,n,建立;創辦;基礎;基金會
+globe,n,地球儀;地球
+groom,n,馬伕;新郎
+hardship,n,艱難;困苦
+minimum,n,最小數;最低限度
+publicity,n,名聲;宣傳
+rejection,n,拒絕;退回
+settler,n,殖民者;開拓者
+sightseeing,n,觀光;遊覽
+spare,n,備用品;備用零件
+theme,n,主題思想;題材
+vessel,n,船;艦;器皿;血管
+athletic,adj,運動的;體育的;行動敏捷的
+logical,adj,合邏輯的;合理的
+memorial,adj,追悼的;記憶的
+oral,adj. n,口頭的;口述的;口部的; 口試
+philosophical,adj,哲學的
+alert,v,向...報警;使警覺
+assume,v,假定
+code,v,為...編碼
+impact,v,對...有影響
+overtake,v,追上;趕上;超過
+triumph,v,獲得勝利
+moreover,adv,並且;加之;此外
+appreciation,n,欣賞;鑑賞;賞識
+combination,n,組合
+consonant,n,子音
+dye,n,染料;染色
+fireplace,n,壁爐
+herd,n,畜群;牧群
+hose,n,軟管;長統襪;短統襪
+humidity,n,濕氣;濕度
+interruption,n,中止;干擾
+jealousy,n,妒忌;猜忌
+misfortune,n,不幸;惡運
+nonsense,n,胡說;胡鬧
+physics,n,物理
+proverb,n,諺語;俗語
+refugee,n,難民;流亡者
+romance,n,戀愛;風流韻事;愛情小說
+technician,n,技術人員;技師
+tension,n,緊張;張力
+voyage,n,乘船旅遊; 空中旅行
+continual,adj,不間斷的;連續的
+flexible,adj,可彎曲的;可變通的
+grave,adj,嚴重的;嚴肅的;認真的
+objective,adj,客觀的
+splendid,adj,燦爛的;傑出的
+bloom,v,開花;興盛
+demonstrate,v,示範操作(產品);展示
+invade,v,侵入;侵略
+proceed,v,開始;著手
+agency,n,仲介;代理
+autobiography,n,自傳
+communication,n,交往;通信
+cripple,n,跛子;殘廢的人
+evaluation,n,評估;估價
+iceberg,n,浮在海洋上的巨大冰塊
+resolve,n,決心;決意;堅決;剛毅;果斷
+revenge,n,報仇;報復
+route,n,路;路線;路程
+witness,n,目擊者;證詞;證據
+circular,adj,圓形的;環形的
+coarse,adj,粗的;粗糙的
+consequent,adj,隨之發生的
+durable,adj,經久的;耐用的
+envious,adj,嫉妒的;羨慕的
+eventual,adj,最後的;結果的
+imaginary,adj,虛構的;幻想的
+nuclear,adj,原子能的;細胞核的
+offensive,adj,冒犯的;唐突的
+monitor,v,監控;監聽;監測
+tense,v,使拉緊;使繃緊
+application,n,申請(書); 應用(程式); 塗抹; 實施
+fundamental,n,基本原則(或原理);綱要
+gangster,n,歹徒;匪盜;流氓
+knuckle,n,關節;肘;蹄;(鉸鏈的)關節
+lag,n,滯後;衰退
+landmark,n,地標;陸標;里程碑
+rainfall,n,降雨;下雨;降雨量
+regulation,n,規章;規則;規定;條例
+smog,n,煙霧
+virgin,n,處女; 童男; 新手；無經驗的人
+witch,n,女巫;巫婆
+courteous,adj,有禮貌的
+visual,adj,視力的;光學的
+carve,v,刻;雕刻
+dispute,v,爭論;爭執
+estimate,v,估計;估量
+surrender,v,使投降;使自首
+transfer,v,轉換;調動
+ancestor,n,祖宗;祖先
+arch,n,拱門;拱形
+calculator,n,計算機
+chamber,n,室;房間;議院
+commerce,n,商業;貿易;交易
+draft,n,草稿;徵兵;通風
+housework,n,家務
+hydrogen,n,氫
+indication,n,指示;指點
+manufacture,n,製品;產品; 製造
+murderer,n,謀殺犯;兇手
+production,n,製造;生產
+psychologist,n,心理學家
+researcher,n,研究員;調查者
+anxious,adj,焦慮的;掛念的
+defensive,adj,防禦的
+economic,adj,經濟上的;經濟學的
+intimate,adj.n,親密的;熟悉的; 密友
+disturb,v,妨礙;打擾
+grieve,v,使悲傷;使苦惱
+prosper,v,繁榮;昌盛
+remark,v,議論;評論
+reward,v,酬謝;獎勵
+sob,v,嗚咽;啜泣
+battery,n,電池
+concrete,n,混凝土
+digestion,n,消化;(知識等的)領悟;吸收
+discipline,n,紀律;風紀;教養
+formula,n,配方;處方;公式
+grief,n,悲痛;悲傷
+involvement,n,介入
+parachute,n,降落傘
+pedal,n,踏板;腳蹬
+annual,adj,一年一次的;每年的
+explosive,adj,爆炸(性)的;爆發性的
+thoughtful,adj,考慮周到的
+disgust,v,使作嘔
+distinguish,v,區別;識別
+draft,v,起草;設計
+portray,v,畫;描寫
+admission,n,進入許可;入場費;承認
+aspirin,n,阿斯匹靈(解熱鎮痛藥)
+bond,n,結合力;束縛
+comic,n,漫畫; 戲劇演員
+dignity,n,尊嚴
+explosion,n,爆發;爆炸
+paragraph,n,(文章的)段;節
+restriction,n,限制;約束;限定;限制規定
+revision,n,修訂;校訂;修正
+telegraph,n,電報;電信
+weekly,n,週刊;週報`;
+        
+        // 初始化遊戲
+        function initGame() {
+            // 解析單字列表
+            vocabulary = parseWordList(wordList);
+            
+            if (vocabulary.length === 0) {
+                alert('單字庫載入失敗！');
+                return;
+            }
+            
+            // 重置遊戲狀態
+            score = 0;
+            scoreDisplay.textContent = score;
+            canAnswer = true; // 重置回答狀態
+            
+            // 清除之前的計時器
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            
+            // 切換到遊戲畫面
+            setupScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+            gameOverScreen.style.display = 'none';
+            
+            // 啟用所有選項
+            enableOptions();
+            
+            // 添加復活節裝飾元素
+            addEasterDecorations();
+            
+            // 開始遊戲
+            gameActive = true;
+            nextQuestion();
+        }
+        
+        // 啟用所有選項
+        function enableOptions() {
+            eggOptions.forEach(option => {
+                option.classList.remove('option-disabled');
+                option.classList.remove('correct-answer');
+            });
+            canAnswer = true;
+        }
+        
+        // 禁用所有選項
+        function disableOptions() {
+            eggOptions.forEach(option => {
+                option.classList.add('option-disabled');
+            });
+            canAnswer = false;
+        }
+        
+        // 添加復活節裝飾元素
+        function addEasterDecorations() {
+            const positions = [
+                {top: '10%', left: '5%', rotate: '15deg'},
+                {top: '15%', right: '5%', rotate: '-10deg'},
+                {bottom: '20%', left: '8%', rotate: '20deg'},
+                {bottom: '15%', right: '7%', rotate: '-15deg'},
+                {top: '30%', right: '10%', rotate: '10deg'},
+                {bottom: '30%', left: '12%', rotate: '-5deg'}
+            ];
+            
+            const gameContainer = document.querySelector('.game-container');
+            
+            // 先清除現有的裝飾
+            document.querySelectorAll('.easter-flower, .easter-leaf').forEach(el => el.remove());
+            
+            positions.forEach(pos => {
+                // 添加花朵
+                const flower = document.createElement('div');
+                flower.className = 'easter-flower';
+                flower.style.top = pos.top || '';
+                flower.style.left = pos.left || '';
+                flower.style.right = pos.right || '';
+                flower.style.bottom = pos.bottom || '';
+                flower.style.transform = `rotate(${pos.rotate})`;
+                gameContainer.appendChild(flower);
+                
+                // 添加葉子
+                const leaf = document.createElement('div');
+                leaf.className = 'easter-leaf';
+                leaf.style.top = pos.top ? `calc(${pos.top} + 30px)` : '';
+                leaf.style.left = pos.left ? `calc(${pos.left} + 20px)` : '';
+                leaf.style.right = pos.right ? `calc(${pos.right} + 25px)` : '';
+                leaf.style.bottom = pos.bottom ? `calc(${pos.bottom} + 15px)` : '';
+                leaf.style.transform = `rotate(${pos.rotate}) scale(0.8)`;
+                gameContainer.appendChild(leaf);
+            });
+        }
+        
+        // 解析單字列表
+        function parseWordList(text) {
+            const lines = text.split('\n');
+            const words = [];
+            
+            for (const line of lines) {
+                const trimmedLine = line.trim();
+                if (!trimmedLine) continue;
+                
+                const parts = trimmedLine.split(',');
+                if (parts.length < 3) continue;
+                
+                const word = parts[0].trim();
+                const pos = parts[1].trim();
+                const meanings = parts[2].split(';').map(m => m.trim()).filter(m => m);
+                
+                for (const meaning of meanings) {
+                    words.push({
+                        word: word,
+                        pos: pos,
+                        meaning: meaning
+                    });
+                }
+            }
+            
+            return words;
+        }
+        
+        // 下一題
+        function nextQuestion() {
+            if (!gameActive) return;
+            
+            // 清除之前的計時器
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            
+            // 隨機選擇一個單字
+            currentWord = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+            
+            // 顯示單字和詞性
+            currentWordDisplay.textContent = currentWord.word;
+            currentPosDisplay.textContent = currentWord.pos;
+            
+            // 準備選項
+            prepareOptions();
+            
+            // 重置計時器
+            timeLeft = 8;
+            timerBar.style.width = '100%';
+            
+            // 啟用選項
+            enableOptions();
+            
+            // 開始倒計時 - 使用新的計時器，確保不會與之前的混在一起
+            timer = setInterval(() => {
+                timeLeft -= 0.1;
+                timerBar.style.width = `${(timeLeft / 8) * 100}%`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    endGame(false);
+                }
+            }, 100);
+        }
+        
+        // 準備選項
+        function prepareOptions() {
+            // 正確答案
+            const correctAnswer = currentWord.meaning;
+            
+            // 收集其他可能的選項
+            const otherMeanings = vocabulary
+                .filter(item => item.meaning !== correctAnswer)
+                .map(item => item.meaning);
+            
+            // 隨機選擇3個不重複的錯誤選項
+            const wrongAnswers = [];
+            while (wrongAnswers.length < 3 && otherMeanings.length > 0) {
+                const randomIndex = Math.floor(Math.random() * otherMeanings.length);
+                const selectedMeaning = otherMeanings[randomIndex];
+                
+                // 確保選項不重複
+                if (!wrongAnswers.includes(selectedMeaning)) {
+                    wrongAnswers.push(selectedMeaning);
+                    otherMeanings.splice(randomIndex, 1);
+                }
+            }
+            
+            // 合併所有選項並打亂順序
+            const allOptions = [correctAnswer, ...wrongAnswers];
+            shuffleArray(allOptions);
+            
+            // 更新選項顯示
+            for (let i = 0; i < 4; i++) {
+                if (i < allOptions.length) {
+                    optionDisplays[i].textContent = allOptions[i];
+                    optionDisplays[i].parentElement.dataset.meaning = allOptions[i];
+                } else {
+                    optionDisplays[i].textContent = '無選項';
+                    optionDisplays[i].parentElement.dataset.meaning = '';
+                }
+            }
+        }
+        
+        // 打亂陣列順序
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // 檢查答案
+        function checkAnswer(selectedOption) {
+            if (!gameActive || !canAnswer) return;
+            
+            // 禁用選項，防止連續點擊
+            disableOptions();
+            
+            const selectedMeaning = selectedOption.dataset.meaning;
+            const isCorrect = selectedMeaning === currentWord.meaning;
+            
+            if (isCorrect) {
+                // 正確答案 - 每題5分
+                score += 5;
+                scoreDisplay.textContent = score;
+                
+                // 顯示正確效果
+                showCorrectEffect(selectedOption);
+                
+                // 減少延遲時間，從1000ms改為600ms
+                setTimeout(() => {
+                    nextQuestion();
+                }, 600);
+            } else {
+                // 錯誤答案
+                endGame(false);
+            }
+        }
+        
+        // 顯示正確效果
+        function showCorrectEffect(correctOption) {
+            correctOption.classList.add('correct-answer');
+            
+            // 創建彩花效果
+            createConfetti();
+            
+            setTimeout(() => {
+                correctOption.classList.remove('correct-answer');
+            }, 500);
+        }
+        
+        // 創建彩花效果
+        function createConfetti() {
+            const colors = ['#a8d8ea', '#f6d5f7', '#f8c3cd', '#faf3dd', '#6b8cae', '#d4e6f1'];
+            
+           for (let i = 0; i < 15; i++) { // 減少彩花數量
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.top = '-10px';
+                confetti.style.opacity = '1';
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                
+                // 隨機形狀
+                const shape = Math.random();
+                if (shape > 0.5) {
+                    confetti.style.borderRadius = '50%';
+                } else if (shape > 0.3) {
+                    confetti.style.width = '10px';
+                    confetti.style.height = '3px';
+                }
+                
+                document.body.appendChild(confetti);
+                
+                // 動畫
+                const animationDuration = Math.random() * 1.2 + 0.6; // 減少動畫時間
+                confetti.style.transition = `top ${animationDuration}s linear, opacity ${animationDuration}s ease-out`;
+                
+                setTimeout(() => {
+                    confetti.style.top = `${Math.random() * 100 + 100}vh`;
+                    confetti.style.opacity = '0';
+                }, 10);
+                
+                // 移除元素
+                setTimeout(() => {
+                    confetti.remove();
+                }, animationDuration * 1000 + 100);
+            }
+        }
+        
+        // 結束遊戲
+        function endGame(isWin) {
+            gameActive = false;
+            clearInterval(timer);
+            
+            // 更新結束畫面
+            finalScoreDisplay.textContent = score;
+            resultMessage.textContent = isWin ? '恭喜你贏了!' : '遊戲結束!';
+            
+            // 顯示結束畫面
+            gameOverScreen.style.display = 'flex';
+            
+            // 如果不是勝利，添加震動效果
+            if (!isWin) {
+                gameScreen.style.animation = 'shake 0.3s'; // 減少震動時間
+                setTimeout(() => {
+                    gameScreen.style.animation = '';
+                }, 300);
+            }
+        }
+        
+        // 重新開始遊戲
+        function restartGame() {
+            // 移除所有裝飾元素
+            document.querySelectorAll('.easter-flower, .easter-leaf').forEach(el => el.remove());
+            
+            gameOverScreen.style.display = 'none';
+            setupScreen.style.display = 'block';
+            gameScreen.style.display = 'none';
+        }
+        
+        // 事件監聽器
+        document.addEventListener('DOMContentLoaded', function() {
+            // 檢測設備類型
+            detectDevice();
+            
+            // 監聽窗口大小變化，重新檢測設備
+            window.addEventListener('resize', detectDevice);
+            
+            startGameBtn.addEventListener('click', initGame);
+            restartBtn.addEventListener('click', restartGame);
+            
+            // 選項點擊事件
+            document.querySelectorAll('.egg-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    if (gameActive && canAnswer) {
+                        checkAnswer(option);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
