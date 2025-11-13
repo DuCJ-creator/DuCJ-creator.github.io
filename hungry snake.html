@@ -485,7 +485,7 @@
             }, 1000);
         }
 
-        /** 處理分數變更和無敵狀態 */
+        /** 處理分數變更和無敵狀態 (移除對 snakeGrid 的直接操作) */
         function handleScoreAndCollision(isCorrect, isSelfWallCollision = false) {
             
             if (isSelfWallCollision) {
@@ -498,7 +498,7 @@
                 currentScore = Math.max(0, currentScore - 10);
                 
                 if (targetLength > 1) {
-                    targetLength--; // 目標長度減少
+                    targetLength--; // 減少目標長度
                     showStatus("撞擊！-10 分，長度 -1", 'red');
                 } else {
                     endGame(false); 
@@ -514,7 +514,7 @@
                 }, 500);
                 
                 updateUI();
-                return false; 
+                return true; // 即使是錯誤碰撞，也允許移動邏輯繼續執行
 
             } else if (isCorrect) {
                 // 正確邏輯
@@ -525,7 +525,7 @@
                 currentScore += scoreIncrease;
                 showStatus(`正確！+${scoreIncrease} (${combo} 連擊)`, 'green');
 
-                targetLength++; // 目標長度增加
+                targetLength++; // 增加目標長度
                 
                 // 1秒無敵時間
                 invulnerable = true;
@@ -550,7 +550,7 @@
                 currentScore = Math.max(0, currentScore - 10);
                 
                 if (targetLength > 1) {
-                    targetLength--; // 目標長度減少
+                    targetLength--; // 減少目標長度
                     showStatus("錯誤！連擊中斷 -10 分，長度 -1", 'red');
                 } else {
                     endGame(false);
@@ -561,32 +561,39 @@
                 if (currentWordData) genFoods(); 
 
                 updateUI();
-                return false; 
+                return true; 
             }
         }
 
 
         function checkCollision(head) {
+            let collisionResult = false;
+            let isFood = false;
+
             // 邊界碰撞
             if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID) {
-                return handleScoreAndCollision(false, true); 
+                collisionResult = handleScoreAndCollision(false, true); // 撞牆
             }
 
             // 身體碰撞 
             for (let i = 1; i < snakeGrid.length; i++) {
                 if (head.x === snakeGrid[i].x && head.y === snakeGrid[i].y) {
-                    return handleScoreAndCollision(false, true); 
+                    collisionResult = handleScoreAndCollision(false, true); // 撞到自己
+                    break;
                 }
             }
 
-            // 食物碰撞
-            const foodIndex = foods.findIndex(f => f.x === head.x && f.y === head.y);
-            if (foodIndex !== -1) {
-                const eatenFood = foods[foodIndex];
-                return handleScoreAndCollision(eatenFood.isCorrect, false);
+            // 食物碰撞 (只有當前沒有發生牆壁或身體碰撞時才檢查食物)
+            if (!collisionResult) {
+                 const foodIndex = foods.findIndex(f => f.x === head.x && f.y === head.y);
+                if (foodIndex !== -1) {
+                    const eatenFood = foods[foodIndex];
+                    collisionResult = handleScoreAndCollision(eatenFood.isCorrect, false);
+                    isFood = true;
+                }
             }
 
-            return false; 
+            return collisionResult || isFood; // 返回是否發生了某種有效互動
         }
 
         // 啟動遊戲時重設目標長度
@@ -598,6 +605,7 @@
             remainingTime = totalTimeSeconds;
             
             snakeGrid = [{ x: Math.floor(GRID / 2), y: Math.floor(GRID / 2) }];
+            snakePos = []; // 重置平滑位置
             targetLength = 1; // 初始目標長度
 
             resizeCanvas();
@@ -630,7 +638,7 @@
             startTimer();
             draw(); 
             
-            lastTime = performance.now(); // 確保 lastTime 在遊戲開始時立即設置
+            lastTime = performance.now(); 
             requestAnimationFrame(gameLoop);
         }
 
@@ -688,18 +696,16 @@
 
         function gameLoop(currentTime) {
             if (!gameStarted) {
-                // 如果遊戲未啟動，只需設置 lastTime 並等待
                 lastTime = currentTime; 
                 requestAnimationFrame(gameLoop);
                 return;
             }
             if (gamePaused) {
-                lastTime = currentTime; // 暫停時更新 lastTime，防止恢復時deltaTime過大
+                lastTime = currentTime; 
                 requestAnimationFrame(gameLoop);
                 return;
             }
 
-            // 確保 lastTime 有效，防止第一次調用時 deltaTime 巨大
             if (lastTime === 0) {
                 lastTime = currentTime;
             }
@@ -724,7 +730,7 @@
                 const tx = (targetX + 0.5) * sz;
                 const ty = (targetY + 0.5) * sz;
                 
-                // 使用 snakePos[0] 作為插值的起點
+                // 計算平滑移動
                 const currentX = snakePos[0] ? snakePos[0].x : (headGrid.x + 0.5) * sz;
                 const currentY = snakePos[0] ? snakePos[0].y : (headGrid.y + 0.5) * sz;
 
@@ -740,6 +746,7 @@
                 
                 direction = nextDirection;
 
+                // 計算新的網格位置
                 const head = { ...snakeGrid[0] };
                 switch (direction) {
                     case 'up': head.y -= 1; break;
@@ -748,13 +755,13 @@
                     case 'right': head.x += 1; break;
                 }
 
-                // 檢查碰撞/吃到食物
+                // 檢查碰撞/吃到食物 (只更新 targetLength 和分數)
                 checkCollision(head);
                 
                 // 1. 將新頭部添加到網格
                 snakeGrid.unshift(head); 
                 
-                // 2. 根據目標長度決定是否移除尾部
+                // 2. 根據目標長度決定是否移除尾部 (這是蛇移動和長度變化的唯一地方)
                 while (snakeGrid.length > targetLength) {
                     snakeGrid.pop(); 
                 }
@@ -762,6 +769,7 @@
                 lastTime = currentTime;
                 moveProgress = 0;
                 
+                // 由於網格已更新，重設平滑位置，準備下一次移動
                 updateSnakeSmoothPos(); 
             }
 
@@ -772,10 +780,14 @@
         function lerp(start, end, progress) { return start + (end - start) * progress; }
         function updateSnakeSmoothPos() { 
              const sz = canvas.width / GRID;
+             // 確保蛇身平滑位置與網格位置同步
              if (snakeGrid.length > 0) {
-                 snakePos[0] = { x: (snakeGrid[0].x + 0.5) * sz, y: (snakeGrid[0].y + 0.5) * sz };
-                 for (let i = 1; i < snakeGrid.length; i++) {
-                     snakePos[i] = { x: (snakeGrid[i].x + 0.5) * sz, y: (snakeGrid[i].y + 0.5) * sz };
+                 snakePos = []; 
+                 for (let i = 0; i < snakeGrid.length; i++) {
+                     snakePos.push({ 
+                         x: (snakeGrid[i].x + 0.5) * sz, 
+                         y: (snakeGrid[i].y + 0.5) * sz 
+                     });
                  }
              } else {
                  snakePos = [];
@@ -910,7 +922,7 @@
             gamePaused = false;
             pauseBtn.style.display = 'block';
             resumeBtn.style.display = 'none';
-            lastTime = performance.now(); // 恢復時更新 lastTime
+            lastTime = performance.now(); 
         });
 
         endBtn.addEventListener('click', () => {
