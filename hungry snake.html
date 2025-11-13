@@ -12,12 +12,22 @@
   }
   *{box-sizing:border-box}
   html,body{height:100%}
-  body{
-    margin:0;background:#E8E5DA;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-    display:flex;align-items:center;justify-content:center;overflow:hidden;
-    padding:calc(env(safe-area-inset-top)) calc(env(safe-area-inset-right)) calc(env(safe-area-inset-bottom)) calc(env(safe-area-inset-left));
-    -webkit-user-select:none;user-select:none;touch-action:manipulation;
-  }
+ body{
+  margin:0;
+  background:#E8E5DA;
+  color:var(--ink);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow-x:hidden;           /* 只鎖水平捲動 */
+  overflow-y:auto;             /* 垂直可以捲 */
+  padding:calc(env(safe-area-inset-top)) calc(env(safe-area-inset-right)) calc(env(safe-area-inset-bottom)) calc(env(safe-area-inset-left));
+  -webkit-user-select:none;
+  user-select:none;
+  touch-action:manipulation;
+}
+
 
   .game-container{display:flex;width:min(95vw,1200px);height:min(84vh,900px);gap:calc(12px*var(--ui-scale))}
   .game-area{flex:1;position:relative;aspect-ratio:1/1;max-height:100%;display:flex;justify-content:center;align-items:center}
@@ -76,14 +86,18 @@
   }
 
   /* --- Phone: < 600 --- */
-  @media (max-width:599.98px){
-    body.is-phone{--ui-scale:1.25}
-    .game-container{flex-direction:column;align-items:center;height:calc(100vh - 16px)}
-    .right-panel{width:100%;height:auto}
-    .time-selector{justify-content:flex-start}
-    .touch-controls{grid-template-rows:repeat(2,1fr)} /* 更緊湊 */
-    .control-btn.up,.control-btn.down,.control-btn.left,.control-btn.right{display:block}
+@media (max-width:599.98px){
+  body.is-phone{--ui-scale:1.25}
+  .game-container{
+    flex-direction:column;
+    align-items:center;
+    height:auto;                      /* 讓內容可以變高 */
+    min-height:calc(100vh - 16px);    /* 至少跟螢幕一樣高 */
   }
+  .right-panel{width:100%;height:auto}
+  ...
+}
+
 
   /* 減少動畫偏好 → 降低 FX */
   @media (prefers-reduced-motion:reduce){
