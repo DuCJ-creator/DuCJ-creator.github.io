@@ -313,6 +313,7 @@
         let combo = 0; 
         let invulnerable = false; 
         let targetLength = 1; // 追蹤蛇的目標長度
+        let animationFrameId = null; // 用來儲存 requestAnimationFrame 的 ID
 
         
         // 設置選項 (50 Unit, 每 5 個 Unit 為一個範圍)
@@ -326,6 +327,8 @@
         const MOVE_DURATION = 150; 
         let lastTime = 0;
         let moveProgress = 0; 
+        let lastGridX = 0; // 用於儲存蛇頭上一次的網格位置
+        let lastGridY = 0; 
 
         // 計時器相關
         let totalTimeSeconds = 600; 
@@ -501,7 +504,7 @@
                     targetLength--; // 減少目標長度
                     showStatus("撞擊！-10 分，長度 -1", 'red');
                 } else {
-                    endGame(false); 
+                    endGame(false); // 撞擊導致長度歸零，遊戲結束
                     return false; 
                 }
                 
@@ -514,7 +517,7 @@
                 }, 500);
                 
                 updateUI();
-                return true; // 即使是錯誤碰撞，也允許移動邏輯繼續執行
+                return true; 
 
             } else if (isCorrect) {
                 // 正確邏輯
@@ -567,49 +570,54 @@
 
 
         function checkCollision(head) {
-            let collisionResult = false;
-            let isFood = false;
-
+            let interacted = false; // 是否發生了碰撞或吃到食物
+            
             // 邊界碰撞
             if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID) {
-                collisionResult = handleScoreAndCollision(false, true); // 撞牆
+                return handleScoreAndCollision(false, true); 
             }
 
             // 身體碰撞 
             for (let i = 1; i < snakeGrid.length; i++) {
                 if (head.x === snakeGrid[i].x && head.y === snakeGrid[i].y) {
-                    collisionResult = handleScoreAndCollision(false, true); // 撞到自己
-                    break;
+                    return handleScoreAndCollision(false, true); 
                 }
             }
 
-            // 食物碰撞 (只有當前沒有發生牆壁或身體碰撞時才檢查食物)
-            if (!collisionResult) {
-                 const foodIndex = foods.findIndex(f => f.x === head.x && f.y === head.y);
-                if (foodIndex !== -1) {
-                    const eatenFood = foods[foodIndex];
-                    collisionResult = handleScoreAndCollision(eatenFood.isCorrect, false);
-                    isFood = true;
-                }
+            // 食物碰撞
+            const foodIndex = foods.findIndex(f => f.x === head.x && f.y === head.y);
+            if (foodIndex !== -1) {
+                const eatenFood = foods[foodIndex];
+                interacted = handleScoreAndCollision(eatenFood.isCorrect, false);
             }
 
-            return collisionResult || isFood; // 返回是否發生了某種有效互動
+            return interacted; 
         }
 
         // 啟動遊戲時重設目標長度
         function startGame() {
             if (!ctx) return; 
 
+            // 清除上次的遊戲迴圈
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+            clearInterval(timerInterval);
+
             currentScore = 0;
             combo = 0;
             remainingTime = totalTimeSeconds;
             
             snakeGrid = [{ x: Math.floor(GRID / 2), y: Math.floor(GRID / 2) }];
-            snakePos = []; // 重置平滑位置
-            targetLength = 1; // 初始目標長度
+            snakePos = []; 
+            targetLength = 1; 
 
             resizeCanvas();
             updateSnakeSmoothPos(); 
+            
+            // 初始化蛇頭上次的網格位置，用於插值
+            lastGridX = snakeGrid[0].x;
+            lastGridY = snakeGrid[0].y;
 
             direction = 'right';
             nextDirection = 'right';
@@ -639,11 +647,15 @@
             draw(); 
             
             lastTime = performance.now(); 
-            requestAnimationFrame(gameLoop);
+            animationFrameId = requestAnimationFrame(gameLoop);
         }
 
         function draw() {
-            if (!ctx || !canvas) return;
+            if (!ctx || !canvas || !gameStarted) {
+                // 如果遊戲未開始或已結束，清空 Canvas
+                if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height); 
             const sz = canvas.width / GRID;
@@ -651,10 +663,9 @@
 
             // 1. 繪製食物 (跳動動畫, 所有食物顏色統一)
             foods.forEach(food => {
-                ctx.fillStyle = 'var(--food-color)'; /* 統一顏色 */
+                ctx.fillStyle = 'var(--food-color)'; 
                 
                 const x = (food.x + 0.5) * sz;
-                // 使用 Math.sin 實現上下跳動效果
                 let y = (food.y + 0.5) * sz + Math.sin(currentTime / 300) * (sz * 0.05); 
                 
                 const r = sz / 2 * 0.4; 
@@ -693,16 +704,19 @@
                 }
             }
         }
+        
+        // 用於儲存上一個網格位置（僅限蛇頭）
+        let previousHeadGrid = null;
+
 
         function gameLoop(currentTime) {
             if (!gameStarted) {
                 lastTime = currentTime; 
-                requestAnimationFrame(gameLoop);
-                return;
+                return; // 如果遊戲未啟動或已結束，直接結束迴圈
             }
             if (gamePaused) {
                 lastTime = currentTime; 
-                requestAnimationFrame(gameLoop);
+                animationFrameId = requestAnimationFrame(gameLoop);
                 return;
             }
 
@@ -715,7 +729,9 @@
 
             if (snakeGrid.length > 0) {
                 const headGrid = snakeGrid[0];
+                const sz = canvas.width / GRID;
                 
+                // 計算蛇頭目標位置 (下一格的中心)
                 let targetX = headGrid.x;
                 let targetY = headGrid.y;
 
@@ -726,14 +742,14 @@
                     case 'right': targetX += 1; break;
                 }
 
-                const sz = canvas.width / GRID;
                 const tx = (targetX + 0.5) * sz;
                 const ty = (targetY + 0.5) * sz;
                 
-                // 計算平滑移動
-                const currentX = snakePos[0] ? snakePos[0].x : (headGrid.x + 0.5) * sz;
-                const currentY = snakePos[0] ? snakePos[0].y : (headGrid.y + 0.5) * sz;
+                // 蛇頭插值起點：上一個網格的中心點
+                const currentX = (lastGridX + 0.5) * sz;
+                const currentY = (lastGridY + 0.5) * sz;
 
+                // 更新蛇頭平滑位置
                 snakePos[0] = { 
                     x: lerp(currentX, tx, moveProgress), 
                     y: lerp(currentY, ty, moveProgress) 
@@ -746,7 +762,7 @@
                 
                 direction = nextDirection;
 
-                // 計算新的網格位置
+                // 準備計算下一格位置
                 const head = { ...snakeGrid[0] };
                 switch (direction) {
                     case 'up': head.y -= 1; break;
@@ -754,6 +770,11 @@
                     case 'left': head.x -= 1; break;
                     case 'right': head.x += 1; break;
                 }
+                
+                // 儲存當前頭部作為下一次插值的起點
+                lastGridX = snakeGrid[0].x;
+                lastGridY = snakeGrid[0].y;
+
 
                 // 檢查碰撞/吃到食物 (只更新 targetLength 和分數)
                 checkCollision(head);
@@ -761,7 +782,7 @@
                 // 1. 將新頭部添加到網格
                 snakeGrid.unshift(head); 
                 
-                // 2. 根據目標長度決定是否移除尾部 (這是蛇移動和長度變化的唯一地方)
+                // 2. 根據目標長度決定是否移除尾部
                 while (snakeGrid.length > targetLength) {
                     snakeGrid.pop(); 
                 }
@@ -769,25 +790,34 @@
                 lastTime = currentTime;
                 moveProgress = 0;
                 
-                // 由於網格已更新，重設平滑位置，準備下一次移動
+                // 由於網格已更新，重設蛇身平滑位置，準備下一次移動
                 updateSnakeSmoothPos(); 
             }
 
-            requestAnimationFrame(gameLoop);
+            animationFrameId = requestAnimationFrame(gameLoop);
         }
 
         // ====== 其他函數保持不變 ======
         function lerp(start, end, progress) { return start + (end - start) * progress; }
+        
+        /** 修正：此函數只負責初始化/更新蛇身 (snakePos[1] 之後) 的位置 */
         function updateSnakeSmoothPos() { 
              const sz = canvas.width / GRID;
-             // 確保蛇身平滑位置與網格位置同步
              if (snakeGrid.length > 0) {
-                 snakePos = []; 
-                 for (let i = 0; i < snakeGrid.length; i++) {
-                     snakePos.push({ 
+                 // 確保 snakePos 的長度匹配 snakeGrid
+                 snakePos.length = snakeGrid.length; 
+                 
+                 // 蛇頭位置將在 gameLoop 中平滑計算，這裡只需要確保其存在
+                 if (!snakePos[0]) {
+                     snakePos[0] = { x: (snakeGrid[0].x + 0.5) * sz, y: (snakeGrid[0].y + 0.5) * sz };
+                 }
+
+                 // 更新蛇身（從索引 1 開始）
+                 for (let i = 1; i < snakeGrid.length; i++) {
+                     snakePos[i] = { 
                          x: (snakeGrid[i].x + 0.5) * sz, 
                          y: (snakeGrid[i].y + 0.5) * sz 
-                     });
+                     };
                  }
              } else {
                  snakePos = [];
@@ -853,7 +883,18 @@
             if (!gameStarted) return;
             gameStarted = false;
             clearInterval(timerInterval);
-            cancelAnimationFrame(gameLoop);
+            
+            // 關鍵修正：取消 requestAnimationFrame
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null; 
+            }
+            
+            // 清空畫布
+            if (ctx && canvas) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+
             generateSound('gameover');
             
             highScore = Math.max(highScore, currentScore);
