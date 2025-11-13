@@ -5,163 +5,158 @@
 <title>Hungry Snake – Word Learning</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
-    /* Setup Screen */
-    .setup-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#E8E5DA;
-        display:flex;flex-direction:column;justify-content:center;align-items:center;
-        z-index:200;font-family:system-ui,sans-serif;gap:20px}
-    .setup-screen h2{color:#5A4A42}
-    select,button{padding:10px 20px;font-size:16px;border-radius:8px;border:1px solid #A89F94}
-    button.start-game-btn{background:#A8B7A5;color:#5A4A42;font-weight:bold;cursor:pointer;margin-top:10px}
+    /* Setup Screen */
+    .setup-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#E8E5DA;
+        display:flex;flex-direction:column;justify-content:center;align-items:center;
+        z-index:200;font-family:system-ui,sans-serif;gap:20px}
+    .setup-screen h2{color:#5A4A42}
+    select,button{padding:10px 20px;font-size:16px;border-radius:8px;border:1px solid #A89F94}
+    button.start-game-btn{background:#A8B7A5;color:#5A4A42;font-weight:bold;cursor:pointer;margin-top:10px}
 
-    /* Body & Layout */
-    body{font-family:system-ui,sans-serif;margin:0;padding:0;display:flex;justify-content:center;
-        align-items:center;background:#E8E5DA;height:100vh;overflow:hidden;-webkit-user-select:none;
-        user-select:none;touch-action:manipulation}
-    .game-container{display:flex;width:95vw;max-width:1200px;height:80vh;gap:10px}
-    .game-area{flex:1;position:relative;aspect-ratio:1/1;max-height:100%;display:flex;
-        justify-content:center;align-items:center}
-    #game-board{border:3px solid #A89F94;border-radius:8px;background:#F0EDE5;width:100%;height:100%}
+    /* Body & Layout */
+    body{font-family:system-ui,sans-serif;margin:0;padding:0;display:flex;justify-content:center;
+        align-items:center;background:#E8E5DA;height:100vh;overflow:hidden;-webkit-user-select:none;
+        user-select:none;touch-action:manipulation}
+    .game-container{display:flex;width:95vw;max-width:1200px;height:80vh;gap:10px}
+    .game-area{flex:1;position:relative;aspect-ratio:1/1;max-height:100%;display:flex;
+        justify-content:center;align-items:center}
+    #game-board{border:3px solid #A89F94;border-radius:8px;background:#F0EDE5;width:100%;height:100%}
 
-    /* Right Panel */
-    .right-panel{width:200px;height:100%;display:flex;flex-direction:column;gap:15px}
-    .question-box{background:#B7AFA1;color:#5A4A42;padding:15px;border-radius:8px;
-        text-align:center;font-weight:bold;word-break:break-word}
-    /* Responsive word size: Bigger on mobile, scales on desktop */
-    @media (min-width: 768px) {.question-box {font-size: 2.2vw; min-font-size: 18px;}}
-    @media (max-width: 767px) {.question-box {font-size: 4.5vw;}}
+    /* Right Panel */
+    .right-panel{width:200px;height:100%;display:flex;flex-direction:column;gap:15px}
+    .question-box{background:#B7AFA1;color:#5A4A42;padding:15px;border-radius:8px;
+        text-align:center;font-weight:bold;word-break:break-word}
+    /* Responsive word size: Bigger on mobile, scales on desktop */
+    @media (min-width: 768px) {.question-box {font-size: 2.2vw; min-font-size: 18px;}}
+    @media (max-width: 767px) {.question-box {font-size: 4.5vw;}}
 
-    .score-container,.time-container{background:#A8B7A5;color:#5A4A42;padding:15px;border-radius:8px;text-align:center}
-    .score-container div,.time-container div{margin:8px 0;font-weight:bold}
-    .time-selector{display:flex;justify-content:space-between;margin-top:8px}
-    .time-btn{background:rgba(90,74,66,.1);border:none;border-radius:4px;color:#5A4A42;padding:4px 8px;cursor:pointer}
-    .time-btn.selected{background:#5A4A42;color:#F0EDE5;font-weight:bold}
-    .touch-controls{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:10px;margin-top:auto}
-    .control-btn{background:rgba(168,159,148,.7);border:none;border-radius:12px;font-size:20px;display:flex;align-items:center;justify-content:center;padding:12px 0;cursor:pointer;color:#5A4A42}
-    .control-btn.up{grid-column:2;grid-row:1}
-    .control-btn.left{grid-column:1;grid-row:2}
-    .control-btn.right{grid-column:3;grid-row:2}
-    .control-btn.down{grid-column:2;grid-row:3}
-    .control-btn.start{grid-column:2;grid-row:2;font-size:16px;background:#A8B7A5}
-    .control-btn.pause{grid-column:2;grid-row:2;font-size:16px;background:#C4B6A0;display:none}
-    .control-btn.end{grid-column:1/span 3;grid-row:4;font-size:16px;background:#B7AFA1;display:none}
-    .resume-btn{background:#B7AFA1;color:#5A4A42;padding:10px 20px;border:none;border-radius:12px;font-size:16px;cursor:pointer;margin-top:auto;display:none}
-    @media(max-width:768px){
-        .control-btn.up,.control-btn.down,.control-btn.left,.control-btn.right{display:none}
-        .touch-controls{grid-template-rows:repeat(2,1fr)}
-        .right-panel{width:150px;font-size:13px}
-    }
+    .score-container,.time-container{background:#A8B7A5;color:#5A4A42;padding:15px;border-radius:8px;text-align:center}
+    .score-container div,.time-container div{margin:8px 0;font-weight:bold}
+    .time-selector{display:flex;justify-content:space-between;margin-top:8px}
+    .time-btn{background:rgba(90,74,66,.1);border:none;border-radius:4px;color:#5A4A42;padding:4px 8px;cursor:pointer}
+    .time-btn.selected{background:#5A4A42;color:#F0EDE5;font-weight:bold}
+    .touch-controls{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:10px;margin-top:auto}
+    .control-btn{background:rgba(168,159,148,.7);border:none;border-radius:12px;font-size:20px;display:flex;align-items:center;justify-content:center;padding:12px 0;cursor:pointer;color:#5A4A42}
+    .control-btn.up{grid-column:2;grid-row:1}
+    .control-btn.left{grid-column:1;grid-row:2}
+    .control-btn.right{grid-column:3;grid-row:2}
+    .control-btn.down{grid-column:2;grid-row:3}
+    .control-btn.start{grid-column:2;grid-row:2;font-size:16px;background:#A8B7A5}
+    .control-btn.pause{grid-column:2;grid-row:2;font-size:16px;background:#C4B6A0;display:none}
+    .control-btn.end{grid-column:1/span 3;grid-row:4;font-size:16px;background:#B7AFA1;display:none}
+    .resume-btn{background:#B7AFA1;color:#5A4A42;padding:10px 20px;border:none;border-radius:12px;font-size:16px;cursor:pointer;margin-top:auto;display:none}
+    @media(max-width:768px){
+        .control-btn.up,.control-btn.down,.control-btn.left,.control-btn.right{display:none}
+        .touch-controls{grid-template-rows:repeat(2,1fr)}
+        .right-panel{width:150px;font-size:13px}
+    }
 
-    /* Dialogs */
-    .confirmation-dialog,.results-screen{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:100;justify-content:center;align-items:center}
-    .confirmation-box,.results-content{background:#F0EDE5;padding:20px;border-radius:8px;text-align:center;max-width:300px;color:#5A4A42}
-    .results-content{background:#5A4A42;color:#F0EDE5}
-    .confirm-btn,.results-button{margin-top:15px;padding:8px 20px;border:none;border-radius:4px;cursor:pointer;font-weight:bold}
-    .confirm-yes{background:#A8B7A5;color:#5A4A42}
-    .confirm-no{background:#B7AFA1;color:#5A4A42;margin-left:10px}
-    .results-button{background:#A89F94;color:#5A4A42}
+    /* Dialogs */
+    .confirmation-dialog,.results-screen{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:100;justify-content:center;align-items:center}
+    .confirmation-box,.results-content{background:#F0EDE5;padding:20px;border-radius:8px;text-align:center;max-width:300px;color:#5A4A42}
+    .results-content{background:#5A4A42;color:#F0EDE5}
+    .confirm-btn,.results-button{margin-top:15px;padding:8px 20px;border:none;border-radius:4px;cursor:pointer;font-weight:bold}
+    .confirm-yes{background:#A8B7A5;color:#5A4A42}
+    .confirm-no{background:#B7AFA1;color:#5A4A42;margin-left:10px}
+    .results-button{background:#A89F94;color:#5A4A42}
 
-    /* Cute Animations */
-    @keyframes snakeWiggle {0%, 100% {transform: rotate(0deg);} 25% {transform: rotate(5deg);} 75% {transform: rotate(-5deg);}}
-    @keyframes bunJump {0%, 100% {transform: translateY(0) scale(1);} 50% {transform: translateY(-15px) scale(1.1);}}
-    @keyframes confettiFall {0% {transform: translateY(-100vh) rotate(0deg); opacity: 1;} 100% {transform: translateY(100vh) rotate(720deg); opacity: 0;}}
-    @keyframes gameOverSparkle {0%, 100% {opacity: 0.5;} 50% {opacity: 1; transform: scale(1.2);}}
-    .snake-head {animation: snakeWiggle 0.5s ease-in-out infinite;}
-    .jump-bun {animation: bunJump 0.6s ease-out;}
-    .confetti {position: absolute; width: 6px; height: 6px; pointer-events: none; border-radius: 50%; z-index: 50;}
-    .sparkle {position: absolute; width: 4px; height: 4px; background: #FFD700; border-radius: 50%; pointer-events: none; z-index: 50; animation: gameOverSparkle 1s infinite;}
+    /* Cute Animations */
+    @keyframes snakeWiggle {0%, 100% {transform: rotate(0deg);} 25% {transform: rotate(5deg);} 75% {transform: rotate(-5deg);}}
+    @keyframes bunJump {0%, 100% {transform: translateY(0) scale(1);} 50% {transform: translateY(-15px) scale(1.1);}}
+    @keyframes confettiFall {0% {transform: translateY(-100vh) rotate(0deg); opacity: 1;} 100% {transform: translateY(100vh) rotate(720deg); opacity: 0;}}
+    @keyframes gameOverSparkle {0%, 100% {opacity: 0.5;} 50% {opacity: 1; transform: scale(1.2);}}
+    .snake-head {animation: snakeWiggle 0.5s ease-in-out infinite;}
+    .jump-bun {animation: bunJump 0.6s ease-out;}
+    .confetti {position: absolute; width: 6px; height: 6px; pointer-events: none; border-radius: 50%; z-index: 50;}
+    .sparkle {position: absolute; width: 4px; height: 4px; background: #FFD700; border-radius: 50%; pointer-events: none; z-index: 50; animation: gameOverSparkle 1s infinite;}
 </style>
 </head>
 <body>
 
-<!-- Setup Screen -->
 <div class="setup-screen" id="setup-screen">
-    <h2>Choose Your Level & Units</h2>
-    <select id="level-select">
-        <option value="1">Level 1</option>
-        <option value="2">Level 2</option>
-        <option value="3">Level 3</option>
-        <option value="4">Level 4</option>
-        <option value="5">Level 5</option>
-        <option value="6">Level 6</option>
-    </select>
-    <select id="unit-range-select">
-        <option value="1-5">Unit 1–5</option>
-        <option value="6-10">Unit 6–10</option>
-        <option value="11-15">Unit 11–15</option>
-        <option value="16-20">Unit 16–20</option>
-        <option value="21-25">Unit 21–25</option>
-        <option value="26-30">Unit 26–30</option>
-        <option value="31-35">Unit 31–35</option>
-        <option value="36-40">Unit 36–40</option>
-        <option value="41-45">Unit 41–45</option>
-        <option value="46-50">Unit 46–50</option>
-    </select>
-    <button class="start-game-btn" id="go-to-game">Start Game</button>
+    <h2>Choose Your Level & Units</h2>
+    <select id="level-select">
+        <option value="1">Level 1</option>
+        <option value="2">Level 2</option>
+        <option value="3">Level 3</option>
+        <option value="4">Level 4</option>
+        <option value="5">Level 5</option>
+        <option value="6">Level 6</option>
+    </select>
+    <select id="unit-range-select">
+        <option value="1-5">Unit 1–5</option>
+        <option value="6-10">Unit 6–10</option>
+        <option value="11-15">Unit 11–15</option>
+        <option value="16-20">Unit 16–20</option>
+        <option value="21-25">Unit 21–25</option>
+        <option value="26-30">Unit 26–30</option>
+        <option value="31-35">Unit 31–35</option>
+        <option value="36-40">Unit 36–40</option>
+        <option value="41-45">Unit 41–45</option>
+        <option value="46-50">Unit 46–50</option>
+    </select>
+    <button class="start-game-btn" id="go-to-game">Start Game</button>
 </div>
 
-<!-- Game Container -->
 <div class="game-container" id="game-container" style="display:none">
-    <div class="game-area"><canvas id="game-board"></canvas></div>
-    <div class="right-panel">
-        <div class="question-box" id="question">Words</div>
-        <div class="score-container">
-            <div>Score: <span id="score">0</span></div>
-            <div>High: <span id="high-score">0</span></div>
-            <div>Length: <span id="snake-length">1</span></div>
-        </div>
-        <div class="time-container">
-            <div>Time: <span id="time-left">00:00</span></div>
-            <div class="time-selector">
-                <button class="time-btn" id="time-5">5m</button>
-                <button class="time-btn selected" id="time-10">10m</button>
-                <button class="time-btn" id="time-15">15m</button>
-            </div>
-        </div>
-        <div class="touch-controls">
-            <button class="control-btn up">↑</button>
-            <button class="control-btn left">←</button>
-            <button class="control-btn start" id="start-btn">Start</button>
-            <button class="control-btn pause" id="pause-btn">Pause</button>
-            <button class="control-btn end" id="end-btn">End Game</button>
-            <button class="control-btn down">↓</button>
-            <button class="control-btn right">→</button>
-        </div>
-        <button class="resume-btn" id="resume-btn">Resume</button>
-    </div>
+    <div class="game-area"><canvas id="game-board"></canvas></div>
+    <div class="right-panel">
+        <div class="question-box" id="question">Words</div>
+        <div class="score-container">
+            <div>Score: <span id="score">0</span></div>
+            <div>High: <span id="high-score">0</span></div>
+            <div>Length: <span id="snake-length">1</span></div>
+        </div>
+        <div class="time-container">
+            <div>Time: <span id="time-left">00:00</span></div>
+            <div class="time-selector">
+                <button class="time-btn" id="time-5">5m</button>
+                <button class="time-btn selected" id="time-10">10m</button>
+                <button class="time-btn" id="time-15">15m</button>
+            </div>
+        </div>
+        <div class="touch-controls">
+            <button class="control-btn up">↑</button>
+            <button class="control-btn left">←</button>
+            <button class="control-btn start" id="start-btn">Start</button>
+            <button class="control-btn pause" id="pause-btn">Pause</button>
+            <button class="control-btn end" id="end-btn">End Game</button>
+            <button class="control-btn down">↓</button>
+            <button class="control-btn right">→</button>
+        </div>
+        <button class="resume-btn" id="resume-btn">Resume</button>
+    </div>
 </div>
 
-<!-- Confirmation Dialog -->
 <div class="confirmation-dialog" id="confirmation-dialog">
-    <div class="confirmation-box">
-        <h3>End game?</h3>
-        <p>Score: <span id="current-score">0</span><br>Length: <span id="current-length">1</span></p>
-        <div>
-            <button class="confirm-btn confirm-yes" id="confirm-yes">Yes</button>
-            <button class="confirm-btn confirm-no" id="confirm-no">No</button>
-        </div>
-    </div>
+    <div class="confirmation-box">
+        <h3>End game?</h3>
+        <p>Score: <span id="current-score">0</span><br>Length: <span id="current-length">1</span></p>
+        <div>
+            <button class="confirm-btn confirm-yes" id="confirm-yes">Yes</button>
+            <button class="confirm-btn confirm-no" id="confirm-no">No</button>
+        </div>
+    </div>
 </div>
 
-<!-- Results Screen -->
 <div class="results-screen" id="results-screen">
-    <div class="results-content">
-        <h2>Game Over 🐍</h2>
-        <p>Score: <span id="final-score">0</span></p>
-        <p>Length: <span id="final-length">1</span></p>
-        <p>Time: <span id="game-time">00:00</span></p>
-        <button class="results-button" id="results-ok">Play Again</button>
-    </div>
+    <div class="results-content">
+        <h2>Game Over 🐍</h2>
+        <p>Score: <span id="final-score">0</span></p>
+        <p>Length: <span id="final-length">1</span></p>
+        <p>Time: <span id="game-time">00:00</span></p>
+        <button class="results-button" id="results-ok">Play Again</button>
+    </div>
 </div>
 
-<!-- Audio Effects -->
 <audio id="eat-sound" preload="auto">
-    <source src="https://assets.mixkit.co/sfx/preview/mixkit-coin-win-notification-1939.mp3" type="audio/mpeg">
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-coin-win-notification-1939.mp3" type="audio/mpeg">
 </audio>
 <audio id="wall-sound" preload="auto">
-    <source src="https://assets.mixkit.co/sfx/preview/mixkit-retro-game-jump-2071.mp3" type="audio/mpeg">
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-retro-game-jump-2071.mp3" type="audio/mpeg">
 </audio>
 <audio id="end-sound" preload="auto">
-    <source src="https://assets.mixkit.co/sfx/preview/mixkit-sad-sigh-2091.mp3" type="audio/mpeg">
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-sad-sigh-2091.mp3" type="audio/mpeg">
 </audio>
 
 <script>
@@ -170,94 +165,94 @@ let currentWordDatabase = [];
 
 /* Fallback Data for Level 1 (from your CSV) */
 const fallbackLevel1 = [
-    {level: '1', unit: 1, no: 1, word: 'action', pos: 'n.', meaning: '动作'},
-    {level: '1', unit: 1, no: 2, word: 'afternoon', pos: 'n.', meaning: '下午;午后'},
-    {level: '1', unit: 1, no: 3, word: 'air', pos: 'n.', meaning: '空气'},
-    {level: '1', unit: 1, no: 4, word: 'banana', pos: 'n.', meaning: '香蕉'},
-    {level: '1', unit: 1, no: 5, word: 'brown', pos: 'adj.; n.', meaning: '棕色的;棕色'},
-    {level: '1', unit: 1, no: 6, word: 'card', pos: 'n.', meaning: '卡'},
-    {level: '1', unit: 1, no: 7, word: 'eat', pos: 'v.', meaning: '吃'},
-    {level: '1', unit: 1, no: 8, word: 'farm', pos: 'n.', meaning: '农场'},
-    {level: '1', unit: 1, no: 9, word: 'fifteen', pos: 'n., adj.', meaning: '十五(的)'},
-    {level: '1', unit: 1, no: 10, word: 'first', pos: 'adv.', meaning: '首先;第一;最早'}
-    // Add more rows if your CSV has them; this matches your sample
+    {level: '1', unit: 1, no: 1, word: 'action', pos: 'n.', meaning: '动作'},
+    {level: '1', unit: 1, no: 2, word: 'afternoon', pos: 'n.', meaning: '下午;午后'},
+    {level: '1', unit: 1, no: 3, word: 'air', pos: 'n.', meaning: '空气'},
+    {level: '1', unit: 1, no: 4, word: 'banana', pos: 'n.', meaning: '香蕉'},
+    {level: '1', unit: 1, no: 5, word: 'brown', pos: 'adj.; n.', meaning: '棕色的;棕色'},
+    {level: '1', unit: 1, no: 6, word: 'card', pos: 'n.', meaning: '卡'},
+    {level: '1', unit: 1, no: 7, word: 'eat', pos: 'v.', meaning: '吃'},
+    {level: '1', unit: 1, no: 8, word: 'farm', pos: 'n.', meaning: '农场'},
+    {level: '1', unit: 1, no: 9, word: 'fifteen', pos: 'n., adj.', meaning: '十五(的)'},
+    {level: '1', unit: 1, no: 10, word: 'first', pos: 'adv.', meaning: '首先;第一;最早'}
+    // Add more rows if your CSV has them; this matches your sample
 ];
 
 /* Load Words (with fallback & error handling) */
 async function loadWordsFromCSV(level, unitRange) {
-    console.log(`Loading Level ${level}, Units ${unitRange}...`);
-    let words = [];
+    console.log(`Loading Level ${level}, Units ${unitRange}...`);
+    let words = [];
 
-    // Fallback for Level 1
-    if (level === '1') {
-        const [startU, endU] = unitRange.split('-').map(Number);
-        words = fallbackLevel1.filter(w => w.unit >= startU && w.unit <= endU);
-        console.log(`Fallback loaded: ${words.length} words`);
-        if (words.length > 0) return words;
-    }
+    // Fallback for Level 1
+    if (level === '1') {
+        const [startU, endU] = unitRange.split('-').map(Number);
+        words = fallbackLevel1.filter(w => w.unit >= startU && w.unit <= endU);
+        console.log(`Fallback loaded: ${words.length} words`);
+        if (words.length > 0) return words;
+    }
 
-    // Try fetch for other levels
-    try {
-        const csvUrl = `https://raw.githubusercontent.com/DuCJ-creator/iVocab-Self-Practice/main/level${level}.csv`;
-        console.log(`Fetching: ${csvUrl}`);
-        const resp = await fetch(csvUrl);
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const text = await resp.text();
-        const lines = text.trim().split('\n');
+    // Try fetch for other levels
+    try {
+        const csvUrl = `https://raw.githubusercontent.com/DuCJ-creator/iVocab-Self-Practice/main/level${level}.csv`;
+        console.log(`Fetching: ${csvUrl}`);
+        const resp = await fetch(csvUrl);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const text = await resp.text();
+        const lines = text.trim().split('\n');
 
-        const headers = lines[0].split(',').map(h => h.trim());
-        const idx = {
-            level: headers.indexOf('Level'),
-            unit: headers.indexOf('Unit'),
-            no: headers.indexOf('No.'),
-            word: headers.indexOf('Word'),
-            pos: headers.indexOf('POS'),
-            meaning: headers.indexOf('Chinese Meaning')
-        };
+        const headers = lines[0].split(',').map(h => h.trim());
+        const idx = {
+            level: headers.indexOf('Level'),
+            unit: headers.indexOf('Unit'),
+            no: headers.indexOf('No.'),
+            word: headers.indexOf('Word'),
+            pos: headers.indexOf('POS'),
+            meaning: headers.indexOf('Chinese Meaning')
+        };
 
-        if (Object.values(idx).some(i => i === -1)) throw new Error('Missing columns');
+        if (Object.values(idx).some(i => i === -1)) throw new Error('Missing columns');
 
-        for (let i = 1; i < lines.length; i++) {
-            const row = lines[i].split(',').map(c => c.trim());
-            if (row.length < Math.max(...Object.values(idx)) + 1) continue;
-            words.push({
-                level: row[idx.level],
-                unit: Number(row[idx.unit]),
-                no: Number(row[idx.no]),
-                word: row[idx.word],
-                pos: row[idx.pos],
-                meaning: row[idx.meaning]
-            });
-        }
+        for (let i = 1; i < lines.length; i++) {
+            const row = lines[i].split(',').map(c => c.trim());
+            if (row.length < Math.max(...Object.values(idx)) + 1) continue;
+            words.push({
+                level: row[idx.level],
+                unit: Number(row[idx.unit]),
+                no: Number(row[idx.no]),
+                word: row[idx.word],
+                pos: row[idx.pos],
+                meaning: row[idx.meaning]
+            });
+        }
 
-        const [startU, endU] = unitRange.split('-').map(Number);
-        words = words.filter(w => w.unit >= startU && w.unit <= endU);
-        console.log(`Loaded: ${words.length} words`);
-    } catch (e) {
-        console.error('Fetch failed:', e);
-        alert(`Failed to load Level ${level} (CORS?). Using fallback or try Level 1.`);
-        // For non-Level 1, you can add more fallbacks here
-        words = [];
-    }
+        const [startU, endU] = unitRange.split('-').map(Number);
+        words = words.filter(w => w.unit >= startU && w.unit <= endU);
+        console.log(`Loaded: ${words.length} words`);
+    } catch (e) {
+        console.error('Fetch failed:', e);
+        alert(`Failed to load Level ${level} (CORS?). Using fallback or try Level 1.`);
+        // For non-Level 1, you can add more fallbacks here
+        words = [];
+    }
 
-    if (words.length === 0) {
-        alert(`No words found! Try Level 1.`);
-    }
-    return words;
+    if (words.length === 0) {
+        alert(`No words found! Try Level 1.`);
+    }
+    return words;
 }
 
 /* Start Game from Setup */
 document.getElementById('go-to-game').addEventListener('click', async () => {
-    const level = document.getElementById('level-select').value;
-    const unitRange = document.getElementById('unit-range-select').value;
-    const words = await loadWordsFromCSV(level, unitRange);
-    if (words.length === 0) return;
-    currentWordDatabase = words;
-    document.getElementById('setup-screen').style.display = 'none';
-    document.getElementById('game-container').style.display = 'flex';
-    newQuestion();
-    draw();
-    console.log('Game setup complete!');
+    const level = document.getElementById('level-select').value;
+    const unitRange = document.getElementById('unit-range-select').value;
+    const words = await loadWordsFromCSV(level, unitRange);
+    if (words.length === 0) return;
+    currentWordDatabase = words;
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('game-container').style.display = 'flex';
+    // 載入單字後，立即啟動遊戲
+    startGame(); 
+    console.log('Game setup complete and started!');
 });
 
 /* Game Core (Canvas & Logic) */
@@ -292,9 +287,9 @@ const wallSound = document.getElementById('wall-sound');
 const endSound = document.getElementById('end-sound');
 
 function resizeCanvas() {
-    const s = Math.min(canvas.parentElement.clientWidth, canvas.parentElement.clientHeight);
-    canvas.width = s;
-    canvas.height = s;
+    const s = Math.min(canvas.parentElement.clientWidth, canvas.parentElement.clientHeight);
+    canvas.width = s;
+    canvas.height = s;
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
@@ -312,363 +307,366 @@ const formatTime = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String
 const lerp = (a, b, t) => a + (b - a) * t;
 
 function selectTime(m) {
-    [time5, time10, time15].forEach(b => b.classList.remove('selected'));
-    if (m === 5) time5.classList.add('selected');
-    else if (m === 10) time10.classList.add('selected');
-    else time15.classList.add('selected');
-    timeLeft = m * 60;
-    timeEl.textContent = formatTime(timeLeft);
+    [time5, time10, time15].forEach(b => b.classList.remove('selected'));
+    if (m === 5) time5.classList.add('selected');
+    else if (m === 10) time10.classList.add('selected');
+    else time15.classList.add('selected');
+    timeLeft = m * 60;
+    timeEl.textContent = formatTime(timeLeft);
 }
 
 function newQuestion() {
-    if (!currentWordDatabase.length) {
-        questionEl.textContent = 'No words loaded! Try Level 1.';
-        console.error('No words in database');
-        return null;
-    }
-    if (usedWords.length >= currentWordDatabase.length) usedWords = [];
-    const avail = currentWordDatabase.filter(w => !usedWords.includes(w.word));
-    if (avail.length === 0) return null;
-    const q = avail[Math.floor(Math.random() * avail.length)];
-    usedWords.push(q.word);
-    currentQuestion = q;
-    questionEl.textContent = `${q.word} (${q.pos})`; // Responsive size via CSS
-    console.log('New question:', q.word);
-    return q;
+    if (!currentWordDatabase.length) {
+        questionEl.textContent = 'No words loaded! Try Level 1.';
+        console.error('No words in database');
+        return null;
+    }
+    if (usedWords.length >= currentWordDatabase.length) usedWords = [];
+    const avail = currentWordDatabase.filter(w => !usedWords.includes(w.word));
+    if (avail.length === 0) return null;
+    const q = avail[Math.floor(Math.random() * avail.length)];
+    usedWords.push(q.word);
+    currentQuestion = q;
+    questionEl.textContent = `${q.word} (${q.pos})`; // Responsive size via CSS
+    console.log('New question:', q.word);
+    return q;
 }
 
 function genFoods(correctMeaning) {
-    const uniques = [...new Set(currentWordDatabase.map(w => w.meaning))];
-    const wrongs = uniques.filter(m => m !== correctMeaning).sort(() => 0.5 - Math.random()).slice(0, 3);
-    const options = [...wrongs, correctMeaning].sort(() => 0.5 - Math.random());
-    const free = [];
-    for (let y = 0; y < GRID; y++) {
-        for (let x = 0; x < GRID; x++) {
-            if (!snakeGrid.some(s => s.x === x && s.y === y)) free.push({ x, y });
-        }
-    }
-    if (free.length < 4) { foods = []; return; }
-    const chosen = [];
-    while (chosen.length < 4) {
-        const idx = Math.floor(Math.random() * free.length);
-        chosen.push(free.splice(idx, 1)[0]);
-    }
-    foods = chosen.map((cell, i) => ({
-        x: cell.x, y: cell.y,
-        meaning: options[i],
-        correct: options[i] === correctMeaning
-    }));
+    const uniques = [...new Set(currentWordDatabase.map(w => w.meaning))];
+    const wrongs = uniques.filter(m => m !== correctMeaning).sort(() => 0.5 - Math.random()).slice(0, 3);
+    const options = [...wrongs, correctMeaning].sort(() => 0.5 - Math.random());
+    const free = [];
+    for (let y = 0; y < GRID; y++) {
+        for (let x = 0; x < GRID; x++) {
+            if (!snakeGrid.some(s => s.x === x && s.y === y)) free.push({ x, y });
+        }
+    }
+    if (free.length < 4) { foods = []; return; }
+    const chosen = [];
+    while (chosen.length < 4) {
+        const idx = Math.floor(Math.random() * free.length);
+        chosen.push(free.splice(idx, 1)[0]);
+    }
+    foods = chosen.map((cell, i) => ({
+        x: cell.x, y: cell.y,
+        meaning: options[i],
+        correct: options[i] === correctMeaning
+    }));
 }
 
 function ensureFourFoods() {
-    if (!currentQuestion) return;
-    if (foods.length === 4) return;
-    const occupied = new Set(snakeGrid.map(s => `${s.x},${s.y}`));
-    foods.forEach(f => occupied.add(`${f.x},${f.y}`));
-    const freeCells = [];
-    for (let y = 0; y < GRID; y++) for (let x = 0; x < GRID; x++) {
-        const k = `${x},${y}`;
-        if (!occupied.has(k)) freeCells.push({ x, y });
-    }
-    if (!freeCells.length) return;
-    const correct = currentQuestion.meaning;
-    const pool = [...new Set(currentWordDatabase.map(w => w.meaning))].filter(m => m !== correct);
-    while (foods.length < 4 && freeCells.length) {
-        const needCorrect = foods.every(f => !f.correct);
-        const meaning = needCorrect ? correct : pool[Math.floor(Math.random() * pool.length)];
-        const cell = freeCells.splice(Math.floor(Math.random() * freeCells.length), 1)[0];
-        foods.push({ x: cell.x, y: cell.y, meaning, correct: meaning === correct });
-    }
-    if (foods.length && foods.every(f => !f.correct)) {
-        const j = Math.floor(Math.random() * foods.length);
-        foods[j] = { ...foods[j], meaning: correct, correct: true };
-    }
+    if (!currentQuestion) return;
+    if (foods.length === 4) return;
+    const occupied = new Set(snakeGrid.map(s => `${s.x},${s.y}`));
+    foods.forEach(f => occupied.add(`${f.x},${f.y}`));
+    const freeCells = [];
+    for (let y = 0; y < GRID; y++) for (let x = 0; x < GRID; x++) {
+        const k = `${x},${y}`;
+        if (!occupied.has(k)) freeCells.push({ x, y });
+    }
+    if (!freeCells.length) return;
+    const correct = currentQuestion.meaning;
+    const pool = [...new Set(currentWordDatabase.map(w => w.meaning))].filter(m => m !== correct);
+    while (foods.length < 4 && freeCells.length) {
+        const needCorrect = foods.every(f => !f.correct);
+        const meaning = needCorrect ? correct : pool[Math.floor(Math.random() * pool.length)];
+        const cell = freeCells.splice(Math.floor(Math.random() * freeCells.length), 1)[0];
+        foods.push({ x: cell.x, y: cell.y, meaning, correct: meaning === correct });
+    }
+    if (foods.length && foods.every(f => !f.correct)) {
+        const j = Math.floor(Math.random() * foods.length);
+        foods[j] = { ...foods[j], meaning: correct, correct: true };
+    }
 }
 
 function draw() {
-    const sz = canvas.width / GRID;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const sz = canvas.width / GRID;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Snake body
-    for (let i = 1; i < snakePos.length; i++) {
-        const s = snakePos[i];
-        ctx.fillStyle = '#A8B7A5';
-        ctx.beginPath(); ctx.arc(s.x, s.y, sz * 0.45, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#8C9D8A'; ctx.lineWidth = 2; ctx.stroke();
-    }
+    // Snake body
+    for (let i = 1; i < snakePos.length; i++) {
+        const s = snakePos[i];
+        ctx.fillStyle = '#A8B7A5';
+        ctx.beginPath(); ctx.arc(s.x, s.y, sz * 0.45, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#8C9D8A'; ctx.lineWidth = 2; ctx.stroke();
+    }
 
-    // Snake head (with wiggle class for animation)
-    if (snakePos.length) {
-        const h = snakePos[0];
-        ctx.fillStyle = invincible ? 'rgba(216,168,168,.7)' : '#D8A8A8';
-        ctx.beginPath(); ctx.arc(h.x, h.y, sz * 0.48, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#B78A8A'; ctx.lineWidth = 2; ctx.stroke();
-        // Eyes
-        ctx.fillStyle = '#fff'; const e = sz * 0.2;
-        let ex1, ey1, ex2, ey2;
-        if (direction === 'right') { ex1 = ex2 = h.x + e; ey1 = h.y - e; ey2 = h.y + e; }
-        else if (direction === 'left') { ex1 = ex2 = h.x - e; ey1 = h.y - e; ey2 = h.y + e; }
-        else if (direction === 'up') { ey1 = ey2 = h.y - e; ex1 = h.x - e; ex2 = h.x + e; }
-        else { ey1 = ey2 = h.y + e; ex1 = h.x - e; ex2 = h.x + e; }
-        ctx.beginPath(); ctx.arc(ex1, ey1, sz * 0.12, 0, Math.PI * 2); ctx.arc(ex2, ey2, sz * 0.12, 0, Math.PI * 2); ctx.fill();
-        // Cute tongue if moving right
-        if (direction === 'right') {
-            ctx.fillStyle = '#FF69B4'; ctx.beginPath(); ctx.ellipse(h.x + sz * 0.3, h.y, sz * 0.1, sz * 0.05, 0, 0, Math.PI * 2); ctx.fill();
-        }
-    }
+    // Snake head (with wiggle class for animation)
+    if (snakePos.length) {
+        const h = snakePos[0];
+        ctx.fillStyle = invincible ? 'rgba(216,168,168,.7)' : '#D8A8A8';
+        ctx.beginPath(); ctx.arc(h.x, h.y, sz * 0.48, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#B78A8A'; ctx.lineWidth = 2; ctx.stroke();
+        // Eyes
+        ctx.fillStyle = '#fff'; const e = sz * 0.2;
+        let ex1, ey1, ex2, ey2;
+        if (direction === 'right') { ex1 = ex2 = h.x + e; ey1 = h.y - e; ey2 = h.y + e; }
+        else if (direction === 'left') { ex1 = ex2 = h.x - e; ey1 = h.y - e; ey2 = h.y + e; }
+        else if (direction === 'up') { ey1 = ey2 = h.y - e; ex1 = h.x - e; ex2 = h.x + e; }
+        else { ey1 = ey2 = h.y + e; ex1 = h.x - e; ex2 = h.x + e; }
+        ctx.beginPath(); ctx.arc(ex1, ey1, sz * 0.12, 0, Math.PI * 2); ctx.arc(ex2, ey2, sz * 0.12, 0, Math.PI * 2); ctx.fill();
+        // Cute tongue if moving right
+        if (direction === 'right') {
+            ctx.fillStyle = '#FF69B4'; ctx.beginPath(); ctx.ellipse(h.x + sz * 0.3, h.y, sz * 0.1, sz * 0.05, 0, 0, Math.PI * 2); ctx.fill();
+        }
+    }
 
-    // Foods (buns with jump on correct)
-    foods.forEach(f => {
-        const cx = (f.x + 0.5) * sz, cy = (f.y + 0.5) * sz;
-        ctx.save();
-        if (f.correct) ctx.translate(0, Math.sin(Date.now() / 300) * 3); // Subtle bob
-        ctx.fillStyle = '#D8C4A8';
-        ctx.beginPath(); ctx.ellipse(cx, cy, sz * 0.8, sz * 0.6, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#C4B6A0'; ctx.lineWidth = 2; ctx.stroke();
-        // Cute steam if correct
-        if (f.correct) {
-            ctx.fillStyle = 'rgba(255,255,255,0.6)'; 
-            for (let i = 0; i < 3; i++) ctx.beginPath(); ctx.arc(cx + i*5 - 5, cy - sz*0.4, 2, 0, Math.PI * 2); ctx.fill();
-        }
-        ctx.restore();
+    // Foods (buns with jump on correct)
+    foods.forEach(f => {
+        const cx = (f.x + 0.5) * sz, cy = (f.y + 0.5) * sz;
+        ctx.save();
+        if (f.correct) ctx.translate(0, Math.sin(Date.now() / 300) * 3); // Subtle bob
+        ctx.fillStyle = '#D8C4A8';
+        ctx.beginPath(); ctx.ellipse(cx, cy, sz * 0.8, sz * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#C4B6A0'; ctx.lineWidth = 2; ctx.stroke();
+        // Cute steam if correct
+        if (f.correct) {
+            ctx.fillStyle = 'rgba(255,255,255,0.6)'; 
+            for (let i = 0; i < 3; i++) ctx.beginPath(); ctx.arc(cx + i*5 - 5, cy - sz*0.4, 2, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
 
-        // Meaning text
-        ctx.fillStyle = '#000';
-        ctx.font = `${Math.max(12, Math.floor(sz * 0.28))}px sans-serif`;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        const ws = f.meaning.split(';'), h = Math.max(16, Math.floor(sz * 0.32)), sy = cy - (ws.length - 1) * h / 2;
-        ws.forEach((w, i) => {
-            const txt = w.trim().length > 8 ? w.trim().substring(0, 7) + '...' : w.trim();
-            ctx.fillText(txt, cx, sy + i * h);
-        });
-    });
+        // Meaning text
+        ctx.fillStyle = '#000';
+        ctx.font = `${Math.max(12, Math.floor(sz * 0.28))}px sans-serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const ws = f.meaning.split(';'), h = Math.max(16, Math.floor(sz * 0.32)), sy = cy - (ws.length - 1) * h / 2;
+        ws.forEach((w, i) => {
+            const txt = w.trim().length > 8 ? w.trim().substring(0, 7) + '...' : w.trim();
+            ctx.fillText(txt, cx, sy + i * h);
+        });
+    });
 }
 
 function applyPenaltyAndRefresh() {
-    penalty = (penalty || 0) + 1;
-    const cost = penalty * 10;
-    if (score >= cost) {
-        score -= cost;
-        for (let i = 0; i < penalty && snakeGrid.length > 1; i++) snakeGrid.pop();
-        snakePos.length = snakeGrid.length;
-        const q = newQuestion();
-        if (q) { foods = []; genFoods(q.meaning); ensureFourFoods(); }
-        updateUI();
-        // Penalty flash
-        ctx.fillStyle = 'rgba(183,175,161,.3)'; ctx.fillRect(0, 0, canvas.width, canvas.height); setTimeout(draw, 180);
-        wallSound.play().catch(() => {});
-    } else {
-        gameOver();
-    }
+    penalty = (penalty || 0) + 1;
+    const cost = penalty * 10;
+    if (score >= cost) {
+        score -= cost;
+        for (let i = 0; i < penalty && snakeGrid.length > 1; i++) snakeGrid.pop();
+        snakePos.length = snakeGrid.length;
+        const q = newQuestion();
+        if (q) { foods = []; genFoods(q.meaning); ensureFourFoods(); }
+        updateUI();
+        // Penalty flash
+        ctx.fillStyle = 'rgba(183,175,161,.3)'; ctx.fillRect(0, 0, canvas.width, canvas.height); setTimeout(draw, 180);
+        wallSound.play().catch(() => {});
+    } else {
+        gameOver();
+    }
 }
 
 function moveSnake() {
-    const head = { ...snakeGrid[0] };
-    switch (nextDirection) {
-        case 'up': head.y--; break;
-        case 'down': head.y++; break;
-        case 'left': head.x--; break;
-        case 'right': head.x++; break;
-    }
-    direction = nextDirection;
+    const head = { ...snakeGrid[0] };
+    switch (nextDirection) {
+        case 'up': head.y--; break;
+        case 'down': head.y++; break;
+        case 'left': head.x--; break;
+        case 'right': head.x++; break;
+    }
+    direction = nextDirection;
 
-    if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID ||
-        snakeGrid.some((s, i) => i > 0 && s.x === head.x && s.y === head.y)) {
-        if (!invincible && timeLeft > 0) applyPenaltyAndRefresh();
-        return;
-    }
+    if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID ||
+        snakeGrid.some((s, i) => i > 0 && s.x === head.x && s.y === head.y)) {
+        if (!invincible && timeLeft > 0) applyPenaltyAndRefresh();
+        return;
+    }
 
-    snakeGrid.unshift(head);
-    const sz = canvas.width / GRID;
-    const headC = { x: (head.x + 0.5) * sz, y: (head.y + 0.5) * sz };
-    const eatDist = sz * 0.9;
-    let eaten = false;
-    for (let i = 0; i < foods.length; i++) {
-        const f = foods[i], fc = { x: (f.x + 0.5) * sz, y: (f.y + 0.5) * sz };
-        if (Math.hypot(headC.x - fc.x, headC.y - fc.y) < eatDist) {
-            if (f.correct) {
-                correctCount++;
-                score += correctCount * 10;
-                if (score > highScore) { highScore = score; localStorage.setItem('snakeHighScore', String(highScore)); }
-                invincible = true; setTimeout(() => invincible = false, 1000);
-                eatSound.play().catch(() => {});
-                confettiBurst(headC.x + canvas.offsetLeft, headC.y + canvas.offsetTop); // Screen coords for confetti
-                const q = newQuestion();
-                if (q) { foods = []; genFoods(q.meaning); ensureFourFoods(); }
-                eaten = true;
-                // Jump animation for eaten bun (visual feedback)
-                const jumpEl = document.createElement('div');
-                jumpEl.className = 'jump-bun confetti';
-                jumpEl.style.left = `${headC.x - 10 + canvas.offsetLeft}px`;
-                jumpEl.style.top = `${headC.y - 10 + canvas.offsetTop}px`;
-                jumpEl.style.background = '#FFD700';
-                document.body.appendChild(jumpEl);
-                setTimeout(() => jumpEl.remove(), 600);
-                break;
-            } else {
-                if (!invincible && timeLeft > 0) {
-                    applyPenaltyAndRefresh();
-                    return;
-                }
-            }
-        }
-    }
-    if (!eaten && snakeGrid.length > 1) snakeGrid.pop();
-    snakePos.length = snakeGrid.length;
-    ensureFourFoods();
-    updateUI();
+    snakeGrid.unshift(head);
+    const sz = canvas.width / GRID;
+    const headC = { x: (head.x + 0.5) * sz, y: (head.y + 0.5) * sz };
+    const eatDist = sz * 0.9;
+    let eaten = false;
+    for (let i = 0; i < foods.length; i++) {
+        const f = foods[i], fc = { x: (f.x + 0.5) * sz, y: (f.y + 0.5) * sz };
+        if (Math.hypot(headC.x - fc.x, headC.y - fc.y) < eatDist) {
+            if (f.correct) {
+                correctCount++;
+                score += correctCount * 10;
+                if (score > highScore) { highScore = score; localStorage.setItem('snakeHighScore', String(highScore)); }
+                invincible = true; setTimeout(() => invincible = false, 1000);
+                eatSound.play().catch(() => {});
+                confettiBurst(headC.x + canvas.offsetLeft, headC.y + canvas.offsetTop); // Screen coords for confetti
+                const q = newQuestion();
+                if (q) { foods = []; genFoods(q.meaning); ensureFourFoods(); }
+                eaten = true;
+                // Jump animation for eaten bun (visual feedback)
+                const jumpEl = document.createElement('div');
+                jumpEl.className = 'jump-bun confetti';
+                jumpEl.style.left = `${headC.x - 10 + canvas.offsetLeft}px`;
+                jumpEl.style.top = `${headC.y - 10 + canvas.offsetTop}px`;
+                jumpEl.style.background = '#FFD700';
+                document.body.appendChild(jumpEl);
+                setTimeout(() => jumpEl.remove(), 600);
+                break;
+            } else {
+                if (!invincible && timeLeft > 0) {
+                    applyPenaltyAndRefresh();
+                    return;
+                }
+            }
+        }
+    }
+    if (!eaten && snakeGrid.length > 1) snakeGrid.pop();
+    snakePos.length = snakeGrid.length;
+    ensureFourFoods();
+    updateUI();
 }
 
 function updateUI() {
-    scoreEl.textContent = score;
-    highScoreEl.textContent = highScore;
-    lengthEl.textContent = snakeGrid.length;
-    timeEl.textContent = formatTime(timeLeft);
+    scoreEl.textContent = score;
+    highScoreEl.textContent = highScore;
+    lengthEl.textContent = snakeGrid.length;
+    timeEl.textContent = formatTime(timeLeft);
 }
 
 function gameOver() {
-    if (gameEnded) return;
-    gameEnded = true;
-    clearInterval(timer);
-    gameStarted = false;
-    endSound.play().catch(() => {});
-    // Cute game over sparkles
-    for (let i = 0; i < 20; i++) {
-        const sparkle = document.createElement('div');
-        sparkle.className = 'sparkle';
-        sparkle.style.left = `${Math.random() * window.innerWidth}px`;
-        sparkle.style.top = `${Math.random() * window.innerHeight}px`;
-        document.body.appendChild(sparkle);
-        setTimeout(() => sparkle.remove(), 2000);
-    }
-    showResults();
+    if (gameEnded) return;
+    gameEnded = true;
+    clearInterval(timer);
+    gameStarted = false;
+    endSound.play().catch(() => {});
+    // Cute game over sparkles
+    for (let i = 0; i < 20; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'sparkle';
+        sparkle.style.left = `${Math.random() * window.innerWidth}px`;
+        sparkle.style.top = `${Math.random() * window.innerHeight}px`;
+        document.body.appendChild(sparkle);
+        setTimeout(() => sparkle.remove(), 2000);
+    }
+    showResults();
 }
 
 function showResults() {
-    const elapsed = Math.floor((Date.now() - startTime) / 1000);
-    finalScore.textContent = score;
-    finalLength.textContent = snakeGrid.length;
-    gameTime.textContent = formatTime(elapsed);
-    resultsScreen.style.display = 'flex';
-    startBtn.style.display = 'flex';
-    pauseBtn.style.display = 'none';
-    endBtn.style.display = 'none';
-    resumeBtn.style.display = 'none';
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    finalScore.textContent = score;
+    finalLength.textContent = snakeGrid.length;
+    gameTime.textContent = formatTime(elapsed);
+    resultsScreen.style.display = 'flex';
+    startBtn.style.display = 'flex';
+    pauseBtn.style.display = 'none';
+    endBtn.style.display = 'none';
+    resumeBtn.style.display = 'none';
 }
 
 function gameLoop(ts) {
-    if (!gameStarted || gamePaused || gameEnded) {
-        requestAnimationFrame(gameLoop);
-        return;
-    }
-    const dt = ts - lastTime;
-    lastTime = ts;
-    const moveT = baseTime * (1 - acceleration * maxAcc);
-    moveProgress += dt / moveT;
-    if (moveProgress >= 1) {
-        moveProgress = 0;
-        moveSnake();
-    }
-    const sz = canvas.width / GRID;
-    if (snakeGrid.length) {
-        const tx = (snakeGrid[0].x + 0.5) * sz, ty = (snakeGrid[0].y + 0.5) * sz;
-        snakePos[0] = { x: lerp(snakePos[0]?.x || tx, tx, moveProgress), y: lerp(snakePos[0]?.y || ty, ty, moveProgress) };
-        for (let i = 1; i < snakeGrid.length; i++) snakePos[i] = { x: (snakeGrid[i].x + 0.5) * sz, y: (snakeGrid[i].y + 0.5) * sz };
-    }
-    draw();
-    requestAnimationFrame(gameLoop);
+    if (!gameStarted || gamePaused || gameEnded) {
+        requestAnimationFrame(gameLoop);
+        return;
+    }
+    const dt = ts - lastTime;
+    lastTime = ts;
+    const moveT = baseTime * (1 - acceleration * maxAcc);
+    moveProgress += dt / moveT;
+    if (moveProgress >= 1) {
+        moveProgress = 0;
+        moveSnake();
+    }
+    const sz = canvas.width / GRID;
+    if (snakeGrid.length) {
+        const tx = (snakeGrid[0].x + 0.5) * sz, ty = (snakeGrid[0].y + 0.5) * sz;
+        snakePos[0] = { x: lerp(snakePos[0]?.x || tx, tx, moveProgress), y: lerp(snakePos[0]?.y || ty, ty, moveProgress) };
+        for (let i = 1; i < snakeGrid.length; i++) snakePos[i] = { x: (snakeGrid[i].x + 0.5) * sz, y: (snakeGrid[i].y + 0.5) * sz };
+    }
+    draw();
+    requestAnimationFrame(gameLoop);
 }
 
 function startGame() {
-    if (gameStarted && !gameEnded) return;
-    snakeGrid = [{ x: Math.floor(GRID / 2), y: Math.floor(GRID / 2) }];
-    const sz = canvas.width / GRID;
-    snakePos = [{ x: (snakeGrid[0].x + 0.5) * sz, y: (snakeGrid[0].y + 0.5) * sz }];
-    direction = 'right';
-    nextDirection = 'right';
-    moveProgress = 0;
-    score = 0;
-    correctCount = 0;
-    penalty = 0;
-    usedWords = [];
-    gameEnded = false;
-    gamePaused = false;
-    invincible = false;
-    const q = newQuestion();
-    if (!q) {
-        alert('Word database error! Reload and try Level 1.');
-        return;
-    }
-    genFoods(q.meaning);
-    ensureFourFoods();
-    updateUI();
-    startTime = Date.now();
-    clearInterval(timer);
-    timer = setInterval(() => {
-        if (timeLeft <= 0) {
-            clearInterval(timer);
-            gameOver();
-        } else {
-            timeLeft--;
-            updateUI();
-        }
-    }, 1000);
-    gameStarted = true;
-    lastTime = performance.now();
-    requestAnimationFrame(gameLoop);
-    startBtn.style.display = 'none';
-    pauseBtn.style.display = 'flex';
-    endBtn.style.display = 'flex';
-    resumeBtn.style.display = 'none';
-    console.log('Game started!');
+    // 移除 if (gameStarted && !gameEnded) return; 確保每次點擊都能重新初始化
+
+    // 重置並初始化遊戲狀態
+    snakeGrid = [{ x: Math.floor(GRID / 2), y: Math.floor(GRID / 2) }];
+    const sz = canvas.width / GRID;
+    snakePos = [{ x: (snakeGrid[0].x + 0.5) * sz, y: (snakeGrid[0].y + 0.5) * sz }];
+    direction = 'right';
+    nextDirection = 'right';
+    moveProgress = 0;
+    score = 0;
+    correctCount = 0;
+    penalty = 0;
+    usedWords = [];
+    gameEnded = false;
+    gamePaused = false;
+    invincible = false;
+    
+    const q = newQuestion();
+    if (!q) {
+        alert('Word database error! Reload and try Level 1.');
+        return;
+    }
+    genFoods(q.meaning);
+    ensureFourFoods();
+    updateUI();
+    startTime = Date.now();
+    clearInterval(timer);
+    timer = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            gameOver();
+        } else {
+            timeLeft--;
+            updateUI();
+        }
+    }, 1000);
+    gameStarted = true;
+    lastTime = performance.now();
+    requestAnimationFrame(gameLoop);
+    startBtn.style.display = 'none';
+    pauseBtn.style.display = 'flex';
+    endBtn.style.display = 'flex';
+    resumeBtn.style.display = 'none';
+    console.log('Game started!');
 }
 
 function togglePause() {
-    if (!gameStarted) return startGame();
-    gamePaused = !gamePaused;
-    pauseBtn.textContent = gamePaused ? 'Resume' : 'Pause';
-    pauseBtn.style.display = gamePaused ? 'none' : 'flex';
-    resumeBtn.style.display = gamePaused ? 'block' : 'none';
-    if (!gamePaused) draw();
+    if (!gameStarted) return startGame();
+    gamePaused = !gamePaused;
+    pauseBtn.textContent = gamePaused ? 'Resume' : 'Pause';
+    pauseBtn.style.display = gamePaused ? 'none' : 'flex';
+    resumeBtn.style.display = gamePaused ? 'block' : 'none';
+    if (!gamePaused) draw();
 }
 
 function resumeGame() { togglePause(); }
 
 function endConfirm() {
-    if (!gameStarted || gameEnded) return;
-    gamePaused = true;
-    currentScore.textContent = score;
-    currentLength.textContent = snakeGrid.length;
-    confirmDlg.style.display = 'flex';
+    if (!gameStarted || gameEnded) return;
+    gamePaused = true;
+    currentScore.textContent = score;
+    currentLength.textContent = snakeGrid.length;
+    confirmDlg.style.display = 'flex';
 }
 
 function endNow() {
-    clearInterval(timer);
-    gameEnded = true;
-    gameStarted = false;
-    confirmDlg.style.display = 'none';
-    showResults();
+    clearInterval(timer);
+    gameEnded = true;
+    gameStarted = false;
+    confirmDlg.style.display = 'none';
+    showResults();
 }
 
 // Confetti Burst (cute celebration)
 function confettiBurst(x, y) {
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
-    for (let i = 0; i < 30; i++) {
-        const conf = document.createElement('div');
-        conf.className = 'confetti';
-        conf.style.left = `${x}px`;
-        conf.style.top = `${y}px`;
-        conf.style.background = colors[Math.floor(Math.random() * colors.length)];
-        conf.style.transform = `translate(${Math.random() * 20 - 10}px, ${Math.random() * 20 - 10}px)`;
-        document.body.appendChild(conf);
-        conf.animate([
-            { transform: 'translateY(0px) rotate(0deg)', opacity: 1 },
-            { transform: `translateY(${window.innerHeight}px) rotate(720deg)`, opacity: 0 }
-        ], {
-            duration: 1000 + Math.random() * 1000,
-            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-        }).onfinish = () => conf.remove();
-    }
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
+    for (let i = 0; i < 30; i++) {
+        const conf = document.createElement('div');
+        conf.className = 'confetti';
+        conf.style.left = `${x}px`;
+        conf.style.top = `${y}px`;
+        conf.style.background = colors[Math.floor(Math.random() * colors.length)];
+        conf.style.transform = `translate(${Math.random() * 20 - 10}px, ${Math.random() * 20 - 10}px)`;
+        document.body.appendChild(conf);
+        conf.animate([
+            { transform: 'translateY(0px) rotate(0deg)', opacity: 1 },
+            { transform: `translateY(${window.innerHeight}px) rotate(720deg)`, opacity: 0 }
+        ], {
+            duration: 1000 + Math.random() * 1000,
+            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        }).onfinish = () => conf.remove();
+    }
 }
 
 // Event Listeners
@@ -688,25 +686,25 @@ selectTime(10);
 let touchX = 0, touchY = 0;
 canvas.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; e.preventDefault(); }, { passive: false });
 canvas.addEventListener('touchmove', e => {
-    if (!gameStarted || gamePaused || gameEnded) return;
-    const dx = e.touches[0].clientX - touchX, dy = e.touches[0].clientY - touchY, threshold = 30;
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > threshold) {
-        nextDirection = dx > 0 && direction !== 'left' ? 'right' : (dx < 0 && direction !== 'right' ? 'left' : direction);
-        touchX = e.touches[0].clientX;
-    } else if (Math.abs(dy) > threshold) {
-        nextDirection = dy > 0 && direction !== 'up' ? 'down' : (dy < 0 && direction !== 'down' ? 'up' : direction);
-        touchY = e.touches[0].clientY;
-    }
-    e.preventDefault();
+    if (!gameStarted || gamePaused || gameEnded) return;
+    const dx = e.touches[0].clientX - touchX, dy = e.touches[0].clientY - touchY, threshold = 30;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > threshold) {
+        nextDirection = dx > 0 && direction !== 'left' ? 'right' : (dx < 0 && direction !== 'right' ? 'left' : direction);
+        touchX = e.touches[0].clientX;
+    } else if (Math.abs(dy) > threshold) {
+        nextDirection = dy > 0 && direction !== 'up' ? 'down' : (dy < 0 && direction !== 'down' ? 'up' : direction);
+        touchY = e.touches[0].clientY;
+    }
+    e.preventDefault();
 }, { passive: false });
 
 document.addEventListener('keydown', e => {
-    if (e.key === ' ') { e.preventDefault(); !gameStarted ? startGame() : togglePause(); }
-    else if (['ArrowUp', 'w', 'W'].includes(e.key) && direction !== 'down') { nextDirection = 'up'; e.preventDefault(); }
-    else if (['ArrowDown', 's', 'S'].includes(e.key) && direction !== 'up') { nextDirection = 'down'; e.preventDefault(); }
-    else if (['ArrowLeft', 'a', 'A'].includes(e.key) && direction !== 'right') { nextDirection = 'left'; e.preventDefault(); }
-    else if (['ArrowRight', 'd', 'D'].includes(e.key) && direction !== 'left') { nextDirection = 'right'; e.preventDefault(); }
-    else if (e.key === 'Escape' && gameStarted) { endConfirm(); e.preventDefault(); }
+    if (e.key === ' ') { e.preventDefault(); !gameStarted ? startGame() : togglePause(); }
+    else if (['ArrowUp', 'w', 'W'].includes(e.key) && direction !== 'down') { nextDirection = 'up'; e.preventDefault(); }
+    else if (['ArrowDown', 's', 'S'].includes(e.key) && direction !== 'up') { nextDirection = 'down'; e.preventDefault(); }
+    else if (['ArrowLeft', 'a', 'A'].includes(e.key) && direction !== 'right') { nextDirection = 'left'; e.preventDefault(); }
+    else if (['ArrowRight', 'd', 'D'].includes(e.key) && direction !== 'left') { nextDirection = 'right'; e.preventDefault(); }
+    else if (e.key === 'Escape' && gameStarted) { endConfirm(); e.preventDefault(); }
 });
 
 // Init
