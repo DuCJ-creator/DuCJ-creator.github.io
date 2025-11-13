@@ -11,7 +11,7 @@
             --secondary-color: #c4d7b9;
             --background-color: #f7f3e8;
             --snake-color: #659c44;
-            --food-color: #576a77;
+            --food-color: #576a77; /* 所有食物的統一顏色 */
         }
 
         body, html {
@@ -61,7 +61,6 @@
                 min-height: 50vh; 
             }
             .panel { margin-bottom: 5px; padding: 5px; }
-            /* 在手機上可以考慮隱藏控制按鈕，因為主要使用滑動 */
             #controls { 
                 display: none !important; 
             } 
@@ -82,12 +81,10 @@
             height: 100%;
             max-width: calc(95vh - 100px); 
             max-height: calc(95vh - 100px);
-            /* 無敵效果視覺加強 */
             transition: filter 0.1s;
         }
 
         .invulnerable-effect {
-            /* 無敵時 Canvas 閃爍效果 */
             filter: drop-shadow(0 0 5px yellow) brightness(1.2);
         }
 
@@ -201,7 +198,7 @@
         <div id="sidebar">
             <div id="word-panel" class="panel">
                 <h2 id="current-word"></h2>
-                <p id="question-meaning"></p>
+                <p id="question-meaning">請選擇正確含義</p>
             </div>
 
             <div id="score-panel" class="panel">
@@ -250,7 +247,6 @@
         function generateSound(type) {
             if (!audioCtx) return;
             
-            // 由於瀏覽器安全策略，需要用戶互動才能啟動 AudioContext
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
@@ -315,6 +311,8 @@
         let currentWordDatabase = []; 
         let combo = 0; 
         let invulnerable = false; 
+        let targetLength = 1; // 追蹤蛇的目標長度，用於處理延遲 pop
+
         
         // 設置選項 (50 Unit, 每 5 個 Unit 為一個範圍)
         const LEVELS = [1, 2, 3, 4, 5, 6];
@@ -352,9 +350,8 @@
         const endBtn = document.getElementById('end-game-btn');
 
 
-        // ====== 輔助函數：數據載入與處理 ======
-
-        function parseCSV(csv) {
+        // ====== 輔助函數：數據載入與處理 (保持不變) ======
+        function parseCSV(csv) { /* ... 保持不變 ... */
             const lines = csv.split('\n').filter(line => line.trim() !== '');
             if (lines.length < 2) return [];
 
@@ -385,7 +382,7 @@
             return data;
         }
 
-        async function fetchWordData(level) {
+        async function fetchWordData(level) { /* ... 保持不變 ... */
             const filename = `level${level}.csv`;
             const url = `https://ducj-creator.github.io/iVocab-Self-Practice/${filename}`; 
             
@@ -404,7 +401,7 @@
             }
         }
 
-        function getFoodMeanings(rawData, correctMeaning) {
+        function getFoodMeanings(rawData, correctMeaning) { /* ... 保持不變 ... */
             const allMeanings = rawData
                 .map(d => d.chinese.split(';').map(m => m.trim())) 
                 .flat()
@@ -424,7 +421,7 @@
             return finalMeanings.slice(0, 4); 
         }
 
-        function newQuestion() {
+        function newQuestion() { /* ... 保持不變 ... */
             if (currentWordDatabase.length === 0) return null;
 
             const randomIndex = Math.floor(Math.random() * currentWordDatabase.length);
@@ -440,18 +437,14 @@
                 meanings: meanings 
             };
             
-            // 題幹顯示單字和詞性
             wordEl.textContent = `${currentWordData.word} (${currentWordData.pos})`;
-            // 意味著食物上的文本是選項
-            meaningEl.textContent = '請選擇正確含義';
+            // meaningEl.textContent = '請選擇正確含義'; // UI 元素不需要在每次新題目時修改
             
             return currentWordData;
         }
 
-
-        // ====== 設置畫面控制函數 ======
-
-        function loadLevelOptions() {
+        // ====== 設置畫面控制函數 (保持不變) ======
+        function loadLevelOptions() { /* ... 保持不變 ... */
             levelSelect.innerHTML = '<option value="" disabled selected>請選擇 Level</option>';
             LEVELS.forEach(level => {
                 const option = document.createElement('option');
@@ -461,7 +454,7 @@
             });
         }
 
-        function loadUnitOptions() {
+        function loadUnitOptions() { /* ... 保持不變 ... */
             unitSelect.innerHTML = '<option value="" disabled selected>請選擇 單元範圍</option>';
             UNIT_RANGES.forEach(range => {
                 const option = document.createElement('option');
@@ -473,62 +466,12 @@
         
         // ====== 遊戲核心邏輯 ======
 
-        function resizeCanvas() {
-            if (!canvas) return;
-            const gameArea = document.getElementById('game-area');
-            const size = Math.min(gameArea.clientWidth, gameArea.clientHeight); 
-            const canvasSize = Math.floor(size / GRID) * GRID;
-            canvas.width = canvasSize;
-            canvas.height = canvasSize;
-            
-            if (gameStarted) {
-                updateSnakeSmoothPos();
-                draw(); 
-            }
-        }
-
-        function getRandomGridPosition() {
-            let x, y;
-            let occupied;
-            do {
-                x = Math.floor(Math.random() * GRID);
-                y = Math.floor(Math.random() * GRID);
-                
-                occupied = snakeGrid.some(p => p.x === x && p.y === y) ||
-                           foods.some(f => f.x === x && f.y === y);
-            } while (occupied);
-            return { x, y };
-        }
-
-        function genFoods() {
-            foods = [];
-            const meanings = currentWordData.meanings;
-            
-            for (let i = 0; i < meanings.length; i++) {
-                const pos = getRandomGridPosition();
-                foods.push({
-                    ...pos,
-                    meaning: meanings[i],
-                    isCorrect: meanings[i] === currentWordData.meaning
-                });
-            }
-        }
-
         function updateUI() {
             scoreEl.textContent = currentScore;
             highEl.textContent = highScore;
-            lengthEl.textContent = snakeGrid.length;
+            lengthEl.textContent = snakeGrid.length; // 顯示實際長度
             comboEl.textContent = combo; 
             localStorage.setItem('snakeHigh', highScore);
-        }
-        
-        function showStatus(message, color = 'red') {
-            statusMessageEl.textContent = message;
-            statusMessageEl.style.color = color;
-            statusMessageEl.style.display = 'block';
-            setTimeout(() => {
-                statusMessageEl.style.display = 'none';
-            }, 1000);
         }
 
         /** 處理分數變更和無敵狀態 */
@@ -539,13 +482,13 @@
 
                 // 碰撞懲罰
                 generateSound('fail');
-                showStatus("撞擊！-10 分", 'red');
                 
                 combo = 0; 
                 currentScore = Math.max(0, currentScore - 10);
                 
-                if (snakeGrid.length > 1) {
-                    snakeGrid.pop(); 
+                if (targetLength > 1) {
+                    targetLength--; // 目標長度減少
+                    showStatus("撞擊！-10 分，長度 -1", 'red');
                 } else {
                     endGame(false); 
                     return false; 
@@ -571,7 +514,7 @@
                 currentScore += scoreIncrease;
                 showStatus(`正確！+${scoreIncrease} (${combo} 連擊)`, 'green');
 
-                snakeGrid.push(snakeGrid[snakeGrid.length - 1]); 
+                targetLength++; // 目標長度增加
                 
                 // 1秒無敵時間
                 invulnerable = true;
@@ -591,13 +534,13 @@
             } else { 
                 // 錯誤選項邏輯
                 generateSound('fail');
-                showStatus("錯誤！連擊中斷 -10 分", 'red');
                 
                 combo = 0; 
                 currentScore = Math.max(0, currentScore - 10);
                 
-                if (snakeGrid.length > 1) {
-                    snakeGrid.pop(); 
+                if (targetLength > 1) {
+                    targetLength--; // 目標長度減少
+                    showStatus("錯誤！連擊中斷 -10 分，長度 -1", 'red');
                 } else {
                     endGame(false);
                     return false; 
@@ -615,12 +558,14 @@
         function checkCollision(head) {
             // 邊界碰撞
             if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID) {
+                // 撞牆是碰撞，isSelfWallCollision = true
                 return handleScoreAndCollision(false, true); 
             }
 
             // 身體碰撞 
             for (let i = 1; i < snakeGrid.length; i++) {
                 if (head.x === snakeGrid[i].x && head.y === snakeGrid[i].y) {
+                    // 撞到自己是碰撞，isSelfWallCollision = true
                     return handleScoreAndCollision(false, true); 
                 }
             }
@@ -629,68 +574,58 @@
             const foodIndex = foods.findIndex(f => f.x === head.x && f.y === head.y);
             if (foodIndex !== -1) {
                 const eatenFood = foods[foodIndex];
+                // 吃到食物不是碰撞
                 return handleScoreAndCollision(eatenFood.isCorrect, false);
             }
 
             return false; 
         }
 
+        // 啟動遊戲時重設目標長度
+        function startGame() {
+            if (!ctx) return; 
 
-        function endGame(timeOut = false) {
-            if (!gameStarted) return;
-            gameStarted = false;
-            clearInterval(timerInterval);
-            cancelAnimationFrame(gameLoop);
-            generateSound('gameover');
+            currentScore = 0;
+            combo = 0;
+            remainingTime = totalTimeSeconds;
             
-            highScore = Math.max(highScore, currentScore);
+            snakeGrid = [{ x: Math.floor(GRID / 2), y: Math.floor(GRID / 2) }];
+            targetLength = 1; // 初始目標長度
+
+            resizeCanvas();
+            updateSnakeSmoothPos(); 
+
+            direction = 'right';
+            nextDirection = 'right';
+            moveProgress = 0;
+            
+            const q = newQuestion();
+            if (!q) {
+                alert("單元內沒有單字，無法開始遊戲。");
+                setupScreen.style.display = 'flex';
+                gameContainer.style.display = 'none';
+                return;
+            }
+            genFoods();
+            
+            timerDisplay.textContent = formatTime(remainingTime);
             updateUI();
             
-            alert(`遊戲結束！\n最終得分: ${currentScore}\n最終蛇身: ${snakeGrid.length}`);
+            gameStarted = true;
+            gamePaused = false;
+            invulnerable = false; 
             
-            // 清除無敵視覺效果
-            canvas.classList.remove('invulnerable-effect');
+            pauseBtn.style.display = 'block';
+            resumeBtn.style.display = 'none';
+            endBtn.style.display = 'block';
 
-            setupScreen.style.display = 'flex';
-            gameContainer.style.display = 'none';
+            startTimer();
+            draw(); 
+            
+            lastTime = performance.now(); 
+            requestAnimationFrame(gameLoop);
         }
 
-        
-        // 其他輔助函數
-        function lerp(start, end, progress) { return start + (end - start) * progress; }
-
-        function updateSnakeSmoothPos() { 
-             const sz = canvas.width / GRID;
-             if (snakeGrid.length > 0) {
-                 snakePos[0] = { x: (snakeGrid[0].x + 0.5) * sz, y: (snakeGrid[0].y + 0.5) * sz };
-                 for (let i = 1; i < snakeGrid.length; i++) {
-                     snakePos[i] = { x: (snakeGrid[i].x + 0.5) * sz, y: (snakeGrid[i].y + 0.5) * sz };
-                 }
-             } else {
-                 snakePos = [];
-             }
-        }
-
-        function formatTime(seconds) { 
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-        }
-
-        function startTimer() { 
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                if (!gamePaused) {
-                    remainingTime--;
-                    timerDisplay.textContent = formatTime(remainingTime);
-                    if (remainingTime <= 0) {
-                        clearInterval(timerInterval);
-                        endGame(true);
-                    }
-                }
-            }, 1000);
-        }
-        
         function draw() {
             if (!ctx || !canvas) return;
 
@@ -698,12 +633,11 @@
             const sz = canvas.width / GRID;
             const currentTime = performance.now();
 
-            // 1. 繪製食物 (跳動動畫)
+            // 1. 繪製食物 (跳動動畫, **所有食物顏色統一**)
             foods.forEach(food => {
-                ctx.fillStyle = 'var(--food-color)'; 
+                ctx.fillStyle = 'var(--food-color)'; /* 統一顏色 */
                 
                 const x = (food.x + 0.5) * sz;
-                // 使用 Math.sin 實現上下跳動效果
                 let y = (food.y + 0.5) * sz + Math.sin(currentTime / 300) * (sz * 0.05); 
                 
                 const r = sz / 2 * 0.4; 
@@ -793,24 +727,20 @@
                     case 'right': head.x += 1; break;
                 }
 
-                if (checkCollision(head)) {
-                    if (!gameStarted) return;
-                    
-                    if (snakeGrid.length > 0) {
-                         updateSnakeSmoothPos();
-                         draw();
-                    }
-
-                } else {
-                    // 正常移動
-                    snakeGrid.unshift(head); 
-                    // 只有在吃到**正確**食物時，長度才會通過 handleScoreAndCollision 內部增加
-                    // 正常移動或吃到**錯誤**食物時，需要 pop
-                    if (snakeGrid.length > currentScore + 1) { // 這裡需要優化，用一個單獨的變量記錄目標長度
-                        snakeGrid.pop(); 
-                    }
+                // 檢查碰撞/吃到食物
+                checkCollision(head);
+                
+                // --- 修正核心邏輯 ---
+                // 1. 將新頭部添加到網格
+                snakeGrid.unshift(head); 
+                
+                // 2. 根據目標長度決定是否移除尾部
+                while (snakeGrid.length > targetLength) {
+                    snakeGrid.pop(); 
                 }
                 
+                // ---------------------
+
                 lastTime = currentTime;
                 moveProgress = 0;
                 
@@ -819,52 +749,94 @@
 
             requestAnimationFrame(gameLoop);
         }
-        
-        function startGame() {
-            if (!ctx) return; 
 
-            currentScore = 0;
-            combo = 0;
-            remainingTime = totalTimeSeconds;
+        // ====== 其他函數保持不變 ======
+        function lerp(start, end, progress) { return start + (end - start) * progress; }
+        function updateSnakeSmoothPos() { /* ... 保持不變 ... */
+             const sz = canvas.width / GRID;
+             if (snakeGrid.length > 0) {
+                 snakePos[0] = { x: (snakeGrid[0].x + 0.5) * sz, y: (snakeGrid[0].y + 0.5) * sz };
+                 for (let i = 1; i < snakeGrid.length; i++) {
+                     snakePos[i] = { x: (snakeGrid[i].x + 0.5) * sz, y: (snakeGrid[i].y + 0.5) * sz };
+                 }
+             } else {
+                 snakePos = [];
+             }
+        }
+        function formatTime(seconds) { /* ... 保持不變 ... */
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+        }
+        function startTimer() { /* ... 保持不變 ... */
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!gamePaused) {
+                    remainingTime--;
+                    timerDisplay.textContent = formatTime(remainingTime);
+                    if (remainingTime <= 0) {
+                        clearInterval(timerInterval);
+                        endGame(true);
+                    }
+                }
+            }, 1000);
+        }
+        function resizeCanvas() { /* ... 保持不變 ... */
+            if (!canvas) return;
+            const gameArea = document.getElementById('game-area');
+            const size = Math.min(gameArea.clientWidth, gameArea.clientHeight); 
+            const canvasSize = Math.floor(size / GRID) * GRID;
+            canvas.width = canvasSize;
+            canvas.height = canvasSize;
             
-            snakeGrid = [{ x: Math.floor(GRID / 2), y: Math.floor(GRID / 2) }];
-            
-            resizeCanvas();
-            updateSnakeSmoothPos(); 
-
-            direction = 'right';
-            nextDirection = 'right';
-            moveProgress = 0;
-            
-            const q = newQuestion();
-            if (!q) {
-                alert("單元內沒有單字，無法開始遊戲。");
-                setupScreen.style.display = 'flex';
-                gameContainer.style.display = 'none';
-                return;
+            if (gameStarted) {
+                updateSnakeSmoothPos();
+                draw(); 
             }
-            genFoods();
+        }
+        function genFoods() { /* ... 保持不變 ... */
+            foods = [];
+            const meanings = currentWordData.meanings;
             
-            timerDisplay.textContent = formatTime(remainingTime);
+            for (let i = 0; i < meanings.length; i++) {
+                const pos = getRandomGridPosition();
+                foods.push({
+                    ...pos,
+                    meaning: meanings[i],
+                    isCorrect: meanings[i] === currentWordData.meaning
+                });
+            }
+        }
+        function getRandomGridPosition() { /* ... 保持不變 ... */
+            let x, y;
+            let occupied;
+            do {
+                x = Math.floor(Math.random() * GRID);
+                y = Math.floor(Math.random() * GRID);
+                
+                occupied = snakeGrid.some(p => p.x === x && p.y === y) ||
+                           foods.some(f => f.x === x && f.y === y);
+            } while (occupied);
+            return { x, y };
+        }
+        function endGame(timeOut = false) { /* ... 保持不變 ... */
+            if (!gameStarted) return;
+            gameStarted = false;
+            clearInterval(timerInterval);
+            cancelAnimationFrame(gameLoop);
+            generateSound('gameover');
+            
+            highScore = Math.max(highScore, currentScore);
             updateUI();
             
-            gameStarted = true;
-            gamePaused = false;
-            invulnerable = false; 
+            alert(`遊戲結束！\n最終得分: ${currentScore}\n最終蛇身: ${targetLength}`);
             
-            pauseBtn.style.display = 'block';
-            resumeBtn.style.display = 'none';
-            endBtn.style.display = 'block';
+            canvas.classList.remove('invulnerable-effect');
 
-            startTimer();
-            draw(); 
-            
-            lastTime = performance.now(); 
-            requestAnimationFrame(gameLoop);
+            setupScreen.style.display = 'flex';
+            gameContainer.style.display = 'none';
         }
-
-
-        // ====== 事件監聽器 ======
+        // ====== 事件監聽器 (保持不變) ======
 
         window.addEventListener('resize', resizeCanvas);
 
@@ -893,7 +865,6 @@
             startGame();
         });
 
-        // 時間按鈕選擇
         timeButtons.addEventListener('click', (e) => {
             if (e.target.tagName === 'BUTTON') {
                 document.querySelectorAll('.time-buttons button').forEach(btn => btn.classList.remove('active'));
@@ -911,7 +882,6 @@
             }
         });
         
-        // 暫停/繼續按鈕
         pauseBtn.addEventListener('click', () => {
             gamePaused = true;
             pauseBtn.style.display = 'none';
@@ -925,14 +895,12 @@
             lastTime = performance.now(); 
         });
 
-        // 結束遊戲按鈕
         endBtn.addEventListener('click', () => {
             if (confirm('確定要結束本局遊戲嗎？')) {
                 endGame(false);
             }
         });
 
-        // 方向控制 (鍵盤)
         document.addEventListener('keydown', (e) => {
             if (!gameStarted || gamePaused) return;
 
@@ -950,7 +918,6 @@
             }
         });
 
-        // 方向控制 (UI 按鈕)
         document.getElementById('controls').addEventListener('click', (e) => {
             if (!gameStarted || gamePaused) return;
             if (e.target.tagName !== 'BUTTON') return;
@@ -968,7 +935,6 @@
             }
         });
 
-        // 初始設置
         window.onload = () => {
             loadLevelOptions(); 
             loadUnitOptions(); 
