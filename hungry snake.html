@@ -2,54 +2,102 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Hungry Snake – iVocab Loader</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Hungry Snake – iVocab (Responsive)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <style>
-  /* ---------- Base layout / theming (same palette) ---------- */
   :root{
     --ink:#5A4A42; --paper:#F0EDE5; --frame:#A89F94; --olive:#A8B7A5; --tan:#B7AFA1;
     --head:#D8A8A8; --head-stroke:#B78A8A; --body:#A8B7A5; --body-stroke:#8C9D8A;
+    --ui-scale:1; /* 依裝置調整 */
   }
   *{box-sizing:border-box}
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;padding:0;background:#E8E5DA;height:100vh;overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:manipulation;display:flex;justify-content:center;align-items:center}
-  .game-container{display:flex;width:95vw;max-width:1200px;height:80vh;gap:10px}
+  html,body{height:100%}
+  body{
+    margin:0;background:#E8E5DA;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+    padding:calc(env(safe-area-inset-top)) calc(env(safe-area-inset-right)) calc(env(safe-area-inset-bottom)) calc(env(safe-area-inset-left));
+    -webkit-user-select:none;user-select:none;touch-action:manipulation;
+  }
+
+  .game-container{display:flex;width:min(95vw,1200px);height:min(84vh,900px);gap:calc(12px*var(--ui-scale))}
   .game-area{flex:1;position:relative;aspect-ratio:1/1;max-height:100%;display:flex;justify-content:center;align-items:center}
   #game-board{border:3px solid var(--frame);border-radius:10px;background:var(--paper);width:100%;height:100%}
+  #fx-layer{position:absolute;inset:0;pointer-events:none}
 
-  .right-panel{width:240px;height:100%;display:flex;flex-direction:column;gap:12px}
-  .card{background:var(--tan);color:var(--ink);padding:14px;border-radius:10px}
-  .question-box{font-size:20px;font-weight:700;text-align:center;word-break:break-word}
-  .score-container div{margin:6px 0;font-weight:700}
+  .right-panel{
+    width:calc(240px*var(--ui-scale));height:100%;
+    display:flex;flex-direction:column;gap:calc(12px*var(--ui-scale))
+  }
+  .card{background:var(--tan);padding:calc(14px*var(--ui-scale));border-radius:12px}
+  .question-box{font-size:calc(20px*var(--ui-scale));font-weight:700;text-align:center;word-break:break-word}
+  .score-container div{margin:calc(6px*var(--ui-scale)) 0;font-weight:700}
   .time-container{background:var(--frame)}
-  .time-selector{display:flex;justify-content:space-between;margin-top:8px}
-  .time-btn{background:rgba(90,74,66,.1);border:none;border-radius:6px;color:var(--ink);padding:4px 8px;cursor:pointer}
+
+  .time-selector{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .time-btn{
+    background:rgba(90,74,66,.08);border:none;border-radius:8px;color:var(--ink);
+    padding:calc(6px*var(--ui-scale)) calc(10px*var(--ui-scale));cursor:pointer;font-size:calc(14px*var(--ui-scale))
+  }
   .time-btn.selected{background:var(--ink);color:var(--paper);font-weight:700}
-  .touch-controls{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:10px;margin-top:auto}
-  .control-btn{background:rgba(168,159,148,.7);border:none;border-radius:12px;font-size:18px;display:flex;align-items:center;justify-content:center;padding:12px 0;cursor:pointer;color:var(--ink)}
+
+  .touch-controls{
+    display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);
+    gap:calc(10px*var(--ui-scale));margin-top:auto
+  }
+  .control-btn{
+    background:rgba(168,159,148,.8);border:none;border-radius:14px;
+    font-size:calc(18px*var(--ui-scale));display:flex;align-items:center;justify-content:center;
+    padding:calc(14px*var(--ui-scale)) 0;cursor:pointer;color:var(--ink)
+  }
   .control-btn.up{grid-column:2;grid-row:1}
   .control-btn.left{grid-column:1;grid-row:2}
   .control-btn.right{grid-column:3;grid-row:2}
   .control-btn.down{grid-column:2;grid-row:3}
-  .control-btn.start{grid-column:2;grid-row:2;font-size:16px;background:var(--olive)}
-  .control-btn.pause{grid-column:2;grid-row:2;font-size:16px;background:#C4B6A0;display:none}
-  .control-btn.end{grid-column:1 / span 3;grid-row:4;font-size:16px;background:var(--tan);display:none}
-  .resume-btn{background:var(--tan);color:var(--ink);padding:10px 20px;border:none;border-radius:12px;font-size:16px;cursor:pointer;margin-top:auto;display:none}
+  .control-btn.start{grid-column:2;grid-row:2;font-size:calc(16px*var(--ui-scale));background:var(--olive)}
+  .control-btn.pause{grid-column:2;grid-row:2;font-size:calc(16px*var(--ui-scale));background:#C4B6A0;display:none}
+  .control-btn.end{grid-column:1 / span 3;grid-row:4;font-size:calc(16px*var(--ui-scale));background:var(--tan);display:none}
+  .resume-btn{background:var(--tan);color:var(--ink);padding:calc(10px*var(--ui-scale)) calc(20px*var(--ui-scale));
+    border:none;border-radius:12px;font-size:calc(16px*var(--ui-scale));cursor:pointer;margin-top:auto;display:none}
 
-  @media(max-width:768px){
-    .control-btn.up,.control-btn.down,.control-btn.left,.control-btn.right{display:none}
-    .touch-controls{grid-template-rows:repeat(2,1fr)}
-    .right-panel{width:170px;font-size:13px}
+  /* --- Desktop: 寬 >= 1024 --- */
+  @media (min-width:1024px){
+    body.is-desktop{--ui-scale:1}
+    .touch-controls .control-btn.up,
+    .touch-controls .control-btn.left,
+    .touch-controls .control-btn.right,
+    .touch-controls .control-btn.down{display:none} /* 桌機用鍵盤 */
   }
 
-  /* ---------- Modals ---------- */
+  /* --- Tablet: 600–1023 --- */
+  @media (min-width:600px) and (max-width:1023.98px){
+    body.is-tablet{--ui-scale:1.1}
+    .right-panel{width:calc(220px*var(--ui-scale))}
+    .time-selector{justify-content:space-between}
+  }
+
+  /* --- Phone: < 600 --- */
+  @media (max-width:599.98px){
+    body.is-phone{--ui-scale:1.25}
+    .game-container{flex-direction:column;align-items:center;height:calc(100vh - 16px)}
+    .right-panel{width:100%;height:auto}
+    .time-selector{justify-content:flex-start}
+    .touch-controls{grid-template-rows:repeat(2,1fr)} /* 更緊湊 */
+    .control-btn.up,.control-btn.down,.control-btn.left,.control-btn.right{display:block}
+  }
+
+  /* 減少動畫偏好 → 降低 FX */
+  @media (prefers-reduced-motion:reduce){
+    body{scroll-behavior:auto}
+  }
+
   .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;justify-content:center;align-items:center;z-index:100}
   .modal{background:var(--paper);color:var(--ink);padding:18px;border-radius:12px;min-width:280px;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
   .modal h3{margin:0 0 10px 0}
   .modal-row{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}
-  .pill{padding:6px 10px;border-radius:999px;border:1px solid var(--frame);cursor:pointer;background:#fff}
+  .pill{padding:8px 12px;border-radius:999px;border:1px solid var(--frame);cursor:pointer;background:#fff}
   .pill.selected{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
-  .modal button.primary{background:var(--olive);border:none;color:var(--ink);padding:8px 14px;border-radius:10px;font-weight:700;cursor:pointer}
-  .modal .muted{opacity:.7}
+  .modal button.primary{background:var(--olive);border:none;color:var(--ink);padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer}
+  .modal .muted{opacity:.8}
 
   .confirmation-dialog,.results-screen{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:100;justify-content:center;align-items:center}
   .confirmation-box,.results-content{background:var(--paper);padding:20px;border-radius:10px;text-align:center;max-width:320px;color:var(--ink)}
@@ -64,19 +112,16 @@
 <div class="game-container">
   <div class="game-area">
     <canvas id="game-board"></canvas>
-    <!-- Sparkle layer for celebration -->
-    <canvas id="fx-layer" style="position:absolute;inset:0;pointer-events:none"></canvas>
+    <canvas id="fx-layer"></canvas>
   </div>
-
   <div class="right-panel">
     <div class="card question-box" id="question">Choose Level & Range first</div>
-
     <div class="card score-container">
       <div>Score: <span id="score">0</span></div>
       <div>High: <span id="high-score">0</span></div>
       <div>Length: <span id="snake-length">1</span></div>
+      <div id="hint" style="font-size:12px;opacity:.75;margin-top:6px"></div>
     </div>
-
     <div class="card time-container">
       <div>Time: <span id="time-left">00:00</span></div>
       <div class="time-selector">
@@ -85,8 +130,6 @@
         <button class="time-btn" id="time-15">15m</button>
       </div>
     </div>
-
-    <!-- Controls -->
     <div class="touch-controls">
       <button class="control-btn up">Up</button>
       <button class="control-btn left">Left</button>
@@ -97,53 +140,42 @@
       <button class="control-btn right">Right</button>
     </div>
     <button class="resume-btn" id="resume-btn">Resume</button>
-
-    <!-- Loader opener -->
     <div class="card" style="margin-top:8px">
       <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
         <span style="font-weight:700">Word Source</span>
-        <button id="open-loader" class="time-btn" title="Choose level & range">Choose…</button>
+        <button id="open-loader" class="time-btn">Choose…</button>
       </div>
       <div id="chosen-summary" class="muted" style="margin-top:6px">None selected</div>
     </div>
   </div>
 </div>
 
-<!-- ---------- Selection / Loader Modal ---------- -->
+<!-- Loader Modal -->
 <div class="backdrop" id="loader-backdrop">
   <div class="modal">
     <h3>Select Level & Unit Range</h3>
-
     <div class="modal-row" id="level-row"></div>
     <div class="modal-row" id="range-row"></div>
-
     <div class="modal-row">
       <button id="load-words" class="primary">Load & Prepare</button>
       <span id="load-status" class="muted" style="margin-left:10px"></span>
     </div>
-
     <details style="margin-top:8px">
       <summary class="muted">CSV sources</summary>
-      <small>
-        level1–6: ducj-creator.github.io/iVocab-Self-Practice/levelX.csv
-      </small>
+      <small>Level 1–6: ducj-creator.github.io/iVocab-Self-Practice/levelX.csv</small>
     </details>
   </div>
 </div>
 
-<!-- ---------- End confirmation ---------- -->
+<!-- End / Results -->
 <div class="confirmation-dialog" id="confirmation-dialog">
   <div class="confirmation-box">
     <h3>End game?</h3>
     <p>Score: <span id="current-score">0</span><br>Length: <span id="current-length">1</span></p>
-    <div>
-      <button class="confirm-btn confirm-yes" id="confirm-yes">Yes</button>
-      <button class="confirm-btn confirm-no" id="confirm-no">No</button>
-    </div>
+    <div><button class="confirm-btn confirm-yes" id="confirm-yes">Yes</button>
+      <button class="confirm-btn confirm-no" id="confirm-no">No</button></div>
   </div>
 </div>
-
-<!-- ---------- Results ---------- -->
 <div class="results-screen" id="results-screen">
   <div class="results-content">
     <h2>Game Over</h2>
@@ -154,7 +186,7 @@
   </div>
 </div>
 
-<!-- ---------- Sounds ---------- -->
+<!-- Sounds -->
 <audio id="snd-correct" preload="auto">
   <source src="https://assets.mixkit.co/sfx/preview/mixkit-extra-bonus-in-a-video-game-2045.mp3" type="audio/mpeg">
 </audio>
@@ -166,346 +198,298 @@
 </audio>
 
 <script>
-/* =========================================================
-   1) Data loader: CSV by Level + Unit Range
-   ========================================================= */
+/* ---------------- Device profile & DPR canvas ---------------- */
+const device = (() => {
+  const isTouch = matchMedia("(pointer:coarse)").matches || 'ontouchstart' in window;
+  const width = Math.min(screen.width, window.innerWidth);
+  const type = width >= 1024 ? 'desktop' : width >= 600 ? 'tablet' : 'phone';
+  return { isTouch, type, reduced: matchMedia("(prefers-reduced-motion:reduce)").matches };
+})();
+document.body.classList.add(`is-${device.type}`);
+const hintEl = document.getElementById('hint');
+hintEl.textContent = device.isTouch ? "Tip: swipe on the board or use the on-screen arrows." : "Tip: use arrow keys or WASD. Space = Pause/Resume";
+
+/* ---------------- CSV loader (Level + Unit Range) ---------------- */
 const LEVEL_CSVS = {
-  1: "https://ducj-creator.github.io/iVocab-Self-Practice/level1.csv",
-  2: "https://ducj-creator.github.io/iVocab-Self-Practice/level2.csv",
-  3: "https://ducj-creator.github.io/iVocab-Self-Practice/level3.csv",
-  4: "https://ducj-creator.github.io/iVocab-Self-Practice/level4.csv",
-  5: "https://ducj-creator.github.io/iVocab-Self-Practice/level5.csv",
-  6: "https://ducj-creator.github.io/iVocab-Self-Practice/level6.csv",
+  1:"https://ducj-creator.github.io/iVocab-Self-Practice/level1.csv",
+  2:"https://ducj-creator.github.io/iVocab-Self-Practice/level2.csv",
+  3:"https://ducj-creator.github.io/iVocab-Self-Practice/level3.csv",
+  4:"https://ducj-creator.github.io/iVocab-Self-Practice/level4.csv",
+  5:"https://ducj-creator.github.io/iVocab-Self-Practice/level5.csv",
+  6:"https://ducj-creator.github.io/iVocab-Self-Practice/level6.csv",
 };
+const UNIT_RANGES = [[1,5],[6,10],[11,15],[16,20],[21,25],[26,30],[31,35],[36,40],[41,45],[46,50]];
+const loaderBackdrop=document.getElementById("loader-backdrop");
+const levelRow=document.getElementById("level-row");
+const rangeRow=document.getElementById("range-row");
+const loadBtn=document.getElementById("load-words");
+const loadStatus=document.getElementById("load-status");
+const chosenSummary=document.getElementById("chosen-summary");
+document.getElementById("open-loader").addEventListener("click", ()=> loaderBackdrop.style.display="flex");
 
-const UNIT_RANGES = [
-  [1,5],[6,10],[11,15],[16,20],[21,25],
-  [26,30],[31,35],[36,40],[41,45],[46,50],
-];
-
+let selection={level:null, range:null};
 function buildPills(container, items, labeler, onPick){
-  container.innerHTML = "";
-  items.forEach((val, idx) => {
-    const b = document.createElement("button");
-    b.className = "pill";
-    b.textContent = labeler(val, idx);
-    b.addEventListener("click", () => {
-      [...container.querySelectorAll(".pill")].forEach(p => p.classList.remove("selected"));
-      b.classList.add("selected");
-      onPick(val, idx);
+  container.innerHTML="";
+  items.forEach((v,i)=>{
+    const b=document.createElement("button");
+    b.className="pill"; b.textContent=labeler(v,i);
+    b.addEventListener("click",()=>{
+      [...container.querySelectorAll(".pill")].forEach(p=>p.classList.remove("selected"));
+      b.classList.add("selected"); onPick(v,i);
     });
     container.appendChild(b);
   });
 }
+buildPills(levelRow,[1,2,3,4,5,6],v=>`Level ${v}`,(v)=>selection.level=v);
+buildPills(rangeRow,UNIT_RANGES,r=>`U${r[0]}–${r[1]}`,(v)=>selection.range=v);
 
-let selection = { level: null, range: null };
-const loaderBackdrop = document.getElementById("loader-backdrop");
-const levelRow = document.getElementById("level-row");
-const rangeRow = document.getElementById("range-row");
-const loadBtn = document.getElementById("load-words");
-const loadStatus = document.getElementById("load-status");
-const chosenSummary = document.getElementById("chosen-summary");
-document.getElementById("open-loader").addEventListener("click", ()=> {
-  loaderBackdrop.style.display = "flex";
-});
-
-buildPills(levelRow, [1,2,3,4,5,6], v => `Level ${v}`, (v)=> selection.level = v);
-buildPills(rangeRow, UNIT_RANGES, r => `U${r[0]}–${r[1]}`, (v)=> selection.range = v);
-
-function parseCSV(text){
-  const lines = text.trim().split(/\r?\n/);
-  const headers = lines[0].split(",").map(h=>h.trim());
-  const rows = [];
+function parseCSV(txt){
+  const lines = txt.trim().split(/\r?\n/);
+  const headers = lines[0].split(",").map(s=>s.trim());
+  const out=[];
   for(let i=1;i<lines.length;i++){
     if(!lines[i].trim()) continue;
-    // Simple CSV (no quoted commas in provided data)
-    const cols = lines[i].split(",").map(c=>c.trim());
-    const row = {};
-    headers.forEach((h,idx)=>row[h]=cols[idx]);
-    rows.push(row);
+    const cols = lines[i].split(",").map(s=>s.trim());
+    const row={}; headers.forEach((h,idx)=>row[h]=cols[idx]); out.push(row);
   }
-  return rows;
+  return out;
 }
 
-async function loadWordsForSelection(){
-  if(!selection.level || !selection.range){
-    loadStatus.textContent = "Please select a level and a unit range.";
-    return null;
-  }
-  loadStatus.textContent = "Loading CSV…";
-  const url = LEVEL_CSVS[selection.level];
-  try{
-    const res = await fetch(url, {cache:"no-store"});
-    if(!res.ok) throw new Error(res.status+" "+res.statusText);
+const wordDatabase=[];
+async function loadWords(){
+  if(!selection.level||!selection.range){ loadStatus.textContent="Please select a level and a unit range."; return; }
+  loadStatus.textContent="Loading CSV…";
+  try {
+    const res = await fetch(LEVEL_CSVS[selection.level], {cache:"no-store"});
+    if(!res.ok) throw new Error(res.statusText);
     const csv = await res.text();
     const all = parseCSV(csv);
-    const [uStart, uEnd] = selection.range;
-    const filtered = all.filter(r => {
+    const [s,e]=selection.range;
+    const filtered = all.filter(r=>{
       const u = Number(r["Unit"] ?? r["unit"] ?? r["UNIT"]);
-      return Number.isFinite(u) && u >= uStart && u <= uEnd;
-    }).map(r => ({
-      word: String(r["Word"]).trim(),
-      pos: String(r["POS"] ?? r["Pos"] ?? r["pos"] ?? "").trim(),
-      meaning: String(r["Chinese Meaning"] ?? r["ChineseMeaning"] ?? r["Meaning"] ?? "").trim(),
-    })).filter(r => r.word && r.meaning);
+      return Number.isFinite(u) && u>=s && u<=e;
+    }).map(r=>({
+      word:String(r["Word"]).trim(),
+      pos:String(r["POS"] ?? r["Pos"] ?? r["pos"] ?? "").trim(),
+      meaning:String(r["Chinese Meaning"] ?? r["ChineseMeaning"] ?? r["Meaning"] ?? "").trim(),
+    })).filter(x=>x.word && x.meaning);
 
-    if(filtered.length === 0){
-      loadStatus.textContent = "No words found in that range.";
-      return null;
-    }
-    loadStatus.textContent = `Loaded ${filtered.length} words. You can start the game!`;
-    chosenSummary.textContent = `Level ${selection.level}, Units U${uStart}–${uEnd} (${filtered.length} words)`;
-    // Store into database used by the game:
-    wordDatabase.length = 0;
-    filtered.forEach(w => wordDatabase.push(w));
-    // Enable Start
-    startBtn.disabled = false;
-    startBtn.title = "";
-    questionEl.textContent = "Words ready — press Start!";
-    loaderBackdrop.style.display = "none";
-    return filtered.length;
-  }catch(err){
-    loadStatus.textContent = "Load failed: " + err.message;
-    return null;
-  }
+    if(!filtered.length){ loadStatus.textContent="No words in that range."; return; }
+    wordDatabase.length=0; filtered.forEach(w=>wordDatabase.push(w));
+    chosenSummary.textContent=`Level ${selection.level}, Units U${s}–${e} (${filtered.length} words)`;
+    loadStatus.textContent=`Loaded ${filtered.length} words. Press Start.`;
+    startBtn.disabled=false; startBtn.title="";
+    questionEl.textContent="Words ready — press Start!";
+    loaderBackdrop.style.display="none";
+  } catch(err){ loadStatus.textContent="Load failed: "+err.message; }
 }
-loadBtn.addEventListener("click", loadWordsForSelection);
+loadBtn.addEventListener("click", loadWords);
 
-/* =========================================================
-   2) Original game (kept), with small visual/audio upgrades
-   ========================================================= */
-const canvas = document.getElementById('game-board'), ctx = canvas.getContext('2d');
-const fxCanvas = document.getElementById('fx-layer'), fx = fxCanvas.getContext('2d');
+/* ---------------- Canvas & DPR scaling ---------------- */
+const board = document.getElementById('game-board');
+const ctx = board.getContext('2d');
+const fxCanvas = document.getElementById('fx-layer');
+const fx = fxCanvas.getContext('2d');
 
 function resizeCanvas(){
-  const s = Math.min(canvas.parentElement.clientWidth, canvas.parentElement.clientHeight);
-  canvas.width = s; canvas.height = s;
-  fxCanvas.width = s; fxCanvas.height = s;
+  const parent = board.parentElement;
+  const s = Math.min(parent.clientWidth, parent.clientHeight);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2); // 限制 2x，避免手機過大
+  board.style.width = board.style.height = s+"px";
+  board.width = Math.floor(s*dpr); board.height = Math.floor(s*dpr);
+  fxCanvas.style.width = fxCanvas.style.height = s+"px";
+  fxCanvas.width = Math.floor(s*dpr); fxCanvas.height = Math.floor(s*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  fx.setTransform(dpr,0,0,dpr,0,0);
 }
-resizeCanvas(); addEventListener('resize', resizeCanvas);
+addEventListener('resize', resizeCanvas); resizeCanvas();
 
-/* ---- DOM ---- */
-const startBtn = document.getElementById('start-btn');
-const pauseBtn = document.getElementById('pause-btn');
-const endBtn = document.getElementById('end-btn');
-const resumeBtn = document.getElementById('resume-btn');
-const scoreEl = document.getElementById('score');
-const highScoreEl = document.getElementById('high-score');
-const lengthEl = document.getElementById('snake-length');
-const questionEl = document.getElementById('question');
-const timeEl = document.getElementById('time-left');
-const time5 = document.getElementById('time-5');
-const time10 = document.getElementById('time-10');
-const time15 = document.getElementById('time-15');
-const confirmDlg = document.getElementById('confirmation-dialog');
-const confirmYes = document.getElementById('confirm-yes');
-const confirmNo = document.getElementById('confirm-no');
-const currentScore = document.getElementById('current-score');
-const currentLength = document.getElementById('current-length');
-const resultsScreen = document.getElementById('results-screen');
-const finalScore = document.getElementById('final-score');
-const finalLength = document.getElementById('final-length');
-const gameTime = document.getElementById('game-time');
-const resultsOk = document.getElementById('results-ok');
+/* ---------------- Original game (with small tweaks) ---------------- */
+const startBtn=document.getElementById('start-btn');
+const pauseBtn=document.getElementById('pause-btn');
+const endBtn=document.getElementById('end-btn');
+const resumeBtn=document.getElementById('resume-btn');
+const scoreEl=document.getElementById('score');
+const highScoreEl=document.getElementById('high-score');
+const lengthEl=document.getElementById('snake-length');
+const questionEl=document.getElementById('question');
+const timeEl=document.getElementById('time-left');
+const time5=document.getElementById('time-5');
+const time10=document.getElementById('time-10');
+const time15=document.getElementById('time-15');
+const confirmDlg=document.getElementById('confirmation-dialog');
+const confirmYes=document.getElementById('confirm-yes');
+const confirmNo=document.getElementById('confirm-no');
+const currentScore=document.getElementById('current-score');
+const currentLength=document.getElementById('current-length');
+const resultsScreen=document.getElementById('results-screen');
+const finalScore=document.getElementById('final-score');
+const finalLength=document.getElementById('final-length');
+const gameTime=document.getElementById('game-time');
+const resultsOk=document.getElementById('results-ok');
 
-const sndCorrect = document.getElementById('snd-correct');
-const sndHit = document.getElementById('snd-hit');
-const sndGameover = document.getElementById('snd-gameover');
+const sndCorrect=document.getElementById('snd-correct');
+const sndHit=document.getElementById('snd-hit');
+const sndGameover=document.getElementById('snd-gameover');
 
-/* ---- Game State ---- */
-const GRID = 20;
-let snakeGrid = [], snakePos = [], direction = 'right', nextDirection = 'right';
-let moveProgress = 0, lastTime = 0;
-let baseTime = 180, acceleration = 0, maxAcc = 0.7;
-let foods = [], score = 0, highScore = Number(localStorage.getItem('snakeHighScore') || 0);
-let gameStarted = false, gamePaused = false, gameEnded = false;
-let correctCount = 0, penalty = 0, timeLeft = 600, timer;
-let invincible = false, usedWords = [], startTime = 0, currentQuestion = null;
-const wordDatabase = [];               // <— populated by loader step
+const GRID=20;
+let snakeGrid=[], snakePos=[], direction='right', nextDirection='right';
+let moveProgress=0, lastTime=0;
+let baseTime=180, acceleration=0, maxAcc=0.7;
+let foods=[], score=0, highScore=Number(localStorage.getItem('snakeHighScore')||0);
+let gameStarted=false, gamePaused=false, gameEnded=false;
+let correctCount=0, penalty=0, timeLeft=600, timer;
+let invincible=false, usedWords=[], startTime=0, currentQuestion=null;
 
-const formatTime = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
-const lerp = (a,b,t)=> a+(b-a)*t;
+const formatTime=s=>`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+const lerp=(a,b,t)=>a+(b-a)*t;
 
-/* ---- Timer selection ---- */
 function selectTime(m){
   [time5,time10,time15].forEach(b=>b.classList.remove('selected'));
   (m===5?time5:m===10?time10:time15).classList.add('selected');
-  timeLeft = m*60;
+  timeLeft=m*60;
 }
-time5.addEventListener('click', ()=>selectTime(5));
-time10.addEventListener('click', ()=>selectTime(10));
-time15.addEventListener('click', ()=>selectTime(15));
+time5.addEventListener('click',()=>selectTime(5));
+time10.addEventListener('click',()=>selectTime(10));
+time15.addEventListener('click',()=>selectTime(15));
 selectTime(10);
 
-/* ---- Questions ---- */
 function newQuestion(){
-  if(!wordDatabase.length) { questionEl.textContent="Load a level & range first."; return null; }
-  if(usedWords.length >= wordDatabase.length) usedWords = [];
-  const avail = wordDatabase.filter(w => !usedWords.includes(w.word));
-  const q = avail[Math.floor(Math.random()*avail.length)];
-  usedWords.push(q.word);
-  currentQuestion = q;
-  questionEl.textContent = `${q.word} (${q.pos})`;
+  if(!wordDatabase.length){ questionEl.textContent="Load a level & range first."; return null; }
+  if(usedWords.length>=wordDatabase.length) usedWords=[];
+  const avail=wordDatabase.filter(w=>!usedWords.includes(w.word));
+  const q=avail[Math.floor(Math.random()*avail.length)];
+  usedWords.push(q.word); currentQuestion=q;
+  questionEl.textContent=`${q.word} (${q.pos})`;
   return q;
 }
-
-/* ---- Food generation (4 buns, ≥1 correct) ---- */
 function genFoods(correct){
-  const uniques = [...new Set(wordDatabase.map(w=>w.meaning))];
-  const wrongs = uniques.filter(m=>m!==correct).sort(()=>0.5-Math.random()).slice(0,3);
-  const options = [...wrongs, correct].sort(()=>0.5-Math.random());
+  const uniques=[...new Set(wordDatabase.map(w=>w.meaning))];
+  const wrongs=uniques.filter(m=>m!==correct).sort(()=>0.5-Math.random()).slice(0,3);
+  const options=[...wrongs,correct].sort(()=>0.5-Math.random());
 
   const free=[];
-  for(let y=0;y<GRID;y++) for(let x=0;x<GRID;x++){
+  for(let y=0;y<GRID;y++)for(let x=0;x<GRID;x++){
     if(!snakeGrid.some(s=>s.x===x&&s.y===y)) free.push({x,y});
   }
   if(free.length<4){ foods=[]; return; }
-
-  const chosen=[];
-  while(chosen.length<4){
-    const idx = Math.floor(Math.random()*free.length);
-    chosen.push(free.splice(idx,1)[0]);
-  }
-  foods = chosen.map((cell,i)=>({ x:cell.x, y:cell.y, meaning:options[i], correct: options[i]===correct }));
+  const chosen=[]; while(chosen.length<4){ const i=Math.floor(Math.random()*free.length); chosen.push(free.splice(i,1)[0]); }
+  foods=chosen.map((c,i)=>({x:c.x,y:c.y,meaning:options[i],correct:options[i]===correct}));
 }
 function ensureFourFoods(){
   if(!currentQuestion) return;
   if(foods.length===4) return;
-
-  const occ = new Set(snakeGrid.map(s=>`${s.x},${s.y}`));
-  foods.forEach(f=>occ.add(`${f.x},${f.y}`));
-
+  const occ=new Set(snakeGrid.map(s=>`${s.x},${s.y}`)); foods.forEach(f=>occ.add(`${f.x},${f.y}`));
   const free=[];
-  for(let y=0;y<GRID;y++)for(let x=0;x<GRID;x++){
-    const k=`${x},${y}`; if(!occ.has(k)) free.push({x,y});
-  }
+  for(let y=0;y<GRID;y++)for(let x=0;x<GRID;x++){ const k=`${x},${y}`; if(!occ.has(k)) free.push({x,y}); }
   if(!free.length) return;
-
-  const correct = currentQuestion.meaning;
-  const pool = [...new Set(wordDatabase.map(w=>w.meaning))].filter(m=>m!==correct);
-
-  while(foods.length<4 && free.length){
-    const needCorrect = foods.every(f=>!f.correct);
-    const meaning = needCorrect ? correct : pool[Math.floor(Math.random()*pool.length)];
-    const cell = free.splice(Math.floor(Math.random()*free.length),1)[0];
-    foods.push({x:cell.x,y:cell.y,meaning,correct:meaning===correct});
+  const correct=currentQuestion.meaning;
+  const pool=[...new Set(wordDatabase.map(w=>w.meaning))].filter(m=>m!==correct);
+  while(foods.length<4&&free.length){
+    const needCorrect=foods.every(f=>!f.correct);
+    const meaning=needCorrect?correct:pool[Math.floor(Math.random()*pool.length)];
+    const c=free.splice(Math.floor(Math.random()*free.length),1)[0];
+    foods.push({x:c.x,y:c.y,meaning,correct:meaning===correct});
   }
   if(foods.length && foods.every(f=>!f.correct)){
-    const j = Math.floor(Math.random()*foods.length);
-    foods[j] = {...foods[j], meaning:correct, correct:true};
+    const j=Math.floor(Math.random()*foods.length);
+    foods[j]={...foods[j],meaning:correct,correct:true};
   }
 }
 
-/* ---- Cute FX (bouncy bread + fireworks) ---- */
-let globalTime = 0;
-const sparks = [];
-function spawnFireworks(cx, cy){
-  for(let i=0;i<30;i++){
-    const ang = Math.random()*Math.PI*2;
-    const sp = 1.5+Math.random()*2.5;
-    sparks.push({x:cx, y:cy, vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp, life:700, born:performance.now()});
+/* ------ FX ------ */
+let globalTime=0; const sparks=[];
+function spawnFireworks(cx,cy){
+  if(device.reduced) return;
+  for(let i=0;i<28;i++){
+    const ang=Math.random()*Math.PI*2, sp=1.4+Math.random()*2.2;
+    sparks.push({x:cx,y:cy,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,life:650,born:performance.now()});
   }
 }
 function drawFX(){
-  fx.clearRect(0,0,fxCanvas.width, fxCanvas.height);
-  const now = performance.now();
+  fx.clearRect(0,0,fxCanvas.width,fxCanvas.height);
+  const now=performance.now();
   for(let i=sparks.length-1;i>=0;i--){
-    const p = sparks[i];
-    const t = now - p.born;
+    const p=sparks[i], t=now-p.born;
     if(t>p.life){ sparks.splice(i,1); continue; }
-    const dt = 16; // approx
-    p.x += p.vx*dt*0.06; p.y += p.vy*dt*0.06; p.vy += 0.02; // gravity
-    const alpha = 1 - t/p.life;
-    fx.fillStyle = `rgba(216,168,168,${alpha})`;
-    fx.beginPath(); fx.arc(p.x, p.y, 3, 0, Math.PI*2); fx.fill();
+    p.x+=p.vx*0.9; p.y+=p.vy*0.9; p.vy+=0.02;
+    const a=1-t/p.life;
+    fx.fillStyle=`rgba(216,168,168,${a})`; fx.beginPath(); fx.arc(p.x,p.y,3,0,Math.PI*2); fx.fill();
   }
 }
 
-/* ---- Rendering ---- */
-function draw(){
-  const sz = canvas.width/GRID;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+/* ------ Draw ------ */
+const varHead=getComputedStyle(document.documentElement).getPropertyValue('--head')||'#D8A8A8';
+const varHeadStroke=getComputedStyle(document.documentElement).getPropertyValue('--head-stroke')||'#B78A8A';
+const varBodyStroke=getComputedStyle(document.documentElement).getPropertyValue('--body-stroke')||'#8C9D8A';
 
-  // body
+function draw(){
+  const sz=board.clientWidth/GRID;
+  ctx.clearRect(0,0,board.clientWidth,board.clientHeight);
   for(let i=1;i<snakePos.length;i++){
     const s=snakePos[i];
-    ctx.fillStyle= 'rgba(168,183,165,.95)';
-    ctx.beginPath(); ctx.arc(s.x, s.y, sz*0.45, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#A8B7A5';
+    ctx.beginPath(); ctx.arc(s.x,s.y,sz*0.45,0,Math.PI*2); ctx.fill();
     ctx.strokeStyle=varBodyStroke; ctx.stroke();
   }
-  // head (slight idle wiggle)
   if(snakePos.length){
-    const h = snakePos[0];
-    ctx.fillStyle = invincible ? 'rgba(216,168,168,.75)' : varHead;
-    ctx.beginPath(); ctx.arc(h.x, h.y, sz*0.48, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = varHeadStroke; ctx.stroke();
-
-    // eyes
-    ctx.fillStyle = '#fff'; const e=sz*0.2;
+    const h=snakePos[0];
+    ctx.fillStyle=invincible?'rgba(216,168,168,.75)':varHead;
+    ctx.beginPath(); ctx.arc(h.x,h.y,sz*0.48,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=varHeadStroke; ctx.stroke();
+    ctx.fillStyle='#fff'; const e=sz*0.2;
     let ex1,ey1,ex2,ey2;
     if(direction==='right'){ex1=ex2=h.x+e;ey1=h.y-e;ey2=h.y+e;}
     else if(direction==='left'){ex1=ex2=h.x-e;ey1=h.y-e;ey2=h.y+e;}
     else if(direction==='up'){ey1=ey2=h.y-e;ex1=h.x-e;ex2=h.x+e;}
     else {ey1=ey2=h.y+e;ex1=h.x-e;ex2=h.x+e;}
-    // blinking every ~2.5s
-    const blink = (Math.floor(globalTime/2500)%2===0) && (globalTime%2500)<160;
+    const blink=(Math.floor(globalTime/2200)%2===0)&&(globalTime%2200)<140;
     ctx.beginPath();
-    if(blink){ ctx.rect(ex1- sz*0.12, ey1-1, sz*0.24, 2); ctx.rect(ex2- sz*0.12, ey2-1, sz*0.24, 2); }
+    if(blink){ ctx.rect(ex1-sz*0.12,ey1-1,sz*0.24,2); ctx.rect(ex2-sz*0.12,ey2-1,sz*0.24,2); }
     else { ctx.arc(ex1,ey1,sz*0.12,0,Math.PI*2); ctx.arc(ex2,ey2,sz*0.12,0,Math.PI*2); }
     ctx.fill();
   }
-
-  // buns (bounce)
+  // bouncing buns（手機上 bounce 幅度略小）
+  const bounceScale = device.isTouch ? 0.05 : 0.07;
   foods.forEach(f=>{
-    const cx = (f.x+0.5)*sz, cy = (f.y+0.5)*sz;
-    const bounce = Math.sin((globalTime + (f.x+f.y)*120)/300)*sz*0.07;
-    ctx.fillStyle = '#D8C4A8';
-    ctx.beginPath(); ctx.ellipse(cx, cy+bounce, sz*0.8, sz*0.6, 0, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = '#C4B6A0'; ctx.stroke();
-
-    ctx.fillStyle = '#000'; ctx.font = `${Math.max(12, Math.floor(sz*0.28))}px system-ui, sans-serif`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    const lines = f.meaning.split(';').map(s=>s.trim());
-    const lh = Math.max(16, Math.floor(sz*0.32));
-    const sy = cy+bounce - (lines.length-1)*lh/2;
-    lines.forEach((w,i)=>{
-      const t = (w.length>10)? (w.slice(0,9)+'…'):w;
-      ctx.fillText(t, cx, sy + i*lh);
-    });
+    const cx=(f.x+0.5)*sz, cy=(f.y+0.5)*sz;
+    const bounce=Math.sin((globalTime+(f.x+f.y)*120)/300)*sz*bounceScale;
+    ctx.fillStyle='#D8C4A8';
+    ctx.beginPath(); ctx.ellipse(cx,cy+bounce,sz*0.8,sz*0.6,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#C4B6A0'; ctx.stroke();
+    ctx.fillStyle='#000'; ctx.font=`${Math.max(12,Math.floor(sz*0.28))}px system-ui,sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    const lines=f.meaning.split(';').map(s=>s.trim());
+    const lh=Math.max(16,Math.floor(sz*0.32));
+    const sy=cy+bounce-(lines.length-1)*lh/2;
+    lines.forEach((w,i)=>{ const t=(w.length>10)?(w.slice(0,9)+'…'):w; ctx.fillText(t,cx,sy+i*lh); });
   });
-
   drawFX();
 }
-const varHead = getComputedStyle(document.documentElement).getPropertyValue('--head') || '#D8A8A8';
-const varHeadStroke = getComputedStyle(document.documentElement).getPropertyValue('--head-stroke') || '#B78A8A';
-const varBodyStroke = getComputedStyle(document.documentElement).getPropertyValue('--body-stroke') || '#8C9D8A';
 
-/* ---- Penalty & flow (same behavior) ---- */
+/* ------ Flow ------ */
 function applyPenaltyAndRefresh(){
-  penalty = (penalty||0)+1;
-  const cost = penalty*10;
-  if(score >= cost){
-    score -= cost;
+  penalty=(penalty||0)+1;
+  const cost=penalty*10;
+  if(score>=cost){
+    score-=cost;
     for(let i=0;i<penalty && snakeGrid.length>1;i++) snakeGrid.pop();
-    snakePos.length = snakeGrid.length;
-    const q = newQuestion(); if(q){ foods=[]; genFoods(q.meaning); ensureFourFoods(); }
+    snakePos.length=snakeGrid.length;
+    const q=newQuestion(); if(q){ foods=[]; genFoods(q.meaning); ensureFourFoods(); }
     updateUI();
-  }else{
-    gameOver();
-  }
+  }else{ gameOver(); }
 }
 
 function moveSnake(){
-  const head = {...snakeGrid[0]};
+  const head={...snakeGrid[0]};
   switch(nextDirection){
     case 'up': head.y--; break;
     case 'down': head.y++; break;
     case 'left': head.x--; break;
     case 'right': head.x++; break;
   }
-  direction = nextDirection;
+  direction=nextDirection;
 
-  // Wall/self
   if(head.x<0||head.x>=GRID||head.y<0||head.y>=GRID||
      snakeGrid.some((s,i)=>i>0&&s.x===head.x&&s.y===head.y)){
     if(!invincible && timeLeft>0){ try{sndHit.currentTime=0;sndHit.play();}catch(_){}
@@ -514,139 +498,112 @@ function moveSnake(){
   }
 
   snakeGrid.unshift(head);
-  const sz = canvas.width/GRID;
-  const headC = {x:(head.x+0.5)*sz, y:(head.y+0.5)*sz};
-  const eatDist = sz*0.9;
-  let ateCorrect = false;
+  const sz=board.clientWidth/GRID;
+  const headC={x:(head.x+0.5)*sz, y:(head.y+0.5)*sz};
+  const eatDist = device.isTouch ? sz*1.05 : sz*0.9; // 行動裝置較寬鬆
+  let ateCorrect=false;
 
   for(let i=0;i<foods.length;i++){
-    const f = foods[i]; const fc = {x:(f.x+0.5)*sz, y:(f.y+0.5)*sz};
-    if(Math.hypot(headC.x-fc.x, headC.y-fc.y)<eatDist){
+    const f=foods[i], fc={x:(f.x+0.5)*sz,y:(f.y+0.5)*sz};
+    if(Math.hypot(headC.x-fc.x,headC.y-fc.y)<eatDist){
       if(f.correct){
-        correctCount++; score += correctCount*10;
-        if(score>highScore){ highScore = score; localStorage.setItem('snakeHighScore', String(highScore)); }
-        invincible = true; setTimeout(()=>invincible=false,1000);
+        correctCount++; score+=correctCount*10;
+        if(score>highScore){ highScore=score; localStorage.setItem('snakeHighScore',String(highScore)); }
+        invincible=true; setTimeout(()=>invincible=false,1000);
         try{ sndCorrect.currentTime=0; sndCorrect.play(); }catch(_){}
-        spawnFireworks(fc.x, fc.y);
-        const q = newQuestion(); if(q){ foods=[]; genFoods(q.meaning); ensureFourFoods(); }
-        ateCorrect = true;
-        break;
+        spawnFireworks(fc.x,fc.y);
+        const q=newQuestion(); if(q){ foods=[]; genFoods(q.meaning); ensureFourFoods(); }
+        ateCorrect=true; break;
       }else{
         if(!invincible && timeLeft>0){ try{sndHit.currentTime=0;sndHit.play();}catch(_){}
           applyPenaltyAndRefresh(); return; }
       }
     }
   }
-
   if(!ateCorrect && snakeGrid.length>1) snakeGrid.pop();
-  snakePos.length = snakeGrid.length;
+  snakePos.length=snakeGrid.length;
   ensureFourFoods();
   updateUI();
 }
 
-/* ---- UI / Lifecycle ---- */
 function updateUI(){
-  scoreEl.textContent = score;
-  highScoreEl.textContent = highScore;
-  lengthEl.textContent = snakeGrid.length;
-  timeEl.textContent = formatTime(timeLeft);
+  scoreEl.textContent=score; highScoreEl.textContent=highScore;
+  lengthEl.textContent=snakeGrid.length; timeEl.textContent=formatTime(timeLeft);
 }
 function gameOver(){
   if(gameEnded) return;
-  gameEnded = true;
-  clearInterval(timer); gameStarted=false;
+  gameEnded=true; clearInterval(timer); gameStarted=false;
   try{ sndGameover.currentTime=0; sndGameover.play(); }catch(_){}
   showResults();
 }
 function showResults(){
-  const el = Math.floor((Date.now()-startTime)/1000);
-  finalScore.textContent = score; finalLength.textContent = snakeGrid.length; gameTime.textContent = formatTime(el);
-  resultsScreen.style.display = 'flex';
-  startBtn.style.display = 'flex'; pauseBtn.style.display = 'none'; endBtn.style.display = 'none'; resumeBtn.style.display = 'none';
+  const el=Math.floor((Date.now()-startTime)/1000);
+  finalScore.textContent=score; finalLength.textContent=snakeGrid.length; gameTime.textContent=formatTime(el);
+  resultsScreen.style.display='flex';
+  startBtn.style.display='flex'; pauseBtn.style.display='none'; endBtn.style.display='none'; resumeBtn.style.display='none';
 }
 
-/* ---- Loop ---- */
 function gameLoop(ts){
-  if(!gameStarted || gamePaused || gameEnded){ requestAnimationFrame(gameLoop); return; }
-  const dt = ts - lastTime; lastTime = ts; globalTime = ts;
-  const moveT = baseTime * (1 - acceleration*maxAcc);
-  moveProgress += dt / moveT;
-  if(moveProgress >= 1){ moveProgress = 0; moveSnake(); }
-
-  const sz = canvas.width/GRID;
+  if(!gameStarted||gamePaused||gameEnded){ requestAnimationFrame(gameLoop); return; }
+  const dt=ts-lastTime; lastTime=ts; globalTime=ts;
+  const moveT=baseTime*(1-acceleration*maxAcc);
+  moveProgress+=dt/moveT;
+  if(moveProgress>=1){ moveProgress=0; moveSnake(); }
+  const sz=board.clientWidth/GRID;
   if(snakeGrid.length){
-    const tx = (snakeGrid[0].x+0.5)*sz, ty = (snakeGrid[0].y+0.5)*sz;
-    const wobble = Math.sin(ts/250)*sz*0.02;
-    snakePos[0] = { x: lerp(snakePos[0]?.x || tx, tx + wobble, moveProgress),
-                    y: lerp(snakePos[0]?.y || ty, ty, moveProgress) };
-    for(let i=1;i<snakeGrid.length;i++){
-      snakePos[i] = { x:(snakeGrid[i].x+0.5)*sz, y:(snakeGrid[i].y+0.5)*sz };
-    }
+    const tx=(snakeGrid[0].x+0.5)*sz, ty=(snakeGrid[0].y+0.5)*sz;
+    const wobble=(device.isTouch?0.015:0.02)*sz;
+    snakePos[0]={ x: lerp(snakePos[0]?.x||tx, tx+Math.sin(ts/250)*wobble, moveProgress),
+                  y: lerp(snakePos[0]?.y||ty, ty, moveProgress) };
+    for(let i=1;i<snakeGrid.length;i++) snakePos[i]={ x:(snakeGrid[i].x+0.5)*sz, y:(snakeGrid[i].y+0.5)*sz };
   }
   draw(); requestAnimationFrame(gameLoop);
 }
 
-/* ---- Start / Pause / End ---- */
+/* Start/Pause/End */
 function startGame(){
-  if(!wordDatabase.length){
-    questionEl.textContent = "No words loaded. Click “Choose…” to select a level & range.";
-    return;
-  }
-  snakeGrid = [{x:Math.floor(GRID/2), y:Math.floor(GRID/2)}];
-  const sz = canvas.width/GRID;
-  snakePos = [{x:(snakeGrid[0].x+0.5)*sz, y:(snakeGrid[0].y+0.5)*sz}];
+  if(!wordDatabase.length){ questionEl.textContent="No words loaded. Click “Choose…” first."; return; }
+  snakeGrid=[{x:Math.floor(GRID/2),y:Math.floor(GRID/2)}];
+  const sz=board.clientWidth/GRID;
+  snakePos=[{x:(snakeGrid[0].x+0.5)*sz,y:(snakeGrid[0].y+0.5)*sz}];
   direction='right'; nextDirection='right'; moveProgress=0;
   score=0; correctCount=0; penalty=0; usedWords=[]; gameEnded=false; gamePaused=false; invincible=false;
-  const q = newQuestion(); if(!q){ alert('Word database error!'); return; }
+  const q=newQuestion(); if(!q){ alert('Word database error!'); return; }
   foods=[]; genFoods(q.meaning); ensureFourFoods(); updateUI(); startTime=Date.now();
-  clearInterval(timer); timer = setInterval(()=>{ if(timeLeft<=0){ clearInterval(timer); gameOver(); } else { timeLeft--; timeEl.textContent = formatTime(timeLeft); } },1000);
+  clearInterval(timer);
+  timer=setInterval(()=>{ if(timeLeft<=0){ clearInterval(timer); gameOver(); } else { timeLeft--; timeEl.textContent=formatTime(timeLeft); } },1000);
   gameStarted=true; lastTime=performance.now(); requestAnimationFrame(gameLoop);
   startBtn.style.display='none'; pauseBtn.style.display='flex'; endBtn.style.display='flex'; resumeBtn.style.display='none';
 }
 function togglePause(){
   if(!gameStarted) return startGame();
-  gamePaused = !gamePaused;
-  pauseBtn.textContent = gamePaused ? 'Resume' : 'Pause';
-  pauseBtn.style.display = gamePaused ? 'none':'flex';
-  resumeBtn.style.display = gamePaused ? 'block':'none';
+  gamePaused=!gamePaused;
+  pauseBtn.textContent=gamePaused?'Resume':'Pause';
+  pauseBtn.style.display=gamePaused?'none':'flex';
+  resumeBtn.style.display=gamePaused?'block':'none';
   if(!gamePaused) draw();
 }
 function resumeGame(){ togglePause(); }
 function endConfirm(){
-  if(!gameStarted || gameEnded) return;
-  gamePaused = true; currentScore.textContent = score; currentLength.textContent = snakeGrid.length;
-  document.getElementById('confirmation-dialog').style.display='flex';
+  if(!gameStarted||gameEnded) return;
+  gamePaused=true; currentScore.textContent=score; currentLength.textContent=snakeGrid.length;
+  confirmDlg.style.display='flex';
 }
 function endNow(){
-  clearInterval(timer); gameEnded = true; gameStarted=false;
-  document.getElementById('confirmation-dialog').style.display='none'; showResults();
+  clearInterval(timer); gameEnded=true; gameStarted=false;
+  confirmDlg.style.display='none'; showResults();
 }
 
-/* ---- Events ---- */
+/* Events */
 document.getElementById('start-btn').addEventListener('click', startGame);
 pauseBtn.addEventListener('click', togglePause);
 resumeBtn.addEventListener('click', resumeGame);
 endBtn.addEventListener('click', endConfirm);
 confirmYes.addEventListener('click', endNow);
-confirmNo.addEventListener('click', ()=>{ document.getElementById('confirmation-dialog').style.display='none'; gamePaused=false; });
+confirmNo.addEventListener('click', ()=>{ confirmDlg.style.display='none'; gamePaused=false; });
 resultsOk.addEventListener('click', ()=> resultsScreen.style.display='none');
 
-/* Touch + Keyboard */
-let tx=0, ty=0;
-canvas.addEventListener('touchstart', e=>{ tx=e.touches[0].clientX; ty=e.touches[0].clientY; e.preventDefault(); }, {passive:false});
-canvas.addEventListener('touchmove', e=>{
-  if(!gameStarted||gamePaused||gameEnded) return;
-  const dx=e.touches[0].clientX-tx, dy=e.touches[0].clientY-ty, t=30;
-  if(Math.abs(dx)>Math.abs(dy) && Math.abs(dx)>t){
-    if(dx>0 && direction!=='left') nextDirection='right'; else if(dx<0 && direction!=='right') nextDirection='left';
-    tx=e.touches[0].clientX;
-  }else if(Math.abs(dy)>t){
-    if(dy>0 && direction!=='up') nextDirection='down'; else if(dy<0 && direction!=='down') nextDirection='up';
-    ty=e.touches[0].clientY;
-  }
-  e.preventDefault();
-},{passive:false});
-
+document.getElementById('open-loader').addEventListener('keydown', e=>{ if(e.key==='Enter') loaderBackdrop.style.display='flex'; });
 document.addEventListener('keydown', e=>{
   if(e.key===' '){ if(!gameStarted) startGame(); else togglePause(); e.preventDefault(); }
   else if(['ArrowUp','w','W'].includes(e.key) && direction!=='down'){ nextDirection='up'; e.preventDefault(); }
@@ -656,10 +613,29 @@ document.addEventListener('keydown', e=>{
   else if(e.key==='Escape' && gameStarted){ endConfirm(); e.preventDefault(); }
 });
 
-/* Kick off initial draw */
-let raf;
-(function animate(t){ globalTime=t||0; draw(); raf=requestAnimationFrame(animate); })();
+/* Touch gestures（手機/平板優化：更高門檻避免誤觸） */
+let tx=0,ty=0,lastSwipe=0;
+board.addEventListener('touchstart', e=>{ if(!device.isTouch) return;
+  tx=e.touches[0].clientX; ty=e.touches[0].clientY; e.preventDefault();
+},{passive:false});
+board.addEventListener('touchmove', e=>{ if(!device.isTouch||!gameStarted||gamePaused||gameEnded) return;
+  const dx=e.touches[0].clientX-tx, dy=e.touches[0].clientY-ty;
+  const t = Math.max(30, Math.min(60, Math.round(board.clientWidth*0.08))); // 視尺寸調整
+  const now=performance.now(); if(now-lastSwipe<80) return; // 防抖
+  if(Math.abs(dx)>Math.abs(dy) && Math.abs(dx)>t){
+    if(dx>0 && direction!=='left') nextDirection='right';
+    else if(dx<0 && direction!=='right') nextDirection='left';
+    tx=e.touches[0].clientX; lastSwipe=now;
+  }else if(Math.abs(dy)>t){
+    if(dy>0 && direction!=='up') nextDirection='down';
+    else if(dy<0 && direction!=='down') nextDirection='up';
+    ty=e.touches[0].clientY; lastSwipe=now;
+  }
+  e.preventDefault();
+},{passive:false});
 
+/* Initial frame */
+(function animate(t){ globalTime=t||0; draw(); requestAnimationFrame(animate); })();
 </script>
 </body>
 </html>
