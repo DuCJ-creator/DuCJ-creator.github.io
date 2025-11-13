@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Air Snake</title>
+    <title>Air 貪食蛇單字挑戰</title>
     <style>
-        /* 引入 CSS 樣式 */
+        /* CSS 樣式 */
         body, html {
             margin: 0;
             padding: 0;
@@ -13,12 +13,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #f7f3e8; /* 淺米色背景 */
+            background-color: #f7f3e8; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         #game-container {
-            display: none; /* 預設隱藏，由 JS 顯示 */
+            display: none; 
             width: 90vw;
             max-width: 1000px;
             height: 90vh;
@@ -27,13 +27,13 @@
             border-radius: 8px;
             overflow: hidden;
             background-color: #fcfcf4;
-            display: flex; /* 使用 flex 佈局 */
+            /* 修正：確保在 JS 顯示前是 display: none */
         }
 
         #game-area {
-            flex-grow: 1; /* 佔據左側所有空間 */
+            flex-grow: 1; 
             position: relative;
-            background-color: #f4f0e7; /* 畫布背景色 */
+            background-color: #f4f0e7; 
         }
 
         #game-canvas {
@@ -60,98 +60,35 @@
             text-align: center;
         }
 
-        #word-panel {
-            background-color: #c4d7b9; /* 淺綠色 */
-        }
-
-        #word-panel h2 {
-            margin: 0 0 5px 0;
-            font-size: 24px;
-            color: #4a6a3b;
-            font-weight: 700;
-        }
-
-        #score-panel {
-            background-color: #c4d7b9;
-        }
-
-        #score-panel p {
-            margin: 5px 0;
-            font-size: 16px;
-            color: #4a6a3b;
-        }
+        #word-panel { background-color: #c4d7b9; }
+        #word-panel h2 { margin: 0 0 5px 0; font-size: 24px; color: #4a6a3b; font-weight: 700; }
+        #score-panel { background-color: #c4d7b9; }
+        #score-panel p { margin: 5px 0; font-size: 16px; color: #4a6a3b; }
+        #timer-panel { background-color: #c4d7b9; display: flex; flex-direction: column; align-items: center; }
+        #timer-display { font-size: 32px; font-weight: bold; color: #4a6a3b; margin-bottom: 10px; }
         
-        #timer-panel {
-            background-color: #c4d7b9;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+        .time-buttons button { background-color: #aebfb2; border: none; padding: 8px 12px; margin: 0 5px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background-color 0.2s; }
+        .time-buttons button.active { background-color: #4a6a3b; color: white; }
         
-        #timer-display {
-            font-size: 32px;
-            font-weight: bold;
-            color: #4a6a3b;
-            margin-bottom: 10px;
-        }
-        
-        .time-buttons button {
-            background-color: #aebfb2;
-            border: none;
-            padding: 8px 12px;
-            margin: 0 5px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s;
-        }
-        
-        .time-buttons button.active {
-            background-color: #4a6a3b;
-            color: white;
-        }
-        
-        /* 方向控制按鈕 */
         #controls {
             display: grid;
-            grid-template-areas: 
-                ". up ."
-                "left pause right"
-                ". down .";
+            grid-template-areas: ". up ." "left pause right" ". down .";
             gap: 10px;
             width: 150px;
-            margin-top: auto; /* 推到底部 */
+            margin-top: auto; 
         }
 
-        #controls button {
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            background-color: #d1cbc0;
-            cursor: pointer;
-            font-size: 18px;
-            transition: background-color 0.1s;
-        }
-
-        #controls button:hover {
-            background-color: #c3bbb2;
-        }
-
-        #controls button:active {
-            background-color: #b5ac9f;
-        }
+        #controls button { padding: 15px; border: none; border-radius: 8px; background-color: #d1cbc0; cursor: pointer; font-size: 18px; transition: background-color 0.1s; }
+        #controls button:hover { background-color: #c3bbb2; }
+        #controls button:active { background-color: #b5ac9f; }
 
         #up { grid-area: up; }
         #down { grid-area: down; }
         #left { grid-area: left; }
         #right { grid-area: right; }
-        #pause { 
-            grid-area: pause; 
-            font-weight: bold;
-            background-color: #e6e3da;
-        }
+        #pause, #resume { grid-area: pause; font-weight: bold; background-color: #e6e3da; }
         
-        #end-game-btn, #resume-game-btn {
+        #end-game-btn {
             width: 100%;
             padding: 15px;
             margin-top: 20px;
@@ -161,10 +98,10 @@
             color: white;
             font-weight: bold;
             cursor: pointer;
-            display: none; /* 遊戲開始後顯示 */
+            display: none; 
         }
         
-        /* 設置畫面 */
+        /* 設置畫面 CSS */
         #setup-screen {
             display: flex; 
             flex-direction: column;
@@ -174,17 +111,48 @@
             background-color: #f7f3e8;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .setup-group {
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .setup-group label {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #4a6a3b;
+        }
+
+        .setup-group select {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #c4d7b9;
+            width: 100%;
+            font-size: 16px;
+            background-color: white;
+            min-width: 250px;
         }
         
-        #setup-screen button {
-            padding: 10px 20px;
+        #start-game-btn {
+            padding: 12px 25px;
             margin-top: 20px;
-            font-size: 18px;
+            font-size: 20px;
             background-color: #4a6a3b;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #start-game-btn:hover {
+            background-color: #3b572f;
         }
     </style>
 </head>
@@ -192,8 +160,21 @@
 
     <div id="setup-screen">
         <h1>Air 貪食蛇單字挑戰</h1>
-        <p>點擊下方按鈕開始遊戲，單字將從外部載入。</p>
-        <button id="go-to-game">開始挑戰</button>
+        <p>請選擇 Level 和單元，然後開始遊戲。</p>
+
+        <div class="setup-group">
+            <label for="level-select">選擇 Level:</label>
+            <select id="level-select">
+                </select>
+        </div>
+
+        <div class="setup-group">
+            <label for="unit-select">選擇 單元 (Unit):</label>
+            <select id="unit-select">
+                </select>
+        </div>
+        
+        <button id="start-game-btn">開始遊戲</button>
     </div>
 
     <div id="game-container">
@@ -203,8 +184,8 @@
 
         <div id="sidebar">
             <div id="word-panel" class="panel">
-                <h2 id="current-word">air (n.)</h2>
-                <p id="question-meaning">空氣；天空</p>
+                <h2 id="current-word"></h2>
+                <p id="question-meaning"></p>
             </div>
 
             <div id="score-panel" class="panel">
@@ -225,7 +206,7 @@
             <div id="controls">
                 <button id="up">↑</button>
                 <button id="left">←</button>
-                <button id="pause" style="display: none;">Pause</button>
+                <button id="pause">Pause</button>
                 <button id="resume" style="display: none;">Resume</button>
                 <button id="right">→</button>
                 <button id="down">↓</button>
@@ -236,6 +217,640 @@
         </div>
     </div>
 
-    <script src="game.js"></script>
+    <script>
+        // ====== 全局變量和初始化 ======
+
+        // Canvas 相關
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas ? canvas.getContext('2d') : null; 
+        if (!ctx) {
+            console.error("Canvas 渲染上下文獲取失敗。");
+        }
+
+        // 遊戲狀態
+        const GRID = 20; 
+        let snakeGrid = []; 
+        let snakePos = []; 
+        let foods = []; 
+        let direction = 'right'; 
+        let nextDirection = 'right'; 
+        let gameStarted = false;
+        let gamePaused = false;
+        let currentScore = 0;
+        let highScore = 0;
+        let currentWordData = null; 
+        let currentWordDatabase = []; 
+
+        // 設置選項 
+        const LEVELS = [1, 2, 3, 4, 5, 6];
+        const UNITS_PER_LEVEL = 10; // 假設每個 Level 檔案中包含 Unit 1 到 10 的數據
+
+        // 平滑移動相關
+        const MOVE_DURATION = 150; 
+        let lastTime = 0;
+        let moveProgress = 0; 
+
+        // 計時器相關
+        let totalTimeSeconds = 600; 
+        let remainingTime = totalTimeSeconds;
+        let timerInterval = null;
+
+        // UI 元素
+        const scoreEl = document.getElementById('current-score');
+        const highEl = document.getElementById('high-score');
+        const lengthEl = document.getElementById('snake-length');
+        const wordEl = document.getElementById('current-word');
+        const meaningEl = document.getElementById('question-meaning');
+        const timerDisplay = document.getElementById('timer-display');
+        const timeButtons = document.querySelector('.time-buttons');
+        const pauseBtn = document.getElementById('pause');
+        const resumeBtn = document.getElementById('resume');
+        const endBtn = document.getElementById('end-game-btn');
+        const levelSelect = document.getElementById('level-select');
+        const unitSelect = document.getElementById('unit-select');
+        const setupScreen = document.getElementById('setup-screen');
+        const gameContainer = document.getElementById('game-container');
+
+
+        // ====== 輔助函數：數據載入與處理 ======
+
+        /**
+         * 通用 CSV 解析器 
+         */
+        function parseCSV(csv) {
+            const lines = csv.split('\n').filter(line => line.trim() !== '');
+            if (lines.length < 2) return [];
+
+            // 假設 CSV 文件中標頭為：Level, Unit, No., Word, POS, Chinese Meaning
+            // 這裡使用通用的分隔符號處理，但假設是逗號 (,)
+            const headers = lines[0].split(',').map(h => h.trim()); 
+            const data = [];
+
+            const unitIndex = headers.findIndex(h => h.toLowerCase() === 'unit');
+            const wordIndex = headers.findIndex(h => h.toLowerCase() === 'word');
+            const posIndex = headers.findIndex(h => h.toLowerCase() === 'pos');
+            const chineseIndex = headers.findIndex(h => h.toLowerCase() === 'chinese meaning');
+            
+            if (unitIndex === -1 || wordIndex === -1 || chineseIndex === -1) {
+                console.error("CSV 格式錯誤：缺少關鍵欄位 (Unit, Word, Chinese Meaning)。請確保標頭準確。");
+                return [];
+            }
+
+            for (let i = 1; i < lines.length; i++) {
+                // 簡易處理，可能不適用於包含逗號的字串
+                const values = lines[i].split(',').map(v => v.trim()); 
+                if (values.length >= headers.length) {
+                    data.push({
+                        unit: parseInt(values[unitIndex], 10), 
+                        word: values[wordIndex],
+                        pos: values[posIndex],
+                        chinese: values[chineseIndex],
+                    });
+                }
+            }
+            return data;
+        }
+
+        /**
+         * 載入單字數據 (使用您的 GitHub Pages URL)
+         */
+        async function fetchWordData(level) {
+            const filename = `level${level}.csv`;
+            // 修正 URL 到您提供的路徑
+            const url = `https://ducj-creator.github.io/iVocab-Self-Practice/${filename}`; 
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP 錯誤! 狀態: ${response.status}`);
+                }
+                const csvText = await response.text();
+                const rawData = parseCSV(csvText); 
+                
+                return rawData;
+
+            } catch (error) {
+                console.error(`載入 Level ${level} 數據時發生錯誤:`, error);
+                alert(`無法載入 Level ${level} 數據。請檢查網路連線或 CSV 檔案路徑/格式。`);
+                return [];
+            }
+        }
+
+        /** * 將原始單字數據轉換為遊戲所需的格式 */
+        function getFoodMeanings(rawData, correctMeaning) {
+            // 獲取所有單字的含義
+            const allMeanings = rawData
+                .map(d => d.chinese.split(';').map(m => m.trim())) 
+                .flat()
+                .filter(m => m !== correctMeaning); 
+            
+            // 去重並打亂
+            const uniqueMeanings = [...new Set(allMeanings)];
+            uniqueMeanings.sort(() => Math.random() - 0.5);
+
+            // 選擇最多 3 個錯誤答案
+            const wrongMeanings = uniqueMeanings.slice(0, 3);
+
+            // 組合正確答案和錯誤答案
+            let finalMeanings = [correctMeaning, ...wrongMeanings];
+
+            // 如果選項不足 4 個，需要填充
+            while (finalMeanings.length < 4) {
+                finalMeanings.push('選項'); // 填充通用選項
+            }
+            
+            return finalMeanings.slice(0, 4); 
+        }
+
+        /** 產生新的題目 */
+        function newQuestion() {
+            if (currentWordDatabase.length === 0) return null;
+
+            const randomIndex = Math.floor(Math.random() * currentWordDatabase.length);
+            const rawWord = currentWordDatabase[randomIndex];
+            
+            const correctMeaning = rawWord.chinese.split(';')[0].trim(); 
+            const meanings = getFoodMeanings(currentWordDatabase, correctMeaning);
+
+            currentWordData = {
+                word: rawWord.word, 
+                part: rawWord.pos, 
+                meaning: correctMeaning, 
+                meanings: meanings 
+            };
+            
+            wordEl.textContent = `${currentWordData.word} (${currentWordData.pos})`;
+            meaningEl.textContent = currentWordData.meaning;
+            
+            return currentWordData;
+        }
+
+
+        // ====== 設置畫面控制函數 ======
+
+        function loadLevelOptions() {
+            levelSelect.innerHTML = '<option value="" disabled selected>請選擇 Level</option>';
+            LEVELS.forEach(level => {
+                const option = document.createElement('option');
+                option.value = level;
+                option.textContent = `Level ${level}`;
+                levelSelect.appendChild(option);
+            });
+        }
+
+        function loadUnitOptions(selectedLevel) {
+            unitSelect.innerHTML = '<option value="" disabled selected>請選擇 單元</option>';
+            unitSelect.disabled = true;
+
+            if (selectedLevel) {
+                for (let i = 1; i <= UNITS_PER_LEVEL; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `Unit ${i}`;
+                    unitSelect.appendChild(option);
+                }
+                unitSelect.disabled = false;
+            }
+        }
+
+        // ====== 輔助函數：遊戲邏輯與 UI (完整版) ======
+        
+        function resizeCanvas() {
+            if (!canvas) return;
+            const gameArea = document.getElementById('game-area');
+            const size = Math.min(gameArea.clientWidth, gameArea.clientHeight); 
+            const canvasSize = Math.floor(size / GRID) * GRID;
+            canvas.width = canvasSize;
+            canvas.height = canvasSize;
+            
+            if (gameStarted) {
+                updateSnakeSmoothPos();
+                draw(); 
+            }
+        }
+
+        function getRandomGridPosition() {
+            let x, y;
+            let occupied;
+            do {
+                x = Math.floor(Math.random() * GRID);
+                y = Math.floor(Math.random() * GRID);
+                
+                occupied = snakeGrid.some(p => p.x === x && p.y === y) ||
+                           foods.some(f => f.x === x && f.y === y);
+            } while (occupied);
+            return { x, y };
+        }
+
+        function genFoods(correctMeaning) {
+            foods = [];
+            const meanings = currentWordData.meanings;
+            
+            // 確保生成食物的位置互不重疊
+            for (let i = 0; i < meanings.length; i++) {
+                const pos = getRandomGridPosition();
+                foods.push({
+                    ...pos,
+                    meaning: meanings[i],
+                    isCorrect: meanings[i] === correctMeaning
+                });
+            }
+        }
+
+        function lerp(start, end, progress) {
+            return start + (end - start) * progress;
+        }
+
+        function updateSnakeSmoothPos() {
+            const sz = canvas.width / GRID;
+            if (snakeGrid.length > 0) {
+                snakePos[0] = {
+                    x: (snakeGrid[0].x + 0.5) * sz,
+                    y: (snakeGrid[0].y + 0.5) * sz
+                };
+                for (let i = 1; i < snakeGrid.length; i++) {
+                    snakePos[i] = {
+                        x: (snakeGrid[i].x + 0.5) * sz,
+                        y: (snakeGrid[i].y + 0.5) * sz
+                    };
+                }
+            } else {
+                snakePos = [];
+            }
+        }
+
+        function updateUI() {
+            scoreEl.textContent = currentScore;
+            highEl.textContent = highScore;
+            lengthEl.textContent = snakeGrid.length;
+            localStorage.setItem('snakeHigh', highScore);
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!gamePaused) {
+                    remainingTime--;
+                    timerDisplay.textContent = formatTime(remainingTime);
+                    if (remainingTime <= 0) {
+                        clearInterval(timerInterval);
+                        endGame(true); 
+                    }
+                }
+            }, 1000);
+        }
+
+        function endGame(timeOut = false) {
+            if (!gameStarted) return;
+            gameStarted = false;
+            clearInterval(timerInterval);
+            cancelAnimationFrame(gameLoop);
+            
+            highScore = Math.max(highScore, currentScore);
+            updateUI();
+            
+            alert(timeOut ? `時間到！遊戲結束。最終得分: ${currentScore}` : `遊戲結束！最終得分: ${currentScore}`);
+            
+            setupScreen.style.display = 'flex';
+            gameContainer.style.display = 'none';
+        }
+
+
+        function draw() {
+            if (!ctx || !canvas) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height); 
+            const sz = canvas.width / GRID;
+
+            // 繪製食物
+            foods.forEach(food => {
+                ctx.fillStyle = food.isCorrect ? '#db504a' : '#576a77'; 
+                
+                const x = (food.x + 0.5) * sz;
+                const y = (food.y + 0.5) * sz;
+                const r = sz / 2 * 0.4; 
+                
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 繪製文字 (含義)
+                ctx.fillStyle = '#444';
+                ctx.font = `${sz * 0.3}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(food.meaning, x, y + sz * 0.4); 
+            });
+
+            // 繪製蛇
+            if (snakePos.length > 0) {
+                // 繪製蛇頭 (使用平滑位置 snakePos[0])
+                ctx.fillStyle = '#659c44'; 
+                const headPos = snakePos[0];
+                const r = sz / 2 * 0.9; 
+
+                ctx.beginPath();
+                ctx.arc(headPos.x, headPos.y, r, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 繪製蛇身 
+                ctx.fillStyle = '#8bc34a'; 
+                for (let i = 1; i < snakePos.length; i++) {
+                    const bodyPos = snakePos[i];
+                    
+                    ctx.beginPath();
+                    ctx.arc(bodyPos.x, bodyPos.y, r * 0.9, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        function checkCollision(head) {
+            // 邊界碰撞
+            if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID) {
+                return true; 
+            }
+
+            // 身體碰撞 
+            for (let i = 1; i < snakeGrid.length; i++) {
+                if (head.x === snakeGrid[i].x && head.y === snakeGrid[i].y) {
+                    return true; 
+                }
+            }
+
+            // 食物碰撞
+            const foodIndex = foods.findIndex(f => f.x === head.x && f.y === head.y);
+            if (foodIndex !== -1) {
+                const eatenFood = foods[foodIndex];
+                
+                if (eatenFood.isCorrect) {
+                    currentScore += 10;
+                    const q = newQuestion(); 
+                    if (q) genFoods(q.meaning);
+                } else {
+                    if (snakeGrid.length > 1) {
+                        snakeGrid.pop(); 
+                    } else {
+                        return true; 
+                    }
+                    
+                    const q = currentWordData; 
+                    if (q) genFoods(q.meaning);
+                }
+                
+                updateUI();
+                return false;
+            }
+
+            return false; 
+        }
+
+
+        function gameLoop(currentTime) {
+            if (!gameStarted || gamePaused) {
+                lastTime = currentTime;
+                requestAnimationFrame(gameLoop);
+                return;
+            }
+
+            const deltaTime = currentTime - lastTime;
+            moveProgress = Math.min(1, deltaTime / MOVE_DURATION);
+
+            if (snakeGrid.length > 0) {
+                const headGrid = snakeGrid[0];
+                
+                let targetX = headGrid.x;
+                let targetY = headGrid.y;
+
+                switch (direction) {
+                    case 'up': targetY -= 1; break;
+                    case 'down': targetY += 1; break;
+                    case 'left': targetX -= 1; break;
+                    case 'right': targetX += 1; break;
+                }
+
+                const sz = canvas.width / GRID;
+                const tx = (targetX + 0.5) * sz;
+                const ty = (targetY + 0.5) * sz;
+                
+                const currentX = snakePos[0]?.x || (headGrid.x + 0.5) * sz;
+                const currentY = snakePos[0]?.y || (headGrid.y + 0.5) * sz;
+
+                snakePos[0] = { 
+                    x: lerp(currentX, tx, moveProgress), 
+                    y: lerp(currentY, ty, moveProgress) 
+                };
+                
+                draw();
+            }
+
+            if (moveProgress >= 1) {
+                
+                direction = nextDirection;
+
+                const head = { ...snakeGrid[0] };
+                switch (direction) {
+                    case 'up': head.y -= 1; break;
+                    case 'down': head.y += 1; break;
+                    case 'left': head.x -= 1; break;
+                    case 'right': head.x += 1; break;
+                }
+
+                if (checkCollision(head)) {
+                    endGame(false);
+                    return;
+                }
+
+                snakeGrid.unshift(head); 
+                if (snakeGrid.length > currentScore + 1) {
+                    snakeGrid.pop(); 
+                }
+                
+                lastTime = currentTime;
+                moveProgress = 0;
+                
+                updateSnakeSmoothPos(); 
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function startGame() {
+            if (!ctx) return; 
+
+            currentScore = 0;
+            remainingTime = totalTimeSeconds;
+            
+            snakeGrid = [{ x: Math.floor(GRID / 2), y: Math.floor(GRID / 2) }];
+            
+            resizeCanvas();
+            updateSnakeSmoothPos(); 
+
+            direction = 'right';
+            nextDirection = 'right';
+            moveProgress = 0;
+            
+            const q = newQuestion();
+            if (!q) {
+                alert("單元內沒有單字，無法開始遊戲。");
+                setupScreen.style.display = 'flex';
+                gameContainer.style.display = 'none';
+                return;
+            }
+            genFoods(q.meaning);
+            
+            timerDisplay.textContent = formatTime(remainingTime);
+            updateUI();
+            
+            gameStarted = true;
+            gamePaused = false;
+            
+            pauseBtn.style.display = 'block';
+            resumeBtn.style.display = 'none';
+            endBtn.style.display = 'block';
+
+            startTimer();
+            
+            draw(); 
+            
+            lastTime = performance.now(); 
+            requestAnimationFrame(gameLoop);
+        }
+
+
+        // ====== 事件監聽器 ======
+
+        window.addEventListener('resize', resizeCanvas);
+
+        levelSelect.addEventListener('change', (e) => {
+            loadUnitOptions(e.target.value);
+        });
+
+        // 點擊 "開始遊戲"
+        document.getElementById('start-game-btn').addEventListener('click', async () => {
+            const selectedLevel = parseInt(levelSelect.value, 10);
+            const selectedUnit = parseInt(unitSelect.value, 10);
+            
+            if (isNaN(selectedLevel) || isNaN(selectedUnit)) {
+                alert("請先選擇 Level 和單元！");
+                return;
+            }
+            
+            const rawData = await fetchWordData(selectedLevel);
+            
+            // 篩選數據: 假設 CSV 中的 'unit' 欄位是數字
+            currentWordDatabase = rawData.filter(d => d.unit === selectedUnit);
+
+            if (currentWordDatabase.length === 0) {
+                alert(`所選的 Level: ${selectedLevel}, 單元: ${selectedUnit} 沒有單字或單元篩選失敗。請檢查 CSV 文件的 'Unit' 欄位。`);
+                return;
+            }
+            
+            setupScreen.style.display = 'none';
+            gameContainer.style.display = 'flex';
+            startGame();
+        });
+
+        // 時間按鈕選擇
+        timeButtons.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                document.querySelectorAll('.time-buttons button').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                const timeStr = e.target.dataset.time;
+                if (timeStr === '5m') totalTimeSeconds = 300;
+                else if (timeStr === '10m') totalTimeSeconds = 600;
+                else if (timeStr === '15m') totalTimeSeconds = 900;
+                
+                remainingTime = totalTimeSeconds;
+                if (!gameStarted) {
+                    timerDisplay.textContent = formatTime(remainingTime);
+                }
+            }
+        });
+
+        // 暫停/繼續按鈕
+        pauseBtn.addEventListener('click', () => {
+            gamePaused = true;
+            pauseBtn.style.display = 'none';
+            resumeBtn.style.display = 'block';
+        });
+
+        resumeBtn.addEventListener('click', () => {
+            gamePaused = false;
+            pauseBtn.style.display = 'block';
+            resumeBtn.style.display = 'none';
+            lastTime = performance.now(); 
+        });
+
+        // 結束遊戲按鈕
+        endBtn.addEventListener('click', () => {
+            if (confirm('確定要結束本局遊戲嗎？')) {
+                endGame(false);
+            }
+        });
+
+        // 方向控制 (鍵盤)
+        document.addEventListener('keydown', (e) => {
+            if (!gameStarted || gamePaused) return;
+
+            const key = e.key.toLowerCase();
+            let newDir = null;
+
+            if ((key === 'arrowup' || key === 'w') && direction !== 'down') newDir = 'up';
+            else if ((key === 'arrowdown' || key === 's') && direction !== 'up') newDir = 'down';
+            else if ((key === 'arrowleft' || key === 'a') && direction !== 'right') newDir = 'left';
+            else if ((key === 'arrowright' || key === 'd') && direction !== 'left') newDir = 'right';
+
+            if (newDir) {
+                nextDirection = newDir;
+                e.preventDefault(); 
+            }
+        });
+
+        // 方向控制 (UI 按鈕)
+        document.getElementById('controls').addEventListener('click', (e) => {
+            if (!gameStarted || gamePaused) return;
+            if (e.target.tagName !== 'BUTTON') return;
+            
+            const id = e.target.id;
+            let newDir = null;
+            
+            if (id === 'up' && direction !== 'down') newDir = 'up';
+            else if (id === 'down' && direction !== 'up') newDir = 'down';
+            else if (id === 'left' && direction !== 'right') newDir = 'left';
+            else if (id === 'right' && direction !== 'left') newDir = 'right';
+
+            if (newDir) {
+                nextDirection = newDir;
+            }
+        });
+
+
+        // ====== 初始設置 ======
+        window.onload = () => {
+            loadLevelOptions(); 
+            loadUnitOptions(null); 
+
+            // 載入高分
+            const storedHigh = localStorage.getItem('snakeHigh');
+            if (storedHigh) {
+                highScore = parseInt(storedHigh, 10);
+                highEl.textContent = highScore;
+            }
+            
+            if (gameContainer.style.display !== 'none') {
+                resizeCanvas();
+            }
+            
+            timerDisplay.textContent = formatTime(totalTimeSeconds);
+        };
+    </script>
 </body>
 </html>
