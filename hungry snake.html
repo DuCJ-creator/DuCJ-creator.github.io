@@ -8,7 +8,7 @@
   :root{
     --ink:#5A4A42; --paper:#F0EDE5; --frame:#A89F94; --olive:#A8B7A5; --tan:#B7AFA1;
     --head:#D8A8A8; --head-stroke:#B78A8A; --body:#A8B7A5; --body-stroke:#8C9D8A;
-    --ui-scale:1; /* 依裝置調整 */
+    --ui-scale:1;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -20,18 +20,21 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  overflow-x:hidden;           /* 只鎖水平捲動 */
-  overflow-y:auto;             /* 垂直可以捲 */
+  overflow-x:hidden;
+  overflow-y:auto;
   padding:calc(env(safe-area-inset-top)) calc(env(safe-area-inset-right)) calc(env(safe-area-inset-bottom)) calc(env(safe-area-inset-left));
   -webkit-user-select:none;
   user-select:none;
   touch-action:manipulation;
 }
 
-
   .game-container{display:flex;width:min(95vw,1200px);height:min(84vh,900px);gap:calc(12px*var(--ui-scale))}
   .game-area{flex:1;position:relative;aspect-ratio:1/1;max-height:100%;display:flex;justify-content:center;align-items:center}
-  #game-board{border:3px solid var(--frame);border-radius:10px;background:var(--paper);width:100%;height:100%}
+  #game-board, #fx-layer{
+    border:3px solid var(--frame);border-radius:10px;background:var(--paper);width:100%;height:100%;
+    will-change: transform;
+    transform: translateZ(0);
+  }
   #fx-layer{position:absolute;inset:0;pointer-events:none}
 
   .right-panel{
@@ -69,37 +72,29 @@
   .resume-btn{background:var(--tan);color:var(--ink);padding:calc(10px*var(--ui-scale)) calc(20px*var(--ui-scale));
     border:none;border-radius:12px;font-size:calc(16px*var(--ui-scale));cursor:pointer;margin-top:auto;display:none}
 
-  /* --- Desktop: 寬 >= 1024 --- */
   @media (min-width:1024px){
     body.is-desktop{--ui-scale:1}
     .touch-controls .control-btn.up,
     .touch-controls .control-btn.left,
     .touch-controls .control-btn.right,
-    .touch-controls .control-btn.down{display:none} /* 桌機用鍵盤 */
+    .touch-controls .control-btn.down{display:none}
   }
-
-  /* --- Tablet: 600–1023 --- */
   @media (min-width:600px) and (max-width:1023.98px){
     body.is-tablet{--ui-scale:1.1}
     .right-panel{width:calc(220px*var(--ui-scale))}
     .time-selector{justify-content:space-between}
   }
-
-  /* --- Phone: < 600 --- */
-@media (max-width:599.98px){
-  body.is-phone{--ui-scale:1.25}
-  .game-container{
-    flex-direction:column;
-    align-items:center;
-    height:auto;                      /* 讓內容可以變高 */
-    min-height:calc(100vh - 16px);    /* 至少跟螢幕一樣高 */
+  @media (max-width:599.98px){
+    body.is-phone{--ui-scale:1.25}
+    .game-container{
+      flex-direction:column;
+      align-items:center;
+      height:auto;
+      min-height:calc(100vh - 16px);
+    }
+    .right-panel{width:100%;height:auto}
   }
-  .right-panel{width:100%;height:auto}
-  ...
-}
 
-
-  /* 減少動畫偏好 → 降低 FX */
   @media (prefers-reduced-motion:reduce){
     body{scroll-behavior:auto}
   }
@@ -176,7 +171,7 @@
     </div>
     <details style="margin-top:8px">
       <summary class="muted">CSV sources</summary>
-      <small>Level 1–6: ducj-creator.github.io/iVocab-Self-Practice/levelX.csv</small>
+      <small>Level 1–6: raw.githubusercontent.com/DuCJ-creator/iVocab-Self-Practice/main/levelX.csv</small>
     </details>
   </div>
 </div>
@@ -212,7 +207,7 @@
 </audio>
 
 <script>
-/* ---------------- Device profile & DPR canvas ---------------- */
+/* ---------------- Device profile ---------------- */
 const device = (() => {
   const isTouch = matchMedia("(pointer:coarse)").matches || 'ontouchstart' in window;
   const width = Math.min(screen.width, window.innerWidth);
@@ -223,14 +218,14 @@ document.body.classList.add(`is-${device.type}`);
 const hintEl = document.getElementById('hint');
 hintEl.textContent = device.isTouch ? "Tip: swipe on the board or use the on-screen arrows." : "Tip: use arrow keys or WASD. Space = Pause/Resume";
 
-/* ---------------- CSV loader (Level + Unit Range) ---------------- */
+/* ---------------- CSV loader ---------------- */
 const LEVEL_CSVS = {
-  1:"https://ducj-creator.github.io/iVocab-Self-Practice/level1.csv",
-  2:"https://ducj-creator.github.io/iVocab-Self-Practice/level2.csv",
-  3:"https://ducj-creator.github.io/iVocab-Self-Practice/level3.csv",
-  4:"https://ducj-creator.github.io/iVocab-Self-Practice/level4.csv",
-  5:"https://ducj-creator.github.io/iVocab-Self-Practice/level5.csv",
-  6:"https://ducj-creator.github.io/iVocab-Self-Practice/level6.csv",
+  1: "https://raw.githubusercontent.com/DuCJ-creator/iVocab-Self-Practice/main/level1.csv",
+  2: "https://raw.githubusercontent.com/DuCJ-creator/iVocab-Self-Practice/main/level2.csv",
+  3: "https://raw.githubusercontent.com/DuCJ-creator/iVocab-Self-Practice/main/level3.csv",
+  4: "https://raw.githubusercontent.com/DuCJ-creator/iVocab-Self-Practice/main/level4.csv",
+  5: "https://raw.githubusercontent.com/DuCJ-creator/iVocab-Self-Practice/main/level5.csv",
+  6: "https://raw.githubusercontent.com/DuCJ-creator/iVocab-Self-Practice/main/level6.csv",
 };
 const UNIT_RANGES = [[1,5],[6,10],[11,15],[16,20],[21,25],[26,30],[31,35],[36,40],[41,45],[46,50]];
 const loaderBackdrop=document.getElementById("loader-backdrop");
@@ -299,7 +294,7 @@ async function loadWords(){
 }
 loadBtn.addEventListener("click", loadWords);
 
-/* ---------------- Canvas & DPR scaling ---------------- */
+/* ---------------- Canvas ---------------- */
 const board = document.getElementById('game-board');
 const ctx = board.getContext('2d');
 const fxCanvas = document.getElementById('fx-layer');
@@ -308,7 +303,7 @@ const fx = fxCanvas.getContext('2d');
 function resizeCanvas(){
   const parent = board.parentElement;
   const s = Math.min(parent.clientWidth, parent.clientHeight);
-  const dpr = Math.min(window.devicePixelRatio || 1, 2); // 限制 2x，避免手機過大
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
   board.style.width = board.style.height = s+"px";
   board.width = Math.floor(s*dpr); board.height = Math.floor(s*dpr);
   fxCanvas.style.width = fxCanvas.style.height = s+"px";
@@ -318,7 +313,7 @@ function resizeCanvas(){
 }
 addEventListener('resize', resizeCanvas); resizeCanvas();
 
-/* ---------------- Original game (with small tweaks) ---------------- */
+/* ---------------- Game Core ---------------- */
 const startBtn=document.getElementById('start-btn');
 const pauseBtn=document.getElementById('pause-btn');
 const endBtn=document.getElementById('end-btn');
@@ -348,7 +343,9 @@ const sndGameover=document.getElementById('snd-gameover');
 
 const GRID=20;
 let snakeGrid=[], snakePos=[], direction='right', nextDirection='right';
-let moveProgress=0, lastTime=0;
+let moveProgress=0, lastTime=0, lastFrameTime=0;
+const MAX_FPS = device.isTouch ? 45 : 60;
+const FRAME_INTERVAL = 1000 / MAX_FPS;
 let baseTime=180, acceleration=0, maxAcc=0.7;
 let foods=[], score=0, highScore=Number(localStorage.getItem('snakeHighScore')||0);
 let gameStarted=false, gamePaused=false, gameEnded=false;
@@ -463,7 +460,6 @@ function draw(){
     else { ctx.arc(ex1,ey1,sz*0.12,0,Math.PI*2); ctx.arc(ex2,ey2,sz*0.12,0,Math.PI*2); }
     ctx.fill();
   }
-  // bouncing buns（手機上 bounce 幅度略小）
   const bounceScale = device.isTouch ? 0.05 : 0.07;
   foods.forEach(f=>{
     const cx=(f.x+0.5)*sz, cy=(f.y+0.5)*sz;
@@ -481,7 +477,69 @@ function draw(){
   drawFX();
 }
 
-/* ------ Flow ------ */
+/* ------ Home Animation ------ */
+let homeAnimTime = 0;
+function drawHomeAnimation() {
+  if (gameStarted || loaderBackdrop.style.display === 'flex') {
+    return;
+  }
+
+  const sz = board.clientWidth / GRID;
+  const centerX = board.clientWidth / 2;
+  const centerY = board.clientHeight / 2;
+  const time = homeAnimTime++;
+
+  ctx.clearRect(0, 0, board.clientWidth, board.clientHeight);
+  fx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+
+  // 🐍 小蛇游動
+  const snakeOffset = Math.sin(time / 60) * 30;
+  const snakeHeadX = centerX - 60 + snakeOffset;
+  const snakeSegments = [
+    {x: snakeHeadX, y: centerY},
+    {x: snakeHeadX - 20, y: centerY + Math.sin(time/80)*10},
+    {x: snakeHeadX - 40, y: centerY + Math.sin((time-20)/80)*10}
+  ];
+
+  snakeSegments.forEach((seg, i) => {
+    ctx.fillStyle = i === 0 ? '#D8A8A8' : '#A8B7A5';
+    ctx.beginPath();
+    ctx.arc(seg.x, seg.y, sz * 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = i === 0 ? '#B78A8A' : '#8C9D8A';
+    ctx.stroke();
+  });
+
+  // 🍞 旋轉跳動麵包
+  const bunCount = 3;
+  for (let i = 0; i < bunCount; i++) {
+    const angle = (time / 200 + i * 2) % (Math.PI * 2);
+    const radius = 80;
+    const x = centerX + Math.cos(angle) * radius;
+    const y = centerY + Math.sin(angle) * radius + Math.sin(time / 300 + i) * 15;
+    const rotation = (time / 50 + i * 10) % 360;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rotation * Math.PI / 180);
+    ctx.fillStyle = '#D8C4A8';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, sz * 0.7, sz * 0.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#C4B6A0';
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.fillStyle = 'rgba(90,74,66,0.7)';
+  ctx.font = '20px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('Select Level & Unit Range to Start', centerX, centerY + 120);
+
+  requestAnimationFrame(drawHomeAnimation);
+}
+
+/* ------ Flow with Optimized Collision ------ */
 function applyPenaltyAndRefresh(){
   penalty=(penalty||0)+1;
   const cost=penalty*10;
@@ -504,17 +562,27 @@ function moveSnake(){
   }
   direction=nextDirection;
 
-  if(head.x<0||head.x>=GRID||head.y<0||head.y>=GRID||
-     snakeGrid.some((s,i)=>i>0&&s.x===head.x&&s.y===head.y)){
-    if(!invincible && timeLeft>0){ try{sndHit.currentTime=0;sndHit.play();}catch(_){}
-      applyPenaltyAndRefresh(); }
+  // 🚀 優化碰撞檢測：柵格地圖 O(1)
+  const gridMap = Array(GRID).fill().map(() => Array(GRID).fill(false));
+  for (let i = 0; i < snakeGrid.length; i++) {
+    const s = snakeGrid[i];
+    if (s.x >= 0 && s.x < GRID && s.y >= 0 && s.y < GRID) {
+      gridMap[s.x][s.y] = true;
+    }
+  }
+
+  if(head.x<0||head.x>=GRID||head.y<0||head.y>=GRID||gridMap[head.x][head.y]){
+    if(!invincible && timeLeft>0){ 
+      try{sndHit.currentTime=0;sndHit.play();}catch(_){}
+      applyPenaltyAndRefresh(); 
+    }
     return;
   }
 
   snakeGrid.unshift(head);
   const sz=board.clientWidth/GRID;
   const headC={x:(head.x+0.5)*sz, y:(head.y+0.5)*sz};
-  const eatDist = device.isTouch ? sz*1.05 : sz*0.9; // 行動裝置較寬鬆
+  const eatDist = device.isTouch ? sz*1.05 : sz*0.9;
   let ateCorrect=false;
 
   for(let i=0;i<foods.length;i++){
@@ -558,7 +626,18 @@ function showResults(){
 }
 
 function gameLoop(ts){
-  if(!gameStarted||gamePaused||gameEnded){ requestAnimationFrame(gameLoop); return; }
+  if(!gameStarted||gamePaused||gameEnded){ 
+    requestAnimationFrame(gameLoop); 
+    return; 
+  }
+
+  // 🚀 FPS 限制
+  if (ts - lastFrameTime < FRAME_INTERVAL) {
+    requestAnimationFrame(gameLoop);
+    return;
+  }
+  lastFrameTime = ts;
+
   const dt=ts-lastTime; lastTime=ts; globalTime=ts;
   const moveT=baseTime*(1-acceleration*maxAcc);
   moveProgress+=dt/moveT;
@@ -571,12 +650,14 @@ function gameLoop(ts){
                   y: lerp(snakePos[0]?.y||ty, ty, moveProgress) };
     for(let i=1;i<snakeGrid.length;i++) snakePos[i]={ x:(snakeGrid[i].x+0.5)*sz, y:(snakeGrid[i].y+0.5)*sz };
   }
-  draw(); requestAnimationFrame(gameLoop);
+  draw(); 
+  requestAnimationFrame(gameLoop);
 }
 
 /* Start/Pause/End */
 function startGame(){
   if(!wordDatabase.length){ questionEl.textContent="No words loaded. Click “Choose…” first."; return; }
+  gameStarted = true; // 停止 home animation
   snakeGrid=[{x:Math.floor(GRID/2),y:Math.floor(GRID/2)}];
   const sz=board.clientWidth/GRID;
   snakePos=[{x:(snakeGrid[0].x+0.5)*sz,y:(snakeGrid[0].y+0.5)*sz}];
@@ -586,7 +667,8 @@ function startGame(){
   foods=[]; genFoods(q.meaning); ensureFourFoods(); updateUI(); startTime=Date.now();
   clearInterval(timer);
   timer=setInterval(()=>{ if(timeLeft<=0){ clearInterval(timer); gameOver(); } else { timeLeft--; timeEl.textContent=formatTime(timeLeft); } },1000);
-  gameStarted=true; lastTime=performance.now(); requestAnimationFrame(gameLoop);
+  lastTime=performance.now(); 
+  requestAnimationFrame(gameLoop);
   startBtn.style.display='none'; pauseBtn.style.display='flex'; endBtn.style.display='flex'; resumeBtn.style.display='none';
 }
 function togglePause(){
@@ -627,15 +709,15 @@ document.addEventListener('keydown', e=>{
   else if(e.key==='Escape' && gameStarted){ endConfirm(); e.preventDefault(); }
 });
 
-/* Touch gestures（手機/平板優化：更高門檻避免誤觸） */
+/* Touch */
 let tx=0,ty=0,lastSwipe=0;
 board.addEventListener('touchstart', e=>{ if(!device.isTouch) return;
   tx=e.touches[0].clientX; ty=e.touches[0].clientY; e.preventDefault();
 },{passive:false});
 board.addEventListener('touchmove', e=>{ if(!device.isTouch||!gameStarted||gamePaused||gameEnded) return;
   const dx=e.touches[0].clientX-tx, dy=e.touches[0].clientY-ty;
-  const t = Math.max(30, Math.min(60, Math.round(board.clientWidth*0.08))); // 視尺寸調整
-  const now=performance.now(); if(now-lastSwipe<80) return; // 防抖
+  const t = Math.max(30, Math.min(60, Math.round(board.clientWidth*0.08)));
+  const now=performance.now(); if(now-lastSwipe<80) return;
   if(Math.abs(dx)>Math.abs(dy) && Math.abs(dx)>t){
     if(dx>0 && direction!=='left') nextDirection='right';
     else if(dx<0 && direction!=='right') nextDirection='left';
@@ -648,8 +730,8 @@ board.addEventListener('touchmove', e=>{ if(!device.isTouch||!gameStarted||gameP
   e.preventDefault();
 },{passive:false});
 
-/* Initial frame */
-(function animate(t){ globalTime=t||0; draw(); requestAnimationFrame(animate); })();
+/* Start home animation */
+drawHomeAnimation();
 </script>
 </body>
 </html>
