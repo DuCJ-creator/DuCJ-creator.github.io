@@ -434,6 +434,51 @@
             background: #e8b04d;
             color: white;
         }
+
+        /* 手動分組樣式 */
+        .manual-groups-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .manual-group {
+            background: #f5f0eb;
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 4px solid #e8b04d;
+        }
+
+        .manual-group-body {
+            margin-top: 8px;
+            min-height: 40px;
+        }
+
+        .manual-member {
+            padding: 6px 8px;
+            margin-bottom: 6px;
+            background: #ffffff;
+            border-radius: 6px;
+            border: 1px solid #e8d1c5;
+            cursor: move;
+            font-size: 14px;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .manual-member:hover {
+            background: #f3e5d8;
+            transform: translateX(3px);
+        }
+
+        .manual-member.dragging {
+            opacity: 0.6;
+        }
+
+        .manual-group-body.drag-over {
+            outline: 2px dashed #e8b04d;
+            background: rgba(232, 176, 77, 0.05);
+        }
         
         /* 响应式设计优化 */
         @media (max-width: 768px) {
@@ -581,6 +626,42 @@
                 margin-bottom: 10px;
             }
         }
+
+        /* 列印 / 匯出 PDF 樣式 */
+        @media print {
+            body {
+                background: #ffffff !important;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .container {
+                display: none !important; /* 隱藏輸入區 */
+            }
+            
+            .result-container {
+                position: static !important;
+                display: block !important;
+                background: #ffffff !important;
+                padding: 0;
+                width: 100%;
+                height: auto;
+            }
+            
+            .result-content {
+                box-shadow: none !important;
+                border: none !important;
+                max-height: none !important;
+                padding: 20px !important;
+            }
+            
+            .close-btn,
+            #next-btn,
+            #print-btn,
+            .decoration {
+                display: none !important; /* 列印時隱藏控制與裝飾 */
+            }
+        }
     </style>
 </head>
 <body>
@@ -610,6 +691,8 @@
             <button class="option-btn" data-action="group3">分3人組</button>
             <button class="option-btn" data-action="group4">分4人組</button>
             <button class="option-btn" data-action="group5">分5人組</button>
+            <!-- 新增：手動分組 -->
+            <button class="option-btn" data-action="manualGroup">手動分組</button>
         </div>
         
         <button class="action-btn" id="execute-btn">執行</button>
@@ -618,6 +701,9 @@
     <div class="result-container" id="result-container">
         <div class="result-content">
             <button class="close-btn" id="close-btn">×</button>
+            <!-- 新增：匯出 / 列印 PDF 按鈕 -->
+            <button class="back-btn" id="print-btn" style="margin-bottom: 10px;">匯出 / 列印 PDF</button>
+
             <h2 class="result-title" id="result-title">活動名稱</h2>
             <div class="event-date" id="event-date-display">活動日期</div>
             <div id="result-display"></div>
@@ -645,6 +731,7 @@
             const closeBtn = document.getElementById('close-btn');
             const nextBtn = document.getElementById('next-btn');
             const optionButtons = document.querySelectorAll('.option-btn');
+            const printBtn = document.getElementById('print-btn');
             
             let selectedAction = 'sort';
             let participants = [];
@@ -716,6 +803,9 @@
                     case 'group5':
                         performGrouping(5);
                         break;
+                    case 'manualGroup':
+                        startManualGrouping();
+                        break;
                 }
             });
             
@@ -746,6 +836,17 @@
                 } else if (selectedAction === 'original') {
                     showNextParticipant();
                 }
+            });
+
+            // 匯出 / 列印 PDF
+            printBtn.addEventListener('click', function() {
+                const originalTitle = document.title;
+                const eventName = eventNameInput.value.trim();
+                if (eventName) {
+                    document.title = eventName + ' - 分組結果';
+                }
+                window.print();
+                document.title = originalTitle;
             });
             
             // 排序功能
@@ -791,7 +892,7 @@
                 // 重置索引
                 currentParticipantIndex = 0;
                 
-                // 添加点击事件监听 - 修复这里
+                // 添加点击事件监听
                 setTimeout(() => {
                     document.querySelectorAll('.participant-item').forEach(item => {
                         item.addEventListener('click', function() {
@@ -876,7 +977,7 @@
                 }
             }
             
-            // 分组功能
+            // 分组功能（自動分組＋積分）
             function performGrouping(groupSize) {
                 const shuffled = [...participants].sort(() => Math.random() - 0.5);
                 groups = [];
@@ -970,6 +1071,118 @@
                 html += `<p>各組積分: ${groupPoints.map((points, index) => `第${index+1}組(${points}分)`).join(', ')}</p>`;
                 
                 summaryContent.innerHTML = html;
+            }
+
+            // ⭐️ 手動分組：先輸入要分幾組，再拖拉調整
+            function startManualGrouping() {
+                const total = participants.length;
+                let groupCount = prompt(`目前共有 ${total} 人，請輸入要分成幾組（1 ~ ${total}）`);
+                
+                if (groupCount === null) {
+                    return; // 取消
+                }
+                
+                groupCount = parseInt(groupCount, 10);
+                if (isNaN(groupCount) || groupCount <= 0 || groupCount > total) {
+                    alert('請輸入 1 到 ' + total + ' 之間的整數');
+                    return;
+                }
+                
+                // 初始化 groups：先平均分配
+                groups = Array.from({ length: groupCount }, () => []);
+                participants.forEach((name, index) => {
+                    const gIndex = index % groupCount;
+                    groups[gIndex].push(name);
+                });
+                
+                resultTitle.textContent = eventNameInput.value;
+                eventDateDisplay.textContent = `活動日期: ${eventDateInput.value}`;
+                renderManualGroups();
+                progressInfo.textContent = '提示：拖曳名字到其他組即可重新分配。';
+                nextBtn.style.display = 'none';
+                resultContainer.style.display = 'flex';
+            }
+
+            // ⭐️ 重新渲染手動分組畫面（含拖拉事件）
+            function renderManualGroups() {
+                let html = `
+                    <h3 style="margin-bottom: 10px; color: #8c6b5d;">手動分組</h3>
+                    <p style="margin-bottom: 10px; color: #8c6b5d; font-size: 0.9rem;">
+                        把學生姓名拖曳到其他組，就可以重新安排分組。
+                    </p>
+                    <div class="manual-groups-container">
+                `;
+                
+                groups.forEach((group, gIndex) => {
+                    html += `
+                        <div class="manual-group" data-group-index="${gIndex}">
+                            <div class="group-header">
+                                <div class="group-title">第 ${gIndex + 1} 組（${group.length} 人）</div>
+                            </div>
+                            <div class="manual-group-body">
+                                ${group.map((name, index) => `
+                                    <div class="manual-member" draggable="true" data-name="${name}">
+                                        ${index + 1}. ${name}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`;
+                resultDisplay.innerHTML = html;
+                
+                // 加上拖拉事件
+                const memberElements = document.querySelectorAll('.manual-member');
+                const groupBodies = document.querySelectorAll('.manual-group-body');
+                
+                let dragSourceGroupIndex = null;
+                let dragName = null;
+                
+                memberElements.forEach(el => {
+                    el.addEventListener('dragstart', function(e) {
+                        dragSourceGroupIndex = parseInt(e.target.closest('.manual-group').dataset.groupIndex, 10);
+                        dragName = e.target.dataset.name;
+                        e.dataTransfer.effectAllowed = 'move';
+                        e.dataTransfer.setData('text/plain', dragName);
+                        e.target.classList.add('dragging');
+                    });
+                    
+                    el.addEventListener('dragend', function(e) {
+                        e.target.classList.remove('dragging');
+                    });
+                });
+                
+                groupBodies.forEach(body => {
+                    body.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                        body.classList.add('drag-over');
+                    });
+                    
+                    body.addEventListener('dragleave', function() {
+                        body.classList.remove('drag-over');
+                    });
+                    
+                    body.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        body.classList.remove('drag-over');
+                        
+                        const targetGroupIndex = parseInt(body.closest('.manual-group').dataset.groupIndex, 10);
+                        if (dragName == null || dragSourceGroupIndex === null) return;
+                        if (dragSourceGroupIndex === targetGroupIndex) return;
+                        
+                        const fromArr = groups[dragSourceGroupIndex];
+                        const idx = fromArr.indexOf(dragName);
+                        if (idx > -1) {
+                            fromArr.splice(idx, 1);
+                            groups[targetGroupIndex].push(dragName);
+                            // 重新畫面，讓人數/排序更新
+                            renderManualGroups();
+                        }
+                    });
+                });
             }
             
             // 五彩纸屑效果
