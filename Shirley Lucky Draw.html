@@ -325,16 +325,25 @@
         .group-title {
             font-weight: bold;
             color: #8c6b5d;
+            text-align: left;
         }
 
-        .group-name-input {
-            width: 100%;
-            margin-top: 6px;
-            padding: 6px 8px;
-            border-radius: 6px;
-            border: 1px solid #e8d1c5;
-            font-size: 13px;
-            background: #fffdf9;
+        .group-name-editable {
+            display: inline-block;
+            margin-top: 4px;
+            font-size: 0.9rem;
+            padding: 2px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .group-name-editable:hover {
+            background: rgba(232, 176, 77, 0.15);
+        }
+
+        .group-name-placeholder {
+            color: #b0a399;
+            font-style: italic;
         }
         
         .points-summary {
@@ -677,7 +686,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Shirley's Name/Group Picker 姓名／分組抽選器</h1>
+        <h1>Shirley's Name/Group Picker 雙語姓名／分組抽選器</h1>
         
         <div class="form-group">
             <label for="event-name">活動名稱 Activity Name</label>
@@ -702,7 +711,6 @@
             <button class="option-btn" data-action="group3">分3人組 Group of 3</button>
             <button class="option-btn" data-action="group4">分4人組 Group of 4</button>
             <button class="option-btn" data-action="group5">分5人組 Group of 5</button>
-            <!-- 手動分組 -->
             <button class="option-btn" data-action="manualGroup">手動分組 Manual Grouping</button>
         </div>
         
@@ -752,7 +760,7 @@
             let isHighlighting = false;
             let currentParticipantIndex = 0;
 
-            // ★ 自動分組與手動分組的組名資料
+            // ★ 組名設定（自動＋手動）
             const teamNames = [
                 { en: "Angry Alpacas", zh: "憤怒的羊駝" },
                 { en: "Blonde Baboons", zh: "金色的狒狒" },
@@ -782,9 +790,16 @@
                 { en: "Zapping Zebras", zh: "快速移動的斑馬" }
             ];
 
-            let currentGroupNames = [];   // 自動分組用：每組的 team name（或 null）
-            let manualGroupNames = [];    // 手動分組用：每組team資料，內含預設與自訂名稱
-            
+            let currentGroupingMode = null;       // 'auto' 或 'manual'
+            let autoGroupNamesText = [];          // 自動分組用：字串組名
+            let manualGroupNamesText = [];        // 手動分組用：字串組名
+
+            function buildTeamNameString(team) {
+                if (!team) return '';
+                if (team.en && team.zh) return `${team.en} / ${team.zh}`;
+                return team.en || team.zh || '';
+            }
+
             // 設定預設日期為今天
             const today = new Date().toISOString().split('T')[0];
             eventDateInput.value = today;
@@ -801,7 +816,6 @@
             // 執行按鈕
             executeBtn.addEventListener('click', function() {
                 const eventName = eventNameInput.value.trim();
-                const eventDate = eventDateInput.value;
                 const participantsText = participantsTextarea.value.trim();
                 
                 if (!eventName) {
@@ -823,7 +837,6 @@
                     return;
                 }
                 
-                // 根據選擇的功能執行操作
                 switch(selectedAction) {
                     case 'sort':
                         performSort();
@@ -881,7 +894,7 @@
                 }
             });
 
-            // 匯出 / 列印 PDF
+            // 匯出 / 列印
             printBtn.addEventListener('click', function() {
                 const originalTitle = document.title;
                 const eventName = eventNameInput.value.trim();
@@ -892,7 +905,7 @@
                 document.title = originalTitle;
             });
             
-            // 排序功能
+            // 排序
             function performSort() {
                 const sorted = [...participants].sort();
                 resultTitle.textContent = eventNameInput.value;
@@ -965,7 +978,6 @@
                 triggerConfetti();
             }
             
-            // 顯示下一位
             function showNextParticipant() {
                 currentParticipantIndex++;
                 if (currentParticipantIndex >= participants.length) {
@@ -974,7 +986,7 @@
                 highlightParticipant(participants[currentParticipantIndex]);
             }
             
-            // 開始幸運抽獎
+            // 幸運抽獎
             function startLuckyDraw() {
                 remainingParticipants = [...participants];
                 usedParticipants = [];
@@ -986,7 +998,6 @@
                 drawNextLucky();
             }
             
-            // 抽下一位幸運者
             function drawNextLucky() {
                 if (remainingParticipants.length === 0) {
                     alert('所有參與者都已經被抽取過了！/ All participants have already been drawn!');
@@ -1010,7 +1021,7 @@
                 }
             }
             
-            // 分組功能（自動分組 + 積分 + 組名）
+            // 自動分組
             function performGrouping(groupSize) {
                 const shuffled = [...participants].sort(() => Math.random() - 0.5);
                 groups = [];
@@ -1021,14 +1032,16 @@
                 
                 groupPoints = Array(groups.length).fill(0);
 
-                // ★ 為每組指定隨機組名（最多 26 組），超過則為 null
+                // 隨機指派組名（最多 26 組）
                 const shuffledTeamNames = [...teamNames].sort(() => Math.random() - 0.5);
-                currentGroupNames = groups.map((_, index) => {
+                autoGroupNamesText = groups.map((_, index) => {
                     if (index < shuffledTeamNames.length) {
-                        return shuffledTeamNames[index];
+                        return buildTeamNameString(shuffledTeamNames[index]);
                     }
-                    return null; // 超過 26 組就沒有組名
+                    return '';
                 });
+                
+                currentGroupingMode = 'auto';
                 
                 resultTitle.textContent = eventNameInput.value;
                 eventDateDisplay.textContent = `活動日期 Date: ${eventDateInput.value}`;
@@ -1039,7 +1052,7 @@
                 resultContainer.style.display = 'flex';
             }
             
-            // 顯示分組＋積分＋組名
+            // 自動分組畫面（含積分與組名）
             function displayGroupsWithPoints(groupSize) {
                 let html = `
                     <h3 style="margin-bottom: 20px; color: #8c6b5d;">分${groupSize}人組 Groups of ${groupSize}</h3>
@@ -1047,16 +1060,16 @@
                 `;
                 
                 groups.forEach((group, index) => {
-                    const team = currentGroupNames[index];
-                    let teamLabel = '';
-                    if (team && (team.en || team.zh)) {
-                        teamLabel = ` - ${team.en || ''} ${team.zh || ''}`.trim();
-                    }
+                    const nameText = autoGroupNamesText[index] || '';
+                    const hasName = nameText.trim() !== '';
                     html += `
                         <div style="margin-bottom: 15px; padding: 15px; background: #f5f0eb; border-radius: 8px; border-left: 4px solid #e8b04d;">
                             <div class="group-header">
                                 <div class="group-title">
-                                    第 ${index + 1} 組 Group ${index + 1}${teamLabel ? ' ' + teamLabel : ''}
+                                    第 ${index + 1} 組 Group ${index + 1}<br>
+                                    <span class="group-name-editable ${hasName ? '' : 'group-name-placeholder'}" data-group-index="${index}">
+                                        ${hasName ? nameText : '點擊設定組名 Click to set name'}
+                                    </span>
                                 </div>
                                 <div class="points-control">
                                     <button class="points-btn" onclick="updatePoints(${index}, -1)">-</button>
@@ -1080,40 +1093,10 @@
                 
                 resultDisplay.innerHTML = html;
                 updatePointsSummary();
-            }
-            
-            // 更新積分
-            window.updatePoints = function(groupIndex, change) {
-                groupPoints[groupIndex] += change;
-                
-                const pointsDisplay = document.querySelectorAll('.points-display')[groupIndex];
-                if (pointsDisplay) {
-                    pointsDisplay.textContent = groupPoints[groupIndex];
-                }
-                
-                updatePointsSummary();
-            };
-            
-            // 更新積分總結
-            function updatePointsSummary() {
-                const summaryContent = document.getElementById('points-summary-content');
-                if (!summaryContent) return;
-                
-                let html = '';
-                
-                const maxPoints = Math.max(...groupPoints);
-                const leadingGroups = groupPoints.reduce((acc, points, index) => {
-                    if (points === maxPoints) acc.push(index + 1);
-                    return acc;
-                }, []);
-                
-                html += `<p>目前領先 Leading: 第 ${leadingGroups.join(', ')} 組 Group(s) (${maxPoints} 分 points)</p>`;
-                html += `<p>各組積分 Group scores: ${groupPoints.map((points, index) => `第${index+1}組 Group ${index+1} (${points} 分 points)`).join(', ')}</p>`;
-                
-                summaryContent.innerHTML = html;
+                attachGroupNameEditors(); // ★ 自動分組組名可點擊編輯
             }
 
-            // ⭐ 手動分組：自動分配＋隨機組名＋可手動輸入組名
+            // 手動分組
             function startManualGrouping() {
                 const total = participants.length;
                 let groupCount = prompt(
@@ -1121,9 +1104,7 @@
                     `There are currently ${total} participants.\nPlease enter how many groups you want (1 ~ ${total}).`
                 );
                 
-                if (groupCount === null) {
-                    return;
-                }
+                if (groupCount === null) return;
                 
                 groupCount = parseInt(groupCount, 10);
                 if (isNaN(groupCount) || groupCount <= 0 || groupCount > total) {
@@ -1131,22 +1112,22 @@
                     return;
                 }
                 
-                // 平均分配到各組
                 groups = Array.from({ length: groupCount }, () => []);
                 participants.forEach((name, index) => {
                     const gIndex = index % groupCount;
                     groups[gIndex].push(name);
                 });
 
-                // ★ 為手動分組設定預設組名（同樣從 26 個中隨機選）
+                // 隨機指派組名
                 const shuffledTeamNames = [...teamNames].sort(() => Math.random() - 0.5);
-                manualGroupNames = groups.map((_, index) => {
+                manualGroupNamesText = groups.map((_, index) => {
                     if (index < shuffledTeamNames.length) {
-                        // 保留預設 en/zh，另外可以放自訂名稱 custom
-                        return { ...shuffledTeamNames[index], custom: '' };
+                        return buildTeamNameString(shuffledTeamNames[index]);
                     }
-                    return { en: '', zh: '', custom: '' };
+                    return '';
                 });
+
+                currentGroupingMode = 'manual';
                 
                 resultTitle.textContent = eventNameInput.value;
                 eventDateDisplay.textContent = `活動日期 Date: ${eventDateInput.value}`;
@@ -1156,7 +1137,7 @@
                 resultContainer.style.display = 'flex';
             }
 
-            // ⭐ 重新渲染手動分組畫面（含拖拉事件與組名輸入）
+            // 手動分組畫面（拖曳＋組名可點擊修改）
             function renderManualGroups() {
                 let html = `
                     <h3 style="margin-bottom: 10px; color: #8c6b5d;">手動分組 Manual Grouping</h3>
@@ -1168,29 +1149,19 @@
                 `;
                 
                 groups.forEach((group, gIndex) => {
-                    const nameObj = manualGroupNames[gIndex] || {};
-                    let displayValue = '';
-                    if (nameObj.custom && nameObj.custom.trim() !== '') {
-                        displayValue = nameObj.custom.trim();
-                    } else if (nameObj.en || nameObj.zh) {
-                        displayValue = `${nameObj.en || ''}${(nameObj.en && nameObj.zh) ? ' / ' : ''}${nameObj.zh || ''}`;
-                    }
+                    const nameText = (manualGroupNamesText[gIndex] || '').trim();
+                    const hasName = nameText !== '';
                     
                     html += `
                         <div class="manual-group" data-group-index="${gIndex}">
                             <div class="group-header">
                                 <div class="group-title">
-                                    第 ${gIndex + 1} 組 Group ${gIndex + 1}
-                                    ${displayValue ? `<br><span style="font-size: 0.85rem;">${displayValue}</span>` : ''}
+                                    第 ${gIndex + 1} 組 Group ${gIndex + 1}<br>
+                                    <span class="group-name-editable ${hasName ? '' : 'group-name-placeholder'}" data-group-index="${gIndex}">
+                                        ${hasName ? nameText : '點擊設定組名 Click to set name'}
+                                    </span>
                                 </div>
                             </div>
-                            <input
-                                type="text"
-                                class="group-name-input"
-                                data-group-index="${gIndex}"
-                                value="${displayValue || ''}"
-                                placeholder="輸入組名 Enter team name (optional)"
-                            >
                             <div class="manual-group-body">
                                 ${group.map((name, index) => `
                                     <div class="manual-member" draggable="true" data-name="${name}">
@@ -1207,23 +1178,10 @@
                 
                 const memberElements = document.querySelectorAll('.manual-member');
                 const groupBodies = document.querySelectorAll('.manual-group-body');
-                const nameInputs = document.querySelectorAll('.group-name-input');
                 
                 let dragSourceGroupIndex = null;
                 let dragName = null;
                 
-                // 組名輸入：更新 manualGroupNames 的 custom
-                nameInputs.forEach(input => {
-                    input.addEventListener('input', function() {
-                        const idx = parseInt(this.dataset.groupIndex, 10);
-                        if (!manualGroupNames[idx]) {
-                            manualGroupNames[idx] = { en: '', zh: '', custom: '' };
-                        }
-                        manualGroupNames[idx].custom = this.value;
-                    });
-                });
-
-                // 拖拉事件
                 memberElements.forEach(el => {
                     el.addEventListener('dragstart', function(e) {
                         dragSourceGroupIndex = parseInt(e.target.closest('.manual-group').dataset.groupIndex, 10);
@@ -1262,13 +1220,76 @@
                         if (idx > -1) {
                             fromArr.splice(idx, 1);
                             groups[targetGroupIndex].push(dragName);
-                            renderManualGroups(); // 重新渲染更新順序與編號
+                            renderManualGroups(); // 重新渲染更新順序
+                        }
+                    });
+                });
+
+                attachGroupNameEditors(); // ★ 手動分組組名可點擊修改
+            }
+
+            // 組名點擊編輯（自動＋手動共用）
+            function attachGroupNameEditors() {
+                const spans = document.querySelectorAll('.group-name-editable');
+                spans.forEach(span => {
+                    span.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.groupIndex, 10);
+                        let currentName = '';
+                        if (currentGroupingMode === 'auto') {
+                            currentName = autoGroupNamesText[idx] || '';
+                        } else if (currentGroupingMode === 'manual') {
+                            currentName = manualGroupNamesText[idx] || '';
+                        }
+                        const newName = prompt('請輸入組名 / Please enter team name:', currentName);
+                        if (newName === null) return; // 取消
+                        const trimmed = newName.trim();
+                        if (currentGroupingMode === 'auto') {
+                            autoGroupNamesText[idx] = trimmed;
+                        } else if (currentGroupingMode === 'manual') {
+                            manualGroupNamesText[idx] = trimmed;
+                        }
+                        if (trimmed === '') {
+                            this.textContent = '點擊設定組名 Click to set name';
+                            this.classList.add('group-name-placeholder');
+                        } else {
+                            this.textContent = trimmed;
+                            this.classList.remove('group-name-placeholder');
                         }
                     });
                 });
             }
             
-            // 五彩紙屑效果
+            // 更新積分
+            window.updatePoints = function(groupIndex, change) {
+                groupPoints[groupIndex] += change;
+                
+                const pointsDisplay = document.querySelectorAll('.points-display')[groupIndex];
+                if (pointsDisplay) {
+                    pointsDisplay.textContent = groupPoints[groupIndex];
+                }
+                
+                updatePointsSummary();
+            };
+            
+            function updatePointsSummary() {
+                const summaryContent = document.getElementById('points-summary-content');
+                if (!summaryContent) return;
+                
+                let html = '';
+                
+                const maxPoints = Math.max(...groupPoints);
+                const leadingGroups = groupPoints.reduce((acc, points, index) => {
+                    if (points === maxPoints) acc.push(index + 1);
+                    return acc;
+                }, []);
+                
+                html += `<p>目前領先 Leading: 第 ${leadingGroups.join(', ')} 組 Group(s) (${maxPoints} 分 points)</p>`;
+                html += `<p>各組積分 Group scores: ${groupPoints.map((points, index) => `第${index+1}組 Group ${index+1} (${points} 分 points)`).join(', ')}</p>`;
+                
+                summaryContent.innerHTML = html;
+            }
+            
+            // 五彩紙屑
             function triggerConfetti() {
                 confetti({
                     particleCount: 100,
