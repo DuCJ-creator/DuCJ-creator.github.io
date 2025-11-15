@@ -77,6 +77,21 @@
       color: white;
     }
 
+    #undo-btn {
+      background: #b0bec5;
+      color: #01579b;
+    }
+
+    #note-btn {
+      background: #ffe082;
+      color: #5d4037;
+    }
+
+    #note-btn.active {
+      background: #ffca28;
+      color: #4e342e;
+    }
+
     .sudoku-container {
       margin: 12px 0;
       background: white;
@@ -90,9 +105,9 @@
 
     .grid {
       display: grid;
-      gap: 1px;
       background: #0288d1;
       padding: 2px;
+      gap: 0; /* 配合 cell border 畫線 */
     }
 
     .cell {
@@ -122,6 +137,11 @@
     .cell.selected {
       background: #b3e5fc !important;
       outline: 2px solid #0288d1;
+    }
+
+    .cell.note-cell {
+      font-weight: normal;
+      color: #90a4ae;
     }
 
     .number-pad {
@@ -254,6 +274,8 @@
     <button class="difficulty-btn active" data-size="6">輕鬆 (6×6)</button>
     <button class="difficulty-btn" data-size="9">挑戰 (9×9)</button>
     <button id="reset-btn">重置</button>
+    <button id="undo-btn">撤銷</button>
+    <button id="note-btn">筆記</button>
     <button id="check-btn">完成確認</button>
   </div>
 
@@ -300,6 +322,11 @@
     let selectedCell = null;
     let selectedPos = null;
 
+    // 新增：筆記與撤銷
+    let notes = [];
+    let history = [];
+    let noteMode = false;
+
     // 标准数独区块定义
     const difficulties = {
       4: { boxH: 2, boxW: 2 },
@@ -307,11 +334,25 @@
       9: { boxH: 3, boxW: 3 }
     };
 
+    function updateNoteButtonUI() {
+      const noteBtn = document.getElementById('note-btn');
+      if (noteMode) {
+        noteBtn.classList.add('active');
+        noteBtn.textContent = '筆記中';
+      } else {
+        noteBtn.classList.remove('active');
+        noteBtn.textContent = '筆記';
+      }
+    }
+
     function initGame(size) {
       currentSize = size;
       document.querySelectorAll('.difficulty-btn').forEach(btn => {
         btn.classList.toggle('active', parseInt(btn.dataset.size) === size);
       });
+      history = [];
+      noteMode = false;
+      updateNoteButtonUI();
       generatePuzzle(size);
       renderGrid();
       renderNumberPad();
@@ -322,17 +363,21 @@
       return [...arr].sort(() => Math.random() - 0.5);
     }
 
+    // 修正：檢查時排除目前這一格本身
     function isValid(grid, row, col, num, size) {
       if (num === 0) return true;
       for (let x = 0; x < size; x++) {
-        if (grid[row][x] === num || grid[x][col] === num) return false;
+        if (grid[row][x] === num && x !== col) return false;
+        if (grid[x][col] === num && x !== row) return false;
       }
       const { boxH, boxW } = difficulties[size];
       const startRow = row - (row % boxH);
       const startCol = col - (col % boxW);
       for (let i = 0; i < boxH; i++) {
         for (let j = 0; j < boxW; j++) {
-          if (grid[startRow + i][startCol + j] === num) return false;
+          const r = startRow + i;
+          const c = startCol + j;
+          if (grid[r][c] === num && (r !== row || c !== col)) return false;
         }
       }
       return true;
@@ -357,23 +402,44 @@
       return true;
     }
 
+    // 產題：保證每列、每行至少保留一個提示
     function generatePuzzle(size) {
       solution = Array(size).fill().map(() => Array(size).fill(0));
       solve(solution, size);
       board = solution.map(row => [...row]);
       given = Array(size).fill().map(() => Array(size).fill(true));
 
+      // 初始化筆記
+      notes = Array(size).fill().map(() =>
+        Array(size).fill(null).map(() => new Set())
+      );
+
+      const totalCells = size * size;
       const removeCount = size === 4 ? 8 : (size === 6 ? 14 : 42);
+
       const allCells = [];
       for (let i = 0; i < size; i++)
         for (let j = 0; j < size; j++)
           allCells.push([i, j]);
 
       const shuffled = shuffle(allCells);
-      for (let k = 0; k < removeCount && k < shuffled.length; k++) {
+
+      // 每列每行目前剩餘提示數
+      const rowCount = Array(size).fill(size);
+      const colCount = Array(size).fill(size);
+
+      let removed = 0;
+      for (let k = 0; k < shuffled.length && removed < removeCount; k++) {
         const [i, j] = shuffled[k];
+
+        // 確保不要讓某一列或某一行全空
+        if (rowCount[i] <= 1 || colCount[j] <= 1) continue;
+
         board[i][j] = 0;
         given[i][j] = false;
+        rowCount[i]--;
+        colCount[j]--;
+        removed++;
       }
     }
 
@@ -385,6 +451,10 @@
 
       const containerWidth = Math.min(500, window.innerWidth - 24);
       const cellSize = Math.floor(containerWidth / size);
+      const baseFontSize = Math.max(10, Math.floor(cellSize * 0.4));
+      const noteFontSize = Math.max(8, Math.floor(cellSize * 0.25));
+
+      const { boxH, boxW } = difficulties[size];
 
       for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
@@ -392,18 +462,50 @@
           cell.className = 'cell';
           cell.style.width = cellSize + 'px';
           cell.style.height = cellSize + 'px';
-          cell.style.fontSize = Math.max(10, Math.floor(cellSize * 0.4)) + 'px';
 
-          if (given[i][j]) {
-            cell.textContent = board[i][j];
-            cell.classList.add('given');
-          } else if (board[i][j] !== 0) {
-            cell.textContent = board[i][j];
-            cell.classList.add('user');
+          // 基本細線
+          cell.style.border = '1px solid #b3e5fc';
+
+          // 粗線畫出每個區塊
+          if (i % boxH === 0) {
+            cell.style.borderTop = '3px solid #01579b';
+          }
+          if (j % boxW === 0) {
+            cell.style.borderLeft = '3px solid #01579b';
+          }
+          if (i === size - 1) {
+            cell.style.borderBottom = '3px solid #01579b';
+          }
+          if (j === size - 1) {
+            cell.style.borderRight = '3px solid #01579b';
           }
 
           cell.dataset.row = i;
           cell.dataset.col = j;
+
+          const value = board[i][j];
+          const cellNotes = notes[i][j];
+
+          if (given[i][j]) {
+            cell.textContent = value;
+            cell.classList.add('given');
+            cell.style.fontSize = baseFontSize + 'px';
+          } else if (value !== 0) {
+            cell.textContent = value;
+            cell.classList.add('user');
+            cell.style.fontSize = baseFontSize + 'px';
+            if (!isValid(board, i, j, value, currentSize)) {
+              cell.classList.add('error');
+            }
+          } else if (cellNotes && cellNotes.size > 0) {
+            cell.textContent = Array.from(cellNotes).sort((a, b) => a - b).join('');
+            cell.classList.add('note-cell');
+            cell.style.fontSize = noteFontSize + 'px';
+          } else {
+            cell.textContent = '';
+            cell.style.fontSize = baseFontSize + 'px';
+          }
+
           const handler = (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -454,31 +556,116 @@
       }
     }
 
+    function recordHistory(row, col, prevValue, newValue, prevNotesSet, newNotesSet) {
+      history.push({
+        row,
+        col,
+        prevValue,
+        newValue,
+        prevNotes: prevNotesSet ? Array.from(prevNotesSet) : [],
+        newNotes: newNotesSet ? Array.from(newNotesSet) : []
+      });
+    }
+
+    function updateCellDisplay(row, col) {
+      const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+      if (!cell) return;
+
+      const size = currentSize;
+      const containerWidth = Math.min(500, window.innerWidth - 24);
+      const cellSize = Math.floor(containerWidth / size);
+      const baseFontSize = Math.max(10, Math.floor(cellSize * 0.4));
+      const noteFontSize = Math.max(8, Math.floor(cellSize * 0.25));
+
+      cell.classList.remove('user', 'error', 'note-cell');
+
+      if (given[row][col]) {
+        cell.textContent = board[row][col];
+        cell.classList.add('given');
+        cell.style.fontSize = baseFontSize + 'px';
+        return;
+      }
+
+      const value = board[row][col];
+      const cellNotes = notes[row][col];
+
+      if (value !== 0) {
+        cell.textContent = value;
+        cell.classList.add('user');
+        cell.style.fontSize = baseFontSize + 'px';
+        if (!isValid(board, row, col, value, currentSize)) {
+          cell.classList.add('error');
+        }
+      } else if (cellNotes && cellNotes.size > 0) {
+        cell.textContent = Array.from(cellNotes).sort((a, b) => a - b).join('');
+        cell.classList.add('note-cell');
+        cell.style.fontSize = noteFontSize + 'px';
+      } else {
+        cell.textContent = '';
+        cell.style.fontSize = baseFontSize + 'px';
+      }
+    }
+
+    function toggleNote(num) {
+      if (!selectedPos) return;
+      const { row, col } = selectedPos;
+      if (given[row][col]) return;
+      if (board[row][col] !== 0) return; // 有答案就不寫筆記
+
+      const cellNotes = notes[row][col] || new Set();
+      const prevNotes = new Set(cellNotes);
+
+      if (cellNotes.has(num)) {
+        cellNotes.delete(num);
+      } else {
+        cellNotes.add(num);
+      }
+      notes[row][col] = cellNotes;
+
+      recordHistory(row, col, board[row][col], board[row][col], prevNotes, cellNotes);
+      updateCellDisplay(row, col);
+    }
+
     function inputNumber(num) {
       if (!selectedPos) return;
       const { row, col } = selectedPos;
-      board[row][col] = num;
-      if (selectedCell) {
-        selectedCell.textContent = num;
-        selectedCell.classList.remove('error', 'user');
-        selectedCell.classList.add('user');
-        if (!isValid(board, row, col, num, currentSize)) {
-          selectedCell.classList.add('error');
-        }
+      if (given[row][col]) return;
+
+      if (noteMode) {
+        toggleNote(num);
+        return;
       }
+
+      const prevValue = board[row][col];
+      const prevNotes = new Set(notes[row][col] || []);
+
+      // 再點一次同一數字 → 清除該格
+      if (prevValue === num) {
+        board[row][col] = 0;
+        notes[row][col] = new Set();
+        recordHistory(row, col, prevValue, 0, prevNotes, new Set());
+      } else {
+        board[row][col] = num;
+        notes[row][col] = new Set(); // 填答案時清掉筆記
+        recordHistory(row, col, prevValue, num, prevNotes, new Set());
+      }
+
+      updateCellDisplay(row, col);
     }
 
     function handleKeyboardInput(key) {
       if (!selectedPos) return;
+      const { row, col } = selectedPos;
       if (['Delete', 'Backspace', ' '].includes(key)) {
-        const { row, col } = selectedPos;
-        if (!given[row][col]) {
-          board[row][col] = 0;
-          if (selectedCell) {
-            selectedCell.textContent = '';
-            selectedCell.classList.remove('error', 'user');
-          }
-        }
+        if (given[row][col]) return;
+        const prevValue = board[row][col];
+        const prevNotes = new Set(notes[row][col] || []);
+        if (prevValue === 0 && prevNotes.size === 0) return;
+
+        board[row][col] = 0;
+        notes[row][col] = new Set();
+        recordHistory(row, col, prevValue, 0, prevNotes, new Set());
+        updateCellDisplay(row, col);
         return;
       }
       const num = parseInt(key);
@@ -488,9 +675,16 @@
     }
 
     function resetGame() {
-      generatePuzzle(currentSize);
-      renderGrid();
-      clearSelection();
+      initGame(currentSize);
+    }
+
+    function undoLast() {
+      const action = history.pop();
+      if (!action) return;
+      const { row, col, prevValue, prevNotes } = action;
+      board[row][col] = prevValue;
+      notes[row][col] = new Set(prevNotes || []);
+      updateCellDisplay(row, col);
     }
 
     function checkSolution() {
@@ -556,6 +750,11 @@
     });
 
     bindButton(document.getElementById('reset-btn'), resetGame);
+    bindButton(document.getElementById('undo-btn'), undoLast);
+    bindButton(document.getElementById('note-btn'), () => {
+      noteMode = !noteMode;
+      updateNoteButtonUI();
+    });
     bindButton(document.getElementById('check-btn'), () => {
       if (checkSolution()) showVictory();
       else showMessage("再看一下");
