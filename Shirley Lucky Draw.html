@@ -277,7 +277,7 @@
             font-size: 1rem;
         }
         
-        /* 积分管理样式 */
+        /* 積分管理樣式 */
         .points-control {
             display: flex;
             align-items: center;
@@ -319,11 +319,22 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
+            gap: 10px;
         }
         
         .group-title {
             font-weight: bold;
             color: #8c6b5d;
+        }
+
+        .group-name-input {
+            width: 100%;
+            margin-top: 6px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: 1px solid #e8d1c5;
+            font-size: 13px;
+            background: #fffdf9;
         }
         
         .points-summary {
@@ -367,7 +378,7 @@
             background: #b5655a;
         }
         
-        /* 固定排序样式 */
+        /* 固定排序樣式 */
         .fixed-order-container {
             text-align: left;
             margin-top: 20px;
@@ -480,7 +491,7 @@
             background: rgba(232, 176, 77, 0.05);
         }
         
-        /* 响应式设计优化 */
+        /* 響應式設計優化 */
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -583,14 +594,14 @@
             }
         }
         
-        /* 平板优化 */
+        /* 平板優化 */
         @media (min-width: 769px) and (max-width: 1024px) {
             .container {
                 max-width: 700px;
             }
         }
         
-        /* 横屏优化 */
+        /* 橫屏優化 */
         @media (max-height: 500px) and (orientation: landscape) {
             .container {
                 max-width: 90%;
@@ -613,7 +624,7 @@
             }
         }
         
-        /* 触摸设备优化 */
+        /* 觸控設備優化 */
         @media (pointer: coarse) {
             .option-btn, .action-btn, .next-btn, .back-btn, .points-btn {
                 min-height: 44px;
@@ -691,7 +702,7 @@
             <button class="option-btn" data-action="group3">分3人組 Group of 3</button>
             <button class="option-btn" data-action="group4">分4人組 Group of 4</button>
             <button class="option-btn" data-action="group5">分5人組 Group of 5</button>
-            <!-- 新增：手動分組 -->
+            <!-- 手動分組 -->
             <button class="option-btn" data-action="manualGroup">手動分組 Manual Grouping</button>
         </div>
         
@@ -701,7 +712,6 @@
     <div class="result-container" id="result-container">
         <div class="result-content">
             <button class="close-btn" id="close-btn">×</button>
-            <!-- 新增：匯出 / 列印 PDF 按鈕 -->
             <button class="back-btn" id="print-btn" style="margin-bottom: 10px;">匯出 / 列印 PDF Export / Print</button>
 
             <h2 class="result-title" id="result-title">活動名稱 Activity Name</h2>
@@ -741,12 +751,45 @@
             let groupPoints = [];
             let isHighlighting = false;
             let currentParticipantIndex = 0;
+
+            // ★ 自動分組與手動分組的組名資料
+            const teamNames = [
+                { en: "Angry Alpacas", zh: "憤怒的羊駝" },
+                { en: "Blonde Baboons", zh: "金色的狒狒" },
+                { en: "Curious Cats", zh: "好奇的貓" },
+                { en: "Dashing Deer", zh: "飛奔的鹿" },
+                { en: "Elite Eagles", zh: "精英的老鷹" },
+                { en: "Fiery Falcons", zh: "火熱的獵鷹" },
+                { en: "Grumpy Geese", zh: "脾氣暴躁的鵝" },
+                { en: "Honest Horses", zh: "誠實的馬" },
+                { en: "Iron Ibises", zh: "鋼鐵的朱鷺" },
+                { en: "Jungle Jaguars", zh: "叢林的美洲虎" },
+                { en: "Killer Koalas", zh: "殺手無尾熊" },
+                { en: "Loyal Lions", zh: "忠誠的獅子" },
+                { en: "Mighty Moose", zh: "強大的駝鹿" },
+                { en: "Naughty Newts", zh: "淘氣的蠑螈" },
+                { en: "Outback Owls", zh: "內陸的貓頭鷹" },
+                { en: "Proud Pumas", zh: "驕傲的美洲獅" },
+                { en: "Quiet Quokkas", zh: "安靜的短尾矮袋鼠" },
+                { en: "Rampant Rhinos", zh: "橫衝直撞的犀牛" },
+                { en: "Silent Sharks", zh: "沉默的鯊魚" },
+                { en: "Terrific Turkeys", zh: "了不起的火雞" },
+                { en: "Unruly Urchins", zh: "不守規矩的海膽" },
+                { en: "Velvet Vultures", zh: "天鵝絨禿鷲" },
+                { en: "Wild Wolves", zh: "野生的狼" },
+                { en: "Xantus's Xenops", zh: "贊圖斯翹嘴雀" },
+                { en: "Yellow Yaks", zh: "黃色的氂牛" },
+                { en: "Zapping Zebras", zh: "快速移動的斑馬" }
+            ];
+
+            let currentGroupNames = [];   // 自動分組用：每組的 team name（或 null）
+            let manualGroupNames = [];    // 手動分組用：每組team資料，內含預設與自訂名稱
             
-            // 设置默认日期为今天
+            // 設定預設日期為今天
             const today = new Date().toISOString().split('T')[0];
             eventDateInput.value = today;
             
-            // 选择功能
+            // 選擇功能
             optionButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     optionButtons.forEach(btn => btn.classList.remove('active'));
@@ -755,7 +798,7 @@
                 });
             });
             
-            // 执行按钮
+            // 執行按鈕
             executeBtn.addEventListener('click', function() {
                 const eventName = eventNameInput.value.trim();
                 const eventDate = eventDateInput.value;
@@ -780,7 +823,7 @@
                     return;
                 }
                 
-                // 根据选择的功能执行操作
+                // 根據選擇的功能執行操作
                 switch(selectedAction) {
                     case 'sort':
                         performSort();
@@ -809,14 +852,14 @@
                 }
             });
             
-            // 关闭结果窗口
+            // 關閉結果視窗
             closeBtn.addEventListener('click', function() {
                 resultContainer.style.display = 'none';
                 isHighlighting = false;
                 currentParticipantIndex = 0;
             });
             
-            // 点击结果容器外部关闭窗口
+            // 點擊遮罩關閉
             resultContainer.addEventListener('click', function(e) {
                 if (e.target === resultContainer) {
                     resultContainer.style.display = 'none';
@@ -864,7 +907,7 @@
                 resultContainer.style.display = 'flex';
             }
             
-            // 原始顺序功能
+            // 原始順序
             function performOriginalOrder() {
                 resultTitle.textContent = eventNameInput.value;
                 eventDateDisplay.textContent = `活動日期 Date: ${eventDateInput.value}`;
@@ -891,10 +934,8 @@
                 nextBtn.style.display = 'none';
                 resultContainer.style.display = 'flex';
                 
-                // 重置索引
                 currentParticipantIndex = 0;
                 
-                // 添加点击事件监听
                 setTimeout(() => {
                     document.querySelectorAll('.participant-item').forEach(item => {
                         item.addEventListener('click', function() {
@@ -906,7 +947,7 @@
                 }, 100);
             }
             
-            // 高亮显示参与者
+            // 高亮顯示
             function highlightParticipant(name) {
                 isHighlighting = true;
                 
@@ -917,27 +958,23 @@
                 
                 resultDisplay.innerHTML = html;
                 
-                // 添加Next按钮事件
                 document.getElementById('next-participant-btn').addEventListener('click', function() {
                     showNextParticipant();
                 });
                 
-                // 触发五彩纸屑效果
                 triggerConfetti();
             }
             
-            // 显示下一位参与者
+            // 顯示下一位
             function showNextParticipant() {
                 currentParticipantIndex++;
                 if (currentParticipantIndex >= participants.length) {
-                    currentParticipantIndex = 0; // 循环回到第一个
+                    currentParticipantIndex = 0;
                 }
-                
-                // 确保始终显示Next按钮
                 highlightParticipant(participants[currentParticipantIndex]);
             }
             
-            // 开始幸运抽奖
+            // 開始幸運抽獎
             function startLuckyDraw() {
                 remainingParticipants = [...participants];
                 usedParticipants = [];
@@ -946,12 +983,10 @@
                 progressInfo.textContent = '';
                 nextBtn.style.display = 'block';
                 resultContainer.style.display = 'flex';
-                
-                // 立即抽取第一位幸运者
                 drawNextLucky();
             }
             
-            // 抽取下一位幸运者
+            // 抽下一位幸運者
             function drawNextLucky() {
                 if (remainingParticipants.length === 0) {
                     alert('所有參與者都已經被抽取過了！/ All participants have already been drawn!');
@@ -962,24 +997,20 @@
                 const randomIndex = Math.floor(Math.random() * remainingParticipants.length);
                 const winner = remainingParticipants[randomIndex];
                 
-                // 从剩余参与者中移除
                 remainingParticipants.splice(randomIndex, 1);
                 usedParticipants.push(winner);
                 
-                // 显示结果
                 resultDisplay.innerHTML = `<div class="winner-name">${winner}</div>`;
                 progressInfo.textContent = `已抽取 Drawn: ${usedParticipants.length} / ${participants.length}`;
                 
-                // 触发五彩纸屑效果
                 triggerConfetti();
                 
-                // 如果所有参与者都已抽取，隐藏"抽取下一位"按钮
                 if (remainingParticipants.length === 0) {
                     nextBtn.style.display = 'none';
                 }
             }
             
-            // 分组功能（自動分組＋積分）
+            // 分組功能（自動分組 + 積分 + 組名）
             function performGrouping(groupSize) {
                 const shuffled = [...participants].sort(() => Math.random() - 0.5);
                 groups = [];
@@ -988,13 +1019,19 @@
                     groups.push(shuffled.slice(i, i + groupSize));
                 }
                 
-                // 初始化积分
                 groupPoints = Array(groups.length).fill(0);
+
+                // ★ 為每組指定隨機組名（最多 26 組），超過則為 null
+                const shuffledTeamNames = [...teamNames].sort(() => Math.random() - 0.5);
+                currentGroupNames = groups.map((_, index) => {
+                    if (index < shuffledTeamNames.length) {
+                        return shuffledTeamNames[index];
+                    }
+                    return null; // 超過 26 組就沒有組名
+                });
                 
                 resultTitle.textContent = eventNameInput.value;
                 eventDateDisplay.textContent = `活動日期 Date: ${eventDateInput.value}`;
-                
-                // 显示分组和积分控制
                 displayGroupsWithPoints(groupSize);
                 
                 progressInfo.textContent = '';
@@ -1002,7 +1039,7 @@
                 resultContainer.style.display = 'flex';
             }
             
-            // 显示带积分控制的分组
+            // 顯示分組＋積分＋組名
             function displayGroupsWithPoints(groupSize) {
                 let html = `
                     <h3 style="margin-bottom: 20px; color: #8c6b5d;">分${groupSize}人組 Groups of ${groupSize}</h3>
@@ -1010,10 +1047,17 @@
                 `;
                 
                 groups.forEach((group, index) => {
+                    const team = currentGroupNames[index];
+                    let teamLabel = '';
+                    if (team && (team.en || team.zh)) {
+                        teamLabel = ` - ${team.en || ''} ${team.zh || ''}`.trim();
+                    }
                     html += `
                         <div style="margin-bottom: 15px; padding: 15px; background: #f5f0eb; border-radius: 8px; border-left: 4px solid #e8b04d;">
                             <div class="group-header">
-                                <div class="group-title">第 ${index + 1} 組 Group ${index + 1}</div>
+                                <div class="group-title">
+                                    第 ${index + 1} 組 Group ${index + 1}${teamLabel ? ' ' + teamLabel : ''}
+                                </div>
                                 <div class="points-control">
                                     <button class="points-btn" onclick="updatePoints(${index}, -1)">-</button>
                                     <div class="points-display">${groupPoints[index]}</div>
@@ -1027,7 +1071,6 @@
                 
                 html += `</div>`;
                 
-                // 添加积分总结
                 html += `
                     <div class="points-summary">
                         <h4>積分總結 Score Summary</h4>
@@ -1039,28 +1082,25 @@
                 updatePointsSummary();
             }
             
-            // 更新积分
+            // 更新積分
             window.updatePoints = function(groupIndex, change) {
                 groupPoints[groupIndex] += change;
                 
-                // 更新显示
                 const pointsDisplay = document.querySelectorAll('.points-display')[groupIndex];
                 if (pointsDisplay) {
                     pointsDisplay.textContent = groupPoints[groupIndex];
                 }
                 
-                // 更新积分总结
                 updatePointsSummary();
             };
             
-            // 更新积分总结
+            // 更新積分總結
             function updatePointsSummary() {
                 const summaryContent = document.getElementById('points-summary-content');
                 if (!summaryContent) return;
                 
                 let html = '';
                 
-                // 找出最高分
                 const maxPoints = Math.max(...groupPoints);
                 const leadingGroups = groupPoints.reduce((acc, points, index) => {
                     if (points === maxPoints) acc.push(index + 1);
@@ -1068,14 +1108,12 @@
                 }, []);
                 
                 html += `<p>目前領先 Leading: 第 ${leadingGroups.join(', ')} 組 Group(s) (${maxPoints} 分 points)</p>`;
-                
-                // 显示所有组积分
                 html += `<p>各組積分 Group scores: ${groupPoints.map((points, index) => `第${index+1}組 Group ${index+1} (${points} 分 points)`).join(', ')}</p>`;
                 
                 summaryContent.innerHTML = html;
             }
 
-            // ⭐️ 手動分組：先輸入要分幾組，再拖拉調整
+            // ⭐ 手動分組：自動分配＋隨機組名＋可手動輸入組名
             function startManualGrouping() {
                 const total = participants.length;
                 let groupCount = prompt(
@@ -1084,7 +1122,7 @@
                 );
                 
                 if (groupCount === null) {
-                    return; // 取消
+                    return;
                 }
                 
                 groupCount = parseInt(groupCount, 10);
@@ -1093,11 +1131,21 @@
                     return;
                 }
                 
-                // 初始化 groups：先平均分配
+                // 平均分配到各組
                 groups = Array.from({ length: groupCount }, () => []);
                 participants.forEach((name, index) => {
                     const gIndex = index % groupCount;
                     groups[gIndex].push(name);
+                });
+
+                // ★ 為手動分組設定預設組名（同樣從 26 個中隨機選）
+                const shuffledTeamNames = [...teamNames].sort(() => Math.random() - 0.5);
+                manualGroupNames = groups.map((_, index) => {
+                    if (index < shuffledTeamNames.length) {
+                        // 保留預設 en/zh，另外可以放自訂名稱 custom
+                        return { ...shuffledTeamNames[index], custom: '' };
+                    }
+                    return { en: '', zh: '', custom: '' };
                 });
                 
                 resultTitle.textContent = eventNameInput.value;
@@ -1108,7 +1156,7 @@
                 resultContainer.style.display = 'flex';
             }
 
-            // ⭐️ 重新渲染手動分組畫面（含拖拉事件）
+            // ⭐ 重新渲染手動分組畫面（含拖拉事件與組名輸入）
             function renderManualGroups() {
                 let html = `
                     <h3 style="margin-bottom: 10px; color: #8c6b5d;">手動分組 Manual Grouping</h3>
@@ -1120,11 +1168,29 @@
                 `;
                 
                 groups.forEach((group, gIndex) => {
+                    const nameObj = manualGroupNames[gIndex] || {};
+                    let displayValue = '';
+                    if (nameObj.custom && nameObj.custom.trim() !== '') {
+                        displayValue = nameObj.custom.trim();
+                    } else if (nameObj.en || nameObj.zh) {
+                        displayValue = `${nameObj.en || ''}${(nameObj.en && nameObj.zh) ? ' / ' : ''}${nameObj.zh || ''}`;
+                    }
+                    
                     html += `
                         <div class="manual-group" data-group-index="${gIndex}">
                             <div class="group-header">
-                                <div class="group-title">第 ${gIndex + 1} 組 Group ${gIndex + 1}（${group.length} 人 people）</div>
+                                <div class="group-title">
+                                    第 ${gIndex + 1} 組 Group ${gIndex + 1}
+                                    ${displayValue ? `<br><span style="font-size: 0.85rem;">${displayValue}</span>` : ''}
+                                </div>
                             </div>
+                            <input
+                                type="text"
+                                class="group-name-input"
+                                data-group-index="${gIndex}"
+                                value="${displayValue || ''}"
+                                placeholder="輸入組名 Enter team name (optional)"
+                            >
                             <div class="manual-group-body">
                                 ${group.map((name, index) => `
                                     <div class="manual-member" draggable="true" data-name="${name}">
@@ -1139,13 +1205,25 @@
                 html += `</div>`;
                 resultDisplay.innerHTML = html;
                 
-                // 加上拖拉事件
                 const memberElements = document.querySelectorAll('.manual-member');
                 const groupBodies = document.querySelectorAll('.manual-group-body');
+                const nameInputs = document.querySelectorAll('.group-name-input');
                 
                 let dragSourceGroupIndex = null;
                 let dragName = null;
                 
+                // 組名輸入：更新 manualGroupNames 的 custom
+                nameInputs.forEach(input => {
+                    input.addEventListener('input', function() {
+                        const idx = parseInt(this.dataset.groupIndex, 10);
+                        if (!manualGroupNames[idx]) {
+                            manualGroupNames[idx] = { en: '', zh: '', custom: '' };
+                        }
+                        manualGroupNames[idx].custom = this.value;
+                    });
+                });
+
+                // 拖拉事件
                 memberElements.forEach(el => {
                     el.addEventListener('dragstart', function(e) {
                         dragSourceGroupIndex = parseInt(e.target.closest('.manual-group').dataset.groupIndex, 10);
@@ -1184,16 +1262,14 @@
                         if (idx > -1) {
                             fromArr.splice(idx, 1);
                             groups[targetGroupIndex].push(dragName);
-                            // 重新畫面，讓人數/排序更新
-                            renderManualGroups();
+                            renderManualGroups(); // 重新渲染更新順序與編號
                         }
                     });
                 });
             }
             
-            // 五彩纸屑效果
+            // 五彩紙屑效果
             function triggerConfetti() {
-                // 多次触发纸屑效果
                 confetti({
                     particleCount: 100,
                     spread: 70,
