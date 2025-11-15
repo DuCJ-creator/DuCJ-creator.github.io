@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>姓名抽取器</title>
+    <title>姓名抽取器 Name / Group Picker</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         * {
@@ -666,49 +666,49 @@
 </head>
 <body>
     <div class="container">
-        <h1>Shirley's Name/Group Picker </h1>
+        <h1>Shirley's Name/Group Picker 雙語姓名／分組抽選器</h1>
         
         <div class="form-group">
-            <label for="event-name">活動名稱</label>
-            <input type="text" id="event-name" placeholder="輸入活動名稱">
+            <label for="event-name">活動名稱 Activity Name</label>
+            <input type="text" id="event-name" placeholder="輸入活動名稱 Enter activity name">
         </div>
         
         <div class="form-group">
-            <label for="event-date">活動日期</label>
+            <label for="event-date">活動日期 Event Date</label>
             <input type="date" id="event-date">
         </div>
         
         <div class="form-group">
-            <label for="participants">參與者姓名 (每行一個)</label>
-            <textarea id="participants" placeholder="請輸入參與者姓名，每行一個"></textarea>
+            <label for="participants">參與者姓名 (每行一個) Participant Names (one per line)</label>
+            <textarea id="participants" placeholder="請輸入參與者姓名，每行一個 Enter participant names, one per line"></textarea>
         </div>
         
         <div class="options">
-            <button class="option-btn active" data-action="sort">排序</button>
-            <button class="option-btn" data-action="lucky">抽取幸運者</button>
-            <button class="option-btn" data-action="original">原始順序</button>
-            <button class="option-btn" data-action="group2">分2人組</button>
-            <button class="option-btn" data-action="group3">分3人組</button>
-            <button class="option-btn" data-action="group4">分4人組</button>
-            <button class="option-btn" data-action="group5">分5人組</button>
+            <button class="option-btn active" data-action="sort">排序 Sort</button>
+            <button class="option-btn" data-action="lucky">抽取幸運者 Lucky Draw</button>
+            <button class="option-btn" data-action="original">原始順序 Original Order</button>
+            <button class="option-btn" data-action="group2">分2人組 Group of 2</button>
+            <button class="option-btn" data-action="group3">分3人組 Group of 3</button>
+            <button class="option-btn" data-action="group4">分4人組 Group of 4</button>
+            <button class="option-btn" data-action="group5">分5人組 Group of 5</button>
             <!-- 新增：手動分組 -->
-            <button class="option-btn" data-action="manualGroup">手動分組</button>
+            <button class="option-btn" data-action="manualGroup">手動分組 Manual Grouping</button>
         </div>
         
-        <button class="action-btn" id="execute-btn">執行</button>
+        <button class="action-btn" id="execute-btn">執行 Execute</button>
     </div>
     
     <div class="result-container" id="result-container">
         <div class="result-content">
             <button class="close-btn" id="close-btn">×</button>
             <!-- 新增：匯出 / 列印 PDF 按鈕 -->
-            <button class="back-btn" id="print-btn" style="margin-bottom: 10px;">匯出 / 列印 PDF</button>
+            <button class="back-btn" id="print-btn" style="margin-bottom: 10px;">匯出 / 列印 PDF Export / Print</button>
 
-            <h2 class="result-title" id="result-title">活動名稱</h2>
-            <div class="event-date" id="event-date-display">活動日期</div>
+            <h2 class="result-title" id="result-title">活動名稱 Activity Name</h2>
+            <div class="event-date" id="event-date-display">活動日期 Event Date</div>
             <div id="result-display"></div>
             <div class="progress-info" id="progress-info"></div>
-            <button class="next-btn" id="next-btn" style="display: none;">Next</button>
+            <button class="next-btn" id="next-btn" style="display: none;">下一位 Next</button>
             
             <div class="decoration decoration-1"></div>
             <div class="decoration decoration-2"></div>
@@ -762,12 +762,12 @@
                 const participantsText = participantsTextarea.value.trim();
                 
                 if (!eventName) {
-                    alert('請輸入活動名稱');
+                    alert('請輸入活動名稱 / Please enter the activity name.');
                     return;
                 }
                 
                 if (!participantsText) {
-                    alert('請輸入參與者姓名');
+                    alert('請輸入參與者姓名 / Please enter participant names.');
                     return;
                 }
                 
@@ -776,7 +776,7 @@
                     .filter(name => name !== '');
                 
                 if (participants.length === 0) {
-                    alert('請輸入有效的參與者姓名');
+                    alert('請輸入有效的參與者姓名 / Please enter valid participant names.');
                     return;
                 }
                 
@@ -829,7 +829,7 @@
             nextBtn.addEventListener('click', function() {
                 if (selectedAction === 'lucky') {
                     if (remainingParticipants.length === 0) {
-                        alert('所有參與者都已經被抽取過了！');
+                        alert('所有參與者都已經被抽取過了！/ All participants have already been drawn!');
                         return;
                     }
                     drawNextLucky();
@@ -843,7 +843,7 @@
                 const originalTitle = document.title;
                 const eventName = eventNameInput.value.trim();
                 if (eventName) {
-                    document.title = eventName + ' - 分組結果';
+                    document.title = eventName + ' - 分組結果 Grouping Result';
                 }
                 window.print();
                 document.title = originalTitle;
@@ -853,7 +853,7 @@
             function performSort() {
                 const sorted = [...participants].sort();
                 resultTitle.textContent = eventNameInput.value;
-                eventDateDisplay.textContent = `活動日期: ${eventDateInput.value}`;
+                eventDateDisplay.textContent = `活動日期 Date: ${eventDateInput.value}`;
                 resultDisplay.innerHTML = `
                     <div style="margin-top: 20px; text-align: left;">
                         ${sorted.map(name => `<p style="padding: 8px; border-bottom: 1px solid #e8d1c5;">${name}</p>`).join('')}
@@ -867,10 +867,12 @@
             // 原始顺序功能
             function performOriginalOrder() {
                 resultTitle.textContent = eventNameInput.value;
-                eventDateDisplay.textContent = `活動日期: ${eventDateInput.value}`;
+                eventDateDisplay.textContent = `活動日期 Date: ${eventDateInput.value}`;
                 
                 let html = `
-                    <p style="margin-bottom: 15px; color: #8c6b5d;">點擊任一名字可突出顯示</p>
+                    <p style="margin-bottom: 15px; color: #8c6b5d;">
+                        點擊任一名字可突出顯示（Click any name to highlight）
+                    </p>
                     <div class="fixed-order-container">
                 `;
                 
@@ -910,7 +912,7 @@
                 
                 let html = `
                     <div class="highlighted-name">${name}</div>
-                    <button class="next-btn" id="next-participant-btn">Next</button>
+                    <button class="next-btn" id="next-participant-btn">下一位 Next</button>
                 `;
                 
                 resultDisplay.innerHTML = html;
@@ -940,7 +942,7 @@
                 remainingParticipants = [...participants];
                 usedParticipants = [];
                 resultTitle.textContent = eventNameInput.value;
-                eventDateDisplay.textContent = `活動日期: ${eventDateInput.value}`;
+                eventDateDisplay.textContent = `活動日期 Date: ${eventDateInput.value}`;
                 progressInfo.textContent = '';
                 nextBtn.style.display = 'block';
                 resultContainer.style.display = 'flex';
@@ -952,7 +954,7 @@
             // 抽取下一位幸运者
             function drawNextLucky() {
                 if (remainingParticipants.length === 0) {
-                    alert('所有參與者都已經被抽取過了！');
+                    alert('所有參與者都已經被抽取過了！/ All participants have already been drawn!');
                     nextBtn.style.display = 'none';
                     return;
                 }
@@ -966,7 +968,7 @@
                 
                 // 显示结果
                 resultDisplay.innerHTML = `<div class="winner-name">${winner}</div>`;
-                progressInfo.textContent = `已抽取: ${usedParticipants.length} / ${participants.length}`;
+                progressInfo.textContent = `已抽取 Drawn: ${usedParticipants.length} / ${participants.length}`;
                 
                 // 触发五彩纸屑效果
                 triggerConfetti();
@@ -990,7 +992,7 @@
                 groupPoints = Array(groups.length).fill(0);
                 
                 resultTitle.textContent = eventNameInput.value;
-                eventDateDisplay.textContent = `活動日期: ${eventDateInput.value}`;
+                eventDateDisplay.textContent = `活動日期 Date: ${eventDateInput.value}`;
                 
                 // 显示分组和积分控制
                 displayGroupsWithPoints(groupSize);
@@ -1003,7 +1005,7 @@
             // 显示带积分控制的分组
             function displayGroupsWithPoints(groupSize) {
                 let html = `
-                    <h3 style="margin-bottom: 20px; color: #8c6b5d;">分${groupSize}人組</h3>
+                    <h3 style="margin-bottom: 20px; color: #8c6b5d;">分${groupSize}人組 Groups of ${groupSize}</h3>
                     <div class="groups-container">
                 `;
                 
@@ -1011,7 +1013,7 @@
                     html += `
                         <div style="margin-bottom: 15px; padding: 15px; background: #f5f0eb; border-radius: 8px; border-left: 4px solid #e8b04d;">
                             <div class="group-header">
-                                <div class="group-title">第 ${index + 1} 組</div>
+                                <div class="group-title">第 ${index + 1} 組 Group ${index + 1}</div>
                                 <div class="points-control">
                                     <button class="points-btn" onclick="updatePoints(${index}, -1)">-</button>
                                     <div class="points-display">${groupPoints[index]}</div>
@@ -1028,7 +1030,7 @@
                 // 添加积分总结
                 html += `
                     <div class="points-summary">
-                        <h4>積分總結</h4>
+                        <h4>積分總結 Score Summary</h4>
                         <div id="points-summary-content"></div>
                     </div>
                 `;
@@ -1065,10 +1067,10 @@
                     return acc;
                 }, []);
                 
-                html += `<p>目前領先: 第 ${leadingGroups.join(', ')} 組 (${maxPoints}分)</p>`;
+                html += `<p>目前領先 Leading: 第 ${leadingGroups.join(', ')} 組 Group(s) (${maxPoints} 分 points)</p>`;
                 
                 // 显示所有组积分
-                html += `<p>各組積分: ${groupPoints.map((points, index) => `第${index+1}組(${points}分)`).join(', ')}</p>`;
+                html += `<p>各組積分 Group scores: ${groupPoints.map((points, index) => `第${index+1}組 Group ${index+1} (${points} 分 points)`).join(', ')}</p>`;
                 
                 summaryContent.innerHTML = html;
             }
@@ -1076,7 +1078,10 @@
             // ⭐️ 手動分組：先輸入要分幾組，再拖拉調整
             function startManualGrouping() {
                 const total = participants.length;
-                let groupCount = prompt(`目前共有 ${total} 人，請輸入要分成幾組（1 ~ ${total}）`);
+                let groupCount = prompt(
+                    `目前共有 ${total} 人，請輸入要分成幾組（1 ~ ${total}）\n` +
+                    `There are currently ${total} participants.\nPlease enter how many groups you want (1 ~ ${total}).`
+                );
                 
                 if (groupCount === null) {
                     return; // 取消
@@ -1084,7 +1089,7 @@
                 
                 groupCount = parseInt(groupCount, 10);
                 if (isNaN(groupCount) || groupCount <= 0 || groupCount > total) {
-                    alert('請輸入 1 到 ' + total + ' 之間的整數');
+                    alert('請輸入 1 到 ' + total + ' 之間的整數 / Please enter an integer between 1 and ' + total + '.');
                     return;
                 }
                 
@@ -1096,9 +1101,9 @@
                 });
                 
                 resultTitle.textContent = eventNameInput.value;
-                eventDateDisplay.textContent = `活動日期: ${eventDateInput.value}`;
+                eventDateDisplay.textContent = `活動日期 Date: ${eventDateInput.value}`;
                 renderManualGroups();
-                progressInfo.textContent = '提示：拖曳名字到其他組即可重新分配。';
+                progressInfo.textContent = '提示：拖曳名字到其他組即可重新分配。Tip: Drag a name to another group to rearrange.';
                 nextBtn.style.display = 'none';
                 resultContainer.style.display = 'flex';
             }
@@ -1106,9 +1111,10 @@
             // ⭐️ 重新渲染手動分組畫面（含拖拉事件）
             function renderManualGroups() {
                 let html = `
-                    <h3 style="margin-bottom: 10px; color: #8c6b5d;">手動分組</h3>
+                    <h3 style="margin-bottom: 10px; color: #8c6b5d;">手動分組 Manual Grouping</h3>
                     <p style="margin-bottom: 10px; color: #8c6b5d; font-size: 0.9rem;">
-                        把學生姓名拖曳到其他組，就可以重新安排分組。
+                        把學生姓名拖曳到其他組，就可以重新安排分組。<br>
+                        Drag a student name to another group to rearrange.
                     </p>
                     <div class="manual-groups-container">
                 `;
@@ -1117,7 +1123,7 @@
                     html += `
                         <div class="manual-group" data-group-index="${gIndex}">
                             <div class="group-header">
-                                <div class="group-title">第 ${gIndex + 1} 組（${group.length} 人）</div>
+                                <div class="group-title">第 ${gIndex + 1} 組 Group ${gIndex + 1}（${group.length} 人 people）</div>
                             </div>
                             <div class="manual-group-body">
                                 ${group.map((name, index) => `
