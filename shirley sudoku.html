@@ -43,6 +43,7 @@
       flex-wrap: wrap;
       justify-content: center;
       max-width: 100%;
+      align-items: center;
     }
 
     button {
@@ -90,6 +91,17 @@
     #note-btn.active {
       background: #ffca28;
       color: #4e342e;
+    }
+
+    .timer {
+      padding: clamp(6px, 1.5vw, 8px) clamp(10px, 2.2vw, 14px);
+      background: #e1f5fe;
+      color: #01579b;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: clamp(0.8rem, 2.2vw, 0.95rem);
+      min-width: 90px;
+      text-align: center;
     }
 
     .sudoku-container {
@@ -277,6 +289,7 @@
     <button id="undo-btn">撤銷</button>
     <button id="note-btn">筆記</button>
     <button id="check-btn">完成確認</button>
+    <span id="timer" class="timer">⌛ 00:00</span>
   </div>
 
   <div class="sudoku-container">
@@ -322,10 +335,14 @@
     let selectedCell = null;
     let selectedPos = null;
 
-    // 新增：筆記與撤銷
+    // 筆記與撤銷
     let notes = [];
     let history = [];
     let noteMode = false;
+
+    // 計時
+    let timerInterval = null;
+    let elapsedSeconds = 0;
 
     // 标准数独区块定义
     const difficulties = {
@@ -333,6 +350,33 @@
       6: { boxH: 2, boxW: 3 },
       9: { boxH: 3, boxW: 3 }
     };
+
+    // ===== 計時相關 =====
+    function updateTimerDisplay() {
+      const timerEl = document.getElementById('timer');
+      const minutes = Math.floor(elapsedSeconds / 60);
+      const seconds = elapsedSeconds % 60;
+      const mm = String(minutes).padStart(2, '0');
+      const ss = String(seconds).padStart(2, '0');
+      timerEl.textContent = `⌛ ${mm}:${ss}`;
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      elapsedSeconds = 0;
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        elapsedSeconds++;
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    // ====================
 
     function updateNoteButtonUI() {
       const noteBtn = document.getElementById('note-btn');
@@ -357,6 +401,8 @@
       renderGrid();
       renderNumberPad();
       clearSelection();
+      // 每次新遊戲重新開始計時
+      startTimer();
     }
 
     function shuffle(arr) {
@@ -702,6 +748,9 @@
       if (currentSize === 4) title.textContent = "數獨新手";
       else if (currentSize === 6) title.textContent = "數獨高手";
       else title.textContent = "數獨王者";
+
+      // 過關時停止計時
+      stopTimer();
 
       document.getElementById('victory-sound').play().catch(e => console.log("Audio play failed:", e));
       overlay.classList.add('show');
