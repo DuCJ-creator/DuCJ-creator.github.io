@@ -1261,50 +1261,60 @@ Participant2"></textarea>
                 .filter(Boolean);
         }
 
-        // ======== FRP ELA 題庫載入 ========
+       // ======== FRP ELA 題庫載入（修正版） ========
+async function loadFRPEntries(semester, units) {
+    const url = 'https://ducj-creator.github.io/Teacher-Shirley/study-tools/FRP%20ELA%20Vocab.csv';
+    const res = await fetch(url);
+    if (!res.ok) {
+        throw new Error('Failed to load FRP ELA CSV: ' + url);
+    }
+    const text = await res.text();
+    const rows = parseCSV(text);
+    if (!rows.length) return [];
 
-        async function loadFRPEntries(semester, units) {
-            const url = 'https://ducj-creator.github.io/Teacher-Shirley/study-tools/FRP%20ELA%20Vocab.csv';
-            const res = await fetch(url);
-            if (!res.ok) {
-                throw new Error('Failed to load FRP ELA CSV: ' + url);
+    const headers = Object.keys(rows[0]);
+    const semKey = detectHeader(headers, ['semester', 'sem', '學期']);
+    const unitKey = detectHeader(headers, ['unit', 'Unit', 'UNIT', '單元']);
+    const wordKey = detectHeader(headers, ['word', 'Word', '單字']);
+    const posKey = detectHeader(headers, ['pos', 'POS', 'part of speech', '詞性']);
+    const meaningKey = detectHeader(headers, ['meaning', 'Meaning', 'Chinese', '中文', '解釋']);
+
+    if (!semKey || !unitKey || !wordKey || !meaningKey) {
+        console.warn('FRP CSV 欄位無法辨識，請確認欄位名稱：', headers);
+        return [];
+    }
+
+    const unitSet = new Set(units);
+
+    return rows
+        .map(row => {
+            // Semester：改成「包含」判斷，避免 'Semester I' / 'Sem I' 無法匹配
+            const semRaw = (row[semKey] || '').trim();
+            const semLower = semRaw.toLowerCase();
+            const wantedLower = semester.toLowerCase();
+            if (!semLower.includes(wantedLower)) return null;
+
+            // Unit：既支援「1 / 2 / 3」也支援「U1 / Unit 1」這種
+            let unitRaw = (row[unitKey] || '').trim();
+            let unitNum = parseInt(unitRaw, 10);
+            if (isNaN(unitNum)) {
+                const m = unitRaw.match(/(\d+)/);
+                if (m) {
+                    unitNum = parseInt(m[1], 10);
+                }
             }
-            const text = await res.text();
-            const rows = parseCSV(text);
-            if (!rows.length) return [];
+            if (!unitNum || !unitSet.has(unitNum)) return null;
 
-            const headers = Object.keys(rows[0]);
-            const semKey = detectHeader(headers, ['semester', 'Sem', '學期']);
-            const unitKey = detectHeader(headers, ['unit', 'Unit', 'UNIT', '單元']);
-            const wordKey = detectHeader(headers, ['word', 'Word', '單字']);
-            const posKey = detectHeader(headers, ['pos', 'POS', 'part of speech', '詞性']);
-            const meaningKey = detectHeader(headers, ['meaning', 'Meaning', 'Chinese', '中文', '解釋']);
+            const word = (row[wordKey] || '').trim();
+            const pos = posKey ? (row[posKey] || '').trim() : '';
+            const meaning = (row[meaningKey] || '').trim();
 
-            if (!semKey || !unitKey || !wordKey || !meaningKey) {
-                console.warn('FRP CSV 欄位無法辨識，請確認欄位名稱：', headers);
-                return [];
-            }
+            if (!word || !meaning) return null;
 
-            const unitSet = new Set(units);
-
-            return rows
-                .map(row => {
-                    const sem = (row[semKey] || '').trim();
-                    if (sem !== semester) return null;
-
-                    const unitNum = parseInt(row[unitKey], 10);
-                    if (isNaN(unitNum) || !unitSet.has(unitNum)) return null;
-
-                    const word = (row[wordKey] || '').trim();
-                    const pos = posKey ? (row[posKey] || '').trim() : '';
-                    const meaning = (row[meaningKey] || '').trim();
-
-                    if (!word || !meaning) return null;
-
-                    return { word, pos, meaning };
-                })
-                .filter(Boolean);
-        }
+            return { word, pos, meaning };
+        })
+        .filter(Boolean);
+}
 
         // ======== TOEFL Junior 題庫載入 ========
 
