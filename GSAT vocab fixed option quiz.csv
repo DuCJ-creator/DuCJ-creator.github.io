@@ -168,7 +168,7 @@ code,question,option 1,option 2,option 3,option 4,correct answer
 111-GSAT-10,"With pink cherry blossoms blooming everywhere, the valley ______ like a young bride under the bright spring sunshine.",bounces,blushes,polishes,transfers,blushes
 111-GSAT-2,Jane is the best ______ I have ever had. I cannot imagine running my office without her help.,assistant,influence,contribution,politician,assistant
 111-GSAT-3,"The temple celebrated Mazu Festival by hosting ten days of lion dances, Taiwanese operas, and traditional hand ______ shows.",chat,quiz,puppet,variety,puppet
-111-GSAT-4,The new vaccine was banned by the Food and Drug Administration due to its potentially fatal side effects.,potentially,delicately,ambiguously,optionally,potentially
+111-GSAT-4,The new vaccine was banned by the Food and Drug Administration due to its ______ fatal side effects.,potentially,delicately,ambiguously,optionally,potentially
 111-GSAT-5,______ the photos with dates and keywords help you sort them easily in your file.,Tagging,Flocking,Rolling,Snapping,Tagging
 111-GSAT-6,"An ______ person is usually pleasant and easy to get along with, but don’t expect that he or she will always say “yes” to everything.",enormous,intimate,agreeable,ultimate,agreeable
 111-GSAT-7,"Hidden deep in a small alley among various tiny shops, the entrance of the Michelin star restaurant is barely ______ to passersby.",identical,visible,available,remarkable,visible
@@ -309,5 +309,3 @@ code,question,option 1,option 2,option 3,option 4,correct answer
 99-GSAT-7,"Steve has several meetings to attend every day; therefore, he has to work on a very _____ schedule.",dense,various,tight,current,tight
 99-GSAT-8,"Michael Phelps, an American swimmer, broke seven world records and won eight gold medals in men’s swimming _____ in the 2008 Olympics.",drills,techniques,routines,contests,contests
 99-GSAT-9,"Those college students work at the orphanage on a _____ basis, helping the children with their studies without receiving any pay.",voluntary,competitive,sorrowful,realistic,voluntary
-
-
