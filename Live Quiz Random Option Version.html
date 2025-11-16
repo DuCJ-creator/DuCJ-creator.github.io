@@ -6,6 +6,7 @@
     <title>Shirley's Live Quiz Show (Random Option Version)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* 全部原有樣式不變 */
         :root {
             --primary-color: #9c27b0;
             --secondary-color: #e91e63;
@@ -18,14 +19,12 @@
             --correct-color: #4CAF50;
             --incorrect-color: #F44336;
         }
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
         body {
             background: linear-gradient(135deg, #8e24aa 0%, #e91e63 100%);
             color: white;
@@ -33,12 +32,10 @@
             padding: 20px;
             overflow-x: hidden;
         }
-        
         .container {
             max-width: 1400px;
             margin: 0 auto;
         }
-        
         header {
             text-align: center;
             margin-bottom: 30px;
@@ -49,7 +46,6 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
         h1 {
             font-size: 3.2rem;
             margin-bottom: 10px;
@@ -57,19 +53,15 @@
             text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
             font-weight: 800;
         }
-        
         .subtitle {
             font-size: 1.4rem;
             opacity: 0.9;
         }
-        
-        /* 新的上下佈局樣式 */
         .game-layout {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
-        
         .host-control-area {
             background: rgba(255, 255, 255, 0.15);
             border-radius: 15px;
@@ -79,13 +71,11 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
         }
-        
         .game-area {
             display: flex;
             gap: 20px;
             min-height: 600px;
         }
-        
         .question-area {
             flex: 2;
             background: rgba(255, 255, 255, 0.15);
@@ -95,7 +85,6 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
         .players-area {
             flex: 1;
             background: rgba(255, 255, 255, 0.15);
@@ -105,7 +94,6 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
         .panel-title {
             font-size: 1.5rem;
             margin-bottom: 20px;
@@ -116,17 +104,14 @@
             border-bottom: 2px solid rgba(255, 255, 255, 0.3);
             padding-bottom: 10px;
         }
-        
         .panel-title i {
             color: var(--accent-color);
         }
-        
         .admin-controls {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
-        
         textarea {
             width: 100%;
             height: 120px;
@@ -140,21 +125,17 @@
             transition: all 0.3s ease;
             color: white;
         }
-        
         textarea::placeholder {
             color: rgba(255, 255, 255, 0.7);
         }
-        
         textarea:focus {
             outline: none;
             border-color: var(--accent-color);
             box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.3);
         }
-        
         .form-group {
             margin-bottom: 15px;
         }
-        
         label {
             display: block;
             margin-bottom: 6px;
@@ -162,7 +143,6 @@
             color: white;
             font-size: 0.9rem;
         }
-        
         select, input {
             width: 100%;
             padding: 10px 12px;
@@ -173,18 +153,15 @@
             transition: all 0.3s ease;
             color: white;
         }
-        
         select option {
             background: #8e24aa;
             color: white;
         }
-        
         select:focus, input:focus {
             outline: none;
             border-color: var(--accent-color);
             box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.3);
         }
-        
         button {
             background: var(--accent-color);
             color: white;
@@ -201,21 +178,17 @@
             margin: 8px 0;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
-        
         button:hover {
             background: #ffb300;
             transform: translateY(-3px);
             box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3);
         }
-        
         button.secondary {
             background: var(--secondary-color);
         }
-        
         button.secondary:hover {
             background: #ec407a;
         }
-        
         .question {
             font-size: 2rem;
             margin-bottom: 20px;
@@ -226,14 +199,12 @@
             color: white;
             text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
         }
-        
         .options {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             margin-bottom: 20px;
         }
-        
         .option {
             background: rgba(255, 255, 255, 0.15);
             padding: 18px;
@@ -249,13 +220,11 @@
             backdrop-filter: blur(5px);
             position: relative;
         }
-        
         .option:hover {
             background: rgba(255, 255, 255, 0.25);
             transform: scale(1.03);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
-        
         .option-letter {
             position: absolute;
             left: 15px;
@@ -265,11 +234,9 @@
             font-size: 1.2rem;
             color: var(--accent-color);
         }
-        
         .option-text {
             margin-left: 30px;
         }
-        
         .timer {
             font-size: 3.5rem;
             font-weight: bold;
@@ -277,13 +244,11 @@
             color: var(--accent-color);
             text-shadow: 0 0 15px rgba(255, 152, 0, 0.7);
         }
-        
         .players-list {
             list-style-type: none;
             max-height: 350px;
             overflow-y: auto;
         }
-        
         .player {
             display: flex;
             justify-content: space-between;
@@ -295,38 +260,31 @@
             border-left: 4px solid var(--accent-color);
             font-size: 0.9rem;
         }
-        
         .player:hover {
             background: rgba(255, 255, 255, 0.2);
         }
-        
         .player-name {
             font-weight: bold;
         }
-        
         .player-score {
             color: var(--accent-color);
             font-weight: bold;
         }
-        
         .player-group {
             font-size: 0.75rem;
             color: rgba(255, 255, 255, 0.7);
             margin-top: 2px;
         }
-        
         .correct {
             background: var(--correct-color) !important;
             color: white;
             box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
         }
-        
         .incorrect {
             background: var(--incorrect-color) !important;
             color: white;
             box-shadow: 0 0 15px rgba(244, 67, 54, 0.5);
         }
-        
         .podium {
             display: flex;
             justify-content: center;
@@ -334,7 +292,6 @@
             margin: 25px 0;
             gap: 15px;
         }
-        
         .podium-place {
             text-align: center;
             padding: 15px;
@@ -345,44 +302,37 @@
             max-width: 180px;
             backdrop-filter: blur(5px);
         }
-        
         .first-place {
             background: linear-gradient(135deg, #FFD700, #FFEC8B);
             order: 2;
             height: 160px;
         }
-        
         .second-place {
             background: linear-gradient(135deg, #C0C0C0, #E8E8E8);
             order: 1;
             height: 130px;
         }
-        
         .third-place {
             background: linear-gradient(135deg, #CD7F32, #E8C8A9);
             order: 3;
             height: 100px;
         }
-        
         .podium-rank {
             font-size: 1.5rem;
             font-weight: bold;
             margin-bottom: 8px;
             color: var(--dark-color);
         }
-        
         .podium-name {
             font-size: 1.2rem;
             font-weight: bold;
             margin-bottom: 5px;
             color: var(--dark-color);
         }
-        
         .podium-score {
             font-size: 1rem;
             color: var(--dark-color);
         }
-        
         .bonus-notification, .penalty-notification {
             position: fixed;
             top: 50%;
@@ -400,17 +350,14 @@
             min-width: 400px;
             backdrop-filter: blur(10px);
         }
-        
         .bonus-notification {
             background: rgba(76, 175, 80, 0.9);
             border: 3px solid #4CAF50;
         }
-        
         .penalty-notification {
             background: rgba(244, 67, 54, 0.9);
             border: 3px solid #f44336;
         }
-        
         @keyframes popIn {
             0% {
                 transform: translate(-50%, -50%) scale(0.5);
@@ -424,34 +371,28 @@
                 opacity: 1;
             }
         }
-        
         .report-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
             font-size: 0.9rem;
         }
-        
         .report-table th, .report-table td {
             padding: 10px 12px;
             text-align: left;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
         .report-table th {
             background: rgba(255, 255, 255, 0.1);
             color: white;
         }
-        
         .report-table tr:hover {
             background: rgba(255, 255, 255, 0.05);
         }
-        
         .current-player {
             background: rgba(255, 152, 0, 0.3) !important;
             border-left: 4px solid var(--accent-color);
         }
-        
         .game-info {
             display: flex;
             justify-content: space-between;
@@ -460,18 +401,15 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
         }
-        
         .game-theme {
             font-size: 1.3rem;
             font-weight: bold;
             color: var(--accent-color);
         }
-        
         .question-number {
             font-size: 1rem;
             color: rgba(255, 255, 255, 0.9);
         }
-        
         .correct-answer {
             font-size: 1.5rem;
             color: var(--correct-color);
@@ -479,14 +417,12 @@
             margin: 15px 0;
             text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
         }
-        
         .game-controls {
             display: flex;
             justify-content: center;
             gap: 15px;
             margin: 20px 0;
         }
-        
         .confetti {
             position: fixed;
             width: 10px;
@@ -495,7 +431,6 @@
             opacity: 0;
             z-index: 999;
         }
-        
         .explosion {
             position: fixed;
             width: 20px;
@@ -506,7 +441,6 @@
             opacity: 0;
             z-index: 999;
         }
-        
         .sound-control {
             position: fixed;
             bottom: 20px;
@@ -524,13 +458,10 @@
             z-index: 100;
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
-        
         .sound-control i {
             font-size: 1.5rem;
             color: white;
         }
-        
-        /* 遊戲開始後隱藏主控區域 */
         .game-started .host-control-area {
             max-height: 0;
             padding-top: 0;
@@ -538,41 +469,33 @@
             overflow: hidden;
             opacity: 0;
         }
-        
         .game-started .game-area {
             min-height: 800px;
         }
-        
         @media (max-width: 768px) {
             .options {
                 grid-template-columns: 1fr;
             }
-            
             .game-area {
                 flex-direction: column;
             }
-            
             .podium {
                 flex-direction: column;
                 align-items: center;
             }
-            
             .podium-place {
                 max-width: 100%;
                 height: auto !important;
             }
-            
             .game-controls {
                 flex-direction: column;
                 align-items: center;
             }
-            
             .bonus-notification, .penalty-notification {
                 min-width: 300px;
                 font-size: 1.4rem;
                 padding: 20px 25px;
             }
-            
             .admin-controls {
                 grid-template-columns: 1fr;
             }
@@ -585,32 +508,37 @@
             <h1>Shirley's Live Quiz Show</h1>
             <p class="subtitle">Random Option Version</p>
         </header>
-        
         <div class="game-layout">
-            <!-- 主控區域 - 遊戲開始後會隱藏 -->
             <div class="host-control-area">
                 <h2 class="panel-title"><i class="fas fa-user-cog"></i> 主控台 Host Control</h2>
-                
                 <div class="admin-controls">
                     <div>
                         <div class="form-group">
                             <label for="gameTheme">遊戲主題 Game Theme</label>
                             <input type="text" id="gameTheme" placeholder="輸入遊戲主題 Enter game theme">
                         </div>
-                        
                         <div class="form-group">
                             <label for="questionsInput">問題與答案 (一行一題，用tab或空格分隔) Questions & Answers (one per line, separate with tab or spaces)</label>
                             <textarea id="questionsInput" placeholder="問題1	答案1
 Question2	Answer2"></textarea>
                         </div>
-                        
+                        <div class="form-group">
+                            <label>或選擇現有題庫 Question Bank:</label>
+                            <select id="questionBank">
+                                <option value="">— 選擇題庫 —</option>
+                                <option value="ivocab">iVocab (Level 1–6)</option>
+                                <option value="frp">FRP ELA Words</option>
+                                <option value="toefl">TOEFL Junior Words</option>
+                            </select>
+                        </div>
+                        <div id="bankOptions" style="display:none; margin-top: 15px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                        </div>
                         <div class="form-group">
                             <label for="playersInput">參與者 (一行一個名字) Participants (one name per line)</label>
                             <textarea id="playersInput" placeholder="參與者1
 Participant2"></textarea>
                         </div>
                     </div>
-                    
                     <div>
                         <div class="form-group">
                             <label for="gameMode">遊戲模式 Game Mode</label>
@@ -619,67 +547,275 @@ Participant2"></textarea>
                                 <option value="team">團隊 Team</option>
                             </select>
                         </div>
-                        
                         <div class="form-group">
                             <label for="answerTime">每題答題時間 (秒) Time per Question (seconds)</label>
                             <input type="number" id="answerTime" min="5" max="120" value="30">
                         </div>
-                        
                         <button id="startGame"><i class="fas fa-play"></i> 開始遊戲 Start Game</button>
                         <button id="showReport" style="display:none;"><i class="fas fa-chart-bar"></i> 查看報告 View Report</button>
                     </div>
                 </div>
             </div>
-            
-            <!-- 遊戲區域 - 遊戲開始後會佔用更多空間 -->
             <div class="game-area">
                 <div class="question-area">
                     <h2 class="panel-title"><i class="fas fa-gamepad"></i> 答題區 Question Area</h2>
-                    
                     <div class="game-info">
                         <div class="game-theme" id="gameThemeDisplay">遊戲主題 Game Theme</div>
                         <div class="question-number" id="questionNumber">問題 0 / 0 Question 0 of 0</div>
                     </div>
-                    
                     <div class="question" id="currentQuestion">等待遊戲開始... Waiting for game to start...</div>
-                    
                     <div class="options" id="optionsContainer">
-                        <!-- 選項將動態生成 -->
                     </div>
-                    
                     <div class="correct-answer" id="correctAnswer"></div>
-                    
                     <div class="timer" id="timer">30</div>
-                    
                     <div id="currentPlayer" style="font-size: 1.5rem; margin: 15px 0; color: var(--accent-color);"></div>
-                    
                     <div class="game-controls" id="gameControls" style="display: none;">
                         <button id="nextQuestion" class="secondary"><i class="fas fa-forward"></i> 下一題 Next Question</button>
                         <button id="endGame"><i class="fas fa-stop"></i> 結束遊戲 End Game</button>
                     </div>
-                    
                     <div class="podium" id="podium" style="display: none;">
-                        <!-- 頒獎台將動態生成 -->
                     </div>
                 </div>
-                
                 <div class="players-area">
                     <h2 class="panel-title"><i class="fas fa-users"></i> 玩家狀態 Player Status</h2>
                     <div class="players-list" id="playersList">
-                        <!-- 玩家列表將動態生成 -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- 聲音控制 -->
     <div class="sound-control" id="soundControl">
         <i class="fas fa-volume-up"></i>
     </div>
-    
     <script>
-        // Game state and variables
+        // ========================
+        // 新增：題庫配置
+        // ========================
+        const QUESTION_BANKS = {
+            ivocab: {
+                url: (level) => `https://ducj-creator.github.io/iVocab-Self-Practice/level${level}.csv`,
+                parse: parseCsv,
+                params: ['level', 'unitRange', 'count']
+            },
+            frp: {
+                url: () => 'https://ducj-creator.github.io/Teacher-Shirley/study-tools/FRP%20ELA%20Vocab.csv',
+                parse: parseCsv,
+                params: ['semester', 'units', 'count']
+            },
+            toefl: {
+                url: () => 'https://ducj-creator.github.io/Teacher-Shirley/study-tools/TOEFL%20Junior%20Word%20List.txt',
+                parse: parseTxtToefl,
+                params: ['category', 'count']
+            }
+        };
+
+        // ========================
+        // 解析函數
+        // ========================
+        function parseCsv(text) {
+            const lines = text.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"(.*)"$/, '$1'));
+            const rows = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim().replace(/^"(.*)"$/, '$1'));
+                if (values.length === headers.length) {
+                    const row = {};
+                    headers.forEach((h, idx) => row[h] = values[idx]);
+                    rows.push(row);
+                }
+            }
+            return rows;
+        }
+
+        function parseTxtToefl(text) {
+            const lines = text.trim().split('\n');
+            const words = [];
+            const categories = [
+                "Language Form & Meaning",
+                "Reading Strategies",
+                "Reading Comprehension",
+                "Listening Comprehension"
+            ];
+            let currentCategory = '';
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (categories.includes(trimmed)) {
+                    currentCategory = trimmed;
+                } else if (trimmed.includes('—') && trimmed.includes('(')) {
+                    const match = trimmed.match(/^([^(]+?)\s*\(([^)]+)\)\s*—\s*(.+)$/);
+                    if (match) {
+                        words.push({
+                            word: match[1].trim(),
+                            partOfSpeech: match[2].trim(),
+                            meaningZh: match[3].trim(),
+                            category: currentCategory
+                        });
+                    }
+                }
+            }
+            return words;
+        }
+
+        // ========================
+        // 動態 UI 與載入
+        // ========================
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('questionBank').addEventListener('change', function() {
+                const bankOptions = document.getElementById('bankOptions');
+                const selected = this.value;
+                bankOptions.innerHTML = '';
+                if (!selected) {
+                    bankOptions.style.display = 'none';
+                    return;
+                }
+                bankOptions.style.display = 'block';
+
+                const div = document.createElement('div');
+                div.className = 'admin-controls';
+
+                if (selected === 'ivocab') {
+                    div.innerHTML = `
+                        <div class="form-group">
+                            <label>Level (1–6)</label>
+                            <select id="ivocabLevel">${[1,2,3,4,5,6].map(l => `<option value="${l}">Level ${l}</option>`).join('')}</select>
+                        </div>
+                        <div class="form-group">
+                            <label>Unit Range</label>
+                            <select id="ivocabUnitRange">
+                                <option value="1-5">Units 1–5</option>
+                                <option value="6-10">Units 6–10</option>
+                                <option value="11-15">Units 11–15</option>
+                                <option value="16-20">Units 16–20</option>
+                                <option value="21-25">Units 21–25</option>
+                                <option value="26-30">Units 26–30</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>題數 (最多 50)</label>
+                            <input type="number" id="ivocabCount" min="1" max="50" value="10">
+                        </div>
+                        <button id="loadIvocab"><i class="fas fa-database"></i> 載入題目 Load Questions</button>
+                    `;
+                } else if (selected === 'frp') {
+                    div.innerHTML = `
+                        <div class="form-group">
+                            <label>Semester</label>
+                            <select id="frpSemester">
+                                <option value="I">I</option>
+                                <option value="II">II</option>
+                                <option value="III">III</option>
+                                <option value="IV">IV</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Unit (可複選)</label>
+                            <select id="frpUnits" multiple size="8">${[1,2,3,4,5,6,7,8].map(u => `<option value="${u}">Unit ${u}</option>`).join('')}</select>
+                        </div>
+                        <div class="form-group">
+                            <label>題數 (最多 50)</label>
+                            <input type="number" id="frpCount" min="1" max="50" value="10">
+                        </div>
+                        <button id="loadFrp"><i class="fas fa-database"></i> 載入題目 Load Questions</button>
+                    `;
+                } else if (selected === 'toefl') {
+                    div.innerHTML = `
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="toeflCategory">
+                                <option value="Language Form &amp; Meaning">語言形式與意義 / Language Form & Meaning</option>
+                                <option value="Reading Strategies">閱讀策略 / Reading Strategies</option>
+                                <option value="Reading Comprehension">閱讀理解 / Reading Comprehension</option>
+                                <option value="Listening Comprehension">聽力理解 / Listening Comprehension</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>題數 (最多 50)</label>
+                            <input type="number" id="toeflCount" min="1" max="50" value="10">
+                        </div>
+                        <button id="loadToefl"><i class="fas fa-database"></i> 載入題目 Load Questions</button>
+                    `;
+                }
+                bankOptions.appendChild(div);
+
+                if (selected === 'ivocab') document.getElementById('loadIvocab').onclick = loadIvocab;
+                else if (selected === 'frp') document.getElementById('loadFrp').onclick = loadFrp;
+                else if (selected === 'toefl') document.getElementById('loadToefl').onclick = loadToefl;
+            });
+        });
+
+        async function fetchAndSetQuestions(dataList, count, formatQuestion) {
+            const uniqueWords = {};
+            const filtered = [];
+            for (const item of dataList) {
+                const key = item.word.toLowerCase();
+                if (!uniqueWords[key]) {
+                    uniqueWords[key] = true;
+                    filtered.push(item);
+                }
+            }
+            const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+            const selected = shuffled.slice(0, Math.min(count, shuffled.length));
+            const qStr = selected.map(item => formatQuestion(item)).join('\n');
+            document.getElementById('questionsInput').value = qStr;
+            alert(`已載入 ${selected.length} 題`);
+        }
+
+        async function loadIvocab() {
+            const level = document.getElementById('ivocabLevel').value;
+            const [start, end] = document.getElementById('ivocabUnitRange').value.split('-').map(Number);
+            const count = parseInt(document.getElementById('ivocabCount').value) || 10;
+
+            const res = await fetch(QUESTION_BANKS.ivocab.url(level));
+            const text = await res.text();
+            const rows = QUESTION_BANKS.ivocab.parse(text);
+
+            // 假設 rows 包含 unit 欄位，否則移除此 filter
+            const filtered = rows.filter(r => {
+                const unit = parseInt(r.unit);
+                return !isNaN(unit) && unit >= start && unit <= end;
+            });
+
+            fetchAndSetQuestions(filtered, count, item =>
+                `${item.word} (${item.partOfSpeech})\t${item.meaningZh}`
+            );
+        }
+
+        async function loadFrp() {
+            const semester = document.getElementById('frpSemester').value;
+            const selectedUnits = Array.from(document.getElementById('frpUnits').selectedOptions).map(o => o.value);
+            const count = parseInt(document.getElementById('frpCount').value) || 10;
+
+            const res = await fetch(QUESTION_BANKS.frp.url());
+            const text = await res.text();
+            const rows = QUESTION_BANKS.frp.parse(text);
+
+            const filtered = rows.filter(r =>
+                r.semester === semester && selectedUnits.includes(r.unit)
+            );
+
+            fetchAndSetQuestions(filtered, count, item =>
+                `${item.word} (${item.partOfSpeech})\t${item.meaningZh}`
+            );
+        }
+
+        async function loadToefl() {
+            const category = document.getElementById('toeflCategory').value.replace('&amp;', '&');
+            const count = parseInt(document.getElementById('toeflCount').value) || 10;
+
+            const res = await fetch(QUESTION_BANKS.toefl.url());
+            const text = await res.text();
+            const rows = QUESTION_BANKS.toefl.parse(text);
+
+            const filtered = rows.filter(r => r.category === category);
+
+            fetchAndSetQuestions(filtered, count, item =>
+                `${item.word} (${item.partOfSpeech})\t${item.meaningZh}`
+            );
+        }
+
+        // ========================
+        // 原有遊戲邏輯（保持不變）
+        // ========================
         let gameState = {
             questions: [],
             players: [],
@@ -725,7 +861,6 @@ Participant2"></textarea>
             questionStats: {}
         };
 
-        // DOM elements
         const gameThemeInput = document.getElementById('gameTheme');
         const questionsInput = document.getElementById('questionsInput');
         const playersInput = document.getElementById('playersInput');
@@ -747,140 +882,87 @@ Participant2"></textarea>
         const podiumEl = document.getElementById('podium');
         const playersListEl = document.getElementById('playersList');
         const hostControlArea = document.querySelector('.host-control-area');
-        const gameLayout = document.querySelector('.game-layout');
 
-        // Audio context for generating sounds
         let audioContext;
-        
-        // Initialize
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize audio context
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             } catch (e) {
                 console.log('Web Audio API is not supported in this browser');
             }
-            
-            // Event listeners
             startGameBtn.addEventListener('click', startGame);
             nextQuestionBtn.addEventListener('click', nextQuestion);
             endGameBtn.addEventListener('click', endGame);
             showReportBtn.addEventListener('click', showReport);
             soundControl.addEventListener('click', toggleSound);
-            
-            // Add a user interaction to unlock audio
             document.body.addEventListener('click', unlockAudio, { once: true });
         });
-        
-        // Unlock audio context on user interaction
+
         function unlockAudio() {
             if (audioContext && audioContext.state === 'suspended') {
                 audioContext.resume();
             }
         }
 
-        // Start game
         function startGame() {
-            // Get game theme
             gameState.gameTheme = gameThemeInput.value.trim();
             if (!gameState.gameTheme) {
                 alert('Please enter a game theme!');
                 return;
             }
-            
-            // Load questions
             if (!loadQuestions()) {
                 alert('Please enter questions and answers correctly!');
                 return;
             }
-            
-            // Load participants
             if (!loadPlayers()) {
                 alert('Please enter at least one participant!');
                 return;
             }
-            
-            // Set game mode and time
             gameState.gameMode = gameModeSelect.value;
             gameState.answerTime = parseInt(answerTimeInput.value);
-            
-            // Check team mode minimum players
             if (gameState.gameMode === 'team' && gameState.players.length < 3) {
                 alert('Team mode requires at least 3 players!');
                 return;
             }
-            
-            // Assign team names for team mode
             if (gameState.gameMode === 'team') {
                 assignTeamNames();
             }
-            
-            // Initialize game state
             gameState.currentQuestionIndex = 0;
             gameState.currentPlayerIndex = 0;
             gameState.isGameActive = true;
-            
-            // Randomize questions and players
             shuffleQuestions();
             shufflePlayers();
-            
-            // Show game theme
             gameThemeDisplay.textContent = gameState.gameTheme;
-            
-            // Update participant list
             updatePlayersList();
-            
-            // Show first question
             displayQuestion();
-            
-            // Show game controls
             gameControls.style.display = 'flex';
-            
-            // Hide start button
             startGameBtn.style.display = 'none';
-            
-            // Add game-started class to body for layout changes
             document.body.classList.add('game-started');
-            
-            // Play background music
             playBackgroundMusic();
-            
             alert('Game started!');
         }
 
-        // Load questions
         function loadQuestions() {
             const input = questionsInput.value.trim();
-            if (!input) {
-                return false;
-            }
-            
+            if (!input) return false;
             const lines = input.split('\n');
             gameState.questions = [];
-            
-            // Collect all correct answers for generating distractors
             const allAnswers = [];
-            
             for (let line of lines) {
                 line = line.trim();
                 if (!line) continue;
-                
-                // Use tab or spaces to separate question and answer
                 const parts = line.split(/\t| {2,}/);
                 if (parts.length < 2) {
                     console.warn('Question format error, skip: ' + line);
                     continue;
                 }
-                
                 const question = {
                     text: parts[0].trim(),
                     correctAnswer: parts[1].trim()
                 };
-                
                 gameState.questions.push(question);
                 allAnswers.push(question.correctAnswer);
-                
-                // Initialize question stats
                 if (!gameState.questionStats[question.text]) {
                     gameState.questionStats[question.text] = {
                         correct: 0,
@@ -889,49 +971,29 @@ Participant2"></textarea>
                     };
                 }
             }
-            
-            if (gameState.questions.length === 0) {
-                return false;
-            }
-            
-            // Generate options for each question
+            if (gameState.questions.length === 0) return false;
             gameState.questions.forEach(question => {
                 question.options = generateOptions(question.correctAnswer, allAnswers);
             });
-            
             return true;
         }
 
-        // Generate options (include correct answer and three random distractors)
         function generateOptions(correctAnswer, allAnswers) {
-            // Create answer pool without correct answer
             const answerPool = allAnswers.filter(answer => answer !== correctAnswer);
-            
-            // Randomly select three distractors
             const shuffledPool = [...answerPool].sort(() => Math.random() - 0.5);
             const distractors = shuffledPool.slice(0, 3);
-            
-            // Combine correct answer and distractors
             const options = [correctAnswer, ...distractors];
-            
-            // Randomly sort options
             return options.sort(() => Math.random() - 0.5);
         }
 
-        // Load participants
         function loadPlayers() {
             const input = playersInput.value.trim();
-            if (!input) {
-                return false;
-            }
-            
+            if (!input) return false;
             const lines = input.split('\n');
             gameState.players = [];
-            
             for (let line of lines) {
                 line = line.trim();
                 if (!line) continue;
-                
                 const player = {
                     id: Date.now().toString() + Math.random(),
                     name: line,
@@ -940,30 +1002,21 @@ Participant2"></textarea>
                     correctAnswers: 0,
                     team: null
                 };
-                
                 gameState.players.push(player);
-                
-                // Initialize player stats
                 gameState.playerStats[player.name] = {
                     answers: 0,
                     correctAnswers: 0
                 };
             }
-            
             return gameState.players.length > 0;
         }
 
-        // Assign team names
         function assignTeamNames() {
             gameState.usedTeamNames = [];
             const shuffledTeamNames = [...gameState.teamNames].sort(() => Math.random() - 0.5);
-            
-            // Calculate players per team (minimum 3 per team)
             const minPlayersPerTeam = 3;
             const teamCount = Math.ceil(gameState.players.length / minPlayersPerTeam);
             const playersPerTeam = Math.ceil(gameState.players.length / teamCount);
-            
-            // Assign team names to each player
             gameState.players.forEach((player, index) => {
                 const teamIndex = Math.floor(index / playersPerTeam);
                 if (teamIndex < shuffledTeamNames.length) {
@@ -975,7 +1028,6 @@ Participant2"></textarea>
             });
         }
 
-        // Shuffle questions for random order
         function shuffleQuestions() {
             for (let i = gameState.questions.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -983,7 +1035,6 @@ Participant2"></textarea>
             }
         }
 
-        // Shuffle players for random order
         function shufflePlayers() {
             for (let i = gameState.players.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -991,23 +1042,15 @@ Participant2"></textarea>
             }
         }
 
-        // Display question
         function displayQuestion() {
             if (gameState.currentQuestionIndex >= gameState.questions.length) {
                 endGame();
                 return;
             }
-            
             const question = gameState.questions[gameState.currentQuestionIndex];
             currentQuestionEl.textContent = question.text;
-            
-            // Update question number
             questionNumber.textContent = `問題 ${gameState.currentQuestionIndex + 1} / ${gameState.questions.length} Question ${gameState.currentQuestionIndex + 1} of ${gameState.questions.length}`;
-            
-            // Clear correct answer display
             correctAnswerEl.textContent = '';
-            
-            // Generate options with letters A, B, C, D
             optionsContainer.innerHTML = '';
             const letters = ['A', 'B', 'C', 'D'];
             question.options.forEach((option, index) => {
@@ -1020,44 +1063,25 @@ Participant2"></textarea>
                 optionEl.addEventListener('click', () => checkAnswer(option, question.correctAnswer, optionEl));
                 optionsContainer.appendChild(optionEl);
             });
-            
-            // Select current answerer (random order)
             selectCurrentPlayer();
-            
-            // Start timer
             startTimer();
-            
-            // Play question sound
             playQuestionSound();
         }
 
-        // Select current answerer (random order)
         function selectCurrentPlayer() {
-            // Ensure each participant has a chance to answer
-            // In this random version, we simply cycle through the shuffled player list
             const player = gameState.players[gameState.currentPlayerIndex % gameState.players.length];
             const teamDisplay = player.team ? ` (${player.team.en} / ${player.team.zh})` : '';
             currentPlayerEl.textContent = `當前玩家: ${player.name}${teamDisplay}`;
-            
-            // Update player list highlight
             updatePlayersList();
         }
 
-        // Start timer
         function startTimer() {
             let timeLeft = gameState.answerTime;
             timerEl.textContent = timeLeft;
-            
-            // Clear previous timer
-            if (gameState.timerInterval) {
-                clearInterval(gameState.timerInterval);
-            }
-            
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
             gameState.timerInterval = setInterval(() => {
                 timeLeft--;
                 timerEl.textContent = timeLeft;
-                
-                // Time's up
                 if (timeLeft <= 0) {
                     clearInterval(gameState.timerInterval);
                     timeUp();
@@ -1065,55 +1089,26 @@ Participant2"></textarea>
             }, 1000);
         }
 
-        // Check answer
         function checkAnswer(selected, correct, optionEl) {
-            // Clear timer
             clearInterval(gameState.timerInterval);
-            
-            // Play answer sound
             playAnswerSound();
-            
             const isCorrect = selected === correct;
             const currentPlayer = gameState.players[gameState.currentPlayerIndex % gameState.players.length];
-            
-            // Update player stats
             currentPlayer.answers++;
             gameState.playerStats[currentPlayer.name].answers++;
-            
-            // Update question stats
             gameState.questionStats[gameState.questions[gameState.currentQuestionIndex].text][isCorrect ? 'correct' : 'incorrect']++;
-            
-            // Show correct answer
             correctAnswerEl.textContent = `正確答案: ${correct} Correct Answer: ${correct}`;
-            
-            // Handle scoring logic
             if (isCorrect) {
-                // Correct answer: +10 points
                 currentPlayer.score += 10;
                 currentPlayer.correctAnswers++;
                 gameState.playerStats[currentPlayer.name].correctAnswers++;
-                
-                // Play correct sound
                 playCorrectSound();
-                
-                // Random bonus
-                if (Math.random() < 0.3) { // 30% chance to trigger bonus
-                    setTimeout(() => applyBonus(currentPlayer), 1500);
-                }
+                if (Math.random() < 0.3) setTimeout(() => applyBonus(currentPlayer), 1500);
             } else {
-                // Wrong answer: -5 points
-                currentPlayer.score = Math.max(-100, currentPlayer.score - 5); // Allow negative scores with a limit
-                
-                // Play incorrect sound
+                currentPlayer.score = Math.max(-100, currentPlayer.score - 5);
                 playIncorrectSound();
-                
-                // Random penalty
-                if (Math.random() < 0.3) { // 30% chance to trigger penalty
-                    setTimeout(() => applyPenalty(currentPlayer), 1500);
-                }
+                if (Math.random() < 0.3) setTimeout(() => applyPenalty(currentPlayer), 1500);
             }
-            
-            // Highlight options
             const options = document.querySelectorAll('.option');
             options.forEach(opt => {
                 if (opt.querySelector('.option-text').textContent === correct) {
@@ -1121,96 +1116,59 @@ Participant2"></textarea>
                 } else if (opt.querySelector('.option-text').textContent === selected && !isCorrect) {
                     opt.classList.add('incorrect');
                 }
-                
-                // Disable all options
                 opt.style.pointerEvents = 'none';
             });
-            
-            // Update player list
             updatePlayersList();
-            
-            // Move to next answerer
             gameState.currentPlayerIndex++;
         }
 
-        // Time's up
         function timeUp() {
             const question = gameState.questions[gameState.currentQuestionIndex];
-            
-            // Show correct answer
             correctAnswerEl.textContent = `正確答案: ${question.correctAnswer} Correct Answer: ${question.correctAnswer}`;
-            
-            // Highlight correct answer
             const options = document.querySelectorAll('.option');
             options.forEach(opt => {
                 if (opt.querySelector('.option-text').textContent === question.correctAnswer) {
                     opt.classList.add('correct');
                 }
-                
-                // Disable all options
                 opt.style.pointerEvents = 'none';
             });
-            
-            // Play time up sound
             playTimeUpSound();
-            
-            // Move to next answerer
             gameState.currentPlayerIndex++;
         }
 
-        // Next question
         function nextQuestion() {
             if (!gameState.isGameActive) {
                 alert('Game has not started!');
                 return;
             }
-            
             gameState.currentQuestionIndex++;
             displayQuestion();
         }
 
-        // End game
         function endGame() {
             gameState.isGameActive = false;
             clearInterval(gameState.timerInterval);
-            
             currentQuestionEl.textContent = '遊戲結束! Game Over!';
             optionsContainer.innerHTML = '';
             correctAnswerEl.textContent = '';
             timerEl.textContent = '0';
             currentPlayerEl.textContent = '';
-            
-            // Hide game controls
             gameControls.style.display = 'none';
-            
-            // Show report button
             showReportBtn.style.display = 'block';
-            
-            // Play game over sound
             playGameOverSound();
-            
-            // Show podium
             showPodium();
         }
 
-        // Apply bonus
         function applyBonus(player) {
             const bonuses = [
                 { type: 'double', text: '分數加倍! Score doubled!' },
                 { type: 'steal', text: '從其他玩家偷取分數! Steal points from another player!' },
                 { type: 'swap', text: '與其他玩家交換分數! Swap scores with another player!' }
             ];
-            
             const bonus = bonuses[Math.floor(Math.random() * bonuses.length)];
-            
-            // Play confetti sound and applause
             playConfettiSound();
             playApplauseSound();
-            
-            // Create confetti effect
             createConfetti();
-            
-            // Show bonus notification
             const notification = document.createElement('div');
             notification.className = 'bonus-notification';
             notification.innerHTML = `
@@ -1218,15 +1176,12 @@ Participant2"></textarea>
                 <div>${player.name} 獲得加分! got bonus!</div>
                 <div style="font-size: 1.5rem; margin-top: 10px;">${bonus.text}</div>
             `;
-            
             document.body.appendChild(notification);
-            
             switch (bonus.type) {
                 case 'double':
                     player.score *= 2;
                     break;
                 case 'steal':
-                    // Randomly select another player
                     const otherPlayers = gameState.players.filter(p => p.id !== player.id);
                     if (otherPlayers.length > 0) {
                         const target = otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
@@ -1237,7 +1192,6 @@ Participant2"></textarea>
                     }
                     break;
                 case 'swap':
-                    // Swap with highest scoring player
                     const sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
                     const highestPlayer = sortedPlayers[0];
                     if (highestPlayer.id !== player.id) {
@@ -1252,32 +1206,18 @@ Participant2"></textarea>
                     }
                     break;
             }
-            
-            // Update player list
             updatePlayersList();
-            
-            // Remove notification after 5 seconds
-            setTimeout(() => {
-                notification.remove();
-            }, 5000);
+            setTimeout(() => notification.remove(), 5000);
         }
 
-        // Apply penalty
         function applyPenalty(player) {
             const penalties = [
                 { type: 'losePercentage', text: '失去部分分數! Lost some points!' },
                 { type: 'zero', text: '分數歸零! Score reset to zero!' }
             ];
-            
             const penalty = penalties[Math.floor(Math.random() * penalties.length)];
-            
-            // Play explosion sound
             playExplosionSound();
-            
-            // Create explosion effect
             createExplosion();
-            
-            // Show penalty notification
             const notification = document.createElement('div');
             notification.className = 'penalty-notification';
             notification.innerHTML = `
@@ -1285,9 +1225,7 @@ Participant2"></textarea>
                 <div>${player.name} 受到處罰! got penalty!</div>
                 <div style="font-size: 1.5rem; margin-top: 10px;">${penalty.text}</div>
             `;
-            
             document.body.appendChild(notification);
-            
             switch (penalty.type) {
                 case 'losePercentage':
                     const losePercentage = [0.1, 0.2, 0.5][Math.floor(Math.random() * 3)];
@@ -1302,20 +1240,12 @@ Participant2"></textarea>
                     `;
                     break;
             }
-            
-            // Update player list
             updatePlayersList();
-            
-            // Remove notification after 5 seconds
-            setTimeout(() => {
-                notification.remove();
-            }, 5000);
+            setTimeout(() => notification.remove(), 5000);
         }
 
-        // Create confetti effect
         function createConfetti() {
             const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
-            
             for (let i = 0; i < 150; i++) {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
@@ -1324,8 +1254,6 @@ Participant2"></textarea>
                 confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
                 confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
                 document.body.appendChild(confetti);
-                
-                // Animate confetti
                 const animation = confetti.animate([
                     { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
                     { transform: `translate(${Math.random() * 200 - 100}px, ${window.innerHeight}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
@@ -1333,13 +1261,10 @@ Participant2"></textarea>
                     duration: 3000 + Math.random() * 2000,
                     easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)'
                 });
-                
-                // Remove confetti after animation
                 animation.onfinish = () => confetti.remove();
             }
         }
 
-        // Create explosion effect
         function createExplosion() {
             for (let i = 0; i < 50; i++) {
                 const explosion = document.createElement('div');
@@ -1347,8 +1272,6 @@ Participant2"></textarea>
                 explosion.style.left = Math.random() * 100 + 'vw';
                 explosion.style.top = Math.random() * 100 + 'vh';
                 document.body.appendChild(explosion);
-                
-                // Animate explosion
                 const animation = explosion.animate([
                     { transform: 'scale(0)', opacity: 1 },
                     { transform: 'scale(1)', opacity: 0 }
@@ -1356,266 +1279,195 @@ Participant2"></textarea>
                     duration: 1000 + Math.random() * 500,
                     easing: 'ease-out'
                 });
-                
-                // Remove explosion after animation
                 animation.onfinish = () => explosion.remove();
             }
         }
 
-        // Sound functions using Web Audio API
         function playBackgroundMusic() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            
-            // Create background music with multiple oscillators
             const oscillator1 = audioContext.createOscillator();
             const oscillator2 = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            
             oscillator1.connect(gainNode);
             oscillator2.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            
             oscillator1.frequency.setValueAtTime(330, audioContext.currentTime);
             oscillator2.frequency.setValueAtTime(440, audioContext.currentTime);
             oscillator1.type = 'sine';
             oscillator2.type = 'sine';
-            
             gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
-            
             oscillator1.start(audioContext.currentTime);
             oscillator2.start(audioContext.currentTime);
-            
-            // Stop after 10 seconds
             setTimeout(() => {
                 oscillator1.stop();
                 oscillator2.stop();
             }, 10000);
         }
-        
+
         function playQuestionSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
             oscillator.type = 'sine';
-            
             gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
-            
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 1);
         }
-        
+
         function playAnswerSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime); // E5
+            oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime);
             oscillator.type = 'triangle';
-            
             gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-            
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.5);
         }
-        
+
         function playCorrectSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            
-            // Play a rising tone for correct answers
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
-            oscillator.frequency.exponentialRampToValueAtTime(1046.50, audioContext.currentTime + 0.5); // C6
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(1046.50, audioContext.currentTime + 0.5);
             oscillator.type = 'sine';
-            
             gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-            
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.5);
         }
-        
+
         function playIncorrectSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            
-            // Play a falling tone for incorrect answers
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
-            oscillator.frequency.exponentialRampToValueAtTime(261.63, audioContext.currentTime + 0.5); // C4
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(261.63, audioContext.currentTime + 0.5);
             oscillator.type = 'sawtooth';
-            
             gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-            
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.5);
         }
-        
+
         function playTimeUpSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            
             oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
             oscillator.type = 'square';
-            
             gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
-            
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 1);
         }
-        
+
         function playGameOverSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            
-            // Play a dramatic descending tone
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
-            oscillator.frequency.exponentialRampToValueAtTime(130.81, audioContext.currentTime + 2); // C3
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(130.81, audioContext.currentTime + 2);
             oscillator.type = 'sawtooth';
-            
             gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
-            
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 2);
         }
-        
+
         function playConfettiSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            
-            // Create a festive sound with multiple oscillators
             for (let i = 0; i < 5; i++) {
                 setTimeout(() => {
                     const oscillator = audioContext.createOscillator();
                     const gainNode = audioContext.createGain();
-                    
                     oscillator.connect(gainNode);
                     gainNode.connect(audioContext.destination);
-                    
                     const freq = 500 + Math.random() * 500;
                     oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
                     oscillator.type = 'sine';
-                    
                     gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
                     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-                    
                     oscillator.start(audioContext.currentTime);
                     oscillator.stop(audioContext.currentTime + 0.5);
                 }, i * 100);
             }
         }
-        
+
         function playApplauseSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            
-            // Create applause-like noise
             for (let i = 0; i < 20; i++) {
                 setTimeout(() => {
                     const oscillator = audioContext.createOscillator();
                     const gainNode = audioContext.createGain();
-                    
                     oscillator.connect(gainNode);
                     gainNode.connect(audioContext.destination);
-                    
                     const freq = 100 + Math.random() * 1000;
                     oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
                     oscillator.type = 'square';
-                    
                     const volume = 0.05 + Math.random() * 0.1;
                     gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
                     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1 + Math.random() * 0.2);
-                    
                     oscillator.start(audioContext.currentTime);
                     oscillator.stop(audioContext.currentTime + 0.1 + Math.random() * 0.2);
                 }, i * 50);
             }
         }
-        
+
         function playExplosionSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            
             oscillator.frequency.setValueAtTime(100, audioContext.currentTime);
             oscillator.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.5);
             oscillator.type = 'sawtooth';
-            
             gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-            
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.5);
         }
-        
+
         function playPodiumSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
-            
-            // Play a triumphant fanfare
-            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            const notes = [523.25, 659.25, 783.99, 1046.50];
             const durations = [0.3, 0.3, 0.3, 0.6];
-            
             let currentTime = audioContext.currentTime;
-            
             notes.forEach((note, index) => {
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
-                
                 oscillator.connect(gainNode);
                 gainNode.connect(audioContext.destination);
-                
                 oscillator.frequency.setValueAtTime(note, currentTime);
                 oscillator.type = 'sine';
-                
                 gainNode.gain.setValueAtTime(0.1, currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + durations[index]);
-                
                 oscillator.start(currentTime);
                 oscillator.stop(currentTime + durations[index]);
-                
                 currentTime += durations[index];
             });
         }
-        
+
         function toggleSound() {
             gameState.isSoundEnabled = !gameState.isSoundEnabled;
             const icon = soundControl.querySelector('i');
-            
             if (gameState.isSoundEnabled) {
                 icon.className = 'fas fa-volume-up';
                 if (audioContext && audioContext.state === 'suspended') {
@@ -1626,12 +1478,9 @@ Participant2"></textarea>
             }
         }
 
-        // Show podium
         function showPodium() {
-            // Sort players by score
             let sortedPlayers;
             if (gameState.gameMode === 'team') {
-                // Team mode: sort by team total score first, then by individual score
                 const teamScores = {};
                 gameState.players.forEach(player => {
                     if (!teamScores[player.team.en]) {
@@ -1639,7 +1488,6 @@ Participant2"></textarea>
                     }
                     teamScores[player.team.en] += player.score;
                 });
-                
                 sortedPlayers = [...gameState.players].sort((a, b) => {
                     if (teamScores[a.team.en] !== teamScores[b.team.en]) {
                         return teamScores[b.team.en] - teamScores[a.team.en];
@@ -1647,22 +1495,15 @@ Participant2"></textarea>
                     return b.score - a.score;
                 });
             } else {
-                // Individual mode: sort directly by score
                 sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
             }
-            
             podiumEl.innerHTML = '';
             podiumEl.style.display = 'flex';
-            
-            // Play podium sound
             playPodiumSound();
-            
-            // Show top three
             for (let i = 0; i < Math.min(3, sortedPlayers.length); i++) {
                 const player = sortedPlayers[i];
                 const placeClass = i === 0 ? 'first-place' : i === 1 ? 'second-place' : 'third-place';
                 const rankText = i === 0 ? '第1名 1st' : i === 1 ? '第2名 2nd' : '第3名 3rd';
-                
                 const podiumPlace = document.createElement('div');
                 podiumPlace.className = `podium-place ${placeClass}`;
                 podiumPlace.innerHTML = `
@@ -1671,11 +1512,8 @@ Participant2"></textarea>
                     <div class="podium-score">${player.score} 分 pts</div>
                     ${player.team ? `<div class="player-group">${player.team.en} / ${player.team.zh}</div>` : ''}
                 `;
-                
                 podiumEl.appendChild(podiumPlace);
             }
-            
-            // Show remaining players
             playersListEl.innerHTML = '';
             for (let i = 3; i < sortedPlayers.length; i++) {
                 const player = sortedPlayers[i];
@@ -1692,13 +1530,10 @@ Participant2"></textarea>
             }
         }
 
-        // Update player list
         function updatePlayersList() {
             playersListEl.innerHTML = '';
-            
             let sortedPlayers;
             if (gameState.gameMode === 'team') {
-                // Team mode: group by team first, then sort by individual score
                 const teams = {};
                 gameState.players.forEach(player => {
                     if (!teams[player.team.en]) {
@@ -1706,17 +1541,12 @@ Participant2"></textarea>
                     }
                     teams[player.team.en].push(player);
                 });
-                
-                // Calculate team total scores and sort
                 const teamScores = {};
                 Object.keys(teams).forEach(team => {
                     teamScores[team] = teams[team].reduce((sum, player) => sum + player.score, 0);
                 });
-                
                 const sortedTeams = Object.keys(teams).sort((a, b) => teamScores[b] - teamScores[a]);
-                
                 sortedTeams.forEach(team => {
-                    // Add team header
                     const teamHeader = document.createElement('li');
                     teamHeader.className = 'player';
                     teamHeader.style.background = 'rgba(255, 255, 255, 0.2)';
@@ -1728,8 +1558,6 @@ Participant2"></textarea>
                         <div class="player-score">${teamScores[team]} 分 pts</div>
                     `;
                     playersListEl.appendChild(teamHeader);
-                    
-                    // Add team members
                     const teamPlayers = teams[team].sort((a, b) => b.score - a.score);
                     teamPlayers.forEach((player, index) => {
                         const isCurrentPlayer = gameState.players[gameState.currentPlayerIndex % gameState.players.length].id === player.id;
@@ -1745,9 +1573,7 @@ Participant2"></textarea>
                     });
                 });
             } else {
-                // Individual mode: sort directly by score
                 sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
-                
                 sortedPlayers.forEach((player, index) => {
                     const isCurrentPlayer = gameState.players[gameState.currentPlayerIndex % gameState.players.length].id === player.id;
                     const playerEl = document.createElement('li');
@@ -1763,20 +1589,14 @@ Participant2"></textarea>
             }
         }
 
-        // View report
         function showReport() {
-            // Calculate overall accuracy
             let totalAnswers = 0;
             let totalCorrect = 0;
-            
             for (const playerName in gameState.playerStats) {
                 totalAnswers += gameState.playerStats[playerName].answers;
                 totalCorrect += gameState.playerStats[playerName].correctAnswers;
             }
-            
             const overallAccuracy = totalAnswers > 0 ? (totalCorrect / totalAnswers * 100).toFixed(2) : 0;
-            
-            // Find questions with error rate over 50%
             const problematicQuestions = [];
             for (const questionText in gameState.questionStats) {
                 const stats = gameState.questionStats[questionText];
@@ -1792,8 +1612,6 @@ Participant2"></textarea>
                     }
                 }
             }
-            
-            // Create report HTML
             let reportHTML = `
                 <h2 class="panel-title"><i class="fas fa-chart-bar"></i> 遊戲報告 Game Report</h2>
                 <div style="margin-bottom: 20px;">
@@ -1816,11 +1634,8 @@ Participant2"></textarea>
                         </thead>
                         <tbody>
             `;
-            
-            // Sort players (by team in team mode)
             let sortedPlayersForReport;
             if (gameState.gameMode === 'team') {
-                // Team mode: sort by team total score first, then by individual score
                 const teamScores = {};
                 gameState.players.forEach(player => {
                     if (!teamScores[player.team.en]) {
@@ -1828,7 +1643,6 @@ Participant2"></textarea>
                     }
                     teamScores[player.team.en] += player.score;
                 });
-                
                 sortedPlayersForReport = [...gameState.players].sort((a, b) => {
                     if (teamScores[a.team.en] !== teamScores[b.team.en]) {
                         return teamScores[b.team.en] - teamScores[a.team.en];
@@ -1836,15 +1650,12 @@ Participant2"></textarea>
                     return b.score - a.score;
                 });
             } else {
-                // Individual mode: sort directly by score
                 sortedPlayersForReport = [...gameState.players].sort((a, b) => b.score - a.score);
             }
-            
             sortedPlayersForReport.forEach(player => {
                 const stats = gameState.playerStats[player.name];
                 const accuracy = stats.answers > 0 ? (stats.correctAnswers / stats.answers * 100).toFixed(2) : 0;
                 const teamDisplay = player.team ? ` (${player.team.en} / ${player.team.zh})` : '';
-                
                 reportHTML += `
                     <tr>
                         <td>${player.name}${teamDisplay}</td>
@@ -1855,13 +1666,11 @@ Participant2"></textarea>
                     </tr>
                 `;
             });
-            
             reportHTML += `
                         </tbody>
                     </table>
                 </div>
             `;
-            
             if (problematicQuestions.length > 0) {
                 reportHTML += `
                     <div>
@@ -1876,7 +1685,6 @@ Participant2"></textarea>
                             </thead>
                             <tbody>
                 `;
-                
                 problematicQuestions.forEach(q => {
                     reportHTML += `
                         <tr>
@@ -1886,15 +1694,12 @@ Participant2"></textarea>
                         </tr>
                     `;
                 });
-                
                 reportHTML += `
                             </tbody>
                         </table>
                     </div>
                 `;
             }
-            
-            // Show report
             const reportPanel = document.querySelector('.question-area');
             reportPanel.innerHTML = reportHTML;
         }
