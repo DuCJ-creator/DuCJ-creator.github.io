@@ -506,6 +506,35 @@
                             <label for="gameTheme">遊戲主題 Game Theme</label>
                             <input type="text" id="gameTheme" placeholder="輸入遊戲主題 Enter game theme">
                         </div>
+
+                        <!-- 🔹 新增：題目來源選擇 + 題庫設定 -->
+                        <div class="form-group">
+                            <label for="questionSource">題目來源 Question Source</label>
+                            <select id="questionSource">
+                                <option value="manual">手動輸入 Manual</option>
+                                <option value="bank">題庫 Question Bank</option>
+                            </select>
+                        </div>
+
+                        <div id="questionBankSettings" style="display:none; padding:10px; border-radius:10px; background:rgba(255,255,255,0.6); margin-bottom:15px;">
+                            <div class="form-group">
+                                <label for="questionBankSelect">選擇題庫 Select Question Bank</label>
+                                <select id="questionBankSelect">
+                                    <option value="gsat_vocab">學測 GSAT Vocab</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="questionBankCount">題數 (最多 50 題) Number of Questions (max 50)</label>
+                                <input type="number" id="questionBankCount" min="1" max="50" value="20">
+                            </div>
+                            <button id="loadFromBank"><i class="fas fa-database"></i> 從題庫載入 Load from Bank</button>
+                            <small style="color: var(--secondary-color);">
+                                會自動從題庫隨機抽題並填入下方問題欄位，格式與手動輸入相同。<br>
+                                The system will randomly pick questions from the bank and fill the textbox below.
+                            </small>
+                        </div>
+                        <!-- 🔹 題庫區塊結束 -->
+
                         <div class="form-group">
                             <label for="questionsInput">問題與選項 (一行一題，用tab分隔) Questions & Options (one per line, separate with tab)</label>
                             <textarea id="questionsInput" placeholder="問題1	選項A	選項B	選項C	選項D	正確答案
@@ -610,6 +639,7 @@ Participant2"></textarea>
             playerStats: {},
             questionStats: {}
         };
+
         const gameThemeInput = document.getElementById('gameTheme');
         const questionsInput = document.getElementById('questionsInput');
         const playersInput = document.getElementById('playersInput');
@@ -630,7 +660,16 @@ Participant2"></textarea>
         const currentPlayerEl = document.getElementById('currentPlayer');
         const podiumEl = document.getElementById('podium');
         const playersListEl = document.getElementById('playersList');
+
+        // 🔹 新增：題庫相關 DOM 物件
+        const questionSourceSelect = document.getElementById('questionSource');
+        const questionBankSettings = document.getElementById('questionBankSettings');
+        const questionBankSelect = document.getElementById('questionBankSelect');
+        const questionBankCountInput = document.getElementById('questionBankCount');
+        const loadFromBankBtn = document.getElementById('loadFromBank');
+
         let audioContext;
+
         document.addEventListener('DOMContentLoaded', function() {
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -643,7 +682,23 @@ Participant2"></textarea>
             showReportBtn.addEventListener('click', showReport);
             soundControl.addEventListener('click', toggleSound);
             document.body.addEventListener('click', unlockAudio, { once: true });
+
+            // 🔹 題目來源切換時顯示 / 隱藏題庫設定
+            questionSourceSelect.addEventListener('change', function() {
+                if (questionSourceSelect.value === 'bank') {
+                    questionBankSettings.style.display = 'block';
+                    // 題庫模式下仍允許編輯 questionsInput（方便老師微調)
+                } else {
+                    questionBankSettings.style.display = 'none';
+                }
+            });
+
+            // 🔹 從題庫載入題目
+            loadFromBankBtn.addEventListener('click', () => {
+                loadQuestionsFromBank();
+            });
         });
+
         function unlockAudio() {
             if (audioContext && audioContext.state === 'suspended') {
                 audioContext.resume();
@@ -693,7 +748,6 @@ Participant2"></textarea>
             o.stop(audioContext.currentTime + 0.4);
         }
 
-        // 已有函數：playConfettiSound / playApplauseSound / playExplosionSound 保留不變
         function playConfettiSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
             for (let i = 0; i < 5; i++) {
@@ -753,6 +807,94 @@ Participant2"></textarea>
             }
         }
 
+        // === 🔹 題庫載入函式 ===
+        async function loadQuestionsFromBank() {
+            const bank = questionBankSelect.value;
+            let count = parseInt(questionBankCountInput.value, 10);
+            if (isNaN(count) || count <= 0) {
+                alert('請輸入有效的題數！Please enter a valid number of questions.');
+                return;
+            }
+            if (count > 50) count = 50;
+
+            if (bank === 'gsat_vocab') {
+                const url = 'https://ducj-creator.github.io/GSAT%20vocab%20fixed%20option%20quiz.csv';
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) {
+                        alert('無法載入題庫（HTTP ' + res.status + '）。');
+                        return;
+                    }
+                    const text = await res.text();
+                    const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+                    const records = [];
+
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (!line) continue;
+
+                        // 最簡單的 CSV 切法（假設題目裡沒有逗號）
+                        const parts = line.split(',');
+                        if (parts.length < 7) continue;
+
+                        // 如果第一列是標題列（含有「編號」或「code」字樣），跳過
+                        if (i === 0 && /編號|code/i.test(parts[0])) continue;
+
+                        const code = parts[0].trim();
+                        const questionText = parts[1].trim();
+                        const optA = parts[2] ? parts[2].trim() : '';
+                        const optB = parts[3] ? parts[3].trim() : '';
+                        const optC = parts[4] ? parts[4].trim() : '';
+                        const optD = parts[5] ? parts[5].trim() : '';
+                        const correct = parts[6] ? parts[6].trim() : '';
+
+                        if (!questionText || !optA || !optB || !correct) continue;
+
+                        // 第一欄編碼以（）加到題目裡
+                        const finalQuestion = `${questionText} (${code})`;
+
+                        // 符合原本 loadQuestions() 需要的 tab 格式
+                        const lineForTextarea =
+                            finalQuestion + '\t' +
+                            optA + '\t' +
+                            optB + '\t' +
+                            optC + '\t' +
+                            optD + '\t' +
+                            correct;
+
+                        records.push(lineForTextarea);
+                    }
+
+                    if (records.length === 0) {
+                        alert('題庫內容為空或格式不符。No valid questions found in bank.');
+                        return;
+                    }
+
+                    // 打亂並抽 count 題
+                    for (let i = records.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [records[i], records[j]] = [records[j], records[i]];
+                    }
+                    const selected = records.slice(0, Math.min(count, records.length));
+
+                    // 填入原本 textarea，保持與既有流程相容
+                    questionsInput.value = selected.join('\n');
+
+                    // 如果主題沒填，自動帶入
+                    if (!gameThemeInput.value.trim()) {
+                        gameThemeInput.value = '學測 GSAT Vocab';
+                    }
+
+                    alert(`已從「學測 GSAT Vocab」載入 ${selected.length} 題。`);
+                } catch (err) {
+                    console.error(err);
+                    alert('載入題庫時發生錯誤，請稍後再試。');
+                }
+            } else {
+                alert('未知的題庫類型。Unknown question bank type.');
+            }
+        }
+
         // === 遊戲邏輯 ===
         function startGame() {
             gameState.gameTheme = gameThemeInput.value.trim();
@@ -760,14 +902,18 @@ Participant2"></textarea>
                 alert('Please enter a game theme!');
                 return;
             }
+
+            // 無論手動或題庫，都從 textarea 載入題目（題庫已經先填進去）
             if (!loadQuestions()) {
-                alert('Please enter questions correctly!');
+                alert('Please enter questions correctly or load from question bank!');
                 return;
             }
+
             if (!loadPlayers()) {
                 alert('Please enter at least one participant!');
                 return;
             }
+
             gameState.gameMode = gameModeSelect.value;
             gameState.answerTime = parseInt(answerTimeInput.value);
             if (gameState.gameMode === 'team' && gameState.players.length < 3) {
@@ -928,7 +1074,7 @@ Participant2"></textarea>
             gameState.questionStats[gameState.questions[gameState.currentQuestionIndex].text][isCorrect ? 'correct' : 'incorrect']++;
             correctAnswerEl.textContent = `正確答案: ${correct} Correct Answer: ${correct}`;
             if (isCorrect) {
-                playCorrectSound(); // ✅ 新增音效
+                playCorrectSound();
                 currentPlayer.score += 10;
                 currentPlayer.correctAnswers++;
                 gameState.playerStats[currentPlayer.name].correctAnswers++;
@@ -936,7 +1082,7 @@ Participant2"></textarea>
                     setTimeout(() => applyBonus(currentPlayer), 1500);
                 }
             } else {
-                playIncorrectSound(); // ✅ 新增音效
+                playIncorrectSound();
                 currentPlayer.score = Math.max(-100, currentPlayer.score - 5);
                 if (Math.random() < 0.3) {
                     setTimeout(() => applyPenalty(currentPlayer), 1500);
@@ -955,7 +1101,7 @@ Participant2"></textarea>
         }
 
         function timeUp() {
-            playTimeUpSound(); // ✅ 新增時間到音效
+            playTimeUpSound();
             const q = gameState.questions[gameState.currentQuestionIndex];
             correctAnswerEl.textContent = `正確答案: ${q.correctAnswer} Correct Answer: ${q.correctAnswer}`;
             document.querySelectorAll('.option').forEach(opt => {
@@ -987,10 +1133,9 @@ Participant2"></textarea>
         }
 
         function applyBonus(player) {
-            playConfettiSound(); // 已有音效，保留
-            playApplauseSound(); // 已有音效，保留
+            playConfettiSound();
+            playApplauseSound();
             createConfetti();
-            // ... (bonus logic unchanged) ...
             const bonuses = [
                 { type: 'double', text: '分數加倍! Score doubled!' },
                 { type: 'steal', text: '從其他玩家偷取分數! Steal points from another player!' },
@@ -1027,9 +1172,8 @@ Participant2"></textarea>
         }
 
         function applyPenalty(player) {
-            playExplosionSound(); // 已有音效，保留
+            playExplosionSound();
             createExplosion();
-            // ... (penalty logic unchanged) ...
             const penalties = [
                 { type: 'losePercentage', text: '失去部分分數! Lost some points!' },
                 { type: 'zero', text: '分數歸零! Score reset to zero!' }
