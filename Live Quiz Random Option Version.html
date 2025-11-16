@@ -822,21 +822,27 @@ Participant2"></textarea>
             return words;
         }
 
-        async function loadAndSetQuestions(dataList, count, formatter) {
-            const seen = new Set();
-            const unique = dataList.filter(item => {
-                const key = item.word.toLowerCase();
-                if (seen.has(key)) return false;
-                seen.add(key);
-                return true;
-            });
-            const shuffled = [...unique].sort(() => Math.random() - 0.5);
-            const selected = shuffled.slice(0, Math.min(count, shuffled.length));
-            const qStr = selected.map(formatter).join('\n');
-            document.getElementById('questionsInput').value = qStr;
-            alert(`✅ 成功載入 ${selected.length} 題！`);
+       async function loadAndSetQuestions(dataList, count, formatter) {
+    const seen = new Set();
+    const unique = dataList.filter(item => {
+        // 安全檢查
+        if (!item || typeof item.word !== 'string' || item.word.trim() === '') {
+            console.warn('無效的單字資料:', item);
+            return false;
         }
+        const key = item.word.trim().toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
 
+    // 打亂並截取
+    const shuffled = [...unique].sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, Math.min(count, shuffled.length));
+    const qStr = selected.map(formatter).join('\n');
+    document.getElementById('questionsInput').value = qStr;
+    alert(`✅ 成功載入 ${selected.length} 題！`);
+}
         async function handleLoadIvocab() {
             const level = document.getElementById('ivocabLevel').value.replace('Level ', '');
             const [start, end] = document.getElementById('ivocabUnitRange').value.split('-').map(Number);
@@ -857,6 +863,12 @@ Participant2"></textarea>
                 alert('❌ iVocab 載入失敗：' + e.message);
                 console.error(e);
             }
+            try {
+    // ... 原始程式碼 ...
+} catch (e) {
+    alert(`❌ iVocab 載入失敗：${e.message}`);
+    console.error('完整錯誤:', e);
+}
         }
 
         async function handleLoadFrp() {
