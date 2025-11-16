@@ -501,18 +501,12 @@
                 grid-template-columns: 1fr;
             }
         }
-        /* 讓多選下拉選單的選中項目更明顯 */
+        /* 讓 FRP 多選 Unit 更明顯 */
         select[multiple] option:checked {
             background-color: var(--accent-color);
             color: white;
             font-weight: bold;
         }
-        /* 讓 FRP 多選 Unit 更明顯 */
-select[multiple] option:checked {
-    background-color: var(--accent-color);
-    color: white;
-    font-weight: bold;
-}
     </style>
 </head>
 <body>
@@ -605,466 +599,9 @@ Participant2"></textarea>
     <!-- 聲音控制 -->
     <div class="sound-control" id="soundControl">
         <i class="fas fa-volume-up"></i>
-    </div
-
-        // ========================
-// 題庫功能（注入到現有遊戲）
-// ========================
-
-// 解析 CSV（保留原始欄位名）
-function parseCsv(text) {
-    const lines = text.trim().split('\n');
-    const headers = lines[0].split(',').map(h => h.trim().replace(/^"(.*)"$/, '$1'));
-    const rows = [];
-    for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim().replace(/^"(.*)"$/, '$1'));
-        if (values.length === headers.length) {
-            const row = {};
-            headers.forEach((h, idx) => row[h] = values[idx]);
-            rows.push(row);
-        }
-    }
-    return rows;
-}
-
-// 解析 TOEFL TXT（支援四類標題 + {word: "...", pos: "...", meaning: "..."} 格式）
-function parseTxtToefl(text) {
-    const lines = text.trim().split('\n');
-    const words = [];
-    let currentCategory = '';
-    const categoryMap = {
-        '第一類': 'Language Form & Meaning',
-        '第二類': 'Reading Strategies',
-        '第三類': 'Reading Comprehension',
-        '第四類': 'Listening Comprehension'
-    };
-
-    for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed) continue;
-
-        // 檢查是否為分類標題
-        for (const key in categoryMap) {
-            if (trimmed.startsWith(key)) {
-                currentCategory = categoryMap[key];
-                break;
-            }
-        }
-
-        // 檢查是否為物件格式 {word: "...", pos: "...", meaning: "..."}
-        if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
-            try {
-                const jsonLike = trimmed.slice(1, -1);
-                const parts = {};
-                const regex = /(\w+)\s*:\s*"([^"]*)"/g;
-                let match;
-                while ((match = regex.exec(jsonLike)) !== null) {
-                    parts[match[1]] = match[2];
-                }
-                if (parts.word && parts.pos && parts.meaning) {
-                    words.push({
-                        word: parts.word,
-                        partOfSpeech: parts.pos,
-                        meaningZh: parts.meaning,
-                        category: currentCategory
-                    });
-                }
-            } catch (e) {
-                console.warn('TOEFL 解析失敗:', line);
-            }
-        }
-    }
-    return words;
-}
-
-// 載入並設定題目
-async function loadAndSetQuestions(dataList, count, formatter) {
-    // 去重
-    const seen = new Set();
-    const unique = dataList.filter(item => {
-        const key = item.word.toLowerCase();
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-    });
-
-    // 打亂並截取
-    const shuffled = [...unique].sort(() => Math.random() - 0.5);
-    const selected = shuffled.slice(0, Math.min(count, shuffled.length));
-    const qStr = selected.map(formatter).join('\n');
-    document.getElementById('questionsInput').value = qStr;
-    alert(`✅ 成功載入 ${selected.length} 題！`);
-}
-
-// 動態生成題庫選項
-document.getElementById('questionBank').addEventListener('change', function () {
-    const container = document.getElementById('bankOptions');
-    const bank = this.value;
-    container.innerHTML = '';
-    if (!bank) {
-        container.style.display = 'none';
-        return;
-    }
-    container.style.display = 'block';
-
-    let html = '';
-    if (bank === 'ivocab') {
-        html = `
-            <div class="form-group"><label>Level</label>
-            <select id="ivocabLevel">${[1,2,3,4,5,6].map(l => `<option>Level ${l}</option>`).join('')}</select></div>
-            <div class="form-group"><label>Unit Range</label>
-            <select id="ivocabUnitRange">
-                <option value="1-5">Units 1–5</option>
-                <option value="6-10">Units 6–10</option>
-                <option value="11-15">Units 11–15</option>
-                <option value="16-20">Units 16–20</option>
-                <option value="21-25">Units 21–25</option>
-                <option value="26-30">Units 26–30</option>
-            </select></div>
-            <div class="form-group"><label>題數</label>
-            <input type="number" id="ivocabCount" min="1" max="50" value="10"></div>
-            <button id="loadIvocab"><i class="fas fa-database"></i> 載入題目</button>
-        `;
-    } else if (bank === 'frp') {
-        html = `
-            <div class="form-group"><label>Semester</label>
-            <select id="frpSemester">
-                <option>SI</option><option>SII</option><option>SIII</option><option>SIV</option>
-            </select></div>
-            <div class="form-group"><label>Unit (Ctrl+Click 多選)</label>
-            <select id="frpUnits" multiple size="8">
-                ${[1,2,3,4,5,6,7,8].map(u => `<option>Unit ${u}</option>`).join('')}
-            </select></div>
-            <div class="form-group"><label>題數</label>
-            <input type="number" id="frpCount" min="1" max="50" value="10"></div>
-            <button id="loadFrp"><i class="fas fa-database"></i> 載入題目</button>
-        `;
-    } else if (bank === 'toefl') {
-        html = `
-            <div class="form-group"><label>Category</label>
-            <select id="toeflCategory">
-                <option value="Language Form & Meaning">語言形式與意義</option>
-                <option value="Reading Strategies">閱讀策略</option>
-                <option value="Reading Comprehension">閱讀理解</option>
-                <option value="Listening Comprehension">聽力理解</option>
-            </select></div>
-            <div class="form-group"><label>題數</label>
-            <input type="number" id="toeflCount" min="1" max="50" value="10"></div>
-            <button id="loadToefl"><i class="fas fa-database"></i> 載入題目</button>
-        `;
-    }
-    container.innerHTML = html;
-
-    // 綁定按鈕
-    if (bank === 'ivocab') document.getElementById('loadIvocab').onclick = handleLoadIvocab;
-    if (bank === 'frp') document.getElementById('loadFrp').onclick = handleLoadFrp;
-    if (bank === 'toefl') document.getElementById('loadToefl').onclick = handleLoadToefl;
-});
-
-// 處理 iVocab 載入
-async function handleLoadIvocab() {
-    const level = document.getElementById('ivocabLevel').value.replace('Level ', '');
-    const [start, end] = document.getElementById('ivocabUnitRange').value.split('-').map(Number);
-    const count = parseInt(document.getElementById('ivocabCount').value) || 10;
-
-    try {
-        const res = await fetch(`https://ducj-creator.github.io/iVocab-Self-Practice/level${level}.csv`);
-        const rows = parseCsv(await res.text());
-        const filtered = rows.filter(r => {
-            const u = parseInt(r.Unit);
-            return !isNaN(u) && u >= start && u <= end;
-        });
-        await loadAndSetQuestions(filtered, count, item =>
-            `${item.Word} (${item.POS})\t${item["Chinese Meaning"]}`
-        );
-    } catch (e) {
-        alert('❌ iVocab 載入失敗：' + e.message);
-        console.error(e);
-    }
-}
-
-// 處理 FRP 載入
-async function handleLoadFrp() {
-    const sem = document.getElementById('frpSemester').value;
-    const units = Array.from(document.getElementById('frpUnits').selectedOptions).map(o => o.value.replace('Unit ', ''));
-    const count = parseInt(document.getElementById('frpCount').value) || 10;
-
-    try {
-        const res = await fetch('https://ducj-creator.github.io/Teacher-Shirley/study-tools/FRP%20ELA%20Vocab.csv');
-        const rows = parseCsv(await res.text());
-        const filtered = rows.filter(r => r.Semester === sem && units.includes(r.Unit));
-        await loadAndSetQuestions(filtered, count, item =>
-            `${item.Word} (${item.POS})\t${item["Chinese Meaning"]}`
-        );
-    } catch (e) {
-        alert('❌ FRP 載入失敗：' + e.message);
-        console.error(e);
-    }
-}
-
-// 處理 TOEFL 載入
-async function handleLoadToefl() {
-    const cat = document.getElementById('toeflCategory').value;
-    const count = parseInt(document.getElementById('toeflCount').value) || 10;
-
-    try {
-        const res = await fetch('https://ducj-creator.github.io/Teacher-Shirley/study-tools/TOEFL%20Junior%20Word%20List.txt');
-        const rows = parseTxtToefl(await res.text());
-        const filtered = rows.filter(r => r.category === cat);
-        await loadAndSetQuestions(filtered, count, item =>
-            `${item.word} (${item.partOfSpeech})\t${item.meaningZh}`
-        );
-    } catch (e) {
-        alert('❌ TOEFL 載入失敗：' + e.message);
-        console.error(e);
-    }
-}
+    </div>
     <script>
-        // ========================
-        // 新增：題庫配置
-        // ========================
-        const QUESTION_BANKS = {
-            ivocab: {
-                url: (level) => `https://ducj-creator.github.io/iVocab-Self-Practice/level${level}.csv`,
-                parse: parseCsv,
-                params: ['level', 'unitRange', 'count']
-            },
-            frp: {
-                url: () => 'https://ducj-creator.github.io/Teacher-Shirley/study-tools/FRP%20ELA%20Vocab.csv',
-                parse: parseCsv,
-                params: ['semester', 'units', 'count']
-            },
-            toefl: {
-                url: () => 'https://ducj-creator.github.io/Teacher-Shirley/study-tools/TOEFL%20Junior%20Word%20List.txt',
-                parse: parseTxtToefl,
-                params: ['category', 'count']
-            }
-        };
-
-        // ========================
-        // 解析函數
-        // ========================
-        function parseCsv(text) {
-            const lines = text.trim().split('\n');
-            const headers = lines[0].split(',').map(h => h.trim().replace(/^"(.*)"$/, '$1'));
-            const rows = [];
-            for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(',').map(v => v.trim().replace(/^"(.*)"$/, '$1'));
-                if (values.length === headers.length) {
-                    const row = {};
-                    headers.forEach((h, idx) => row[h] = values[idx]);
-                    rows.push(row);
-                }
-            }
-            return rows;
-        }
-
-        function parseTxtToefl(text) {
-            const lines = text.trim().split('\n');
-            const words = [];
-            let currentCategory = '';
-
-            for (const line of lines) {
-                const trimmed = line.trim();
-
-                // 檢查是否為分類標題
-                if (trimmed.startsWith('第一類') || trimmed.startsWith('第二類') || trimmed.startsWith('第三類') || trimmed.startsWith('第四類')) {
-                    const match = trimmed.match(/:\s*(.+)$/);
-                    if (match) {
-                        currentCategory = match[1].trim();
-                    }
-                }
-                // 檢查是否為 JSON 物件行
-                else if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
-                    try {
-                        // 移除前後括號並解析
-                        const jsonStr = trimmed.slice(1, -1).trim();
-                        // 手動替換 key 值以符合標準 JSON 格式
-                        const fixedJsonStr = jsonStr
-                            .replace(/word\s*:\s*/g, '"word":')
-                            .replace(/pos\s*:\s*/g, '"pos":')
-                            .replace(/meaning\s*:\s*/g, '"meaning":');
-
-                        const obj = JSON.parse(`{${fixedJsonStr}}`);
-                        words.push({
-                            word: obj.word,
-                            partOfSpeech: obj.pos,
-                            meaningZh: obj.meaning,
-                            category: currentCategory
-                        });
-                    } catch (e) {
-                        console.warn('無法解析此行:', trimmed, e.message);
-                    }
-                }
-            }
-
-            return words;
-        }
-
-        // ========================
-        // 動態 UI 與載入
-        // ========================
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('questionBank').addEventListener('change', function() {
-                const bankOptions = document.getElementById('bankOptions');
-                const selected = this.value;
-                bankOptions.innerHTML = '';
-                if (!selected) {
-                    bankOptions.style.display = 'none';
-                    return;
-                }
-                bankOptions.style.display = 'block';
-
-                const div = document.createElement('div');
-                div.className = 'admin-controls';
-
-                if (selected === 'ivocab') {
-                    div.innerHTML = `
-                        <div class="form-group">
-                            <label>Level (1–6)</label>
-                            <select id="ivocabLevel">${[1,2,3,4,5,6].map(l => `<option value="${l}">Level ${l}</option>`).join('')}</select>
-                        </div>
-                        <div class="form-group">
-                            <label>Unit Range</label>
-                            <select id="ivocabUnitRange">
-                                <option value="1-5">Units 1–5</option>
-                                <option value="6-10">Units 6–10</option>
-                                <option value="11-15">Units 11–15</option>
-                                <option value="16-20">Units 16–20</option>
-                                <option value="21-25">Units 21–25</option>
-                                <option value="26-30">Units 26–30</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>題數 (最多 50)</label>
-                            <input type="number" id="ivocabCount" min="1" max="50" value="10">
-                        </div>
-                        <button id="loadIvocab"><i class="fas fa-database"></i> 載入題目 Load Questions</button>
-                    `;
-                } else if (selected === 'frp') {
-                    div.innerHTML = `
-                        <div class="form-group">
-                            <label>Semester</label>
-                            <select id="frpSemester">
-                                <option value="SI">SI</option>
-                                <option value="SII">SII</option>
-                                <option value="SIII">SIII</option>
-                                <option value="SIV">SIV</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Unit (可複選)</label>
-                            <select id="frpUnits" multiple size="8">${[1,2,3,4,5,6,7,8].map(u => `<option value="${u}">Unit ${u}</option>`).join('')}</select>
-                        </div>
-                        <div class="form-group">
-                            <label>題數 (最多 50)</label>
-                            <input type="number" id="frpCount" min="1" max="50" value="10">
-                        </div>
-                        <button id="loadFrp"><i class="fas fa-database"></i> 載入題目 Load Questions</button>
-                    `;
-                } else if (selected === 'toefl') {
-                    div.innerHTML = `
-                        <div class="form-group">
-                            <label>Category</label>
-                            <select id="toeflCategory">
-                                <option value="Language Form &amp; Meaning">語言形式與意義 / Language Form & Meaning</option>
-                                <option value="Reading Strategies">閱讀策略 / Reading Strategies</option>
-                                <option value="Reading Comprehension">閱讀理解 / Reading Comprehension</option>
-                                <option value="Listening Comprehension">聽力理解 / Listening Comprehension</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>題數 (最多 50)</label>
-                            <input type="number" id="toeflCount" min="1" max="50" value="10">
-                        </div>
-                        <button id="loadToefl"><i class="fas fa-database"></i> 載入題目 Load Questions</button>
-                    `;
-                }
-                bankOptions.appendChild(div);
-
-                if (selected === 'ivocab') document.getElementById('loadIvocab').onclick = loadIvocab;
-                else if (selected === 'frp') document.getElementById('loadFrp').onclick = loadFrp;
-                else if (selected === 'toefl') document.getElementById('loadToefl').onclick = loadToefl;
-            });
-        });
-
-        // ========================
-        // 載入題目功能
-        // ========================
-        async function fetchAndSetQuestions(dataList, count, formatQuestion) {
-            const uniqueWords = {};
-            const filtered = [];
-            for (const item of dataList) {
-                const key = item.word.toLowerCase();
-                if (!uniqueWords[key]) {
-                    uniqueWords[key] = true;
-                    filtered.push(item);
-                }
-            }
-            const shuffled = [...filtered].sort(() => Math.random() - 0.5);
-            const selected = shuffled.slice(0, Math.min(count, shuffled.length));
-            const qStr = selected.map(item => formatQuestion(item)).join('\n');
-            document.getElementById('questionsInput').value = qStr;
-            alert(`已載入 ${selected.length} 題`);
-        }
-
-        async function loadIvocab() {
-            const level = document.getElementById('ivocabLevel').value;
-            const [startStr, endStr] = document.getElementById('ivocabUnitRange').value.split('-');
-            const start = parseInt(startStr);
-            const end = parseInt(endStr);
-            const count = parseInt(document.getElementById('ivocabCount').value) || 10;
-
-            const res = await fetch(`https://ducj-creator.github.io/iVocab-Self-Practice/level${level}.csv`);
-            const text = await res.text();
-            const rows = parseCsv(text);
-
-            const filtered = rows.filter(r => {
-                const unit = parseInt(r.Unit);
-                return !isNaN(unit) && unit >= start && unit <= end;
-            });
-
-            fetchAndSetQuestions(filtered, count, item =>
-                `${item.Word} (${item.POS})\t${item["Chinese Meaning"]}`
-            );
-        }
-
-        async function loadFrp() {
-            const semester = document.getElementById('frpSemester').value;
-            const selectedUnits = Array.from(document.getElementById('frpUnits').selectedOptions).map(o => o.value);
-            const count = parseInt(document.getElementById('frpCount').value) || 10;
-
-            const res = await fetch('https://ducj-creator.github.io/Teacher-Shirley/study-tools/FRP%20ELA%20Vocab.csv');
-            const text = await res.text();
-            const rows = parseCsv(text);
-
-            const filtered = rows.filter(r =>
-                r.Semester === semester && selectedUnits.includes(r.Unit)
-            );
-
-            fetchAndSetQuestions(filtered, count, item =>
-                `${item.Word} (${item.POS})\t${item["Chinese Meaning"]}`
-            );
-        }
-
-        async function loadToefl() {
-            const category = document.getElementById('toeflCategory').value;
-            const count = parseInt(document.getElementById('toeflCount').value) || 10;
-
-            const res = await fetch('https://ducj-creator.github.io/Teacher-Shirley/study-tools/TOEFL%20Junior%20Word%20List.txt');
-            const text = await res.text();
-            const rows = parseTxtToefl(text);
-
-            const filtered = rows.filter(r => r.category === category);
-
-            fetchAndSetQuestions(filtered, count, item =>
-                `${item.word} (${item.partOfSpeech})\t${item.meaningZh}`
-            );
-        }
-
-        // ========================
-        // 原有遊戲邏輯（保持不變）
-        // ========================
+        // Game state and variables
         let gameState = {
             questions: [],
             players: [],
@@ -1150,7 +687,215 @@ async function handleLoadToefl() {
             soundControl.addEventListener('click', toggleSound);
             // Add a user interaction to unlock audio
             document.body.addEventListener('click', unlockAudio, { once: true });
+
+            // =============
+            // 題庫功能初始化
+            // =============
+            document.getElementById('questionBank').addEventListener('change', function () {
+                const container = document.getElementById('bankOptions');
+                const bank = this.value;
+                container.innerHTML = '';
+                if (!bank) {
+                    container.style.display = 'none';
+                    return;
+                }
+                container.style.display = 'block';
+
+                let html = '';
+                if (bank === 'ivocab') {
+                    html = `
+                        <div class="form-group"><label>Level</label>
+                        <select id="ivocabLevel">${[1,2,3,4,5,6].map(l => `<option>Level ${l}</option>`).join('')}</select></div>
+                        <div class="form-group"><label>Unit Range</label>
+                        <select id="ivocabUnitRange">
+                            <option value="1-5">Units 1–5</option>
+                            <option value="6-10">Units 6–10</option>
+                            <option value="11-15">Units 11–15</option>
+                            <option value="16-20">Units 16–20</option>
+                            <option value="21-25">Units 21–25</option>
+                            <option value="26-30">Units 26–30</option>
+                        </select></div>
+                        <div class="form-group"><label>題數</label>
+                        <input type="number" id="ivocabCount" min="1" max="50" value="10"></div>
+                        <button id="loadIvocab"><i class="fas fa-database"></i> 載入題目並開始遊戲</button>
+                    `;
+                } else if (bank === 'frp') {
+                    html = `
+                        <div class="form-group"><label>Semester</label>
+                        <select id="frpSemester">
+                            <option>SI</option><option>SII</option><option>SIII</option><option>SIV</option>
+                        </select></div>
+                        <div class="form-group"><label>Unit (Ctrl+Click 多選)</label>
+                        <select id="frpUnits" multiple size="8">
+                            ${[1,2,3,4,5,6,7,8].map(u => `<option>Unit ${u}</option>`).join('')}
+                        </select></div>
+                        <div class="form-group"><label>題數</label>
+                        <input type="number" id="frpCount" min="1" max="50" value="10"></div>
+                        <button id="loadFrp"><i class="fas fa-database"></i> 載入題目並開始遊戲</button>
+                    `;
+                } else if (bank === 'toefl') {
+                    html = `
+                        <div class="form-group"><label>Category</label>
+                        <select id="toeflCategory">
+                            <option value="Language Form & Meaning">語言形式與意義</option>
+                            <option value="Reading Strategies">閱讀策略</option>
+                            <option value="Reading Comprehension">閱讀理解</option>
+                            <option value="Listening Comprehension">聽力理解</option>
+                        </select></div>
+                        <div class="form-group"><label>題數</label>
+                        <input type="number" id="toeflCount" min="1" max="50" value="10"></div>
+                        <button id="loadToefl"><i class="fas fa-database"></i> 載入題目並開始遊戲</button>
+                    `;
+                }
+                container.innerHTML = html;
+
+                // 綁定按鈕
+                if (bank === 'ivocab') document.getElementById('loadIvocab').onclick = handleLoadIvocab;
+                if (bank === 'frp') document.getElementById('loadFrp').onclick = handleLoadFrp;
+                if (bank === 'toefl') document.getElementById('loadToefl').onclick = handleLoadToefl;
+            });
         });
+
+        // =============
+        // 題庫功能函數
+        // =============
+
+        function parseCsv(text) {
+            const lines = text.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"(.*)"$/, '$1'));
+            const rows = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim().replace(/^"(.*)"$/, '$1'));
+                if (values.length === headers.length) {
+                    const row = {};
+                    headers.forEach((h, idx) => row[h] = values[idx]);
+                    rows.push(row);
+                }
+            }
+            return rows;
+        }
+
+        function parseTxtToefl(text) {
+            const lines = text.trim().split('\n');
+            const words = [];
+            let currentCategory = '';
+            const categoryMap = {
+                '第一類': 'Language Form & Meaning',
+                '第二類': 'Reading Strategies',
+                '第三類': 'Reading Comprehension',
+                '第四類': 'Listening Comprehension'
+            };
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed) continue;
+
+                for (const key in categoryMap) {
+                    if (trimmed.startsWith(key)) {
+                        currentCategory = categoryMap[key];
+                        break;
+                    }
+                }
+
+                if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+                    try {
+                        const jsonLike = trimmed.slice(1, -1);
+                        const parts = {};
+                        const regex = /(\w+)\s*:\s*"([^"]*)"/g;
+                        let match;
+                        while ((match = regex.exec(jsonLike)) !== null) {
+                            parts[match[1]] = match[2];
+                        }
+                        if (parts.word && parts.pos && parts.meaning) {
+                            words.push({
+                                word: parts.word,
+                                partOfSpeech: parts.pos,
+                                meaningZh: parts.meaning,
+                                category: currentCategory
+                            });
+                        }
+                    } catch (e) {
+                        console.warn('TOEFL 解析失敗:', line);
+                    }
+                }
+            }
+            return words;
+        }
+
+        async function loadAndSetQuestions(dataList, count, formatter) {
+            const seen = new Set();
+            const unique = dataList.filter(item => {
+                const key = item.word.toLowerCase();
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+            const shuffled = [...unique].sort(() => Math.random() - 0.5);
+            const selected = shuffled.slice(0, Math.min(count, shuffled.length));
+            const qStr = selected.map(formatter).join('\n');
+            document.getElementById('questionsInput').value = qStr;
+            alert(`✅ 成功載入 ${selected.length} 題！`);
+        }
+
+        async function handleLoadIvocab() {
+            const level = document.getElementById('ivocabLevel').value.replace('Level ', '');
+            const [start, end] = document.getElementById('ivocabUnitRange').value.split('-').map(Number);
+            const count = parseInt(document.getElementById('ivocabCount').value) || 10;
+
+            try {
+                const res = await fetch(`https://ducj-creator.github.io/iVocab-Self-Practice/level${level}.csv`);
+                const rows = parseCsv(await res.text());
+                const filtered = rows.filter(r => {
+                    const u = parseInt(r.Unit);
+                    return !isNaN(u) && u >= start && u <= end;
+                });
+                await loadAndSetQuestions(filtered, count, item =>
+                    `${item.Word} (${item.POS})\t${item["Chinese Meaning"]}`
+                );
+                startGame();
+            } catch (e) {
+                alert('❌ iVocab 載入失敗：' + e.message);
+                console.error(e);
+            }
+        }
+
+        async function handleLoadFrp() {
+            const sem = document.getElementById('frpSemester').value;
+            const units = Array.from(document.getElementById('frpUnits').selectedOptions).map(o => o.value.replace('Unit ', ''));
+            const count = parseInt(document.getElementById('frpCount').value) || 10;
+
+            try {
+                const res = await fetch('https://ducj-creator.github.io/Teacher-Shirley/study-tools/FRP%20ELA%20Vocab.csv');
+                const rows = parseCsv(await res.text());
+                const filtered = rows.filter(r => r.Semester === sem && units.includes(r.Unit));
+                await loadAndSetQuestions(filtered, count, item =>
+                    `${item.Word} (${item.POS})\t${item["Chinese Meaning"]}`
+                );
+                startGame();
+            } catch (e) {
+                alert('❌ FRP 載入失敗：' + e.message);
+                console.error(e);
+            }
+        }
+
+        async function handleLoadToefl() {
+            const cat = document.getElementById('toeflCategory').value;
+            const count = parseInt(document.getElementById('toeflCount').value) || 10;
+
+            try {
+                const res = await fetch('https://ducj-creator.github.io/Teacher-Shirley/study-tools/TOEFL%20Junior%20Word%20List.txt');
+                const rows = parseTxtToefl(await res.text());
+                const filtered = rows.filter(r => r.category === cat);
+                await loadAndSetQuestions(filtered, count, item =>
+                    `${item.word} (${item.partOfSpeech})\t${item.meaningZh}`
+                );
+                startGame();
+            } catch (e) {
+                alert('❌ TOEFL 載入失敗：' + e.message);
+                console.error(e);
+            }
+        }
+
         // Unlock audio context on user interaction
         function unlockAudio() {
             if (audioContext && audioContext.state === 'suspended') {
