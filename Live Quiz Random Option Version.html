@@ -843,32 +843,69 @@ Participant2"></textarea>
     document.getElementById('questionsInput').value = qStr;
     alert(`✅ 成功載入 ${selected.length} 題！`);
 }
-        async function handleLoadIvocab() {
-            const level = document.getElementById('ivocabLevel').value.replace('Level ', '');
-            const [start, end] = document.getElementById('ivocabUnitRange').value.split('-').map(Number);
-            const count = parseInt(document.getElementById('ivocabCount').value) || 10;
+     async function handleLoadIvocab() {
+    const level = document.getElementById('ivocabLevel').value.replace('Level ', '');
+    const [start, end] = document.getElementById('ivocabUnitRange').value.split('-').map(Number);
+    const count = parseInt(document.getElementById('ivocabCount').value) || 10;
 
-            try {
-                const res = await fetch(`https://ducj-creator.github.io/iVocab-Self-Practice/level${level}.csv`);
-                const rows = parseCsv(await res.text());
-                const filtered = rows.filter(r => {
-                    const u = parseInt(r.Unit);
-                    return !isNaN(u) && u >= start && u <= end;
-                });
-                await loadAndSetQuestions(filtered, count, item =>
-                    `${item.Word} (${item.POS})\t${item["Chinese Meaning"]}`
-                );
-                startGame();
-            } catch (e) {
-                alert('❌ iVocab 載入失敗：' + e.message);
-                console.error(e);
+    try {
+        console.log(`正在載入 Level ${level}...`);
+        const res = await fetch(`https://ducj-creator.github.io/iVocab-Self-Practice/level${level}.csv`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+
+        const text = await res.text();
+        console.log('原始 CSV 內容:', text.substring(0, 500)); // 顯示前 500 字元
+
+        const rows = parseCsv(text);
+        console.log(`解析出 ${rows.length} 筆資料`);
+
+        // 檢查第一筆資料的欄位名稱
+        if (rows.length > 0) {
+            console.log('第一筆資料欄位:', Object.keys(rows[0]));
+        }
+
+        const filtered = rows.filter(r => {
+            const u = parseInt(r.Unit); // 注意：這裡是大寫 Unit
+            console.log(`處理單字: ${r.Word}, Unit: ${r.Unit}, 解析後: ${u}`); // 加入日誌
+            return !isNaN(u) && u >= start && u <= end;
+        });
+
+        console.log(`篩選後剩餘 ${filtered.length} 筆`);
+
+        const seen = new Set();
+        const unique = filtered.filter(item => {
+            // 安全檢查
+            if (!item || typeof item.Word !== 'string' || item.Word.trim() === '') {
+                console.warn('無效的單字資料:', item);
+                return false;
             }
-            try {
-    // ... 原始程式碼 ...
-} catch (e) {
-    alert(`❌ iVocab 載入失敗：${e.message}`);
-    console.error('完整錯誤:', e);
-}
+            const key = item.Word.trim().toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+
+        console.log(`去重後剩餘 ${unique.length} 筆`);
+
+        const shuffled = [...unique].sort(() => Math.random() - 0.5);
+        const selected = shuffled.slice(0, Math.min(count, shuffled.length));
+
+        console.log(`最終選取 ${selected.length} 題`);
+
+        const qStr = selected.map(item =>
+            `${item.Word} (${item.POS})\t${item["Chinese Meaning"]}`
+        ).join('\n');
+
+        document.getElementById('questionsInput').value = qStr;
+        alert(`✅ 成功載入 ${selected.length} 題！`);
+
+        // 自動啟動遊戲
+        startGame();
+
+    } catch (e) {
+        alert(`❌ iVocab 載入失敗：${e.message}`);
+        console.error('完整錯誤:', e);
+    }
         }
 
         async function handleLoadFrp() {
