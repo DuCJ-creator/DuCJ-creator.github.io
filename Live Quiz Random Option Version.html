@@ -787,13 +787,18 @@ async function loadIvocab() {
     const rows = parseCsv(text);
 
     const filtered = rows.filter(r => {
-        const unit = parseInt(r.Unit); // ← 注意：大寫 Unit
+        const unit = parseInt(r.Unit);
         return !isNaN(unit) && unit >= start && unit <= end;
     });
 
-    fetchAndSetQuestions(filtered, count, item =>
-        `${item.Word} (${item.POS})\t${item["Chinese Meaning"]}` // ← 注意：含空格的欄位名
-    );
+    // 載入題目到 textarea
+    const qStr = filtered.map(item =>
+        `${item.Word} (${item.POS})\t${item["Chinese Meaning"]}`
+    ).join('\n');
+    document.getElementById('questionsInput').value = qStr;
+
+    // 直接啟動遊戲
+    startGame();
 }
 
 async function loadFrp() {
@@ -806,12 +811,17 @@ async function loadFrp() {
     const rows = parseCsv(text);
 
     const filtered = rows.filter(r =>
-        r.Semester === semester && selectedUnits.includes(r.Unit) // ← 注意：大寫 Semester, Unit
+        r.Semester === semester && selectedUnits.includes(r.Unit)
     );
 
-    fetchAndSetQuestions(filtered, count, item =>
-        `${item.Word} (${item.POS})\t${item["Chinese Meaning"]}` // ← 注意：含空格的欄位名
-    );
+    // 載入題目到 textarea
+    const qStr = filtered.map(item =>
+        `${item.Word} (${item.POS})\t${item["Chinese Meaning"]}`
+    ).join('\n');
+    document.getElementById('questionsInput').value = qStr;
+
+    // 直接啟動遊戲
+    startGame();
 }
 
 async function loadToefl() {
@@ -824,9 +834,14 @@ async function loadToefl() {
 
     const filtered = rows.filter(r => r.category === category);
 
-    fetchAndSetQuestions(filtered, count, item =>
+    // 載入題目到 textarea
+    const qStr = filtered.map(item =>
         `${item.word} (${item.partOfSpeech})\t${item.meaningZh}`
-    );
+    ).join('\n');
+    document.getElementById('questionsInput').value = qStr;
+
+    // 直接啟動遊戲
+    startGame();
 }
 
         // ========================
