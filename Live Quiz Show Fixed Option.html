@@ -807,93 +807,112 @@ Participant2"></textarea>
             }
         }
 
-        // === 🔹 題庫載入函式 ===
-        async function loadQuestionsFromBank() {
-            const bank = questionBankSelect.value;
-            let count = parseInt(questionBankCountInput.value, 10);
-            if (isNaN(count) || count <= 0) {
-                alert('請輸入有效的題數！Please enter a valid number of questions.');
+       // === 🔹 題庫載入函式 ===
+async function loadQuestionsFromBank() {
+    const bank = questionBankSelect.value;
+    let count = parseInt(questionBankCountInput.value, 10);
+    if (isNaN(count) || count <= 0) {
+        alert('請輸入有效的題數！Please enter a valid number of questions.');
+        return;
+    }
+    if (count > 50) count = 50;
+
+    if (bank === 'gsat_vocab') {
+        const url = 'https://ducj-creator.github.io/GSAT%20vocab%20fixed%20option%20quiz.csv';
+        try {
+            const res = await fetch(url);
+            if (!res.ok) {
+                alert('無法載入題庫（HTTP ' + res.status + '）。');
                 return;
             }
-            if (count > 50) count = 50;
+            const text = await res.text();
+            const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+            const records = [];
 
-            if (bank === 'gsat_vocab') {
-                const url = 'https://ducj-creator.github.io/GSAT%20vocab%20fixed%20option%20quiz.csv';
-                try {
-                    const res = await fetch(url);
-                    if (!res.ok) {
-                        alert('無法載入題庫（HTTP ' + res.status + '）。');
-                        return;
-                    }
-                    const text = await res.text();
-                    const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
-                    const records = [];
+            for (let i = 0; i < lines.length; i++) {
+                const rawLine = lines[i].trim();
+                if (!rawLine) continue;
 
-                    for (let i = 0; i < lines.length; i++) {
-                        const line = lines[i].trim();
-                        if (!line) continue;
+                const parts = parseCsvLine(rawLine).map(x => x.trim());
 
-                        // 最簡單的 CSV 切法（假設題目裡沒有逗號）
-                        const parts = line.split(',');
-                        if (parts.length < 7) continue;
+                // 至少要有：code, question, A, B, C, D, correct → 7 欄
+                if (parts.length < 7) continue;
 
-                        // 如果第一列是標題列（含有「編號」或「code」字樣），跳過
-                        if (i === 0 && /編號|code/i.test(parts[0])) continue;
+                const code     = parts[0]; // 第一欄一定是 code
+                const question = parts[1]; // 第二欄一定是題目
+                const optA     = parts[2];
+                const optB     = parts[3];
+                const optC     = parts[4];
+                const optD     = parts[5];
+                let correctRaw = parts[6];
 
-                        const code = parts[0].trim();
-                        const questionText = parts[1].trim();
-                        const optA = parts[2] ? parts[2].trim() : '';
-                        const optB = parts[3] ? parts[3].trim() : '';
-                        const optC = parts[4] ? parts[4].trim() : '';
-                        const optD = parts[5] ? parts[5].trim() : '';
-                        const correct = parts[6] ? parts[6].trim() : '';
-
-                        if (!questionText || !optA || !optB || !correct) continue;
-
-                        // 第一欄編碼以（）加到題目裡
-                        const finalQuestion = `${questionText} (${code})`;
-
-                        // 符合原本 loadQuestions() 需要的 tab 格式
-                        const lineForTextarea =
-                            finalQuestion + '\t' +
-                            optA + '\t' +
-                            optB + '\t' +
-                            optC + '\t' +
-                            optD + '\t' +
-                            correct;
-
-                        records.push(lineForTextarea);
-                    }
-
-                    if (records.length === 0) {
-                        alert('題庫內容為空或格式不符。No valid questions found in bank.');
-                        return;
-                    }
-
-                    // 打亂並抽 count 題
-                    for (let i = records.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [records[i], records[j]] = [records[j], records[i]];
-                    }
-                    const selected = records.slice(0, Math.min(count, records.length));
-
-                    // 填入原本 textarea，保持與既有流程相容
-                    questionsInput.value = selected.join('\n');
-
-                    // 如果主題沒填，自動帶入
-                    if (!gameThemeInput.value.trim()) {
-                        gameThemeInput.value = '學測 GSAT Vocab';
-                    }
-
-                    alert(`已從「學測 GSAT Vocab」載入 ${selected.length} 題。`);
-                } catch (err) {
-                    console.error(err);
-                    alert('載入題庫時發生錯誤，請稍後再試。');
+                // 如果第一列是標題列就跳過
+                if (i === 0 &&
+                    (/code/i.test(code) || /編號/.test(code)) &&
+                    (/question/i.test(question) || /題目/.test(question))) {
+                    continue;
                 }
-            } else {
-                alert('未知的題庫類型。Unknown question bank type.');
+
+                // 確保基本欄位有東西
+                if (!question || !optA || !optB || !correctRaw) continue;
+
+                // 依照「欄位」來解答案：
+                // 若是 A/B/C/D → 代表第幾個選項
+                let correctText = correctRaw;
+                const letter = correctRaw.toUpperCase();
+                if (['A', 'B', 'C', 'D'].includes(letter)) {
+                    const idxMap = { A: 2, B: 3, C: 4, D: 5 };
+                    const opt = parts[idxMap[letter]];
+                    if (opt && opt.trim()) {
+                        correctText = opt.trim();
+                    }
+                }
+
+                // 第一欄 code 用（）加到題目後面
+                const finalQuestion = `${question} (${code})`;
+
+                // 組成與原本系統相容的 tab 格式：
+                // 問題[TAB]A[TAB]B[TAB]C[TAB]D[TAB]正確答案(文字)
+                const lineForTextarea =
+                    finalQuestion + '\t' +
+                    optA + '\t' +
+                    optB + '\t' +
+                    optC + '\t' +
+                    optD + '\t' +
+                    correctText;
+
+                records.push(lineForTextarea);
             }
+
+            if (records.length === 0) {
+                alert('題庫內容為空或格式不符。No valid questions found in bank.');
+                return;
+            }
+
+            // 打亂並抽 count 題
+            for (let i = records.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [records[i], records[j]] = [records[j], records[i]];
+            }
+            const selected = records.slice(0, Math.min(count, records.length));
+
+            // ✅ 填入原本 textarea，後續沿用既有 loadQuestions()
+            questionsInput.value = selected.join('\n');
+
+            // 如果主題沒填，自動帶入
+            if (!gameThemeInput.value.trim()) {
+                gameThemeInput.value = '學測 GSAT Vocab';
+            }
+
+            alert(`已從「學測 GSAT Vocab」載入 ${selected.length} 題。`);
+        } catch (err) {
+            console.error(err);
+            alert('載入題庫時發生錯誤，請稍後再試。');
         }
+    } else {
+        alert('未知的題庫類型。Unknown question bank type.');
+    }
+}
 
         // === 遊戲邏輯 ===
         function startGame() {
@@ -1339,6 +1358,34 @@ Participant2"></textarea>
             }
             document.querySelector('.question-area').innerHTML = html;
         }
+        // 🔹 安全解析一行 CSV，支援雙引號與欄位內逗號
+function parseCsvLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+
+        if (ch === '"') {
+            // 連續兩個 " => 代表欄位內的一個 "
+            if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+                current += '"';
+                i++; // 跳過下一個 "
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (ch === ',' && !inQuotes) {
+            // 只有在不在引號裡的逗號才是分隔符
+            result.push(current);
+            current = '';
+        } else {
+            current += ch;
+        }
+    }
+    result.push(current);
+    return result;
+}
     </script>
 </body>
 </html>
