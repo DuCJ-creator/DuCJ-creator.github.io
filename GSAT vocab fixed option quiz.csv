@@ -294,7 +294,7 @@ code,question,option 1,option 2,option 3,option 4,correct answer
 98-GSAT-7,We hope that there will be no war in the world and that all people live in peace and _____ with each other.,complaint,harmony,mission,texture,harmony
 98-GSAT-8,"To have a full discussion of the issue, the committee spent a whole hour _____ their ideas at the meeting.",depositing,exchanging,governing,interrupting,exchanging
 98-GSAT-9,"While adapting to western ways of living, many Asian immigrants in the US still try hard to _____ their own cultures and traditions.",volunteer,scatter,preserve,motivate,preserve
-99-GSAT-1,Mr. Lin is a very ________ writer; he publishes at least five novels every year.	moderate	temporary	productive	reluctant	productive
+99-GSAT-1,Mr. Lin is a very ________ writer; he publishes at least five novels every year.	moderate,	temporary,	productive,	reluctant, productive
 99-GSAT-10,"Studies show that asking children to do house _____, such as taking out the trash or doing the dishes, helps them grow into responsible adults.",missions,chores,approaches,incidents,chores
 99-GSAT-11,"John has been scolded by his boss for over ten minutes now. _____, she is not happy about his being late again.",Expressively,Apparently,Immediately,Originally,Apparently
 99-GSAT-12,"Since the orange trees suffered _____ damage from a storm in the summer, the farmers are expecting a sharp decline in harvests this winter.",potential,relative,severe,mutual,severe
@@ -309,3 +309,4 @@ code,question,option 1,option 2,option 3,option 4,correct answer
 99-GSAT-7,"Steve has several meetings to attend every day; therefore, he has to work on a very _____ schedule.",dense,various,tight,current,tight
 99-GSAT-8,"Michael Phelps, an American swimmer, broke seven world records and won eight gold medals in men’s swimming _____ in the 2008 Olympics.",drills,techniques,routines,contests,contests
 99-GSAT-9,"Those college students work at the orphanage on a _____ basis, helping the children with their studies without receiving any pay.",voluntary,competitive,sorrowful,realistic,voluntary
+
