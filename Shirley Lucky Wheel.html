@@ -554,6 +554,7 @@
             let isLoading = false;
 
      // 加载CSV数据
+// 加载CSV数据 - 终极修复版 + 新URL
 async function loadQuizData() {
     if (isLoading) return;
     isLoading = true;
@@ -561,20 +562,41 @@ async function loadQuizData() {
     loadStatus.style.display = "block";
 
     try {
-        const response = await fetch('https://ducj-creator.github.io/small%20talk%20&%20GEPT.csv');
+        // ✅ 更新為新的 CSV 地址
+        const response = await fetch('https://ducj-creator.github.io/quick%20questions.csv');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const csvText = await response.text();
-        
+        let csvText = await response.text();
+
+        // 移除BOM字节序标记 (Byte Order Mark)
+        if (csvText.charCodeAt(0) === 0xFEFF) {
+            csvText = csvText.slice(1);
+        }
+
+        // 清理行尾符，统一为 \n
+        csvText = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
         // 解析CSV
         const lines = csvText.split('\n').filter(line => line.trim().length > 0);
-        const headers = lines[0].split(',').map(h => h.trim()); // 获取并清理列名
-        
+
+        if (lines.length < 2) {
+            throw new Error("CSV文件为空或只有一行标题");
+        }
+
+        const headers = lines[0].split(',').map(h => h.trim());
+        console.log("检测到的列名:", headers);
+
         quizData = [];
         for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(',').map(v => v.trim());
-            if (values.length >= 4) { // 确保有至少4列
+            let values = lines[i].split(',').map(v => v.trim());
+
+            // 如果分割后只有1个元素，尝试用制表符（备用）
+            if (values.length === 1 && lines[i].includes('\t')) {
+                values = lines[i].split('\t').map(v => v.trim());
+            }
+
+            if (values.length >= 4) {
                 const item = {
                     Category: values[0],
                     Level: values[1],
@@ -582,15 +604,18 @@ async function loadQuizData() {
                     Question: values[3]
                 };
                 quizData.push(item);
+            } else {
+                console.warn(`第${i+1}行数据格式异常，跳过:`, lines[i]);
             }
         }
 
-        // 更新类别下拉菜单
-        updateCategoryOptions();
+        console.log("成功加载数据条目数:", quizData.length);
+        console.log("前5条数据:", quizData.slice(0, 5));
 
+        updateCategoryOptions();
         loadStatus.textContent = `題庫載入完成！共 ${quizData.length} 題`;
         loadStatus.style.color = "#4CAF50";
-        
+
     } catch (error) {
         console.error("Error loading quiz data:", error);
         loadStatus.textContent = "載入題庫失敗：" + error.message;
