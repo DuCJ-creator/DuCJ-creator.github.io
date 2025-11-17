@@ -553,52 +553,52 @@
             let quizData = []; // 存储从CSV加载的数据
             let isLoading = false;
 
-            // 加载CSV数据
-            async function loadQuizData() {
-                if (isLoading) return;
-                isLoading = true;
-                loadStatus.textContent = "正在載入題庫...";
-                loadStatus.style.display = "block";
+     // 加载CSV数据
+async function loadQuizData() {
+    if (isLoading) return;
+    isLoading = true;
+    loadStatus.textContent = "正在載入題庫...";
+    loadStatus.style.display = "block";
 
-                try {
-                    const response = await fetch('https://ducj-creator.github.io/small%20talk%20&%20GEPT.csv');
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const csvText = await response.text();
-                    
-                    // 解析CSV
-                    const lines = csvText.split('\n').filter(line => line.trim().length > 0);
-                    const headers = lines[0].split(',').map(h => h.trim());
-                    
-                    quizData = [];
-                    for (let i = 1; i < lines.length; i++) {
-                        const values = lines[i].split(',').map(v => v.trim());
-                        if (values.length >= 4) { // 确保有至少4列
-                            const item = {
-                                Category: values[0],
-                                Level: values[1],
-                                No: values[2],
-                                Question: values[3]
-                            };
-                            quizData.push(item);
-                        }
-                    }
-
-                    // 更新类别下拉菜单
-                    updateCategoryOptions();
-
-                    loadStatus.textContent = `題庫載入完成！共 ${quizData.length} 題`;
-                    loadStatus.style.color = "#4CAF50";
-                    
-                } catch (error) {
-                    console.error("Error loading quiz data:", error);
-                    loadStatus.textContent = "載入題庫失敗：" + error.message;
-                    loadStatus.style.color = "#F44336";
-                } finally {
-                    isLoading = false;
-                }
+    try {
+        const response = await fetch('https://ducj-creator.github.io/small%20talk%20&%20GEPT.csv');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const csvText = await response.text();
+        
+        // 解析CSV
+        const lines = csvText.split('\n').filter(line => line.trim().length > 0);
+        const headers = lines[0].split(',').map(h => h.trim()); // 获取并清理列名
+        
+        quizData = [];
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',').map(v => v.trim());
+            if (values.length >= 4) { // 确保有至少4列
+                const item = {
+                    Category: values[0],
+                    Level: values[1],
+                    No: values[2],
+                    Question: values[3]
+                };
+                quizData.push(item);
             }
+        }
+
+        // 更新类别下拉菜单
+        updateCategoryOptions();
+
+        loadStatus.textContent = `題庫載入完成！共 ${quizData.length} 題`;
+        loadStatus.style.color = "#4CAF50";
+        
+    } catch (error) {
+        console.error("Error loading quiz data:", error);
+        loadStatus.textContent = "載入題庫失敗：" + error.message;
+        loadStatus.style.color = "#F44336";
+    } finally {
+        isLoading = false;
+    }
+}
 
             // 更新类别选项
             function updateCategoryOptions() {
