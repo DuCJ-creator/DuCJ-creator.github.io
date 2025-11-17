@@ -410,18 +410,103 @@
                 max-width: 900px;
             }
         }
+
+        /* 新增的题库选择样式 */
+        .quiz-selector {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .selector-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .selector-label {
+            font-weight: bold;
+            min-width: 80px;
+            color: #5a4a6a;
+        }
+
+        select, input[type="number"] {
+            padding: 10px;
+            border: 2px solid rgba(138, 107, 184, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.8);
+            color: #5a4a6a;
+            font-size: 1rem;
+            flex: 1;
+        }
+
+        input[type="number"] {
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .load-status {
+            font-size: 0.9rem;
+            color: #8a6bb8;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(to right, #c2b1d4, #b19cd9);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(to right, #b19cd9, #8a6bb8);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Shirley's Lucky Wheel</h1>
         
+        <!-- 手动输入区域 -->
         <div class="input-section">
             <textarea id="itemsInput" placeholder="請輸入選項，每行一個"></textarea>
-            
-            <div class="buttons">
-                <button id="startBtn">Start</button>
+        </div>
+
+        <!-- 题库选择区域 -->
+        <div class="quiz-selector">
+            <h3 style="margin-bottom: 15px; color: #8a6bb8;">從題庫隨機抽題</h3>
+            <div class="selector-row">
+                <span class="selector-label">類別:</span>
+                <select id="categorySelect">
+                    <option value="">-- 請選擇類別 --</option>
+                </select>
             </div>
+            <div class="selector-row">
+                <span class="selector-label">級別:</span>
+                <select id="levelSelect" disabled>
+                    <option value="">-- 請先選擇類別 --</option>
+                </select>
+            </div>
+            <div class="selector-row">
+                <span class="selector-label">題數:</span>
+                <input type="number" id="questionCount" min="1" max="50" value="5" placeholder="輸入題數">
+            </div>
+            <div class="btn-group">
+                <button id="loadQuizBtn" class="btn-secondary">載入題庫</button>
+                <button id="startQuizBtn">開始抽題</button>
+            </div>
+            <div id="loadStatus" class="load-status"></div>
+        </div>
+        
+        <div class="buttons">
+            <button id="startBtn">Start</button>
         </div>
     </div>
     
@@ -453,12 +538,154 @@
             const wheelCenter = document.getElementById('wheelCenter');
             const resultDisplay = document.getElementById('resultDisplay');
             const closeBtn = document.getElementById('closeBtn');
-            
+
+            // 新增的题库相关元素
+            const categorySelect = document.getElementById('categorySelect');
+            const levelSelect = document.getElementById('levelSelect');
+            const questionCount = document.getElementById('questionCount');
+            const loadQuizBtn = document.getElementById('loadQuizBtn');
+            const startQuizBtn = document.getElementById('startQuizBtn');
+            const loadStatus = document.getElementById('loadStatus');
+
             // 初始化變數
             let items = [];
             let isSpinning = false;
-            
-            // 開始按鈕點擊事件
+            let quizData = []; // 存储从CSV加载的数据
+            let isLoading = false;
+
+            // 加载CSV数据
+            async function loadQuizData() {
+                if (isLoading) return;
+                isLoading = true;
+                loadStatus.textContent = "正在載入題庫...";
+                loadStatus.style.display = "block";
+
+                try {
+                    const response = await fetch('https://ducj-creator.github.io/small%20talk%20&%20GEPT.csv');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const csvText = await response.text();
+                    
+                    // 解析CSV
+                    const lines = csvText.split('\n').filter(line => line.trim().length > 0);
+                    const headers = lines[0].split(',').map(h => h.trim());
+                    
+                    quizData = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        const values = lines[i].split(',').map(v => v.trim());
+                        if (values.length >= 4) { // 确保有至少4列
+                            const item = {
+                                Category: values[0],
+                                Level: values[1],
+                                No: values[2],
+                                Question: values[3]
+                            };
+                            quizData.push(item);
+                        }
+                    }
+
+                    // 更新类别下拉菜单
+                    updateCategoryOptions();
+
+                    loadStatus.textContent = `題庫載入完成！共 ${quizData.length} 題`;
+                    loadStatus.style.color = "#4CAF50";
+                    
+                } catch (error) {
+                    console.error("Error loading quiz data:", error);
+                    loadStatus.textContent = "載入題庫失敗：" + error.message;
+                    loadStatus.style.color = "#F44336";
+                } finally {
+                    isLoading = false;
+                }
+            }
+
+            // 更新类别选项
+            function updateCategoryOptions() {
+                const categories = [...new Set(quizData.map(item => item.Category))].sort();
+                categorySelect.innerHTML = '<option value="">-- 請選擇類別 --</option>';
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    categorySelect.appendChild(option);
+                });
+            }
+
+            // 根据类别更新级别选项
+            function updateLevelOptions(selectedCategory) {
+                if (!selectedCategory) {
+                    levelSelect.innerHTML = '<option value="">-- 請先選擇類別 --</option>';
+                    levelSelect.disabled = true;
+                    return;
+                }
+
+                const levels = [...new Set(quizData.filter(item => item.Category === selectedCategory).map(item => item.Level))].sort();
+                levelSelect.innerHTML = '<option value="">-- 請選擇級別 --</option>';
+                levels.forEach(level => {
+                    const option = document.createElement('option');
+                    option.value = level;
+                    option.textContent = level;
+                    levelSelect.appendChild(option);
+                });
+                levelSelect.disabled = false;
+            }
+
+            // 从题库中随机抽取问题
+            function getRandomQuestions(category, level, count) {
+                const filteredQuestions = quizData.filter(item => item.Category === category && item.Level === level);
+                
+                if (filteredQuestions.length === 0) {
+                    alert("沒有找到符合條件的問題！");
+                    return [];
+                }
+
+                if (count > filteredQuestions.length) {
+                    alert(`該類別和級別只有 ${filteredQuestions.length} 題，已自動調整為全部題目。`);
+                    count = filteredQuestions.length;
+                }
+
+                // 使用Fisher-Yates洗牌算法进行随机抽取
+                const shuffled = [...filteredQuestions];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+
+                return shuffled.slice(0, count).map(item => item.Question);
+            }
+
+            // 绑定事件监听器
+            loadQuizBtn.addEventListener('click', loadQuizData);
+
+            categorySelect.addEventListener('change', function() {
+                const selectedCategory = this.value;
+                updateLevelOptions(selectedCategory);
+            });
+
+            startQuizBtn.addEventListener('click', function() {
+                const selectedCategory = categorySelect.value;
+                const selectedLevel = levelSelect.value;
+                const count = parseInt(questionCount.value);
+
+                if (!selectedCategory || !selectedLevel) {
+                    alert("請選擇類別和級別！");
+                    return;
+                }
+
+                if (isNaN(count) || count < 1) {
+                    alert("請輸入有效的題數（大於0）！");
+                    return;
+                }
+
+                const questions = getRandomQuestions(selectedCategory, selectedLevel, count);
+                if (questions.length > 0) {
+                    items = questions;
+                    spinWheel();
+                }
+            });
+
+            // 开始按钮点击事件
             startBtn.addEventListener('click', function() {
                 const inputText = itemsInput.value.trim();
                 if (!inputText) {
@@ -477,8 +704,8 @@
                 
                 spinWheel();
             });
-            
-            // Next按鈕點擊事件
+
+            // Next按钮点击事件
             nextBtn.addEventListener('click', function() {
                 if (items.length === 0) {
                     alert('所有選項已經選完！');
@@ -487,20 +714,20 @@
                 
                 spinWheel();
             });
-            
-            // 關閉按鈕點擊事件
+
+            // 关闭按钮点击事件
             closeBtn.addEventListener('click', function() {
                 wheelContainer.classList.remove('active');
             });
-            
-            // 點擊輪盤容器外部關閉
+
+            // 点击轮盘容器外部关闭
             wheelContainer.addEventListener('click', function(e) {
                 if (e.target === wheelContainer) {
                     wheelContainer.classList.remove('active');
                 }
             });
-            
-            // 創建輪盤分段
+
+            // 创建轮盘分段
             function createWheelSegments() {
                 wheelCircle.innerHTML = '';
                 
@@ -528,8 +755,8 @@
                     wheelCircle.appendChild(segment);
                 }
             }
-            
-            // 旋轉輪盤函數
+
+            // 旋转轮盘函数
             function spinWheel() {
                 if (isSpinning || items.length === 0) return;
                 
@@ -538,44 +765,44 @@
                 resultDisplay.textContent = '';
                 wheelCenter.textContent = '';
                 
-                // 創建輪盤分段
+                // 创建轮盘分段
                 createWheelSegments();
                 
-                // 播放旋轉音效
+                // 播放旋转音效
                 createSpinSound();
                 
-                // 計算旋轉角度
+                // 计算旋转角度
                 const segmentAngle = 360 / items.length;
                 const selectedIndex = Math.floor(Math.random() * items.length);
                 const selectedItem = items[selectedIndex];
                 
-                // 計算旋轉角度（多轉幾圈後停在選中項目）
-                const extraRotations = 5; // 額外旋轉圈數
+                // 计算旋转角度（多转几圈后停在选中项目）
+                const extraRotations = 5; // 额外旋转圈数
                 const targetAngle = 360 * extraRotations + (360 - (selectedIndex * segmentAngle + segmentAngle / 2));
                 
-                // 應用旋轉動畫
+                // 应用旋转动画
                 wheelCircle.style.transform = `rotate(${targetAngle}deg)`;
                 
-                // 3秒後顯示結果
+                // 3秒后显示结果
                 setTimeout(() => {
-                    // 播放掌聲音效
+                    // 播放掌声效果
                     createApplauseSound();
                     
-                    // 顯示結果
+                    // 显示结果
                     resultDisplay.textContent = selectedItem;
                     wheelCenter.textContent = selectedItem;
                     
-                    // 從選項中移除
+                    // 从选项中移除
                     items.splice(selectedIndex, 1);
                     
-                    // 創建彩色紙屑效果
+                    // 创建彩色纸屑效果
                     createConfetti();
                     
                     isSpinning = false;
                 }, 3000);
             }
-            
-            // 生成旋轉音效
+
+            // 生成旋转音效
             function createSpinSound() {
                 try {
                     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -597,8 +824,8 @@
                     console.warn("Audio not supported");
                 }
             }
-            
-            // 生成掌聲音效
+
+            // 生成掌声音效
             function createApplauseSound() {
                 try {
                     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -631,8 +858,8 @@
                     console.warn("Audio not supported");
                 }
             }
-            
-            // 創建彩色紙屑效果
+
+            // 创建彩色纸屑效果
             function createConfetti() {
                 const colors = ['#8a6bb8', '#b19cd9', '#c2b1d4', '#d4bdd9', '#e6c9de'];
                 
@@ -650,7 +877,7 @@
                     
                     document.body.appendChild(confetti);
                     
-                    // 動畫結束後移除元素
+                    // 动画结束后移除元素
                     setTimeout(() => {
                         if (confetti.parentNode) {
                             confetti.remove();
@@ -658,7 +885,7 @@
                     }, animationDuration * 1000);
                 }
             }
-            
+
             // 防止双击缩放
             let lastTouchEnd = 0;
             document.addEventListener('touchend', function(e) {
