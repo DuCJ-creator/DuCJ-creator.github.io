@@ -1,3 +1,4 @@
+以下代碼裡，如果是從題庫選題，要增加一個Load from the question bank 的按鈕，load以後不僅有題，主題/theme也會自動補足，更方便遊戲組織者
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -727,26 +728,6 @@ Question2	Answer2"></textarea>
                             <p style="font-size:0.8rem; margin-top:4px;">
                                 ※ 題數必須小於或等於所選單字範圍；若輸入過大，系統會自動使用可用的最大題數。
                             </p>
-
-                                                        <!-- 題數設定 (共用) -->
-                            <div style="margin-top: 8px;">
-                                <label>
-                                    題數 Number of questions:
-                                    <input type="number" id="questionBankCount" min="1" value="20">
-                                </label>
-                            </div>
-                            <p style="font-size:0.8rem; margin-top:4px;">
-                                ※ 題數必須小於或等於所選單字範圍；若輸入過大，系統會自動使用可用的最大題數。
-                            </p>
-
-                            <!-- 從題庫載入按鈕 -->
-                            <button id="loadFromBankBtn" type="button" class="secondary" style="margin-top:8px;">
-                                <i class="fas fa-download"></i> Load from the Question Bank
-                            </button>
-                            <p style="font-size:0.8rem; margin-top:4px;">
-                                點擊後會先依題庫設定抽題，並自動填入遊戲主題與題目預覽。
-                            </p>
-
                         </div>
                         
                         <div class="form-group">
@@ -905,7 +886,6 @@ Participant2"></textarea>
         const ivocabUnitRangeSelect = document.getElementById('ivocabUnitRange');
         const frpSemesterSelect = document.getElementById('frpSemester');
         const toeflCategorySelect = document.getElementById('toeflCategory');
-        const loadFromBankBtn = document.getElementById('loadFromBankBtn'); // ★ 新增
 
         // Audio context for generating sounds
         let audioContext;
@@ -932,14 +912,9 @@ Participant2"></textarea>
                 radio.addEventListener('change', updateQuestionSourceUI);
             });
 
-                       // 題庫種類切換
+            // 題庫種類切換
             if (questionBankType) {
                 questionBankType.addEventListener('change', updateQuestionBankTypeUI);
-            }
-
-            // 「從題庫載入」按鈕
-            if (loadFromBankBtn) {
-                loadFromBankBtn.addEventListener('click', handleLoadFromBank);
             }
 
             // 初始化 UI
@@ -948,7 +923,7 @@ Participant2"></textarea>
             
             // Add a user interaction to unlock audio
             document.body.addEventListener('click', unlockAudio, { once: true });
-
+        });
 
         function updateQuestionSourceUI() {
             const source = document.querySelector('input[name="questionSource"]:checked')?.value || 'manual';
@@ -1220,51 +1195,6 @@ Participant2"></textarea>
 
             return true;
         }
-                    // 由題庫預先載入題目，並自動補遊戲主題＆題目預覽
-        async function handleLoadFromBank() {
-            const source = document.querySelector('input[name="questionSource"]:checked')?.value || 'manual';
-            if (source !== 'bank') {
-                alert('請先選擇「題庫 Question Bank」作為題目來源。');
-                return;
-            }
-
-            // 直接用既有的題庫載入函式
-            const ok = await loadQuestionsFromBank();
-            if (!ok) return;
-
-            // 將目前抽到的題目預覽寫回 textarea（方便遊戲主持人確認）
-            if (gameState.questions && gameState.questions.length > 0) {
-                const previewLines = gameState.questions.map(q => `${q.text}\t${q.correctAnswer}`);
-                questionsInput.value = previewLines.join('\n');
-            }
-
-            // 根據題庫設定自動產生主題字串
-            const bankType = questionBankType ? questionBankType.value : 'ivocab';
-            let theme = '';
-
-            if (bankType === 'ivocab') {
-                const level = ivocabLevelSelect.value;
-                const [uStart, uEnd] = ivocabUnitRangeSelect.value.split('-');
-                theme = `iVocab Level ${level} Unit ${uStart}–${uEnd}`;
-            } else if (bankType === 'frp') {
-                const semester = frpSemesterSelect.value;
-                const unitCheckboxes = Array.from(document.querySelectorAll('input[name="frpUnit"]:checked'));
-                const unitLabels = unitCheckboxes.map(cb => `U${cb.value}`).join(', ');
-                theme = `FRP ELA Semester ${semester} ${unitLabels}`;
-            } else if (bankType === 'toefl') {
-                const select = toeflCategorySelect;
-                const label = select.options[select.selectedIndex].text;
-                theme = `TOEFL Junior - ${label}`;
-            } else {
-                theme = 'Question Bank Game';
-            }
-
-            // 寫入主題輸入框，讓主持人不用再手打
-            gameThemeInput.value = theme;
-
-            alert('已從題庫載入題目並自動填入主題！\nQuestions loaded from the Question Bank and theme auto-filled.');
-        }
-
 
         // ======== 共同工具：CSV 解析與欄位偵測 ========
 
