@@ -52,7 +52,7 @@
             color: #8c6b5d;
         }
         
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 12px;
             border: 2px solid #e8d1c5;
@@ -62,7 +62,7 @@
             background-color: #faf6f2;
         }
         
-        input:focus, textarea:focus {
+        input:focus, textarea:focus, select:focus {
             border-color: #d4a096;
             outline: none;
         }
@@ -697,6 +697,36 @@
             <label for="event-date">活動日期 Event Date</label>
             <input type="date" id="event-date">
         </div>
+
+        <!-- ★★ 新增：從姓名庫匯入 ★★ -->
+        <div class="form-group">
+            <label>從姓名庫匯入 Import from Name Bank</label>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <select id="namebank-school">
+                    <option value="">全部學校 All schools</option>
+                </select>
+
+                <select id="namebank-grade" multiple size="4">
+                    <!-- 由 JS 自動載入年級 -->
+                </select>
+
+                <select id="namebank-class" multiple size="4">
+                    <!-- 由 JS 自動載入班級 -->
+                </select>
+
+                <button type="button"
+                        class="action-btn"
+                        id="load-from-namebank-btn"
+                        style="background:#d4a096; margin-top: 5px;">
+                    從姓名庫載入姓名 Load Names
+                </button>
+
+                <small style="color:#8c6b5d; margin-top:4px;">
+                    提示：school、grade、class 任一欄位留空，代表不以該欄位篩選（＝全選）。
+                </small>
+            </div>
+        </div>
+        <!-- ★★ 新增區塊結束 ★★ -->
         
         <div class="form-group">
             <label for="participants">參與者姓名 (每行一個) Participant Names (one per line)</label>
@@ -750,6 +780,17 @@
             const nextBtn = document.getElementById('next-btn');
             const optionButtons = document.querySelectorAll('.option-btn');
             const printBtn = document.getElementById('print-btn');
+
+            // ★ 新增：name bank UI 元素
+            const nameBankSchoolSelect = document.getElementById('namebank-school');
+            const nameBankGradeSelect  = document.getElementById('namebank-grade');
+            const nameBankClassSelect  = document.getElementById('namebank-class');
+            const loadFromNameBankBtn  = document.getElementById('load-from-namebank-btn');
+
+            // ★ 新增：name bank 資料
+            const nameBankUrl = 'https://ducj-creator.github.io/name%20bank.csv';
+            let nameBank = [];
+            let nameBankLoaded = false;
             
             let selectedAction = 'sort';
             let participants = [];
@@ -800,6 +841,104 @@
                 return team.en || team.zh || '';
             }
 
+            // ===== Name Bank：載入 CSV 並建立選單 =====
+            function loadNameBank() {
+                fetch(nameBankUrl)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return res.text();
+                    })
+                    .then(text => {
+                        parseNameBank(text);
+                        nameBankLoaded = true;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('無法載入姓名庫（name bank），請稍後再試。');
+                    });
+            }
+
+            function parseNameBank(csvText) {
+                const lines = csvText.trim().split(/\r?\n/);
+                if (lines.length <= 1) return;
+
+                const header = lines.shift().split(',').map(h => h.trim().toLowerCase());
+                const schoolIdx = header.indexOf('school');
+                const gradeIdx  = header.indexOf('grade');
+                const classIdx  = header.indexOf('class');
+                const nameIdx   = header.indexOf('name');
+
+                if (schoolIdx === -1 || gradeIdx === -1 || classIdx === -1 || nameIdx === -1) {
+                    alert('姓名庫欄位格式錯誤，需為 school, grade, class, name。');
+                    return;
+                }
+
+                nameBank = lines
+                    .map(line => line.split(','))
+                    .filter(cols => cols.length >= 4)
+                    .map(cols => ({
+                        school: (cols[schoolIdx] || '').trim(),
+                        grade : (cols[gradeIdx]  || '').trim(),
+                        class : (cols[classIdx]  || '').trim(),
+                        name  : (cols[nameIdx]   || '').trim(),
+                    }))
+                    .filter(row => row.name !== '');
+
+                buildNameBankOptions();
+            }
+
+            function buildNameBankOptions() {
+                const schools = Array.from(
+                    new Set(nameBank.map(r => r.school).filter(Boolean))
+                ).sort();
+
+                const grades = Array.from(
+                    new Set(nameBank.map(r => r.grade).filter(Boolean))
+                ).sort();
+
+                const classes = Array.from(
+                    new Set(nameBank.map(r => r.class).filter(Boolean))
+                ).sort();
+
+                // school 下拉（單選）
+                nameBankSchoolSelect.innerHTML = '<option value="">全部學校 All schools</option>';
+                schools.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s;
+                    opt.textContent = s;
+                    nameBankSchoolSelect.appendChild(opt);
+                });
+
+                // grade 多選
+                nameBankGradeSelect.innerHTML = '';
+                grades.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g;
+                    opt.textContent = g;
+                    nameBankGradeSelect.appendChild(opt);
+                });
+
+                // class 多選
+                nameBankClassSelect.innerHTML = '';
+                classes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    nameBankClassSelect.appendChild(opt);
+                });
+            }
+
+            function getSelectedValues(selectEl) {
+                return Array.from(selectEl.selectedOptions)
+                    .map(o => o.value)
+                    .filter(v => v !== '');
+            }
+
+            // 先載入 name bank，完成後會自動建立選單
+            loadNameBank();
+
             // 設定預設日期為今天
             const today = new Date().toISOString().split('T')[0];
             eventDateInput.value = today;
@@ -811,6 +950,35 @@
                     this.classList.add('active');
                     selectedAction = this.getAttribute('data-action');
                 });
+            });
+
+            // 按下「從姓名庫載入姓名」
+            loadFromNameBankBtn.addEventListener('click', function () {
+                if (!nameBankLoaded) {
+                    alert('姓名庫尚未載入完成，請稍候或重新整理頁面後再試。');
+                    return;
+                }
+
+                const selectedSchool  = nameBankSchoolSelect.value;
+                const selectedGrades  = getSelectedValues(nameBankGradeSelect);  // 可空、可複選
+                const selectedClasses = getSelectedValues(nameBankClassSelect);  // 可空、可複選
+
+                const filtered = nameBank.filter(row => {
+                    if (selectedSchool && row.school !== selectedSchool) return false;
+                    if (selectedGrades.length > 0 && !selectedGrades.includes(row.grade)) return false;
+                    if (selectedClasses.length > 0 && !selectedClasses.includes(row.class)) return false;
+                    return true;
+                });
+
+                if (filtered.length === 0) {
+                    alert('找不到符合條件的姓名。請試著放寬條件（例如取消某些欄位的選擇）。');
+                    return;
+                }
+
+                // 覆蓋 participants，如要改成「追加」可自行改動這一段
+                participantsTextarea.value = filtered.map(r => r.name).join('\n');
+
+                alert(`已載入 ${filtered.length} 筆姓名到名單中。`);
             });
             
             // 執行按鈕
