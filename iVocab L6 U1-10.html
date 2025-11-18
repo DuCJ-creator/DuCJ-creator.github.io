@@ -266,7 +266,7 @@
             position: absolute;
             right: calc(30% + 8px);
             bottom: 115px;
-            width: 70px;
+            width: 80px;
             height: 6px;
             background: linear-gradient(to right, #f39c12, #e74c3c);
             transform-origin: right center;
@@ -477,6 +477,44 @@
             /* 手机设备样式 */
         }
 
+        /* 遊戲時間選擇 */
+        .time-selector {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.95rem;
+            color: #6b5b95;
+        }
+
+        .time-selector span {
+            margin-bottom: 4px;
+        }
+
+        .time-btn {
+            background-color: #dcedc1;
+            color: #333;
+            border: none;
+            padding: 6px 14px;
+            margin: 0 4px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            box-shadow: 0 3px 0 #b7d1a0;
+            font-family: 'Comic Sans MS', cursive;
+        }
+
+        .time-btn.active {
+            background-color: #a8e6cf;
+            box-shadow: 0 3px 0 #86c7b8;
+        }
+
+        .time-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #b7d1a0;
+        }
+
         /* 响应式设计优化 */
         @media (max-width: 768px) {
             .game-container {
@@ -570,6 +608,15 @@
                 padding: 10px 20px;
                 font-size: 1rem;
                 min-width: 150px;
+            }
+
+            .time-selector {
+                font-size: 0.85rem;
+            }
+
+            .time-btn {
+                padding: 4px 10px;
+                font-size: 0.8rem;
             }
         }
         
@@ -1018,6 +1065,16 @@
                         <div class="farm-decoration" style="bottom: 15px; left: 15px;">🌻</div>
                         <div class="farm-decoration" style="bottom: 15px; right: 15px;">🌽</div>
                     </div>
+
+                    <div class="time-selector">
+                        <span>選擇遊戲時間：</span>
+                        <div>
+                            <button class="time-btn active" data-time="180">3 分鐘</button>
+                            <button class="time-btn" data-time="300">5 分鐘</button>
+                            <button class="time-btn" data-time="600">10 分鐘</button>
+                        </div>
+                    </div>
+
                     <button id="start-btn">開始挑戰！</button>
                 </div>
             </div>
@@ -1025,7 +1082,7 @@
             <div class="game-screen hidden">
                 <div class="screen-content">
                     <div class="score-display">得分: <span id="score">0</span></div>
-                    <div class="countdown" id="countdown">8</div>
+                    <div class="countdown" id="countdown">3:00</div>
                     <div class="timer-container">
                         <div class="timer-bar" id="timer-bar"></div>
                     </div>
@@ -1366,15 +1423,12 @@ urine,n,尿
             
             switch(deviceType) {
                 case 'desktop':
-                    // 桌面设备 - 使用更大的字体和间距
                     gameContainer.style.maxWidth = '1000px';
                     break;
                 case 'tablet':
-                    // 平板设备 - 中等大小
                     gameContainer.style.maxWidth = '800px';
                     break;
                 case 'mobile':
-                    // 手机设备 - 保持原有设置
                     gameContainer.style.maxWidth = '100%';
                     break;
             }
@@ -1384,12 +1438,20 @@ urine,n,尿
         let score = 0;
         let currentQuestionIndex = 0;
         let timer;
-        let timeLeft = 8;
+        let totalGameTime = 180;    // 預設 3 分鐘，秒數
+        let timeLeft = totalGameTime;
         let startTime;
         let questions = [];
         let usedInCurrentSession = []; // ✅ 本局已使用的單字索引
-        let lastCountdownNumber = 8;
+        let lastCountdownNumber = 0;
         let isAnswering = false;
+        
+        // 連續答對 / 答錯計數
+        let correctStreak = 0;
+        let wrongStreak = 0;
+
+        // 遊戲是否已結束
+        let gameOver = false;
         
         // DOM元素
         const startScreen = document.querySelector('.start-screen');
@@ -1411,7 +1473,16 @@ urine,n,尿
         const finalScoreDisplay = document.getElementById('final-score');
         const timeUsedDisplay = document.getElementById('time-used');
         const wordDatabase = document.getElementById('word-database');
+        const timeButtons = document.querySelectorAll('.time-btn');
         
+        // 時間格式：mm:ss
+        function formatTime(seconds) {
+            seconds = Math.max(0, seconds);
+            const m = Math.floor(seconds / 60);
+            const s = Math.ceil(seconds % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
         // 初始化遊戲
         function initGame() {
             // 解析單字庫
@@ -1431,10 +1502,28 @@ urine,n,尿
             // 重置遊戲狀態
             score = 0;
             currentQuestionIndex = 0;
-            usedInCurrentSession = []; // ✅ 每次重新開始都清空本局記錄
-            lastCountdownNumber = 8;
+            usedInCurrentSession = [];
+            lastCountdownNumber = 0;
             isAnswering = false;
+            correctStreak = 0;
+            wrongStreak = 0;
+            gameOver = false;
+
+            clearInterval(timer);
+
+            // 依目前 active 時間按鈕設定總時間
+            if (timeButtons.length > 0) {
+                let activeBtn = document.querySelector('.time-btn.active') || timeButtons[0];
+                timeButtons.forEach(btn => btn.classList.remove('active'));
+                activeBtn.classList.add('active');
+                totalGameTime = parseInt(activeBtn.dataset.time, 10);
+            }
+
+            timeLeft = totalGameTime;
             scoreDisplay.textContent = score;
+            countdownDisplay.textContent = formatTime(timeLeft);
+            timerBar.style.width = '100%';
+            timerBar.style.backgroundColor = '#ff8b94';
             
             // 重置視覺元素
             pig.textContent = '🐷';
@@ -1445,6 +1534,7 @@ urine,n,尿
             explosion.style.opacity = '0';
             explosion.style.transform = 'scale(0)';
             confettiContainer.innerHTML = '';
+            countdownDisplay.style.color = '#ff8b94';
             countdownDisplay.className = 'countdown';
             
             // 顯示開始畫面
@@ -1452,38 +1542,45 @@ urine,n,尿
             gameScreen.classList.add('hidden');
             endScreen.classList.remove('active');
         }
-        
+
+        // 開始遊戲
         function startGame() {
             if (questions.length === 0) {
                 alert('單字庫解析錯誤，請檢查單字格式！');
                 return;
             }
             
+            // 讀取目前選的時間
+            const activeBtn = document.querySelector('.time-btn.active');
+            if (activeBtn) {
+                totalGameTime = parseInt(activeBtn.dataset.time, 10);
+            }
+
+            timeLeft = totalGameTime;
+            lastCountdownNumber = Math.ceil(timeLeft);
+            countdownDisplay.textContent = formatTime(timeLeft);
+            timerBar.style.width = '100%';
+
+            score = 0;
+            correctStreak = 0;
+            wrongStreak = 0;
+            gameOver = false;
+            scoreDisplay.textContent = score;
+
             startScreen.classList.add('hidden');
             gameScreen.classList.remove('hidden');
+
             startTime = new Date().getTime();
+            clearInterval(timer);
+            timer = setInterval(updateTimer, 100);
+
             loadQuestion();
         }
         
-        // 載入問題（✅ 已重寫）
+        // 載入問題
         function loadQuestion() {
-            // 重置計時器
-            clearInterval(timer);
-            timeLeft = 8;
-            lastCountdownNumber = 8;
-            countdownDisplay.textContent = timeLeft;
-            timerBar.style.width = '100%';
-            timerBar.style.backgroundColor = '#ff8b94';
-            flame.style.opacity = '0';
-            flame.style.transform = 'scale(0)';
-            fuse.style.width = '80px';
-            explosion.style.opacity = '0';
-            explosion.style.transform = 'scale(0)';
-            confettiContainer.innerHTML = '';
-            countdownDisplay.style.color = '#ff8b94';
-            countdownDisplay.style.fontSize = '1.5rem';
-            countdownDisplay.className = 'countdown';
-            
+            if (gameOver) return;
+
             // 重置回答狀態
             isAnswering = false;
             
@@ -1515,12 +1612,9 @@ urine,n,尿
             
             // 生成選項
             generateOptions(question);
-            
-            // 開始計時
-            timer = setInterval(updateTimer, 100);
         }
         
-        // 生成選項（保持不變）
+        // 生成選項
         function generateOptions(correctQuestion) {
             optionsContainer.innerHTML = '';
             
@@ -1543,7 +1637,7 @@ urine,n,尿
                 button.className = 'option';
                 button.textContent = option;
                 button.addEventListener('click', () => {
-                    if (!isAnswering) {
+                    if (!isAnswering && !gameOver) {
                         isAnswering = true;
                         checkAnswer(option, correctQuestion.meaning);
                     }
@@ -1552,9 +1646,9 @@ urine,n,尿
             });
         }
         
-        // 檢查答案（保持不變）
+        // 檢查答案＆計分邏輯
         function checkAnswer(selectedOption, correctAnswer) {
-            clearInterval(timer);
+            if (gameOver) return;
             
             const options = document.querySelectorAll('.option');
             options.forEach(option => {
@@ -1567,17 +1661,43 @@ urine,n,尿
             });
             
             if (selectedOption === correctAnswer) {
-                score += 5;
+                // ✅ 答對：連續正確 +1，錯誤歸零
+                correctStreak++;
+                wrongStreak = 0;
+
+                let addScore = 5;
+                if (correctStreak === 1) addScore = 5;
+                else if (correctStreak === 2) addScore = 10;
+                else if (correctStreak === 3) addScore = 15;
+                else addScore = 20; // 第 4 題起封頂
+
+                score += addScore;
                 scoreDisplay.textContent = score;
+
                 pig.textContent = '🐷🎉';
                 createConfetti();
                 playSound('correct');
                 
                 setTimeout(() => {
+                    if (gameOver) return;
                     pig.textContent = '🐷';
+                    optionsContainer.innerHTML = '';
                     loadQuestion();
                 }, 800);
             } else {
+                // ❌ 答錯：連續錯誤 +1，正確歸零
+                wrongStreak++;
+                correctStreak = 0;
+
+                let penalty = 5;
+                if (wrongStreak === 1) penalty = 5;
+                else if (wrongStreak === 2) penalty = 10;
+                else if (wrongStreak === 3) penalty = 15;
+                else penalty = 20;  // 第 4 題起封頂
+
+                score = Math.max(score - penalty, 0);
+                scoreDisplay.textContent = score;
+
                 flame.style.opacity = '1';
                 flame.style.transform = 'scale(1)';
                 explosion.style.opacity = '1';
@@ -1586,19 +1706,43 @@ urine,n,尿
                 playSound('explosion');
                 
                 setTimeout(() => {
-                    const endTime = new Date().getTime();
-                    const timeUsed = Math.floor((endTime - startTime) / 1000);
-                    
-                    finalScoreDisplay.textContent = score;
-                    timeUsedDisplay.textContent = timeUsed;
-                    
-                    gameScreen.classList.add('hidden');
-                    endScreen.classList.add('active');
+                    if (gameOver) return;
+
+                    if (score <= 0) {
+                        // 分數歸零 ⇒ 遊戲結束
+                        endGame('score');
+                    } else {
+                        // 還有分數 ⇒ 繼續遊戲
+                        pig.textContent = '🐷';
+                        pig.className = 'pig';
+                        flame.style.opacity = '0';
+                        flame.style.transform = 'scale(0)';
+                        explosion.style.opacity = '0';
+                        explosion.style.transform = 'scale(0)';
+                        optionsContainer.innerHTML = '';
+                        loadQuestion();
+                    }
                 }, 800);
             }
         }
+
+        function endGame(reason) {
+            if (gameOver) return;
+            gameOver = true;
+
+            clearInterval(timer);
+
+            const endTime = new Date().getTime();
+            const timeUsed = Math.floor((endTime - startTime) / 1000);
+
+            finalScoreDisplay.textContent = score;
+            timeUsedDisplay.textContent = timeUsed;
+            
+            gameScreen.classList.add('hidden');
+            endScreen.classList.add('active');
+        }
         
-        // 播放音效（保持不變）
+        // 播放音效
         function playSound(type) {
             if (type === 'correct') {
                 const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3');
@@ -1611,7 +1755,7 @@ urine,n,尿
             }
         }
         
-        // 創建彩色紙花效果（保持不變）
+        // 創建彩色紙花效果
         function createConfetti() {
             const colors = ['#ff8b94', '#ffaaa5', '#a8e6cf', '#dcedc1', '#6b5b95', '#ffd3b6'];
             const confettiCount = 50;
@@ -1653,25 +1797,32 @@ urine,n,尿
             document.head.appendChild(style);
         }
         
-        // 更新計時器（保持不變）
+        // 更新計時器：整場遊戲倒數
         function updateTimer() {
+            if (gameOver) {
+                clearInterval(timer);
+                return;
+            }
+
             timeLeft -= 0.1;
-            const percentage = (timeLeft / 8) * 100;
+            if (timeLeft < 0) timeLeft = 0;
+
+            const percentage = (timeLeft / totalGameTime) * 100;
             timerBar.style.width = `${percentage}%`;
             
             const currentNumber = Math.ceil(timeLeft);
-            countdownDisplay.textContent = currentNumber;
+            countdownDisplay.textContent = formatTime(timeLeft);
             
             if (currentNumber !== lastCountdownNumber) {
                 lastCountdownNumber = currentNumber;
                 countdownDisplay.className = 'countdown pulse';
                 
                 setTimeout(() => {
-                    countdownDisplay.className = 'countdown';
-                }, 500);
+                    if (!gameOver) countdownDisplay.className = 'countdown';
+                }, 300);
             }
             
-            fuse.style.width = `${percentage * 0.8}px`;
+            fuse.style.width = `${Math.max(percentage * 0.8, 0)}px`;
             
             if (percentage < 20) {
                 timerBar.style.background = 'linear-gradient(to right, #ff0000, #ff6600)';
@@ -1686,29 +1837,20 @@ urine,n,尿
                 flame.style.opacity = '0.7';
                 flame.style.transform = 'scale(0.7)';
             } else {
+                timerBar.style.background = 'linear-gradient(to right, #ff8b94, #ffaaa5)';
                 countdownDisplay.style.color = '#ff8b94';
                 countdownDisplay.style.fontSize = '1.5rem';
+                flame.style.opacity = '0';
+                flame.style.transform = 'scale(0)';
             }
             
             if (timeLeft <= 0) {
                 clearInterval(timer);
-                const options = document.querySelectorAll('.option');
-                const correctAnswer = questions[currentQuestionIndex].meaning;
-                let wrongOption;
-                for (let i = 0; i < options.length; i++) {
-                    if (options[i].textContent !== correctAnswer) {
-                        wrongOption = options[i].textContent;
-                        break;
-                    }
-                }
-                if (wrongOption) {
-                    isAnswering = true;
-                    checkAnswer(wrongOption, correctAnswer);
-                }
+                endGame('time');
             }
         }
         
-        // 輔助函數：打亂數組（保持不變）
+        // 輔助函數：打亂數組
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -1717,6 +1859,22 @@ urine,n,尿
             return array;
         }
         
+        // 時間選擇按鈕事件
+        timeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                timeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // 只在開始畫面調整顯示
+                if (!gameOver && !gameScreen || startScreen && !startScreen.classList.contains('hidden')) {
+                    totalGameTime = parseInt(btn.dataset.time, 10);
+                    timeLeft = totalGameTime;
+                    countdownDisplay.textContent = formatTime(timeLeft);
+                    timerBar.style.width = '100%';
+                }
+            });
+        });
+
         // 事件監聽器
         startBtn.addEventListener('click', startGame);
         restartBtn.addEventListener('click', initGame);
