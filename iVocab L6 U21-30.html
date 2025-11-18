@@ -260,6 +260,21 @@
             text-align: center;
             padding: 20px;
         }
+
+        /* 新增：遊戲時間選擇樣式 */
+        .time-select {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            color: #d4af37;
+        }
+        .time-select label {
+            margin: 0 8px;
+            cursor: pointer;
+        }
+        .time-select input {
+            margin-right: 3px;
+        }
         
         .start-btn {
             background-color: #e52e71;
@@ -417,6 +432,13 @@
         
         <div class="start-container" id="start-container">
             <p>Ready for the Challenge？</p>
+            <!-- 新增：遊戲時間選擇 -->
+            <div class="time-select">
+                <div>選擇遊戲時間：</div>
+                <label><input type="radio" name="game-time" value="180" checked> 3 分鐘</label>
+                <label><input type="radio" name="game-time" value="300"> 5 分鐘</label>
+                <label><input type="radio" name="game-time" value="600"> 10 分鐘</label>
+            </div>
             <button class="start-btn" id="start-btn">Start</button>
         </div>
         
@@ -449,7 +471,7 @@
     </div>
     
     <script>
-        // 耶誕節主題單字資料
+        // 耶誕節主題單字資料（略，維持原本）
         const newVocabulary = `
 premier,adj,首位的;最早的
 rash,adj,輕率的;急躁的
@@ -741,10 +763,12 @@ siege,n,圍攻;包圍;圍城
         let currentQuestionIndex = 0;
         let score = 0;
         let questions = [];
-        let timer = null; // 確保計時器初始為null
-        let timeLeft = 8;
-        let tickSound;
+        let timer = null; // 整場遊戲計時器
         let usedInCurrentSession = []; // 本局已使用單字索引
+
+        // 整場遊戲時間（秒）
+        let totalGameTime = 180;
+        let gameTimeLeft = 180;
 
         // ⭐ 連擊計分變數：連續答對 / 連續答錯次數
         let correctStreak = 0;
@@ -802,8 +826,13 @@ siege,n,圍攻;包圍;圍城
             currentQuestionIndex = 0;
             score = 0;
             usedInCurrentSession = []; 
-            correctStreak = 0;  // ⭐ 重置連擊
-            wrongStreak = 0;    // ⭐ 重置連錯
+            correctStreak = 0;
+            wrongStreak = 0;
+            
+            // 依選擇的遊戲時間設定
+            const selectedTime = document.querySelector('input[name="game-time"]:checked');
+            totalGameTime = selectedTime ? parseInt(selectedTime.value, 10) : 180;
+            gameTimeLeft = totalGameTime;
             
             // 清除之前的計時器
             if (timer) {
@@ -816,6 +845,9 @@ siege,n,圍攻;包圍;圍城
             
             // 更新UI
             updateScore();
+            timerBar.style.width = '100%';
+            timerBar.style.backgroundColor = '#00ff00';
+            timerBar.classList.remove('urgent');
             
             // 顯示遊戲元素
             questionContainer.classList.remove('hidden');
@@ -826,8 +858,43 @@ siege,n,圍攻;包圍;圍城
             // 生成第一個問題
             generateQuestion();
             
+            // 開始整場計時
+            startGameTimer();
+            
             // 開始雪花動畫
             createSnowflakes();
+        }
+
+        // 整場遊戲計時
+        function startGameTimer() {
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            timer = setInterval(() => {
+                gameTimeLeft--;
+                if (gameTimeLeft < 0) gameTimeLeft = 0;
+                const percent = (gameTimeLeft / totalGameTime) * 100;
+                timerBar.style.width = percent + '%';
+
+                // 顏色與緊急效果
+                if (gameTimeLeft <= totalGameTime * 0.2) {
+                    timerBar.style.backgroundColor = '#ff0000';
+                    timerBar.classList.add('urgent');
+                } else if (gameTimeLeft <= totalGameTime * 0.5) {
+                    timerBar.style.backgroundColor = '#ffff00';
+                    timerBar.classList.remove('urgent');
+                } else {
+                    timerBar.style.backgroundColor = '#00ff00';
+                    timerBar.classList.remove('urgent');
+                }
+
+                if (gameTimeLeft <= 0) {
+                    clearInterval(timer);
+                    timer = null;
+                    endGame(); // 時間到結束遊戲
+                }
+            }, 1000);
         }
         
         // 生成新問題
@@ -842,19 +909,14 @@ siege,n,圍攻;包圍;圍城
                 .map((_, i) => i)
                 .filter(i => !usedInCurrentSession.includes(i));
             
-            // 安全防護
             if (availableIndices.length === 0) {
                 usedInCurrentSession = [];
-                generateQuestion();
-                return;
             }
             
-            // 隨機選擇一個未使用過的單字
             const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
             usedInCurrentSession.push(randomIndex);
             const selectedWord = vocabulary[randomIndex];
             
-            // 創建問題
             const question = {
                 word: selectedWord.word,
                 type: selectedWord.type,
@@ -862,7 +924,7 @@ siege,n,圍攻;包圍;圍城
                 options: generateOptions(selectedWord.meaning)
             };
             
-            questions.push(question);
+            questions[currentQuestionIndex] = question;
             showQuestion();
         }
         
@@ -870,7 +932,6 @@ siege,n,圍攻;包圍;圍城
         function generateOptions(correctMeaning) {
             const options = [correctMeaning];
             
-            // 從單字庫中隨機選擇3個不同的意思作為錯誤選項
             const otherMeanings = vocabulary
                 .map(item => item.meaning)
                 .filter(meaning => meaning !== correctMeaning);
@@ -884,7 +945,6 @@ siege,n,圍攻;包圍;圍城
                 }
             }
             
-            // 打亂選項順序
             return shuffleArray(options);
         }
         
@@ -902,133 +962,36 @@ siege,n,圍攻;包圍;圍城
         function showQuestion() {
             const currentQuestion = questions[currentQuestionIndex];
             
-            // 更新問題計數
             questionCountElement.textContent = currentQuestionIndex + 1;
-            
-            // 顯示問題
             questionElement.textContent = `${currentQuestion.word} (${currentQuestion.type})`;
             
-            // 清除之前的選項
             optionsContainer.innerHTML = '';
             
-            // 添加新的選項
             currentQuestion.options.forEach((option, index) => {
                 const optionElement = document.createElement('div');
                 optionElement.classList.add('option');
                 optionElement.textContent = option;
                 optionElement.addEventListener('click', () => selectOption(option, currentQuestion.correctMeaning));
                 
-                // 為每個彩球添加不同顏色
                 const colors = ['#ffcce6', '#ccf2ff', '#e6ffcc', '#ffebcc'];
                 optionElement.style.backgroundColor = colors[index];
                 
                 optionsContainer.appendChild(optionElement);
             });
             
-            // 清除反饋
             feedbackElement.textContent = '';
             feedbackElement.style.color = '#d4af37';
             
-            // 清除之前的麋鹿
             mooseContainer.innerHTML = '';
-            
-            // 添加一隻跳躍的麋鹿
             const moose = document.createElement('div');
             moose.classList.add('moose');
             moose.textContent = '🫎';
             mooseContainer.appendChild(moose);
-            
-            // 開始倒計時
-            startTimer();
-        }
-        
-        // 開始倒計時
-        function startTimer() {
-            timeLeft = 8;
-            timerBar.style.width = '100%';
-            timerBar.style.backgroundColor = '#00ff00';
-            timerBar.classList.remove('urgent');
-            
-            // 清除之前的計時器
-            if (timer) {
-                clearInterval(timer);
-                timer = null;
-            }
-            
-            timer = setInterval(() => {
-                timeLeft--;
-                timerBar.style.width = `${(timeLeft / 8) * 100}%`;
-                
-                // 根據剩餘時間改變顏色
-                if (timeLeft <= 3) {
-                    timerBar.style.backgroundColor = '#ff0000';
-                    // 添加緊急脈動效果
-                    timerBar.classList.add('urgent');
-                    
-                    // 播放滴答聲
-                    if (timeLeft > 0) {
-                        tickSound = createSound(800 + (3 - timeLeft) * 200, 'sine');
-                        setTimeout(() => {
-                            if (tickSound) tickSound.stop();
-                        }, 100);
-                    }
-                } else if (timeLeft <= 5) {
-                    timerBar.style.backgroundColor = '#ffff00';
-                    timerBar.classList.remove('urgent');
-                } else {
-                    timerBar.classList.remove('urgent');
-                }
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    timer = null; // 重要：將計時器設為null
-                    timeUp();
-                }
-            }, 1000);
-        }
-        
-        // 時間到（視為答錯並扣分）
-        function timeUp() {
-            const currentQuestion = questions[currentQuestionIndex];
-
-            // ⭐ 計算「時間到」的扣分（當作一個錯誤）
-            wrongStreak++;
-            correctStreak = 0;
-            const penalty = 5 * wrongStreak; // 無上限，每次多 5 分級距
-            score -= penalty;
-            updateScore();
-            
-            feedbackElement.textContent = `時間到! -${penalty} 分，正確答案是: ${currentQuestion.correctMeaning}`;
-            feedbackElement.style.color = '#ff0000';
-            
-            // 禁用所有選項
-            const options = document.querySelectorAll('.option');
-            options.forEach(option => {
-                option.style.pointerEvents = 'none';
-                if (option.textContent === currentQuestion.correctMeaning) {
-                    option.classList.add('correct');
-                }
-            });
-            
-            // 播放錯誤音效
-            const errorSound = createSound(400, 'sawtooth');
-            setTimeout(() => {
-                if (errorSound) errorSound.stop();
-            }, 300);
-            
-            // 結束遊戲 - 縮短等待時間
-            setTimeout(() => {
-                endGame();
-            }, 1000);
         }
         
         // 選擇選項
         function selectOption(selectedOption, correctAnswer) {
-            // 停止計時器
-            if (timer) {
-                clearInterval(timer);
-                timer = null; // 重要：將計時器設為null
-            }
+            if (gameTimeLeft <= 0) return;
             
             // 禁用所有選項
             const options = document.querySelectorAll('.option');
@@ -1041,27 +1004,23 @@ siege,n,圍攻;包圍;圍城
                 }
             });
             
-            // 檢查答案
             if (selectedOption === correctAnswer) {
                 // ⭐ 正確：連續答對次數+1，錯誤連擊歸 0
                 correctStreak++;
                 wrongStreak = 0;
-                const bonus = 5 * correctStreak; // 5, 10, 15, 20, ... 無上限
+                const bonus = 5 * correctStreak; // 5, 10, 15, 20...
                 score += bonus;
 
                 feedbackElement.textContent = `正確! +${bonus} 分 🎄`;
                 feedbackElement.style.color = '#00ff00';
                 
-                // 播放正確音效
                 const correctSound = createSound(600, 'sine');
                 setTimeout(() => {
                     if (correctSound) correctSound.stop();
                 }, 200);
                 
-                // 更新分數
                 updateScore();
                 
-                // 準備下一題 - 縮短等待時間
                 setTimeout(() => {
                     currentQuestionIndex++;
                     generateQuestion();
@@ -1070,25 +1029,31 @@ siege,n,圍攻;包圍;圍城
                 // ⭐ 錯誤：連續答錯次數+1，正確連擊歸 0
                 wrongStreak++;
                 correctStreak = 0;
-                const penalty = 5 * wrongStreak; // 5, 10, 15, 20, ... 無上限
+                const penalty = 5 * wrongStreak; // 5, 10, 15, 20...
                 score -= penalty;
-
+                if (score < 0) score = 0; // 不讓分數變負
+                
                 feedbackElement.textContent = `錯誤! -${penalty} 分，正確答案是: ${correctAnswer}`;
                 feedbackElement.style.color = '#ff0000';
                 
-                // 播放錯誤音效
                 const errorSound = createSound(400, 'sawtooth');
                 setTimeout(() => {
                     if (errorSound) errorSound.stop();
                 }, 300);
                 
-                // 更新分數
                 updateScore();
                 
-                // 結束遊戲 - 縮短等待時間
-                setTimeout(() => {
-                    endGame();
-                }, 1000);
+                // 分數歸 0 就結束，否則繼續下一題
+                if (score <= 0) {
+                    setTimeout(() => {
+                        endGame();
+                    }, 800);
+                } else {
+                    setTimeout(() => {
+                        currentQuestionIndex++;
+                        generateQuestion();
+                    }, 800);
+                }
             }
         }
         
@@ -1099,9 +1064,14 @@ siege,n,圍攻;包圍;圍城
         
         // 結束遊戲
         function endGame() {
+            // 停止整場計時
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            
             finalScoreElement.textContent = score;
             
-            // 根據分數顯示不同的訊息（門檻仍沿用原本設定）
             if (score >= 20) {
                 resultMessageElement.textContent = '太棒了! 你是英文單字大師! 🎅';
             } else if (score >= 10) {
@@ -1112,10 +1082,7 @@ siege,n,圍攻;包圍;圍城
                 resultMessageElement.textContent = '繼續努力，你會越來越進步! 🦌';
             }
             
-            // 顯示結果容器
             resultContainer.classList.remove('hidden');
-            
-            // 隱藏問題和選項容器
             questionContainer.classList.add('hidden');
             optionsContainer.classList.add('hidden');
             feedbackElement.classList.add('hidden');
@@ -1123,17 +1090,14 @@ siege,n,圍攻;包圍;圍城
         
         // 創建雪花效果
         function createSnowflakes() {
-            // 清除舊的雪花
             const oldSnowflakes = document.querySelectorAll('.snowflake');
             oldSnowflakes.forEach(snowflake => snowflake.remove());
             
-            // 創建新雪花
             for (let i = 0; i < 50; i++) {
                 const snowflake = document.createElement('div');
                 snowflake.classList.add('snowflake');
                 snowflake.innerHTML = '❄';
                 
-                // 隨機位置和大小
                 snowflake.style.left = `${Math.random() * 100}%`;
                 snowflake.style.fontSize = `${Math.random() * 10 + 10}px`;
                 snowflake.style.opacity = Math.random();
