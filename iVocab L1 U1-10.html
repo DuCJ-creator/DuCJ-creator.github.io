@@ -266,7 +266,7 @@
             position: absolute;
             right: calc(30% + 8px);
             bottom: 115px;
-            width: 70px;
+            width: 80px;
             height: 6px;
             background: linear-gradient(to right, #f39c12, #e74c3c);
             transform-origin: right center;
@@ -477,6 +477,44 @@
             /* 手机设备样式 */
         }
 
+        /* 遊戲時間選擇 */
+        .time-selector {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.95rem;
+            color: #6b5b95;
+        }
+
+        .time-selector span {
+            margin-bottom: 4px;
+        }
+
+        .time-btn {
+            background-color: #dcedc1;
+            color: #333;
+            border: none;
+            padding: 6px 14px;
+            margin: 0 4px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            box-shadow: 0 3px 0 #b7d1a0;
+            font-family: 'Comic Sans MS', cursive;
+        }
+
+        .time-btn.active {
+            background-color: #a8e6cf;
+            box-shadow: 0 3px 0 #86c7b8;
+        }
+
+        .time-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #b7d1a0;
+        }
+
         /* 响应式设计优化 */
         @media (max-width: 768px) {
             .game-container {
@@ -570,6 +608,15 @@
                 padding: 10px 20px;
                 font-size: 1rem;
                 min-width: 150px;
+            }
+
+            .time-selector {
+                font-size: 0.85rem;
+            }
+
+            .time-btn {
+                padding: 4px 10px;
+                font-size: 0.8rem;
             }
         }
         
@@ -1018,6 +1065,16 @@
                         <div class="farm-decoration" style="bottom: 15px; left: 15px;">🌻</div>
                         <div class="farm-decoration" style="bottom: 15px; right: 15px;">🌽</div>
                     </div>
+
+                    <div class="time-selector">
+                        <span>選擇遊戲時間：</span>
+                        <div>
+                            <button class="time-btn active" data-time="180">3 分鐘</button>
+                            <button class="time-btn" data-time="300">5 分鐘</button>
+                            <button class="time-btn" data-time="600">10 分鐘</button>
+                        </div>
+                    </div>
+
                     <button id="start-btn">開始挑戰！</button>
                 </div>
             </div>
@@ -1025,7 +1082,7 @@
             <div class="game-screen hidden">
                 <div class="screen-content">
                     <div class="score-display">得分: <span id="score">0</span></div>
-                    <div class="countdown" id="countdown">8</div>
+                    <div class="countdown" id="countdown">3:00</div>
                     <div class="timer-container">
                         <div class="timer-bar" id="timer-bar"></div>
                     </div>
@@ -1061,96 +1118,295 @@
         
         <!-- 單字庫區域 -->
         <textarea id="word-database" style="display: none;">
-action,n,動作  
-afternoon,n,下午;午後  
-air,n,空氣  
-banana,n,香蕉  
-brown,adj,褐色的;棕色的  
-brown,n,棕色  
-card,n,卡片  
-eat,v,吃  
-farm,n,農場  
-fifteen,n,十五  
-fifteen,adj,十五的  
-first,adv,先;首先;第一;首次  
-hand,v,面交;給;傳遞  
-idea,n,主意  
-large,adj,大的  
-make,v,製造;使得  
-many,adj,很多的  
-May,n,五月  
-outside,n,外面;外部;外側;外表  
-please,v,請;取悅  
-question,v,詢問  
-radio,v,用無線電傳送  
-room,n,房間  
-room,v,居住;為...提供住處  
-shall,v,將;應該  
-shot,n,射擊;開槍;投籃;拍攝  
-soil,n,土;泥土;土壤  
-study,v,學習;讀書  
-time,v,記錄...的時間;使合拍子  
-too,adv,也是;過於  
-toward,prep,向;對  
-welcome,n,歡迎;款待;歡迎辭  
-yes,n,肯定的回答;同意;贊成票  
-almost,adv,幾乎  
-animal,n,動物  
-begin,v,開始  
-cost,v,花費  
-fight,n,打架;戰鬥  
-finish,n,結束;(傢具等)末道漆  
-funny,adj,可笑的;滑稽的  
-haircut,n,理髮  
-home,adv,在家;回家;到家  
-hurt,v,傷害;使疼痛  
-level,n,水平線  
-mail,v,寄信  
-nine,n,九  
-nine,adj,九的  
-on,prep,在…上面  
-only,conj,可是;不過;要不是;若非  
-plant,n,植物;農作物;工廠  
-soda,n,蘇打;汽水  
-sound,v,聽起來  
-strong,adj,強壯的  
-ticket,v,加標籤於;開違規罰單  
-touch,n,觸;碰;接觸;潤色;特長;才能;少許  
-town,n,城市  
-up,prep,向...上  
-win,v,贏得  
-world,n,世界  
-come,v,到來  
-country,n,國家;鄉下  
-cowboy,n,牛仔  
-every,adj,每一個的  
-examination,n,檢查;調查;考試 (=exam)  
-except,v,把...除外;反對  
-frog,n,青蛙  
-glad,adj,高興的  
-goodbye,n,告別  
-inside,prep,在…裡面  
-laugh,v,笑  
-lion,n,獅子  
-never,adv,永不  
-paint,v,畫圖;油漆  
-pencil,v,草擬;起草  
-piano,n,鋼琴  
-right,adv,向右地;馬上;正好  
-sand,n,沙  
-second,adj,第二的;次要的;副的;從屬的  
-seesaw,n,蹺蹺板  
-seesaw,v,(玩) 蹺蹺板  
-sometimes,adv,有時候  
-still,adj,靜止的  
-stop,v,停止  
-wear,v,穿著;磨損;使力竭  
-Wednesday,n,星期三  
-well,adv,很好地;充分地  
-will,n,意志;決心;遺囑  
-yellow,n,黃色  
-yellow,adj,黃色的  
-yesterday,adv,昨天  
+action,n,動作
+afternoon,n,下午;午後
+air,n,空氣
+banana,n,香蕉
+brown,adj;n,褐色的;棕色的;棕色
+card,n,卡片
+eat,v,吃
+farm,n,農場
+fifteen,n;adj,十五(的)
+first,adv,先;首先;第一;首次
+hand,v,面交;給;傳遞
+idea,n,主意
+large,adj,大的
+make,v,製造; 使得
+many,adj,很多的
+May,n,五月
+outside,n,外面;外部;外側;外表
+please,v,請;取悅
+question,v,詢問
+radio,v,用無線電傳送
+room,n;v,房間; 居住; 為...提供住處
+shall,v,將;應該
+shot,n,射擊;開槍;投籃;拍攝
+soil,n,土;泥土;土壤
+study,v,學習;讀書
+time,v,記錄...的時間;使合拍子
+too,adv,也是;過於
+toward,prep,向;對
+welcome,n,歡迎;款待;歡迎辭
+yes,n,肯定的回答;同意;贊成票
+almost,adv,幾乎
+animal,n,動物
+begin,v,開始
+cost,v,花費
+fight,n,打架;戰鬥
+finish,n,結束;(傢具等)末道漆
+funny,adj,可笑的;滑稽的
+haircut,n,理髮
+home,adv,在家;回家;到家
+hurt,v,傷害;使疼痛
+level,n,水平線
+mail,v,寄信
+nine,n;adj,九(的)
+on,prep,在…上面
+only,conj,可是;不過;要不是;若非
+plant,n,植物;農作物;工廠
+soda,n,蘇打;汽水
+sound,v,聽起來
+strong,adj,強壯的
+ticket,v,加標籤於;開違規罰單
+touch,n,觸;碰;接觸;潤色;特長;才能;少許
+town,n,城市
+up,prep,向...上
+win,v,贏得
+world,n,世界
+come,v,到來
+country,n,國家;鄉下
+cowboy,n,牛仔
+every,adj,每一個的
+examination,n,檢查;調查; 考試 (=exam)
+except,v,把...除外;反對
+frog,n,青蛙
+glad,adj,高興的
+goodbye,n,告別
+inside,prep,在…裡面
+laugh,v,笑
+lion,n,獅子
+never,adv,永不
+paint,v,畫圖;油漆
+pencil,v,草擬;起草
+piano,n,鋼琴
+right,adv,向右地;馬上;正好
+sand,n,沙
+second,adj,第二的;次要的;副的;從屬的
+seesaw,n;v,(玩) 蹺蹺板
+sometimes,adv,有時候
+still,adj,靜止的
+stop,v,停止
+wear,v,穿著; 磨損; 使力竭
+Wednesday,n,星期三
+well,adv,很好地;充分地
+will,n,意志;決心;遺囑
+yellow,n;adj,黃色(的)
+yesterday,adv,昨天
+ago,adv,以前
+born,adj,出生的;誕生的
+care,v;n,關心;照顧; 看護;關懷
+certain,adj,肯定的
+draw,v,畫;繪製;描寫
+fall,n,秋天
+far,adj,遠的
+first,n,第一;第一個;第一名;優等;開始;開始時間
+fog,v,以霧籠罩;使困惑;使模糊
+fresh,adj,新鮮的
+front,v,向前;在前面;面對
+front,n,前方
+iron,v,熨燙
+keeper,n,保管人;守衛
+kitten,n,小貓
+knee,v,用膝蓋碰(撞)
+leave,v,離開;丟下
+nurse,n,護士
+out,adv;prep,在外;向外
+ready,v,預先;事先;使準備好
+seventy,n;adj,七十(的)
+smell,n,氣味;香味;臭味;嗅覺;一嗅;一聞;少許;跡象;影蹤
+song,n,歌曲
+sour,v,使變酸;厭煩;變壞
+sure,adj,確定
+thus,adv,如此;這樣
+wear,n,穿;戴;佩;磨損
+wrong,adv,錯誤地;邪惡地;不正當地
+again,adv,再一次
+agreement,n,同意
+class,v,把...分類;把...分等級
+clean,n,打掃;去垢
+coat,v,塗在...上;給...穿上外套
+farmer,n,農夫
+flower,v,開花;發育;成熟;繁榮
+history,n,歷史
+hole,v,鑿洞於;穿孔於;進入洞中
+job,n,職業;工作
+joy,n,歡喜;樂趣
+other,adj,其他的
+papa,n,爸爸
+scene,n,景色;場面
+selfish,adj,自私的
+set,n,套;組
+shine,n,光;光亮;光澤;擦亮;陽光;晴天
+something,n,某人;某事;重要的人(或事物)
+special,adj,特別的
+thirteen,n;adj,十三(的)
+view,v,察看;將...看成是
+visit,n,訪問
+welcome,v,歡迎
+whole,n,全部;全體;整體
+yet,adv,尚未;但是
+angry,adj,生氣的
+beat,v;n,擊敗;敲擊;心跳聲;滴答聲;拍子
+behind,adv;prep,在背後;向背後;遲;落後
+brave,adj,勇敢的
+camel,n,駱駝
+Christmas,n,耶誕節
+cold,adj,寒冷的
+daughter,n,女兒
+desk,n,書桌
+early,adj,早的;提早的
+English,adj,英格蘭的;英國的;英國人的;英語的
+for,prep,為…做的;給
+ground,v,使擱淺;使停飛;依靠;根據;基於
+land,v,登陸
+last,n,最後的人(或東西);最後;上回
+letter,n,信;字母
+light,v,點(火);點燃;照亮
+look,n,看;瞥;臉色;眼神;表情
+no,adj,沒有;不
+nose,n,鼻子
+note,v,注意;記下
+number,v,編號;總數達到;共計
+pull,v,拉
+race,v,與...賽跑
+sad,adj,難過的
+save,v,救;省;存錢
+taste,n,味道;滋味;體驗;風雅;得體;興趣
+wish,n,希望;願望;祝福;祈頌
+around,adv;prep,到處;四處;周圍;附近;環繞;大約;差不多
+beautiful,adj,漂亮的
+correct,v,改正;糾正
+cover,n,封面
+date,n,日期
+dog,n,狗
+fat,n,(動;植物)脂肪;油脂
+feed,v,吃;餵養
+first,adj,第一的
+free,adv,免費地;無約束地;鬆開著;脫開著
+girl,n,女孩
+grand,adj,雄偉的;總的
+horse,n,馬
+hour,n,小時
+long,adj,長的
+mother,n,母親
+name,n,名字
+newspaper,n,報紙
+once,n,一次;一回
+perhaps,adv,或許;可能
+rise,v,起身;升起
+tomorrow,adv,明天
+two,n;adj,二(的)
+water,v,給...澆水;加水稀釋;流口水
+worse,n,更糟的事
+also,adv,也
+bell,n,鈴;鐘
+below,adv;prep,在下面;到下面
+blood,n,血
+chair,v,主持(會議);任(會議的)主席
+chance,v,冒...的險;賭(錢); 碰巧
+cloud,v,陰雲密佈;變暗;變模糊;變混濁
+cola,n,可樂
+cook,n,廚師
+early,adv,早;提早
+east,n;adj,東方(的)
+gray,n;adj,灰色(的) (美式拼寫)
+home,adj,家庭的;國內的
+key,adj,重要的;基本的;關鍵的
+little,adj,很少的; 小的
+live,adj,活的;有生命的;燃著的;實況播送的
+mother,v,生下;產生出;像母親般照顧
+open,v,打開
+out,adv;prep,在外地
+pen,n,原子筆;墨水筆; 畜欄
+pie,n,派(食品)
+pocket,v,侵吞;擊(球)落袋;忍受
+pool,v,合辦;聯營
+purple,n;adj,紫色(的)
+reason,v,推論;推理
+serve,v,服務
+service,v,維修;保養
+size,n,大小;尺寸
+smell,v,聞
+soon,adv,即刻;不久
+soul,n,靈魂
+sun,v,曬;曝; 曬太陽
+tall,adj,高的
+tie,v,綁;繫
+weather,v,經受到;使風化;褪色;損壞
+west,adv,向西方
+white,n;adj,白色 (的)
+cake,n,蛋糕
+climb,v;n,爬;攀登
+dancer,n,舞蹈演員;舞蹈家
+date,v,約會; 註明日期
+direct,adj,直接的
+end,n,盡頭;結局
+inside,n,內部;裡面;內幕
+laugh,n,笑;笑聲
+outside,adv,外面地
+run,v,跑
+season,n,季節
+short,adj,矮的;短的
+silver,n,銀
+sorry,adj,抱歉;遺憾的
+station,v,駐紮;部署;配置
+stop,n,車站
+such,adj,如此的
+third,adj,第三
+want,n,需要的東西;必需品;缺乏;匱乏
+waste,n,浪費
+wide,adv,張得(或開得)很大地;充分地
+wife,n,妻子
+wood,n,木材
+auntie,n,aunt 的暱稱
+between,adv;prep,在中間;介乎兩者之間
+body,n,身體
+buy,v;n,買; 購買;便宜貨
+cool,adj,涼快的;很棒的;酷
+crow,n,鴉;烏鴉
+cup,n,杯子
+dance,n,舞會
+downstairs,n;adj;adv,樓下(的); 在樓下
+duck,n,鴨
+guess,v,猜
+hate,n,仇恨;憎恨;厭惡
+heat,n,熱氣
+keep,v,保留;保持
+kitchen,n,廚房
+lesson,n,課;教訓
+lunch,v,吃午餐
+may,v,可能
+mouse,n,老鼠; 滑鼠
+name,v,給...取名;列舉
+nature,n,自然
+parent,n,雙親之一
+pool,n,水池;美式撞球
+price,v,給...定價
+print,v,印刷;用印刷體寫
+remember,v,記得
+rule,n,規則
+sharp,adv,整(指時刻);銳利地;機警地
+sing,v,唱歌
+skin,n,皮膚
+sleep,n,睡眠;死亡;冬眠
+sour,n;adj,酸(的) (東西)
+store,n,商店
+toy,v,玩弄;戲耍;調情;調戲
+twenty,n;adj,二十(的)
+week,n,星期
+welcome,adj,受歡迎的;令人愉快的;被允許的
+when,adv,何時
+write,v,寫
         </textarea>
     </div>
 
@@ -1196,15 +1452,12 @@ yesterday,adv,昨天
             
             switch(deviceType) {
                 case 'desktop':
-                    // 桌面设备 - 使用更大的字体和间距
                     gameContainer.style.maxWidth = '1000px';
                     break;
                 case 'tablet':
-                    // 平板设备 - 中等大小
                     gameContainer.style.maxWidth = '800px';
                     break;
                 case 'mobile':
-                    // 手机设备 - 保持原有设置
                     gameContainer.style.maxWidth = '100%';
                     break;
             }
@@ -1214,12 +1467,20 @@ yesterday,adv,昨天
         let score = 0;
         let currentQuestionIndex = 0;
         let timer;
-        let timeLeft = 8;
+        let totalGameTime = 180;    // 預設 3 分鐘，秒數
+        let timeLeft = totalGameTime;
         let startTime;
         let questions = [];
         let usedInCurrentSession = []; // ✅ 本局已使用的單字索引
-        let lastCountdownNumber = 8;
+        let lastCountdownNumber = 0;
         let isAnswering = false;
+        
+        // 連續答對 / 答錯計數
+        let correctStreak = 0;
+        let wrongStreak = 0;
+
+        // 遊戲是否已結束
+        let gameOver = false;
         
         // DOM元素
         const startScreen = document.querySelector('.start-screen');
@@ -1241,7 +1502,16 @@ yesterday,adv,昨天
         const finalScoreDisplay = document.getElementById('final-score');
         const timeUsedDisplay = document.getElementById('time-used');
         const wordDatabase = document.getElementById('word-database');
+        const timeButtons = document.querySelectorAll('.time-btn');
         
+        // 時間格式：mm:ss
+        function formatTime(seconds) {
+            seconds = Math.max(0, seconds);
+            const m = Math.floor(seconds / 60);
+            const s = Math.ceil(seconds % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
         // 初始化遊戲
         function initGame() {
             // 解析單字庫
@@ -1261,10 +1531,28 @@ yesterday,adv,昨天
             // 重置遊戲狀態
             score = 0;
             currentQuestionIndex = 0;
-            usedInCurrentSession = []; // ✅ 每次重新開始都清空本局記錄
-            lastCountdownNumber = 8;
+            usedInCurrentSession = [];
+            lastCountdownNumber = 0;
             isAnswering = false;
+            correctStreak = 0;
+            wrongStreak = 0;
+            gameOver = false;
+
+            clearInterval(timer);
+
+            // 依目前 active 時間按鈕設定總時間
+            if (timeButtons.length > 0) {
+                let activeBtn = document.querySelector('.time-btn.active') || timeButtons[0];
+                timeButtons.forEach(btn => btn.classList.remove('active'));
+                activeBtn.classList.add('active');
+                totalGameTime = parseInt(activeBtn.dataset.time, 10);
+            }
+
+            timeLeft = totalGameTime;
             scoreDisplay.textContent = score;
+            countdownDisplay.textContent = formatTime(timeLeft);
+            timerBar.style.width = '100%';
+            timerBar.style.backgroundColor = '#ff8b94';
             
             // 重置視覺元素
             pig.textContent = '🐷';
@@ -1275,6 +1563,7 @@ yesterday,adv,昨天
             explosion.style.opacity = '0';
             explosion.style.transform = 'scale(0)';
             confettiContainer.innerHTML = '';
+            countdownDisplay.style.color = '#ff8b94';
             countdownDisplay.className = 'countdown';
             
             // 顯示開始畫面
@@ -1282,38 +1571,45 @@ yesterday,adv,昨天
             gameScreen.classList.add('hidden');
             endScreen.classList.remove('active');
         }
-        
+
+        // 開始遊戲
         function startGame() {
             if (questions.length === 0) {
                 alert('單字庫解析錯誤，請檢查單字格式！');
                 return;
             }
             
+            // 讀取目前選的時間
+            const activeBtn = document.querySelector('.time-btn.active');
+            if (activeBtn) {
+                totalGameTime = parseInt(activeBtn.dataset.time, 10);
+            }
+
+            timeLeft = totalGameTime;
+            lastCountdownNumber = Math.ceil(timeLeft);
+            countdownDisplay.textContent = formatTime(timeLeft);
+            timerBar.style.width = '100%';
+
+            score = 0;
+            correctStreak = 0;
+            wrongStreak = 0;
+            gameOver = false;
+            scoreDisplay.textContent = score;
+
             startScreen.classList.add('hidden');
             gameScreen.classList.remove('hidden');
+
             startTime = new Date().getTime();
+            clearInterval(timer);
+            timer = setInterval(updateTimer, 100);
+
             loadQuestion();
         }
         
-        // 載入問題（✅ 已重寫）
+        // 載入問題
         function loadQuestion() {
-            // 重置計時器
-            clearInterval(timer);
-            timeLeft = 8;
-            lastCountdownNumber = 8;
-            countdownDisplay.textContent = timeLeft;
-            timerBar.style.width = '100%';
-            timerBar.style.backgroundColor = '#ff8b94';
-            flame.style.opacity = '0';
-            flame.style.transform = 'scale(0)';
-            fuse.style.width = '80px';
-            explosion.style.opacity = '0';
-            explosion.style.transform = 'scale(0)';
-            confettiContainer.innerHTML = '';
-            countdownDisplay.style.color = '#ff8b94';
-            countdownDisplay.style.fontSize = '1.5rem';
-            countdownDisplay.className = 'countdown';
-            
+            if (gameOver) return;
+
             // 重置回答狀態
             isAnswering = false;
             
@@ -1345,12 +1641,9 @@ yesterday,adv,昨天
             
             // 生成選項
             generateOptions(question);
-            
-            // 開始計時
-            timer = setInterval(updateTimer, 100);
         }
         
-        // 生成選項（保持不變）
+        // 生成選項
         function generateOptions(correctQuestion) {
             optionsContainer.innerHTML = '';
             
@@ -1373,7 +1666,7 @@ yesterday,adv,昨天
                 button.className = 'option';
                 button.textContent = option;
                 button.addEventListener('click', () => {
-                    if (!isAnswering) {
+                    if (!isAnswering && !gameOver) {
                         isAnswering = true;
                         checkAnswer(option, correctQuestion.meaning);
                     }
@@ -1382,9 +1675,9 @@ yesterday,adv,昨天
             });
         }
         
-        // 檢查答案（保持不變）
+        // 檢查答案＆計分邏輯
         function checkAnswer(selectedOption, correctAnswer) {
-            clearInterval(timer);
+            if (gameOver) return;
             
             const options = document.querySelectorAll('.option');
             options.forEach(option => {
@@ -1397,17 +1690,43 @@ yesterday,adv,昨天
             });
             
             if (selectedOption === correctAnswer) {
-                score += 5;
+                // ✅ 答對：連續正確 +1，錯誤歸零
+                correctStreak++;
+                wrongStreak = 0;
+
+                let addScore = 5;
+                if (correctStreak === 1) addScore = 5;
+                else if (correctStreak === 2) addScore = 10;
+                else if (correctStreak === 3) addScore = 15;
+                else addScore = 20; // 第 4 題起封頂
+
+                score += addScore;
                 scoreDisplay.textContent = score;
+
                 pig.textContent = '🐷🎉';
                 createConfetti();
                 playSound('correct');
                 
                 setTimeout(() => {
+                    if (gameOver) return;
                     pig.textContent = '🐷';
+                    optionsContainer.innerHTML = '';
                     loadQuestion();
                 }, 800);
             } else {
+                // ❌ 答錯：連續錯誤 +1，正確歸零
+                wrongStreak++;
+                correctStreak = 0;
+
+                let penalty = 5;
+                if (wrongStreak === 1) penalty = 5;
+                else if (wrongStreak === 2) penalty = 10;
+                else if (wrongStreak === 3) penalty = 15;
+                else penalty = 20;  // 第 4 題起封頂
+
+                score = Math.max(score - penalty, 0);
+                scoreDisplay.textContent = score;
+
                 flame.style.opacity = '1';
                 flame.style.transform = 'scale(1)';
                 explosion.style.opacity = '1';
@@ -1416,19 +1735,43 @@ yesterday,adv,昨天
                 playSound('explosion');
                 
                 setTimeout(() => {
-                    const endTime = new Date().getTime();
-                    const timeUsed = Math.floor((endTime - startTime) / 1000);
-                    
-                    finalScoreDisplay.textContent = score;
-                    timeUsedDisplay.textContent = timeUsed;
-                    
-                    gameScreen.classList.add('hidden');
-                    endScreen.classList.add('active');
+                    if (gameOver) return;
+
+                    if (score <= 0) {
+                        // 分數歸零 ⇒ 遊戲結束
+                        endGame('score');
+                    } else {
+                        // 還有分數 ⇒ 繼續遊戲
+                        pig.textContent = '🐷';
+                        pig.className = 'pig';
+                        flame.style.opacity = '0';
+                        flame.style.transform = 'scale(0)';
+                        explosion.style.opacity = '0';
+                        explosion.style.transform = 'scale(0)';
+                        optionsContainer.innerHTML = '';
+                        loadQuestion();
+                    }
                 }, 800);
             }
         }
+
+        function endGame(reason) {
+            if (gameOver) return;
+            gameOver = true;
+
+            clearInterval(timer);
+
+            const endTime = new Date().getTime();
+            const timeUsed = Math.floor((endTime - startTime) / 1000);
+
+            finalScoreDisplay.textContent = score;
+            timeUsedDisplay.textContent = timeUsed;
+            
+            gameScreen.classList.add('hidden');
+            endScreen.classList.add('active');
+        }
         
-        // 播放音效（保持不變）
+        // 播放音效
         function playSound(type) {
             if (type === 'correct') {
                 const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3');
@@ -1441,7 +1784,7 @@ yesterday,adv,昨天
             }
         }
         
-        // 創建彩色紙花效果（保持不變）
+        // 創建彩色紙花效果
         function createConfetti() {
             const colors = ['#ff8b94', '#ffaaa5', '#a8e6cf', '#dcedc1', '#6b5b95', '#ffd3b6'];
             const confettiCount = 50;
@@ -1483,25 +1826,32 @@ yesterday,adv,昨天
             document.head.appendChild(style);
         }
         
-        // 更新計時器（保持不變）
+        // 更新計時器：整場遊戲倒數
         function updateTimer() {
+            if (gameOver) {
+                clearInterval(timer);
+                return;
+            }
+
             timeLeft -= 0.1;
-            const percentage = (timeLeft / 8) * 100;
+            if (timeLeft < 0) timeLeft = 0;
+
+            const percentage = (timeLeft / totalGameTime) * 100;
             timerBar.style.width = `${percentage}%`;
             
             const currentNumber = Math.ceil(timeLeft);
-            countdownDisplay.textContent = currentNumber;
+            countdownDisplay.textContent = formatTime(timeLeft);
             
             if (currentNumber !== lastCountdownNumber) {
                 lastCountdownNumber = currentNumber;
                 countdownDisplay.className = 'countdown pulse';
                 
                 setTimeout(() => {
-                    countdownDisplay.className = 'countdown';
-                }, 500);
+                    if (!gameOver) countdownDisplay.className = 'countdown';
+                }, 300);
             }
             
-            fuse.style.width = `${percentage * 0.8}px`;
+            fuse.style.width = `${Math.max(percentage * 0.8, 0)}px`;
             
             if (percentage < 20) {
                 timerBar.style.background = 'linear-gradient(to right, #ff0000, #ff6600)';
@@ -1516,29 +1866,20 @@ yesterday,adv,昨天
                 flame.style.opacity = '0.7';
                 flame.style.transform = 'scale(0.7)';
             } else {
+                timerBar.style.background = 'linear-gradient(to right, #ff8b94, #ffaaa5)';
                 countdownDisplay.style.color = '#ff8b94';
                 countdownDisplay.style.fontSize = '1.5rem';
+                flame.style.opacity = '0';
+                flame.style.transform = 'scale(0)';
             }
             
             if (timeLeft <= 0) {
                 clearInterval(timer);
-                const options = document.querySelectorAll('.option');
-                const correctAnswer = questions[currentQuestionIndex].meaning;
-                let wrongOption;
-                for (let i = 0; i < options.length; i++) {
-                    if (options[i].textContent !== correctAnswer) {
-                        wrongOption = options[i].textContent;
-                        break;
-                    }
-                }
-                if (wrongOption) {
-                    isAnswering = true;
-                    checkAnswer(wrongOption, correctAnswer);
-                }
+                endGame('time');
             }
         }
         
-        // 輔助函數：打亂數組（保持不變）
+        // 輔助函數：打亂數組
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -1547,6 +1888,22 @@ yesterday,adv,昨天
             return array;
         }
         
+        // 時間選擇按鈕事件
+        timeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                timeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // 只在開始畫面調整顯示
+                if (!gameOver && !gameScreen || startScreen && !startScreen.classList.contains('hidden')) {
+                    totalGameTime = parseInt(btn.dataset.time, 10);
+                    timeLeft = totalGameTime;
+                    countdownDisplay.textContent = formatTime(timeLeft);
+                    timerBar.style.width = '100%';
+                }
+            });
+        });
+
         // 事件監聽器
         startBtn.addEventListener('click', startGame);
         restartBtn.addEventListener('click', initGame);
