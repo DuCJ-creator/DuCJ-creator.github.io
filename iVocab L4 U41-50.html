@@ -157,6 +157,17 @@
             margin: 8px 0;
             font-weight: bold;
         }
+
+        /* 新增：遊戲時間選擇 */
+        .time-select {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            color: #4a6fa5;
+        }
+        .time-select label {
+            margin: 0 8px;
+        }
         
         .game-over {
             position: fixed;
@@ -364,9 +375,16 @@
 </head>
 <body>
     <div class="game-container">
-        <h1>L4 U41-50 單字挑戰無極限</h1>
+        <h1>L4 U 41-50 單字挑戰無極限</h1>
         <div class="score-display">Score: <span id="score">0</span></div>
         <div id="setup-screen">
+            <!-- 新增：遊戲時間選擇 -->
+            <div class="time-select">
+                <div>選擇遊戲時間：</div>
+                <label><input type="radio" name="game-time" value="180" checked> 3 分鐘</label>
+                <label><input type="radio" name="game-time" value="300"> 5 分鐘</label>
+                <label><input type="radio" name="game-time" value="600"> 10 分鐘</label>
+            </div>
             <button class="start-btn" id="start-game">Start</button>
         </div>
         <div id="game-screen" style="display: none;">
@@ -404,16 +422,12 @@
             const userAgent = navigator.userAgent;
             const body = document.body;
             
-            // 移除可能已存在的設備類別
             body.classList.remove('desktop-device', 'tablet-device', 'mobile-device', 'ios-device', 'android-device');
             
-            // 檢測設備類型
             if (/iPad|tablet/i.test(userAgent) || (window.innerWidth >= 768 && window.innerWidth <= 1024)) {
                 body.classList.add('tablet-device');
             } else if (/iPhone|iPod|Android.*Mobile|Windows Phone|Mobile/i.test(userAgent) || window.innerWidth < 768) {
                 body.classList.add('mobile-device');
-                
-                // 檢測具體的移動設備平台
                 if (/iPhone|iPod|iPad/i.test(userAgent)) {
                     body.classList.add('ios-device');
                 } else if (/Android/i.test(userAgent)) {
@@ -422,8 +436,6 @@
             } else {
                 body.classList.add('desktop-device');
             }
-            
-            console.log('檢測到的設備類型:', body.classList.toString());
         }
         
         // 遊戲變數
@@ -431,9 +443,16 @@
         let currentWord = null;
         let score = 0;
         let timer = null;
-        let timeLeft = 8;
         let gameActive = false;
-        let canAnswer = true; // 新增：控制是否可回答
+        let canAnswer = true;
+
+        // 新增：整場遊戲計時
+        let totalGameTime = 180; // 預設 3 分鐘
+        let gameTimeLeft = 180;
+
+        // 新增：連續正確 / 錯誤計數
+        let correctStreak = 0;
+        let wrongStreak = 0;
         
         // DOM元素
         const setupScreen = document.getElementById('setup-screen');
@@ -455,7 +474,7 @@
         const timerBar = document.getElementById('timer-bar');
         const eggOptions = document.querySelectorAll('.egg-option');
         
-        // 單字庫 (簡化版本)
+        // 單字庫 (略)
         const wordList = `multiple,adj,複合的;多樣的
 shameful,adj,可恥的;丟臉的
 delight,v,使高興
@@ -695,18 +714,27 @@ weekly,n,週刊;週報`;
         
         // 初始化遊戲
         function initGame() {
-            // 解析單字列表
-            vocabulary = parseWordList(wordList);
+            // 解析單字列表（只在第一次或重新開始時）
+            if (vocabulary.length === 0) {
+                vocabulary = parseWordList(wordList);
+            }
             
             if (vocabulary.length === 0) {
                 alert('單字庫載入失敗！');
                 return;
             }
             
+            // 根據選擇的遊戲時間設定
+            const selectedTime = document.querySelector('input[name="game-time"]:checked');
+            totalGameTime = selectedTime ? parseInt(selectedTime.value, 10) : 180;
+            gameTimeLeft = totalGameTime;
+            
             // 重置遊戲狀態
             score = 0;
             scoreDisplay.textContent = score;
-            canAnswer = true; // 重置回答狀態
+            canAnswer = true;
+            correctStreak = 0;
+            wrongStreak = 0;
             
             // 清除之前的計時器
             if (timer) {
@@ -727,7 +755,28 @@ weekly,n,週刊;週報`;
             
             // 開始遊戲
             gameActive = true;
-            nextQuestion();
+            timerBar.style.width = '100%';
+            startGameTimer();   // 開始整場計時
+            nextQuestion();     // 出第一題
+        }
+
+        // 整場遊戲計時
+        function startGameTimer() {
+            if (timer) clearInterval(timer);
+            timer = setInterval(() => {
+                if (!gameActive) {
+                    clearInterval(timer);
+                    return;
+                }
+                gameTimeLeft -= 1;
+                if (gameTimeLeft < 0) gameTimeLeft = 0;
+                const percent = (gameTimeLeft / totalGameTime) * 100;
+                timerBar.style.width = percent + '%';
+                if (gameTimeLeft <= 0) {
+                    clearInterval(timer);
+                    endGame(false); // 時間到結束
+                }
+            }, 1000);
         }
         
         // 啟用所有選項
@@ -760,11 +809,9 @@ weekly,n,週刊;週報`;
             
             const gameContainer = document.querySelector('.game-container');
             
-            // 先清除現有的裝飾
             document.querySelectorAll('.easter-flower, .easter-leaf').forEach(el => el.remove());
             
             positions.forEach(pos => {
-                // 添加花朵
                 const flower = document.createElement('div');
                 flower.className = 'easter-flower';
                 flower.style.top = pos.top || '';
@@ -774,7 +821,6 @@ weekly,n,週刊;週報`;
                 flower.style.transform = `rotate(${pos.rotate})`;
                 gameContainer.appendChild(flower);
                 
-                // 添加葉子
                 const leaf = document.createElement('div');
                 leaf.className = 'easter-leaf';
                 leaf.style.top = pos.top ? `calc(${pos.top} + 30px)` : '';
@@ -818,12 +864,6 @@ weekly,n,週刊;週報`;
         function nextQuestion() {
             if (!gameActive) return;
             
-            // 清除之前的計時器
-            if (timer) {
-                clearInterval(timer);
-                timer = null;
-            }
-            
             // 隨機選擇一個單字
             currentWord = vocabulary[Math.floor(Math.random() * vocabulary.length)];
             
@@ -834,53 +874,31 @@ weekly,n,週刊;週報`;
             // 準備選項
             prepareOptions();
             
-            // 重置計時器
-            timeLeft = 8;
-            timerBar.style.width = '100%';
-            
             // 啟用選項
             enableOptions();
-            
-            // 開始倒計時 - 使用新的計時器，確保不會與之前的混在一起
-            timer = setInterval(() => {
-                timeLeft -= 0.1;
-                timerBar.style.width = `${(timeLeft / 8) * 100}%`;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    endGame(false);
-                }
-            }, 100);
         }
         
         // 準備選項
         function prepareOptions() {
-            // 正確答案
             const correctAnswer = currentWord.meaning;
             
-            // 收集其他可能的選項
             const otherMeanings = vocabulary
                 .filter(item => item.meaning !== correctAnswer)
                 .map(item => item.meaning);
             
-            // 隨機選擇3個不重複的錯誤選項
             const wrongAnswers = [];
             while (wrongAnswers.length < 3 && otherMeanings.length > 0) {
                 const randomIndex = Math.floor(Math.random() * otherMeanings.length);
                 const selectedMeaning = otherMeanings[randomIndex];
-                
-                // 確保選項不重複
                 if (!wrongAnswers.includes(selectedMeaning)) {
                     wrongAnswers.push(selectedMeaning);
                     otherMeanings.splice(randomIndex, 1);
                 }
             }
             
-            // 合併所有選項並打亂順序
             const allOptions = [correctAnswer, ...wrongAnswers];
             shuffleArray(allOptions);
             
-            // 更新選項顯示
             for (let i = 0; i < 4; i++) {
                 if (i < allOptions.length) {
                     optionDisplays[i].textContent = allOptions[i];
@@ -901,41 +919,54 @@ weekly,n,週刊;週報`;
             return array;
         }
         
-        // 檢查答案
+        // 檢查答案（已改為連續加減分邏輯）
         function checkAnswer(selectedOption) {
             if (!gameActive || !canAnswer) return;
             
-            // 禁用選項，防止連續點擊
             disableOptions();
             
             const selectedMeaning = selectedOption.dataset.meaning;
             const isCorrect = selectedMeaning === currentWord.meaning;
             
             if (isCorrect) {
-                // 正確答案 - 每題5分
-                score += 5;
+                // 連續正確加分：5, 10, 15, 20...
+                correctStreak++;
+                wrongStreak = 0;
+                const delta = correctStreak * 5;
+                score += delta;
                 scoreDisplay.textContent = score;
                 
-                // 顯示正確效果
                 showCorrectEffect(selectedOption);
                 
-                // 減少延遲時間，從1000ms改為600ms
                 setTimeout(() => {
                     nextQuestion();
                 }, 600);
             } else {
-                // 錯誤答案
-                endGame(false);
+                // 連續錯誤扣分：-5, -10, -15, -20...
+                wrongStreak++;
+                correctStreak = 0;
+                const penalty = wrongStreak * 5;
+                score -= penalty;
+                if (score < 0) score = 0;
+                scoreDisplay.textContent = score;
+
+                if (score <= 0) {
+                    endGame(false); // 分數歸 0 結束遊戲
+                } else {
+                    // 有扣到分但沒歸 0，繼續遊戲，下一題從 5 分重新累積
+                    gameScreen.style.animation = 'shake 0.3s';
+                    setTimeout(() => {
+                        gameScreen.style.animation = '';
+                        nextQuestion();
+                    }, 600);
+                }
             }
         }
         
         // 顯示正確效果
         function showCorrectEffect(correctOption) {
             correctOption.classList.add('correct-answer');
-            
-            // 創建彩花效果
             createConfetti();
-            
             setTimeout(() => {
                 correctOption.classList.remove('correct-answer');
             }, 500);
@@ -945,7 +976,7 @@ weekly,n,週刊;週報`;
         function createConfetti() {
             const colors = ['#a8d8ea', '#f6d5f7', '#f8c3cd', '#faf3dd', '#6b8cae', '#d4e6f1'];
             
-           for (let i = 0; i < 15; i++) { // 減少彩花數量
+           for (let i = 0; i < 15; i++) {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
                 confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
@@ -954,7 +985,6 @@ weekly,n,週刊;週報`;
                 confetti.style.opacity = '1';
                 confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
                 
-                // 隨機形狀
                 const shape = Math.random();
                 if (shape > 0.5) {
                     confetti.style.borderRadius = '50%';
@@ -965,8 +995,7 @@ weekly,n,週刊;週報`;
                 
                 document.body.appendChild(confetti);
                 
-                // 動畫
-                const animationDuration = Math.random() * 1.2 + 0.6; // 減少動畫時間
+                const animationDuration = Math.random() * 1.2 + 0.6;
                 confetti.style.transition = `top ${animationDuration}s linear, opacity ${animationDuration}s ease-out`;
                 
                 setTimeout(() => {
@@ -974,7 +1003,6 @@ weekly,n,週刊;週報`;
                     confetti.style.opacity = '0';
                 }, 10);
                 
-                // 移除元素
                 setTimeout(() => {
                     confetti.remove();
                 }, animationDuration * 1000 + 100);
@@ -986,25 +1014,21 @@ weekly,n,週刊;週報`;
             gameActive = false;
             clearInterval(timer);
             
-            // 更新結束畫面
             finalScoreDisplay.textContent = score;
             resultMessage.textContent = isWin ? '恭喜你贏了!' : '遊戲結束!';
             
-            // 顯示結束畫面
             gameOverScreen.style.display = 'flex';
             
-            // 如果不是勝利，添加震動效果
             if (!isWin) {
-                gameScreen.style.animation = 'shake 0.3s'; // 減少震動時間
+                gameScreen.style.animation = 'shake 0.3s';
                 setTimeout(() => {
                     gameScreen.style.animation = '';
                 }, 300);
             }
         }
         
-        // 重新開始遊戲
+        // 重新開始遊戲（回到設定畫面）
         function restartGame() {
-            // 移除所有裝飾元素
             document.querySelectorAll('.easter-flower, .easter-leaf').forEach(el => el.remove());
             
             gameOverScreen.style.display = 'none';
@@ -1014,16 +1038,12 @@ weekly,n,週刊;週報`;
         
         // 事件監聽器
         document.addEventListener('DOMContentLoaded', function() {
-            // 檢測設備類型
             detectDevice();
-            
-            // 監聽窗口大小變化，重新檢測設備
             window.addEventListener('resize', detectDevice);
             
             startGameBtn.addEventListener('click', initGame);
             restartBtn.addEventListener('click', restartGame);
             
-            // 選項點擊事件
             document.querySelectorAll('.egg-option').forEach(option => {
                 option.addEventListener('click', () => {
                     if (gameActive && canAnswer) {
