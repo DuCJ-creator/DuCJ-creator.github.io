@@ -706,7 +706,11 @@
         let timeLeft = 8;
         let gameActive = false;
         let canAnswer = true;
-        let usedInCurrentSession = []; // ✅ 新增：本局已使用單字索引
+        let usedInCurrentSession = []; // 本局已使用單字索引
+
+        // ⭐ 連擊計分變數
+        let correctStreak = 0; // 連續答對題數
+        let wrongStreak = 0;   // 連續答錯題數（含時間到）
         
         // DOM元素
         const setupScreen = document.getElementById('setup-screen');
@@ -722,6 +726,7 @@
             document.getElementById('option-3'),
             document.getElementById('option-4')
         ];
+        const setupScoreDisplay = document.getElementById('score');
         const scoreDisplay = document.getElementById('score-display');
         const finalScoreDisplay = document.getElementById('final-score');
         const resultMessage = document.getElementById('result-message');
@@ -1040,8 +1045,10 @@ than,prep,比;超過`;
             
             // 重置遊戲狀態
             score = 0;
-            scoreDisplay.textContent = score;
-            usedInCurrentSession = []; // ✅ 每次重新開始都清空本局記錄
+            correctStreak = 0;
+            wrongStreak = 0;
+            usedInCurrentSession = [];
+            updateScore();
             
             // 切換到遊戲畫面
             setupScreen.classList.add('hidden');
@@ -1052,6 +1059,12 @@ than,prep,比;超過`;
             gameActive = true;
             canAnswer = true;
             nextQuestion();
+        }
+        
+        // 分數顯示同步
+        function updateScore() {
+            if (scoreDisplay) scoreDisplay.textContent = score;
+            if (setupScoreDisplay) setupScoreDisplay.textContent = score;
         }
         
         // 解析單字列表
@@ -1141,6 +1154,14 @@ than,prep,比;超過`;
                 if (timeLeft <= 0) {
                     clearInterval(timer);
                     timer = null; // 重要：將計時器設為null
+
+                    // ⭐ 時間到視為答錯：扣分（連續錯誤級距）
+                    wrongStreak++;
+                    correctStreak = 0;
+                    const penalty = 5 * wrongStreak;
+                    score -= penalty;
+                    updateScore();
+
                     endGame(false);
                 }
             }, 100);
@@ -1228,9 +1249,12 @@ than,prep,比;超過`;
             const isCorrect = selectedMeaning === currentWord.meaning;
             
             if (isCorrect) {
-                // 正確答案 - 每題加5分
-                score += 5;
-                scoreDisplay.textContent = score;
+                // ⭐ 正確：連續答對+1，清空錯誤連擊
+                correctStreak++;
+                wrongStreak = 0;
+                const bonus = 5 * correctStreak; // 5,10,15,... 無上限
+                score += bonus;
+                updateScore();
                 
                 // 顯示正確效果
                 showCorrectEffect(selectedOption);
@@ -1243,7 +1267,13 @@ than,prep,比;超過`;
                     nextQuestion();
                 }, 800);
             } else {
-                // 錯誤答案
+                // ⭐ 錯誤：連續答錯+1，清空正確連擊
+                wrongStreak++;
+                correctStreak = 0;
+                const penalty = 5 * wrongStreak; // 5,10,15,... 無上限
+                score -= penalty;
+                updateScore();
+
                 endGame(false);
             }
         }
