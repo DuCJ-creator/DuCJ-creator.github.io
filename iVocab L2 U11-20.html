@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>U11-20 單字挑戰無極限 - 萬聖節特別版</title>
     <style>
         /* 基礎樣式重置 */
@@ -26,6 +26,18 @@
             background-attachment: fixed;
             overflow-x: hidden;
             touch-action: manipulation;
+        }
+
+        .device-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
         }
         
         .game-container {
@@ -63,17 +75,35 @@
         .pos-display {
             font-size: 1.2rem;
             color: #f05454;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             font-style: italic;
             text-shadow: 1px 1px 0px #fff;
             transition: opacity 0.3s ease;
+        }
+
+        .countdown {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #f05454;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 0px #fff;
+        }
+
+        .countdown.pulse {
+            animation: pulseText 0.5s;
+        }
+
+        @keyframes pulseText {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
         
         .options-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            margin: 20px 0;
+            margin: 15px 0 10px;
             gap: 10px;
         }
         
@@ -128,7 +158,7 @@
             height: 15px;
             background-color: #f0f0f0;
             border-radius: 10px;
-            margin: 15px 0;
+            margin: 10px 0 15px;
             overflow: hidden;
             border: 2px solid #f05454;
         }
@@ -139,6 +169,15 @@
             background: linear-gradient(to right, #f05454, #ff9f43);
             transition: width 0.1s linear;
             border-radius: 8px;
+        }
+
+        .timer-warning {
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
         }
         
         .ghost {
@@ -164,7 +203,7 @@
         .score-display {
             font-size: 1.2rem;
             color: #f05454;
-            margin: 8px 0;
+            margin: 8px 0 10px;
             font-weight: bold;
             text-shadow: 1px 1px 0px #fff;
         }
@@ -176,17 +215,20 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.9);
-            display: flex;
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 100;
             flex-direction: column;
             color: white;
             font-size: 1.5rem;
-            display: none;
             text-shadow: 2px 2px 0px #000;
             padding: 20px;
             text-align: center;
+        }
+
+        .game-over.active {
+            display: flex;
         }
         
         .game-over h2 {
@@ -274,6 +316,16 @@
             opacity: 0.7;
             filter: grayscale(50%);
         }
+
+        .pumpkin-option.correct {
+            transform: scale(1.08);
+            filter: drop-shadow(0 0 15px #ff9f43);
+        }
+
+        .pumpkin-option.wrong {
+            animation: shake 0.3s;
+            filter: drop-shadow(0 0 10px #ff0000);
+        }
         
         /* 題目切換動畫 */
         .fade-out {
@@ -288,14 +340,49 @@
             transition: all 0.3s ease;
         }
         
-        /* 計時器警告效果 */
-        .timer-warning {
-            animation: pulse 0.5s infinite alternate;
+        .score-display span {
+            padding: 2px 10px;
+            border-radius: 20px;
+            background-color: rgba(255,255,255,0.8);
         }
-        
-        @keyframes pulse {
-            from { opacity: 1; }
-            to { opacity: 0.5; }
+
+        /* 遊戲時間選擇 */
+        .time-selector {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.95rem;
+            color: #f05454;
+        }
+
+        .time-selector span {
+            margin-bottom: 4px;
+        }
+
+        .time-btn {
+            background-color: #ffe0d4;
+            color: #333;
+            border: none;
+            padding: 6px 14px;
+            margin: 0 4px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            box-shadow: 0 3px 0 #f5b79a;
+            font-family: 'Comic Sans MS', cursive;
+        }
+
+        .time-btn.active {
+            background-color: #ffb08a;
+            box-shadow: 0 3px 0 #f05454;
+            color: #fff;
+        }
+
+        .time-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #f5b79a;
         }
         
         /* 響應式設計 - 平板 */
@@ -314,6 +401,10 @@
             
             .pos-display {
                 font-size: 1.4rem;
+            }
+
+            .countdown {
+                font-size: 1.5rem;
             }
             
             .pumpkin-option {
@@ -340,7 +431,7 @@
             }
         }
         
-        /* 響應式設計 - 電腦 */
+        /* 響應式設計 - 電腦（大字版） */
         @media (min-width: 1024px) {
             .game-container {
                 padding: 30px;
@@ -348,21 +439,27 @@
             }
             
             h1 {
-                font-size: 2.5rem;
+                font-size: 2.8rem;
             }
             
             .word-display {
-                font-size: 2.5rem;
+                font-size: 2.8rem;
+                margin: 20px 0 10px;
             }
             
             .pos-display {
-                font-size: 1.5rem;
+                font-size: 1.6rem;
+                margin-bottom: 10px;
+            }
+
+            .countdown {
+                font-size: 1.8rem;
             }
             
             .pumpkin-option {
                 width: 22%;
-                height: 160px;
-                max-width: 180px;
+                height: 170px;
+                max-width: 200px;
             }
             
             .pumpkin-option:hover {
@@ -379,7 +476,7 @@
             }
             
             .score-display {
-                font-size: 1.5rem;
+                font-size: 1.6rem;
             }
             
             .restart-btn, .start-btn {
@@ -389,7 +486,7 @@
             
             .restart-btn:hover, .start-btn:hover {
                 background-color: #ff9f43;
-                transform: scale(1.1);
+                transform: scale(1.05);
             }
         }
         
@@ -409,6 +506,10 @@
             
             .pos-display {
                 font-size: 1.1rem;
+            }
+
+            .countdown {
+                font-size: 1.2rem;
             }
             
             .pumpkin-option {
@@ -435,6 +536,15 @@
                 padding: 12px 24px;
                 min-width: 160px;
             }
+
+            .time-selector {
+                font-size: 0.85rem;
+            }
+
+            .time-btn {
+                padding: 4px 10px;
+                font-size: 0.8rem;
+            }
         }
         
         /* 響應式設計 - 超小手機 */
@@ -453,19 +563,60 @@
                 height: 45px;
             }
         }
+
+        /* 橫向時微調 */
+        @media (orientation: landscape) and (max-height: 450px) {
+            .game-container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            .word-display {
+                font-size: 1.6rem;
+            }
+
+            .pumpkin-option {
+                height: 110px;
+            }
+        }
+
+        /* 觸控設備：按鈕更高 */
+        @media (pointer: coarse) {
+            .restart-btn, .start-btn {
+                min-height: 50px;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="device-info" id="deviceInfo">檢測設備中...</div>
+
     <div class="game-container">
-        <h1>L2 U11-20 單字挑戰無極限</h1>
+        <h1>L2 U11-20 單字挑戰無極限 🎃</h1>
         <div class="score-display">Score: <span id="score">0</span></div>
+
+        <!-- 起始畫面 -->
         <div id="setup-screen">
-            <p>準備好挑戰你的單字能力了嗎？點擊開始！</p>
+            <p>準備好挑戰你的萬聖節單字冒險了嗎？</p>
+            <div class="time-selector">
+                <span>選擇遊戲時間：</span>
+                <div>
+                    <button class="time-btn active" data-time="180">3 分鐘</button>
+                    <button class="time-btn" data-time="300">5 分鐘</button>
+                    <button class="time-btn" data-time="600">10 分鐘</button>
+                </div>
+            </div>
             <button class="start-btn" id="start-game">Start Game</button>
         </div>
+
+        <!-- 遊戲畫面 -->
         <div id="game-screen" style="display: none;">
             <div class="word-display" id="current-word">單字</div>
             <div class="pos-display" id="current-pos">詞性</div>
+            <div class="countdown" id="countdown">3:00</div>
             <div class="timer-container">
                 <div class="timer-bar" id="timer-bar"></div>
             </div>
@@ -486,26 +637,81 @@
             <div class="ghost"></div>
             <div class="bats" id="bats-container"></div>
         </div>
+
+        <!-- 結束畫面 -->
         <div class="game-over" id="game-over">
             <h2 id="result-message">Game Over!</h2>
             <div>Final Score: <span id="final-score">0</span></div>
+            <div>用時: <span id="time-used">0</span> 秒</div>
             <button class="restart-btn" id="restart-btn">再玩一次</button>
         </div>
     </div>
 
     <script>
-        // 遊戲變數
+        // ========= 設備偵測 =========
+        function detectDevice() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            const deviceInfo = document.getElementById('deviceInfo');
+            let deviceType = 'desktop';
+            let screenInfo = '';
+            
+            if (/mobile|android|iphone|ipad/.test(userAgent)) {
+                if (/ipad|tablet/.test(userAgent) || (window.innerWidth >= 768 && window.innerWidth <= 1024)) {
+                    deviceType = 'tablet';
+                    screenInfo = '平板設備';
+                } else {
+                    deviceType = 'mobile';
+                    screenInfo = '手機設備';
+                }
+            } else {
+                deviceType = 'desktop';
+                screenInfo = '桌面設備';
+            }
+            
+            document.body.classList.add(deviceType + '-view');
+            
+            const screenSize = `螢幕: ${window.innerWidth} × ${window.innerHeight}`;
+            const dpr = `像素比: ${window.devicePixelRatio}`;
+            deviceInfo.textContent = `${screenInfo} | ${screenSize} | ${dpr}`;
+            
+            adjustForDevice(deviceType);
+            return deviceType;
+        }
+
+        function adjustForDevice(deviceType) {
+            const gameContainer = document.querySelector('.game-container');
+            if (!gameContainer) return;
+            switch (deviceType) {
+                case 'desktop':
+                    gameContainer.style.maxWidth = '900px';
+                    break;
+                case 'tablet':
+                    gameContainer.style.maxWidth = '800px';
+                    break;
+                case 'mobile':
+                    gameContainer.style.maxWidth = '100%';
+                    break;
+            }
+        }
+
+        // ========= 遊戲變數 =========
         let vocabulary = [];
         let currentWord = null;
         let score = 0;
+        let totalGameTime = 180; // 預設 3 分鐘
+        let timeLeft = totalGameTime;
         let timer = null;
-        let timeLeft = 8;
+        let startTime = null;
         let gameActive = false;
+        let gameOver = false;
         let batInterval = null;
-        let canAnswer = true;
+        let canAnswer = false;
         let usedInCurrentSession = [];
-        
-        // DOM元素
+        let correctStreak = 0;
+        let wrongStreak = 0;
+        let lastCountdownNumber = 0;
+
+        // ========= DOM元素 =========
         const setupScreen = document.getElementById('setup-screen');
         const gameScreen = document.getElementById('game-screen');
         const gameOverScreen = document.getElementById('game-over');
@@ -525,8 +731,11 @@
         const timerBar = document.getElementById('timer-bar');
         const batsContainer = document.getElementById('bats-container');
         const pumpkinOptions = document.querySelectorAll('.pumpkin-option');
-        
-        // 單字庫
+        const countdownDisplay = document.getElementById('countdown');
+        const timeUsedDisplay = document.getElementById('time-used');
+        const timeButtons = document.querySelectorAll('.time-btn');
+
+        // ========= 單字庫 =========
         const wordList = `central,adj,中央的
 foggy,adj,有霧的
 humid,adj,潮濕的
@@ -814,81 +1023,9 @@ support,n,支持
 treatment,n,對待;待遇;治療法
 truck,n,卡車
 waterfall,n,瀑布
-whale,n,鯨魚  `;
-        
-        // 初始化遊戲
-        function initGame() {
-            // 解析單字列表
-            vocabulary = parseWordList(wordList);
-            
-            if (vocabulary.length === 0) {
-                alert('單字庫載入失敗！');
-                return;
-            }
-            
-            // 重置遊戲狀態
-            score = 0;
-            scoreDisplay.textContent = score;
-            usedInCurrentSession = [];
-            
-            // 切換到遊戲畫面
-            setupScreen.style.display = 'none';
-            gameScreen.style.display = 'block';
-            gameOverScreen.style.display = 'none';
-            
-            // 開始遊戲
-            gameActive = true;
-            canAnswer = true;
-            
-            // 開始蝙蝠動畫
-            startBatAnimation();
-            
-            nextQuestion();
-        }
-        
-        // 開始蝙蝠動畫
-        function startBatAnimation() {
-            batInterval = setInterval(() => {
-                createBat();
-            }, 2000);
-        }
-        
-        // 創建蝙蝠
-        function createBat() {
-            const bat = document.createElement('div');
-            bat.className = 'bat';
-            
-            // 隨機位置和大小
-            const size = Math.random() * 20 + 10;
-            bat.style.width = `${size}px`;
-            bat.style.height = `${size}px`;
-            bat.style.left = `-${size}px`;
-            bat.style.top = `${Math.random() * 80 + 10}%`;
-            
-            // 隨機動畫時間
-            const duration = Math.random() * 5 + 5;
-            
-            // 添加到容器
-            batsContainer.appendChild(bat);
-            
-            // 開始動畫
-            setTimeout(() => {
-                bat.style.animation = `batFly ${duration}s linear forwards`;
-            }, 10);
-            
-            // 動畫結束後移除
-            setTimeout(() => {
-                bat.remove();
-            }, duration * 1000);
-        }
-        
-        // 停止蝙蝠動畫
-        function stopBatAnimation() {
-            clearInterval(batInterval);
-            batsContainer.innerHTML = '';
-        }
-        
-        // 解析單字列表
+whale,n,鯨魚 `;
+
+        // ========= 工具函數 =========
         function parseWordList(text) {
             const lines = text.split('\n');
             const words = [];
@@ -905,108 +1042,226 @@ whale,n,鯨魚  `;
                 const meanings = parts[2].split(';').map(m => m.trim()).filter(m => m);
                 
                 for (const meaning of meanings) {
-                    words.push({
-                        word: word,
-                        pos: pos,
-                        meaning: meaning
-                    });
+                    words.push({ word, pos, meaning });
                 }
             }
-            
             return words;
         }
-        
-        // 下一題
-        function nextQuestion() {
-            if (!gameActive) return;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function formatTime(seconds) {
+            seconds = Math.max(0, seconds);
+            const m = Math.floor(seconds / 60);
+            const s = Math.ceil(seconds % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // ========= 蝙蝠動畫 =========
+        let batFlyStyleAdded = false;
+        function createBat() {
+            const bat = document.createElement('div');
+            bat.className = 'bat';
             
-            // 清除之前的計時器
+            const size = Math.random() * 20 + 10;
+            bat.style.width = `${size}px`;
+            bat.style.height = `${size}px`;
+            bat.style.left = `-${size}px`;
+            bat.style.top = `${Math.random() * 80 + 10}%`;
+            
+            const duration = Math.random() * 5 + 5;
+            batsContainer.appendChild(bat);
+            
+            setTimeout(() => {
+                bat.style.animation = `batFly ${duration}s linear forwards`;
+            }, 10);
+            
+            setTimeout(() => {
+                bat.remove();
+            }, duration * 1000);
+        }
+
+        function startBatAnimation() {
+            stopBatAnimation();
+            batInterval = setInterval(() => {
+                createBat();
+            }, 2000);
+        }
+        
+        function stopBatAnimation() {
+            clearInterval(batInterval);
+            batsContainer.innerHTML = '';
+        }
+
+        // ========= 遊戲流程 =========
+        function initGame() {
+            vocabulary = parseWordList(wordList);
+
+            if (vocabulary.length === 0) {
+                alert('單字庫載入失敗！');
+                return;
+            }
+
+            score = 0;
+            scoreDisplay.textContent = score;
+            usedInCurrentSession = [];
+            correctStreak = 0;
+            wrongStreak = 0;
+            gameActive = false;
+            gameOver = false;
+            canAnswer = false;
+            lastCountdownNumber = 0;
+
             if (timer) {
                 clearInterval(timer);
-                timer = null; // 重要：將計時器設為null
+                timer = null;
             }
-            
-            // 啟用所有選項
+            stopBatAnimation();
+
+            // 依目前時間按鈕設定時間與顯示
+            const activeBtn = document.querySelector('.time-btn.active') || timeButtons[0];
+            totalGameTime = parseInt(activeBtn.dataset.time, 10) || 180;
+            timeLeft = totalGameTime;
+            countdownDisplay.textContent = formatTime(timeLeft);
+            timerBar.style.width = '100%';
+            timerBar.classList.remove('timer-warning');
+
+            setupScreen.style.display = 'block';
+            gameScreen.style.display = 'none';
+            gameOverScreen.classList.remove('active');
+        }
+
+        function startGame() {
+            if (vocabulary.length === 0) {
+                alert('單字庫載入失敗！');
+                return;
+            }
+
+            const activeBtn = document.querySelector('.time-btn.active') || timeButtons[0];
+            totalGameTime = parseInt(activeBtn.dataset.time, 10) || 180;
+            timeLeft = totalGameTime;
+            lastCountdownNumber = Math.ceil(timeLeft);
+
+            score = 0;
+            scoreDisplay.textContent = score;
+            usedInCurrentSession = [];
+            correctStreak = 0;
+            wrongStreak = 0;
+            gameActive = true;
+            gameOver = false;
+            canAnswer = true;
+
+            setupScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+            gameOverScreen.classList.remove('active');
+
+            countdownDisplay.textContent = formatTime(timeLeft);
+            timerBar.style.width = '100%';
+            timerBar.classList.remove('timer-warning');
+
+            startTime = Date.now();
+            if (timer) clearInterval(timer);
+            timer = setInterval(updateTimer, 100);
+
+            startBatAnimation();
+            nextQuestion();
+        }
+
+        function updateTimer() {
+            if (!gameActive) {
+                clearInterval(timer);
+                timer = null;
+                return;
+            }
+
+            timeLeft -= 0.1;
+            if (timeLeft < 0) timeLeft = 0;
+
+            const percentage = (timeLeft / totalGameTime) * 100;
+            timerBar.style.width = `${percentage}%`;
+            countdownDisplay.textContent = formatTime(timeLeft);
+
+            const currentNumber = Math.ceil(timeLeft);
+            if (currentNumber !== lastCountdownNumber) {
+                lastCountdownNumber = currentNumber;
+                countdownDisplay.className = 'countdown pulse';
+                setTimeout(() => {
+                    if (!gameOver) countdownDisplay.className = 'countdown';
+                }, 300);
+            }
+
+            if (percentage < 20) {
+                timerBar.classList.add('timer-warning');
+            } else {
+                timerBar.classList.remove('timer-warning');
+            }
+
+            if (timeLeft <= 0) {
+                endGame('time');
+            }
+        }
+
+        function nextQuestion() {
+            if (!gameActive || gameOver) return;
+
             canAnswer = true;
             pumpkinOptions.forEach(option => {
-                option.classList.remove('disabled');
+                option.classList.remove('disabled', 'correct', 'wrong');
             });
-            
-            // 如果本局已用完所有單字，清空記錄以開始新一輪
+
             if (usedInCurrentSession.length >= vocabulary.length) {
                 usedInCurrentSession = [];
             }
-            
-            // 找出尚未使用的索引
+
             const availableIndices = vocabulary
                 .map((_, i) => i)
                 .filter(i => !usedInCurrentSession.includes(i));
-            
-            // 安全防護
+
             if (availableIndices.length === 0) {
                 usedInCurrentSession = [];
                 nextQuestion();
                 return;
             }
-            
-            // 隨機選擇一個未使用過的問題
+
             const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
             usedInCurrentSession.push(randomIndex);
             currentWord = vocabulary[randomIndex];
-            
-            // 添加淡入效果
+
             currentWordDisplay.classList.add('fade-out');
             currentPosDisplay.classList.add('fade-out');
-            
+
             setTimeout(() => {
-                // 顯示單字和詞性
                 currentWordDisplay.textContent = currentWord.word;
                 currentPosDisplay.textContent = currentWord.pos;
-                
-                // 準備選項
+
                 prepareOptions();
-                
-                // 淡入效果
+
                 currentWordDisplay.classList.remove('fade-out');
                 currentPosDisplay.classList.remove('fade-out');
                 currentWordDisplay.classList.add('fade-in');
                 currentPosDisplay.classList.add('fade-in');
-                
-                // 重置計時器
-                timeLeft = 8;
-                timerBar.style.width = '100%';
-                timerBar.classList.remove('timer-warning');
-                
-                // 開始倒計時
-                timer = setInterval(() => {
-                    timeLeft -= 0.1;
-                    timerBar.style.width = `${(timeLeft / 8) * 100}%`;
-                    
-                    if (timeLeft <= 3 && !timerBar.classList.contains('timer-warning')) {
-                        timerBar.classList.add('timer-warning');
-                    }
-                    
-                    if (timeLeft <= 0) {
-                        clearInterval(timer);
-                        timer = null; // 重要：將計時器設為null
-                        endGame(false);
-                    }
-                }, 100);
-                
+
                 setTimeout(() => {
                     currentWordDisplay.classList.remove('fade-in');
                     currentPosDisplay.classList.remove('fade-in');
                 }, 300);
             }, 200);
         }
-        
-        // 準備選項
+
         function prepareOptions() {
+            if (!currentWord) return;
+
             const correctAnswer = currentWord.meaning;
             const otherMeanings = vocabulary
                 .filter(item => item.meaning !== correctAnswer)
                 .map(item => item.meaning);
-            
+
             const wrongAnswers = [];
             while (wrongAnswers.length < 3 && otherMeanings.length > 0) {
                 const randomIndex = Math.floor(Math.random() * otherMeanings.length);
@@ -1016,10 +1271,10 @@ whale,n,鯨魚  `;
                     otherMeanings.splice(randomIndex, 1);
                 }
             }
-            
+
             const allOptions = [correctAnswer, ...wrongAnswers];
             shuffleArray(allOptions);
-            
+
             for (let i = 0; i < 4; i++) {
                 if (i < allOptions.length) {
                     optionDisplays[i].textContent = allOptions[i];
@@ -1030,63 +1285,74 @@ whale,n,鯨魚  `;
                 }
             }
         }
-        
-        // 打亂陣列順序
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
-        
-        // 檢查答案
+
         function checkAnswer(selectedOption) {
-            if (!gameActive || !canAnswer) return;
-            
+            if (!gameActive || !canAnswer || gameOver) return;
+
             canAnswer = false;
-            pumpkinOptions.forEach(option => {
-                option.classList.add('disabled');
-            });
-            
             const selectedMeaning = selectedOption.dataset.meaning;
             const isCorrect = selectedMeaning === currentWord.meaning;
-            
+
+            pumpkinOptions.forEach(option => {
+                option.classList.add('disabled');
+                const meaning = option.dataset.meaning;
+                if (meaning === currentWord.meaning) {
+                    option.classList.add('correct');
+                } else if (option === selectedOption && !isCorrect) {
+                    option.classList.add('wrong');
+                }
+            });
+
             if (isCorrect) {
-                // 清除計時器
-                if (timer) {
-                    clearInterval(timer);
-                    timer = null; // 重要：將計時器設為null
-                }
-                
-                score += 5;
+                correctStreak++;
+                wrongStreak = 0;
+
+                let addScore = 5;
+                if (correctStreak === 1) addScore = 5;
+                else if (correctStreak === 2) addScore = 10;
+                else if (correctStreak === 3) addScore = 15;
+                else addScore = 20;
+
+                score += addScore;
                 scoreDisplay.textContent = score;
-                showCorrectEffect(selectedOption);
+
+                createBatsEffect();
+
                 setTimeout(() => {
-                    nextQuestion();
-                }, 500);
+                    if (!gameOver) nextQuestion();
+                }, 700);
             } else {
-                // 清除計時器
-                if (timer) {
-                    clearInterval(timer);
-                    timer = null; // 重要：將計時器設為null
-                }
-                endGame(false);
+                wrongStreak++;
+                correctStreak = 0;
+
+                let penalty = 5;
+                if (wrongStreak === 1) penalty = 5;
+                else if (wrongStreak === 2) penalty = 10;
+                else if (wrongStreak === 3) penalty = 15;
+                else penalty = 20;
+
+                score = Math.max(score - penalty, 0);
+                scoreDisplay.textContent = score;
+
+                gameScreen.style.animation = 'shake 0.4s';
+                setTimeout(() => {
+                    gameScreen.style.animation = '';
+                }, 400);
+
+                setTimeout(() => {
+                    if (score <= 0) {
+                        endGame('score');
+                    } else if (!gameOver) {
+                        pumpkinOptions.forEach(option => {
+                            option.classList.remove('correct', 'wrong', 'disabled');
+                        });
+                        canAnswer = true;
+                        nextQuestion();
+                    }
+                }, 800);
             }
         }
-        
-        // 顯示正確效果
-        function showCorrectEffect(correctOption) {
-            correctOption.style.transform = 'scale(1.1)';
-            correctOption.style.filter = 'drop-shadow(0 0 15px #ff9f43)';
-            createBatsEffect();
-            setTimeout(() => {
-                correctOption.style.transform = '';
-                correctOption.style.filter = '';
-            }, 500);
-        }
-        
-        // 創建蝙蝠效果
+
         function createBatsEffect() {
             for (let i = 0; i < 5; i++) {
                 setTimeout(() => {
@@ -1094,51 +1360,84 @@ whale,n,鯨魚  `;
                 }, i * 100);
             }
         }
-        
-        // 結束遊戲
-        function endGame(isWin) {
+
+        function endGame(reason) {
+            if (gameOver) return;
+            gameOver = true;
             gameActive = false;
             canAnswer = false;
-            
-            // 確保計時器被清除
+
             if (timer) {
                 clearInterval(timer);
                 timer = null;
             }
-            
             stopBatAnimation();
-            
+
             finalScoreDisplay.textContent = score;
-            resultMessage.textContent = isWin ? '恭喜你贏了!' : 'Game Over!';
-            gameOverScreen.style.display = 'flex';
-            
-            if (!isWin) {
-                gameScreen.style.animation = 'shake 0.5s';
-                setTimeout(() => {
-                    gameScreen.style.animation = '';
-                }, 500);
+
+            let used;
+            if (startTime) {
+                used = Math.floor((Date.now() - startTime) / 1000);
+            } else {
+                used = Math.floor(totalGameTime - timeLeft);
             }
+            if (used < 0 || !isFinite(used)) used = 0;
+            timeUsedDisplay.textContent = used;
+
+            if (reason === 'time') {
+                resultMessage.textContent = '時間到！👻';
+            } else if (reason === 'score') {
+                resultMessage.textContent = '分數歸零了！🧟‍♂️';
+            } else {
+                resultMessage.textContent = 'Game Over!';
+            }
+
+            gameOverScreen.classList.add('active');
         }
-        
-        // 重新開始遊戲
+
         function restartGame() {
-            gameOverScreen.style.display = 'none';
-            setupScreen.style.display = 'block';
-            gameScreen.style.display = 'none';
+            initGame();
         }
-        
-        // 事件監聽器
-        document.addEventListener('DOMContentLoaded', function() {
-            startGameBtn.addEventListener('click', initGame);
+
+        // ========= 事件處理 =========
+        document.addEventListener('DOMContentLoaded', function () {
+            detectDevice();
+            initGame();
+
+            startGameBtn.addEventListener('click', startGame);
             restartBtn.addEventListener('click', restartGame);
-            
-            document.querySelectorAll('.pumpkin-option').forEach(option => {
+
+            pumpkinOptions.forEach(option => {
                 option.addEventListener('click', () => {
                     checkAnswer(option);
                 });
             });
+
+            timeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    timeButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    totalGameTime = parseInt(btn.dataset.time, 10) || 180;
+                    timeLeft = totalGameTime;
+                    countdownDisplay.textContent = formatTime(timeLeft);
+                    timerBar.style.width = '100%';
+                    timerBar.classList.remove('timer-warning');
+                });
+            });
+        });
+
+        // 防止雙擊縮放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) e.preventDefault();
+            lastTouchEnd = now;
+        }, { passive: false });
+
+        window.addEventListener('resize', function () {
+            setTimeout(detectDevice, 100);
         });
     </script>
 </body>
 </html>
-
