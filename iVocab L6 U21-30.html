@@ -450,7 +450,8 @@
     
     <script>
         // 耶誕節主題單字資料
-        const newVocabulary = `premier,adj,首位的;最早的
+        const newVocabulary = `
+premier,adj,首位的;最早的
 rash,adj,輕率的;急躁的
 textile,adj,紡織的
 compile,v,匯編;收集(資料等);編譯(程式)
@@ -743,7 +744,11 @@ siege,n,圍攻;包圍;圍城
         let timer = null; // 確保計時器初始為null
         let timeLeft = 8;
         let tickSound;
-        let usedInCurrentSession = []; // ✅ 新增：本局已使用單字索引
+        let usedInCurrentSession = []; // 本局已使用單字索引
+
+        // ⭐ 連擊計分變數：連續答對 / 連續答錯次數
+        let correctStreak = 0;
+        let wrongStreak = 0;
         
         // DOM 元素
         const questionElement = document.getElementById('question');
@@ -796,7 +801,9 @@ siege,n,圍攻;包圍;圍城
         function initGame() {
             currentQuestionIndex = 0;
             score = 0;
-            usedInCurrentSession = []; // ✅ 每次重新開始都清空本局記錄
+            usedInCurrentSession = []; 
+            correctStreak = 0;  // ⭐ 重置連擊
+            wrongStreak = 0;    // ⭐ 重置連錯
             
             // 清除之前的計時器
             if (timer) {
@@ -823,7 +830,7 @@ siege,n,圍攻;包圍;圍城
             createSnowflakes();
         }
         
-        // 生成新問題（✅ 已重寫）
+        // 生成新問題
         function generateQuestion() {
             // 如果本局已用完所有單字，清空記錄以開始新一輪
             if (usedInCurrentSession.length >= vocabulary.length) {
@@ -920,6 +927,7 @@ siege,n,圍攻;包圍;圍城
             
             // 清除反饋
             feedbackElement.textContent = '';
+            feedbackElement.style.color = '#d4af37';
             
             // 清除之前的麋鹿
             mooseContainer.innerHTML = '';
@@ -939,6 +947,7 @@ siege,n,圍攻;包圍;圍城
             timeLeft = 8;
             timerBar.style.width = '100%';
             timerBar.style.backgroundColor = '#00ff00';
+            timerBar.classList.remove('urgent');
             
             // 清除之前的計時器
             if (timer) {
@@ -978,10 +987,18 @@ siege,n,圍攻;包圍;圍城
             }, 1000);
         }
         
-        // 時間到
+        // 時間到（視為答錯並扣分）
         function timeUp() {
             const currentQuestion = questions[currentQuestionIndex];
-            feedbackElement.textContent = `時間到! 正確答案是: ${currentQuestion.correctMeaning}`;
+
+            // ⭐ 計算「時間到」的扣分（當作一個錯誤）
+            wrongStreak++;
+            correctStreak = 0;
+            const penalty = 5 * wrongStreak; // 無上限，每次多 5 分級距
+            score -= penalty;
+            updateScore();
+            
+            feedbackElement.textContent = `時間到! -${penalty} 分，正確答案是: ${currentQuestion.correctMeaning}`;
             feedbackElement.style.color = '#ff0000';
             
             // 禁用所有選項
@@ -1026,8 +1043,13 @@ siege,n,圍攻;包圍;圍城
             
             // 檢查答案
             if (selectedOption === correctAnswer) {
-                score += 5;
-                feedbackElement.textContent = '正確! 🎄';
+                // ⭐ 正確：連續答對次數+1，錯誤連擊歸 0
+                correctStreak++;
+                wrongStreak = 0;
+                const bonus = 5 * correctStreak; // 5, 10, 15, 20, ... 無上限
+                score += bonus;
+
+                feedbackElement.textContent = `正確! +${bonus} 分 🎄`;
                 feedbackElement.style.color = '#00ff00';
                 
                 // 播放正確音效
@@ -1045,7 +1067,13 @@ siege,n,圍攻;包圍;圍城
                     generateQuestion();
                 }, 500);
             } else {
-                feedbackElement.textContent = `錯誤! 正確答案是: ${correctAnswer}`;
+                // ⭐ 錯誤：連續答錯次數+1，正確連擊歸 0
+                wrongStreak++;
+                correctStreak = 0;
+                const penalty = 5 * wrongStreak; // 5, 10, 15, 20, ... 無上限
+                score -= penalty;
+
+                feedbackElement.textContent = `錯誤! -${penalty} 分，正確答案是: ${correctAnswer}`;
                 feedbackElement.style.color = '#ff0000';
                 
                 // 播放錯誤音效
@@ -1053,6 +1081,9 @@ siege,n,圍攻;包圍;圍城
                 setTimeout(() => {
                     if (errorSound) errorSound.stop();
                 }, 300);
+                
+                // 更新分數
+                updateScore();
                 
                 // 結束遊戲 - 縮短等待時間
                 setTimeout(() => {
@@ -1070,7 +1101,7 @@ siege,n,圍攻;包圍;圍城
         function endGame() {
             finalScoreElement.textContent = score;
             
-            // 根據分數顯示不同的訊息
+            // 根據分數顯示不同的訊息（門檻仍沿用原本設定）
             if (score >= 20) {
                 resultMessageElement.textContent = '太棒了! 你是英文單字大師! 🎅';
             } else if (score >= 10) {
