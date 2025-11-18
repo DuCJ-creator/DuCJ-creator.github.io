@@ -195,6 +195,52 @@
             font-weight: bold;
             flex-shrink: 0;
         }
+
+        /* 總遊戲時間顯示 */
+        .time-display {
+            font-size: 1.1rem;
+            color: #636e72;
+            margin: 5px 0 10px;
+            flex-shrink: 0;
+        }
+
+        /* 遊戲時間選擇區塊 */
+        .time-select-container {
+            margin: 15px 0;
+            flex-shrink: 0;
+        }
+
+        .time-select-title {
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: #2d3436;
+        }
+
+        .time-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .time-btn {
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 2px solid #ff9e9e;
+            background-color: #ffeaea;
+            color: #d63031;
+            font-size: 0.95rem;
+            cursor: pointer;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .time-btn.active {
+            background-color: #d63031;
+            color: #fff;
+            border-color: #d63031;
+            box-shadow: 0 0 8px rgba(214,48,49,0.5);
+        }
         
         .game-over {
             position: absolute;
@@ -649,17 +695,33 @@
         <h1>L2 U 31-40 單字挑戰無極限</h1>
         
         <div class="game-content">
+            <!-- 設定畫面 -->
             <div class="screen" id="setup-screen">
                 <div class="screen-content">
                     <div class="score-display">Score: <span id="score">0</span></div>
+
+                    <!-- 新增：遊戲時間選擇 -->
+                    <div class="time-select-container">
+                        <div class="time-select-title">選擇遊戲時間：</div>
+                        <div class="time-buttons">
+                            <button type="button" class="time-btn" data-minutes="3">3 分鐘</button>
+                            <button type="button" class="time-btn active" data-minutes="5">5 分鐘</button>
+                            <button type="button" class="time-btn" data-minutes="10">10 分鐘</button>
+                        </div>
+                    </div>
+
                     <button class="start-btn" id="start-game">Start</button>
                 </div>
             </div>
             
+            <!-- 遊戲畫面 -->
             <div class="screen hidden" id="game-screen">
                 <div class="screen-content">
                     <div class="score-display">Score: <span id="score-display">0</span></div>
                     
+                    <!-- 新增：總遊戲時間顯示 -->
+                    <div class="time-display">Time: <span id="game-time">00:00</span></div>
+
                     <div class="timer-container">
                         <div class="timer-bar" id="timer-bar"></div>
                     </div>
@@ -686,6 +748,7 @@
                 </div>
             </div>
             
+            <!-- 結束畫面 -->
             <div class="game-over" id="game-over">
                 <h2 id="result-message">Game Over!</h2>
                 <div>Final Score: <span id="final-score">0</span></div>
@@ -694,7 +757,7 @@
         </div>
     </div>
 
-    <!-- 新增煙火動畫元素 -->
+    <!-- 煙火動畫層 -->
     <div class="firework-animation" id="firework-animation"></div>
 
     <script>
@@ -702,16 +765,21 @@
         let vocabulary = [];
         let currentWord = null;
         let score = 0;
-        let timer = null;
-        let timeLeft = 8;
+        let timer = null;           // 單題倒數
+        let timeLeft = 8;           // 每題 8 秒
         let gameActive = false;
         let canAnswer = true;
         let usedInCurrentSession = []; // 本局已使用單字索引
 
-        // ⭐ 連擊計分變數
-        let correctStreak = 0; // 連續答對題數
-        let wrongStreak = 0;   // 連續答錯題數（含時間到）
-        
+        // 連續答對 / 答錯紀錄
+        let correctStreak = 0;
+        let wrongStreak = 0;
+
+        // 整體遊戲時間（秒）
+        let gameDuration = 5 * 60;  // 預設 5 分鐘
+        let gameTimeLeft = gameDuration;
+        let gameTimer = null;       // 整體遊戲時間倒數
+
         // DOM元素
         const setupScreen = document.getElementById('setup-screen');
         const gameScreen = document.getElementById('game-screen');
@@ -733,7 +801,9 @@
         const timerBar = document.getElementById('timer-bar');
         const fireworkAnimation = document.getElementById('firework-animation');
         const optionElements = document.querySelectorAll('.firework-option');
-        
+        const timeButtons = document.querySelectorAll('.time-btn');
+        const gameTimeSpan = document.getElementById('game-time');
+
         // 完整單字庫
         const wordList = `absent,adj,缺席的
 elder,adj,年紀較長的
@@ -1037,42 +1107,8 @@ toilet,n,馬桶
 tooth,n,牙齒
 tradition,n,傳統
 trial,n,審判`;
-        
-        // 初始化遊戲
-        function initGame() {
-            // 解析單字列表
-            vocabulary = parseWordList(wordList);
-            
-            if (vocabulary.length === 0) {
-                alert('單字庫載入失敗！');
-                return;
-            }
-            
-            // 重置遊戲狀態
-            score = 0;
-            correctStreak = 0;
-            wrongStreak = 0;
-            usedInCurrentSession = [];
-            updateScore();
-            
-            // 切換到遊戲畫面
-            setupScreen.classList.add('hidden');
-            gameScreen.classList.remove('hidden');
-            gameOverScreen.style.display = 'none';
-            
-            // 開始遊戲
-            gameActive = true;
-            canAnswer = true;
-            nextQuestion();
-        }
-        
-        // 分數顯示同步
-        function updateScore() {
-            if (scoreDisplay) scoreDisplay.textContent = score;
-            if (setupScoreDisplay) setupScoreDisplay.textContent = score;
-        }
-        
-        // 解析單字列表
+
+        // 將字串解析為單字物件陣列
         function parseWordList(text) {
             const lines = text.split('\n');
             const words = [];
@@ -1099,15 +1135,87 @@ trial,n,審判`;
             
             return words;
         }
+
+        // 格式化時間 mm:ss
+        function formatTime(sec) {
+            sec = Math.max(0, Math.floor(sec));
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        function updateGameTimeDisplay() {
+            gameTimeSpan.textContent = formatTime(gameTimeLeft);
+        }
+
+        function updateScoreUI() {
+            setupScoreDisplay.textContent = score;
+            scoreDisplay.textContent = score;
+        }
+
+        // 初始化遊戲
+        function initGame() {
+            // 解析單字列表（只做一次也可以，但這樣比較直觀）
+            vocabulary = parseWordList(wordList);
+            
+            if (vocabulary.length === 0) {
+                alert('單字庫載入失敗！');
+                return;
+            }
+            
+            // 重置遊戲狀態
+            score = 0;
+            correctStreak = 0;
+            wrongStreak = 0;
+            usedInCurrentSession = [];
+            updateScoreUI();
+
+            // 重置整體遊戲時間
+            gameTimeLeft = gameDuration;
+            updateGameTimeDisplay();
+
+            // 清除舊的計時器
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
+
+            // 切換到遊戲畫面
+            setupScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            gameOverScreen.style.display = 'none';
+            
+            // 開始遊戲
+            gameActive = true;
+            canAnswer = true;
+
+            // 啟動整體遊戲倒數
+            gameTimer = setInterval(() => {
+                if (!gameActive) return;
+                gameTimeLeft--;
+                updateGameTimeDisplay();
+                if (gameTimeLeft <= 0) {
+                    gameTimeLeft = 0;
+                    updateGameTimeDisplay();
+                    endGame('time');
+                }
+            }, 1000);
+
+            nextQuestion();
+        }
         
         // 下一題
         function nextQuestion() {
             if (!gameActive) return;
             
-            // 清除之前的計時器
+            // 清除單題計時器
             if (timer) {
                 clearInterval(timer);
-                timer = null; // 重要：將計時器設為null
+                timer = null;
             }
             
             // 啟用所有選項
@@ -1142,13 +1250,17 @@ trial,n,審判`;
             // 準備選項
             prepareOptions();
             
-            // 重置計時器
+            // 重置單題計時器
             timeLeft = 8;
             timerBar.style.width = '100%';
             timerBar.classList.remove('timer-warning');
             
-            // 開始倒計時
             timer = setInterval(() => {
+                if (!gameActive) {
+                    clearInterval(timer);
+                    timer = null;
+                    return;
+                }
                 timeLeft -= 0.1;
                 timerBar.style.width = `${(timeLeft / 8) * 100}%`;
                 
@@ -1158,23 +1270,15 @@ trial,n,審判`;
                 
                 if (timeLeft <= 0) {
                     clearInterval(timer);
-                    timer = null; // 重要：將計時器設為null
-
-                    // ⭐ 時間到視為答錯：扣分（連續錯誤級距）
-                    wrongStreak++;
-                    correctStreak = 0;
-                    const penalty = 5 * wrongStreak;
-                    score -= penalty;
-                    updateScore();
-
-                    endGame(false);
+                    timer = null;
+                    // 單題時間到視為答錯，只扣分不結束遊戲
+                    handleTimeout();
                 }
             }, 100);
         }
         
         // 準備選項
         function prepareOptions() {
-            // 正確答案
             const correctAnswer = currentWord.meaning;
             
             // 收集其他可能的選項
@@ -1188,18 +1292,15 @@ trial,n,審判`;
                 const randomIndex = Math.floor(Math.random() * otherMeanings.length);
                 const selectedMeaning = otherMeanings[randomIndex];
                 
-                // 確保選項不重複
                 if (!wrongAnswers.includes(selectedMeaning)) {
                     wrongAnswers.push(selectedMeaning);
                     otherMeanings.splice(randomIndex, 1);
                 }
             }
             
-            // 合併所有選項並打亂順序
             const allOptions = [correctAnswer, ...wrongAnswers];
             shuffleArray(allOptions);
             
-            // 更新選項顯示
             for (let i = 0; i < 4; i++) {
                 if (i < allOptions.length) {
                     optionDisplays[i].textContent = allOptions[i];
@@ -1237,50 +1338,80 @@ trial,n,審判`;
             });
         }
         
+        // 單題 timeout 處理：視為答錯
+        function handleTimeout() {
+            if (!gameActive) return;
+            disableOptions();
+
+            // 顯示正確答案
+            optionElements.forEach(opt => {
+                if (opt.dataset.meaning === currentWord.meaning) {
+                    opt.classList.add('correct-answer');
+                }
+            });
+
+            applyWrongScore();
+
+            setTimeout(() => {
+                if (gameActive) nextQuestion();
+            }, 800);
+        }
+
         // 檢查答案
         function checkAnswer(selectedOption) {
             if (!gameActive || !canAnswer) return;
             
-            // 立即禁用所有選項，防止多次點擊
             disableOptions();
             
-            // 清除計時器
             if (timer) {
                 clearInterval(timer);
-                timer = null; // 重要：將計時器設為null
+                timer = null;
             }
             
             const selectedMeaning = selectedOption.dataset.meaning;
             const isCorrect = selectedMeaning === currentWord.meaning;
             
             if (isCorrect) {
-                // ⭐ 正確：連續答對+1，清空錯誤連擊
-                correctStreak++;
-                wrongStreak = 0;
-                const bonus = 5 * correctStreak; // 5,10,15,... 無上限
-                score += bonus;
-                updateScore();
-                
-                // 顯示正確效果
+                // 正確
+                applyCorrectScore();
                 showCorrectEffect(selectedOption);
-                
-                // 播放煙花動畫
                 showFireworkAnimation();
                 
-                // 減少延遲時間
                 setTimeout(() => {
-                    nextQuestion();
+                    if (gameActive) nextQuestion();
                 }, 800);
             } else {
-                // ⭐ 錯誤：連續答錯+1，清空正確連擊
-                wrongStreak++;
-                correctStreak = 0;
-                const penalty = 5 * wrongStreak; // 5,10,15,... 無上限
-                score -= penalty;
-                updateScore();
+                // 錯誤：顯示正確選項，扣分但不結束遊戲
+                optionElements.forEach(opt => {
+                    if (opt.dataset.meaning === currentWord.meaning) {
+                        opt.classList.add('correct-answer');
+                    }
+                });
 
-                endGame(false);
+                applyWrongScore();
+
+                setTimeout(() => {
+                    if (gameActive) nextQuestion();
+                }, 800);
             }
+        }
+
+        // 正確計分（連續答對遞增 +5）
+        function applyCorrectScore() {
+            correctStreak++;
+            wrongStreak = 0;
+            const bonus = correctStreak * 5;
+            score += bonus;
+            updateScoreUI();
+        }
+
+        // 錯誤計分（連續答錯遞增 -5，分數不低於 0）
+        function applyWrongScore() {
+            wrongStreak++;
+            correctStreak = 0;
+            const penalty = wrongStreak * 5;
+            score = Math.max(0, score - penalty);
+            updateScoreUI();
         }
         
         // 顯示正確效果
@@ -1293,20 +1424,16 @@ trial,n,審判`;
             fireworkAnimation.style.display = 'block';
             fireworkAnimation.innerHTML = '';
             
-            // 創建多個煙火元素
             for (let i = 0; i < 3; i++) {
                 const firework = document.createElement('div');
                 firework.className = 'firework-effect';
                 
-                // 隨機位置
                 const x = Math.random() * 80 + 10;
                 const y = Math.random() * 80 + 10;
                 
-                // 隨機選擇煙花顏色
                 const colors = ['#d63031', '#0984e3', '#00b894', '#fdcb6e', '#6c5ce7'];
                 const color = colors[Math.floor(Math.random() * colors.length)];
                 
-                // 設置煙花樣式
                 firework.style.left = `${x}%`;
                 firework.style.top = `${y}%`;
                 firework.style.opacity = '1';
@@ -1318,31 +1445,36 @@ trial,n,審判`;
                 fireworkAnimation.appendChild(firework);
             }
             
-            // 0.8秒後隱藏煙火動畫
             setTimeout(() => {
                 fireworkAnimation.style.display = 'none';
             }, 800);
         }
         
         // 結束遊戲
-        function endGame(isWin) {
+        function endGame(reason = 'normal') {
             gameActive = false;
+            canAnswer = false;
             
-            // 確保計時器被清除
             if (timer) {
                 clearInterval(timer);
                 timer = null;
             }
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
             
-            // 更新結束畫面
             finalScoreDisplay.textContent = score;
-            resultMessage.textContent = isWin ? '恭喜你贏了!' : '遊戲結束!';
+
+            if (reason === 'time') {
+                resultMessage.textContent = '時間到，挑戰結束！';
+            } else {
+                resultMessage.textContent = '遊戲結束！';
+            }
             
-            // 顯示結束畫面
             gameOverScreen.style.display = 'flex';
             
-            // 如果不是勝利，添加震動效果
-            if (!isWin) {
+            if (reason !== 'time') {
                 gameScreen.style.animation = 'shake 0.3s';
                 setTimeout(() => {
                     gameScreen.style.animation = '';
@@ -1350,14 +1482,22 @@ trial,n,審判`;
             }
         }
         
-        // 重新開始遊戲
+        // 重新開始遊戲（回到設定畫面）
         function restartGame() {
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
             gameOverScreen.style.display = 'none';
             setupScreen.classList.remove('hidden');
             gameScreen.classList.add('hidden');
         }
-        
-        // 事件監聽器
+
+        // 綁定事件
         document.addEventListener('DOMContentLoaded', function() {
             startGameBtn.addEventListener('click', initGame);
             restartBtn.addEventListener('click', restartGame);
@@ -1368,6 +1508,20 @@ trial,n,審判`;
                     checkAnswer(option);
                 });
             });
+
+            // 遊戲時間選擇事件
+            timeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    timeButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const minutes = parseInt(btn.dataset.minutes, 10) || 5;
+                    gameDuration = minutes * 60;
+                });
+            });
+
+            // 初始顯示時間
+            updateGameTimeDisplay();
+            updateScoreUI();
         });
     </script>
 </body>
