@@ -651,12 +651,10 @@
         @media print {
             body {
                 background: #ffffff !important;
-                padding: 0;
-                margin: 0;
             }
             
             .container {
-                display: none !important; /* 隱藏輸入區 */
+                display: none !important;
             }
             
             .result-container {
@@ -679,7 +677,7 @@
             #next-btn,
             #print-btn,
             .decoration {
-                display: none !important; /* 列印時隱藏控制與裝飾 */
+                display: none !important;
             }
         }
     </style>
@@ -698,19 +696,22 @@
             <input type="date" id="event-date">
         </div>
 
-        <!-- ★★ 新增：從姓名庫匯入 ★★ -->
+        <!-- ★★ 從姓名庫匯入 ★★ -->
         <div class="form-group">
             <label>從姓名庫匯入 Import from Name Bank</label>
             <div style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- 學校：單選 -->
                 <select id="namebank-school">
                     <option value="">全部學校 All schools</option>
                 </select>
 
-                <select id="namebank-grade" multiple size="4">
-                    <!-- 由 JS 自動載入年級 -->
+                <!-- 年級：單選（可留空） -->
+                <select id="namebank-grade">
+                    <option value="">全部年級 All grades</option>
                 </select>
 
-                <select id="namebank-class" multiple size="4">
+                <!-- 班級：可複選 -->
+                <select id="namebank-class" multiple size="6">
                     <!-- 由 JS 自動載入班級 -->
                 </select>
 
@@ -722,7 +723,7 @@
                 </button>
 
                 <small style="color:#8c6b5d; margin-top:4px;">
-                    提示：school、grade、class 任一欄位留空，代表不以該欄位篩選（＝全選）。
+                    提示：school、grade 留空＝不篩選；class 可按住 Ctrl（或 Command）點擊複選。
                 </small>
             </div>
         </div>
@@ -781,13 +782,13 @@
             const optionButtons = document.querySelectorAll('.option-btn');
             const printBtn = document.getElementById('print-btn');
 
-            // ★ 新增：name bank UI 元素
+            // name bank UI 元素
             const nameBankSchoolSelect = document.getElementById('namebank-school');
             const nameBankGradeSelect  = document.getElementById('namebank-grade');
             const nameBankClassSelect  = document.getElementById('namebank-class');
             const loadFromNameBankBtn  = document.getElementById('load-from-namebank-btn');
 
-            // ★ 新增：name bank 資料
+            // name bank 資料
             const nameBankUrl = 'https://ducj-creator.github.io/name%20bank.csv';
             let nameBank = [];
             let nameBankLoaded = false;
@@ -801,7 +802,7 @@
             let isHighlighting = false;
             let currentParticipantIndex = 0;
 
-            // ★ 組名設定（自動＋手動）
+            // 組名設定
             const teamNames = [
                 { en: "Angry Alpacas", zh: "憤怒的羊駝" },
                 { en: "Blonde Baboons", zh: "金色的狒狒" },
@@ -831,9 +832,9 @@
                 { en: "Zapping Zebras", zh: "快速移動的斑馬" }
             ];
 
-            let currentGroupingMode = null;       // 'auto' 或 'manual'
-            let autoGroupNamesText = [];          // 自動分組用：字串組名
-            let manualGroupNamesText = [];        // 手動分組用：字串組名
+            let currentGroupingMode = null;       
+            let autoGroupNamesText = [];          
+            let manualGroupNamesText = [];        
 
             function buildTeamNameString(team) {
                 if (!team) return '';
@@ -841,13 +842,11 @@
                 return team.en || team.zh || '';
             }
 
-            // ===== Name Bank：載入 CSV 並建立選單 =====
+            // Name Bank：載入 CSV
             function loadNameBank() {
                 fetch(nameBankUrl)
                     .then(res => {
-                        if (!res.ok) {
-                            throw new Error('Network response was not ok');
-                        }
+                        if (!res.ok) throw new Error('Network response was not ok');
                         return res.text();
                     })
                     .then(text => {
@@ -902,7 +901,7 @@
                     new Set(nameBank.map(r => r.class).filter(Boolean))
                 ).sort();
 
-                // school 下拉（單選）
+                // school 單選
                 nameBankSchoolSelect.innerHTML = '<option value="">全部學校 All schools</option>';
                 schools.forEach(s => {
                     const opt = document.createElement('option');
@@ -911,8 +910,8 @@
                     nameBankSchoolSelect.appendChild(opt);
                 });
 
-                // grade 多選
-                nameBankGradeSelect.innerHTML = '';
+                // grade 單選（可空）
+                nameBankGradeSelect.innerHTML = '<option value="">全部年級 All grades</option>';
                 grades.forEach(g => {
                     const opt = document.createElement('option');
                     opt.value = g;
@@ -936,10 +935,10 @@
                     .filter(v => v !== '');
             }
 
-            // 先載入 name bank，完成後會自動建立選單
+            // 載入 name bank
             loadNameBank();
 
-            // 設定預設日期為今天
+            // 預設日期為今天
             const today = new Date().toISOString().split('T')[0];
             eventDateInput.value = today;
             
@@ -952,20 +951,20 @@
                 });
             });
 
-            // 按下「從姓名庫載入姓名」
+            // 從姓名庫載入姓名
             loadFromNameBankBtn.addEventListener('click', function () {
                 if (!nameBankLoaded) {
                     alert('姓名庫尚未載入完成，請稍候或重新整理頁面後再試。');
                     return;
                 }
 
-                const selectedSchool  = nameBankSchoolSelect.value;
-                const selectedGrades  = getSelectedValues(nameBankGradeSelect);  // 可空、可複選
-                const selectedClasses = getSelectedValues(nameBankClassSelect);  // 可空、可複選
+                const selectedSchool  = nameBankSchoolSelect.value;       // 單選 / 可空
+                const selectedGrade   = nameBankGradeSelect.value;        // 單選 / 可空
+                const selectedClasses = getSelectedValues(nameBankClassSelect); // 多選 / 可空
 
                 const filtered = nameBank.filter(row => {
                     if (selectedSchool && row.school !== selectedSchool) return false;
-                    if (selectedGrades.length > 0 && !selectedGrades.includes(row.grade)) return false;
+                    if (selectedGrade && row.grade !== selectedGrade) return false;
                     if (selectedClasses.length > 0 && !selectedClasses.includes(row.class)) return false;
                     return true;
                 });
@@ -975,8 +974,15 @@
                     return;
                 }
 
-                // 覆蓋 participants，如要改成「追加」可自行改動這一段
-                participantsTextarea.value = filtered.map(r => r.name).join('\n');
+                // 把年級、班級資訊一起寫進名單，格式：[grade-class] name
+                const lines = filtered.map(row => {
+                    const g = row.grade || '';
+                    const c = row.class || '';
+                    const tag = (g || c) ? `[${g}${g && c ? '-' : ''}${c}] ` : '';
+                    return `${tag}${row.name}`;
+                });
+
+                participantsTextarea.value = lines.join('\n');
 
                 alert(`已載入 ${filtered.length} 筆姓名到名單中。`);
             });
@@ -1080,7 +1086,7 @@
                 eventDateDisplay.textContent = `活動日期 Date: ${eventDateInput.value}`;
                 resultDisplay.innerHTML = `
                     <div style="margin-top: 20px; text-align: left;">
-                        ${sorted.map(name => `<p style="padding: 8px; border-bottom: 1px solid #e8d1c5;">${name}</p>`).join('')}
+                        ${sorted.map((name, i) => `<p style="padding: 8px; border-bottom: 1px solid #e8d1c5;">${i + 1}. ${name}</p>`).join('')}
                     </div>
                 `;
                 progressInfo.textContent = '';
@@ -1200,7 +1206,6 @@
                 
                 groupPoints = Array(groups.length).fill(0);
 
-                // 隨機指派組名（最多 26 組）
                 const shuffledTeamNames = [...teamNames].sort(() => Math.random() - 0.5);
                 autoGroupNamesText = groups.map((_, index) => {
                     if (index < shuffledTeamNames.length) {
@@ -1220,7 +1225,7 @@
                 resultContainer.style.display = 'flex';
             }
             
-            // 自動分組畫面（含積分與組名）
+            // 自動分組畫面
             function displayGroupsWithPoints(groupSize) {
                 let html = `
                     <h3 style="margin-bottom: 20px; color: #8c6b5d;">分${groupSize}人組 Groups of ${groupSize}</h3>
@@ -1261,7 +1266,7 @@
                 
                 resultDisplay.innerHTML = html;
                 updatePointsSummary();
-                attachGroupNameEditors(); // ★ 自動分組組名可點擊編輯
+                attachGroupNameEditors();
             }
 
             // 手動分組
@@ -1286,7 +1291,6 @@
                     groups[gIndex].push(name);
                 });
 
-                // 隨機指派組名
                 const shuffledTeamNames = [...teamNames].sort(() => Math.random() - 0.5);
                 manualGroupNamesText = groups.map((_, index) => {
                     if (index < shuffledTeamNames.length) {
@@ -1305,7 +1309,7 @@
                 resultContainer.style.display = 'flex';
             }
 
-            // 手動分組畫面（拖曳＋組名可點擊修改）
+            // 手動分組畫面
             function renderManualGroups() {
                 let html = `
                     <h3 style="margin-bottom: 10px; color: #8c6b5d;">手動分組 Manual Grouping</h3>
@@ -1388,15 +1392,15 @@
                         if (idx > -1) {
                             fromArr.splice(idx, 1);
                             groups[targetGroupIndex].push(dragName);
-                            renderManualGroups(); // 重新渲染更新順序
+                            renderManualGroups();
                         }
                     });
                 });
 
-                attachGroupNameEditors(); // ★ 手動分組組名可點擊修改
+                attachGroupNameEditors();
             }
 
-            // 組名點擊編輯（自動＋手動共用）
+            // 組名點擊編輯
             function attachGroupNameEditors() {
                 const spans = document.querySelectorAll('.group-name-editable');
                 spans.forEach(span => {
@@ -1409,7 +1413,7 @@
                             currentName = manualGroupNamesText[idx] || '';
                         }
                         const newName = prompt('請輸入組名 / Please enter team name:', currentName);
-                        if (newName === null) return; // 取消
+                        if (newName === null) return;
                         const trimmed = newName.trim();
                         if (currentGroupingMode === 'auto') {
                             autoGroupNamesText[idx] = trimmed;
