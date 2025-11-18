@@ -1,4 +1,3 @@
-以下代碼裡，如果是從題庫選題，要增加一個Load from the question bank 的按鈕，load以後不僅有題，主題/theme也會自動補足，更方便遊戲組織者
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -203,7 +202,7 @@
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
             margin: 8px 0;
@@ -728,6 +727,14 @@ Question2	Answer2"></textarea>
                             <p style="font-size:0.8rem; margin-top:4px;">
                                 ※ 題數必須小於或等於所選單字範圍；若輸入過大，系統會自動使用可用的最大題數。
                             </p>
+
+                            <!-- 從題庫載入按鈕 -->
+                            <button id="loadFromBankBtn" type="button" class="secondary" style="margin-top:8px;">
+                                <i class="fas fa-download"></i> Load from the Question Bank
+                            </button>
+                            <p style="font-size:0.8rem; margin-top:4px;">
+                                點擊後會依目前設定載入題庫題目，並自動填入遊戲主題與題目預覽。
+                            </p>
                         </div>
                         
                         <div class="form-group">
@@ -886,6 +893,7 @@ Participant2"></textarea>
         const ivocabUnitRangeSelect = document.getElementById('ivocabUnitRange');
         const frpSemesterSelect = document.getElementById('frpSemester');
         const toeflCategorySelect = document.getElementById('toeflCategory');
+        const loadFromBankBtn = document.getElementById('loadFromBankBtn'); // 新增按鈕 DOM
 
         // Audio context for generating sounds
         let audioContext;
@@ -915,6 +923,11 @@ Participant2"></textarea>
             // 題庫種類切換
             if (questionBankType) {
                 questionBankType.addEventListener('change', updateQuestionBankTypeUI);
+            }
+
+            // 「從題庫載入」按鈕
+            if (loadFromBankBtn) {
+                loadFromBankBtn.addEventListener('click', handleLoadFromBank);
             }
 
             // 初始化 UI
@@ -1264,60 +1277,60 @@ Participant2"></textarea>
                 .filter(Boolean);
         }
 
-       // ======== FRP ELA 題庫載入（修正版） ========
-async function loadFRPEntries(semester, units) {
-    const url = 'https://ducj-creator.github.io/Teacher-Shirley/study-tools/FRP%20ELA%20Vocab.csv';
-    const res = await fetch(url);
-    if (!res.ok) {
-        throw new Error('Failed to load FRP ELA CSV: ' + url);
-    }
-    const text = await res.text();
-    const rows = parseCSV(text);
-    if (!rows.length) return [];
-
-    const headers = Object.keys(rows[0]);
-    const semKey = detectHeader(headers, ['semester', 'sem', '學期']);
-    const unitKey = detectHeader(headers, ['unit', 'Unit', 'UNIT', '單元']);
-    const wordKey = detectHeader(headers, ['word', 'Word', '單字']);
-    const posKey = detectHeader(headers, ['pos', 'POS', 'part of speech', '詞性']);
-    const meaningKey = detectHeader(headers, ['meaning', 'Meaning', 'Chinese', '中文', '解釋']);
-
-    if (!semKey || !unitKey || !wordKey || !meaningKey) {
-        console.warn('FRP CSV 欄位無法辨識，請確認欄位名稱：', headers);
-        return [];
-    }
-
-    const unitSet = new Set(units);
-
-    return rows
-        .map(row => {
-            // Semester：改成「包含」判斷，避免 'Semester I' / 'Sem I' 無法匹配
-            const semRaw = (row[semKey] || '').trim();
-            const semLower = semRaw.toLowerCase();
-            const wantedLower = semester.toLowerCase();
-            if (!semLower.includes(wantedLower)) return null;
-
-            // Unit：既支援「1 / 2 / 3」也支援「U1 / Unit 1」這種
-            let unitRaw = (row[unitKey] || '').trim();
-            let unitNum = parseInt(unitRaw, 10);
-            if (isNaN(unitNum)) {
-                const m = unitRaw.match(/(\d+)/);
-                if (m) {
-                    unitNum = parseInt(m[1], 10);
-                }
+        // ======== FRP ELA 題庫載入（修正版） ========
+        async function loadFRPEntries(semester, units) {
+            const url = 'https://ducj-creator.github.io/Teacher-Shirley/study-tools/FRP%20ELA%20Vocab.csv';
+            const res = await fetch(url);
+            if (!res.ok) {
+                throw new Error('Failed to load FRP ELA CSV: ' + url);
             }
-            if (!unitNum || !unitSet.has(unitNum)) return null;
+            const text = await res.text();
+            const rows = parseCSV(text);
+            if (!rows.length) return [];
 
-            const word = (row[wordKey] || '').trim();
-            const pos = posKey ? (row[posKey] || '').trim() : '';
-            const meaning = (row[meaningKey] || '').trim();
+            const headers = Object.keys(rows[0]);
+            const semKey = detectHeader(headers, ['semester', 'sem', '學期']);
+            const unitKey = detectHeader(headers, ['unit', 'Unit', 'UNIT', '單元']);
+            const wordKey = detectHeader(headers, ['word', 'Word', '單字']);
+            const posKey = detectHeader(headers, ['pos', 'POS', 'part of speech', '詞性']);
+            const meaningKey = detectHeader(headers, ['meaning', 'Meaning', 'Chinese', '中文', '解釋']);
 
-            if (!word || !meaning) return null;
+            if (!semKey || !unitKey || !wordKey || !meaningKey) {
+                console.warn('FRP CSV 欄位無法辨識，請確認欄位名稱：', headers);
+                return [];
+            }
 
-            return { word, pos, meaning };
-        })
-        .filter(Boolean);
-}
+            const unitSet = new Set(units);
+
+            return rows
+                .map(row => {
+                    // Semester：改成「包含」判斷，避免 'Semester I' / 'Sem I' 無法匹配
+                    const semRaw = (row[semKey] || '').trim();
+                    const semLower = semRaw.toLowerCase();
+                    const wantedLower = semester.toLowerCase();
+                    if (!semLower.includes(wantedLower)) return null;
+
+                    // Unit：既支援「1 / 2 / 3」也支援「U1 / Unit 1」這種
+                    let unitRaw = (row[unitKey] || '').trim();
+                    let unitNum = parseInt(unitRaw, 10);
+                    if (isNaN(unitNum)) {
+                        const m = unitRaw.match(/(\d+)/);
+                        if (m) {
+                            unitNum = parseInt(m[1], 10);
+                        }
+                    }
+                    if (!unitNum || !unitSet.has(unitNum)) return null;
+
+                    const word = (row[wordKey] || '').trim();
+                    const pos = posKey ? (row[posKey] || '').trim() : '';
+                    const meaning = (row[meaningKey] || '').trim();
+
+                    if (!word || !meaning) return null;
+
+                    return { word, pos, meaning };
+                })
+                .filter(Boolean);
+        }
 
         // ======== TOEFL Junior 題庫載入 ========
 
@@ -1387,6 +1400,49 @@ async function loadFRPEntries(semester, units) {
             }
 
             return segment;
+        }
+
+        // ======== 從題庫預先載入＋自動補主題＆預覽 ========
+
+        async function handleLoadFromBank() {
+            const source = document.querySelector('input[name="questionSource"]:checked')?.value || 'manual';
+            if (source !== 'bank') {
+                alert('請先選擇「題庫 Question Bank」作為題目來源。');
+                return;
+            }
+
+            const ok = await loadQuestionsFromBank();
+            if (!ok) return;
+
+            // 將目前抽到的題目預覽寫回 textarea
+            if (gameState.questions && gameState.questions.length > 0) {
+                const previewLines = gameState.questions.map(q => `${q.text}\t${q.correctAnswer}`);
+                questionsInput.value = previewLines.join('\n');
+            }
+
+            // 根據題庫設定自動產生主題字串
+            const bankType = questionBankType ? questionBankType.value : '';
+            let theme = '';
+
+            if (bankType === 'ivocab') {
+                const level = ivocabLevelSelect.value;
+                const [uStart, uEnd] = ivocabUnitRangeSelect.value.split('-');
+                theme = `iVocab Level ${level} Unit ${uStart}–${uEnd}`;
+            } else if (bankType === 'frp') {
+                const semester = frpSemesterSelect.value;
+                const unitCheckboxes = Array.from(document.querySelectorAll('input[name="frpUnit"]:checked'));
+                const unitLabels = unitCheckboxes.map(cb => `U${cb.value}`).join(', ');
+                theme = `FRP ELA Semester ${semester} ${unitLabels}`;
+            } else if (bankType === 'toefl') {
+                const selected = toeflCategorySelect.options[toeflCategorySelect.selectedIndex].text;
+                theme = `TOEFL Junior - ${selected}`;
+            } else {
+                theme = 'Question Bank Game';
+            }
+
+            gameThemeInput.value = theme;
+
+            alert('已從題庫載入題目並自動填入主題與預覽！');
         }
 
         // Generate options (include correct answer and three random distractors)
