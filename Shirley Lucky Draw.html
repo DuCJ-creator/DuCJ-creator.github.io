@@ -1013,7 +1013,7 @@
                 
                 switch(selectedAction) {
                     case 'sort':
-                        performSort();
+                        ();
                         break;
                     case 'lucky':
                         startLuckyDraw();
@@ -1079,20 +1079,25 @@
                 document.title = originalTitle;
             });
             
-            // 排序
-            function performSort() {
-                const sorted = [...participants].sort();
-                resultTitle.textContent = eventNameInput.value;
-                eventDateDisplay.textContent = `活動日期 Date: ${eventDateInput.value}`;
-                resultDisplay.innerHTML = `
-                    <div style="margin-top: 20px; text-align: left;">
-                        ${sorted.map((name, i) => `<p style="padding: 8px; border-bottom: 1px solid #e8d1c5;">${i + 1}. ${name}</p>`).join('')}
-                    </div>
-                `;
-                progressInfo.textContent = '';
-                nextBtn.style.display = 'none';
-                resultContainer.style.display = 'flex';
-            }
+           // 排序（實際為隨機洗牌）
+function performSort() {
+    // 使用 Fisher-Yates 洗牌算法
+    const shuffled = [...participants];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    resultTitle.textContent = eventNameInput.value;
+    eventDateDisplay.textContent = `活動日期 Date: ${eventDateInput.value}`;
+    resultDisplay.innerHTML = `
+        <div style="margin-top: 20px; text-align: left;">
+            ${shuffled.map((name, i) => `<p style="padding: 8px; border-bottom: 1px solid #e8d1c5;">${i + 1}. ${name}</p>`).join('')}
+        </div>
+    `;
+    progressInfo.textContent = '';
+    nextBtn.style.display = 'none';
+    resultContainer.style.display = 'flex';
+}
             
             // 原始順序
             function performOriginalOrder() {
