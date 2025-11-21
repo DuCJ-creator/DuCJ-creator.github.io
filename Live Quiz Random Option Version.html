@@ -223,104 +223,91 @@
             background: #ec407a;
         }
         
-        .question {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            min-height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
-        }
-        
-        .options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .option {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 18px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1.1rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            min-height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-            position: relative;
-        }
-        
-        .option:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scale(1.03);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .option-letter {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-weight: bold;
-            font-size: 1.2rem;
-            color: var(--accent-color);
-        }
-        
-        .option-text {
-            margin-left: 30px;
-        }
-        
-        .timer {
-            font-size: 3.5rem;
-            font-weight: bold;
-            margin: 15px 0;
-            color: var(--accent-color);
-            text-shadow: 0 0 15px rgba(255, 152, 0, 0.7);
-        }
-        
-        .players-list {
-            list-style-type: none;
-            max-height: 350px;
-            overflow-y: auto;
-        }
-        
-        .player {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            border-left: 4px solid var(--accent-color);
-            font-size: 0.9rem;
-        }
-        
-        .player:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .player-name {
-            font-weight: bold;
-        }
-        
-        .player-score {
-            color: var(--accent-color);
-            font-weight: bold;
-        }
-        
-        .player-group {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-top: 2px;
-        }
+/* === 提升可讀性與字號 === */
+.question {
+    font-size: 2.8rem; /* 原 2rem */
+    margin-bottom: 25px;
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7), 0 0 12px rgba(255, 255, 255, 0.8); /* 強化陰影 */
+    font-weight: bold;
+}
+
+.option {
+    background: rgba(0, 0, 0, 0.3); /* 改深一點，提升文字對比 */
+    padding: 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.4rem; /* 原 1.1rem */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.option:hover {
+    background: rgba(255, 255, 255, 0.35); /* 原 0.25，稍微提亮但保持對比 */
+    transform: scale(1.03);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.timer {
+    font-size: 4.2rem; /* 原 3.5rem */
+    font-weight: bold;
+    margin: 20px 0;
+    color: white; /* 改為白色＋陰影，比亮橘更投影友好 */
+    text-shadow: 0 0 12px var(--accent-color), 2px 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.current-player {
+    background: rgba(255, 215, 0, 0.25) !important; /* 金色高亮更明顯 */
+    border-left: 4px solid gold;
+}
+
+#currentPlayer {
+    font-size: 1.9rem; /* 原 1.5rem */
+    margin: 20px 0;
+    color: gold;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* 玩家列表字號增大 */
+.player {
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    background: rgba(0, 0, 0, 0.2); /* 深色背景提升文字可讀性 */
+    border-radius: 10px;
+    font-size: 1.1rem; /* 原 0.9rem */
+}
+
+.player-name {
+    font-weight: bold;
+    font-size: 1.15rem;
+}
+
+.player-score {
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.player-group {
+    font-size: 0.9rem; /* 原 0.75rem */
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* 題區與玩家區背景微調（更暗） */
+.question-area, .players-area, .host-control-area {
+    background: rgba(0, 0, 0, 0.25); /* 原 0.15，加深背景 */
+}
         
         .correct {
             background: var(--correct-color) !important;
