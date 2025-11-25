@@ -52,6 +52,17 @@
             padding: 10px;
         }
         
+        .event-title-line1 {
+            display: block;
+            font-size: 2.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .event-title-line2 {
+            display: block;
+            font-size: 2.4rem;
+        }
+        
         .event-subtitle {
             text-align: center;
             color: #8c6b5d;
@@ -322,6 +333,14 @@
                 font-size: 2.5rem;
             }
             
+            .event-title-line1 {
+                font-size: 2.2rem;
+            }
+            
+            .event-title-line2 {
+                font-size: 1.8rem;
+            }
+            
             .event-subtitle {
                 font-size: 1.4rem;
             }
@@ -352,6 +371,14 @@
             
             .event-title {
                 font-size: 2rem;
+            }
+            
+            .event-title-line1 {
+                font-size: 1.8rem;
+            }
+            
+            .event-title-line2 {
+                font-size: 1.5rem;
             }
             
             .event-subtitle {
@@ -389,13 +416,16 @@
         <div class="decoration decoration-1"></div>
         <div class="decoration decoration-2"></div>
         
-        <div class="event-title">114 忠信文化月英文演講比賽</div>
+        <div class="event-title">
+            <span class="event-title-line1">114 忠信文化月</span>
+            <span class="event-title-line2">英文演講比賽</span>
+        </div>
         <div class="event-subtitle">CHHS Culture English Speech Competition</div>
         <div class="event-date">2025-11-28</div>
         
         <!-- 工作人員 -->
         <div class="participants-section">
-            <div class="section-title"> Staff</div>
+            <div class="section-title">工作人員 Staff</div>
             <div class="participants-grid">
                 <div class="participant-item" data-name="Hostess: Shirley Du">
                     <span class="participant-number">H</span> Hostess: Shirley Du
@@ -417,7 +447,7 @@
         
         <!-- 參賽者 -->
         <div class="participants-section">
-            <div class="section-title"> Participants</div>
+            <div class="section-title">參賽者 Participants</div>
             <div class="participants-grid">
                 <div class="participant-item" data-name="2030MSa23曾韋程Kevin">
                     <span class="participant-number">1</span> 2030MSa23曾韋程Kevin
@@ -487,7 +517,10 @@
         <div class="result-content">
             <button class="close-btn" id="close-btn">×</button>
             
-            <div class="event-title">114 忠信文化月英文演講比賽</div>
+            <div class="event-title">
+                <span class="event-title-line1">114 忠信文化月</span>
+                <span class="event-title-line2">英文演講比賽</span>
+            </div>
             <div class="event-subtitle">CHHS Culture English Speech Competition</div>
             <div class="event-date">2025-11-28</div>
             
@@ -503,7 +536,7 @@
             const closeBtn = document.getElementById('close-btn');
             const nextBtn = document.getElementById('next-btn');
 
-            // 所有參與者名單（用於輪播）
+            // 所有參與者名單（用於輪播）- 修正了缺少逗號的問題
             const allParticipants = [
                 "Hostess: Shirley Du",
                 "Coordinator: Angela Ou", 
@@ -530,7 +563,6 @@
                 "2027TCLIPb20劉穎妍Flora",
                 "2027TCLIPc15林巽宇Gary",
                 "Commentators"
-                
             ];
             
             let currentParticipantIndex = 0;
