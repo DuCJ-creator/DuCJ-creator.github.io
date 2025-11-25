@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>114 CHHS 文化月英文演講比賽計時器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Helvetica Neue', 'Microsoft JhengHei', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px 16px;
+            color: #333;
+            touch-action: manipulation;
+            overflow: hidden;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 22px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+            padding: 24px;
+            width: 100%;
+            max-width: 780px;
+            display: flex;
+            gap: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        h1 {
+            color: #ff7b00;
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 2.0rem;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        
+        .title-main {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #ff7b00;
+        }
+        
+        .title-sub {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #ff7b00;
+        }
+        
+        .timer-display {
+            font-size: 3.8rem;
+            font-weight: 700;
+            color: #ff7b00;
+            margin: 16px 0;
+            letter-spacing: 3px;
+            font-variant-numeric: tabular-nums;
+            text-align: center;
+        }
+        
+        .orange-container {
+            height: 200px;
+            margin: 16px auto;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .orange {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle at 30% 30%, #ffa726, #ff9800);
+            border-radius: 50%;
+            position: relative;
+            animation: bounce 2s infinite alternate;
+            box-shadow: 0 8px 20px rgba(255, 152, 0, 0.4);
+            z-index: 2;
+        }
+        
+        .orange-leaf {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 20px;
+            background: #4caf50;
+            border-radius: 50% 50% 0 0;
+            z-index: 3;
+        }
+        
+        .orange-highlight {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            width: 25px;
+            height: 25px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+        }
+        
+        .orange-segment {
+            position: absolute;
+            width: 4px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.3);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(0deg);
+            transform-origin: center;
+        }
+        
+        .orange-segment:nth-child(2) {
+            transform: translate(-50%, -50%) rotate(60deg);
+        }
+        
+        .orange-segment:nth-child(3) {
+            transform: translate(-50%, -50%) rotate(120deg);
+        }
+        
+        .orange-segment:nth-child(4) {
+            transform: translate(-50%, -50%) rotate(180deg);
+        }
+        
+        .orange-segment:nth-child(5) {
+            transform: translate(-50%, -50%) rotate(240deg);
+        }
+        
+        .orange-segment:nth-child(6) {
+            transform: translate(-50%, -50%) rotate(300deg);
+        }
+        
+        @keyframes bounce {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-15px);
+            }
+        }
+        
+        .time-indicator {
+            background: rgba(255, 167, 38, 0.2);
+            border: 1px solid rgba(255, 167, 38, 0.5);
+            border-radius: 50px;
+            padding: 10px 18px;
+            font-size: 1.1rem;
+            color: #ff7b00;
+            margin: 16px 0;
+            min-width: 120px;
+            text-align: center;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+        }
+        
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 20px;
+        }
+        
+        .control-btn {
+            padding: 12px 26px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-weight: 600;
+            min-width: 110px;
+        }
+        
+        .start-btn {
+            background: linear-gradient(to right, #ff9800, #ff5722);
+            color: white;
+        }
+        
+        .start-btn:hover {
+            background: linear-gradient(to right, #ffa726, #ff7043);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .reset-btn {
+            background: rgba(255, 167, 38, 0.3);
+            color: #ff7b00;
+            border: 1px solid rgba(255, 167, 38, 0.5);
+        }
+        
+        .reset-btn:hover {
+            background: rgba(255, 167, 38, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .reset-btn:disabled {
+            background: rgba(255, 167, 38, 0.2);
+            color: rgba(255, 123, 0, 0.5);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(to right, #ff9800, #ff5722);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 50px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: 100;
+            font-weight: 600;
+            font-size: 1.05rem;
+            pointer-events: none;
+        }
+        
+        .notification.show {
+            opacity: 1;
+        }
+        
+        .floating-oranges {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .floating-orange {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle at 30% 30%, #ffa726, #ff9800);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.3);
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            33% {
+                transform: translateY(-20px) rotate(120deg);
+            }
+            66% {
+                transform: translateY(10px) rotate(240deg);
+            }
+        }
+        
+        /* 响应式设计优化 */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                max-width: 480px;
+                padding: 20px;
+                gap: 16px;
+            }
+            
+            .title-main {
+                font-size: 1.8rem;
+            }
+            
+            .title-sub {
+                font-size: 1.3rem;
+            }
+            
+            .timer-display {
+                font-size: 3.3rem;
+                margin: 12px 0;
+            }
+            
+            .orange-container {
+                height: 160px;
+                margin: 12px auto;
+            }
+            
+            .orange {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .control-buttons {
+                gap: 12px;
+                margin-top: 16px;
+            }
+            
+            .control-btn {
+                padding: 10px 22px;
+                min-width: 100px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 16px;
+                gap: 12px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+                margin-bottom: 16px;
+            }
+            
+            .timer-display {
+                font-size: 2.8rem;
+            }
+            
+            .orange-container {
+                height: 140px;
+            }
+            
+            .orange {
+                width: 90px;
+                height: 90px;
+            }
+            
+            .control-buttons {
+                gap: 10px;
+            }
+            
+            .control-btn {
+                padding: 10px 20px;
+                min-width: 90px;
+                font-size: 1rem;
+            }
+        }
+        
+        /* 触摸设备优化 */
+        @media (pointer: coarse) {
+            .control-btn {
+                min-height: 48px;
+                padding-top: 14px;
+                padding-bottom: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-oranges" id="floatingOranges"></div>
+    
+    <div class="container">
+        <div class="left-panel">
+            <h1>
+                <div class="title-main">114 CHHS Culture Month</div>
+                <div class="title-sub">English Speech Competition Timer</div>
+                <div class="title-sub">忠信文化月英文演講比賽計時器</div>
+            </h1>
+            
+            <div class="orange-container">
+                <div class="orange">
+                    <div class="orange-leaf"></div>
+                    <div class="orange-highlight"></div>
+                    <div class="orange-segment"></div>
+                    <div class="orange-segment"></div>
+                    <div class="orange-segment"></div>
+                    <div class="orange-segment"></div>
+                    <div class="orange-segment"></div>
+                    <div class="orange-segment"></div>
+                </div>
+            </div>
+            
+            <div class="timer-display" id="timerDisplay">02:00</div>
+            
+            <div class="control-buttons">
+                <button class="control-btn start-btn" id="startBtn">開始</button>
+                <button class="control-btn reset-btn" id="resetBtn" disabled>重置</button>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="time-indicator">2 分鐘計時器</div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">時間到！</div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 创建漂浮的橙子
+            const floatingOranges = document.getElementById('floatingOranges');
+            for (let i = 0; i < 8; i++) {
+                const orange = document.createElement('div');
+                orange.classList.add('floating-orange');
+                orange.style.left = Math.random() * 100 + '%';
+                orange.style.top = Math.random() * 100 + '%';
+                orange.style.animationDelay = Math.random() * 8 + 's';
+                orange.style.width = (Math.random() * 20 + 30) + 'px';
+                orange.style.height = orange.style.width;
+                floatingOranges.appendChild(orange);
+            }
+            
+            // 获取DOM元素
+            const timerDisplay = document.getElementById('timerDisplay');
+            const startBtn = document.getElementById('startBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const notification = document.getElementById('notification');
+            const orange = document.querySelector('.orange');
+            
+            // 计时器状态变量
+            let countdown = null;
+            let totalSeconds = 120; // 默认2分钟
+            let isRunning = false;
+            let startTime = 0;
+            let duration = 0;
+            let audioContext = null;
+
+            // 更新显示
+            function updateDisplay() {
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                timerDisplay.textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            // 开始计时
+            function startTimer() {
+                if (totalSeconds <= 0) return;
+                isRunning = true;
+                startBtn.textContent = '暫停';
+                resetBtn.disabled = false;
+                
+                // 开始橙子跳动动画
+                orange.style.animation = 'bounce 0.5s infinite alternate';
+                
+                duration = totalSeconds * 1000;
+                startTime = Date.now();
+                runCountdown();
+            }
+
+            // 运行倒计时
+            function runCountdown() {
+                countdown = setInterval(() => {
+                    const elapsed = Date.now() - startTime;
+                    const remainingTime = Math.max(0, duration - elapsed);
+                    totalSeconds = Math.ceil(remainingTime / 1000);
+                    updateDisplay();
+
+                    if (remainingTime <= 0) {
+                        clearInterval(countdown);
+                        timerComplete();
+                    }
+                }, 100);
+            }
+
+            // 暂停计时
+            function pauseTimer() {
+                clearInterval(countdown);
+                isRunning = false;
+                startBtn.textContent = '繼續';
+                
+                // 暂停橙子跳动动画
+                orange.style.animation = 'bounce 2s infinite alternate';
+            }
+
+            // 恢复计时
+            function resumeTimer() {
+                isRunning = true;
+                startBtn.textContent = '暫停';
+                
+                // 恢复橙子跳动动画
+                orange.style.animation = 'bounce 0.5s infinite alternate';
+                
+                const elapsed = Date.now() - (duration - totalSeconds * 1000);
+                startTime = Date.now() - (duration - totalSeconds * 1000 - elapsed);
+                runCountdown();
+            }
+
+            // 切换计时器状态
+            function toggleTimer() {
+                if (!isRunning) {
+                    if (totalSeconds > 0 && totalSeconds < duration / 1000) {
+                        resumeTimer();
+                    } else {
+                        startTimer();
+                    }
+                } else {
+                    pauseTimer();
+                }
+            }
+
+            // 计时完成
+            function timerComplete() {
+                isRunning = false;
+                startBtn.textContent = '開始';
+                startBtn.disabled = true;
+                resetBtn.disabled = false;
+                
+                // 恢复橙子正常跳动
+                orange.style.animation = 'bounce 2s infinite alternate';
+                
+                // 同步显示通知和播放声音
+                notification.classList.add('show');
+                playAlarm();
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 4000);
+            }
+
+            // 播放提醒声音
+            function playAlarm() {
+                // 创建音频上下文（如果不存在）
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                // 创建振荡器
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 800;
+                gainNode.gain.value = 0.3;
+                
+                oscillator.start();
+                
+                // 添加淡出效果
+                setTimeout(() => {
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+                }, 300);
+                
+                // 停止振荡器
+                setTimeout(() => {
+                    oscillator.stop();
+                }, 800);
+                
+                // 语音提示
+                if (window.speechSynthesis) {
+                    // 取消任何正在进行的语音
+                    window.speechSynthesis.cancel();
+                    
+                    // 创建新的语音
+                    const utterance = new SpeechSynthesisUtterance("時間到");
+                    utterance.lang = 'zh-TW';
+                    utterance.volume = 1;
+                    utterance.rate = 1;
+                    utterance.pitch = 1;
+                    
+                    // 立即播放语音
+                    speechSynthesis.speak(utterance);
+                }
+            }
+
+            // 重置计时器
+            function resetTimer() {
+                clearInterval(countdown);
+                isRunning = false;
+                totalSeconds = 120; // 重置为2分钟
+                duration = 0;
+                startTime = 0;
+                updateDisplay();
+                startBtn.textContent = '開始';
+                startBtn.disabled = false;
+                resetBtn.disabled = true;
+                
+                // 恢复橙子正常跳动
+                orange.style.animation = 'bounce 2s infinite alternate';
+            }
+
+            // 事件监听器
+            startBtn.addEventListener('click', toggleTimer);
+            resetBtn.addEventListener('click', resetTimer);
+
+            // 防止双击缩放
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(e) {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) e.preventDefault();
+                lastTouchEnd = now;
+            }, { passive: false });
+
+            // 初始化显示
+            updateDisplay();
+        });
+    </script>
+</body>
+</html>
