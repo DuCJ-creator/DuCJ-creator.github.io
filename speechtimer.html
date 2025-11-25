@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>114 CHHS 文化月英文演講比賽計時器</title>
+    <title>114 CHHS Culture Month English Speech Competition Timer</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'Helvetica Neue', 'Microsoft JhengHei', sans-serif;
+            font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
         
@@ -403,21 +403,21 @@
             <div class="timer-display" id="timerDisplay">02:00</div>
             
             <div class="control-buttons">
-                <button class="control-btn start-btn" id="startBtn">開始</button>
-                <button class="control-btn reset-btn" id="resetBtn" disabled>重置</button>
+                <button class="control-btn start-btn" id="startBtn">Start</button>
+                <button class="control-btn reset-btn" id="resetBtn" disabled>Reset</button>
             </div>
         </div>
         
         <div class="right-panel">
-            <div class="time-indicator">2 分鐘計時器</div>
+            <div class="time-indicator">2 Minute Timer</div>
         </div>
     </div>
     
-    <div class="notification" id="notification">時間到！</div>
+    <div class="notification" id="notification">Time's Up!</div>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 创建漂浮的橙子
+            // Create floating oranges
             const floatingOranges = document.getElementById('floatingOranges');
             for (let i = 0; i < 8; i++) {
                 const orange = document.createElement('div');
@@ -430,22 +430,22 @@
                 floatingOranges.appendChild(orange);
             }
             
-            // 获取DOM元素
+            // Get DOM elements
             const timerDisplay = document.getElementById('timerDisplay');
             const startBtn = document.getElementById('startBtn');
             const resetBtn = document.getElementById('resetBtn');
             const notification = document.getElementById('notification');
             const orange = document.querySelector('.orange');
             
-            // 计时器状态变量
+            // Timer state variables
             let countdown = null;
-            let totalSeconds = 120; // 默认2分钟
+            let totalSeconds = 120; // Default 2 minutes
             let isRunning = false;
             let startTime = 0;
             let duration = 0;
             let audioContext = null;
 
-            // 更新显示
+            // Update display
             function updateDisplay() {
                 const minutes = Math.floor(totalSeconds / 60);
                 const seconds = totalSeconds % 60;
@@ -453,14 +453,14 @@
                     `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
 
-            // 开始计时
+            // Start timer
             function startTimer() {
                 if (totalSeconds <= 0) return;
                 isRunning = true;
-                startBtn.textContent = '暫停';
+                startBtn.textContent = 'Pause';
                 resetBtn.disabled = false;
                 
-                // 开始橙子跳动动画
+                // Start orange bounce animation
                 orange.style.animation = 'bounce 0.5s infinite alternate';
                 
                 duration = totalSeconds * 1000;
@@ -468,7 +468,7 @@
                 runCountdown();
             }
 
-            // 运行倒计时
+            // Run countdown
             function runCountdown() {
                 countdown = setInterval(() => {
                     const elapsed = Date.now() - startTime;
@@ -483,22 +483,22 @@
                 }, 100);
             }
 
-            // 暂停计时
+            // Pause timer
             function pauseTimer() {
                 clearInterval(countdown);
                 isRunning = false;
-                startBtn.textContent = '繼續';
+                startBtn.textContent = 'Resume';
                 
-                // 暂停橙子跳动动画
+                // Slow down orange bounce animation
                 orange.style.animation = 'bounce 2s infinite alternate';
             }
 
-            // 恢复计时
+            // Resume timer
             function resumeTimer() {
                 isRunning = true;
-                startBtn.textContent = '暫停';
+                startBtn.textContent = 'Pause';
                 
-                // 恢复橙子跳动动画
+                // Speed up orange bounce animation
                 orange.style.animation = 'bounce 0.5s infinite alternate';
                 
                 const elapsed = Date.now() - (duration - totalSeconds * 1000);
@@ -506,7 +506,7 @@
                 runCountdown();
             }
 
-            // 切换计时器状态
+            // Toggle timer state
             function toggleTimer() {
                 if (!isRunning) {
                     if (totalSeconds > 0 && totalSeconds < duration / 1000) {
@@ -519,17 +519,17 @@
                 }
             }
 
-            // 计时完成
+            // Timer complete
             function timerComplete() {
                 isRunning = false;
-                startBtn.textContent = '開始';
+                startBtn.textContent = 'Start';
                 startBtn.disabled = true;
                 resetBtn.disabled = false;
                 
-                // 恢复橙子正常跳动
+                // Return orange to normal bounce
                 orange.style.animation = 'bounce 2s infinite alternate';
                 
-                // 同步显示通知和播放声音
+                // Show notification and play sound
                 notification.classList.add('show');
                 playAlarm();
                 
@@ -538,14 +538,14 @@
                 }, 4000);
             }
 
-            // 播放提醒声音
+            // Play alarm sound
             function playAlarm() {
-                // 创建音频上下文（如果不存在）
+                // Create audio context if not exists
                 if (!audioContext) {
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 }
                 
-                // 创建振荡器
+                // Create oscillator
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
                 
@@ -558,54 +558,54 @@
                 
                 oscillator.start();
                 
-                // 添加淡出效果
+                // Add fade out effect
                 setTimeout(() => {
                     gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
                 }, 300);
                 
-                // 停止振荡器
+                // Stop oscillator
                 setTimeout(() => {
                     oscillator.stop();
                 }, 800);
                 
-                // 语音提示
+                // Voice alert
                 if (window.speechSynthesis) {
-                    // 取消任何正在进行的语音
+                    // Cancel any ongoing speech
                     window.speechSynthesis.cancel();
                     
-                    // 创建新的语音
-                    const utterance = new SpeechSynthesisUtterance("時間到");
-                    utterance.lang = 'zh-TW';
+                    // Create new speech
+                    const utterance = new SpeechSynthesisUtterance("Time's up!");
+                    utterance.lang = 'en-US';
                     utterance.volume = 1;
                     utterance.rate = 1;
                     utterance.pitch = 1;
                     
-                    // 立即播放语音
+                    // Play speech immediately
                     speechSynthesis.speak(utterance);
                 }
             }
 
-            // 重置计时器
+            // Reset timer
             function resetTimer() {
                 clearInterval(countdown);
                 isRunning = false;
-                totalSeconds = 120; // 重置为2分钟
+                totalSeconds = 120; // Reset to 2 minutes
                 duration = 0;
                 startTime = 0;
                 updateDisplay();
-                startBtn.textContent = '開始';
+                startBtn.textContent = 'Start';
                 startBtn.disabled = false;
                 resetBtn.disabled = true;
                 
-                // 恢复橙子正常跳动
+                // Return orange to normal bounce
                 orange.style.animation = 'bounce 2s infinite alternate';
             }
 
-            // 事件监听器
+            // Event listeners
             startBtn.addEventListener('click', toggleTimer);
             resetBtn.addEventListener('click', resetTimer);
 
-            // 防止双击缩放
+            // Prevent double-tap zoom
             let lastTouchEnd = 0;
             document.addEventListener('touchend', function(e) {
                 const now = Date.now();
@@ -613,7 +613,7 @@
                 lastTouchEnd = now;
             }, { passive: false });
 
-            // 初始化显示
+            // Initialize display
             updateDisplay();
         });
     </script>
