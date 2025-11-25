@@ -30,11 +30,11 @@
             backdrop-filter: blur(10px);
             border-radius: 22px;
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-            padding: 24px;
+            padding: 20px;
             width: 100%;
             max-width: 780px;
             display: flex;
-            gap: 24px;
+            gap: 20px;
             border: 1px solid rgba(255, 255, 255, 0.5);
             position: relative;
             overflow: hidden;
@@ -56,41 +56,39 @@
             align-items: center;
         }
         
-        h1 {
-            color: #ff7b00;
-            margin-bottom: 20px;
-            font-weight: 600;
-            font-size: 2.0rem;
-            letter-spacing: 1px;
+        .header {
+            margin-bottom: 15px;
             text-align: center;
         }
         
-        .title-main {
-            font-size: 2.2rem;
+        .main-title {
+            font-size: 2.0rem;
             font-weight: 700;
-            margin-bottom: 8px;
             color: #ff7b00;
+            line-height: 1.2;
+            margin-bottom: 5px;
         }
         
-        .title-sub {
-            font-size: 1.5rem;
+        .sub-title {
+            font-size: 1.3rem;
             font-weight: 500;
             color: #ff7b00;
+            line-height: 1.1;
         }
         
         .timer-display {
             font-size: 3.8rem;
             font-weight: 700;
             color: #ff7b00;
-            margin: 16px 0;
+            margin: 12px 0;
             letter-spacing: 3px;
             font-variant-numeric: tabular-nums;
             text-align: center;
         }
         
         .orange-container {
-            height: 200px;
-            margin: 16px auto;
+            height: 180px;
+            margin: 12px auto;
             position: relative;
             display: flex;
             justify-content: center;
@@ -177,7 +175,7 @@
             padding: 10px 18px;
             font-size: 1.1rem;
             color: #ff7b00;
-            margin: 16px 0;
+            margin: 12px 0;
             min-width: 120px;
             text-align: center;
             box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
@@ -188,7 +186,7 @@
             display: flex;
             justify-content: center;
             gap: 14px;
-            margin-top: 20px;
+            margin-top: 15px;
         }
         
         .control-btn {
@@ -293,26 +291,26 @@
             .container {
                 flex-direction: column;
                 max-width: 480px;
-                padding: 20px;
+                padding: 18px;
                 gap: 16px;
             }
             
-            .title-main {
+            .main-title {
                 font-size: 1.8rem;
             }
             
-            .title-sub {
-                font-size: 1.3rem;
+            .sub-title {
+                font-size: 1.1rem;
             }
             
             .timer-display {
                 font-size: 3.3rem;
-                margin: 12px 0;
+                margin: 10px 0;
             }
             
             .orange-container {
-                height: 160px;
-                margin: 12px auto;
+                height: 150px;
+                margin: 10px auto;
             }
             
             .orange {
@@ -322,7 +320,7 @@
             
             .control-buttons {
                 gap: 12px;
-                margin-top: 16px;
+                margin-top: 12px;
             }
             
             .control-btn {
@@ -333,13 +331,20 @@
         
         @media (max-width: 480px) {
             .container {
-                padding: 16px;
+                padding: 15px;
                 gap: 12px;
             }
             
-            h1 {
-                font-size: 1.8rem;
-                margin-bottom: 16px;
+            .header {
+                margin-bottom: 10px;
+            }
+            
+            .main-title {
+                font-size: 1.6rem;
+            }
+            
+            .sub-title {
+                font-size: 1.0rem;
             }
             
             .timer-display {
@@ -347,7 +352,7 @@
             }
             
             .orange-container {
-                height: 140px;
+                height: 130px;
             }
             
             .orange {
@@ -381,11 +386,10 @@
     
     <div class="container">
         <div class="left-panel">
-            <h1>
-                <div class="title-main">114 CHHS Culture Month</div>
-                <div class="title-sub">English Speech Competition Timer</div>
-                <div class="title-sub">忠信文化月英文演講比賽計時器</div>
-            </h1>
+            <div class="header">
+                <div class="main-title">114 CHHS Culture Month</div>
+                <div class="sub-title">English Speech Competition Timer</div>
+            </div>
             
             <div class="orange-container">
                 <div class="orange">
