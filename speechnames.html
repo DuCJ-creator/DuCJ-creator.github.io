@@ -174,6 +174,17 @@
             text-align: center;
         }
         
+        .highlighted-name-line1 {
+            display: block;
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .highlighted-name-line2 {
+            display: block;
+            font-size: 3rem;
+        }
+        
         @keyframes highlight-pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.08); }
@@ -371,6 +382,14 @@
                 padding: 15px;
             }
             
+            .highlighted-name-line1 {
+                font-size: 2.2rem;
+            }
+            
+            .highlighted-name-line2 {
+                font-size: 1.8rem;
+            }
+            
             .participants-grid {
                 grid-template-columns: 1fr;
             }
@@ -411,6 +430,14 @@
                 padding: 12px;
             }
             
+            .highlighted-name-line1 {
+                font-size: 1.6rem;
+            }
+            
+            .highlighted-name-line2 {
+                font-size: 1.3rem;
+            }
+            
             .participant-item {
                 font-size: 14px;
                 padding: 10px;
@@ -444,35 +471,35 @@
         <div class="participants-section">
             <div class="section-title"> Staff</div>
             <div class="participants-grid">
-                <div class="participant-item" data-name="Hostess: Shirley Du">
+                <div class="participant-item" data-name="Hostess: Shirley Du" data-line1="Hostess" data-line2="Shirley Du">
                     <span class="participant-number">H</span>
                     <div class="participant-info">
                         <div class="participant-id">Hostess</div>
                         <div class="participant-name">Shirley Du</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="Coordinator: Angela Ou">
+                <div class="participant-item" data-name="Coordinator: Angela Ou" data-line1="Coordinator" data-line2="Angela Ou">
                     <span class="participant-number">C</span>
                     <div class="participant-info">
                         <div class="participant-id">Coordinator</div>
                         <div class="participant-name">Angela Ou</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="Judge: Rafe Walters">
+                <div class="participant-item" data-name="Judge: Rafe Walters" data-line1="Judge" data-line2="Rafe Walters">
                     <span class="participant-number">J</span>
                     <div class="participant-info">
                         <div class="participant-id">Judge</div>
                         <div class="participant-name">Rafe Walters</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="Judge: Miguel Ruiz">
+                <div class="participant-item" data-name="Judge: Miguel Ruiz" data-line1="Judge" data-line2="Miguel Ruiz">
                     <span class="participant-number">J</span>
                     <div class="participant-info">
                         <div class="participant-id">Judge</div>
                         <div class="participant-name">Miguel Ruiz</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="Judge: Sean Kao">
+                <div class="participant-item" data-name="Judge: Sean Kao" data-line1="Judge" data-line2="Sean Kao">
                     <span class="participant-number">J</span>
                     <div class="participant-info">
                         <div class="participant-id">Judge</div>
@@ -486,140 +513,140 @@
         <div class="participants-section">
             <div class="section-title"> Participants</div>
             <div class="participants-grid">
-                <div class="participant-item" data-name="2030MSa23曾韋程Kevin">
+                <div class="participant-item" data-name="2030MSa23曾韋程Kevin" data-line1="2030MSa23 曾韋程" data-line2="Kevin">
                     <span class="participant-number">1</span>
                     <div class="participant-info">
                         <div class="participant-id">2030MSa23</div>
                         <div class="participant-name">曾韋程 Kevin</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2031MSb7林采緹Eeyore">
+                <div class="participant-item" data-name="2031MSb7林采緹Eeyore" data-line1="2031MSb7 林采緹" data-line2="Eeyore">
                     <span class="participant-number">2</span>
                     <div class="participant-info">
                         <div class="participant-id">2031MSb7</div>
                         <div class="participant-name">林采緹 Eeyore</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2030MSb22陳亮杰Jerald">
+                <div class="participant-item" data-name="2030MSb22陳亮杰Jerald" data-line1="2030MSb22 陳亮杰" data-line2="Jerald">
                     <span class="participant-number">3</span>
                     <div class="participant-info">
                         <div class="participant-id">2030MSb22</div>
                         <div class="participant-name">陳亮杰 Jerald</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2029MSa12陳咏彤Nina">
+                <div class="participant-item" data-name="2029MSa12陳咏彤Nina" data-line1="2029MSa12 陳咏彤" data-line2="Nina">
                     <span class="participant-number">4</span>
                     <div class="participant-info">
                         <div class="participant-id">2029MSa12</div>
                         <div class="participant-name">陳咏彤 Nina</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2031MSa19陳宥羽Yoyo">
+                <div class="participant-item" data-name="2031MSa19陳宥羽Yoyo" data-line1="2031MSa19 陳宥羽" data-line2="Yoyo">
                     <span class="participant-number">5</span>
                     <div class="participant-info">
                         <div class="participant-id">2031MSa19</div>
                         <div class="participant-name">陳宥羽 Yoyo</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2029MSb23陳泑臻Reese">
+                <div class="participant-item" data-name="2029MSb23陳泑臻Reese" data-line1="2029MSb23 陳泑臻" data-line2="Reese">
                     <span class="participant-number">6</span>
                     <div class="participant-info">
                         <div class="participant-id">2029MSb23</div>
                         <div class="participant-name">陳泑臻 Reese</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2028TCLIPb15許庭睿Timothy">
+                <div class="participant-item" data-name="2028TCLIPb15許庭睿Timothy" data-line1="2028TCLIPb15 許庭睿" data-line2="Timothy">
                     <span class="participant-number">7</span>
                     <div class="participant-info">
                         <div class="participant-id">2028TCLIPb15</div>
                         <div class="participant-name">許庭睿 Timothy</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2027ZCb10林子傑">
+                <div class="participant-item" data-name="2027ZCb10林子傑" data-line1="2027ZCb10 林子傑" data-line2="">
                     <span class="participant-number">8</span>
                     <div class="participant-info">
                         <div class="participant-id">2027ZCb10</div>
                         <div class="participant-name">林子傑</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2026GGa22許萓庭Sherry">
+                <div class="participant-item" data-name="2026GGa22許萓庭Sherry" data-line1="2026GGa22 許萓庭" data-line2="Sherry">
                     <span class="participant-number">9</span>
                     <div class="participant-info">
                         <div class="participant-id">2026GGa22</div>
                         <div class="participant-name">許萓庭 Sherry</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2026ZCb30鍾承恩Ryan">
+                <div class="participant-item" data-name="2026ZCb30鍾承恩Ryan" data-line1="2026ZCb30 鍾承恩" data-line2="Ryan">
                     <span class="participant-number">10</span>
                     <div class="participant-info">
                         <div class="participant-id">2026ZCb30</div>
                         <div class="participant-name">鍾承恩 Ryan</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2028TCLIPc8林歆恬Cynthia">
+                <div class="participant-item" data-name="2028TCLIPc8林歆恬Cynthia" data-line1="2028TCLIPc8 林歆恬" data-line2="Cynthia">
                     <span class="participant-number">11</span>
                     <div class="participant-info">
                         <div class="participant-id">2028TCLIPc8</div>
                         <div class="participant-name">林歆恬 Cynthia</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2027ZCa6范彙暄Anne">
+                <div class="participant-item" data-name="2027ZCa6范彙暄Anne" data-line1="2027ZCa6 范彙暄" data-line2="Anne">
                     <span class="participant-number">12</span>
                     <div class="participant-info">
                         <div class="participant-id">2027ZCa6</div>
                         <div class="participant-name">范彙暄 Anne</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2028ZCa35蔡秉志">
+                <div class="participant-item" data-name="2028ZCa35蔡秉志" data-line1="2028ZCa35 蔡秉志" data-line2="">
                     <span class="participant-number">13</span>
                     <div class="participant-info">
                         <div class="participant-id">2028ZCa35</div>
                         <div class="participant-name">蔡秉志</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2027TCLIPa1余秉翰Benjamin">
+                <div class="participant-item" data-name="2027TCLIPa1余秉翰Benjamin" data-line1="2027TCLIPa1 余秉翰" data-line2="Benjamin">
                     <span class="participant-number">14</span>
                     <div class="participant-info">
                         <div class="participant-id">2027TCLIPa1</div>
                         <div class="participant-name">余秉翰 Benjamin</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2027GGa4古湘翎Kiki">
+                <div class="participant-item" data-name="2027GGa4古湘翎Kiki" data-line1="2027GGa4 古湘翎" data-line2="Kiki">
                     <span class="participant-number">15</span>
                     <div class="participant-info">
                         <div class="participant-id">2027GGa4</div>
                         <div class="participant-name">古湘翎 Kiki</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2028TCLIPa7吳芷萱Alice">
+                <div class="participant-item" data-name="2028TCLIPa7吳芷萱Alice" data-line1="2028TCLIPa7 吳芷萱" data-line2="Alice">
                     <span class="participant-number">16</span>
                     <div class="participant-info">
                         <div class="participant-id">2028TCLIPa7</div>
                         <div class="participant-name">吳芷萱 Alice</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2028GGa19葉向恩Sean">
+                <div class="participant-item" data-name="2028GGa19葉向恩Sean" data-line1="2028GGa19 葉向恩" data-line2="Sean">
                     <span class="participant-number">17</span>
                     <div class="participant-info">
                         <div class="participant-id">2028GGa19</div>
                         <div class="participant-name">葉向恩 Sean</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2027TCLIPb20劉穎妍Flora">
+                <div class="participant-item" data-name="2027TCLIPb20劉穎妍Flora" data-line1="2027TCLIPb20 劉穎妍" data-line2="Flora">
                     <span class="participant-number">18</span>
                     <div class="participant-info">
                         <div class="participant-id">2027TCLIPb20</div>
                         <div class="participant-name">劉穎妍 Flora</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="2027TCLIPc15林巽宇Gary">
+                <div class="participant-item" data-name="2027TCLIPc15林巽宇Gary" data-line1="2027TCLIPc15 林巽宇" data-line2="Gary">
                     <span class="participant-number">19</span>
                     <div class="participant-info">
                         <div class="participant-id">2027TCLIPc15</div>
                         <div class="participant-name">林巽宇 Gary</div>
                     </div>
                 </div>
-                <div class="participant-item" data-name="Commentators">
+                <div class="participant-item" data-name="Commentators" data-line1="Commentators" data-line2="">
                     <span class="participant-number">20</span>
                     <div class="participant-info">
                         <div class="participant-id">Commentators</div>
@@ -654,31 +681,31 @@
 
             // 所有參與者名單（用於輪播）
             const allParticipants = [
-                "Hostess: Shirley Du",
-                "Coordinator: Angela Ou", 
-                "Judge: Rafe Walters",
-                "Judge: Miguel Ruiz",
-                "Judge: Sean Kao",
-                "2030MSa23曾韋程Kevin",
-                "2031MSb7林采緹Eeyore",
-                "2030MSb22陳亮杰Jerald",
-                "2029MSa12陳咏彤Nina",
-                "2031MSa19陳宥羽Yoyo",
-                "2029MSb23陳泑臻Reese",
-                "2028TCLIPb15許庭睿Timothy",
-                "2027ZCb10林子傑",
-                "2026GGa22許萓庭Sherry",
-                "2026ZCb30鍾承恩Ryan",
-                "2028TCLIPc8林歆恬Cynthia",
-                "2027ZCa6范彙暄Anne",
-                "2028ZCa35蔡秉志",
-                "2027TCLIPa1余秉翰Benjamin",
-                "2027GGa4古湘翎Kiki",
-                "2028TCLIPa7吳芷萱Alice",
-                "2028GGa19葉向恩Sean",
-                "2027TCLIPb20劉穎妍Flora",
-                "2027TCLIPc15林巽宇Gary",
-                "Commentators"
+                {name: "Hostess: Shirley Du", line1: "Hostess", line2: "Shirley Du"},
+                {name: "Coordinator: Angela Ou", line1: "Coordinator", line2: "Angela Ou"}, 
+                {name: "Judge: Rafe Walters", line1: "Judge", line2: "Rafe Walters"},
+                {name: "Judge: Miguel Ruiz", line1: "Judge", line2: "Miguel Ruiz"},
+                {name: "Judge: Sean Kao", line1: "Judge", line2: "Sean Kao"},
+                {name: "2030MSa23曾韋程Kevin", line1: "2030MSa23 曾韋程", line2: "Kevin"},
+                {name: "2031MSb7林采緹Eeyore", line1: "2031MSb7 林采緹", line2: "Eeyore"},
+                {name: "2030MSb22陳亮杰Jerald", line1: "2030MSb22 陳亮杰", line2: "Jerald"},
+                {name: "2029MSa12陳咏彤Nina", line1: "2029MSa12 陳咏彤", line2: "Nina"},
+                {name: "2031MSa19陳宥羽Yoyo", line1: "2031MSa19 陳宥羽", line2: "Yoyo"},
+                {name: "2029MSb23陳泑臻Reese", line1: "2029MSb23 陳泑臻", line2: "Reese"},
+                {name: "2028TCLIPb15許庭睿Timothy", line1: "2028TCLIPb15 許庭睿", line2: "Timothy"},
+                {name: "2027ZCb10林子傑", line1: "2027ZCb10 林子傑", line2: ""},
+                {name: "2026GGa22許萓庭Sherry", line1: "2026GGa22 許萓庭", line2: "Sherry"},
+                {name: "2026ZCb30鍾承恩Ryan", line1: "2026ZCb30 鍾承恩", line2: "Ryan"},
+                {name: "2028TCLIPc8林歆恬Cynthia", line1: "2028TCLIPc8 林歆恬", line2: "Cynthia"},
+                {name: "2027ZCa6范彙暄Anne", line1: "2027ZCa6 范彙暄", line2: "Anne"},
+                {name: "2028ZCa35蔡秉志", line1: "2028ZCa35 蔡秉志", line2: ""},
+                {name: "2027TCLIPa1余秉翰Benjamin", line1: "2027TCLIPa1 余秉翰", line2: "Benjamin"},
+                {name: "2027GGa4古湘翎Kiki", line1: "2027GGa4 古湘翎", line2: "Kiki"},
+                {name: "2028TCLIPa7吳芷萱Alice", line1: "2028TCLIPa7 吳芷萱", line2: "Alice"},
+                {name: "2028GGa19葉向恩Sean", line1: "2028GGa19 葉向恩", line2: "Sean"},
+                {name: "2027TCLIPb20劉穎妍Flora", line1: "2027TCLIPb20 劉穎妍", line2: "Flora"},
+                {name: "2027TCLIPc15林巽宇Gary", line1: "2027TCLIPc15 林巽宇", line2: "Gary"},
+                {name: "Commentators", line1: "Commentators", line2: ""}
             ];
             
             let currentParticipantIndex = 0;
@@ -687,9 +714,11 @@
             document.querySelectorAll('.participant-item').forEach(item => {
                 item.addEventListener('click', function() {
                     const name = this.getAttribute('data-name');
-                    highlightParticipant(name);
+                    const line1 = this.getAttribute('data-line1');
+                    const line2 = this.getAttribute('data-line2');
+                    highlightParticipant(name, line1, line2);
                     // 找到當前點擊的參與者在列表中的索引
-                    currentParticipantIndex = allParticipants.indexOf(name);
+                    currentParticipantIndex = allParticipants.findIndex(p => p.name === name);
                 });
             });
             
@@ -711,9 +740,12 @@
             });
             
             // 高亮顯示
-            function highlightParticipant(name) {
+            function highlightParticipant(name, line1, line2) {
                 let html = `
-                    <div class="highlighted-name">${name}</div>
+                    <div class="highlighted-name">
+                        <span class="highlighted-name-line1">${line1}</span>
+                        ${line2 ? `<span class="highlighted-name-line2">${line2}</span>` : ''}
+                    </div>
                     <button class="next-btn" id="next-participant-btn">下一位 Next</button>
                 `;
                 
@@ -733,7 +765,8 @@
                 if (currentParticipantIndex >= allParticipants.length) {
                     currentParticipantIndex = 0;
                 }
-                highlightParticipant(allParticipants[currentParticipantIndex]);
+                const participant = allParticipants[currentParticipantIndex];
+                highlightParticipant(participant.name, participant.line1, participant.line2);
             }
             
             // 五彩紙屑
