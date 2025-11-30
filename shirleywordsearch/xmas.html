@@ -130,6 +130,7 @@
             border: 2px dashed var(--xmas-green);
         }
 
+        /* ✅ 確保網格是 11x11 */
         .word-grid {
             display: grid;
             grid-template-columns: repeat(11, 40px);
@@ -318,7 +319,7 @@
         <div class="word-list-container">
             <h3 class="word-list-title">Hidden Words</h3>
             <div class="word-list" id="word-list"></div>
-            <div class="stats">Found: <span id="found-count">0</span> / 9</div>
+            <div class="stats">Found: <span id="found-count">0</span> / 11</div>
         </div>
 
         <div class="controls">
@@ -336,8 +337,9 @@
     </div>
 
     <script>
-        // ✅ 你的 9 個單字
-        const words = ["Christmas", "snowflake", "reindeer", "stocking", "wreath", "candle", "tinsel", "sleigh", "Santa"];
+        // ✅ 已加入 chimney 和 mistletoe，共 11 個單字
+        const words = ["Christmas", "snowflake", "reindeer", "stocking", "wreath", "candle", "tinsel", "sleigh", "Santa", "chimney", "mistletoe"];
+        // ✅ 保持 11x11 大小
         const SIZE = 11;
         const CELL = 40; // 與 CSS .cell width 保持一致
         // 增加 CSS gap (4px) 到計算中
@@ -532,7 +534,6 @@
                     if (found.size === words.length) {
                         setTimeout(() => {
                             document.getElementById('win-modal').style.display = 'flex';
-                            // createConfetti(); // 移除未定義的函式調用
                         }, 300);
                     }
                 }
@@ -587,7 +588,6 @@
             }
         }
 
-        // ✅ 已修正邏輯：直接跳轉到你的網址
         document.getElementById('back-btn').onclick = () => {
             window.location.href = "https://ducj-creator.github.io/Teacher-Shirley/";
         };
