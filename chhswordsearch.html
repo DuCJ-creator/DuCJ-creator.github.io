@@ -3,8 +3,18 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Halloween Word Search</title>
+    <title>Christmas Word Search</title>
+    <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Varela+Round&display=swap" rel="stylesheet">
+    
     <style>
+        :root {
+            --xmas-red: #D42426;
+            --xmas-green: #165B33;
+            --xmas-gold: #F8B229;
+            --snow-white: #ffffff;
+            --bg-color: #f0f4f8;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -14,70 +24,119 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-            background: linear-gradient(135deg, #fff9f0 0%, #ffe0b2 100%);
+            font-family: 'Varela Round', sans-serif;
+            background-color: #2c3e50; /* 夜晚的顏色 */
+            background-image: linear-gradient(to bottom, #2c3e50, #4ca1af);
             padding: 16px;
             min-height: 100vh;
             overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* 雪花背景動畫 */
+        .snow-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background-image: 
+                radial-gradient(4px 4px at 100px 50px, #fff, transparent), 
+                radial-gradient(6px 6px at 200px 150px, #fff, transparent), 
+                radial-gradient(3px 3px at 300px 250px, #fff, transparent);
+            background-size: 650px 650px;
+            animation: snow 10s linear infinite;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        @keyframes snow {
+            0% { background-position: 0 0, 0 0, 0 0; }
+            100% { background-position: 500px 1000px, 400px 400px, 300px 300px; }
         }
 
         .container {
+            position: relative;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 24px 20px;
+            max-width: 500px;
+            width: 100%;
+            margin-top: 20px;
+            border: 4px solid var(--xmas-red);
+            z-index: 1;
+        }
+
+        /* 裝飾性頂部 */
+        .container::before {
+            content: '❄️';
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            font-size: 30px;
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-            padding: 20px;
-            max-width: 100%;
-            margin: 0 auto;
+            border-radius: 50%;
+            padding: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .container::after {
+            content: '🎅';
+            position: absolute;
+            top: -20px;
+            right: 20px;
+            font-size: 30px;
+            background: white;
+            border-radius: 50%;
+            padding: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         header h1 {
-            color: #e65100;
+            font-family: 'Mountains of Christmas', cursive;
+            color: var(--xmas-red);
             text-align: center;
-            font-size: 1.5rem;
-            margin: 0 0 12px;
+            font-size: 2.2rem;
+            margin: 0 0 8px;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
         }
 
         .instructions {
             text-align: center;
-            color: #5d4037;
-            font-size: 0.95rem;
+            color: #666;
+            font-size: 0.9rem;
             margin-bottom: 20px;
+            background: #fff3cd;
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            width: fit-content;
         }
 
-        /* ✅ 11x11 網格：可水平滾動 */
         .grid-container {
             width: 100%;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            background: #fdf6e3;
-            padding: 12px 8px;
-            border-radius: 12px;
+            background: #e8f5e9; /* 淺綠底 */
+            padding: 10px;
+            border-radius: 16px;
             margin-bottom: 24px;
-            position: relative;
-        }
-
-        /* 滾動提示 */
-        .grid-container::after {
-            content: '';
-            position: sticky;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            width: 28px;
-            background: linear-gradient(to right, transparent, #fdf6e3);
-            pointer-events: none;
-            z-index: 2;
+            border: 2px dashed var(--xmas-green);
         }
 
         .word-grid {
             display: grid;
             grid-template-columns: repeat(11, 40px);
             grid-template-rows: repeat(11, 40px);
-            gap: 2px;
-            background: #bcaaa4;
-            border: 2px solid #8d6e63;
+            gap: 4px;
+            margin: 0 auto;
             width: fit-content;
-            min-width: 100%;
         }
 
         .cell {
@@ -87,53 +146,88 @@
             align-items: center;
             justify-content: center;
             background: white;
-            font-family: "Times New Roman", serif;
+            border-radius: 8px;
             font-size: 18px;
             font-weight: bold;
+            color: #444;
             user-select: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.2s;
         }
 
-        .cell.selected { background-color: #c8e6c9; }
-        .cell.found { background-color: #81d4fa; color: #01579b; }
+        /* 選中狀態 - 金色光芒 */
+        .cell.selected { 
+            background-color: var(--xmas-gold); 
+            color: #fff;
+            transform: scale(1.1);
+            z-index: 10;
+            box-shadow: 0 0 10px var(--xmas-gold);
+        }
+
+        /* 找到狀態 - 聖誕綠 */
+        .cell.found { 
+            background-color: var(--xmas-green); 
+            color: white;
+            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
 
         .word-list-container {
-            background: #fdf6e3;
-            padding: 16px;
-            border-radius: 12px;
+            background: #fff;
+            padding: 0;
             margin-bottom: 20px;
         }
 
         .word-list-title {
             text-align: center;
-            color: #e65100;
+            color: var(--xmas-green);
             margin: 0 0 14px;
-            font-size: 1.25rem;
+            font-size: 1.2rem;
+            font-family: 'Mountains of Christmas', cursive;
+            font-weight: bold;
+            letter-spacing: 1px;
         }
 
         .word-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
         }
 
         .word-item {
-            padding: 10px 0;
+            padding: 6px 12px;
             text-align: center;
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 1rem;
+            background: #f0f0f0;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #555;
+            transition: all 0.3s;
+            border: 1px solid transparent;
         }
 
         .word-item.found {
-            background: linear-gradient(135deg, #b3e5fc, #81d4fa);
-            color: #01579b;
+            background: var(--xmas-red);
+            color: white;
+            text-decoration: line-through;
+            opacity: 0.8;
+            transform: scale(0.95);
         }
 
         .stats {
             text-align: center;
-            margin: 14px 0;
-            color: #d84315;
+            margin: 14px 0 0;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        #found-count {
+            color: var(--xmas-red);
             font-weight: bold;
             font-size: 1.1rem;
         }
@@ -141,34 +235,80 @@
         .controls {
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
             margin-top: 10px;
         }
 
         button {
             padding: 14px;
-            background: #ff7043;
-            color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 50px; /* 藥丸形狀 */
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1rem;
             width: 100%;
-            max-width: 300px;
-            margin: 0 auto;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            font-family: 'Varela Round', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        /* 返回按鈕樣式 */
-        #back-btn {
-            background: #78909c;
+        button:active {
+            transform: translateY(2px);
+            box-shadow: none;
         }
+
+        #reset-btn {
+            background: var(--xmas-green);
+            color: white;
+            box-shadow: 0 4px 0 #0e3d22;
+        }
+
+        #back-btn {
+            background: #90A4AE;
+            color: white;
+            box-shadow: 0 4px 0 #607D8B;
+        }
+        
+        /* Modal for Win */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            border: 4px solid var(--xmas-gold);
+            animation: pop 0.5s;
+        }
+        .modal h2 { font-family: 'Mountains of Christmas', cursive; color: var(--xmas-red); font-size: 2rem; margin-bottom: 10px; }
+        .modal p { margin-bottom: 20px; font-size: 1.2rem; }
+        .close-modal {
+            background: var(--xmas-red);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            font-size: 1rem;
+        }
+
     </style>
 </head>
 <body>
+    <div class="snow-bg"></div>
+
     <div class="container">
         <header>
-            <h1>🎃 Halloween Word Search</h1>
-            <p class="instructions">Touch and drag to find words in any direction!</p>
+            <h1>🎄 Shirley's Xmas Word Search</h1>
+            <p class="instructions">Drag across letters to find words!</p>
         </header>
 
         <div class="grid-container">
@@ -176,23 +316,32 @@
         </div>
 
         <div class="word-list-container">
-            <h3 class="word-list-title">Find These Words (9)</h3>
+            <h3 class="word-list-title">Hidden Words</h3>
             <div class="word-list" id="word-list"></div>
             <div class="stats">Found: <span id="found-count">0</span> / 9</div>
         </div>
 
         <div class="controls">
-            <button id="reset-btn">Reset Game</button>
-            <!-- ✅ 返回按鈕：請替換 YOUR_GOOGLE_SITE_URL -->
-            <button id="back-btn">Back to Google Site</button>
+            <button id="reset-btn">🔄 New Game</button>
+            <button id="back-btn">🔙 Back to Site</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="win-modal">
+        <div class="modal">
+            <h2>🎉 Merry Christmas!</h2>
+            <p>You found all the words!</p>
+            <button class="close-modal" onclick="closeModal()">Play Again</button>
         </div>
     </div>
 
     <script>
         // ✅ 你的 9 個單字
-        const words = ["ghost", "pumpkin", "witch", "vampire", "candy", "costume", "trick", "treat", "skeleton"];
+        const words = ["Christmas", "snowflake", "reindeer", "stocking", "wreath", "candle", "tinsel", "sleigh", "Santa"];
         const SIZE = 11;
-        const CELL = 40;
+        const CELL = 40; // 與 CSS .cell width 保持一致
+        // 增加 CSS gap (4px) 到計算中
+        const GAP = 4; 
         const DIRS = [[0,1],[1,0],[0,-1],[-1,0],[1,1],[1,-1],[-1,-1],[-1,1]];
         let grid = Array(SIZE).fill().map(() => Array(SIZE).fill(''));
         let wordPos = {};
@@ -214,10 +363,11 @@
                     }
                 }
             }
-            const letters = 'aaaaaaaaaabbcccddeeeeeeeeeeeeffgghhiiiiiiijkllllmmnnnnnnooooooooppqrrrrrrssssssttttttttuuuuvvwxyyz';
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             for (let i = 0; i < SIZE; i++) {
                 for (let j = 0; j < SIZE; j++) {
                     if (grid[i][j] === '') grid[i][j] = letters[Math.floor(Math.random() * letters.length)];
+                    else grid[i][j] = grid[i][j].toUpperCase();
                 }
             }
         }
@@ -227,18 +377,19 @@
                 const nr = r + dr * i;
                 const nc = c + dc * i;
                 if (nr < 0 || nr >= SIZE || nc < 0 || nc >= SIZE) return false;
-                if (grid[nr][nc] !== '' && grid[nr][nc] !== word[i]) return false;
+                if (grid[nr][nc] !== '' && grid[nr][nc].toUpperCase() !== word[i].toUpperCase()) return false;
             }
             return true;
         }
 
         function doPlace(word, r, c, [dr, dc]) {
-            wordPos[word] = [];
+            const upWord = word.toUpperCase();
+            wordPos[upWord] = [];
             for (let i = 0; i < word.length; i++) {
                 const nr = r + dr * i;
                 const nc = c + dc * i;
-                grid[nr][nc] = word[i];
-                wordPos[word].push({r: nr, c: nc});
+                grid[nr][nc] = upWord[i];
+                wordPos[upWord].push({r: nr, c: nc});
             }
         }
 
@@ -262,9 +413,11 @@
             const el = document.getElementById('word-list');
             el.innerHTML = '';
             words.forEach(word => {
+                const upWord = word.toUpperCase();
                 const item = document.createElement('div');
-                item.className = 'word-item' + (found.has(word) ? ' found' : '');
-                item.textContent = word;
+                item.className = 'word-item' + (found.has(upWord) ? ' found' : '');
+                item.textContent = word; // 顯示原始大小寫
+                item.dataset.word = upWord;
                 el.appendChild(item);
             });
         }
@@ -280,19 +433,19 @@
             document.getElementById('found-count').textContent = found.size;
         }
 
-        // 觸控邏輯
+        // 觸控邏輯優化
         let isSelecting = false;
         let startCell = null;
 
         function getCell(x, y) {
-            const container = document.querySelector('.grid-container');
-            const gridRect = document.querySelector('.word-grid').getBoundingClientRect();
-            const scrollLeft = container.scrollLeft;
-            const adjX = x + scrollLeft;
-            if (adjX < gridRect.left || adjX > gridRect.right || y < gridRect.top || y > gridRect.bottom) return null;
-            const col = Math.floor((adjX - gridRect.left) / CELL);
-            const row = Math.floor((y - gridRect.top) / CELL);
-            if (row >= 0 && row < SIZE && col >= 0 && col < SIZE) return {r: row, c: col};
+            // 使用 elementFromPoint 更精確地獲取元素，不受滾動影響
+            const el = document.elementFromPoint(x, y);
+            if (el && el.classList.contains('cell')) {
+                return {
+                    r: parseInt(el.dataset.r),
+                    c: parseInt(el.dataset.c)
+                };
+            }
             return null;
         }
 
@@ -302,6 +455,10 @@
             const dc = to.c - from.c;
             const steps = Math.max(Math.abs(dr), Math.abs(dc));
             if (steps === 0) return [from];
+            
+            // 強制只能走 8 個方向 (0, 45, 90 度等)
+            if (Math.abs(dr) !== Math.abs(dc) && dr !== 0 && dc !== 0) return null;
+
             const sr = dr === 0 ? 0 : dr > 0 ? 1 : -1;
             const sc = dc === 0 ? 0 : dc > 0 ? 1 : -1;
             let r = from.r, c = from.c;
@@ -316,66 +473,99 @@
 
         const gridEl = document.getElementById('word-grid');
 
-        gridEl.addEventListener('touchstart', e => {
-            e.preventDefault();
-            if (isSelecting) return;
-            const touch = e.touches[0];
-            const cell = getCell(touch.clientX, touch.clientY);
+        // 通用事件處理 (支援 Touch 和 Mouse)
+        const handleStart = (x, y) => {
+            const cell = getCell(x, y);
             if (!cell) return;
             const el = document.querySelector(`.cell[data-r="${cell.r}"][data-c="${cell.c}"]`);
             if (!el || el.classList.contains('found')) return;
             isSelecting = true;
             startCell = cell;
             el.classList.add('selected');
-        }, { passive: false });
+        };
 
-        gridEl.addEventListener('touchmove', e => {
+        const handleMove = (x, y) => {
             if (!isSelecting) return;
-            e.preventDefault();
-            const touch = e.touches[0];
-            const cell = getCell(touch.clientX, touch.clientY);
+            const cell = getCell(x, y);
             if (!cell) return;
-            const path = getLine(startCell, cell);
+            
+            // 清除之前的預覽
             document.querySelectorAll('.cell.selected').forEach(el => el.classList.remove('selected'));
-            path.forEach(({r, c}) => {
-                const el = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
-                if (el && !el.classList.contains('found')) el.classList.add('selected');
-            });
-        }, { passive: false });
+            
+            // 重新繪製線條
+            const path = getLine(startCell, cell);
+            if (path) {
+                path.forEach(({r, c}) => {
+                    const el = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+                    if (el && !el.classList.contains('found')) el.classList.add('selected');
+                });
+            } else {
+                // 如果不是直線，只高亮起始點
+                const el = document.querySelector(`.cell[data-r="${startCell.r}"][data-c="${startCell.c}"]`);
+                if(el) el.classList.add('selected');
+            }
+        };
 
-        gridEl.addEventListener('touchend', e => {
-            e.preventDefault();
+        const handleEnd = () => {
             if (!isSelecting) return;
             const selected = Array.from(document.querySelectorAll('.cell.selected'));
             if (selected.length >= 2) {
                 const str = selected.map(el => el.textContent).join('');
                 const rev = str.split('').reverse().join('');
                 let foundWord = null;
+                
+                // 檢查是否匹配 (轉大寫比較)
                 for (const word of words) {
-                    if (!found.has(word) && (word === str || word === rev)) {
-                        foundWord = word;
+                    const up = word.toUpperCase();
+                    if (!found.has(up) && (up === str || up === rev)) {
+                        foundWord = up;
                         break;
                     }
                 }
+
                 if (foundWord) {
                     found.add(foundWord);
-                    selected.forEach(el => {
-                        el.classList.remove('selected');
-                        el.classList.add('found');
-                    });
-                    updateFound();
-                    renderWordList();
+                    // 視覺更新
+                    renderWordList(); // 更新列表刪除線
+                    updateFound();    // 更新格子顏色
+                    
                     if (found.size === words.length) {
-                        setTimeout(() => alert('🎉 You found all words!'), 100);
+                        setTimeout(() => {
+                            document.getElementById('win-modal').style.display = 'flex';
+                            createConfetti();
+                        }, 300);
                     }
-                } else {
-                    selected.forEach(el => el.classList.remove('selected'));
                 }
-            } else {
-                document.querySelectorAll('.cell.selected').forEach(el => el.classList.remove('selected'));
             }
+            // 清除選取狀態
+            document.querySelectorAll('.cell.selected').forEach(el => el.classList.remove('selected'));
             isSelecting = false;
+        };
+
+        // Touch Events
+        gridEl.addEventListener('touchstart', e => {
+            e.preventDefault();
+            handleStart(e.touches[0].clientX, e.touches[0].clientY);
         }, { passive: false });
+
+        gridEl.addEventListener('touchmove', e => {
+            e.preventDefault();
+            handleMove(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: false });
+
+        gridEl.addEventListener('touchend', e => {
+            e.preventDefault();
+            handleEnd();
+        });
+
+        // Mouse Events (為了方便在電腦測試)
+        gridEl.addEventListener('mousedown', e => {
+            handleStart(e.clientX, e.clientY);
+        });
+        window.addEventListener('mousemove', e => {
+            handleMove(e.clientX, e.clientY);
+        });
+        window.addEventListener('mouseup', handleEnd);
 
         // 按鈕功能
         document.getElementById('reset-btn').onclick = () => {
@@ -383,11 +573,22 @@
             placeWords();
             renderGrid();
             renderWordList();
+            closeModal();
         };
 
-        // ✅ 返回按鈕：請替換 YOUR_GOOGLE_SITE_URL 為你的 Google Site 網址
+        function closeModal() {
+            document.getElementById('win-modal').style.display = 'none';
+            if (found.size === words.length) {
+                // 如果是點 Play Again
+                found.clear();
+                placeWords();
+                renderGrid();
+                renderWordList();
+            }
+        }
+
         document.getElementById('back-btn').onclick = () => {
-            const siteUrl = "YOUR_GOOGLE_SITE_URL"; // ← ← ← 在這裡填入你的 Google Site 網址
+            const siteUrl = "YOUR_GOOGLE_SITE_URL"; // 請在此填入
             if (siteUrl && siteUrl !== "YOUR_GOOGLE_SITE_URL") {
                 window.location.href = siteUrl;
             } else {
