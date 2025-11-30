@@ -532,7 +532,7 @@
                     if (found.size === words.length) {
                         setTimeout(() => {
                             document.getElementById('win-modal').style.display = 'flex';
-                            createConfetti();
+                            // createConfetti(); // 移除未定義的函式調用
                         }, 300);
                     }
                 }
@@ -587,13 +587,9 @@
             }
         }
 
+        // ✅ 已修正邏輯：直接跳轉到你的網址
         document.getElementById('back-btn').onclick = () => {
-            const siteUrl = "https://ducj-creator.github.io/Teacher-Shirley/"; // 請在此填入
-            if (siteUrl && siteUrl !== "https://ducj-creator.github.io/Teacher-Shirley/") {
-                window.location.href = siteUrl;
-            } else {
-                alert("Please update the Google Site URL in the HTML code.");
-            }
+            window.location.href = "https://ducj-creator.github.io/Teacher-Shirley/";
         };
 
         // 初始化
