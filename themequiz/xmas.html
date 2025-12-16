@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Christmas Live Quiz Show v5.2 (Copy Paste Only) 🎄✨</title>
+    <title>Christmas Live Quiz Show 🎄✨</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -26,7 +26,7 @@
             opacity: 0.4; pointer-events: none; z-index: 0;
         }
 
-        /* --- 特效：燈串與雪花 --- */
+        /* --- 裝飾特效 --- */
         .light-string { position: fixed; top: -20px; left: 0; width: 100%; height: 80px; z-index: 5; pointer-events: none; display: flex; justify-content: space-around; padding: 0 20px; }
         .light-bulb {
             width: 40px; height: 40px; border-radius: 50%;
@@ -49,29 +49,30 @@
             text-align: center; display: flex; flex-direction: column; justify-content: center;
         }
         h1 { font-family: 'Playfair Display', serif; color: #8a1c1c; font-size: 3rem; margin: 0 0 20px 0; }
+        p { font-size: 1.2rem; margin-bottom: 30px; color: #555; }
 
-        /* --- 輸入與按鈕 --- */
-        textarea { width: 100%; height: 150px; background: #f9f9f9; border: 2px dashed #8a1c1c; color: #333; padding: 15px; border-radius: 10px; resize: none; margin-bottom: 20px; font-size: 1rem; box-sizing: border-box; }
-        .btn { background: #198754; border: none; padding: 15px 50px; color: white; font-size: 1.4rem; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 0 #0f5132; transition: all 0.1s; font-weight: 700; margin: 10px; }
+        /* --- 按鈕 --- */
+        .btn { background: #198754; border: none; padding: 20px 60px; color: white; font-size: 1.8rem; border-radius: 50px; cursor: pointer; box-shadow: 0 6px 0 #0f5132; transition: all 0.1s; font-weight: 700; margin: 10px; }
         .btn:active { transform: translateY(4px); box-shadow: none; }
+        .btn:hover { background: #157347; }
 
         /* --- 遊戲畫面 --- */
         .status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.4rem; font-weight: 700; color: #8a1c1c; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         .timer-container { width: 100%; height: 12px; background: #e9ecef; border-radius: 6px; margin-bottom: 30px; overflow: hidden; }
         .timer-fill { height: 100%; background: #d4af37; width: 100%; transition: width 1s linear; }
-        .question-text { font-size: 2.2rem; font-weight: 900; color: #222; margin-bottom: 40px; min-height: 80px; display: flex; align-items: center; justify-content: center; line-height: 1.3; }
+        .question-text { font-size: 2rem; font-weight: 900; color: #222; margin-bottom: 30px; min-height: 80px; display: flex; align-items: center; justify-content: center; line-height: 1.3; }
 
         /* --- 選項樣式 --- */
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .opt-btn {
-            border: none; padding: 20px; color: white; font-size: 1.5rem; font-weight: bold;
+            border: none; padding: 15px 20px; color: white; font-size: 1.3rem; font-weight: bold;
             border-radius: 10px; cursor: pointer; display: flex; align-items: center; text-align: left;
-            min-height: 90px; box-shadow: 0 5px 0 rgba(0,0,0,0.2); transition: all 0.2s; position: relative;
+            min-height: 80px; box-shadow: 0 5px 0 rgba(0,0,0,0.2); transition: all 0.2s; position: relative;
         }
         .opt-btn:hover { filter: brightness(1.15); }
         .opt-btn:active { transform: translateY(4px); box-shadow: none; }
 
-        .icon { width: 35px; height: 35px; background: white; margin-right: 15px; flex-shrink: 0; }
+        .icon { width: 30px; height: 30px; background: white; margin-right: 15px; flex-shrink: 0; }
         .k-red { background: #e21b3c; } .k-red .icon { clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }
         .k-blue { background: #1368ce; } .k-blue .icon { transform: rotate(45deg) scale(0.7); border-radius: 3px; }
         .k-yellow { background: #d89e00; } .k-yellow .icon { border-radius: 50%; }
@@ -105,37 +106,28 @@
     <div id="snow-container"></div>
 
     <div id="setup-screen" class="container active">
-        <h1>Christmas Quiz Show</h1>
-        <p style="color: #666; font-weight: bold;">v5.2 Simple Edition</p>
-        <p>Copy and paste from an EXCEl or Google Sheet</p>
-        <p style="font-size: 0.9rem; color: #888; margin-top: -10px;">(格式：題目 | 選項1 | 選項2 | 選項3 | 選項4 | 正確答案)</p>
-        
-        <textarea id="paste-area" placeholder="範例：
-聖誕老人住在哪裡?	紐約	北極	南極	台北	北極
-1+1等於多少?	1	2	3	4	2"></textarea>
-        
-        <div>
-            <button class="btn" onclick="processDataAndStart()">START GAME 🎄</button>
-        </div>
+        <h1>Shirley's Christmas Quiz Show</h1>
+        <p>20 Questions (Randomized) Ready!</p>
+        <button class="btn" onclick="initGameUI()">START GAME 🎄</button>
     </div>
 
     <div id="game-screen" class="container">
         <div class="status-bar">
-            <span>Q <span id="q-num">1</span></span>
+            <span>Q <span id="q-num">1</span>/20</span>
             <span style="color: #d4af37;">Score: <span id="score-display">0</span></span>
         </div>
         <div class="timer-container"><div id="timer-fill" class="timer-fill"></div></div>
         <div class="question-text" id="question-text">Loading...</div>
         <div class="options-grid" id="options-container"></div>
         <div id="next-btn-container" style="margin-top: 30px; display: none;">
-            <button class="btn" onclick="nextQuestion()" style="background: #8a1c1c;">Next Question <i class="fas fa-arrow-right"></i></button>
+            <button class="btn" onclick="nextQuestion()" style="background: #8a1c1c; font-size: 1.2rem; padding: 15px 40px;">Next Question <i class="fas fa-arrow-right"></i></button>
         </div>
     </div>
 
     <div id="end-screen" class="container">
         <h1 style="margin-bottom: 10px;">Show Finished!</h1>
         <h2 id="final-score" style="font-size: 3.5rem; color: #198754; margin: 10px 0;">0</h2>
-        <button class="btn" onclick="location.reload()">Replay Show</button>
+        <button class="btn" onclick="location.reload()">Play Again</button>
         <div class="res-list" id="result-list"></div>
     </div>
 
@@ -162,7 +154,7 @@
         }
 
         // --- 核心變數 ---
-        let questions = []; let currentQIndex = 0; let score = 0; 
+        let currentQIndex = 0; let score = 0; 
         let timerInterval; let timeLeft = 20; let isAnswered = false; let history = [];
         const bgm = document.getElementById('bgm');
         const sfxCorrect = document.getElementById('sfx-correct');
@@ -170,6 +162,39 @@
         const sfxExplode = document.getElementById('sfx-explode');
         const sfxCheer = document.getElementById('sfx-cheer');
 
+        // ★★★ 題庫 (寫死但隨機) ★★★
+        const questions = [
+            { text: "How many people around the world celebrate Christmas?", options: ["1 billion", "2 billion", "3 billion", "4 billion"], answer: "2 billion" },
+            { text: "What does the \"X\" in \"Xmas\" represent?", options: ["The unknown", "The Greek letter Chi, initial letter in Christós", "The Roman numeral for 10", "The cross of Christianity"], answer: "The Greek letter Chi, initial letter in Christós" },
+            { text: "When did Christmas become a federal holiday in the United States?", options: ["1850", "1860", "1870", "1880"], answer: "1870" },
+            { text: "Which state was the first to declare Christmas a holiday?", options: ["Alabama", "Virginia", "Massachusetts", "New York"], answer: "Alabama" },
+            { text: "What percentage of people in the United States celebrate Christmas?", options: ["About 70%", "About 80%", "About 90%", "About 100%"], answer: "About 90%" },
+            { text: "In countries like Egypt, Russia and Ethiopia, Christmas is celebrated on:", options: ["December 24th", "December 25th", "January 7th", "January 1st"], answer: "January 7th" }, 
+            { text: "What was Rudolph the Red-Nosed Reindeer almost named?", options: ["Rollo", "Rolo", "Randy", "Rocket"], answer: "Rolo" },
+            { text: "Who was Rolo, the name almost given to Rudolph?", options: ["A famous reindeer trainer", "A Viking who became the first Duke of Normandy", "A character from a children's book", "Santa's brother in early Christmas stories"], answer: "A Viking who became the first Duke of Normandy" },
+            { text: "What does \"mas\" in \"Christmas\" come from?", options: ["Mass", "Master", "Message", "Messenger"], answer: "Mass" },
+            { text: "When did the word \"Xmas\" first come into use?", options: ["14th century", "15th century", "16th century", "17th century"], answer: "16th century" },
+            { text: "What were the first Christmas tree decorations?", options: ["Glass ornaments", "Candles", "Foods like apples, nuts, and dates", "Tinsel and ribbons"], answer: "Foods like apples, nuts, and dates" },
+            { text: "Since what year have more artificial Christmas trees been sold than real ones?", options: ["1981", "1991", "2001", "2011"], answer: "1991" },
+            { text: "Which of the following is NOT mentioned as a tree that people in India might decorate for Christmas?", options: ["Pine trees", "Mango trees", "Banana trees", "Palm trees"], answer: "Pine trees" },
+            { text: "What number President of the United States was Ulysses S. Grant?", options: ["16th", "17th", "18th", "19th"], answer: "18th" },
+            { text: "Which of these facts about Christmas is NOT mentioned in the information provided?", options: ["Christmas began as a religious festival", "Christmas is celebrated on December 25th by Christians", "Santa Claus was based on a real person", "Everyone can join in the Christmas fun nowadays"], answer: "Santa Claus was based on a real person" },
+            { text: "What does the Greek letter Chi (Χ) represent in \"Xmas\"?", options: ["The first letter of \"Cross\"", "The first letter of \"Christmas\"", "The first letter of \"Christ\" in Greek (Christós)", "The first letter of \"Christian\""], answer: "The first letter of \"Christ\" in Greek (Christós)" },
+            { text: "How would you best describe the current celebration of Christmas based on the information provided?", options: ["Exclusively a religious celebration", "A celebration only for Christians", "A festival that began as religious but is now celebrated by many", "A modern holiday with no religious connections"], answer: "A festival that began as religious but is now celebrated by many" },
+            { text: "Which statement is true about Christmas celebrations worldwide?", options: ["Everyone celebrates Christmas on December 25th", "Different countries have different Christmas traditions", "All countries use the same decorations", "Christmas is only celebrated in Western countries"], answer: "Different countries have different Christmas traditions" },
+            { text: "What happened to Christmas tree decorations over time?", options: ["They became less colorful", "They changed from edible items to non-edible decorations", "They became smaller", "They disappeared completely"], answer: "They changed from edible items to non-edible decorations" },
+            { text: "What is the primary purpose of the information provided about Christmas?", options: ["To convince people to celebrate Christmas", "To explain the religious significance of Christmas", "To share interesting facts about Christmas", "To compare Christmas to other holidays"], answer: "To share interesting facts about Christmas" }
+        ];
+
+        // --- 隨機洗牌演算法 (Fisher-Yates Shuffle) ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // --- 遊戲邏輯 ---
         let isMusicPlaying = false; bgm.volume = 0.4;
         function toggleMusic() {
             if (bgm.paused) { bgm.play().then(()=>{ isMusicPlaying=true; updateMusicIcon(); }); }
@@ -182,47 +207,10 @@
             btn.style.background = isMusicPlaying ? '#d4af37' : 'rgba(0,0,0,0.5)';
         }
 
-        // --- 唯一的解析入口 (Copy Paste 專用) ---
-        function processDataAndStart() {
-            const rawData = document.getElementById('paste-area').value.trim();
-            if(!rawData) return alert("請貼上題目！");
-
-            // 自動偵測：如果有 Tab 就用 Tab，沒有就嘗試用逗號
-            let delimiter = ',';
-            if (rawData.indexOf('\t') !== -1) delimiter = '\t';
-
-            const lines = rawData.split(/\r\n|\n|\r/);
-            questions = [];
-
-            lines.forEach(line => {
-                if(!line.trim()) return; // 跳過空行
-                // 跳過可能的標題行
-                if(line.includes("題目") && line.includes("答案")) return;
-
-                // 拆分並去除前後空白
-                let parts = line.split(delimiter).map(p => p.trim());
-
-                if(parts.length >= 2) {
-                    let q = {
-                        text: parts[0],
-                        // 確保至少有選項，不足補 "-"
-                        options: parts.slice(1, parts.length - 1).concat(["-","-","-"]).slice(0,4),
-                        // ★ 關鍵修正：將答案強制轉字串並去空白，確保比對無誤
-                        answer: String(parts[parts.length - 1]).trim()
-                    };
-                    questions.push(q);
-                }
-            });
-
-            if(questions.length > 0) {
-                initGameUI();
-            } else {
-                alert("無法解析題目！\n請確保格式為：題目 [分隔] 選項... [分隔] 正確答案");
-            }
-        }
-
-        // --- 遊戲邏輯 ---
         function initGameUI() {
+            // ★ 遊戲開始前，先洗牌！
+            shuffleArray(questions);
+
             document.getElementById('setup-screen').classList.remove('active');
             document.getElementById('game-screen').classList.add('active');
             bgm.play().then(() => { isMusicPlaying = true; updateMusicIcon(); }).catch(() => {});
@@ -248,7 +236,6 @@
                 let btn = document.createElement('button');
                 btn.className = `opt-btn ${['k-red','k-blue','k-yellow','k-green'][i%4]}`;
                 btn.innerHTML = `<div class="icon"></div><span>${opt}</span>`;
-                // 直接傳遞字串進行比對
                 btn.onclick = () => checkAnswer(btn, opt, q.answer);
                 optsContainer.appendChild(btn);
             });
@@ -273,10 +260,7 @@
             isAnswered = true; 
             clearInterval(timerInterval);
 
-            // ★ 核心比對邏輯：雙方都 Trim，確保萬無一失
-            const userAns = String(selected).trim();
-            const correctAns = String(correct).trim();
-            const isCorrect = (userAns === correctAns);
+            const isCorrect = (String(selected).trim() === String(correct).trim());
 
             if(isCorrect) {
                 score += 10 + Math.floor(timeLeft / 2);
@@ -286,10 +270,10 @@
             } else {
                 btn.classList.add('wrong-highlight');
                 sfxWrong.currentTime = 0; sfxWrong.play();
-                highlightCorrect(correctAns);
+                highlightCorrect(correct);
             }
 
-            recordHistory(userAns, correctAns, isCorrect);
+            recordHistory(selected, correct, isCorrect);
             document.getElementById('score-display').innerText = score;
             document.getElementById('next-btn-container').style.display = 'block';
         }
@@ -300,7 +284,7 @@
             document.getElementById('flash-overlay').classList.add('flash');
             setTimeout(() => document.getElementById('flash-overlay').classList.remove('flash'), 500);
             
-            let correct = String(questions[currentQIndex].answer).trim();
+            let correct = questions[currentQIndex].answer;
             highlightCorrect(correct);
             recordHistory("Time's up", correct, false);
             
@@ -310,8 +294,7 @@
         function highlightCorrect(correctText) {
             let btns = document.querySelectorAll('.opt-btn');
             btns.forEach(b => {
-                // 檢查按鈕內的文字是否包含正確答案
-                if(b.innerText.trim() === correctText) {
+                if(b.innerText.trim().includes(String(correctText).trim())) {
                     b.classList.add('correct-highlight');
                 } else {
                     b.classList.add('dim');
