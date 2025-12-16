@@ -489,6 +489,200 @@
                 grid-template-columns: 1fr;
             }
         }
+    
+        /* ===== Color Theme System ===== */
+        body[data-theme="general"] { }
+
+        body[data-theme="xmas"]{
+            --primary-color:#b71c1c;      /* ribbon red */
+            --secondary-color:#1b5e20;    /* pine green */
+            --accent-color:#d4af37;       /* gold */
+            --light-color:#fffdf8;
+            --dark-color:#1f2933;
+            --success-color:#2e7d32;
+            --warning-color:#ffca28;
+            --danger-color:#c62828;
+            --correct-color:#2e7d32;
+            --incorrect-color:#c62828;
+        }
+        body[data-theme="newyear"]{
+            /* Chinese New Year: festive red + gold */
+            --primary-color:#b71c1c;
+            --secondary-color:#8e0000;
+            --accent-color:#d4af37;
+            --light-color:#fff8f2;
+            --dark-color:#2b1b12;
+            --success-color:#d4af37;
+            --warning-color:#ffb300;
+            --danger-color:#c62828;
+            --correct-color:#d4af37;
+            --incorrect-color:#c62828;
+        }
+        body[data-theme="spring"]{
+            --primary-color:#2f6f4e;
+            --secondary-color:#6aa884;
+            --accent-color:#caa24a; /* warm gold */
+            --light-color:#fbfff9;
+            --dark-color:#2a3b33;
+            --correct-color:#2f6f4e;
+            --incorrect-color:#c75c5c;
+        }
+        body[data-theme="easter"]{
+            --primary-color:#5b3fa6;  /* lavender */
+            --secondary-color:#2f7ea6;/* robin-egg blue */
+            --accent-color:#d4af37;   /* gold */
+            --light-color:#fffdfc;
+            --dark-color:#2b2b33;
+            --correct-color:#2f7ea6;
+            --incorrect-color:#c75c5c;
+        }
+        body[data-theme="halloween"]{
+            --primary-color:#2b1f36;  /* deep purple */
+            --secondary-color:#0f172a;/* night */
+            --accent-color:#ff8f00;   /* pumpkin */
+            --light-color:#fff9f0;
+            --dark-color:#101828;
+            --correct-color:#ff8f00;
+            --incorrect-color:#c62828;
+        }
+
+        /* Panels pick up theme more strongly */
+        body[data-theme]:not([data-theme="general"]) header,
+        body[data-theme]:not([data-theme="general"]) .host-control-area,
+        body[data-theme]:not([data-theme="general"]) .question-area,
+        body[data-theme]:not([data-theme="general"]) .players-area{
+            border: 1px solid rgba(212,175,55,0.35);
+            box-shadow: 0 18px 50px rgba(0,0,0,0.10);
+        }
+
+        /* Xmas gift-wrap look */
+        body[data-theme="xmas"]{
+            background:
+              radial-gradient(1200px 600px at 20% 0%, rgba(212,175,55,0.14), transparent 60%),
+              radial-gradient(900px 500px at 85% 10%, rgba(46,125,50,0.10), transparent 65%),
+              repeating-linear-gradient(135deg,
+                rgba(183,28,28,0.07) 0 18px,
+                rgba(27,94,32,0.07) 18px 36px),
+              linear-gradient(135deg, #fffdf7 0%, #fff8f0 100%);
+        }
+        body[data-theme="xmas"] header{
+            background: rgba(255,255,255,0.78);
+        }
+        body[data-theme="xmas"] .panel-title{
+            border-bottom: 2px solid rgba(183,28,28,0.22);
+        }
+        body[data-theme="xmas"] button{
+            background: linear-gradient(135deg, #b71c1c, #e53935);
+            border: 1px solid rgba(212,175,55,0.55);
+            box-shadow: 0 10px 26px rgba(183,28,28,0.18);
+        }
+        body[data-theme="xmas"] button:hover{
+            background: linear-gradient(135deg, #a31515, #d32f2f);
+        }
+        body[data-theme="xmas"] button.secondary{
+            background: linear-gradient(135deg, #1b5e20, #2e7d32);
+            box-shadow: 0 10px 26px rgba(27,94,32,0.16);
+        }
+        body[data-theme="xmas"] button.secondary:hover{
+            background: linear-gradient(135deg, #184f1b, #276a2c);
+        }
+
+        /* Options: red/green blocks + gold ribbon cross */
+        body[data-theme="xmas"] .option{
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(212,175,55,0.50);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+        }
+        body[data-theme="xmas"] .option:nth-child(odd){
+            background:
+              linear-gradient(90deg, rgba(183,28,28,0.22), rgba(183,28,28,0.10)),
+              rgba(255,255,255,0.78);
+        }
+        body[data-theme="xmas"] .option:nth-child(even){
+            background:
+              linear-gradient(90deg, rgba(27,94,32,0.22), rgba(27,94,32,0.10)),
+              rgba(255,255,255,0.78);
+        }
+        body[data-theme="xmas"] .option::before{
+            content:"";
+            position:absolute;
+            inset:0;
+            background:
+              linear-gradient(90deg, transparent 0 42%, rgba(212,175,55,0.85) 42% 58%, transparent 58% 100%),
+              linear-gradient(0deg, transparent 0 42%, rgba(212,175,55,0.85) 42% 58%, transparent 58% 100%);
+            opacity:0.70;
+            mix-blend-mode:multiply;
+            pointer-events:none;
+        }
+        body[data-theme="xmas"] .option::after{
+            content:"";
+            position:absolute;
+            top:10px; right:10px;
+            width:26px; height:26px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cpath d='M34 12c6-7 16-6 18 2 2 7-4 14-14 14-7 0-9-3-9-3s1-9 5-13z' fill='%231b5e20'/%3E%3Cpath d='M30 12c-6-7-16-6-18 2-2 7 4 14 14 14 7 0 9-3 9-3s-1-9-5-13z' fill='%231b5e20'/%3E%3Ccircle cx='32' cy='28' r='7' fill='%23b71c1c'/%3E%3Cpath d='M32 35c6 0 14 6 14 14H18c0-8 8-14 14-14z' fill='%23d4af37' opacity='0.9'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            filter: drop-shadow(0 6px 10px rgba(0,0,0,0.15));
+            opacity:0.95;
+            pointer-events:none;
+        }
+
+        /* Chinese New Year: red + gold + subtle pattern */
+        body[data-theme="newyear"]{
+            background:
+              radial-gradient(1200px 700px at 20% 0%, rgba(212,175,55,0.18), transparent 60%),
+              radial-gradient(900px 550px at 85% 20%, rgba(212,175,55,0.10), transparent 70%),
+              linear-gradient(135deg, #fff4ef 0%, #fffaf4 100%);
+        }
+        body[data-theme="newyear"] header,
+        body[data-theme="newyear"] .host-control-area,
+        body[data-theme="newyear"] .question-area,
+        body[data-theme="newyear"] .players-area{
+            background:
+              radial-gradient(600px 220px at 15% 0%, rgba(212,175,55,0.14), transparent 60%),
+              radial-gradient(500px 200px at 90% 10%, rgba(212,175,55,0.10), transparent 65%),
+              rgba(255,255,255,0.78);
+        }
+        body[data-theme="newyear"] button{
+            background: linear-gradient(135deg, #b71c1c, #8e0000);
+            border: 1px solid rgba(212,175,55,0.6);
+            box-shadow: 0 14px 32px rgba(183,28,28,0.18);
+        }
+        body[data-theme="newyear"] button.secondary{
+            background: linear-gradient(135deg, #d4af37, #ffb300);
+            color:#2b1b12;
+        }
+        body[data-theme="newyear"] .option{
+            border: 1px solid rgba(212,175,55,0.55);
+            background:
+              linear-gradient(135deg, rgba(183,28,28,0.15), rgba(212,175,55,0.10)),
+              rgba(255,255,255,0.78);
+        }
+
+        /* Snow layer */
+        .snow-layer{
+            position:fixed;
+            inset:0;
+            pointer-events:none;
+            z-index:50;
+            overflow:hidden;
+        }
+        .snowflake{
+            position:absolute;
+            top:-10vh;
+            width:10px;height:10px;
+            border-radius:50%;
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 0 10px rgba(255,255,255,0.6);
+            opacity:0.95;
+        }
+        @keyframes snowFall{
+            0% { transform: translate3d(0, -10vh, 0); opacity:0; }
+            10%{ opacity:0.95; }
+            100%{ transform: translate3d(var(--dx), 110vh, 0); opacity:0.2; }
+        }
+
     </style>
 </head>
 <body>
@@ -548,6 +742,19 @@ Participant2"></textarea>
                         </div>
                     </div>
                     <div>
+                        
+                        <div class="form-group">
+                            <label for="colorTheme">配色主題 Color Theme</label>
+                            <select id="colorTheme">
+                                <option value="general">General (通用)</option>
+                                <option value="xmas">Xmas (聖誕風)</option>
+                                <option value="newyear">New Year (新年風 / 春節)</option>
+                                <option value="spring">Spring (春天氣息)</option>
+                                <option value="easter">Easter (復活節)</option>
+                                <option value="halloween">Halloween (萬聖節)</option>
+                            </select>
+                        </div>
+
                         <div class="form-group">
                             <label for="gameMode">遊戲模式 Game Mode</label>
                             <select id="gameMode">
@@ -592,6 +799,7 @@ Participant2"></textarea>
             </div>
         </div>
     </div>
+    <div class="snow-layer" id="snowLayer" style="display:none;"></div>
     <div class="sound-control" id="soundControl">
         <i class="fas fa-volume-up"></i>
     </div>
@@ -661,6 +869,63 @@ Participant2"></textarea>
         const podiumEl = document.getElementById('podium');
         const playersListEl = document.getElementById('playersList');
 
+        // ===== Color Theme (General is current look) =====
+        const colorThemeSelect = document.getElementById('colorTheme');
+        const snowLayer = document.getElementById('snowLayer');
+
+        function applyTheme(theme){
+            const t = theme || 'general';
+            document.body.setAttribute('data-theme', t);
+            localStorage.setItem('liveQuizColorTheme', t);
+
+            // Snow only for Xmas
+            if (t === 'xmas') {
+                startSnow();
+            } else {
+                stopSnow();
+            }
+        }
+
+        function startSnow(){
+            if (!snowLayer) return;
+            snowLayer.style.display = 'block';
+            // already running
+            if (snowLayer.childElementCount > 0) return;
+
+            const flakeCount = 70;
+            for (let i = 0; i < flakeCount; i++){
+                const f = document.createElement('div');
+                f.className = 'snowflake';
+                const size = 4 + Math.random() * 8;
+                f.style.width = size + 'px';
+                f.style.height = size + 'px';
+                f.style.left = (Math.random() * 100) + 'vw';
+                f.style.opacity = (0.45 + Math.random() * 0.55).toFixed(2);
+                f.style.setProperty('--dx', ((Math.random() * 14) - 7).toFixed(2) + 'vw');
+                const dur = 6 + Math.random() * 7;
+                const delay = Math.random() * 4;
+                f.style.animation = `snowFall ${dur}s linear ${delay}s infinite`;
+                snowLayer.appendChild(f);
+            }
+        }
+
+        function stopSnow(){
+            if (!snowLayer) return;
+            snowLayer.style.display = 'none';
+            snowLayer.innerHTML = '';
+        }
+
+        function getConfettiColors(){
+            const t = document.body.getAttribute('data-theme') || 'general';
+            if (t === 'xmas') return ['#b71c1c', '#1b5e20', '#d4af37', '#ffffff', '#2e7d32'];
+            if (t === 'newyear') return ['#b71c1c', '#8e0000', '#d4af37', '#ffb300', '#ffffff'];
+            if (t === 'spring') return ['#2f6f4e', '#6aa884', '#caa24a', '#fbfff9'];
+            if (t === 'easter') return ['#5b3fa6', '#2f7ea6', '#d4af37', '#ffffff'];
+            if (t === 'halloween') return ['#2b1f36', '#ff8f00', '#101828', '#d4af37'];
+            return ['#5b8c85', '#74a69a', '#8fbc8f', '#a8d5ba', '#c8e6c9', '#e8f5e8'];
+        }
+
+
         // 🔹 新增：題庫相關 DOM 物件
         const questionSourceSelect = document.getElementById('questionSource');
         const questionBankSettings = document.getElementById('questionBankSettings');
@@ -671,6 +936,13 @@ Participant2"></textarea>
         let audioContext;
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Restore last color theme
+            const savedTheme = localStorage.getItem('liveQuizColorTheme') || 'general';
+            if (colorThemeSelect) {
+                colorThemeSelect.value = savedTheme;
+                colorThemeSelect.addEventListener('change', () => applyTheme(colorThemeSelect.value));
+            }
+            applyTheme(savedTheme);
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             } catch (e) {
@@ -1216,7 +1488,7 @@ async function loadQuestionsFromBank() {
         }
 
         function createConfetti() {
-            const colors = ['#5b8c85', '#74a69a', '#8fbc8f', '#a8d5ba', '#c8e6c9', '#e8f5e8'];
+            const colors = getConfettiColors();
             for (let i = 0; i < 150; i++) {
                 const c = document.createElement('div');
                 c.className = 'confetti';
