@@ -198,6 +198,8 @@
             justify-content: center;
             color: var(--primary-color);
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            white-space: pre-wrap;
         }
         .options {
             display: grid;
@@ -506,7 +508,6 @@
             --incorrect-color:#c62828;
         }
         body[data-theme="newyear"]{
-            /* Chinese New Year: festive red + gold */
             --primary-color:#b71c1c;
             --secondary-color:#8e0000;
             --accent-color:#d4af37;
@@ -521,32 +522,31 @@
         body[data-theme="spring"]{
             --primary-color:#2f6f4e;
             --secondary-color:#6aa884;
-            --accent-color:#caa24a; /* warm gold */
+            --accent-color:#caa24a; 
             --light-color:#fbfff9;
             --dark-color:#2a3b33;
             --correct-color:#2f6f4e;
             --incorrect-color:#c75c5c;
         }
         body[data-theme="easter"]{
-            --primary-color:#5b3fa6;  /* lavender */
-            --secondary-color:#2f7ea6;/* robin-egg blue */
-            --accent-color:#d4af37;   /* gold */
+            --primary-color:#5b3fa6;
+            --secondary-color:#2f7ea6;
+            --accent-color:#d4af37;
             --light-color:#fffdfc;
             --dark-color:#2b2b33;
             --correct-color:#2f7ea6;
             --incorrect-color:#c75c5c;
         }
         body[data-theme="halloween"]{
-            --primary-color:#2b1f36;  /* deep purple */
-            --secondary-color:#0f172a;/* night */
-            --accent-color:#ff8f00;   /* pumpkin */
+            --primary-color:#2b1f36;
+            --secondary-color:#0f172a;
+            --accent-color:#ff8f00;
             --light-color:#fff9f0;
             --dark-color:#101828;
             --correct-color:#ff8f00;
             --incorrect-color:#c62828;
         }
 
-        /* Panels pick up theme more strongly */
         body[data-theme]:not([data-theme="general"]) header,
         body[data-theme]:not([data-theme="general"]) .host-control-area,
         body[data-theme]:not([data-theme="general"]) .question-area,
@@ -555,7 +555,6 @@
             box-shadow: 0 18px 50px rgba(0,0,0,0.10);
         }
 
-        /* Xmas gift-wrap look */
         body[data-theme="xmas"]{
             background:
               radial-gradient(1200px 600px at 20% 0%, rgba(212,175,55,0.14), transparent 60%),
@@ -586,8 +585,6 @@
         body[data-theme="xmas"] button.secondary:hover{
             background: linear-gradient(135deg, #184f1b, #276a2c);
         }
-
-        /* Options: red/green blocks + gold ribbon cross */
         body[data-theme="xmas"] .option{
             position: relative;
             overflow: hidden;
@@ -628,7 +625,6 @@
             pointer-events:none;
         }
 
-        /* Chinese New Year: red + gold + subtle pattern */
         body[data-theme="newyear"]{
             background:
               radial-gradient(1200px 700px at 20% 0%, rgba(212,175,55,0.18), transparent 60%),
@@ -660,7 +656,6 @@
               rgba(255,255,255,0.78);
         }
 
-        /* Snow layer */
         .snow-layer{
             position:fixed;
             inset:0;
@@ -701,7 +696,6 @@
                             <input type="text" id="gameTheme" placeholder="輸入遊戲主題 Enter game theme">
                         </div>
 
-                        <!-- 🔹 新增：題目來源選擇 + 題庫設定 -->
                         <div class="form-group">
                             <label for="questionSource">題目來源 Question Source</label>
                             <select id="questionSource">
@@ -715,6 +709,7 @@
                                 <label for="questionBankSelect">選擇題庫 Select Question Bank</label>
                                 <select id="questionBankSelect">
                                     <option value="gsat_vocab">學測 GSAT Vocab</option>
+                                    <option value="cap_pp">CAP Past Paper</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -723,11 +718,10 @@
                             </div>
                             <button id="loadFromBank"><i class="fas fa-database"></i> 從題庫載入 Load from Bank</button>
                             <small style="color: var(--secondary-color);">
-                                會自動從題庫隨機抽題並填入下方問題欄位，格式與手動輸入相同。<br>
-                                The system will randomly pick questions from the bank and fill the textbox below.
+                                會自動從題庫隨機抽題並填入下方問題欄位。<br>
+                                The system will randomly pick questions from the bank.
                             </small>
                         </div>
-                        <!-- 🔹 題庫區塊結束 -->
 
                         <div class="form-group">
                             <label for="questionsInput">問題與選項 (一行一題，用tab分隔) Questions & Options (one per line, separate with tab)</label>
@@ -869,7 +863,6 @@ Participant2"></textarea>
         const podiumEl = document.getElementById('podium');
         const playersListEl = document.getElementById('playersList');
 
-        // ===== Color Theme (General is current look) =====
         const colorThemeSelect = document.getElementById('colorTheme');
         const snowLayer = document.getElementById('snowLayer');
 
@@ -877,8 +870,6 @@ Participant2"></textarea>
             const t = theme || 'general';
             document.body.setAttribute('data-theme', t);
             localStorage.setItem('liveQuizColorTheme', t);
-
-            // Snow only for Xmas
             if (t === 'xmas') {
                 startSnow();
             } else {
@@ -889,7 +880,6 @@ Participant2"></textarea>
         function startSnow(){
             if (!snowLayer) return;
             snowLayer.style.display = 'block';
-            // already running
             if (snowLayer.childElementCount > 0) return;
 
             const flakeCount = 70;
@@ -925,8 +915,6 @@ Participant2"></textarea>
             return ['#5b8c85', '#74a69a', '#8fbc8f', '#a8d5ba', '#c8e6c9', '#e8f5e8'];
         }
 
-
-        // 🔹 新增：題庫相關 DOM 物件
         const questionSourceSelect = document.getElementById('questionSource');
         const questionBankSettings = document.getElementById('questionBankSettings');
         const questionBankSelect = document.getElementById('questionBankSelect');
@@ -936,7 +924,6 @@ Participant2"></textarea>
         let audioContext;
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Restore last color theme
             const savedTheme = localStorage.getItem('liveQuizColorTheme') || 'general';
             if (colorThemeSelect) {
                 colorThemeSelect.value = savedTheme;
@@ -955,17 +942,14 @@ Participant2"></textarea>
             soundControl.addEventListener('click', toggleSound);
             document.body.addEventListener('click', unlockAudio, { once: true });
 
-            // 🔹 題目來源切換時顯示 / 隱藏題庫設定
             questionSourceSelect.addEventListener('change', function() {
                 if (questionSourceSelect.value === 'bank') {
                     questionBankSettings.style.display = 'block';
-                    // 題庫模式下仍允許編輯 questionsInput（方便老師微調)
                 } else {
                     questionBankSettings.style.display = 'none';
                 }
             });
 
-            // 🔹 從題庫載入題目
             loadFromBankBtn.addEventListener('click', () => {
                 loadQuestionsFromBank();
             });
@@ -977,7 +961,6 @@ Participant2"></textarea>
             }
         }
 
-        // === 音效函數 ===
         function playCorrectSound() {
             if (!gameState.isSoundEnabled || !audioContext) return;
             const o = audioContext.createOscillator();
@@ -1079,7 +1062,7 @@ Participant2"></textarea>
             }
         }
 
-       // === 🔹 題庫載入函式 ===
+       // === 🔹 智慧 CSV 解析與載入 ===
 async function loadQuestionsFromBank() {
     const bank = questionBankSelect.value;
     let count = parseInt(questionBankCountInput.value, 10);
@@ -1089,104 +1072,161 @@ async function loadQuestionsFromBank() {
     }
     if (count > 50) count = 50;
 
+    let url = '';
+    let defaultThemeName = '';
+
     if (bank === 'gsat_vocab') {
-        const url = 'https://ducj-creator.github.io/GSAT%20vocab%20fixed%20option%20quiz.csv';
-        try {
-            const res = await fetch(url);
-            if (!res.ok) {
-                alert('無法載入題庫（HTTP ' + res.status + '）。');
-                return;
-            }
-            const text = await res.text();
-            const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
-            const records = [];
+        url = 'https://ducj-creator.github.io/GSAT%20vocab%20fixed%20option%20quiz.csv';
+        defaultThemeName = '學測 GSAT Vocab';
+    } else if (bank === 'cap_pp') {
+        url = 'https://ducj-creator.github.io/Teacher-Shirley/tests/CAP%20PP.csv';
+        defaultThemeName = 'CAP Past Paper';
+    }
 
-            for (let i = 0; i < lines.length; i++) {
-                const rawLine = lines[i].trim();
-                if (!rawLine) continue;
-
-                const parts = parseCsvLine(rawLine).map(x => x.trim());
-
-                // 至少要有：code, question, A, B, C, D, correct → 7 欄
-                if (parts.length < 7) continue;
-
-                const code     = parts[0]; // 第一欄一定是 code
-                const question = parts[1]; // 第二欄一定是題目
-                const optA     = parts[2];
-                const optB     = parts[3];
-                const optC     = parts[4];
-                const optD     = parts[5];
-                let correctRaw = parts[6];
-
-                // 如果第一列是標題列就跳過
-                if (i === 0 &&
-                    (/code/i.test(code) || /編號/.test(code)) &&
-                    (/question/i.test(question) || /題目/.test(question))) {
-                    continue;
-                }
-
-                // 確保基本欄位有東西
-                if (!question || !optA || !optB || !correctRaw) continue;
-
-                // 依照「欄位」來解答案：
-                // 若是 A/B/C/D → 代表第幾個選項
-                let correctText = correctRaw;
-                const letter = correctRaw.toUpperCase();
-                if (['A', 'B', 'C', 'D'].includes(letter)) {
-                    const idxMap = { A: 2, B: 3, C: 4, D: 5 };
-                    const opt = parts[idxMap[letter]];
-                    if (opt && opt.trim()) {
-                        correctText = opt.trim();
-                    }
-                }
-
-                // 第一欄 code 用（）加到題目後面
-                const finalQuestion = `${question} (${code})`;
-
-                // 組成與原本系統相容的 tab 格式：
-                // 問題[TAB]A[TAB]B[TAB]C[TAB]D[TAB]正確答案(文字)
-                const lineForTextarea =
-                    finalQuestion + '\t' +
-                    optA + '\t' +
-                    optB + '\t' +
-                    optC + '\t' +
-                    optD + '\t' +
-                    correctText;
-
-                records.push(lineForTextarea);
-            }
-
-            if (records.length === 0) {
-                alert('題庫內容為空或格式不符。No valid questions found in bank.');
-                return;
-            }
-
-            // 打亂並抽 count 題
-            for (let i = records.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [records[i], records[j]] = [records[j], records[i]];
-            }
-            const selected = records.slice(0, Math.min(count, records.length));
-
-            // ✅ 填入原本 textarea，後續沿用既有 loadQuestions()
-            questionsInput.value = selected.join('\n');
-
-            // 如果主題沒填，自動帶入
-            if (!gameThemeInput.value.trim()) {
-                gameThemeInput.value = '學測 GSAT Vocab';
-            }
-
-            alert(`已從「學測 GSAT Vocab」載入 ${selected.length} 題。`);
-        } catch (err) {
-            console.error(err);
-            alert('載入題庫時發生錯誤，請稍後再試。');
+    try {
+        const res = await fetch(url);
+        if (!res.ok) {
+            alert('無法載入題庫（HTTP ' + res.status + '）。');
+            return;
         }
-    } else {
-        alert('未知的題庫類型。Unknown question bank type.');
+        const text = await res.text();
+        const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+        
+        if (lines.length < 2) {
+             alert('題庫內容太少或格式錯誤。Not enough data in bank.');
+             return;
+        }
+
+        const records = [];
+        
+        // 1. 偵測欄位 (Header Detection)
+        const headerParts = parseCsvLine(lines[0]);
+        const headers = headerParts.map(h => h.toLowerCase().trim());
+
+        let idxCode = -1;
+        let idxYear = -1; // 年份
+        let idxNo = -1;   // 序號/題號
+        let idxQ = -1;
+        let idxA = -1;
+        let idxB = -1;
+        let idxC = -1;
+        let idxD = -1;
+        let idxAns = -1;
+
+        // Helper to find index
+        const findIdx = (keywords) => headers.findIndex(h => keywords.some(k => h.includes(k) || h === k));
+        
+        // 關鍵字對映
+        idxCode = findIdx(['code', '編號', 'source', '來源', 'id']);
+        idxYear = findIdx(['year', '年份']);
+        idxNo   = findIdx(['no', 'number', '序號', '題號', 'sequence']);
+        idxQ    = findIdx(['question', '題目', 'vocabulary', '單字', 'content', '內容']);
+        idxAns  = findIdx(['correct', 'answer', '答案', '正解']);
+        
+        // 選項比較嚴格，避免抓到 Answer
+        idxA    = findIdx(['option a', '選項a', 'a)', 'a.']);
+        if (idxA === -1) idxA = headers.indexOf('a');
+        
+        idxB    = findIdx(['option b', '選項b', 'b)', 'b.']);
+        if (idxB === -1) idxB = headers.indexOf('b');
+
+        idxC    = findIdx(['option c', '選項c', 'c)', 'c.']);
+        if (idxC === -1) idxC = headers.indexOf('c');
+
+        idxD    = findIdx(['option d', '選項d', 'd)', 'd.']);
+        if (idxD === -1) idxD = headers.indexOf('d');
+
+        // 如果偵測失敗，使用預設值 (Fallback)
+        if (idxQ === -1 || idxAns === -1) {
+            console.warn('無法自動偵測欄位，使用預設順序。Using default column order.');
+            // 假設順序: Code, Question, A, B, C, D, Answer
+            idxCode = 0; idxQ = 1; idxA = 2; idxB = 3; idxC = 4; idxD = 5; idxAns = 6;
+        }
+
+        // 2. 解析資料列
+        for (let i = 1; i < lines.length; i++) {
+            const rawLine = lines[i].trim();
+            if (!rawLine) continue;
+
+            const parts = parseCsvLine(rawLine).map(x => x.trim());
+            const getVal = (idx) => (idx >= 0 && idx < parts.length) ? parts[idx] : '';
+
+            const qVal = getVal(idxQ);
+            const optA = getVal(idxA);
+            const optB = getVal(idxB);
+            const optC = getVal(idxC);
+            const optD = getVal(idxD);
+            let correctRaw = getVal(idxAns);
+
+            // 來源處理
+            const codeVal = getVal(idxCode);
+            const yearVal = getVal(idxYear);
+            const noVal = getVal(idxNo);
+
+            if (!qVal || !optA || !optB || !correctRaw) continue;
+
+            // 處理答案為 A/B/C/D 的情況
+            let correctText = correctRaw;
+            const letter = correctRaw.toUpperCase();
+            if (['A', 'B', 'C', 'D'].includes(letter)) {
+                if (letter === 'A') correctText = optA;
+                if (letter === 'B') correctText = optB;
+                if (letter === 'C') correctText = optC;
+                if (letter === 'D') correctText = optD;
+            }
+
+            // 🔹 格式化題目：題目內容 (出處)
+            // 優先使用：(年份-序號)
+            // 備案使用：(Code/編號)
+            let sourceLabel = '';
+            if (yearVal && noVal) {
+                sourceLabel = `${yearVal}-${noVal}`;
+            } else if (codeVal) {
+                sourceLabel = codeVal;
+            }
+
+            let finalQuestion = qVal;
+            if (sourceLabel && sourceLabel.toLowerCase() !== 'null') {
+                finalQuestion = `${qVal} (${sourceLabel})`;
+            }
+
+            // 組成 Tab 分隔字串
+            const lineForTextarea =
+                finalQuestion + '\t' +
+                optA + '\t' +
+                optB + '\t' +
+                optC + '\t' +
+                optD + '\t' +
+                correctText;
+
+            records.push(lineForTextarea);
+        }
+
+        if (records.length === 0) {
+            alert('題庫解析後無有效題目。No valid questions found.');
+            return;
+        }
+
+        // 打亂並選題
+        for (let i = records.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [records[i], records[j]] = [records[j], records[i]];
+        }
+        const selected = records.slice(0, Math.min(count, records.length));
+
+        questionsInput.value = selected.join('\n');
+
+        if (!gameThemeInput.value.trim()) {
+            gameThemeInput.value = defaultThemeName;
+        }
+
+        alert(`已從「${defaultThemeName}」載入 ${selected.length} 題。\nLoaded ${selected.length} questions.`);
+    } catch (err) {
+        console.error(err);
+        alert('載入題庫時發生錯誤，請檢查網路或檔案格式。');
     }
 }
 
-        // === 遊戲邏輯 ===
         function startGame() {
             gameState.gameTheme = gameThemeInput.value.trim();
             if (!gameState.gameTheme) {
@@ -1194,7 +1234,6 @@ async function loadQuestionsFromBank() {
                 return;
             }
 
-            // 無論手動或題庫，都從 textarea 載入題目（題庫已經先填進去）
             if (!loadQuestions()) {
                 alert('Please enter questions correctly or load from question bank!');
                 return;
@@ -1630,7 +1669,7 @@ async function loadQuestionsFromBank() {
             }
             document.querySelector('.question-area').innerHTML = html;
         }
-        // 🔹 安全解析一行 CSV，支援雙引號與欄位內逗號
+
 function parseCsvLine(line) {
     const result = [];
     let current = '';
@@ -1640,15 +1679,13 @@ function parseCsvLine(line) {
         const ch = line[i];
 
         if (ch === '"') {
-            // 連續兩個 " => 代表欄位內的一個 "
             if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
                 current += '"';
-                i++; // 跳過下一個 "
+                i++; 
             } else {
                 inQuotes = !inQuotes;
             }
         } else if (ch === ',' && !inQuotes) {
-            // 只有在不在引號裡的逗號才是分隔符
             result.push(current);
             current = '';
         } else {
