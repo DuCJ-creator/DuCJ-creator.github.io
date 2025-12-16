@@ -6,6 +6,22 @@
     <title>姓名抽取器 Name / Group Picker</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
+
+        :root {
+            --bg1: #e8d1c5;
+            --bg2: #f3e5d8;
+            --text: #5a4a42;
+            --muted: #8c6b5d;
+            --primary: #b5655a;
+            --primarySoft: #d4a096;
+            --accent: #e8b04d;
+            --accentHover: #d49c3d;
+            --surface: #faf6f2;
+            --surfaceElev: rgba(255, 255, 255, 0.9);
+            --border: #e8d1c5;
+            --panel: #f5f0eb;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,8 +30,8 @@
         }
         
         body {
-            background: linear-gradient(135deg, #e8d1c5 0%, #f3e5d8 100%);
-            color: #5a4a42;
+            background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+            color: var(--text);
             min-height: 100vh;
             padding: 20px;
             display: flex;
@@ -27,16 +43,16 @@
             max-width: 800px;
             width: 100%;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.9);
+            background: var(--surfaceElev);
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             padding: 30px;
-            border: 1px solid #e8d1c5;
+            border: 1px solid var(--border);
         }
         
         h1 {
             text-align: center;
-            color: #b5655a;
+            color: var(--primary);
             margin-bottom: 30px;
             font-size: 2.5rem;
         }
@@ -49,21 +65,21 @@
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
-            color: #8c6b5d;
+            color: var(--muted);
         }
         
         input, textarea, select {
             width: 100%;
             padding: 12px;
-            border: 2px solid #e8d1c5;
+            border: 2px solid var(--border);
             border-radius: 8px;
             font-size: 16px;
             transition: border-color 0.3s;
-            background-color: #faf6f2;
+            background-color: var(--surface);
         }
         
         input:focus, textarea:focus, select:focus {
-            border-color: #d4a096;
+            border-color: var(--primarySoft);
             outline: none;
         }
         
@@ -83,7 +99,7 @@
             flex: 1;
             min-width: 120px;
             padding: 12px;
-            background: #d4a096;
+            background: var(--primarySoft);
             color: white;
             border: none;
             border-radius: 8px;
@@ -94,13 +110,13 @@
         }
         
         .option-btn:hover {
-            background: #b5655a;
+            background: var(--primary);
             transform: translateY(-2px);
         }
         
         .option-btn.active {
-            background: #b5655a;
-            box-shadow: 0 4px 8px rgba(181, 101, 90, 0.3);
+            background: var(--primary);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
         }
         
         .option-btn:active {
@@ -111,7 +127,7 @@
             display: block;
             width: 100%;
             padding: 15px;
-            background: #e8b04d;
+            background: var(--accent);
             color: white;
             border: none;
             border-radius: 8px;
@@ -123,7 +139,7 @@
         }
         
         .action-btn:hover {
-            background: #d49c3d;
+            background: var(--accentHover);
             transform: translateY(-2px);
         }
         
@@ -147,7 +163,7 @@
         }
         
         .result-content {
-            background: #faf6f2;
+            background: var(--surface);
             border-radius: 15px;
             padding: 30px;
             width: 90%;
@@ -155,19 +171,19 @@
             text-align: center;
             position: relative;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            border: 1px solid #e8d1c5;
+            border: 1px solid var(--border);
             max-height: 90vh;
             overflow-y: auto;
         }
         
         .result-title {
-            color: #b5655a;
+            color: var(--primary);
             margin-bottom: 10px;
             font-size: 1.8rem;
         }
         
         .event-date {
-            color: #8c6b5d;
+            color: var(--muted);
             margin-bottom: 30px;
             font-size: 1.2rem;
         }
@@ -175,7 +191,7 @@
         .winner-name {
             font-size: 5rem;
             font-weight: bold;
-            color: #b5655a;
+            color: var(--primary);
             margin: 40px 0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
             animation: pulse 2s infinite, glow 3s infinite alternate;
@@ -197,9 +213,9 @@
             position: sticky;
             bottom: 10px;
             padding: 10px 20px;
-            background: rgba(232, 176, 77, 0.1);
-            color: #e8b04d;
-            border: 2px solid #e8b04d;
+            background: rgba(0, 0, 0, 0.03);
+            color: var(--accent);
+            border: 2px solid var(--accent);
             border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
@@ -210,7 +226,7 @@
         }
         
         .next-btn:hover {
-            background: #e8b04d;
+            background: var(--accent);
             color: white;
         }
         
@@ -261,18 +277,18 @@
             border: none;
             font-size: 24px;
             cursor: pointer;
-            color: #8c6b5d;
+            color: var(--muted);
             z-index: 10;
             margin-bottom: 10px;
             float: right;
         }
         
         .close-btn:hover {
-            color: #b5655a;
+            color: var(--primary);
         }
         
         .progress-info {
-            color: #8c6b5d;
+            color: var(--muted);
             margin-top: 20px;
             font-size: 1rem;
         }
@@ -287,7 +303,7 @@
         }
         
         .points-btn {
-            background: #e8b04d;
+            background: var(--accent);
             color: white;
             border: none;
             border-radius: 50%;
@@ -302,7 +318,7 @@
         }
         
         .points-btn:hover {
-            background: #d49c3d;
+            background: var(--accentHover);
             transform: scale(1.1);
         }
         
@@ -311,7 +327,7 @@
             font-weight: bold;
             min-width: 40px;
             text-align: center;
-            color: #b5655a;
+            color: var(--primary);
         }
         
         .group-header {
@@ -324,7 +340,7 @@
         
         .group-title {
             font-weight: bold;
-            color: #8c6b5d;
+            color: var(--muted);
             text-align: left;
         }
 
@@ -338,7 +354,7 @@
         }
 
         .group-name-editable:hover {
-            background: rgba(232, 176, 77, 0.15);
+            background: rgba(0, 0, 0, 0.05);
         }
 
         .group-name-placeholder {
@@ -349,14 +365,14 @@
         .points-summary {
             margin-top: 20px;
             padding: 15px;
-            background: #f5f0eb;
+            background: var(--panel);
             border-radius: 8px;
-            border-left: 4px solid #e8b04d;
+            border-left: 4px solid var(--accent);
         }
         
         .points-summary h4 {
             margin-bottom: 10px;
-            color: #8c6b5d;
+            color: var(--muted);
         }
         
         .points-summary p {
@@ -379,12 +395,12 @@
         }
         
         .groups-container::-webkit-scrollbar-thumb {
-            background: #d4a096;
+            background: var(--primarySoft);
             border-radius: 4px;
         }
         
         .groups-container::-webkit-scrollbar-thumb:hover {
-            background: #b5655a;
+            background: var(--primary);
         }
         
         /* 固定排序樣式 */
@@ -396,23 +412,23 @@
         .participant-item {
             padding: 12px 15px;
             margin-bottom: 8px;
-            background: #f5f0eb;
+            background: var(--panel);
             border-radius: 8px;
-            border-left: 4px solid #e8b04d;
+            border-left: 4px solid var(--accent);
             cursor: pointer;
             transition: all 0.3s;
             font-size: 18px;
         }
         
         .participant-item:hover {
-            background: #e8d1c5;
+            background: var(--border);
             transform: translateX(5px);
         }
         
         .highlighted-name {
             font-size: 4rem;
             font-weight: bold;
-            color: #b5655a;
+            color: var(--primary);
             margin: 30px 0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
             animation: highlight-pulse 1.5s infinite, highlight-glow 2s infinite alternate;
@@ -440,9 +456,9 @@
         
         .back-btn {
             padding: 10px 20px;
-            background: rgba(232, 176, 77, 0.1);
-            color: #e8b04d;
-            border: 2px solid #e8b04d;
+            background: rgba(0, 0, 0, 0.03);
+            color: var(--accent);
+            border: 2px solid var(--accent);
             border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
@@ -451,7 +467,7 @@
         }
         
         .back-btn:hover {
-            background: #e8b04d;
+            background: var(--accent);
             color: white;
         }
 
@@ -464,10 +480,10 @@
         }
 
         .manual-group {
-            background: #f5f0eb;
+            background: var(--panel);
             border-radius: 8px;
             padding: 12px;
-            border-left: 4px solid #e8b04d;
+            border-left: 4px solid var(--accent);
         }
 
         .manual-group-body {
@@ -480,14 +496,14 @@
             margin-bottom: 6px;
             background: #ffffff;
             border-radius: 6px;
-            border: 1px solid #e8d1c5;
+            border: 1px solid var(--border);
             cursor: move;
             font-size: 14px;
             transition: background 0.2s, transform 0.2s;
         }
 
         .manual-member:hover {
-            background: #f3e5d8;
+            background: var(--bg2);
             transform: translateX(3px);
         }
 
@@ -497,7 +513,7 @@
 
         .manual-group-body.drag-over {
             outline: 2px dashed #e8b04d;
-            background: rgba(232, 176, 77, 0.05);
+            background: rgba(0, 0, 0, 0.03);
         }
         
         /* 響應式設計優化 */
@@ -680,6 +696,48 @@
                 display: none !important;
             }
         }
+    
+        /* === THEME FX LAYERS === */
+        #fx-layer{
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+        .snowflake{
+            position: absolute;
+            top: -10vh;
+            color: rgba(255,255,255,0.95);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.12);
+            user-select: none;
+            will-change: transform;
+            animation: snow-fall linear infinite;
+        }
+        @keyframes snow-fall{
+            0%   { transform: translate3d(0,-12vh,0) rotate(0deg); opacity: 0; }
+            10%  { opacity: 1; }
+            100% { transform: translate3d(0,112vh,0) rotate(360deg); opacity: 0.9; }
+        }
+        .sparkle{
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: radial-gradient(circle, rgba(255,233,170,0.95) 0%, rgba(212,175,55,0.65) 45%, rgba(212,175,55,0) 70%);
+            filter: drop-shadow(0 6px 14px rgba(212,175,55,0.35));
+            animation: sparkle-drift linear infinite, sparkle-twinkle ease-in-out infinite;
+            opacity: 0.9;
+        }
+        @keyframes sparkle-drift{
+            0%   { transform: translate3d(0,110vh,0); }
+            100% { transform: translate3d(0,-20vh,0); }
+        }
+        @keyframes sparkle-twinkle{
+            0%,100% { opacity: 0.15; transform: scale(0.7); }
+            50%     { opacity: 0.95; transform: scale(1.25); }
+        }
+    
     </style>
 </head>
 <body>
@@ -694,6 +752,18 @@
         <div class="form-group">
             <label for="event-date">活動日期 Event Date</label>
             <input type="date" id="event-date">
+        </div>
+
+        <div class="form-group">
+            <label for="theme-select">配色主題 Theme</label>
+            <select id="theme-select">
+                <option value="general">General（通用）</option>
+                <option value="xmas">Xmas（聖誕風）</option>
+                <option value="newyear">New Year（新年風）</option>
+                <option value="spring">Spring（春天氣息）</option>
+                <option value="easter">Easter（復活節）</option>
+                <option value="halloween">Halloween（萬聖節）</option>
+            </select>
         </div>
 
         <!-- ★★ 從姓名庫匯入 ★★ -->
@@ -781,6 +851,269 @@
             const nextBtn = document.getElementById('next-btn');
             const optionButtons = document.querySelectorAll('.option-btn');
             const printBtn = document.getElementById('print-btn');
+
+
+            // Theme UI
+            const themeSelect = document.getElementById('theme-select');
+
+            const themePalettes = {
+                general: {
+                    vars: {
+                        '--bg1': '#e8d1c5',
+                        '--bg2': '#f3e5d8',
+                        '--text': '#5a4a42',
+                        '--muted': '#8c6b5d',
+                        '--primary': '#b5655a',
+                        '--primarySoft': '#d4a096',
+                        '--accent': '#e8b04d',
+                        '--accentHover': '#d49c3d',
+                        '--surface': '#faf6f2',
+                        '--surfaceElev': 'rgba(255, 255, 255, 0.90)',
+                        '--border': '#e8d1c5',
+                        '--panel': '#f5f0eb'
+                    },
+                    confetti: ['#b5655a', '#e8b04d', '#d4a096', '#f3d9a4']
+                },
+                xmas: {
+                    // 高級聖誕：松綠 / 香檳金 / 酒紅 / 雪白
+                    vars: {
+                        '--bg1': '#fff6ef',
+                        '--bg2': '#f2fff8',
+                        '--text': '#1a1a1a',
+                        '--muted': '#5b5b5b',
+                        '--primary': '#c81d25',
+                        '--primarySoft': '#ffe3e6',
+                        '--accent': '#1b7f4f',
+                        '--accentHover': '#166742',
+                        '--surface': 'rgba(255,255,255,0.82)',
+                        '--surfaceElev': 'rgba(255,255,255,0.92)',
+                        '--border': 'rgba(200, 29, 37, 0.22)',
+                        '--panel': 'rgba(255,255,255,0.65)'
+                    },
+                    confetti: ['#d4af37', '#ffffff', '#c81d25', '#1b7f4f']
+                },
+                newyear: {
+                    // 高級新年（中國新年）：喜慶紅金 / 溫潤奶白底板（不刺眼）
+                    vars: {
+                        '--bg1': '#fff2e0',
+                        '--bg2': '#ffe3eb',
+                        '--text': '#1a1a1a',
+                        '--muted': '#5b3a2b',
+                        '--primary': '#d11a2a',
+                        '--primarySoft': '#ffe0e5',
+                        '--accent': '#d4af37',
+                        '--accentHover': '#b8924f',
+                        '--surface': 'rgba(255,255,255,0.86)',
+                        '--surfaceElev': 'rgba(255,255,255,0.94)',
+                        '--border': 'rgba(209, 26, 42, 0.22)',
+                        '--panel': 'rgba(255,255,255,0.70)'
+                    },
+                    confetti: ['#d4af37', '#ffec99', '#d11a2a', '#ffffff']
+                },
+                spring: {
+                    // 高級春天：鼠尾草綠 / 奶油白 / 柔粉
+                    vars: {
+                        '--bg1': '#e7efe8',
+                        '--bg2': '#f7f5ee',
+                        '--text': '#2f3a34',
+                        '--muted': '#55655d',
+                        '--primary': '#2f6f58',
+                        '--primarySoft': '#7aa894',
+                        '--accent': '#e2b36b',
+                        '--accentHover': '#cc9b54',
+                        '--surface': '#fbfbf6',
+                        '--surfaceElev': 'rgba(251, 251, 246, 0.92)',
+                        '--border': 'rgba(47, 111, 88, 0.18)',
+                        '--panel': 'rgba(47, 111, 88, 0.06)'
+                    },
+                    confetti: ['#2f6f58', '#e2b36b', '#f2c3c6', '#ffffff']
+                },
+                easter: {
+                    // 高級復活節：柔霧紫 / 兔毛白 / 蛋彩
+                    vars: {
+                        '--bg1': '#f6f2ff',
+                        '--bg2': '#fff7f0',
+                        '--text': '#3a2f3f',
+                        '--muted': '#6b5f72',
+                        '--primary': '#7b5ea7',
+                        '--primarySoft': '#c1b0e3',
+                        '--accent': '#d6a3a5',
+                        '--accentHover': '#c48c8f',
+                        '--surface': '#fffdf9',
+                        '--surfaceElev': 'rgba(255, 253, 249, 0.92)',
+                        '--border': 'rgba(123, 94, 167, 0.18)',
+                        '--panel': 'rgba(123, 94, 167, 0.06)'
+                    },
+                    confetti: ['#7b5ea7', '#b8e1dd', '#f2d0a7', '#ffffff']
+                },
+                halloween: {
+                    // 高級萬聖：碳黑 / 南瓜橘 / 深紫 / 霧骨白
+                    vars: {
+                        '--bg1': '#0b0b0f',
+                        '--bg2': '#14131a',
+                        '--text': '#f3efe6',
+                        '--muted': '#c7bfb1',
+                        '--primary': '#ff7a18',
+                        '--primarySoft': '#a14100',
+                        '--accent': '#7a3cff',
+                        '--accentHover': '#622fe0',
+                        '--surface': '#101015',
+                        '--surfaceElev': 'rgba(16, 16, 21, 0.92)',
+                        '--border': 'rgba(255, 122, 24, 0.28)',
+                        '--panel': 'rgba(255, 255, 255, 0.06)'
+                    },
+                    confetti: ['#ff7a18', '#7a3cff', '#98c379', '#ffffff']
+                }
+            };
+
+            let currentThemeConfetti = themePalettes.general.confetti;
+
+            
+            let fxInterval = null;
+            let fxMode = null;
+
+            function clearFXLayer() {
+                const layer = document.getElementById('fx-layer');
+                if (layer) layer.innerHTML = '';
+            }
+
+            function stopThemeFX() {
+                if (fxInterval) {
+                    clearInterval(fxInterval);
+                    fxInterval = null;
+                }
+                fxMode = null;
+                clearFXLayer();
+            }
+
+            function startXmasFX() {
+                const layer = document.getElementById('fx-layer');
+                if (!layer) return;
+                clearFXLayer();
+
+                // 雪花：多層速度/大小，營造飄雪感
+                const snowCount = 42;
+                for (let i = 0; i < snowCount; i++) {
+                    const s = document.createElement('div');
+                    s.className = 'snowflake';
+                    s.textContent = '❄';
+                    const size = 10 + Math.random() * 18;
+                    const left = Math.random() * 100;
+                    const dur = 7 + Math.random() * 10;
+                    const delay = Math.random() * 6;
+                    const drift = (Math.random() * 2 - 1) * 40; // 左右飄移
+                    s.style.left = left + 'vw';
+                    s.style.fontSize = size + 'px';
+                    s.style.animationDuration = dur + 's';
+                    s.style.animationDelay = (-delay) + 's';
+                    s.style.transform = `translate3d(${drift}px, -12vh, 0)`;
+                    layer.appendChild(s);
+                }
+
+                // 金粉：由下往上輕飄的 sparkle
+                const sparkleCount = 26;
+                for (let i = 0; i < sparkleCount; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'sparkle';
+                    p.style.left = (Math.random() * 100) + 'vw';
+                    p.style.bottom = (-10 - Math.random() * 80) + 'vh';
+                    const dur = 6 + Math.random() * 10;
+                    const delay = Math.random() * 4;
+                    p.style.animationDuration = `${dur}s, ${1.6 + Math.random() * 2.2}s`;
+                    p.style.animationDelay = `${-delay}s, ${-delay}s`;
+                    layer.appendChild(p);
+                }
+
+                // 偶爾撒一點「香檳金」微彩帶（不干擾操作）
+                fxInterval = setInterval(() => {
+                    try {
+                        confetti({
+                            particleCount: 18,
+                            spread: 35,
+                            startVelocity: 18,
+                            gravity: 0.55,
+                            origin: { y: 0.2 },
+                            colors: ['#d4af37', '#ffffff', '#c62828', '#1b7f4f']
+                        });
+                    } catch (e) {}
+                }, 2600);
+            }
+
+            function startNewYearFX() {
+                // 中國新年：不做飄雪，改成金粉與紅金彩帶節奏
+                const layer = document.getElementById('fx-layer');
+                if (!layer) return;
+                clearFXLayer();
+
+                // 金粉：多一些，像「金粉飄落」
+                const sparkleCount = 40;
+                for (let i = 0; i < sparkleCount; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'sparkle';
+                    p.style.left = (Math.random() * 100) + 'vw';
+                    p.style.bottom = (-10 - Math.random() * 80) + 'vh';
+                    const dur = 5 + Math.random() * 9;
+                    const delay = Math.random() * 4;
+                    p.style.animationDuration = `${dur}s, ${1.4 + Math.random() * 2.0}s`;
+                    p.style.animationDelay = `${-delay}s, ${-delay}s`;
+                    layer.appendChild(p);
+                }
+
+                fxInterval = setInterval(() => {
+                    try {
+                        confetti({
+                            particleCount: 26,
+                            spread: 45,
+                            startVelocity: 22,
+                            gravity: 0.75,
+                            origin: { y: 0.15 },
+                            colors: ['#d4af37', '#ffec99', '#c81d25', '#ffffff']
+                        });
+                    } catch (e) {}
+                }, 2400);
+            }
+
+            function startThemeFX(themeKey) {
+                // 避免重複啟動
+                if (fxMode === themeKey) return;
+                stopThemeFX();
+
+                if (themeKey === 'xmas') {
+                    fxMode = 'xmas';
+                    startXmasFX();
+                } else if (themeKey === 'newyear') {
+                    fxMode = 'newyear';
+                    startNewYearFX();
+                }
+            }
+
+            function applyTheme(themeKey) {
+                const theme = themePalettes[themeKey] || themePalettes.general;
+                Object.entries(theme.vars).forEach(([k, v]) => {
+                    document.documentElement.style.setProperty(k, v);
+                });
+                currentThemeConfetti = theme.confetti || themePalettes.general.confetti;
+                localStorage.setItem('nl_theme', themeKey);
+                if (themeSelect) themeSelect.value = themeKey;
+
+                // Theme FX（僅 Xmas / NewYear 啟用）
+                if (themeKey === 'xmas' || themeKey === 'newyear') {
+                    startThemeFX(themeKey);
+                } else {
+                    stopThemeFX();
+                }
+            }
+
+            // 初始化 theme（預設 general）
+            const savedTheme = localStorage.getItem('nl_theme') || 'general';
+            applyTheme(savedTheme);
+
+            if (themeSelect) {
+                themeSelect.addEventListener('change', function() {
+                    applyTheme(this.value);
+                });
+            }
+
 
             // name bank UI 元素
             const nameBankSchoolSelect = document.getElementById('namebank-school');
@@ -1106,7 +1439,7 @@ function performSort() {
                 eventDateDisplay.textContent = `活動日期 Date: ${eventDateInput.value}`;
                 
                 let html = `
-                    <p style="margin-bottom: 15px; color: #8c6b5d;">
+                    <p style="margin-bottom: 15px; color: var(--muted);">
                         點擊任一名字可突出顯示（Click any name to highlight）
                     </p>
                     <div class="fixed-order-container">
@@ -1234,7 +1567,7 @@ function performSort() {
             // 自動分組畫面
             function displayGroupsWithPoints(groupSize) {
                 let html = `
-                    <h3 style="margin-bottom: 20px; color: #8c6b5d;">分${groupSize}人組 Groups of ${groupSize}</h3>
+                    <h3 style="margin-bottom: 20px; color: var(--muted);">分${groupSize}人組 Groups of ${groupSize}</h3>
                     <div class="groups-container">
                 `;
                 
@@ -1242,7 +1575,7 @@ function performSort() {
                     const nameText = autoGroupNamesText[index] || '';
                     const hasName = nameText.trim() !== '';
                     html += `
-                        <div style="margin-bottom: 15px; padding: 15px; background: #f5f0eb; border-radius: 8px; border-left: 4px solid #e8b04d;">
+                        <div style="margin-bottom: 15px; padding: 15px; background: var(--panel); border-radius: 8px; border-left: 4px solid var(--accent);">
                             <div class="group-header">
                                 <div class="group-title">
                                     第 ${index + 1} 組 Group ${index + 1}<br>
@@ -1318,8 +1651,8 @@ function performSort() {
             // 手動分組畫面
             function renderManualGroups() {
                 let html = `
-                    <h3 style="margin-bottom: 10px; color: #8c6b5d;">手動分組 Manual Grouping</h3>
-                    <p style="margin-bottom: 10px; color: #8c6b5d; font-size: 0.9rem;">
+                    <h3 style="margin-bottom: 10px; color: var(--muted);">手動分組 Manual Grouping</h3>
+                    <p style="margin-bottom: 10px; color: var(--muted); font-size: 0.9rem;">
                         把學生姓名拖曳到其他組，就可以重新安排分組。<br>
                         Drag a student name to another group to rearrange.
                     </p>
@@ -1473,7 +1806,7 @@ function performSort() {
                     particleCount: 100,
                     spread: 70,
                     origin: { y: 0.6 },
-                    colors: ['#b5655a', '#e8b04d', '#d4a096', '#f3d9a4']
+                    colors: currentThemeConfetti
                 });
                 
                 setTimeout(() => {
@@ -1482,7 +1815,7 @@ function performSort() {
                         angle: 60,
                         spread: 55,
                         origin: { x: 0, y: 0.6 },
-                        colors: ['#b5655a', '#e8b04d', '#d4a096', '#f3d9a4']
+                        colors: currentThemeConfetti
                     });
                 }, 250);
                 
@@ -1492,11 +1825,12 @@ function performSort() {
                         angle: 120,
                         spread: 55,
                         origin: { x: 1, y: 0.6 },
-                        colors: ['#b5655a', '#e8b04d', '#d4a096', '#f3d9a4']
+                        colors: currentThemeConfetti
                     });
                 }, 500);
             }
         });
     </script>
+    <div id="fx-layer" aria-hidden="true"></div>
 </body>
 </html>
