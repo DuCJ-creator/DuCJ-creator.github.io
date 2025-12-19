@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shirley's Ultimate EMO Shredder (Starry Flow)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Noto+Serif+TC:wght@400;700&family=Caveat:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* ================= STAR BACKGROUND (CORRECTED) ================= */
+        /* 星星流動動畫 */
+        @keyframes animStar {
+            from { transform: translateY(0px) translateX(0px); }
+            to   { transform: translateY(-1000px) translateX(-300px); } /* 移動距離 */
+        }
+
+        .star-layer {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        /* 第一層：小白星 (量多、慢、遠) */
+        #stars1 {
+            z-index: -2;
+            width: 2px; height: 2px;
+            background: transparent;
+            /* 修正：增強亮度與數量 */
+            box-shadow: 
+                10vw 10vh #fff, 20vw 80vh #fff, 80vw 10vh #fff, 90vw 50vh #fff,
+                30vw 30vh #fff, 40vw 90vh #fff, 70vw 20vh #fff, 10vw 60vh #fff,
+                50vw 10vh #fff, 60vw 80vh #fff, 15vw 45vh #fff, 85vw 35vh #fff,
+                25vw 25vh #fff, 75vw 75vh #fff, 95vw 15vh #fff, 05vw 95vh #fff,
+                /* 重複部分以確保滾動無縫 */
+                10vw 110vh #fff, 20vw 180vh #fff, 80vw 110vh #fff, 90vw 150vh #fff,
+                30vw 130vh #fff, 40vw 190vh #fff, 70vw 120vh #fff, 10vw 160vh #fff;
+            animation: animStar 60s linear infinite; /* 加快速度確保可見 */
+            opacity: 0.8;
+        }
+
+        /* 第二層：大金星 (量少、快、近) */
+        #stars2 {
+            z-index: -1;
+            width: 3px; height: 3px;
+            background: transparent;
+            box-shadow: 
+                15vw 25vh #ffd700, 65vw 35vh #ffd700, 45vw 85vh #fffacd,
+                85vw 15vh #ffd700, 35vw 65vh #fffacd, 95vw 95vh #ffd700,
+                25vw 55vh #ffd700, 75vw 45vh #fffacd, 05vw 75vh #ffd700,
+                /* 重複 */
+                15vw 125vh #ffd700, 65vw 135vh #ffd700, 45vw 185vh #fffacd;
+            animation: animStar 40s linear infinite; /* 比第一層快 */
+            opacity: 1;
+        }
+
+        /* ================= MAIN STYLES ================= */
+        :root {
+            --bg-color: #050505;
+            --gold: #ffd700;
+            --gold-light: #fffacd;
+            --gold-dark: #b8860b;
+            --paper-1: #ffcfdf; 
+            --paper-2: #cdf0ea; 
+            --paper-3: #f9f9c5; 
+            --paper-4: #e2dcf5; 
+            --paper-5: #fad4c0; 
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            /* 背景：深藍紫黑漸層，模擬宇宙星雲感，不再是純黑 */
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 120%, #1a0b2e 0%, #000000 70%);
+            color: #fff;
+            font-family: 'Noto Serif TC', serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 120px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- Header --- */
+        header {
+            text-align: center;
+            padding: 40px 20px 20px;
+            z-index: 10;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            background: linear-gradient(to bottom, #fff 20%, var(--gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            margin-bottom: 10px;
+            font-weight: 900;
+        }
+
+        .subtitle {
+            color: #aaa;
+            font-size: 0.9rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* --- Wall --- */
+        .wall-section {
+            width: 95%;
+            max-width: 1200px;
+            margin: 20px auto;
+            z-index: 5;
+            perspective: 1000px;
+        }
+
+        .wall-title {
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            font-family: 'Cinzel', serif;
+        }
+
+        .wall-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+            padding: 10px;
+        }
+
+        .note-card {
+            background: #fff;
+            padding: 15px;
+            min-height: 120px;
+            border-radius: 2px 2px 15px 2px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+            color: #333;
+            font-family: 'Caveat', 'Noto Serif TC', serif;
+            font-size: 1.1rem;
+            line-height: 1.4;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            user-select: none;
+            border: 2px solid transparent;
+            transform-origin: top center;
+            white-space: pre-wrap;
+        }
+
+        .note-card:hover {
+            transform: scale(1.05) rotate(0deg) !important;
+            z-index: 20;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+        }
+
+        .note-card.selected {
+            border-color: var(--gold);
+            transform: scale(1.05) !important;
+            box-shadow: 0 0 20px var(--gold);
+            z-index: 10;
+        }
+        
+        .note-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: -10px; right: -10px;
+            background: var(--gold);
+            color: #000;
+            width: 25px; height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .note-card.gone {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.8);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        /* --- Controls --- */
+        .control-panel {
+            width: 90%;
+            max-width: 600px;
+            background: rgba(20, 20, 20, 0.85); /* 稍微不透明一點，避免背景干擾 */
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            padding: 25px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            margin: 20px 0 50px 0;
+            z-index: 6;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-panel h3 {
+            color: var(--gold);
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            text-align: center;
+            margin: 0 0 5px 0;
+            text-shadow: 0 0 10px rgba(255,215,0,0.3);
+        }
+
+        textarea {
+            width: 100%;
+            height: 90px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #444;
+            color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: none;
+            font-family: 'Noto Serif TC', serif;
+            transition: border 0.3s;
+        }
+        textarea:focus { border-color: var(--gold); outline: none; }
+
+        .btn-main-shred {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #FFD700 0%, #FDB931 50%, #FFD700 100%);
+            border: none;
+            color: #000;
+            font-weight: 900;
+            font-size: 1.2rem;
+            font-family: 'Cinzel', serif;
+            cursor: pointer;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-main-shred:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5); }
+        .btn-main-shred:active { transform: translateY(1px); }
+        .btn-main-shred:disabled { filter: grayscale(1); cursor: not-allowed; transform: none; }
+
+        /* --- Machine --- */
+        .shredder-zone {
+            position: fixed;
+            bottom: 0; left: 0;
+            width: 100%; height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .machine-head {
+            width: 360px; height: 70px;
+            background: linear-gradient(to bottom, #2a2a2a, #000);
+            border-radius: 12px 12px 0 0;
+            border-top: 1px solid #444;
+            box-shadow: 0 -10px 60px rgba(0,0,0,1);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 51;
+        }
+        .machine-head::before {
+            content: '';
+            position: absolute;
+            top: 5px; left: 10px; right: 10px; bottom: 0;
+            border-top: 2px solid var(--gold-dark);
+            border-radius: 10px 10px 0 0;
+            opacity: 0.5;
+        }
+
+        .machine-slot {
+            width: 300px; height: 10px;
+            background: #000;
+            border-radius: 5px;
+            box-shadow: inset 0 0 10px #000;
+        }
+
+        .shredding-active { animation: shake 0.1s infinite; }
+        @keyframes shake {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(1px, -1px); }
+            100% { transform: translate(-1px, 1px); }
+        }
+
+        /* --- Flying Ghost Paper --- */
+        .flying-ghost {
+            position: fixed;
+            z-index: 40;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            pointer-events: none;
+            transition: all 0.8s cubic-bezier(0.5, 0, 0.2, 1);
+        }
+
+        .shreds-container {
+            position: fixed;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 320px; height: 300px;
+            pointer-events: none;
+            z-index: 45;
+        }
+        .confetti-strip {
+            position: absolute;
+            width: 4px; height: 8px;
+            top: 80px; 
+        }
+
+        /* --- THE GOLDEN SPHERE --- */
+        .energy-ball-wrapper {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .the-sphere {
+            width: 0px; height: 0px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffffff 0%, #ffd700 40%, #b8860b 85%, #8b4500 100%);
+            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.5), 0 0 20px #ffd700, 0 0 40px #ffd700;
+            opacity: 0;
+            position: relative;
+        }
+
+        .the-sphere::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 60%);
+            animation: pulse-shine 2s infinite;
+        }
+
+        .ball-animate-in {
+            animation: sphereGrow 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .ball-explode {
+            animation: sphereExplode 0.3s ease-out forwards;
+        }
+
+        @keyframes sphereGrow {
+            0% { width: 0; height: 0; opacity: 0; }
+            100% { width: 250px; height: 250px; opacity: 1; box-shadow: 0 0 60px #ffd700; }
+        }
+        @keyframes pulse-shine {
+            0% { transform: scale(0.9); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.5; }
+        }
+        @keyframes sphereExplode {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.9; background: #fff; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        /* --- THE PARTICLES (FULL SCREEN EXPLOSION) --- */
+        .energy-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 90;
+            overflow: hidden;
+        }
+
+        .plus-particle {
+            position: absolute;
+            color: var(--gold);
+            font-family: 'Cinzel', serif;
+            font-weight: 900;
+            text-shadow: 0 0 10px var(--gold), 0 0 20px #fff;
+            user-select: none;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+
+        /* Shockwave */
+        .shockwave {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 200;
+        }
+        .shockwave-active {
+            animation: flash 1s ease-out forwards;
+        }
+        @keyframes flash {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        @media (min-width: 768px) {
+            .wall-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+            @keyframes sphereGrow { 100% { width: 400px; height: 400px; opacity: 1; } }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="stars1" class="star-layer"></div>
+    <div id="stars2" class="star-layer"></div>
+
+    <header>
+        <h1>Shirley's EMO Shredder</h1>
+        <div class="subtitle">Select. Destroy. Rebirth.</div>
+    </header>
+
+    <div class="wall-section">
+        <div class="wall-title">- CLICK TO SELECT NEGATIVE THOUGHTS -</div>
+        <div class="wall-grid" id="wallGrid"></div>
+    </div>
+
+    <div class="control-panel">
+        <h3>自定義負能量 (Custom)</h3>
+        <textarea id="customInput" placeholder="如果牆上沒有你的心聲，請寫在這裡..."></textarea>
+        
+        <button class="btn-main-shred" onclick="startShreddingSequence()">
+            粉碎所有的不開心 (SHRED IT)
+        </button>
+    </div>
+
+    <div class="shredder-zone">
+        <div class="machine-head" id="machine">
+            <div class="machine-slot" id="machineSlot"></div>
+        </div>
+        <div class="shreds-container" id="shredsZone"></div>
+    </div>
+
+    <div class="energy-ball-wrapper">
+        <div id="theSphere" class="the-sphere"></div>
+    </div>
+
+    <div id="shockwaveLayer" class="shockwave"></div>
+    <div class="energy-overlay" id="energyLayer"></div>
+
+    <script>
+        // --- DATA ---
+        const negativeData = [
+            "I'm swamped with work.\n我被段考、社團成發和競賽準備給淹沒了。",
+            "I'm having a bad hair day.\n今天諸事不順，睡過頭、考砸了，真是個厭世日。",
+            "I've spread myself too thin.\n我分身乏術，一個人要扛太多責任。",
+            "I'm snowed under with work.\n補習作業像雪崩一樣埋住，熬夜已是家常便飯。",
+            "Dealing with difficult people.\n應付那些擺爛組員或奧客，耗光我所有精力。",
+            "Powerless.\n拚了命努力，成績還是毫無起色，無力感很絕望。",
+            "The world is a nightmare.\n考試、排名、期望，構成無盡的噩夢。",
+            "I just want to give up.\n想徹底躺平，什麼都不在乎了。",
+            "睡眠不足。\n連睡滿6小時都是奢望。",
+            "數學考卷爆炸。\nOverslept, bombed the math test.",
+            "分組報告只有我在做。\nOnly me doing the group project.",
+            "人生好難。\n看不到盡頭。Life is so hard.",
+            "理智線秒斷。\nMy patience snaps instantly.",
+            "贏不過別人。\nNo matter how hard I study.",
+            "高壓循環。\nHigh-pressure nightmare on repeat.",
+            "只想放空。\nJust want to zone out.",
+            "數學題庫無底洞。\nMath is a bottomless pit.",
+            "恨文言文。\nI hate classical Chinese.",
+            "英文作文卡關。\nCan't write the essay.",
+            "物理化學全錯。\nGot everything wrong.",
+            "歷史年代混亂。\nDates are mixed up like congee.",
+            "地理像抽象畫。\nAbstract art maps.",
+            "記憶體不足。\nBrain shows 'insufficient memory'.",
+            "只想時光倒流。\nWant to turn back time."
+        ];
+        
+        const colors = ['var(--paper-1)', 'var(--paper-2)', 'var(--paper-3)', 'var(--paper-4)', 'var(--paper-5)'];
+
+        // --- INIT WALL ---
+        const wallGrid = document.getElementById('wallGrid');
+        negativeData.forEach((text, i) => {
+            const card = document.createElement('div');
+            card.className = 'note-card';
+            card.innerText = text;
+            const color = colors[i % colors.length];
+            card.style.backgroundColor = color;
+            card.style.transform = `rotate(${(Math.random() * 6) - 3}deg)`;
+            card.dataset.color = color;
+            card.onclick = () => card.classList.toggle('selected');
+            wallGrid.appendChild(card);
+        });
+
+        // --- AUDIO ---
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playShredSound(duration) {
+            const bufferSize = audioCtx.sampleRate * duration;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(800, audioCtx.currentTime);
+            filter.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + duration);
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + duration);
+            noise.connect(filter).connect(gain).connect(audioCtx.destination);
+            noise.start();
+        }
+
+        function playChargeSound() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 2.5);
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 2);
+            osc.connect(gain).connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 2.5);
+        }
+
+        function playBoomSound() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+            gain.gain.setValueAtTime(1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+            osc.type = 'triangle';
+            osc.connect(gain).connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.5);
+        }
+
+        // --- MAIN LOGIC ---
+        let isRunning = false;
+
+        function startShreddingSequence() {
+            if(isRunning) return;
+            initAudio();
+
+            const selected = document.querySelectorAll('.note-card.selected');
+            const customVal = document.getElementById('customInput').value.trim();
+            const inputField = document.getElementById('customInput');
+
+            if(selected.length === 0 && !customVal) {
+                alert("請先選擇或輸入！");
+                return;
+            }
+
+            isRunning = true;
+            const btn = document.querySelector('.btn-main-shred');
+            btn.disabled = true;
+            btn.innerText = "DESTROYING...";
+
+            const machine = document.getElementById('machine');
+            machine.classList.add('shredding-active');
+            playShredSound(3);
+
+            // Phase 1: Shred
+            let delay = 0;
+            const delayStep = 150;
+
+            selected.forEach(card => {
+                setTimeout(() => {
+                    animateFly(card, card.dataset.color);
+                    card.classList.remove('selected');
+                    card.classList.add('gone');
+                }, delay);
+                delay += delayStep;
+            });
+
+            if(customVal) {
+                setTimeout(() => {
+                    const rect = inputField.getBoundingClientRect();
+                    const dummy = { getBoundingClientRect: () => rect };
+                    animateFly(dummy, '#fff', true);
+                    inputField.value = '';
+                }, delay);
+                delay += delayStep;
+            }
+
+            // Phase 2: Gather
+            const shredEndTime = delay + 1000;
+            setTimeout(() => {
+                machine.classList.remove('shredding-active');
+                btn.innerText = "GATHERING ENERGY...";
+                const sphere = document.getElementById('theSphere');
+                sphere.classList.remove('ball-explode');
+                sphere.className = 'the-sphere ball-animate-in';
+                playChargeSound();
+            }, shredEndTime);
+
+            // Phase 3: EXPLODE
+            const explosionTime = shredEndTime + 2500;
+            setTimeout(() => {
+                const sphere = document.getElementById('theSphere');
+                sphere.classList.remove('ball-animate-in');
+                sphere.classList.add('ball-explode'); 
+                playBoomSound();
+
+                const shock = document.getElementById('shockwaveLayer');
+                shock.classList.add('shockwave-active');
+
+                // *** FIREWORK LOGIC (FULL SCREEN) ***
+                spawnFullExplosion(); 
+
+                btn.innerText = "PURE ENERGY";
+                
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerText = "SHRED MORE";
+                    isRunning = false;
+                    shock.classList.remove('shockwave-active');
+                }, 3000);
+
+            }, explosionTime);
+        }
+
+        // --- ANIMATIONS ---
+        function animateFly(el, color) {
+            const start = el.getBoundingClientRect();
+            const slot = document.getElementById('machineSlot').getBoundingClientRect();
+            const ghost = document.createElement('div');
+            ghost.className = 'flying-ghost';
+            ghost.style.background = color;
+            ghost.style.width = start.width + 'px';
+            ghost.style.height = start.height + 'px';
+            ghost.style.top = start.top + 'px';
+            ghost.style.left = start.left + 'px';
+            document.body.appendChild(ghost);
+
+            requestAnimationFrame(() => {
+                ghost.style.top = slot.top + 'px';
+                ghost.style.left = (slot.left + slot.width/2 - 20) + 'px';
+                ghost.style.width = '40px';
+                ghost.style.height = '5px';
+                ghost.style.opacity = '0.5';
+            });
+            setTimeout(() => { ghost.remove(); spawnConfetti(color); }, 800);
+        }
+
+        function spawnConfetti(color) {
+            const zone = document.getElementById('shredsZone');
+            for(let i=0; i<8; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti-strip';
+                c.style.background = color;
+                c.style.left = Math.random() * 300 + 'px';
+                zone.appendChild(c);
+                const dur = Math.random() + 0.5;
+                c.style.transition = `top ${dur}s linear, opacity ${dur}s ease`;
+                requestAnimationFrame(() => {
+                    c.style.top = '300px'; c.style.opacity = '0';
+                    c.style.transform = `rotate(${Math.random()*360}deg)`;
+                });
+                setTimeout(() => c.remove(), dur * 1000);
+            }
+        }
+
+        function spawnFullExplosion() {
+            const layer = document.getElementById('energyLayer');
+            const particleCount = 150; 
+
+            for(let i=0; i<particleCount; i++) {
+                const p = document.createElement('div');
+                p.className = 'plus-particle';
+                p.innerText = '+++++';
+                
+                const size = Math.random() * 2 + 1; 
+                p.style.fontSize = size + 'rem';
+                
+                layer.appendChild(p);
+
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = (Math.random() * 80) + 40; 
+                
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+                
+                p.style.transition = 'transform 1.2s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 1.2s ease';
+                
+                requestAnimationFrame(() => {
+                    p.style.opacity = '1';
+                    p.style.transform = `translate(calc(-50% + ${tx}vw), calc(-50% + ${ty}vh)) rotate(${Math.random()*360}deg)`;
+                });
+
+                setTimeout(() => {
+                    p.style.opacity = '0';
+                }, 1200);
+                setTimeout(() => p.remove(), 2000);
+            }
+        }
+    </script>
+</body>
+</html>
