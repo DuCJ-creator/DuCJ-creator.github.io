@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shirley's 上上籤 - Celestial Guidance Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            /* 1. 改為高級藍灰天幕背景 (High-grade Blue-Gray Sky Background) */
+            background: radial-gradient(ellipse at bottom center, 
+                #3a4e63 0%, /* 底部較亮的藍灰色 */
+                #22303f 50%, /* 中間過渡 */
+                #0f1722 100% /* 頂部深邃夜空 */
+            );
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft JhengHei', serif;
+            color: #f5f5f5;
+            overflow-x: hidden;
+            padding: 10px;
+            touch-action: pan-y;
+            position: relative;
+        }
+
+        /* 2. 北斗七星樣式 (Big Dipper Styling) */
+        .big-dipper-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2; /* 在背景光效(z1)之上，主內容(z10)之下 */
+            pointer-events: none;
+            transition: transform 0.1s ease-out; /* 平滑移動 */
+            will-change: transform;
+        }
+
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            /* 白色核心，帶有金色光暈 */
+            box-shadow: 
+                0 0 4px 1px #fff, 
+                0 0 15px 2px #ffd700,
+                0 0 30px rgba(255, 215, 0, 0.4); 
+            animation: twinkling 4s infinite alternate ease-in-out;
+        }
+
+        /* 北斗七星位置佈局 (大致模擬杓子形狀，偏左上指引) */
+        /* 杓柄末端 (Alkaid) */
+        .s1 { top: 15%; left: 25%; width: 4px; height: 4px; animation-delay: 0s; }
+        /* Mizar */
+        .s2 { top: 18%; left: 32%; width: 3px; height: 3px; animation-delay: 0.5s; }
+        /* Alioth */
+        .s3 { top: 22%; left: 38%; width: 4px; height: 4px; animation-delay: 1s; }
+        /* 杓身連接點 (Megrez) */
+        .s4 { top: 28%; left: 42%; width: 4px; height: 4px; animation-delay: 1.5s; opacity: 0.8; }
+        /* Phecda */
+        .s5 { top: 35%; left: 40%; width: 5px; height: 5px; animation-delay: 2s; }
+        /* 杓口指引星 (Merak) */
+        .s6 { top: 36%; left: 48%; width: 5px; height: 5px; animation-delay: 2.5s; }
+        /* 杓口指引星 (Dubhe - 最亮) */
+        .s7 { top: 28%; left: 50%; width: 6px; height: 6px; animation-delay: 3s; box-shadow: 0 0 5px 2px #fff, 0 0 20px 4px #ffd700; }
+
+        @keyframes twinkling {
+            0% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 0.4; transform: scale(0.9); }
+        }
+
+        /* 原有的全域聖光與流動特效 (Global Holy Light & Flow) - 調整顏色以適應藍背景 */
+        .global-light-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .holy-ambient {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120vmax;
+            height: 120vmax;
+            /* 調整為偏冷金色的光暈 */
+            background: radial-gradient(circle, rgba(255, 230, 150, 0.1) 0%, rgba(255, 215, 0, 0) 60%);
+            transform: translate(-50%, -50%);
+            mix-blend-mode: screen;
+            animation: ambientPulse 8s ease-in-out infinite alternate;
+        }
+
+        .light-stream {
+            position: absolute;
+            width: 200%;
+            height: 100px;
+            /* 調整流光顏色 */
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 240, 180, 0.08) 50%, transparent 100%);
+            transform: rotate(-45deg);
+            mix-blend-mode: overlay;
+            filter: blur(20px);
+            opacity: 0.5;
+        }
+
+        .s1-stream { top: -50%; left: -50%; animation: streamFlow 15s linear infinite; }
+        .s2-stream { top: 0%; left: -30%; animation: streamFlow 12s linear infinite reverse; animation-delay: -5s;}
+        .s3-stream { top: 50%; left: -60%; animation: streamFlow 18s linear infinite; animation-delay: -2s; }
+
+        @keyframes ambientPulse {
+            0% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        @keyframes streamFlow {
+            0% { transform: translateY(100vh) rotate(-45deg) translateX(-100%); }
+            100% { transform: translateY(-100vh) rotate(-45deg) translateX(100%); }
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            height: 95vh;
+        }
+        
+        .header {
+            flex: 0 0 auto;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 300;
+            letter-spacing: clamp(3px, 1vw, 8px);
+            color: #FFD700;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            position: relative;
+            display: inline-block;
+            text-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+        }
+        
+        h1::before, h1::after {
+            content: '✦';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #FFD700;
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            opacity: 0.8;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+        }
+        
+        h1::before { left: -40px; }
+        h1::after { right: -40px; }
+        
+        .subtitle {
+            font-size: clamp(0.8rem, 1.5vw, 1rem);
+            color: #D4AF37;
+            letter-spacing: 3px;
+            font-weight: 300;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-end;
+            gap: clamp(20px, 4vw, 50px);
+            flex: 1;
+            padding-bottom: 20px;
+            position: relative;
+        }
+        
+        .tube-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            position: relative;
+        }
+        
+        .bamboo-tube-container {
+            position: relative;
+            width: clamp(180px, 25vw, 260px);
+            height: clamp(400px, 50vh, 550px);
+            margin: 0 auto;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            z-index: 20;
+            overflow: visible; 
+        }
+
+        .bamboo-tube-inner-clipper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            border-radius: 0 0 20px 20px;
+            overflow: hidden;
+            transform-origin: center bottom;
+        }
+        
+        .bamboo-tube-container:hover {
+            transform: translateY(-10px);
+        }
+        
+        .bamboo-tube {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(95deg, #2a1f12 0%, #5c4a2a 20%, #7a6236 50%, #46341d 80%, #1f180f 100%);
+            position: relative;
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.9), 10px 30px 70px rgba(0, 0, 0, 0.8), 0 0 0 2px rgba(212, 175, 55, 0.3);
+        }
+        
+        @keyframes shaking {
+            0%, 100% { transform: rotate(0deg); }
+            10% { transform: rotate(-8deg) translateY(-5px); }
+            20% { transform: rotate(8deg) translateY(-8px); }
+            30% { transform: rotate(-8deg) translateY(-5px); }
+            40% { transform: rotate(8deg) translateY(-8px); }
+            50% { transform: rotate(-8deg) translateY(-5px); }
+            60% { transform: rotate(8deg) translateY(-8px); }
+            70% { transform: rotate(-8deg) translateY(-5px); }
+            80% { transform: rotate(8deg) translateY(-8px); }
+            90% { transform: rotate(-4deg) translateY(-4px); }
+        }
+        
+        .bamboo-tube-inner-clipper.shaking {
+            animation: shaking 0.8s ease-in-out infinite;
+        }
+        
+        .bamboo-knots {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(to bottom, transparent, transparent 80px, rgba(0, 0, 0, 0.4) 80px, rgba(212, 175, 55, 0.4) 82px, rgba(0, 0, 0, 0.4) 84px);
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        .bamboo-tube::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at center, #1a120b 40%, #2d2215 100%);
+            border-radius: 20px 20px 50% 50% / 20px 20px 10px 10px;
+            box-shadow: inset 0 -5px 15px rgba(0,0,0,0.8);
+            z-index: 3;
+        }
+        
+        .fortune-sticks-inside {
+            position: absolute;
+            width: 70%;
+            height: 100%;
+            top: 0;
+            left: 15%;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            overflow: visible;
+            padding-bottom: 20px;
+        }
+        
+        .fortune-stick-inside {
+            width: clamp(6px, 1vw, 10px);
+            height: 140%; 
+            background: linear-gradient(90deg, #966f0f, #ffd700, #966f0f);
+            margin: 0 -2px;
+            border-radius: 4px 4px 2px 2px;
+            box-shadow: 1px 0 3px rgba(0,0,0,0.6);
+            transform-origin: bottom center;
+            position: relative;
+            bottom: -35%; 
+        }
+        
+        .fortune-stick-inside::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 10%;
+            width: 80%;
+            height: 20px;
+            background-color: rgba(180, 40, 40, 0.9);
+            border-radius: 2px;
+            box-shadow: 0 0 5px rgba(255,0,0,0.3);
+        }
+        
+        .shake-hint {
+            color: #FFD700;
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            letter-spacing: 2px;
+            margin-top: 30px;
+            opacity: 0.8;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px 30px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .shake-hint:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: #FFD700;
+        }
+        
+        .sticks-area {
+            flex: 1;
+            height: clamp(250px, 35vh, 400px);
+            max-width: 350px;
+            position: relative;
+            /* 調整右側區域背景以適應新天幕 */
+            background: linear-gradient(180deg, rgba(30, 40, 50, 0.4) 0%, rgba(15, 20, 25, 0.7) 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .sticks-area::before {
+            content: "YOUR FORTUNE";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 215, 0, 0.07);
+            font-size: 2rem;
+            font-weight: bold;
+            white-space: nowrap;
+            pointer-events: none;
+            writing-mode: vertical-rl;
+            letter-spacing: 10px;
+        }
+        
+        .flying-stick {
+            position: fixed;
+            width: 12px;
+            height: 180px;
+            background: linear-gradient(90deg, #d4af37, #ffd700, #d4af37);
+            border-radius: 6px;
+            z-index: 100;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+            pointer-events: none;
+        }
+        
+        .fallen-stick {
+            position: relative;
+            width: clamp(28px, 4vw, 36px);
+            height: clamp(200px, 30vh, 260px);
+            background: linear-gradient(135deg, #aa8a39 0%, #fceabb 50%, #aa8a39 100%);
+            border-radius: 6px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.2), 0 0 20px rgba(255, 215, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        
+        .fallen-stick.landed {
+            opacity: 1;
+            transform: translateY(0);
+            animation: floatingStick 3s ease-in-out infinite;
+        }
+        
+        @keyframes floatingStick {
+            0%, 100% { transform: translateY(0); box-shadow: 0 10px 20px rgba(0,0,0,0.8), 0 0 20px rgba(255,215,0,0.2); }
+            50% { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 30px rgba(255,215,0,0.4); }
+        }
+        
+        .fallen-stick:hover {
+            transform: scale(1.05) translateY(-15px);
+            filter: brightness(1.2);
+        }
+        
+        .fallen-stick::before {
+            content: "上上籤";
+            color: #5c4a2a;
+            font-size: 1.2rem;
+            font-weight: 900;
+            writing-mode: vertical-rl;
+            letter-spacing: 8px;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+        }
+        
+        .fallen-stick .tap-hint {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            color: #FFD700;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .fallen-stick:hover .tap-hint {
+            opacity: 1;
+        }
+
+        .fortune-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Modal 背景也改為深藍色系 */
+            background: rgba(15, 23, 33, 0.95);
+            backdrop-filter: blur(15px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+        
+        .fortune-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .holy-radiance {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150vmax;
+            height: 150vmax;
+            background: conic-gradient(from 0deg, transparent 0%, rgba(255, 215, 0, 0.2) 10%, transparent 20%, rgba(255, 215, 0, 0.25) 30%, transparent 40%, rgba(255, 215, 0, 0.2) 50%, transparent 60%, rgba(255, 215, 0, 0.25) 70%, transparent 80%, rgba(255, 215, 0, 0.2) 90%, transparent 100%);
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            opacity: 0;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+        
+        .fortune-modal.active .holy-radiance {
+            opacity: 1;
+            animation: rotateRadiance 20s linear infinite;
+        }
+        
+        @keyframes rotateRadiance {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        .fortune-card {
+            /* 卡片背景微調 */
+            background: radial-gradient(circle at center, #2a3b4c 0%, #1a2533 100%);
+            width: 90%;
+            max-width: 800px;
+            border-radius: 30px;
+            padding: clamp(30px, 5vw, 50px);
+            border: 2px solid rgba(212, 175, 55, 0.5);
+            box-shadow: 0 0 100px rgba(255, 215, 0, 0.3), inset 0 0 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            transform: scale(0.8);
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .fortune-card.active {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .fortune-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            padding-bottom: 20px;
+        }
+        
+        .fortune-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: #FFD700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            margin-bottom: 10px;
+        }
+        
+        .fortune-subtitle {
+            color: #D4AF37;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .fortune-content {
+            background: rgba(30, 40, 50, 0.5);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 1px solid rgba(255,215,0,0.1);
+        }
+        
+        .fortune-chinese {
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            color: #fff;
+            margin-bottom: 15px;
+            font-weight: bold;
+            line-height: 1.4;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+        
+        .fortune-english {
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            color: #e0c060;
+            font-style: italic;
+            font-weight: 300;
+        }
+        
+        .fortune-annotation {
+            text-align: left;
+            padding: 20px;
+            background: rgba(255, 215, 0, 0.05);
+            border-left: 4px solid #FFD700;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .fortune-annotation-title {
+            color: #FFD700;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .annotation-chinese {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+        
+        .annotation-english {
+            font-size: 1rem;
+            color: #a0a0a0;
+            font-style: italic;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 2px solid #D4AF37;
+            color: #D4AF37;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-modal:hover {
+            background: #D4AF37;
+            color: #000;
+            transform: rotate(90deg);
+            box-shadow: 0 0 15px #D4AF37;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+            
+            .tube-section {
+                flex: none;
+                height: auto;
+                width: 100%;
+            }
+            
+            .sticks-area {
+                width: 90%;
+                height: 150px;
+                margin-top: 20px;
+            }
+
+            .fallen-stick {
+                height: 180px;
+                width: 30px;
+            }
+            
+            .bamboo-tube-container {
+                width: 160px;
+                height: 380px;
+            }
+            
+            h1::before, h1::after {
+                display: none;
+            }
+
+            /* 手機版減少北斗七星的移動幅度，避免暈眩 */
+            .big-dipper-container {
+                 transition: transform 0.3s ease-out;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="global-light-effects">
+        <div class="holy-ambient"></div>
+        <div class="light-stream s1-stream"></div>
+        <div class="light-stream s2-stream"></div>
+        <div class="light-stream s3-stream"></div>
+    </div>
+
+    <div class="big-dipper-container" id="bigDipper">
+        <div class="star s1"></div>
+        <div class="star s2"></div>
+        <div class="star s3"></div>
+        <div class="star s4"></div>
+        <div class="star s5"></div>
+        <div class="star s6"></div>
+        <div class="star s7"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Shirley's 上上籤</h1>
+            <p class="subtitle">Best Fortunes for Academic Success</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="tube-section">
+                <div class="bamboo-tube-container" id="bambooTube">
+                    <div class="bamboo-tube-inner-clipper" id="tubeClipper">
+                        <div class="bamboo-tube" id="tubeElement">
+                            <div class="bamboo-knots"></div>
+                            <div class="fortune-sticks-inside" id="fortuneSticksInside">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="shake-hint">CLICK TO SHAKE • 點擊搖籤<br><span style="font-size:0.8em; opacity:0.7">Sound On 🔊</span></div>
+            </div>
+            
+            <div class="sticks-area" id="sticksArea">
+                </div>
+        </div>
+    </div>
+    
+    <div class="fortune-modal" id="fortuneModal">
+        <div class="holy-radiance"></div>
+        <div class="fortune-card" id="fortuneCard">
+            <button class="close-modal" id="closeModal">×</button>
+            
+            <div class="fortune-header">
+                <div class="fortune-title" id="fortuneTitle">上上籤</div>
+                <div class="fortune-subtitle" id="fortuneSubtitle">Academic Excellence</div>
+            </div>
+            
+            <div class="fortune-content" id="fortuneContent">
+                </div>
+            
+            <div class="fortune-annotation">
+                <div class="fortune-annotation-title">
+                    <span>✦ 籤詩註解 • ANNOTATION</span>
+                </div>
+                <div class="fortune-annotation-content" id="fortuneAnnotation">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fortunes = [
+            {
+                title: "上上實力籤 • STRENGTH FORTUNE",
+                chinese: "所學皆所考，筆下如有神",
+                english: "All that you've studied will appear on the test, writing flows with divine inspiration.",
+                annotation: "你讀過的書，都會在考卷上與你相遇。長期積累的學識，將在關鍵時刻發揮作用，助你取得優異成績。",
+                annotation_en: "Every book you've studied will meet you on the test paper. The knowledge you've accumulated over time will come to your aid at crucial moments, helping you achieve excellent results."
+            },
+            {
+                title: "上上文思籤 • INSPIRATION FORTUNE",
+                chinese: "靈感如泉湧，下筆成文章",
+                english: "Inspiration flows like a spring, words effortlessly become essays.",
+                annotation: "文言文的深意，將在你筆下自然流轉。無論是閱讀理解還是寫作表達，你都能準確把握文意，展現才華。",
+                annotation_en: "The profound meaning of classical Chinese will flow naturally through your pen. Whether it's reading comprehension or writing expression, you'll accurately grasp the text's meaning and showcase your talent."
+            },
+            {
+                title: "上上思路籤 • CLARITY FORTUNE",
+                chinese: "難題見階梯，步步登高處",
+                english: "Difficult problems reveal steps, climbing higher with each solution.",
+                annotation: "複雜的題目，會在你眼前分解為清晰的步驟。當你感到困惑時，新的解題思路將會自然浮現。",
+                annotation_en: "Complex problems will break down into clear steps before your eyes. When you feel confused, new problem-solving approaches will naturally emerge."
+            },
+            {
+                title: "上上靈感籤 • INTUITION FORTUNE",
+                chinese: "困頓時見光，直覺引前路",
+                english: "Light appears in difficulty, intuition guides the way forward.",
+                annotation: "當你卡住時，直覺會為你點亮一條路。創意和靈感將在需要時自然湧現，助你突破困境。",
+                annotation_en: "When you're stuck, your intuition will light a path for you. Creativity and inspiration will naturally emerge when needed, helping you break through difficulties."
+            },
+            {
+                title: "上上細心籤 • PRECISION FORTUNE",
+                chinese: "明察秋毫末，細節見真章",
+                english: "Observing the finest details, truth reveals itself in precision.",
+                annotation: "你會看清每一個題目細節，就像看清自己的優勢。細心審題將幫你避開陷阱，準確作答。",
+                annotation_en: "You will see every detail in the questions, just as you see your own strengths. Careful examination will help you avoid pitfalls and answer accurately."
+            }
+        ];
+
+        class ShakeAudio {
+            constructor() {
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playRattle() {
+                this.init();
+                const t = this.ctx.currentTime;
+                const bufferSize = this.ctx.sampleRate * 0.1;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                for(let i=0; i<5; i++) {
+                    const noise = this.ctx.createBufferSource();
+                    noise.buffer = buffer;
+                    const gain = this.ctx.createGain();
+                    noise.playbackRate.value = 0.8 + Math.random() * 0.5;
+                    gain.gain.setValueAtTime(0, t + i*0.06);
+                    gain.gain.linearRampToValueAtTime(0.2, t + i*0.06 + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.01, t + i*0.06 + 0.08);
+                    noise.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    noise.start(t + i*0.06);
+                }
+            }
+
+            playPop() {
+                this.init();
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.frequency.setValueAtTime(400, t);
+                osc.frequency.exponentialRampToValueAtTime(800, t + 0.1);
+                gain.gain.setValueAtTime(0.3, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(t);
+                osc.stop(t + 0.1);
+            }
+            
+            playHoly() {
+                this.init();
+                const freqs = [523.25, 659.25, 783.99, 1046.50];
+                const t = this.ctx.currentTime;
+                freqs.forEach((f, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = f;
+                    gain.gain.setValueAtTime(0, t);
+                    gain.gain.linearRampToValueAtTime(0.1, t + 0.5);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 4.0);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(t);
+                    osc.stop(t + 4.0);
+                });
+            }
+        }
+
+        const audioSys = new ShakeAudio();
+
+        const bambooTubeContainer = document.getElementById('bambooTube');
+        const tubeClipper = document.getElementById('tubeClipper');
+        const tubeElement = document.getElementById('tubeElement');
+        const fortuneSticksInside = document.getElementById('fortuneSticksInside');
+        const sticksArea = document.getElementById('sticksArea');
+        const fortuneModal = document.getElementById('fortuneModal');
+        const fortuneCard = document.getElementById('fortuneCard');
+        
+        // 3. 北斗七星隨滑鼠移動互動 (Mouse Interaction for Big Dipper)
+        const bigDipper = document.getElementById('bigDipper');
+        let mouseX = 0, mouseY = 0;
+        // 設定移動幅度係數，數值越小移動越含蓄
+        const moveFactor = window.innerWidth < 768 ? 0.01 : 0.025;
+
+        document.addEventListener('mousemove', (e) => {
+            // 計算滑鼠相對於螢幕中心的位置
+            mouseX = e.clientX - window.innerWidth / 2;
+            mouseY = e.clientY - window.innerHeight / 2;
+            
+            // 應用輕微位移 (Parallax效果)
+            requestAnimationFrame(() => {
+                bigDipper.style.transform = `translate(${mouseX * moveFactor}px, ${mouseY * moveFactor}px)`;
+            });
+        });
+
+        let isShaking = false;
+
+        function initSticks() {
+            fortuneSticksInside.innerHTML = '';
+            for(let i=0; i<28; i++) {
+                const stick = document.createElement('div');
+                stick.className = 'fortune-stick-inside';
+                stick.style.height = (135 + Math.random() * 25) + '%';
+                stick.style.transform = `rotate(${Math.random() * 6 - 3}deg)`;
+                stick.style.filter = `brightness(${0.8 + Math.random()*0.4})`;
+                stick.style.zIndex = Math.floor(Math.random() * 3);
+                fortuneSticksInside.appendChild(stick);
+            }
+        }
+
+        function shakeTube() {
+            if(isShaking) return;
+            isShaking = true;
+            audioSys.playRattle();
+            sticksArea.innerHTML = '';
+            tubeClipper.classList.add('shaking');
+            
+            const sticks = document.querySelectorAll('.fortune-stick-inside');
+            const shakeInterval = setInterval(() => {
+                sticks.forEach(s => {
+                    s.style.transform = `rotate(${Math.random() * 12 - 6}deg) translateY(${Math.random() * 25 - 10}px)`;
+                });
+            }, 90);
+
+            setTimeout(() => {
+                clearInterval(shakeInterval);
+                tubeClipper.classList.remove('shaking');
+                sticks.forEach(s => {
+                    s.style.transform = `rotate(${Math.random() * 6 - 3}deg) translateY(0)`;
+                });
+                animateJumpStick();
+            }, 1500);
+        }
+
+        function animateJumpStick() {
+            const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+            const tubeRect = tubeElement.getBoundingClientRect();
+            const startX = tubeRect.left + tubeRect.width / 2;
+            const startY = tubeRect.top;
+            const targetRect = sticksArea.getBoundingClientRect();
+            const endX = targetRect.left + targetRect.width / 2;
+            const endY = targetRect.bottom - 50;
+
+            const flyStick = document.createElement('div');
+            flyStick.className = 'flying-stick';
+            document.body.appendChild(flyStick);
+            
+            audioSys.playPop();
+
+            const animation = flyStick.animate([
+                { 
+                    transform: `translate(${startX}px, ${startY}px) rotate(0deg) scale(0.6)`,
+                    opacity: 0
+                },
+                { 
+                    transform: `translate(${startX}px, ${startY - 80}px) rotate(20deg) scale(1)`,
+                    opacity: 1,
+                    offset: 0.15
+                },
+                {
+                    transform: `translate(${(startX + endX)/2}px, ${startY - 200}px) rotate(180deg) scale(1.1)`,
+                    offset: 0.5
+                },
+                { 
+                    transform: `translate(${endX}px, ${endY}px) rotate(360deg) scale(1)`,
+                    opacity: 1
+                }
+            ], {
+                duration: 800,
+                easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+                fill: 'forwards'
+            });
+
+            animation.onfinish = () => {
+                flyStick.remove();
+                showLandedStick(fortune);
+                isShaking = false;
+            };
+        }
+
+        function showLandedStick(fortune) {
+            const stick = document.createElement('div');
+            stick.className = 'fallen-stick';
+            
+            const hint = document.createElement('div');
+            hint.className = 'tap-hint';
+            hint.textContent = '👆 TAP TO REVEAL';
+            stick.appendChild(hint);
+
+            sticksArea.appendChild(stick);
+            
+            requestAnimationFrame(() => {
+                stick.classList.add('landed');
+            });
+
+            stick.addEventListener('click', () => {
+                openModal(fortune);
+            });
+        }
+
+        function openModal(data) {
+            audioSys.playHoly();
+            
+            document.getElementById('fortuneTitle').textContent = data.title;
+            document.getElementById('fortuneContent').innerHTML = `
+                <div class="fortune-chinese">${data.chinese}</div>
+                <div class="fortune-english">${data.english}</div>
+            `;
+            document.getElementById('fortuneAnnotation').innerHTML = `
+                <div class="annotation-chinese">${data.annotation}</div>
+                <div class="annotation-english">${data.annotation_en}</div>
+            `;
+            
+            fortuneModal.classList.add('active');
+            setTimeout(() => {
+                fortuneCard.classList.add('active');
+            }, 100);
+        }
+
+        function closeModal() {
+            fortuneCard.classList.remove('active');
+            setTimeout(() => {
+                fortuneModal.classList.remove('active');
+            }, 300);
+        }
+
+        initSticks();
+        
+        bambooTubeContainer.addEventListener('click', shakeTube);
+        document.getElementById('closeModal').addEventListener('click', closeModal);
+        fortuneModal.addEventListener('click', (e) => {
+            if(e.target === fortuneModal) closeModal();
+        });
+
+        let lastX, lastY, lastZ;
+        let lastTime = 0;
+        const SHAKE_THRESHOLD = 15;
+
+        if (window.DeviceMotionEvent) {
+            window.addEventListener('devicemotion', (e) => {
+                const current = e.accelerationIncludingGravity;
+                if(!current) return;
+                const currentTime = new Date().getTime();
+                if ((currentTime - lastTime) > 100) {
+                    const diffTime = currentTime - lastTime;
+                    lastTime = currentTime;
+                    const speed = Math.abs(current.x + current.y + current.z - lastX - lastY - lastZ) / diffTime * 10000;
+                    if (speed > SHAKE_THRESHOLD * 50) {
+                        shakeTube();
+                    }
+                    lastX = current.x;
+                    lastY = current.y;
+                    lastZ = current.z;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
