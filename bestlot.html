@@ -12,7 +12,7 @@
         }
         
         body {
-            /* 1. 改為高級藍灰天幕背景 (High-grade Blue-Gray Sky Background) */
+            /* 高級藍灰天幕背景 */
             background: radial-gradient(ellipse at bottom center, 
                 #3a4e63 0%, /* 底部較亮的藍灰色 */
                 #22303f 50%, /* 中間過渡 */
@@ -30,16 +30,16 @@
             position: relative;
         }
 
-        /* 2. 北斗七星樣式 (Big Dipper Styling) */
+        /* 北斗七星樣式 */
         .big-dipper-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 2; /* 在背景光效(z1)之上，主內容(z10)之下 */
+            z-index: 2;
             pointer-events: none;
-            transition: transform 0.1s ease-out; /* 平滑移動 */
+            transition: transform 0.1s ease-out;
             will-change: transform;
         }
 
@@ -47,7 +47,6 @@
             position: absolute;
             background: #fff;
             border-radius: 50%;
-            /* 白色核心，帶有金色光暈 */
             box-shadow: 
                 0 0 4px 1px #fff, 
                 0 0 15px 2px #ffd700,
@@ -55,20 +54,13 @@
             animation: twinkling 4s infinite alternate ease-in-out;
         }
 
-        /* 北斗七星位置佈局 (大致模擬杓子形狀，偏左上指引) */
-        /* 杓柄末端 (Alkaid) */
+        /* 北斗七星位置 */
         .s1 { top: 15%; left: 25%; width: 4px; height: 4px; animation-delay: 0s; }
-        /* Mizar */
         .s2 { top: 18%; left: 32%; width: 3px; height: 3px; animation-delay: 0.5s; }
-        /* Alioth */
         .s3 { top: 22%; left: 38%; width: 4px; height: 4px; animation-delay: 1s; }
-        /* 杓身連接點 (Megrez) */
         .s4 { top: 28%; left: 42%; width: 4px; height: 4px; animation-delay: 1.5s; opacity: 0.8; }
-        /* Phecda */
         .s5 { top: 35%; left: 40%; width: 5px; height: 5px; animation-delay: 2s; }
-        /* 杓口指引星 (Merak) */
         .s6 { top: 36%; left: 48%; width: 5px; height: 5px; animation-delay: 2.5s; }
-        /* 杓口指引星 (Dubhe - 最亮) */
         .s7 { top: 28%; left: 50%; width: 6px; height: 6px; animation-delay: 3s; box-shadow: 0 0 5px 2px #fff, 0 0 20px 4px #ffd700; }
 
         @keyframes twinkling {
@@ -77,7 +69,7 @@
             100% { opacity: 0.4; transform: scale(0.9); }
         }
 
-        /* 原有的全域聖光與流動特效 (Global Holy Light & Flow) - 調整顏色以適應藍背景 */
+        /* 光效 */
         .global-light-effects {
             position: fixed;
             top: 0;
@@ -95,7 +87,6 @@
             left: 50%;
             width: 120vmax;
             height: 120vmax;
-            /* 調整為偏冷金色的光暈 */
             background: radial-gradient(circle, rgba(255, 230, 150, 0.1) 0%, rgba(255, 215, 0, 0) 60%);
             transform: translate(-50%, -50%);
             mix-blend-mode: screen;
@@ -106,7 +97,6 @@
             position: absolute;
             width: 200%;
             height: 100px;
-            /* 調整流光顏色 */
             background: linear-gradient(90deg, transparent 0%, rgba(255, 240, 180, 0.08) 50%, transparent 100%);
             transform: rotate(-45deg);
             mix-blend-mode: overlay;
@@ -337,7 +327,6 @@
             height: clamp(250px, 35vh, 400px);
             max-width: 350px;
             position: relative;
-            /* 調整右側區域背景以適應新天幕 */
             background: linear-gradient(180deg, rgba(30, 40, 50, 0.4) 0%, rgba(15, 20, 25, 0.7) 100%);
             border-radius: 20px;
             border: 1px solid rgba(255, 215, 0, 0.2);
@@ -395,17 +384,16 @@
         
         .fallen-stick.landed {
             opacity: 1;
-            transform: translateY(0);
             animation: floatingStick 3s ease-in-out infinite;
         }
         
         @keyframes floatingStick {
-            0%, 100% { transform: translateY(0); box-shadow: 0 10px 20px rgba(0,0,0,0.8), 0 0 20px rgba(255,215,0,0.2); }
-            50% { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 30px rgba(255,215,0,0.4); }
+            0%, 100% { transform: translateY(0) var(--rotation); box-shadow: 0 10px 20px rgba(0,0,0,0.8), 0 0 20px rgba(255,215,0,0.2); }
+            50% { transform: translateY(-10px) var(--rotation); box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 30px rgba(255,215,0,0.4); }
         }
         
         .fallen-stick:hover {
-            transform: scale(1.05) translateY(-15px);
+            transform: scale(1.05) translateY(-15px) var(--rotation) !important;
             filter: brightness(1.2);
         }
         
@@ -441,7 +429,6 @@
             left: 0;
             width: 100%;
             height: 100%;
-            /* Modal 背景也改為深藍色系 */
             background: rgba(15, 23, 33, 0.95);
             backdrop-filter: blur(15px);
             display: none;
@@ -482,7 +469,6 @@
         }
         
         .fortune-card {
-            /* 卡片背景微調 */
             background: radial-gradient(circle at center, #2a3b4c 0%, #1a2533 100%);
             width: 90%;
             max-width: 800px;
@@ -639,7 +625,6 @@
                 display: none;
             }
 
-            /* 手機版減少北斗七星的移動幅度，避免暈眩 */
             .big-dipper-container {
                  transition: transform 0.3s ease-out;
             }
@@ -715,39 +700,186 @@
     <script>
         const fortunes = [
             {
-                title: "上上實力籤 • STRENGTH FORTUNE",
-                chinese: "所學皆所考，筆下如有神",
-                english: "All that you've studied will appear on the test, writing flows with divine inspiration.",
-                annotation: "你讀過的書，都會在考卷上與你相遇。長期積累的學識，將在關鍵時刻發揮作用，助你取得優異成績。",
-                annotation_en: "Every book you've studied will meet you on the test paper. The knowledge you've accumulated over time will come to your aid at crucial moments, helping you achieve excellent results."
+                title: "上上實力籤",
+                chinese: "所讀皆所考，所學皆所用",
+                english: "Every book you've studied will meet you on the test paper.",
+                annotation: "題解：所讀皆所考，所學皆所用。長期積累的學識，將在關鍵時刻發揮作用。",
+                annotation_en: "Every book you've studied will meet you on the test paper."
             },
             {
-                title: "上上文思籤 • INSPIRATION FORTUNE",
-                chinese: "靈感如泉湧，下筆成文章",
-                english: "Inspiration flows like a spring, words effortlessly become essays.",
-                annotation: "文言文的深意，將在你筆下自然流轉。無論是閱讀理解還是寫作表達，你都能準確把握文意，展現才華。",
-                annotation_en: "The profound meaning of classical Chinese will flow naturally through your pen. Whether it's reading comprehension or writing expression, you'll accurately grasp the text's meaning and showcase your talent."
+                title: "上上鎮定籤",
+                chinese: "知識猶在，心穩則明",
+                english: "Take a deep breath. Your knowledge is safely stored in your mind, it won't get lost.",
+                annotation: "題解：知識猶在，心穩則明。保持冷靜，你的實力將自然流露。",
+                annotation_en: "Take a deep breath. Your knowledge is safely stored in your mind."
             },
             {
-                title: "上上思路籤 • CLARITY FORTUNE",
-                chinese: "難題見階梯，步步登高處",
-                english: "Difficult problems reveal steps, climbing higher with each solution.",
-                annotation: "複雜的題目，會在你眼前分解為清晰的步驟。當你感到困惑時，新的解題思路將會自然浮現。",
-                annotation_en: "Complex problems will break down into clear steps before your eyes. When you feel confused, new problem-solving approaches will naturally emerge."
+                title: "上上細心籤",
+                chinese: "明察題意，如見本心",
+                english: "You will see every detail in the questions, just as you see your own strengths.",
+                annotation: "題解：明察題意，如見本心。細心審題將幫你避開陷阱，準確作答。",
+                annotation_en: "You will see every detail in the questions, just as you see your own strengths."
             },
             {
-                title: "上上靈感籤 • INTUITION FORTUNE",
-                chinese: "困頓時見光，直覺引前路",
-                english: "Light appears in difficulty, intuition guides the way forward.",
-                annotation: "當你卡住時，直覺會為你點亮一條路。創意和靈感將在需要時自然湧現，助你突破困境。",
-                annotation_en: "When you're stuck, your intuition will light a path for you. Creativity and inspiration will naturally emerge when needed, helping you break through difficulties."
+                title: "上上時策籤",
+                chinese: "時間為友，從容應對",
+                english: "Time will be your ally, not your enemy.",
+                annotation: "題解：時間為友，從容應對。掌握節奏，你將有充裕的時間完成挑戰。",
+                annotation_en: "Time will be your ally, not your enemy."
             },
             {
-                title: "上上細心籤 • PRECISION FORTUNE",
-                chinese: "明察秋毫末，細節見真章",
-                english: "Observing the finest details, truth reveals itself in precision.",
-                annotation: "你會看清每一個題目細節，就像看清自己的優勢。細心審題將幫你避開陷阱，準確作答。",
-                annotation_en: "You will see every detail in the questions, just as you see your own strengths. Careful examination will help you avoid pitfalls and answer accurately."
+                title: "上上穩進籤",
+                chinese: "先固根本，餘皆加成",
+                english: "First, secure the points you can. Everything after that is a gift.",
+                annotation: "題解：先固根本，餘皆加成。穩紮穩打，每一分都是成功的基石。",
+                annotation_en: "First, secure the points you can. Everything after that is a gift."
+            },
+            {
+                title: "上上靈光籤",
+                chinese: "思路若卡，直覺引燈",
+                english: "When you're stuck, your intuition will light a path for you.",
+                annotation: "題解：思路若卡，直覺引燈。相信你的直覺，答案往往就在轉念之間。",
+                annotation_en: "When you're stuck, your intuition will light a path for you."
+            },
+            {
+                title: "上上順筆籤",
+                chinese: "下筆流暢，如呼吸自然",
+                english: "May your pen flow as naturally as your breath.",
+                annotation: "題解：下筆流暢，如呼吸自然。寫作與答題將如行雲流水般順暢。",
+                annotation_en: "May your pen flow as naturally as your breath."
+            },
+            {
+                title: "上上遠景籤",
+                chinese: "此試如階，未來可期",
+                english: "This test is just a footnote in your brilliant future.",
+                annotation: "題解：此試如階，未來可期。眼光放遠，這只是通往成功的一小步。",
+                annotation_en: "This test is just a footnote in your brilliant future."
+            },
+            {
+                title: "上上文思籤",
+                chinese: "靈感如泉湧，下筆自有神",
+                english: "The meaning of classical Chinese will flow naturally through your pen.",
+                annotation: "題解：靈感如泉湧，下筆自有神。文思泉湧，古文深意皆能領會。",
+                annotation_en: "The meaning of classical Chinese will flow naturally through your pen."
+            },
+            {
+                title: "上上明鏡籤",
+                chinese: "閱讀如鏡，照見文本真意",
+                english: "Your reading comprehension will be as clear and thorough as a bright mirror.",
+                annotation: "題解：閱讀如鏡，照見文本真意。心如明鏡，任何考題陷阱都無所遁形。",
+                annotation_en: "Your reading comprehension will be as clear and thorough as a bright mirror."
+            },
+            {
+                title: "上上語感籤",
+                chinese: "語感引路，詞句皆通",
+                english: "Even unfamiliar words will make way for you, because language intuition is on your side.",
+                annotation: "題解：語感引路，詞句皆通。語感將成為你最好的嚮導，助你克服生詞。",
+                annotation_en: "Even unfamiliar words will make way for you, because language intuition is on your side."
+            },
+            {
+                title: "上上流暢籤",
+                chinese: "文思成韻，下筆成章",
+                english: "The structure of your essay will unfold as naturally as a melody.",
+                annotation: "題解：文思成韻，下筆成章。文章結構將如樂章般自然展開。",
+                annotation_en: "The structure of your essay will unfold as naturally as a melody."
+            },
+            {
+                title: "上上思路籤",
+                chinese: "難題見階，步步為營",
+                english: "Complex problems will break down into clear steps before your eyes.",
+                annotation: "題解：難題見階，步步為營。繁雜的題目將在你眼中分解為清晰的步驟。",
+                annotation_en: "Complex problems will break down into clear steps before your eyes."
+            },
+            {
+                title: "上上精準籤",
+                chinese: "運算如尺，分毫不差",
+                english: "Your calculations will be as precise as a geometric construction.",
+                annotation: "題解：運算如尺，分毫不差。計算過程精準無誤，答案自然浮現。",
+                annotation_en: "Your calculations will be as precise as a geometric construction."
+            },
+            {
+                title: "上上時序籤",
+                chinese: "時光有序，因果自明",
+                english: "All dates and events will fall into place within the context of your memory.",
+                annotation: "題解：時光有序，因果自明。歷史的脈絡將在你腦海中清晰呈現。",
+                annotation_en: "All dates and events will fall into place within the context of your memory."
+            },
+            {
+                title: "上上洞見籤",
+                chinese: "見史如鏡，照見興衰之理",
+                english: "You will see through cause and effect, not just memorize facts.",
+                annotation: "題解：見史如鏡，照見興衰之理。你將洞悉歷史的因果與規律，而非死記硬背。",
+                annotation_en: "You will see through cause and effect, not just memorize facts."
+            },
+            {
+                title: "上上圖景籤",
+                chinese: "地圖成畫，萬象在心",
+                english: "Maps, climates, and economic zones will layer into a three-dimensional image in your mind.",
+                annotation: "題解：地圖成畫，萬象在心。地理空間將在你腦中立體呈現。",
+                annotation_en: "Maps, climates, and economic zones will layer into a three-dimensional image in your mind."
+            },
+            {
+                title: "上上系統籤",
+                chinese: "天地為系統，連結自然成",
+                english: "You will see the connections between systems, not just scattered facts.",
+                annotation: "題解：天地為系統，連結自然成。萬物之間的關聯將在你眼前豁然開朗。",
+                annotation_en: "You will see the connections between systems, not just scattered facts."
+            },
+            {
+                title: "上上邏輯籤",
+                chinese: "法理如鏈，環環相扣",
+                english: "Legal articles and social issues will reveal clear logical chains in your analysis.",
+                annotation: "題解：法理如鏈，環環相扣。邏輯推演將如鎖鏈般嚴密，論述無懈可擊。",
+                annotation_en: "Legal articles and social issues will reveal clear logical chains in your analysis."
+            },
+            {
+                title: "上上平衡籤",
+                chinese: "持衡諸方，論述自成",
+                english: "You will balance multiple perspectives and write essays with depth.",
+                annotation: "題解：持衡諸方，論述自成。你將能權衡多方觀點，寫出有深度的論述。",
+                annotation_en: "You will balance multiple perspectives and write essays with depth."
+            },
+            {
+                title: "上上直覺籤",
+                chinese: "公式即世界，運動如眼見",
+                english: "Formulas and the motion of the real world will play out in sync in your imagination.",
+                annotation: "題解：公式即世界，運動如眼見。物理公式將與現實世界的運動在你腦中完美同步。",
+                annotation_en: "Formulas and the motion of the real world will play out in sync in your imagination."
+            },
+            {
+                title: "上上規律籤",
+                chinese: "萬物有理，一覽即明",
+                english: "You will see the physical laws behind every question at a glance.",
+                annotation: "題解：萬物有理，一覽即明。你將一眼看穿題目背後的物理法則。",
+                annotation_en: "You will see the physical laws behind every question at a glance."
+            },
+            {
+                title: "上上平衡籤",
+                chinese: "方程式自尋平衡，反應如你所願",
+                english: "Every chemical equation will reach perfect balance for you.",
+                annotation: "題解：方程式自尋平衡，反應如你所願。化學反應式將自然達成平衡。",
+                annotation_en: "Every chemical equation will reach perfect balance for you."
+            },
+            {
+                title: "上上洞察籤",
+                chinese: "原子之間，自有必然",
+                english: "You will see the inevitability of reactions between atoms and molecules.",
+                annotation: "題解：原子之間，自有必然。微觀世界的變化規律盡在掌握之中。",
+                annotation_en: "You will see the inevitability of reactions between atoms and molecules."
+            },
+            {
+                title: "上上系統籤",
+                chinese: "生命如網，層層相繫",
+                english: "From cells to ecosystems, every layer of knowledge will integrate perfectly in your mind.",
+                annotation: "題解：生命如網，層層相繫。從細胞到生態，生命知識將融會貫通。",
+                annotation_en: "From cells to ecosystems, every layer of knowledge will integrate perfectly in your mind."
+            },
+            {
+                title: "上上動態籤",
+                chinese: "生理如畫，動態自現",
+                english: "Complex physiological processes will play in your memory like an animation.",
+                annotation: "題解：生理如畫，動態自現。複雜的生理機制將如動畫般在你記憶中播放。",
+                annotation_en: "Complex physiological processes will play in your memory like an animation."
             }
         ];
 
@@ -834,28 +966,25 @@
         const fortuneModal = document.getElementById('fortuneModal');
         const fortuneCard = document.getElementById('fortuneCard');
         
-        // 3. 北斗七星隨滑鼠移動互動 (Mouse Interaction for Big Dipper)
+        // 北斗七星互動
         const bigDipper = document.getElementById('bigDipper');
         let mouseX = 0, mouseY = 0;
-        // 設定移動幅度係數，數值越小移動越含蓄
         const moveFactor = window.innerWidth < 768 ? 0.01 : 0.025;
 
         document.addEventListener('mousemove', (e) => {
-            // 計算滑鼠相對於螢幕中心的位置
             mouseX = e.clientX - window.innerWidth / 2;
             mouseY = e.clientY - window.innerHeight / 2;
-            
-            // 應用輕微位移 (Parallax效果)
             requestAnimationFrame(() => {
                 bigDipper.style.transform = `translate(${mouseX * moveFactor}px, ${mouseY * moveFactor}px)`;
             });
         });
 
         let isShaking = false;
+        let lastFortuneIndex = -1;
 
         function initSticks() {
             fortuneSticksInside.innerHTML = '';
-            for(let i=0; i<28; i++) {
+            for(let i=0; i<30; i++) { // 增加一點裝飾用的籤條數量
                 const stick = document.createElement('div');
                 stick.className = 'fortune-stick-inside';
                 stick.style.height = (135 + Math.random() * 25) + '%';
@@ -891,7 +1020,18 @@
         }
 
         function animateJumpStick() {
-            const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+            let newIndex;
+            if (fortunes.length > 1) {
+                do {
+                    newIndex = Math.floor(Math.random() * fortunes.length);
+                } while (newIndex === lastFortuneIndex);
+            } else {
+                newIndex = 0;
+            }
+            
+            lastFortuneIndex = newIndex;
+            const fortune = fortunes[newIndex];
+
             const tubeRect = tubeElement.getBoundingClientRect();
             const startX = tubeRect.left + tubeRect.width / 2;
             const startY = tubeRect.top;
@@ -939,6 +1079,9 @@
         function showLandedStick(fortune) {
             const stick = document.createElement('div');
             stick.className = 'fallen-stick';
+            
+            const randomRot = Math.random() * 10 - 5;
+            stick.style.setProperty('--rotation', `rotate(${randomRot}deg)`);
             
             const hint = document.createElement('div');
             hint.className = 'tap-hint';
