@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Happy New Year Word Search</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Playfair+Display:wght@700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* 新年配色：高級金、喜慶紅、午夜藍 */
+            --ny-gold: #FFD700;
+            --ny-gold-dark: #B8860B;
+            --ny-red: #D42426;
+            --ny-dark: #1a1a2e;
+            --ny-accent: #e94560;
+            --text-color: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            /* 修正點：移除全域 touch-action: none，允許頁面滑動 */
+        }
+
+        body {
+            font-family: 'Roboto Slab', serif;
+            background-color: var(--ny-dark);
+            /* 高級午夜藍漸層背景 */
+            background-image: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            padding: 20px 10px;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* 確保內容長時可以往下延伸 */
+        }
+
+        /* 背景煙火粒子動畫 */
+        .fireworks-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #FFD700, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 50px 160px, #FF69B4, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 40px, #00FFFF, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: twinkle 4s linear infinite;
+            z-index: 0;
+            opacity: 0.4;
+        }
+        
+        @keyframes twinkle {
+            0% { transform: translateY(0); opacity: 0.3; }
+            50% { opacity: 0.6; }
+            100% { transform: translateY(-100px); opacity: 0.3; }
+        }
+
+        .container {
+            position: relative;
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.2); /* 金色光暈 */
+            padding: 25px 15px;
+            max-width: 600px;
+            width: 100%;
+            border: 2px solid var(--ny-gold);
+            z-index: 1;
+            margin-bottom: 50px; /* 底部留白，方便滑動 */
+        }
+
+        /* 標題裝飾 */
+        .container::before { 
+            content: '🎆'; position: absolute; top: -20px; left: 15px; 
+            font-size: 28px; background: var(--ny-dark); border-radius: 50%; padding: 5px; border: 2px solid var(--ny-gold);
+        }
+        .container::after { 
+            content: '🎉'; position: absolute; top: -20px; right: 15px; 
+            font-size: 28px; background: var(--ny-dark); border-radius: 50%; padding: 5px; border: 2px solid var(--ny-gold);
+        }
+
+        header h1 {
+            font-family: 'Cinzel', serif; /* 高級襯線字體 */
+            color: var(--ny-red);
+            text-align: center;
+            font-size: 1.8rem;
+            margin: 10px 0 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0px var(--ny-gold);
+        }
+
+        .instructions {
+            text-align: center; color: #555; font-size: 0.9rem; margin-bottom: 20px;
+            background: #fff8e1; display: table; 
+            padding: 6px 20px; border-radius: 50px; margin-left: auto; margin-right: auto;
+            border: 1px solid var(--ny-gold);
+        }
+
+        .grid-container {
+            width: 100%; background: #fff; padding: 5px;
+            border-radius: 8px; margin-bottom: 20px;
+            border: 4px double var(--ny-dark); /* 雙線邊框更有質感 */
+            overflow: hidden; 
+            /* 修正點：只在這裡禁止瀏覽器預設觸控，讓畫線順暢 */
+            touch-action: none; 
+        }
+
+        .word-grid {
+            display: grid;
+            gap: 2px;
+            width: 100%;
+            aspect-ratio: 1 / 1; 
+        }
+
+        .cell {
+            width: auto; height: auto; aspect-ratio: 1 / 1;
+            display: flex; align-items: center; justify-content: center;
+            background: #fafafa; border-radius: 2px;
+            font-size: clamp(12px, 4vw, 24px); 
+            font-family: 'Playfair Display', serif; /* 字母使用襯線體 */
+            font-weight: bold; color: #2c3e50;
+            user-select: none; 
+            cursor: pointer;
+        }
+
+        /* 選取時的樣式：金色 */
+        .cell.selected { 
+            background-color: var(--ny-gold); color: #000;
+            transform: scale(1.05); z-index: 10;
+            box-shadow: 0 0 8px var(--ny-gold);
+            border-radius: 4px;
+        }
+        /* 找到時的樣式：紅色 */
+        .cell.found { 
+            background-color: var(--ny-red); color: white;
+            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 4px;
+        }
+        @keyframes pop {
+            0% { transform: scale(0.8); } 50% { transform: scale(1.1); } 100% { transform: scale(1); }
+        }
+
+        .word-list-container { 
+            background: #fff; padding: 0; margin-bottom: 15px; 
+        }
+        .word-list-title {
+            text-align: center; color: var(--ny-gold-dark); margin: 0 0 12px;
+            font-size: 1.2rem; font-family: 'Cinzel', serif;
+            font-weight: bold; letter-spacing: 1px;
+            border-bottom: 1px solid #eee; padding-bottom: 5px;
+        }
+        .word-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+        
+        .word-item {
+            padding: 6px 14px; text-align: center; background: #f4f4f4;
+            border-radius: 4px; font-size: 0.85rem; color: #444;
+            transition: all 0.3s; border: 1px solid #ddd;
+            font-weight: 600;
+        }
+        .word-item.found {
+            background: var(--ny-gold); color: #000;
+            border-color: var(--ny-gold-dark);
+            text-decoration: line-through; opacity: 0.7; transform: scale(0.95);
+        }
+        
+        .stats { 
+            text-align: center; margin: 15px 0 0; color: #666; font-size: 0.95rem; 
+            font-family: 'Cinzel', serif;
+        }
+        #found-count { color: var(--ny-red); font-weight: bold; font-size: 1.2rem; }
+
+        .controls { display: flex; flex-direction: row; gap: 10px; margin-top: 20px; }
+        button {
+            padding: 14px; border: none; border-radius: 4px;
+            font-weight: bold; font-size: 0.9rem; width: 100%;
+            cursor: pointer; transition: transform 0.1s;
+            font-family: 'Roboto Slab', serif;
+            text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        button:active { transform: translateY(2px); }
+        
+        #reset-btn { 
+            background: var(--ny-red); color: white; 
+            background-image: linear-gradient(to right, #D42426, #a81c1d);
+        }
+        #back-btn { 
+            background: #34495e; color: white; 
+        }
+        
+        /* Modal Design */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8); z-index: 100;
+            align-items: center; justify-content: center; backdrop-filter: blur(5px);
+        }
+        .modal {
+            background: white; padding: 40px 30px; border-radius: 12px;
+            text-align: center; border: 2px solid var(--ny-gold);
+            animation: pop 0.5s; width: 85%; max-width: 320px;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+        }
+        .modal h2 { 
+            font-family: 'Cinzel', serif; color: var(--ny-red); 
+            font-size: 1.8rem; margin-bottom: 15px; 
+            border-bottom: 2px solid var(--ny-gold); padding-bottom: 10px;
+        }
+        .modal p { margin-bottom: 20px; font-size: 1.1rem; color: #555; }
+        .close-modal {
+            background: var(--ny-gold); color: #000; padding: 12px 30px;
+            border: none; border-radius: 4px; font-size: 1rem; margin-top: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="fireworks-bg"></div>
+
+    <div class="container">
+        <header>
+            <h1>Happy New Year</h1>
+            <p class="instructions">Find the hidden words to celebrate!</p>
+        </header>
+
+        <div class="grid-container">
+            <div class="word-grid" id="word-grid"></div>
+        </div>
+
+        <div class="word-list-container">
+            <h3 class="word-list-title">Celebration Words</h3>
+            <div class="word-list" id="word-list"></div>
+            <div class="stats">Progress: <span id="found-count">0</span> / <span id="total-count">0</span></div>
+        </div>
+
+        <div class="controls">
+            <button id="reset-btn">🔄 Restart</button>
+            <button id="back-btn">🔙 Exit</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="win-modal">
+        <div class="modal">
+            <h2>🎉 2026 🎉</h2>
+            <p>Congratulations!<br>You are ready for a great year!</p>
+            <button class="close-modal" onclick="closeModal()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // 新年單字庫 (混合了慶祝與希望的詞彙)
+        const words = [
+            "NewYear", "Fireworks", "Party", "Cheers", 
+            "Midnight", "Toast", "Dream", "Hope", 
+            "January", "Resolution", "Joy", "Clock",
+            "Family", "Sparkler", "Countdown"
+        ];
+        
+        const SIZE = 11; 
+        
+        const DIRS = [[0,1],[1,0],[0,-1],[-1,0],[1,1],[1,-1],[-1,-1],[-1,1]];
+        let grid = [];
+        let wordPos = {};
+        let found = new Set();
+        let placedWordsList = []; 
+
+        function placeWords() {
+            grid = Array(SIZE).fill().map(() => Array(SIZE).fill(''));
+            wordPos = {};
+            placedWordsList = []; 
+            
+            const gridEl = document.getElementById('word-grid');
+            gridEl.style.gridTemplateColumns = `repeat(${SIZE}, 1fr)`;
+            gridEl.style.gridTemplateRows = `repeat(${SIZE}, 1fr)`;
+
+            const sorted = [...words].sort((a, b) => b.length - a.length);
+            for (const word of sorted) {
+                let placed = false;
+                for (let attempt = 0; attempt < 1000 && !placed; attempt++) {
+                    const dir = DIRS[Math.floor(Math.random() * DIRS.length)];
+                    const r = Math.floor(Math.random() * SIZE);
+                    const c = Math.floor(Math.random() * SIZE);
+                    if (canPlace(word, r, c, dir)) {
+                        doPlace(word, r, c, dir);
+                        placed = true;
+                    }
+                }
+                if (placed) placedWordsList.push(word);
+            }
+            
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            for (let i = 0; i < SIZE; i++) {
+                for (let j = 0; j < SIZE; j++) {
+                    if (grid[i][j] === '') grid[i][j] = letters[Math.floor(Math.random() * letters.length)];
+                    else grid[i][j] = grid[i][j].toUpperCase();
+                }
+            }
+            document.getElementById('total-count').textContent = placedWordsList.length;
+        }
+
+        function canPlace(word, r, c, [dr, dc]) {
+            for (let i = 0; i < word.length; i++) {
+                const nr = r + dr * i;
+                const nc = c + dc * i;
+                if (nr < 0 || nr >= SIZE || nc < 0 || nc >= SIZE) return false;
+                if (grid[nr][nc] !== '' && grid[nr][nc].toUpperCase() !== word[i].toUpperCase()) return false;
+            }
+            return true;
+        }
+
+        function doPlace(word, r, c, [dr, dc]) {
+            const upWord = word.toUpperCase();
+            wordPos[upWord] = [];
+            for (let i = 0; i < word.length; i++) {
+                const nr = r + dr * i;
+                const nc = c + dc * i;
+                grid[nr][nc] = upWord[i];
+                wordPos[upWord].push({r: nr, c: nc});
+            }
+        }
+
+        function renderGrid() {
+            const el = document.getElementById('word-grid');
+            el.innerHTML = '';
+            for (let i = 0; i < SIZE; i++) {
+                for (let j = 0; j < SIZE; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.textContent = grid[i][j];
+                    cell.dataset.r = i;
+                    cell.dataset.c = j;
+                    el.appendChild(cell);
+                }
+            }
+            updateFound();
+        }
+
+        function renderWordList() {
+            const el = document.getElementById('word-list');
+            el.innerHTML = '';
+            placedWordsList.forEach(word => {
+                const upWord = word.toUpperCase();
+                const item = document.createElement('div');
+                item.className = 'word-item' + (found.has(upWord) ? ' found' : '');
+                item.textContent = word; 
+                item.dataset.word = upWord;
+                el.appendChild(item);
+            });
+        }
+
+        function updateFound() {
+            document.querySelectorAll('.cell').forEach(c => c.classList.remove('found'));
+            found.forEach(word => {
+                (wordPos[word] || []).forEach(({r, c}) => {
+                    const el = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+                    if (el) el.classList.add('found');
+                });
+            });
+            document.getElementById('found-count').textContent = found.size;
+        }
+
+        // --- 核心互動邏輯 (已包含觸控修正) ---
+        let isSelecting = false;
+        let startCell = null;
+
+        function getCell(x, y) {
+            const el = document.elementFromPoint(x, y);
+            if (el && el.classList.contains('cell')) {
+                return {
+                    r: parseInt(el.dataset.r),
+                    c: parseInt(el.dataset.c)
+                };
+            }
+            return null;
+        }
+
+        function getLine(from, to) {
+            const cells = [];
+            let dr = to.r - from.r;
+            let dc = to.c - from.c;
+
+            if (dr === 0 && dc === 0) return [from];
+
+            if (Math.abs(dr) > Math.abs(dc) * 2) dc = 0; 
+            else if (Math.abs(dc) > Math.abs(dr) * 2) dr = 0; 
+            else {
+                const max = Math.max(Math.abs(dr), Math.abs(dc));
+                dr = dr > 0 ? max : -max;
+                dc = dc > 0 ? max : -max;
+            }
+
+            const steps = Math.max(Math.abs(dr), Math.abs(dc));
+            const sr = dr === 0 ? 0 : (dr > 0 ? 1 : -1);
+            const sc = dc === 0 ? 0 : (dc > 0 ? 1 : -1);
+
+            let r = from.r;
+            let c = from.c;
+
+            for (let i = 0; i <= steps; i++) {
+                if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) break;
+                cells.push({r, c});
+                r += sr;
+                c += sc;
+            }
+            return cells;
+        }
+
+        const gridEl = document.getElementById('word-grid');
+
+        const handleStart = (x, y) => {
+            const cell = getCell(x, y);
+            if (!cell) return;
+            const el = document.querySelector(`.cell[data-r="${cell.r}"][data-c="${cell.c}"]`);
+            if (!el) return; 
+            isSelecting = true;
+            startCell = cell;
+            el.classList.add('selected');
+        };
+
+        const handleMove = (x, y) => {
+            if (!isSelecting) return;
+            const cell = getCell(x, y);
+            if (!cell) return;
+            
+            document.querySelectorAll('.cell.selected').forEach(el => el.classList.remove('selected'));
+            
+            const path = getLine(startCell, cell);
+            if (path) {
+                path.forEach(({r, c}) => {
+                    const el = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+                    if (el) el.classList.add('selected');
+                });
+            }
+        };
+
+        const handleEnd = () => {
+            if (!isSelecting) return;
+            const selected = Array.from(document.querySelectorAll('.cell.selected'));
+            if (selected.length >= 2) {
+                const str = selected.map(el => el.textContent).join('');
+                const rev = str.split('').reverse().join('');
+                let foundWord = null;
+                
+                for (const word of placedWordsList) {
+                    const up = word.toUpperCase();
+                    if (!found.has(up) && (up === str || up === rev)) {
+                        foundWord = up;
+                        break;
+                    }
+                }
+
+                if (foundWord) {
+                    found.add(foundWord);
+                    renderWordList();
+                    updateFound();
+                    if (found.size === placedWordsList.length) {
+                        setTimeout(() => {
+                            document.getElementById('win-modal').style.display = 'flex';
+                        }, 300);
+                    }
+                }
+            }
+            document.querySelectorAll('.cell.selected').forEach(el => el.classList.remove('selected'));
+            isSelecting = false;
+        };
+
+        // Event Listeners
+        gridEl.addEventListener('touchstart', e => {
+            // 注意：這裡只阻止 grid 內部的預設行為，外部滑動由 CSS touch-action 控制
+            if(e.cancelable) e.preventDefault(); 
+            handleStart(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: false });
+
+        gridEl.addEventListener('touchmove', e => {
+            if(e.cancelable) e.preventDefault();
+            handleMove(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: false });
+
+        gridEl.addEventListener('touchend', e => {
+            if(e.cancelable) e.preventDefault();
+            handleEnd();
+        });
+
+        gridEl.addEventListener('mousedown', e => {
+            handleStart(e.clientX, e.clientY);
+        });
+        window.addEventListener('mousemove', e => {
+            handleMove(e.clientX, e.clientY);
+        });
+        window.addEventListener('mouseup', handleEnd);
+
+        document.getElementById('reset-btn').onclick = () => {
+            found.clear();
+            placeWords();
+            renderGrid();
+            renderWordList();
+            closeModal();
+        };
+
+        function closeModal() {
+            document.getElementById('win-modal').style.display = 'none';
+            if (found.size === placedWordsList.length) {
+                found.clear();
+                placeWords();
+                renderGrid();
+                renderWordList();
+            }
+        }
+
+        document.getElementById('back-btn').onclick = () => {
+            window.history.back();
+        };
+
+        placeWords();
+        renderGrid();
+        renderWordList();
+    </script>
+</body>
+</html>
