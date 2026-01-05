@@ -20,7 +20,7 @@
             margin: 0;
             padding: 0;
             -webkit-tap-highlight-color: transparent;
-            touch-action: none;
+            /* 修正：移除全域禁止觸控，允許頁面滑動 */
         }
 
         body {
@@ -89,6 +89,8 @@
             border-radius: 12px; margin-bottom: 20px;
             border: 2px dashed var(--xmas-green);
             overflow: hidden; 
+            /* 修正：只在遊戲區域禁止觸控捲動，讓畫線操作順暢 */
+            touch-action: none; 
         }
 
         .word-grid {
