@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>英語單字拳擊手 V6.2 (完美修復版)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700;900&family=Noto+Sans+TC:wght@500;900&display=swap');
+
+        body {
+            margin: 0;
+            background-color: #0f0f1a;
+            color: white;
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            touch-action: none;
+        }
+
+        #game-wrapper {
+            position: relative;
+            width: 1000px;
+            height: 750px;
+            transform-origin: center center;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            overflow: hidden;
+            outline: none; /* 移除點擊後的黑框 */
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center top, #2b32b2, #1488cc);
+            position: relative;
+            perspective: 800px;
+            border: 4px solid #fff;
+            box-sizing: border-box;
+        }
+
+        #floor {
+            position: absolute;
+            bottom: -300px; left: -50%; width: 200%; height: 100%;
+            background: 
+                linear-gradient(#000 2px, transparent 2px),
+                linear-gradient(90deg, #000 2px, transparent 2px),
+                linear-gradient(rgba(20, 20, 20, 0.8), #000);
+            background-size: 100px 100px, 100px 100px, 100% 100%;
+            transform: rotateX(70deg);
+            animation: moveFloor 0.5s linear infinite;
+            z-index: 1;
+            opacity: 0.6;
+        }
+        @keyframes moveFloor { from { background-position: 0 0; } to { background-position: 0 100px; } }
+
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%;
+            padding: 20px; box-sizing: border-box;
+            display: flex; justify-content: space-between; z-index: 100;
+        }
+        .hud-panel {
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            padding: 10px 25px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+        }
+        .hud-label { font-size: 12px; color: #aaa; margin-bottom: 2px; }
+        .hud-value { font-size: 24px; font-weight: 900; color: #fff; }
+        #score-val { color: #f1c40f; }
+
+        #question-display {
+            position: absolute; top: 12%; left: 50%;
+            transform: translateX(-50%);
+            text-align: center; z-index: 50; width: 90%;
+        }
+        #current-word {
+            font-size: 70px; font-weight: 900; color: #fff;
+            text-shadow: 0 5px 0 #0056b3, 0 10px 20px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+            animation: floatWord 3s ease-in-out infinite;
+        }
+        @keyframes floatWord { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        #pos-display {
+            font-size: 22px; background: #e74c3c; padding: 5px 15px;
+            border-radius: 5px; display: inline-block;
+        }
+
+        #doors-row {
+            position: absolute; top: 42%; left: 50%;
+            transform: translateX(-50%);
+            display: flex; justify-content: center;
+            gap: 20px; z-index: 10;
+            width: 90%;
+        }
+
+        .wood-door {
+            height: 300px;
+            background-color: #5d4037;
+            background-image: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px);
+            border: 6px solid #3e2723; border-radius: 10px 10px 0 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            cursor: pointer; position: relative;
+            transition: transform 0.2s, filter 0.2s;
+            flex: 1; max-width: 250px;
+        }
+
+        .door-text {
+            font-size: 36px; font-weight: 900; color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            text-align: center; padding: 5px; z-index: 2;
+            line-height: 1.2;
+            word-break: break-all;
+        }
+
+        .wood-door.selected {
+            transform: scale(1.08) translateY(-10px);
+            filter: brightness(1.3);
+            border-color: #f1c40f;
+            box-shadow: 0 0 40px rgba(241, 196, 15, 0.4);
+        }
+
+        #hero-container {
+            position: absolute; bottom: 120px; left: 50%;
+            transform: translateX(-50%); z-index: 50;
+            transition: left 0.15s ease-out, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; flex-direction: column; align-items: center;
+        }
+        #hero { font-size: 90px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); }
+        #hero-shadow {
+            width: 70px; height: 15px; background: rgba(0,0,0,0.6);
+            border-radius: 50%; margin-top: -10px; filter: blur(5px);
+        }
+
+        #mobile-controls {
+            position: absolute; bottom: 15px; left: 0; width: 100%;
+            display: flex; justify-content: space-between; padding: 0 30px;
+            box-sizing: border-box; z-index: 200;
+        }
+        .control-btn {
+            width: 80px; height: 80px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: white; font-size: 30px;
+            display: flex; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .control-btn:active { background: rgba(255, 255, 255, 0.4); transform: scale(0.95); }
+        .punch-btn { 
+            width: 90px; height: 90px; 
+            background: rgba(231, 76, 60, 0.6); 
+            border-color: #c0392b;
+            font-weight: bold; font-size: 20px;
+        }
+
+        #effects-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 150; }
+        .effect-text { position: absolute; font-weight: 900; animation: popUp 1s forwards; text-shadow: 2px 2px 0 #000; }
+        @keyframes popUp { 
+            0% { transform: scale(0.5); opacity: 0; } 
+            50% { transform: scale(1.2); opacity: 1; } 
+            100% { transform: scale(1) translateY(-50px); opacity: 0; } 
+        }
+
+        #overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 15, 26, 0.95);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 300; backdrop-filter: blur(10px);
+        }
+        .title-main { font-size: 50px; font-weight: 900; color: #f1c40f; margin-bottom: 10px; text-transform: uppercase; text-align: center; }
+        .subtitle { color: #ccc; font-size: 18px; margin-bottom: 30px; text-align: center; line-height: 1.5; }
+        .btn-large {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white; font-size: 24px; font-weight: bold;
+            padding: 15px 50px; border: none; border-radius: 50px;
+            cursor: pointer; box-shadow: 0 10px 20px rgba(231, 76, 60, 0.4);
+            transition: transform 0.1s;
+            outline: none; /* 移除點擊後的藍框 */
+        }
+        .btn-large:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+<div id="game-wrapper" tabindex="0"> <div id="game-container">
+        <div id="floor"></div>
+        <div id="ui-layer">
+            <div class="hud-panel"><div class="hud-label">LEVEL</div><div class="hud-value" id="level-display">1</div></div>
+            <div class="hud-panel"><div class="hud-label">PROGRESS</div><div class="hud-value" id="word-progress">1/9</div></div>
+            <div class="hud-panel"><div class="hud-label">SCORE</div><div class="hud-value" id="score-val">0</div></div>
+        </div>
+        <div id="question-display"><div id="current-word">READY</div><div id="pos-display">...</div></div>
+        <div id="doors-row"></div>
+        <div id="hero-container"><div id="hero">🥊</div><div id="hero-shadow"></div></div>
+        <div id="mobile-controls">
+            <div class="control-btn" ontouchstart="handleInput('left')" onmousedown="handleInput('left')">⬅️</div>
+            <div class="control-btn punch-btn" ontouchstart="handleInput('punch')" onmousedown="handleInput('punch')">👊</div>
+            <div class="control-btn" ontouchstart="handleInput('right')" onmousedown="handleInput('right')">➡️</div>
+        </div>
+        <div id="effects-layer"></div>
+        <div id="overlay">
+            <div class="title-main">VOCAB FIGHTER單字拳擊手L1U1-5 developed by Shirley Du</div>
+            <div class="subtitle">15 關卡挑戰 (135單字)<br>電腦：⬅️ ➡️ 移動，SPACE/ENTER 攻擊<br>手機：使用下方按鈕或點擊門</div>
+            <button class="btn-large" onclick="startGame()">START GAME</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const vocabList = [
+      {en:"action",cn:"動作",pos:"n."}, {en:"afternoon",cn:"下午",pos:"n."}, {en:"air",cn:"空氣",pos:"n."}, {en:"banana",cn:"香蕉",pos:"n."}, {en:"brown",cn:"棕色",pos:"adj."}, 
+      {en:"card",cn:"卡片",pos:"n."}, {en:"eat",cn:"吃",pos:"v."}, {en:"farm",cn:"農場",pos:"n."}, {en:"fifteen",cn:"十五",pos:"n."}, {en:"first",cn:"第一",pos:"adv."}, 
+      {en:"hand",cn:"手;傳遞",pos:"v."}, {en:"idea",cn:"主意",pos:"n."}, {en:"large",cn:"大的",pos:"adj."}, {en:"make",cn:"製造",pos:"v."}, {en:"many",cn:"很多的",pos:"adj."}, 
+      {en:"May",cn:"五月",pos:"n."}, {en:"outside",cn:"外面",pos:"n."}, {en:"please",cn:"請",pos:"v."}, {en:"question",cn:"問題",pos:"n."}, {en:"radio",cn:"廣播",pos:"n."}, 
+      {en:"room",cn:"房間",pos:"n."}, {en:"shall",cn:"應該",pos:"v."}, {en:"shot",cn:"射擊",pos:"n."}, {en:"soil",cn:"土壤",pos:"n."}, {en:"study",cn:"讀書",pos:"v."}, 
+      {en:"time",cn:"時間",pos:"n."}, {en:"too",cn:"也是",pos:"adv."}, {en:"toward",cn:"朝向",pos:"prep."}, {en:"welcome",cn:"歡迎",pos:"v."}, {en:"yes",cn:"是",pos:"n."}, 
+      {en:"almost",cn:"幾乎",pos:"adv."}, {en:"animal",cn:"動物",pos:"n."}, {en:"begin",cn:"開始",pos:"v."}, {en:"cost",cn:"花費",pos:"v."}, {en:"fight",cn:"打架",pos:"n."}, 
+      {en:"finish",cn:"結束",pos:"v."}, {en:"funny",cn:"好笑的",pos:"adj."}, {en:"haircut",cn:"理髮",pos:"n."}, {en:"home",cn:"家",pos:"n."}, {en:"hurt",cn:"受傷",pos:"v."}, 
+      {en:"level",cn:"等級",pos:"n."}, {en:"mail",cn:"信件",pos:"n."}, {en:"nine",cn:"九",pos:"n."}, {en:"on",cn:"在上面",pos:"prep."}, {en:"only",cn:"唯一的",pos:"adj."}, 
+      {en:"plant",cn:"植物",pos:"n."}, {en:"soda",cn:"汽水",pos:"n."}, {en:"sound",cn:"聲音",pos:"n."}, {en:"strong",cn:"強壯的",pos:"adj."}, {en:"ticket",cn:"票",pos:"n."}, 
+      {en:"touch",cn:"觸摸",pos:"v."}, {en:"town",cn:"城鎮",pos:"n."}, {en:"up",cn:"向上",pos:"adv."}, {en:"win",cn:"贏",pos:"v."}, {en:"world",cn:"世界",pos:"n."}, 
+      {en:"come",cn:"來",pos:"v."}, {en:"country",cn:"國家",pos:"n."}, {en:"cowboy",cn:"牛仔",pos:"n."}, {en:"every",cn:"每個",pos:"adj."}, {en:"exam",cn:"考試",pos:"n."}, 
+      {en:"except",cn:"除了",pos:"prep."}, {en:"frog",cn:"青蛙",pos:"n."}, {en:"glad",cn:"高興的",pos:"adj."}, {en:"goodbye",cn:"再見",pos:"n."}, {en:"inside",cn:"裡面",pos:"prep."}, 
+      {en:"laugh",cn:"大笑",pos:"v."}, {en:"lion",cn:"獅子",pos:"n."}, {en:"never",cn:"從不",pos:"adv."}, {en:"paint",cn:"繪畫",pos:"v."}, {en:"pencil",cn:"鉛筆",pos:"n."}, 
+      {en:"piano",cn:"鋼琴",pos:"n."}, {en:"right",cn:"右邊;對",pos:"n.adj."}, {en:"sand",cn:"沙子",pos:"n."}, {en:"second",cn:"第二",pos:"n."}, {en:"seesaw",cn:"蹺蹺板",pos:"n."}, 
+      {en:"sometimes",cn:"有時",pos:"adv."}, {en:"still",cn:"仍然",pos:"adv."}, {en:"stop",cn:"停止",pos:"v."}, {en:"wear",cn:"穿戴",pos:"v."}, {en:"Wednesday",cn:"週三",pos:"n."}, 
+      {en:"well",cn:"很好",pos:"adv."}, {en:"will",cn:"將會",pos:"v."}, {en:"yellow",cn:"黃色",pos:"n."}, {en:"yesterday",cn:"昨天",pos:"n."}, {en:"ago",cn:"以前",pos:"adv."}, 
+      {en:"born",cn:"出生",pos:"v."}, {en:"care",cn:"照顧",pos:"v."}, {en:"certain",cn:"確定的",pos:"adj."}, {en:"draw",cn:"畫",pos:"v."}, {en:"fall",cn:"跌倒;秋天",pos:"v.n."}, 
+      {en:"far",cn:"遠的",pos:"adj."}, {en:"fog",cn:"霧",pos:"n."}, {en:"fresh",cn:"新鮮的",pos:"adj."}, {en:"front",cn:"前面",pos:"n."}, 
+      {en:"iron",cn:"鐵;燙",pos:"n.v."}, {en:"keeper",cn:"守衛",pos:"n."}, {en:"kitten",cn:"小貓",pos:"n."}, {en:"knee",cn:"膝蓋",pos:"n."}, 
+      {en:"leave",cn:"離開",pos:"v."}, {en:"nurse",cn:"護士",pos:"n."}, {en:"out",cn:"外面",pos:"adv."}, {en:"ready",cn:"準備好",pos:"adj."}, {en:"seventy",cn:"七十",pos:"n."}, 
+      {en:"smell",cn:"聞",pos:"v."}, {en:"song",cn:"歌曲",pos:"n."}, {en:"sour",cn:"酸的",pos:"adj."}, {en:"sure",cn:"確定的",pos:"adj."}, {en:"thus",cn:"因此",pos:"adv."}, 
+      {en:"wrong",cn:"錯誤的",pos:"adj."}, {en:"again",cn:"再一次",pos:"adv."}, {en:"agreement",cn:"同意",pos:"n."}, {en:"class",cn:"班級",pos:"n."}, 
+      {en:"clean",cn:"乾淨的",pos:"adj."}, {en:"coat",cn:"外套",pos:"n."}, {en:"farmer",cn:"農夫",pos:"n."}, {en:"flower",cn:"花",pos:"n."}, {en:"history",cn:"歷史",pos:"n."}, 
+      {en:"hole",cn:"洞",pos:"n."}, {en:"job",cn:"工作",pos:"n."}, {en:"joy",cn:"喜悅",pos:"n."}, {en:"other",cn:"其他的",pos:"adj."}, {en:"papa",cn:"爸爸",pos:"n."}, 
+      {en:"scene",cn:"場景",pos:"n."}, {en:"selfish",cn:"自私的",pos:"adj."}, {en:"shine",cn:"照耀",pos:"v."}, {en:"something",cn:"某事",pos:"n."}, {en:"special",cn:"特別的",pos:"adj."}, 
+      {en:"thirteen",cn:"十三",pos:"n."}, {en:"view",cn:"視野",pos:"n."}, {en:"visit",cn:"拜訪",pos:"v."}, {en:"whole",cn:"全部的",pos:"adj."}
+    ];
+
+    const WORDS_PER_LEVEL = 9;
+    let totalIndex = 0;
+    let currentLevel = 1;
+    let levelProgress = 0;
+    let score = 0;
+    let currentOptions = [];
+    let selectedLane = 0;
+    let isLocked = false;
+    let optionCount = 2;
+
+    const wordEl = document.getElementById('current-word');
+    const posEl = document.getElementById('pos-display');
+    const doorsRow = document.getElementById('doors-row');
+    const heroContainer = document.getElementById('hero-container');
+    const scoreEl = document.getElementById('score-val');
+    const levelEl = document.getElementById('level-display');
+    const progressEl = document.getElementById('word-progress');
+    const overlay = document.getElementById('overlay');
+    const effectsLayer = document.getElementById('effects-layer');
+    const wrapper = document.getElementById('game-wrapper');
+
+    function resizeGame() {
+        const scaleX = window.innerWidth / 1000;
+        const scaleY = window.innerHeight / 750;
+        const scale = Math.min(scaleX, scaleY, 1);
+        wrapper.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resizeGame);
+    resizeGame();
+
+    function startGame() {
+        totalIndex = 0;
+        score = 0;
+        overlay.style.display = 'none';
+        
+        // 移除焦點，避免按鍵觸發按鈕
+        if(document.activeElement) document.activeElement.blur();
+        wrapper.focus();
+
+        if(window.AudioContext || window.webkitAudioContext) {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AC(); ctx.resume();
+        }
+        loadLevel();
+    }
+
+    function loadLevel() {
+        currentLevel = Math.floor(totalIndex / WORDS_PER_LEVEL) + 1;
+        levelProgress = totalIndex % WORDS_PER_LEVEL;
+
+        if (currentLevel <= 5) optionCount = 2;
+        else if (currentLevel <= 10) optionCount = 3;
+        else optionCount = 4;
+
+        updateHUD();
+        nextWord();
+    }
+
+    function updateHUD() {
+        scoreEl.innerText = score;
+        levelEl.innerText = currentLevel;
+        progressEl.innerText = `${levelProgress + 1} / ${WORDS_PER_LEVEL}`;
+    }
+
+    function nextWord() {
+        if (totalIndex >= vocabList.length) {
+            gameVictory();
+            return;
+        }
+
+        // 強制解鎖狀態
+        isLocked = false;
+        
+        // 重置主角樣式
+        heroContainer.style.transition = 'none';
+        heroContainer.style.transform = 'translateX(-50%) scale(1)';
+        heroContainer.style.opacity = '1';
+        
+        selectedLane = Math.floor(optionCount / 2);
+        
+        setTimeout(() => {
+            updateHeroPosition();
+            heroContainer.style.transition = 'left 0.15s ease-out, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        }, 50);
+
+        const target = vocabList[totalIndex];
+        wordEl.innerText = target.en;
+        posEl.innerText = target.pos;
+
+        currentOptions = [];
+        currentOptions.push({ text: target.cn, isCorrect: true });
+
+        while (currentOptions.length < optionCount) {
+            const r = vocabList[Math.floor(Math.random() * vocabList.length)];
+            if (r.cn !== target.cn && !currentOptions.some(o => o.text === r.cn)) {
+                currentOptions.push({ text: r.cn, isCorrect: false });
+            }
+        }
+        currentOptions.sort(() => Math.random() - 0.5);
+
+        renderDoors();
+        highlightLane();
+    }
+
+    function renderDoors() {
+        doorsRow.innerHTML = '';
+        const doorWidth = optionCount === 2 ? '240px' : (optionCount === 3 ? '200px' : '160px');
+        
+        currentOptions.forEach((opt, index) => {
+            const door = document.createElement('div');
+            door.className = 'wood-door';
+            door.style.maxWidth = doorWidth;
+            door.innerHTML = `<div class="door-text">${opt.text}</div>`;
+            door.id = `door-${index}`;
+            
+            door.onpointerdown = (e) => {
+                e.preventDefault();
+                if(!isLocked) {
+                    selectedLane = index;
+                    updateHeroPosition();
+                    executeMove();
+                }
+            };
+            doorsRow.appendChild(door);
+        });
+    }
+
+    function handleInput(action) {
+        if (isLocked || overlay.style.display !== 'none') return;
+        
+        if (document.querySelector('.level-complete-btn')) {
+             startNextLevelChunk();
+             return;
+        }
+
+        if (action === 'left') {
+            if (selectedLane > 0) {
+                selectedLane--;
+                playSound('swish');
+                updateHeroPosition();
+                highlightLane();
+            }
+        } else if (action === 'right') {
+            if (selectedLane < optionCount - 1) {
+                selectedLane++;
+                playSound('swish');
+                updateHeroPosition();
+                highlightLane();
+            }
+        } else if (action === 'punch') {
+            executeMove();
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        // 只有在遊戲進行中才攔截預設行為 (避免 Enter/Space 捲動或誤觸按鈕)
+        if (overlay.style.display === 'none') {
+            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', ' ', 'Enter'].includes(e.key)) {
+                e.preventDefault();
+            }
+            
+            if (e.key === 'ArrowLeft') handleInput('left');
+            else if (e.key === 'ArrowRight') handleInput('right');
+            else if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowUp') handleInput('punch');
+        }
+    });
+
+    function updateHeroPosition() {
+        const doors = document.querySelectorAll('.wood-door');
+        if (doors[selectedLane]) {
+            const doorRect = doors[selectedLane].getBoundingClientRect();
+            const containerRect = document.getElementById('game-container').getBoundingClientRect();
+            const centerX = doorRect.left - containerRect.left + (doorRect.width / 2);
+            const percent = (centerX / containerRect.width) * 100;
+            heroContainer.style.left = percent + '%';
+        }
+    }
+
+    function highlightLane() {
+        const doors = document.querySelectorAll('.wood-door');
+        doors.forEach(d => d.classList.remove('selected'));
+        if(doors[selectedLane]) doors[selectedLane].classList.add('selected');
+    }
+
+    function executeMove() {
+        if (isLocked) return;
+        isLocked = true;
+        playSound('swish');
+        heroContainer.style.transform = 'translateX(-50%) translateY(-250px) scale(0.6)';
+        setTimeout(() => checkAnswer(), 300);
+    }
+
+    function checkAnswer() {
+        const chosen = currentOptions[selectedLane];
+        const doorEl = document.getElementById(`door-${selectedLane}`);
+        if (chosen.isCorrect) handleSuccess(doorEl);
+        else handleFail(doorEl);
+    }
+
+    function handleSuccess(doorEl) {
+        playSound('smash');
+        doorEl.style.transform = 'scale(1.2) rotateY(90deg)';
+        doorEl.style.opacity = '0';
+        createEffect('💥', '#f1c40f');
+        createEffect('NICE!', '#2ecc71', -100);
+
+        score += 100;
+        totalIndex++;
+        levelProgress++;
+        updateHUD();
+
+        setTimeout(() => {
+            if (levelProgress >= WORDS_PER_LEVEL) {
+                 showLevelComplete();
+            } else {
+                 nextWord();
+            }
+        }, 600);
+    }
+
+    function handleFail(doorEl) {
+        playSound('error');
+        createEffect('❌', 'red');
+        heroContainer.style.transform = 'translateX(-50%) translateY(0) scale(1)';
+        wrapper.style.transform += ' translateX(5px)';
+        setTimeout(()=> resizeGame(), 100);
+        score -= 50;
+        if(score < 0) score = 0;
+        updateHUD();
+        setTimeout(() => isLocked = false, 500);
+    }
+
+    function showLevelComplete() {
+        overlay.innerHTML = `
+            <div class="title-main" style="color:#3498db">LEVEL ${currentLevel} CLEAR!</div>
+            <div class="subtitle">
+                準備好進入下一階段了嗎？<br>
+                難度: ${currentLevel >= 10 ? '困難 (4選1)' : (currentLevel >= 5 ? '普通 (3選1)' : '簡單 (2選1)')}
+            </div>
+            <button class="btn-large level-complete-btn" onclick="startNextLevelChunk()">NEXT LEVEL ▶</button>
+        `;
+        overlay.style.display = 'flex';
+        playSound('win');
+    }
+
+    function startNextLevelChunk() {
+        overlay.style.display = 'none';
+        
+        // 關鍵修正：讓按鈕失去焦點，避免 Enter/Space 繼續觸發按鈕
+        if(document.activeElement) document.activeElement.blur();
+        
+        // 強制解鎖，防止卡住
+        isLocked = false;
+        
+        loadLevel(); 
+    }
+
+    function gameVictory() {
+        overlay.innerHTML = `
+            <div class="title-main">VICTORY!</div>
+            <div class="subtitle">恭喜完成所有 15 關卡！<br>最終分數: <span style="color:#f1c40f; font-size:30px">${score}</span></div>
+            <button class="btn-large" onclick="startGame()">REPLAY</button>
+        `;
+        overlay.style.display = 'flex';
+        playSound('win');
+    }
+
+    function createEffect(text, color, yOffset = 0) {
+        const el = document.createElement('div');
+        el.className = 'effect-text';
+        el.innerText = text;
+        el.style.color = color;
+        el.style.fontSize = '60px';
+        const heroRect = heroContainer.getBoundingClientRect();
+        const containerRect = document.getElementById('game-container').getBoundingClientRect();
+        el.style.left = (heroRect.left - containerRect.left + 20) + 'px';
+        el.style.top = (heroRect.top - containerRect.top + yOffset) + 'px';
+        effectsLayer.appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+    }
+
+    function playSound(type) {
+        try {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return;
+            const ctx = new AC();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            const now = ctx.currentTime;
+
+            if (type === 'swish') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(50, now+0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now+0.1);
+                osc.start(now); osc.stop(now+0.1);
+            } else if (type === 'smash') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(100, now);
+                osc.frequency.exponentialRampToValueAtTime(10, now+0.15);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now+0.15);
+                osc.start(now); osc.stop(now+0.15);
+            } else if (type === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(100, now+0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now+0.3);
+                osc.start(now); osc.stop(now+0.3);
+            } else if (type === 'win') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.setValueAtTime(600, now+0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now+0.4);
+                osc.start(now); osc.stop(now+0.4);
+            }
+        } catch (e) {}
+    }
+</script>
+</body>
+</html>
