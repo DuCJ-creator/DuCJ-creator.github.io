@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>英語單字拳擊手 V6.2 (完美修復版)</title>
+    <title>英語單字拳擊手 V6.4 (滑鼠點擊專用版)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700;900&family=Noto+Sans+TC:wght@500;900&display=swap');
 
@@ -17,8 +17,9 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            user-select: none;
+            user-select: none; /* 禁止選取文字，防止變色 */
             touch-action: none;
+            -webkit-user-select: none;
         }
 
         #game-wrapper {
@@ -28,7 +29,7 @@
             transform-origin: center center;
             box-shadow: 0 0 50px rgba(0,0,0,0.8);
             overflow: hidden;
-            outline: none; /* 移除點擊後的黑框 */
+            outline: none;
         }
 
         #game-container {
@@ -75,6 +76,7 @@
             position: absolute; top: 12%; left: 50%;
             transform: translateX(-50%);
             text-align: center; z-index: 50; width: 90%;
+            pointer-events: none; /* 防止點擊到文字 */
         }
         #current-word {
             font-size: 70px; font-weight: 900; color: #fff;
@@ -105,8 +107,20 @@
             display: flex; flex-direction: column;
             justify-content: center; align-items: center;
             cursor: pointer; position: relative;
-            transition: transform 0.2s, filter 0.2s;
+            transition: transform 0.1s, filter 0.1s;
             flex: 1; max-width: 250px;
+        }
+        
+        /* 滑鼠懸停效果，讓學生知道可以點 */
+        .wood-door:hover {
+            filter: brightness(1.2);
+            transform: translateY(-5px);
+            border-color: #f1c40f;
+        }
+
+        /* 按下時的效果 */
+        .wood-door:active {
+            transform: scale(0.98) translateY(0);
         }
 
         .door-text {
@@ -115,9 +129,11 @@
             text-align: center; padding: 5px; z-index: 2;
             line-height: 1.2;
             word-break: break-all;
+            pointer-events: none; /* 讓點擊事件穿透文字直接作用在門上 */
         }
 
         .wood-door.selected {
+            /* 程式控制選中時的樣式 */
             transform: scale(1.08) translateY(-10px);
             filter: brightness(1.3);
             border-color: #f1c40f;
@@ -125,40 +141,23 @@
         }
 
         #hero-container {
-            position: absolute; bottom: 120px; left: 50%;
+            position: absolute; bottom: 80px; left: 50%; /* 調整位置，因為下方按鈕拿掉了 */
             transform: translateX(-50%); z-index: 50;
             transition: left 0.15s ease-out, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex; flex-direction: column; align-items: center;
+            pointer-events: none;
         }
-        #hero { font-size: 90px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); }
+        #hero { font-size: 100px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); }
         #hero-shadow {
-            width: 70px; height: 15px; background: rgba(0,0,0,0.6);
-            border-radius: 50%; margin-top: -10px; filter: blur(5px);
+            width: 80px; height: 15px; background: rgba(0,0,0,0.6);
+            border-radius: 50%; margin-top: -15px; filter: blur(5px);
         }
 
-        #mobile-controls {
-            position: absolute; bottom: 15px; left: 0; width: 100%;
-            display: flex; justify-content: space-between; padding: 0 30px;
-            box-sizing: border-box; z-index: 200;
-        }
-        .control-btn {
-            width: 80px; height: 80px;
-            background: rgba(255, 255, 255, 0.15);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            color: white; font-size: 30px;
-            display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(5px);
-            cursor: pointer;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .control-btn:active { background: rgba(255, 255, 255, 0.4); transform: scale(0.95); }
-        .punch-btn { 
-            width: 90px; height: 90px; 
-            background: rgba(231, 76, 60, 0.6); 
-            border-color: #c0392b;
-            font-weight: bold; font-size: 20px;
+        /* 提示文字 */
+        #instruction-text {
+            position: absolute; bottom: 20px; width: 100%; text-align: center;
+            color: rgba(255,255,255,0.5); font-size: 18px; z-index: 20;
+            pointer-events: none;
         }
 
         #effects-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 150; }
@@ -183,14 +182,15 @@
             padding: 15px 50px; border: none; border-radius: 50px;
             cursor: pointer; box-shadow: 0 10px 20px rgba(231, 76, 60, 0.4);
             transition: transform 0.1s;
-            outline: none; /* 移除點擊後的藍框 */
+            outline: none;
         }
         .btn-large:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
-<div id="game-wrapper" tabindex="0"> <div id="game-container">
+<div id="game-wrapper">
+    <div id="game-container">
         <div id="floor"></div>
         <div id="ui-layer">
             <div class="hud-panel"><div class="hud-label">LEVEL</div><div class="hud-value" id="level-display">1</div></div>
@@ -198,17 +198,18 @@
             <div class="hud-panel"><div class="hud-label">SCORE</div><div class="hud-value" id="score-val">0</div></div>
         </div>
         <div id="question-display"><div id="current-word">READY</div><div id="pos-display">...</div></div>
+        
         <div id="doors-row"></div>
+        
         <div id="hero-container"><div id="hero">🥊</div><div id="hero-shadow"></div></div>
-        <div id="mobile-controls">
-            <div class="control-btn" ontouchstart="handleInput('left')" onmousedown="handleInput('left')">⬅️</div>
-            <div class="control-btn punch-btn" ontouchstart="handleInput('punch')" onmousedown="handleInput('punch')">👊</div>
-            <div class="control-btn" ontouchstart="handleInput('right')" onmousedown="handleInput('right')">➡️</div>
-        </div>
+        
+        <div id="instruction-text">直接點擊正確的門來攻擊！</div>
+
         <div id="effects-layer"></div>
+        
         <div id="overlay">
-            <div class="title-main">VOCAB FIGHTER單字拳擊手L1U1-5 developed by Shirley Du</div>
-            <div class="subtitle">15 關卡挑戰 (135單字)<br>電腦：⬅️ ➡️ 移動，SPACE/ENTER 攻擊<br>手機：使用下方按鈕或點擊門</div>
+            <div class="title-main">VOCAB FIGHTER</div>
+            <div class="subtitle">15 關卡挑戰 (135單字)<br>操作方法：直接點擊門上的正確答案</div>
             <button class="btn-large" onclick="startGame()">START GAME</button>
         </div>
     </div>
@@ -280,9 +281,8 @@
         score = 0;
         overlay.style.display = 'none';
         
-        // 移除焦點，避免按鍵觸發按鈕
+        // 移除所有焦點，確保鍵盤不會意外觸發
         if(document.activeElement) document.activeElement.blur();
-        wrapper.focus();
 
         if(window.AudioContext || window.webkitAudioContext) {
             const AC = window.AudioContext || window.webkitAudioContext;
@@ -315,14 +315,15 @@
             return;
         }
 
-        // 強制解鎖狀態
+        // 徹底重置鎖定狀態
         isLocked = false;
         
-        // 重置主角樣式
+        // 重置主角
         heroContainer.style.transition = 'none';
         heroContainer.style.transform = 'translateX(-50%) scale(1)';
         heroContainer.style.opacity = '1';
         
+        // 預設位置
         selectedLane = Math.floor(optionCount / 2);
         
         setTimeout(() => {
@@ -360,55 +361,37 @@
             door.innerHTML = `<div class="door-text">${opt.text}</div>`;
             door.id = `door-${index}`;
             
+            // 關鍵修改：使用 pointerdown 統一處理滑鼠和觸控，並防止重複觸發
             door.onpointerdown = (e) => {
-                e.preventDefault();
-                if(!isLocked) {
-                    selectedLane = index;
-                    updateHeroPosition();
-                    executeMove();
+                // 如果已經鎖定(正在攻擊或結算中)，絕對不允許再次執行
+                if(isLocked) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
                 }
+                
+                // 立即鎖定，防止連點導致單字變換
+                isLocked = true;
+                e.preventDefault();
+                
+                selectedLane = index;
+                updateHeroPosition();
+                highlightLane(); // 立刻視覺回饋
+                
+                // 執行攻擊動作
+                executeMove();
             };
+            
             doorsRow.appendChild(door);
         });
     }
 
-    function handleInput(action) {
-        if (isLocked || overlay.style.display !== 'none') return;
-        
-        if (document.querySelector('.level-complete-btn')) {
-             startNextLevelChunk();
-             return;
-        }
-
-        if (action === 'left') {
-            if (selectedLane > 0) {
-                selectedLane--;
-                playSound('swish');
-                updateHeroPosition();
-                highlightLane();
-            }
-        } else if (action === 'right') {
-            if (selectedLane < optionCount - 1) {
-                selectedLane++;
-                playSound('swish');
-                updateHeroPosition();
-                highlightLane();
-            }
-        } else if (action === 'punch') {
-            executeMove();
-        }
-    }
-
+    // 鍵盤事件監聽器：雖然移除了左右控制，但防止使用者按鍵導致意外捲動
     document.addEventListener('keydown', (e) => {
-        // 只有在遊戲進行中才攔截預設行為 (避免 Enter/Space 捲動或誤觸按鈕)
         if (overlay.style.display === 'none') {
-            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', ' ', 'Enter'].includes(e.key)) {
-                e.preventDefault();
+            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'Enter'].includes(e.key)) {
+                e.preventDefault(); // 阻擋預設行為
             }
-            
-            if (e.key === 'ArrowLeft') handleInput('left');
-            else if (e.key === 'ArrowRight') handleInput('right');
-            else if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowUp') handleInput('punch');
         }
     });
 
@@ -430,24 +413,32 @@
     }
 
     function executeMove() {
-        if (isLocked) return;
-        isLocked = true;
+        // 這裡不需要檢查 isLocked，因為點擊事件已經檢查過了
         playSound('swish');
+        
+        // 攻擊動畫
         heroContainer.style.transform = 'translateX(-50%) translateY(-250px) scale(0.6)';
+        
+        // 稍微延遲後檢查答案
         setTimeout(() => checkAnswer(), 300);
     }
 
     function checkAnswer() {
         const chosen = currentOptions[selectedLane];
         const doorEl = document.getElementById(`door-${selectedLane}`);
+        
         if (chosen.isCorrect) handleSuccess(doorEl);
         else handleFail(doorEl);
     }
 
     function handleSuccess(doorEl) {
         playSound('smash');
-        doorEl.style.transform = 'scale(1.2) rotateY(90deg)';
-        doorEl.style.opacity = '0';
+        
+        if(doorEl) {
+            doorEl.style.transform = 'scale(1.2) rotateY(90deg)';
+            doorEl.style.opacity = '0';
+        }
+        
         createEffect('💥', '#f1c40f');
         createEffect('NICE!', '#2ecc71', -100);
 
@@ -468,12 +459,19 @@
     function handleFail(doorEl) {
         playSound('error');
         createEffect('❌', 'red');
+        
+        // 回到原位
         heroContainer.style.transform = 'translateX(-50%) translateY(0) scale(1)';
+        
+        // 震動畫面
         wrapper.style.transform += ' translateX(5px)';
         setTimeout(()=> resizeGame(), 100);
+        
         score -= 50;
         if(score < 0) score = 0;
         updateHUD();
+        
+        // 失敗後，延遲解鎖，讓玩家可以再次嘗試
         setTimeout(() => isLocked = false, 500);
     }
 
@@ -493,12 +491,9 @@
     function startNextLevelChunk() {
         overlay.style.display = 'none';
         
-        // 關鍵修正：讓按鈕失去焦點，避免 Enter/Space 繼續觸發按鈕
         if(document.activeElement) document.activeElement.blur();
         
-        // 強制解鎖，防止卡住
         isLocked = false;
-        
         loadLevel(); 
     }
 
