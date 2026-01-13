@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Shirley's Magic Cube</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gold: #FFD700;
+            --dark-gold: #FFC107;
+            --dark-bg: #0a0a0a;
+            --medium-bg: #1a1a1a;
+            --light-bg: #2a2a2a;
+            --text-light: #f0f0f0;
+            --text-muted: #aaaaaa;
+            --red: #FF5252;
+            --cyan: #26A69A;
+            --yellow: #FFC145;
+            --green: #05C793;
+            --blue: #0A7EA5;
+            --purple: #8A2BE2;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --border-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--medium-bg) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: clamp(10px, 3vw, 20px);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: clamp(15px, 4vw, 25px);
+            width: 100%;
+            max-width: 900px;
+        }
+        
+        h1 {
+            font-size: clamp(2rem, 6vw, 2.8rem);
+            font-weight: 300;
+            margin-bottom: 8px;
+            background: linear-gradient(to right, var(--primary-gold), var(--dark-gold));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+        
+        /* Platform indicator */
+        .platform-indicator {
+            display: inline-flex;
+            background: rgba(40, 40, 40, 0.7);
+            border-radius: 20px;
+            padding: 5px;
+            margin-top: 5px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            gap: 5px;
+        }
+        
+        .platform-icon {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(60, 60, 60, 0.5);
+            color: var(--primary-gold);
+            font-size: 0.9rem;
+        }
+        
+        .platform-icon.active {
+            background: var(--primary-gold);
+            color: var(--dark-bg);
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(20px, 4vw, 30px);
+            width: 100%;
+            max-width: 1400px;
+            flex: 1;
+        }
+        
+        /* Enhanced Cube Container */
+        .cube-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+        
+        .cube-display-container {
+            width: min(85vw, 500px, 75vh);
+            height: min(85vw, 500px, 75vh);
+            position: relative;
+            perspective: 2000px;
+            margin: 0 auto;
+            cursor: grab;
+        }
+        
+        .cube-display-container:active {
+            cursor: grabbing;
+        }
+        
+        .cube-3d {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(-25deg) rotateY(-40deg);
+            transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        
+        .cube-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 2px;
+            padding: 2px;
+            border-radius: 3px;
+            background: rgba(10, 10, 10, 0.9);
+            box-sizing: border-box;
+            box-shadow: 
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+                0 0 20px rgba(0, 0, 0, 0.5);
+            backface-visibility: hidden;
+            border: 2px solid rgba(30, 30, 30, 0.8);
+        }
+        
+        .sticker {
+            border-radius: 4px;
+            box-shadow: 
+                inset 0 0 15px rgba(0, 0, 0, 0.6),
+                0 2px 4px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            border-left: 1px solid rgba(255, 255, 255, 0.15);
+            border-right: 1px solid rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+        }
+        
+        .sticker::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 30%);
+            border-radius: 4px;
+            pointer-events: none;
+        }
+        
+        .front { 
+            transform: translateZ(calc(min(85vw, 500px, 75vh) / 2));
+            border-color: rgba(50, 50, 50, 0.9);
+        }
+        .back { 
+            transform: rotateY(180deg) translateZ(calc(min(85vw, 500px, 75vh) / 2));
+            border-color: rgba(50, 50, 50, 0.9);
+        }
+        .right { 
+            transform: rotateY(90deg) translateZ(calc(min(85vw, 500px, 75vh) / 2));
+            border-color: rgba(50, 50, 50, 0.9);
+        }
+        .left { 
+            transform: rotateY(-90deg) translateZ(calc(min(85vw, 500px, 75vh) / 2));
+            border-color: rgba(50, 50, 50, 0.9);
+        }
+        .top { 
+            transform: rotateX(90deg) translateZ(calc(min(85vw, 500px, 75vh) / 2));
+            border-color: rgba(50, 50, 50, 0.9);
+        }
+        .bottom { 
+            transform: rotateX(-90deg) translateZ(calc(min(85vw, 500px, 75vh) / 2));
+            border-color: rgba(50, 50, 50, 0.9);
+        }
+        
+        /* Controls section */
+        .controls-section {
+            width: 100%;
+            max-width: min(500px, 90vw);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .control-panel {
+            background: rgba(30, 30, 30, 0.9);
+            border-radius: var(--border-radius);
+            padding: clamp(15px, 4vw, 25px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(100, 100, 100, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .panel-title {
+            font-size: clamp(1.2rem, 4vw, 1.4rem);
+            margin-bottom: 20px;
+            color: var(--primary-gold);
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Buttons */
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .action-btn {
+            background: linear-gradient(to bottom, var(--light-bg), #222);
+            color: var(--text-light);
+            border: none;
+            padding: clamp(12px, 3vw, 16px);
+            border-radius: var(--border-radius);
+            font-size: clamp(0.9rem, 3vw, 1rem);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: 1px solid rgba(100, 100, 100, 0.2);
+            touch-action: manipulation;
+            min-height: 48px;
+            position: relative;
+        }
+        
+        .action-btn:hover {
+            background: linear-gradient(to bottom, #3a3a3a, #2a2a2a);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .action-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .primary-btn {
+            background: linear-gradient(to bottom, var(--primary-gold), var(--dark-gold));
+            color: var(--dark-bg);
+            font-weight: 600;
+        }
+        
+        .primary-btn:hover {
+            background: linear-gradient(to bottom, #FFE44D, #FFCA28);
+        }
+        
+        /* Keyboard shortcut indicators */
+        .keyboard-shortcut {
+            position: absolute;
+            top: 4px;
+            right: 8px;
+            font-size: 0.7rem;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Rotation controls */
+        .rotation-controls {
+            margin-top: 20px;
+        }
+        
+        .rotation-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: clamp(8px, 2vw, 12px);
+            margin-top: 10px;
+        }
+        
+        .rotation-btn {
+            aspect-ratio: 1;
+            padding: 12px;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            min-height: clamp(45px, 10vw, 60px);
+        }
+        
+        .center-btn {
+            grid-column: 2;
+            grid-row: 2;
+            background: rgba(60, 60, 60, 0.7);
+        }
+        
+        /* View controls */
+        .view-controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .view-btn {
+            width: clamp(45px, 10vw, 55px);
+            height: clamp(45px, 10vw, 55px);
+            font-size: clamp(1rem, 3vw, 1.2rem);
+        }
+        
+        /* Stats */
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(100, 100, 100, 0.3);
+        }
+        
+        .stat {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-size: clamp(1.4rem, 4vw, 1.8rem);
+            font-weight: 300;
+            color: var(--primary-gold);
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+        
+        /* Control instructions for desktop */
+        .desktop-controls {
+            display: none;
+            background: rgba(40, 40, 40, 0.7);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        .desktop-controls h4 {
+            color: var(--primary-gold);
+            margin-bottom: 10px;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        
+        .control-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            background: rgba(50, 50, 50, 0.5);
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        
+        .key {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: monospace;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        /* Color legend */
+        .color-legend {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 18px;
+            background: rgba(40, 40, 40, 0.7);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(100, 100, 100, 0.2);
+        }
+        
+        .color-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .color-sample {
+            width: clamp(28px, 7vw, 36px);
+            height: clamp(28px, 7vw, 36px);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .color-name {
+            font-size: clamp(0.7rem, 2.5vw, 0.85rem);
+            color: var(--text-light);
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        /* Instructions */
+        .instructions {
+            margin-top: 20px;
+            font-size: clamp(0.85rem, 3vw, 0.95rem);
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        
+        .instructions h3 {
+            color: var(--primary-gold);
+            margin-bottom: 12px;
+            font-weight: 400;
+            font-size: clamp(1rem, 3.5vw, 1.1rem);
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        /* Touch instruction */
+        .touch-instruction {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(60, 60, 60, 0.5);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            max-width: 300px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Responsive layouts */
+        @media (min-width: 768px) {
+            .game-container {
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: center;
+                gap: clamp(25px, 5vw, 40px);
+            }
+            
+            .cube-section {
+                max-width: 50%;
+            }
+            
+            .controls-section {
+                max-width: 45%;
+            }
+            
+            /* Show desktop controls on larger screens */
+            .desktop-controls {
+                display: block;
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            .cube-display-container {
+                width: min(500px, 40vw);
+                height: min(500px, 40vw);
+            }
+            
+            .front { transform: translateZ(calc(min(500px, 40vw) / 2)); }
+            .back { transform: rotateY(180deg) translateZ(calc(min(500px, 40vw) / 2)); }
+            .right { transform: rotateY(90deg) translateZ(calc(min(500px, 40vw) / 2)); }
+            .left { transform: rotateY(-90deg) translateZ(calc(min(500px, 40vw) / 2)); }
+            .top { transform: rotateX(90deg) translateZ(calc(min(500px, 40vw) / 2)); }
+            .bottom { transform: rotateX(-90deg) translateZ(calc(min(500px, 40vw) / 2)); }
+        }
+        
+        @media (max-width: 900px) and (orientation: landscape) {
+            body {
+                padding: 10px;
+            }
+            
+            .game-container {
+                flex-direction: row;
+                gap: 20px;
+            }
+            
+            .cube-section {
+                max-width: 50%;
+            }
+            
+            .controls-section {
+                max-width: 50%;
+            }
+            
+            .cube-display-container {
+                width: min(60vh, 45vw);
+                height: min(60vh, 45vw);
+            }
+            
+            .btn-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) and (orientation: portrait) {
+            .btn-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .color-legend {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .cube-display-container {
+                width: min(90vw, 85vh);
+                height: min(90vw, 85vh);
+            }
+            
+            .cube-face {
+                gap: 1px;
+                padding: 1px;
+            }
+        }
+        
+        @media (max-width: 350px) {
+            .rotation-btn {
+                min-height: 40px;
+                font-size: 0.9rem;
+            }
+            
+            .action-btn {
+                padding: 10px;
+                font-size: 0.85rem;
+            }
+        }
+        
+        /* Desktop hover effects */
+        @media (hover: hover) and (pointer: fine) {
+            .action-btn:hover .keyboard-shortcut {
+                background: rgba(0, 0, 0, 0.5);
+            }
+            
+            .cube-display-container:hover {
+                cursor: grab;
+            }
+        }
+        
+        /* Prevent text selection */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Loading animation */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--primary-gold);
+            font-size: 1.2rem;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="no-select">
+    <div class="header">
+        <h1>Shirley's Magic Cube</h1>
+        <p class="subtitle">A premium 3D puzzle experience</p>
+        
+        <div class="platform-indicator">
+            <div class="platform-icon" id="desktop-icon" title="Desktop Controls">
+                <i class="fas fa-desktop"></i>
+            </div>
+            <div class="platform-icon" id="mobile-icon" title="Mobile Controls">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="game-container">
+        <!-- Cube Display -->
+        <div class="cube-section">
+            <div class="cube-display-container" id="cube-container">
+                <div class="cube-3d" id="cube">
+                    <!-- Cube faces will be generated by JavaScript -->
+                </div>
+                <div class="loading" id="cube-loading">Loading...</div>
+            </div>
+            
+            <div class="touch-instruction" id="touch-instruction">
+                <div style="display: flex; gap: 15px; margin-bottom: 8px;">
+                    <div style="width: 36px; height: 36px; background: rgba(255, 215, 0, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFD700;">
+                        <i class="fas fa-arrows-alt"></i>
+                    </div>
+                    <div style="width: 36px; height: 36px; background: rgba(255, 215, 0, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFD700;">
+                        <i class="fas fa-hand-pointer"></i>
+                    </div>
+                </div>
+                <div style="font-size: 0.85rem; color: #aaaaaa;">
+                    Drag to rotate • Tap buttons to rotate layers
+                </div>
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="controls-section">
+            <div class="control-panel">
+                <h2 class="panel-title">
+                    <i class="fas fa-gamepad"></i> Game Controls
+                </h2>
+                
+                <div class="btn-grid">
+                    <button class="action-btn primary-btn" id="scramble-btn">
+                        <i class="fas fa-random"></i> Scramble Cube
+                        <span class="keyboard-shortcut">S</span>
+                    </button>
+                    <button class="action-btn" id="reset-btn">
+                        <i class="fas fa-redo"></i> Reset Cube
+                        <span class="keyboard-shortcut">R</span>
+                    </button>
+                    <button class="action-btn" id="solve-btn">
+                        <i class="fas fa-lightbulb"></i> Solution Hint
+                        <span class="keyboard-shortcut">H</span>
+                    </button>
+                    <button class="action-btn" id="undo-btn">
+                        <i class="fas fa-undo"></i> Undo Move
+                        <span class="keyboard-shortcut">Z</span>
+                    </button>
+                </div>
+                
+                <div class="rotation-controls">
+                    <h3 class="panel-title">
+                        <i class="fas fa-sync-alt"></i> Rotation Controls
+                    </h3>
+                    
+                    <div class="rotation-grid">
+                        <button class="action-btn rotation-btn" data-rotation="U" data-key="U">
+                            <i class="fas fa-arrow-up"></i> U
+                        </button>
+                        <button class="action-btn rotation-btn" data-rotation="F" data-key="F">
+                            <i class="fas fa-arrow-up"></i> F
+                        </button>
+                        <button class="action-btn rotation-btn" data-rotation="R" data-key="R">
+                            <i class="fas fa-arrow-up"></i> R
+                        </button>
+                        
+                        <button class="action-btn rotation-btn" data-rotation="L" data-key="L">
+                            <i class="fas fa-arrow-left"></i> L
+                        </button>
+                        <button class="action-btn center-btn" id="center-view">
+                            <i class="fas fa-arrows-alt"></i>
+                        </button>
+                        <button class="action-btn rotation-btn" data-rotation="R'" data-key="Shift+R">
+                            <i class="fas fa-arrow-right"></i> R'
+                        </button>
+                        
+                        <button class="action-btn rotation-btn" data-rotation="D" data-key="D">
+                            <i class="fas fa-arrow-down"></i> D
+                        </button>
+                        <button class="action-btn rotation-btn" data-rotation="B" data-key="B">
+                            <i class="fas fa-arrow-down"></i> B
+                        </button>
+                        <button class="action-btn rotation-btn" data-rotation="L'" data-key="Shift+L">
+                            <i class="fas fa-arrow-down"></i> L'
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="view-controls">
+                    <button class="action-btn view-btn" id="view-front" title="Front View" data-key="1">
+                        <i class="fas fa-eye"></i> F
+                    </button>
+                    <button class="action-btn view-btn" id="view-right" title="Right View" data-key="2">
+                        <i class="fas fa-eye"></i> R
+                    </button>
+                    <button class="action-btn view-btn" id="view-top" title="Top View" data-key="3">
+                        <i class="fas fa-eye"></i> U
+                    </button>
+                    <button class="action-btn view-btn" id="view-reset" title="Reset View" data-key="0">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stat">
+                        <div class="stat-value" id="move-count">0</div>
+                        <div class="stat-label">Moves</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="time-count">00:00</div>
+                        <div class="stat-label">Time</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="difficulty">Medium</div>
+                        <div class="stat-label">Difficulty</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Desktop Controls Guide -->
+            <div class="desktop-controls">
+                <h4><i class="fas fa-keyboard"></i> Keyboard Controls</h4>
+                <div class="control-list">
+                    <div class="control-item">
+                        <span>Rotate Cube View</span>
+                        <div class="key">Mouse Drag</div>
+                    </div>
+                    <div class="control-item">
+                        <span>Rotate Layers (U, F, R, L, D, B)</span>
+                        <div class="key">U F R L D B</div>
+                    </div>
+                    <div class="control-item">
+                        <span>Reverse Rotation</span>
+                        <div class="key">Shift + Letter</div>
+                    </div>
+                    <div class="control-item">
+                        <span>Change View</span>
+                        <div class="key">1, 2, 3, 0</div>
+                    </div>
+                    <div class="control-item">
+                        <span>Scramble Cube</span>
+                        <div class="key">S</div>
+                    </div>
+                    <div class="control-item">
+                        <span>Reset Cube</span>
+                        <div class="key">R</div>
+                    </div>
+                    <div class="control-item">
+                        <span>Show Hint</span>
+                        <div class="key">H</div>
+                    </div>
+                    <div class="control-item">
+                        <span>Undo Move</span>
+                        <div class="key">Z</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Color Legend -->
+            <div class="color-legend">
+                <div class="color-item">
+                    <div class="color-sample" style="background: linear-gradient(135deg, var(--red), #FF3838);"></div>
+                    <div class="color-name">Front<br>Red</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-sample" style="background: linear-gradient(135deg, var(--cyan), #1D968A);"></div>
+                    <div class="color-name">Back<br>Cyan</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-sample" style="background: linear-gradient(135deg, var(--yellow), #FFB52E);"></div>
+                    <div class="color-name">Right<br>Yellow</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-sample" style="background: linear-gradient(135deg, var(--green), #04B585);"></div>
+                    <div class="color-name">Left<br>Green</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-sample" style="background: linear-gradient(135deg, var(--blue), #096F9A);"></div>
+                    <div class="color-name">Top<br>Blue</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-sample" style="background: linear-gradient(135deg, var(--purple), #7A1FDF);"></div>
+                    <div class="color-name">Bottom<br>Purple</div>
+                </div>
+            </div>
+            
+            <!-- Instructions -->
+            <div class="control-panel instructions">
+                <h3>How to Play</h3>
+                <ul>
+                    <li><strong>Desktop:</strong> Drag with mouse to rotate view • Use keyboard shortcuts for quick control</li>
+                    <li><strong>Mobile:</strong> Drag with finger to rotate view • Tap buttons to rotate layers</li>
+                    <li><strong>U/F/R/L/D/B buttons/keys</strong> rotate layers clockwise</li>
+                    <li><strong>Buttons/keys with '</strong> rotate counterclockwise</li>
+                    <li><strong>Eye buttons/1,2,3,0 keys</strong> quickly change your view</li>
+                    <li><strong>Goal:</strong> Restore each face to a single color</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced cube with full desktop support
+        document.addEventListener('DOMContentLoaded', function() {
+            // Device detection
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isDesktop = !isMobile || window.innerWidth > 1024;
+            
+            // Update platform indicator
+            const desktopIcon = document.getElementById('desktop-icon');
+            const mobileIcon = document.getElementById('mobile-icon');
+            
+            if (isDesktop) {
+                desktopIcon.classList.add('active');
+            } else {
+                mobileIcon.classList.add('active');
+            }
+            
+            // Initialize variables
+            const cube = document.getElementById('cube');
+            const cubeContainer = document.getElementById('cube-container');
+            const cubeLoading = document.getElementById('cube-loading');
+            const touchInstruction = document.getElementById('touch-instruction');
+            const moveCountElement = document.getElementById('move-count');
+            const timeCountElement = document.getElementById('time-count');
+            
+            // Control buttons
+            const scrambleBtn = document.getElementById('scramble-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const solveBtn = document.getElementById('solve-btn');
+            const undoBtn = document.getElementById('undo-btn');
+            const rotationBtns = document.querySelectorAll('.rotation-btn');
+            const viewFrontBtn = document.getElementById('view-front');
+            const viewRightBtn = document.getElementById('view-right');
+            const viewTopBtn = document.getElementById('view-top');
+            const viewResetBtn = document.getElementById('view-reset');
+            const centerViewBtn = document.getElementById('center-view');
+            
+            // Game state
+            let moveCount = 0;
+            let startTime = null;
+            let timerInterval = null;
+            let moveHistory = [];
+            let cubeRotationX = -25;
+            let cubeRotationY = -40;
+            let isDragging = false;
+            let startX = 0;
+            let startY = 0;
+            
+            // Cube colors
+            const COLORS = {
+                'F': 'var(--red)',
+                'B': 'var(--cyan)',
+                'R': 'var(--yellow)',
+                'L': 'var(--green)',
+                'U': 'var(--blue)',
+                'D': 'var(--purple)'
+            };
+            
+            // Enhanced color variations for 3D effect
+            const COLOR_SHADES = {
+                'F': { light: '#FF6B6B', dark: '#D43A3A' },
+                'B': { light: '#4ECDC4', dark: '#1A968A' },
+                'R': { light: '#FFD166', dark: '#D4A642' },
+                'L': { light: '#06D6A0', dark: '#04966D' },
+                'U': { light: '#118AB2', dark: '#0A5A7A' },
+                'D': { light: '#9D4EDD', dark: '#6A1B9A' }
+            };
+            
+            // Cube state representation
+            let cubeState = {
+                'F': Array(9).fill('F'),
+                'B': Array(9).fill('B'),
+                'R': Array(9).fill('R'),
+                'L': Array(9).fill('L'),
+                'U': Array(9).fill('U'),
+                'D': Array(9).fill('D')
+            };
+            
+            // Initialize the cube
+            function initCube() {
+                cube.innerHTML = '';
+                cube.style.opacity = '0.8';
+                
+                const sides = [
+                    { id: 'F', className: 'front' },
+                    { id: 'B', className: 'back' },
+                    { id: 'R', className: 'right' },
+                    { id: 'L', className: 'left' },
+                    { id: 'U', className: 'top' },
+                    { id: 'D', className: 'bottom' }
+                ];
+                
+                sides.forEach(side => {
+                    const sideDiv = document.createElement('div');
+                    sideDiv.className = `cube-face ${side.className}`;
+                    sideDiv.dataset.side = side.id;
+                    
+                    for (let i = 0; i < 9; i++) {
+                        const sticker = document.createElement('div');
+                        sticker.className = 'sticker';
+                        sticker.dataset.side = side.id;
+                        sticker.dataset.position = i;
+                        sideDiv.appendChild(sticker);
+                    }
+                    
+                    cube.appendChild(sideDiv);
+                });
+                
+                // Initial animation
+                setTimeout(() => {
+                    cube.style.transition = 'transform 2s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.5s ease';
+                    cube.style.opacity = '1';
+                    cube.style.transform = 'rotateX(-25deg) rotateY(-40deg) rotateZ(0deg)';
+                    
+                    setTimeout(() => {
+                        cube.style.transition = 'transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)';
+                    }, 1500);
+                }, 100);
+            }
+            
+            // Update cube colors
+            function updateCubeColors() {
+                const sides = ['F', 'B', 'R', 'L', 'U', 'D'];
+                
+                sides.forEach(side => {
+                    const sideElement = document.querySelector(`.cube-face[data-side="${side}"]`);
+                    if (!sideElement) return;
+                    
+                    const stickers = sideElement.querySelectorAll('.sticker');
+                    
+                    stickers.forEach((sticker, index) => {
+                        const colorCode = cubeState[side][index];
+                        const shades = COLOR_SHADES[colorCode] || { light: COLORS[colorCode], dark: adjustColor(COLORS[colorCode], -30) };
+                        
+                        sticker.style.background = `linear-gradient(145deg, ${shades.light}, ${shades.dark})`;
+                        
+                        sticker.style.borderTop = '2px solid rgba(255, 255, 255, 0.2)';
+                        sticker.style.borderLeft = '2px solid rgba(255, 255, 255, 0.15)';
+                        sticker.style.borderRight = '2px solid rgba(0, 0, 0, 0.25)';
+                        sticker.style.borderBottom = '2px solid rgba(0, 0, 0, 0.3)';
+                    });
+                });
+            }
+            
+            // Color adjustment utilities
+            function adjustColor(color, percent) {
+                if (color.startsWith('var(')) {
+                    return color;
+                }
+                
+                let hex = color.replace('#', '');
+                
+                let r = parseInt(hex.substring(0, 2), 16);
+                let g = parseInt(hex.substring(2, 4), 16);
+                let b = parseInt(hex.substring(4, 6), 16);
+                
+                const amount = Math.round(2.55 * percent);
+                r = Math.min(255, Math.max(0, r + amount));
+                g = Math.min(255, Math.max(0, g + amount));
+                b = Math.min(255, Math.max(0, b + amount));
+                
+                return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+            }
+            
+            // Rotate a layer of the cube
+            function rotateLayer(layer) {
+                const newState = JSON.parse(JSON.stringify(cubeState));
+                
+                switch(layer) {
+                    case 'U': // Up clockwise
+                        newState.U = [
+                            cubeState.U[6], cubeState.U[3], cubeState.U[0],
+                            cubeState.U[7], cubeState.U[4], cubeState.U[1],
+                            cubeState.U[8], cubeState.U[5], cubeState.U[2]
+                        ];
+                        
+                        newState.F[0] = cubeState.R[0];
+                        newState.F[1] = cubeState.R[1];
+                        newState.F[2] = cubeState.R[2];
+                        
+                        newState.R[0] = cubeState.B[0];
+                        newState.R[1] = cubeState.B[1];
+                        newState.R[2] = cubeState.B[2];
+                        
+                        newState.B[0] = cubeState.L[0];
+                        newState.B[1] = cubeState.L[1];
+                        newState.B[2] = cubeState.L[2];
+                        
+                        newState.L[0] = cubeState.F[0];
+                        newState.L[1] = cubeState.F[1];
+                        newState.L[2] = cubeState.F[2];
+                        break;
+                        
+                    case "U'": // Up counterclockwise
+                        newState.U = [
+                            cubeState.U[2], cubeState.U[5], cubeState.U[8],
+                            cubeState.U[1], cubeState.U[4], cubeState.U[7],
+                            cubeState.U[0], cubeState.U[3], cubeState.U[6]
+                        ];
+                        
+                        newState.F[0] = cubeState.L[0];
+                        newState.F[1] = cubeState.L[1];
+                        newState.F[2] = cubeState.L[2];
+                        
+                        newState.R[0] = cubeState.F[0];
+                        newState.R[1] = cubeState.F[1];
+                        newState.R[2] = cubeState.F[2];
+                        
+                        newState.B[0] = cubeState.R[0];
+                        newState.B[1] = cubeState.R[1];
+                        newState.B[2] = cubeState.R[2];
+                        
+                        newState.L[0] = cubeState.B[0];
+                        newState.L[1] = cubeState.B[1];
+                        newState.L[2] = cubeState.B[2];
+                        break;
+                        
+                    case 'F': // Front clockwise
+                        newState.F = [
+                            cubeState.F[6], cubeState.F[3], cubeState.F[0],
+                            cubeState.F[7], cubeState.F[4], cubeState.F[1],
+                            cubeState.F[8], cubeState.F[5], cubeState.F[2]
+                        ];
+                        
+                        newState.U[6] = cubeState.L[8];
+                        newState.U[7] = cubeState.L[5];
+                        newState.U[8] = cubeState.L[2];
+                        
+                        newState.R[0] = cubeState.U[6];
+                        newState.R[3] = cubeState.U[7];
+                        newState.R[6] = cubeState.U[8];
+                        
+                        newState.D[0] = cubeState.R[6];
+                        newState.D[1] = cubeState.R[3];
+                        newState.D[2] = cubeState.R[0];
+                        
+                        newState.L[2] = cubeState.D[0];
+                        newState.L[5] = cubeState.D[1];
+                        newState.L[8] = cubeState.D[2];
+                        break;
+                    
+                    case "F'": // Front counterclockwise
+                        newState.F = [
+                            cubeState.F[2], cubeState.F[5], cubeState.F[8],
+                            cubeState.F[1], cubeState.F[4], cubeState.F[7],
+                            cubeState.F[0], cubeState.F[3], cubeState.F[6]
+                        ];
+                        
+                        newState.U[6] = cubeState.R[0];
+                        newState.U[7] = cubeState.R[3];
+                        newState.U[8] = cubeState.R[6];
+                        
+                        newState.R[0] = cubeState.D[2];
+                        newState.R[3] = cubeState.D[1];
+                        newState.R[6] = cubeState.D[0];
+                        
+                        newState.D[0] = cubeState.L[2];
+                        newState.D[1] = cubeState.L[5];
+                        newState.D[2] = cubeState.L[8];
+                        
+                        newState.L[2] = cubeState.U[8];
+                        newState.L[5] = cubeState.U[7];
+                        newState.L[8] = cubeState.U[6];
+                        break;
+                    
+                    case 'R': // Right clockwise
+                        newState.R = [
+                            cubeState.R[6], cubeState.R[3], cubeState.R[0],
+                            cubeState.R[7], cubeState.R[4], cubeState.R[1],
+                            cubeState.R[8], cubeState.R[5], cubeState.R[2]
+                        ];
+                        
+                        newState.U[2] = cubeState.F[2];
+                        newState.U[5] = cubeState.F[5];
+                        newState.U[8] = cubeState.F[8];
+                        
+                        newState.B[0] = cubeState.U[8];
+                        newState.B[3] = cubeState.U[5];
+                        newState.B[6] = cubeState.U[2];
+                        
+                        newState.D[2] = cubeState.B[6];
+                        newState.D[5] = cubeState.B[3];
+                        newState.D[8] = cubeState.B[0];
+                        
+                        newState.F[2] = cubeState.D[2];
+                        newState.F[5] = cubeState.D[5];
+                        newState.F[8] = cubeState.D[8];
+                        break;
+                    
+                    case "R'": // Right counterclockwise
+                        newState.R = [
+                            cubeState.R[2], cubeState.R[5], cubeState.R[8],
+                            cubeState.R[1], cubeState.R[4], cubeState.R[7],
+                            cubeState.R[0], cubeState.R[3], cubeState.R[6]
+                        ];
+                        
+                        newState.U[2] = cubeState.B[6];
+                        newState.U[5] = cubeState.B[3];
+                        newState.U[8] = cubeState.B[0];
+                        
+                        newState.B[0] = cubeState.D[8];
+                        newState.B[3] = cubeState.D[5];
+                        newState.B[6] = cubeState.D[2];
+                        
+                        newState.D[2] = cubeState.F[2];
+                        newState.D[5] = cubeState.F[5];
+                        newState.D[8] = cubeState.F[8];
+                        
+                        newState.F[2] = cubeState.U[2];
+                        newState.F[5] = cubeState.U[5];
+                        newState.F[8] = cubeState.U[8];
+                        break;
+                    
+                    case 'L': // Left clockwise
+                        newState.L = [
+                            cubeState.L[6], cubeState.L[3], cubeState.L[0],
+                            cubeState.L[7], cubeState.L[4], cubeState.L[1],
+                            cubeState.L[8], cubeState.L[5], cubeState.L[2]
+                        ];
+                        
+                        newState.U[0] = cubeState.B[8];
+                        newState.U[3] = cubeState.B[5];
+                        newState.U[6] = cubeState.B[2];
+                        
+                        newState.F[0] = cubeState.U[0];
+                        newState.F[3] = cubeState.U[3];
+                        newState.F[6] = cubeState.U[6];
+                        
+                        newState.D[0] = cubeState.F[0];
+                        newState.D[3] = cubeState.F[3];
+                        newState.D[6] = cubeState.F[6];
+                        
+                        newState.B[2] = cubeState.D[6];
+                        newState.B[5] = cubeState.D[3];
+                        newState.B[8] = cubeState.D[0];
+                        break;
+                    
+                    case "L'": // Left counterclockwise
+                        newState.L = [
+                            cubeState.L[2], cubeState.L[5], cubeState.L[8],
+                            cubeState.L[1], cubeState.L[4], cubeState.L[7],
+                            cubeState.L[0], cubeState.L[3], cubeState.L[6]
+                        ];
+                        
+                        newState.U[0] = cubeState.F[0];
+                        newState.U[3] = cubeState.F[3];
+                        newState.U[6] = cubeState.F[6];
+                        
+                        newState.F[0] = cubeState.D[0];
+                        newState.F[3] = cubeState.D[3];
+                        newState.F[6] = cubeState.D[6];
+                        
+                        newState.D[0] = cubeState.B[8];
+                        newState.D[3] = cubeState.B[5];
+                        newState.D[6] = cubeState.B[2];
+                        
+                        newState.B[2] = cubeState.U[6];
+                        newState.B[5] = cubeState.U[3];
+                        newState.B[8] = cubeState.U[0];
+                        break;
+                    
+                    case 'D': // Down clockwise
+                        newState.D = [
+                            cubeState.D[6], cubeState.D[3], cubeState.D[0],
+                            cubeState.D[7], cubeState.D[4], cubeState.D[1],
+                            cubeState.D[8], cubeState.D[5], cubeState.D[2]
+                        ];
+                        
+                        newState.F[6] = cubeState.L[6];
+                        newState.F[7] = cubeState.L[7];
+                        newState.F[8] = cubeState.L[8];
+                        
+                        newState.R[6] = cubeState.F[6];
+                        newState.R[7] = cubeState.F[7];
+                        newState.R[8] = cubeState.F[8];
+                        
+                        newState.B[6] = cubeState.R[6];
+                        newState.B[7] = cubeState.R[7];
+                        newState.B[8] = cubeState.R[8];
+                        
+                        newState.L[6] = cubeState.B[6];
+                        newState.L[7] = cubeState.B[7];
+                        newState.L[8] = cubeState.B[8];
+                        break;
+                    
+                    case "D'": // Down counterclockwise
+                        newState.D = [
+                            cubeState.D[2], cubeState.D[5], cubeState.D[8],
+                            cubeState.D[1], cubeState.D[4], cubeState.D[7],
+                            cubeState.D[0], cubeState.D[3], cubeState.D[6]
+                        ];
+                        
+                        newState.F[6] = cubeState.R[6];
+                        newState.F[7] = cubeState.R[7];
+                        newState.F[8] = cubeState.R[8];
+                        
+                        newState.R[6] = cubeState.B[6];
+                        newState.R[7] = cubeState.B[7];
+                        newState.R[8] = cubeState.B[8];
+                        
+                        newState.B[6] = cubeState.L[6];
+                        newState.B[7] = cubeState.L[7];
+                        newState.B[8] = cubeState.L[8];
+                        
+                        newState.L[6] = cubeState.F[6];
+                        newState.L[7] = cubeState.F[7];
+                        newState.L[8] = cubeState.F[8];
+                        break;
+                    
+                    case 'B': // Back clockwise
+                        newState.B = [
+                            cubeState.B[6], cubeState.B[3], cubeState.B[0],
+                            cubeState.B[7], cubeState.B[4], cubeState.B[1],
+                            cubeState.B[8], cubeState.B[5], cubeState.B[2]
+                        ];
+                        
+                        newState.U[0] = cubeState.R[2];
+                        newState.U[1] = cubeState.R[5];
+                        newState.U[2] = cubeState.R[8];
+                        
+                        newState.R[2] = cubeState.D[8];
+                        newState.R[5] = cubeState.D[7];
+                        newState.R[8] = cubeState.D[6];
+                        
+                        newState.D[6] = cubeState.L[0];
+                        newState.D[7] = cubeState.L[3];
+                        newState.D[8] = cubeState.L[6];
+                        
+                        newState.L[0] = cubeState.U[2];
+                        newState.L[3] = cubeState.U[1];
+                        newState.L[6] = cubeState.U[0];
+                        break;
+                    
+                    case "B'": // Back counterclockwise
+                        newState.B = [
+                            cubeState.B[2], cubeState.B[5], cubeState.B[8],
+                            cubeState.B[1], cubeState.B[4], cubeState.B[7],
+                            cubeState.B[0], cubeState.B[3], cubeState.B[6]
+                        ];
+                        
+                        newState.U[0] = cubeState.L[6];
+                        newState.U[1] = cubeState.L[3];
+                        newState.U[2] = cubeState.L[0];
+                        
+                        newState.R[2] = cubeState.U[0];
+                        newState.R[5] = cubeState.U[1];
+                        newState.R[8] = cubeState.U[2];
+                        
+                        newState.D[6] = cubeState.R[8];
+                        newState.D[7] = cubeState.R[5];
+                        newState.D[8] = cubeState.R[2];
+                        
+                        newState.L[0] = cubeState.D[6];
+                        newState.L[3] = cubeState.D[7];
+                        newState.L[6] = cubeState.D[8];
+                        break;
+                }
+                
+                cubeState = newState;
+                updateCubeColors();
+                
+                moveCount++;
+                moveCountElement.textContent = moveCount;
+                moveHistory.push(layer);
+                
+                if (moveCount === 1 && !startTime) {
+                    startTimer();
+                }
+                
+                cube.style.transition = 'transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
+                setTimeout(() => {
+                    cube.style.transition = 'transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)';
+                }, 300);
+            }
+            
+            // Timer functions
+            function startTimer() {
+                if (timerInterval) clearInterval(timerInterval);
+                startTime = new Date();
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+            
+            function updateTimer() {
+                if (!startTime) {
+                    timeCountElement.textContent = '00:00';
+                    return;
+                }
+                
+                const now = new Date();
+                const diff = Math.floor((now - startTime) / 1000);
+                const minutes = Math.floor(diff / 60).toString().padStart(2, '0');
+                const seconds = (diff % 60).toString().padStart(2, '0');
+                
+                timeCountElement.textContent = `${minutes}:${seconds}`;
+            }
+            
+            // Scramble the cube
+            function scrambleCube() {
+                cubeState = {
+                    'F': Array(9).fill('F'),
+                    'B': Array(9).fill('B'),
+                    'R': Array(9).fill('R'),
+                    'L': Array(9).fill('L'),
+                    'U': Array(9).fill('U'),
+                    'D': Array(9).fill('D')
+                };
+                
+                updateCubeColors();
+                
+                moveCount = 0;
+                moveCountElement.textContent = '0';
+                moveHistory = [];
+                
+                if (timerInterval) clearInterval(timerInterval);
+                startTime = null;
+                updateTimer();
+                
+                startTimer();
+                
+                const moves = ['U', "U'", 'F', "F'", 'R', "R'", 'L', "L'", 'D', "D'", 'B', "B'"];
+                
+                for (let i = 0; i < 20; i++) {
+                    const randomMove = moves[Math.floor(Math.random() * moves.length)];
+                    setTimeout(() => {
+                        rotateLayer(randomMove);
+                        moveCount--;
+                        moveCountElement.textContent = moveCount;
+                    }, i * 200);
+                }
+                
+                setTimeout(() => {
+                    moveCount = 20;
+                    moveCountElement.textContent = moveCount;
+                    document.getElementById('difficulty').textContent = 'Hard';
+                }, 20 * 200);
+            }
+            
+            // Reset the cube
+            function resetCube() {
+                cubeState = {
+                    'F': Array(9).fill('F'),
+                    'B': Array(9).fill('B'),
+                    'R': Array(9).fill('R'),
+                    'L': Array(9).fill('L'),
+                    'U': Array(9).fill('U'),
+                    'D': Array(9).fill('D')
+                };
+                
+                updateCubeColors();
+                
+                cubeRotationX = -25;
+                cubeRotationY = -40;
+                cube.style.transition = 'transform 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
+                cube.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
+                
+                moveCount = 0;
+                moveCountElement.textContent = '0';
+                
+                if (timerInterval) clearInterval(timerInterval);
+                startTime = null;
+                updateTimer();
+                
+                moveHistory = [];
+                
+                document.getElementById('difficulty').textContent = 'Medium';
+                
+                setTimeout(() => {
+                    cube.style.transition = 'transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)';
+                }, 1500);
+            }
+            
+            // Show solution hint
+            function showSolutionHint() {
+                alert(`Solution Guide:
+1. Make a white cross on the top
+2. Solve the white corners
+3. Solve the middle layer edges
+4. Make a yellow cross on top
+5. Position the yellow corners
+6. Orient the yellow corners
+7. Position the yellow edges
+
+Tip: Use the color legend to identify each face!`);
+            }
+            
+            // Undo last move
+            function undoMove() {
+                if (moveHistory.length === 0) return;
+                
+                const lastMove = moveHistory.pop();
+                let oppositeMove;
+                
+                switch(lastMove) {
+                    case 'U': oppositeMove = "U'"; break;
+                    case "U'": oppositeMove = 'U'; break;
+                    case 'F': oppositeMove = "F'"; break;
+                    case "F'": oppositeMove = 'F'; break;
+                    case 'R': oppositeMove = "R'"; break;
+                    case "R'": oppositeMove = 'R'; break;
+                    case 'L': oppositeMove = "L'"; break;
+                    case "L'": oppositeMove = 'L'; break;
+                    case 'D': oppositeMove = "D'"; break;
+                    case "D'": oppositeMove = 'D'; break;
+                    case 'B': oppositeMove = "B'"; break;
+                    case "B'": oppositeMove = 'B'; break;
+                    default: oppositeMove = lastMove;
+                }
+                
+                rotateLayer(oppositeMove);
+                
+                if (moveCount >= 2) {
+                    moveCount -= 2;
+                    moveCountElement.textContent = moveCount;
+                }
+            }
+            
+            // Set view angle
+            function setView(x, y) {
+                cubeRotationX = x;
+                cubeRotationY = y;
+                cube.style.transition = 'transform 1s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
+                cube.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
+                
+                setTimeout(() => {
+                    cube.style.transition = 'transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)';
+                }, 1000);
+            }
+            
+            // Handle drag rotation
+            function startDrag(e) {
+                e.preventDefault();
+                isDragging = true;
+                
+                if (e.type.includes('touch')) {
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                } else {
+                    startX = e.clientX;
+                    startY = e.clientY;
+                }
+                
+                touchInstruction.style.opacity = '0';
+                
+                if (isTouchDevice) {
+                    document.addEventListener('touchmove', drag, { passive: false });
+                    document.addEventListener('touchend', stopDrag);
+                } else {
+                    document.addEventListener('mousemove', drag);
+                    document.addEventListener('mouseup', stopDrag);
+                }
+            }
+            
+            function drag(e) {
+                if (!isDragging) return;
+                
+                let currentX, currentY;
+                
+                if (e.type.includes('touch')) {
+                    currentX = e.touches[0].clientX;
+                    currentY = e.touches[0].clientY;
+                } else {
+                    currentX = e.clientX;
+                    currentY = e.clientY;
+                }
+                
+                const deltaX = currentX - startX;
+                const deltaY = currentY - startY;
+                
+                const speed = isMobile ? 0.5 : 0.7;
+                cubeRotationY += deltaX * speed;
+                cubeRotationX -= deltaY * speed;
+                
+                cube.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
+                
+                startX = currentX;
+                startY = currentY;
+            }
+            
+            function stopDrag() {
+                isDragging = false;
+                
+                if (isTouchDevice) {
+                    document.removeEventListener('touchmove', drag);
+                    document.removeEventListener('touchend', stopDrag);
+                } else {
+                    document.removeEventListener('mousemove', drag);
+                    document.removeEventListener('mouseup', stopDrag);
+                }
+            }
+            
+            // Initialize everything
+            initCube();
+            updateCubeColors();
+            
+            setTimeout(() => {
+                cubeLoading.style.display = 'none';
+                cube.style.opacity = '1';
+            }, 800);
+            
+            // Set up event listeners
+            scrambleBtn.addEventListener('click', scrambleCube);
+            resetBtn.addEventListener('click', resetCube);
+            solveBtn.addEventListener('click', showSolutionHint);
+            undoBtn.addEventListener('click', undoMove);
+            
+            // Rotation buttons
+            rotationBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const rotation = this.dataset.rotation;
+                    rotateLayer(rotation);
+                    
+                    if (isTouchDevice) {
+                        this.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            this.style.transform = '';
+                        }, 150);
+                    }
+                });
+            });
+            
+            // View buttons
+            viewFrontBtn.addEventListener('click', () => setView(-25, 0));
+            viewRightBtn.addEventListener('click', () => setView(-25, -90));
+            viewTopBtn.addEventListener('click', () => setView(-70, -40));
+            viewResetBtn.addEventListener('click', () => setView(-25, -40));
+            centerViewBtn.addEventListener('click', () => setView(-25, -40));
+            
+            // Drag rotation
+            cubeContainer.addEventListener('mousedown', startDrag);
+            cubeContainer.addEventListener('touchstart', startDrag, { passive: false });
+            
+            // Hide touch instruction
+            setTimeout(() => {
+                touchInstruction.style.opacity = '0.7';
+                setTimeout(() => {
+                    touchInstruction.style.opacity = '0';
+                    setTimeout(() => {
+                        touchInstruction.style.display = 'none';
+                    }, 500);
+                }, 4000);
+            }, 2000);
+            
+            // Auto-scramble
+            setTimeout(scrambleCube, 2000);
+            
+            // Keyboard controls for desktop
+            document.addEventListener('keydown', function(e) {
+                // Don't trigger if user is typing in an input field
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    return;
+                }
+                
+                const key = e.key.toUpperCase();
+                const shiftKey = e.shiftKey;
+                
+                // Prevent default for game control keys
+                if ('UFRDLBSHZ1230'.includes(key)) {
+                    e.preventDefault();
+                }
+                
+                // Cube layer rotations
+                if (key === 'U' || key === 'F' || key === 'R' || key === 'L' || key === 'D' || key === 'B') {
+                    const move = shiftKey ? `${key}'` : key;
+                    rotateLayer(move);
+                    
+                    // Visual feedback
+                    const btn = document.querySelector(`.rotation-btn[data-key="${shiftKey ? `Shift+${key}` : key}"]`);
+                    if (btn) {
+                        btn.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            btn.style.transform = '';
+                        }, 150);
+                    }
+                }
+                
+                // View controls
+                if (key === '1') {
+                    setView(-25, 0);
+                    viewFrontBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        viewFrontBtn.style.transform = '';
+                    }, 150);
+                } else if (key === '2') {
+                    setView(-25, -90);
+                    viewRightBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        viewRightBtn.style.transform = '';
+                    }, 150);
+                } else if (key === '3') {
+                    setView(-70, -40);
+                    viewTopBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        viewTopBtn.style.transform = '';
+                    }, 150);
+                } else if (key === '0') {
+                    setView(-25, -40);
+                    viewResetBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        viewResetBtn.style.transform = '';
+                    }, 150);
+                }
+                
+                // Action controls
+                if (key === 'S') {
+                    scrambleCube();
+                    scrambleBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        scrambleBtn.style.transform = '';
+                    }, 150);
+                } else if (key === 'R') {
+                    resetCube();
+                    resetBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        resetBtn.style.transform = '';
+                    }, 150);
+                } else if (key === 'H') {
+                    showSolutionHint();
+                    solveBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        solveBtn.style.transform = '';
+                    }, 150);
+                } else if (key === 'Z') {
+                    undoMove();
+                    undoBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        undoBtn.style.transform = '';
+                    }, 150);
+                }
+                
+                // Arrow keys for cube rotation (alternative to dragging)
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    cubeRotationX -= 15;
+                    cube.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    cubeRotationX += 15;
+                    cube.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    cubeRotationY -= 15;
+                    cube.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    cubeRotationY += 15;
+                    cube.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
+                }
+            });
+            
+            // Device-specific optimizations
+            if (isDesktop) {
+                // Desktop-specific adjustments
+                document.body.classList.add('desktop-device');
+                
+                // Change cursor for better UX
+                cubeContainer.style.cursor = 'grab';
+                
+                // Show keyboard shortcuts
+                document.querySelectorAll('.action-btn').forEach(btn => {
+                    const key = btn.getAttribute('data-key');
+                    if (key) {
+                        const shortcut = document.createElement('span');
+                        shortcut.className = 'keyboard-shortcut';
+                        shortcut.textContent = key;
+                        btn.appendChild(shortcut);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
