@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shirley's GOMOKU</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1f2e 0%, #2a3249 50%, #1a1f2e 100%);
+            color: #e0e0e0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 1400px;
+            gap: 30px;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        
+        .header {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .game-title {
+            font-size: 3.5rem;
+            font-weight: 300;
+            background: linear-gradient(90deg, #ffd700, #ffed4e, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            position: relative;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+        
+        .game-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ffd700, transparent);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: #c0c0c0;
+            font-weight: 300;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 15px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .game-board-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .board-wrapper {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            background: linear-gradient(145deg, #2a3249, #1a1f2e);
+            padding: 30px;
+            border: 2px solid #3a4259;
+        }
+        
+        #board {
+            border-radius: 8px;
+            background: linear-gradient(145deg, #d6cfb9, #c2bb9f);
+            box-shadow: 
+                inset 0 0 40px rgba(0, 0, 0, 0.4),
+                0 15px 35px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            display: block;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #board::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                transparent 30%, 
+                rgba(255, 255, 255, 0.08) 50%, 
+                transparent 70%);
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        #board:hover {
+            box-shadow: 
+                inset 0 0 40px rgba(0, 0, 0, 0.4),
+                0 20px 45px rgba(0, 0, 0, 0.6);
+        }
+        
+        /* 交叉點閃爍光點樣式 */
+        .grid-point {
+            position: absolute;
+            pointer-events: none;
+            z-index: 5;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+            background: radial-gradient(circle at 30% 30%, 
+                rgba(255, 255, 255, 0.9) 0%, 
+                rgba(255, 100, 100, 0.8) 30%,
+                rgba(255, 68, 68, 0.7) 60%,
+                rgba(255, 68, 68, 0.5) 100%);
+            animation: pointPulse 1.2s infinite alternate;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+        
+        @keyframes pointPulse {
+            0% { 
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0.6;
+                box-shadow: 0 0 15px rgba(255, 68, 68, 0.6);
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.1);
+                opacity: 0.9;
+                box-shadow: 0 0 25px rgba(255, 68, 68, 1);
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(0.9);
+                opacity: 0.7;
+                box-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+            }
+        }
+        
+        .grid-point.hidden {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.5);
+        }
+        
+        .controls-panel {
+            width: 360px;
+            background: linear-gradient(145deg, #2a3249, #1a1f2e);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            border: 2px solid #3a4259;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .controls-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                transparent 30%, 
+                rgba(255, 255, 255, 0.05) 50%, 
+                transparent 70%);
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .panel-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            text-align: center;
+            color: #ffd700;
+            border-bottom: 2px solid #3a4259;
+            padding-bottom: 15px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.7);
+        }
+        
+        .game-info {
+            background: linear-gradient(135deg, rgba(40, 45, 65, 0.9), rgba(30, 35, 55, 0.9));
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 2px solid #3a3249;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .player-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(50, 55, 75, 0.8), rgba(40, 45, 65, 0.8));
+            border-left: 4px solid transparent;
+        }
+        
+        .player-info.active {
+            background: linear-gradient(135deg, rgba(70, 75, 95, 0.9), rgba(60, 65, 85, 0.9));
+            border-left: 4px solid #ffd700;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .piece-preview {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            margin-right: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
+            transition: all 0.3s ease;
+            border: 3px solid;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .piece-preview::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            filter: blur(1px);
+        }
+        
+        .player-info.active .piece-preview {
+            transform: scale(1.2);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+        }
+        
+        .black-piece {
+            background: radial-gradient(circle at 35% 35%, 
+                #000000 0%, 
+                #111111 30%,
+                #222222 60%,
+                #000000 100%);
+            border-color: #222;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.9) !important;
+        }
+        
+        .white-piece {
+            background: radial-gradient(circle at 35% 35%, 
+                #ffffff 0%, 
+                #f8f8f8 30%,
+                #f0f0f0 60%,
+                #ffffff 100%);
+            border-color: #ddd;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7) !important;
+        }
+        
+        .player-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .player-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+        }
+        
+        .player-type {
+            font-size: 0.9rem;
+            color: #c0c0c0;
+            margin-top: 3px;
+            font-style: italic;
+        }
+        
+        .player-score {
+            margin-left: auto;
+            font-size: 2rem;
+            font-weight: 600;
+            text-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+            background: linear-gradient(90deg, #ffd700, #ffed4e, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .status-container {
+            background: linear-gradient(135deg, rgba(40, 45, 65, 0.9), rgba(30, 35, 55, 0.9));
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            border: 2px solid #3a4259;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .status-label {
+            font-size: 0.9rem;
+            color: #c0c0c0;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .status-message {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffd700;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+        }
+        
+        .status-message.blink {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+        
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 25px 0;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 16px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.15), 
+                transparent);
+            transition: 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, #3a4259, #4a5269, #3a4259);
+            color: #ffffff;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            border: 2px solid #4a5269;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(90deg, #2a3249, #3a4259, #2a3249);
+            color: #e0e0e0;
+            border: 2px solid #3a4259;
+        }
+        
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .game-mode {
+            background: linear-gradient(135deg, rgba(40, 45, 65, 0.9), rgba(30, 35, 55, 0.9));
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            border: 2px solid #3a4259;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .mode-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #ffd700;
+            letter-spacing: 1px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+        }
+        
+        .mode-selector {
+            display: flex;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 10px;
+            border: 2px solid #3a4259;
+        }
+        
+        .mode-option {
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            background: linear-gradient(135deg, #3a4259, #2a3249);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #c0c0c0;
+        }
+        
+        .mode-option.active {
+            background: linear-gradient(135deg, #4a5269, #3a4259);
+            color: #ffd700;
+            font-weight: 600;
+        }
+        
+        .mode-option:hover:not(.active) {
+            background: linear-gradient(135deg, #4a5269, #3a4259);
+        }
+        
+        .settings {
+            background: linear-gradient(135deg, rgba(40, 45, 65, 0.9), rgba(30, 35, 55, 0.9));
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            border: 2px solid #3a4259;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .setting-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #ffd700;
+            letter-spacing: 1px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px 0;
+            border-bottom: 1px solid #3a4259;
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #2a3249;
+            transition: .4s;
+            border-radius: 34px;
+            border: 2px solid #3a4259;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 2px;
+            background-color: #c0c0c0;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #3a4259;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(28px);
+            background-color: #ffd700;
+        }
+        
+        select {
+            background: linear-gradient(135deg, #3a4259, #2a3249);
+            color: #ffffff;
+            border: 2px solid #4a5269;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            width: 150px;
+            cursor: pointer;
+        }
+        
+        .coordinate-preview {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(30, 35, 55, 0.9);
+            color: #ff4444;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            z-index: 20;
+            pointer-events: none;
+            border: 2px solid #ff4444;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(255, 68, 68, 0.8);
+        }
+        
+        .history-panel {
+            background: linear-gradient(135deg, rgba(40, 45, 65, 0.9), rgba(30, 35, 55, 0.9));
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 25px;
+            border: 2px solid #3a4259;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .history-title {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: #ffd700;
+            letter-spacing: 1px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+        }
+        
+        .move-history {
+            height: 180px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .move-history::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .move-history::-webkit-scrollbar-track {
+            background: #2a3249;
+            border-radius: 8px;
+        }
+        
+        .move-history::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #3a4259, #4a5269);
+            border-radius: 8px;
+        }
+        
+        .move-item {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(50, 55, 75, 0.8), rgba(40, 45, 65, 0.8));
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #3a4259;
+        }
+        
+        .move-item:hover {
+            background: linear-gradient(135deg, rgba(70, 75, 95, 0.9), rgba(60, 65, 85, 0.9));
+            transform: translateX(5px);
+            border-color: #4a5269;
+        }
+        
+        .move-number {
+            color: #ff4444;
+            font-weight: 700;
+            margin-right: 10px;
+            font-size: 1.2rem;
+            text-shadow: 0 0 8px rgba(255, 68, 68, 0.6);
+        }
+        
+        .move-details {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .winner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(20, 25, 45, 0.97);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            border-radius: 12px;
+        }
+        
+        .winner-content {
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #2a3249, #1a1f2e);
+            border-radius: 12px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9);
+            max-width: 500px;
+            border: 3px solid #ffd700;
+            animation: fadeIn 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .winner-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                transparent 30%, 
+                rgba(255, 255, 255, 0.08) 50%, 
+                transparent 70%);
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .winner-text {
+            font-size: 3.5rem;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, #ffd700, #ffed4e, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
+            letter-spacing: 3px;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.7);
+        }
+        
+        .winner-piece {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            margin: 30px auto;
+            box-shadow: 0 0 80px rgba(255, 215, 0, 0.7);
+            border: 4px solid #ffd700;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #c0c0c0;
+            font-size: 0.9rem;
+            width: 100%;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .key-shortcut {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 68, 68, 0.15);
+            border-radius: 6px;
+            padding: 6px 12px;
+            margin: 0 5px;
+            border: 2px solid rgba(255, 68, 68, 0.4);
+            color: #ff4444;
+            text-shadow: 0 0 8px rgba(255, 68, 68, 0.6);
+            font-weight: 600;
+        }
+        
+        .flash {
+            animation: flashEffect 0.7s ease-out;
+        }
+        
+        @keyframes flashEffect {
+            0% { 
+                box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.9);
+            }
+            50% { 
+                box-shadow: 0 0 50px 25px rgba(255, 68, 68, 1);
+                transform: scale(1.15);
+            }
+            100% { 
+                box-shadow: 0 0 0 0 rgba(255, 68, 68, 0);
+                transform: scale(1);
+            }
+        }
+        
+        .cell-highlight {
+            animation: cellGlow 2s ease-in-out;
+        }
+        
+        @keyframes cellGlow {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.8); }
+            100% { filter: brightness(1); }
+        }
+        
+        .ai-thinking {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 35, 55, 0.97);
+            padding: 25px 50px;
+            border-radius: 12px;
+            border: 3px solid #ffd700;
+            z-index: 50;
+            display: none;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+        }
+        
+        .ai-thinking.show {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .thinking-text {
+            color: #ffd700;
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+        
+        .thinking-dots {
+            display: inline-block;
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        @media (max-width: 1200px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .controls-panel {
+                width: 100%;
+                max-width: 600px;
+            }
+            
+            .game-title {
+                font-size: 2.8rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2.2rem;
+            }
+            
+            .board-wrapper {
+                padding: 15px;
+            }
+            
+            #board {
+                width: 400px;
+                height: 400px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #board {
+                width: 320px;
+                height: 320px;
+            }
+            
+            .game-title {
+                font-size: 1.8rem;
+            }
+            
+            .btn {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="game-title">Shirley's GOMOKU</h1>
+            <p class="subtitle">A BRAIN TEASER</p>
+        </div>
+        
+        <div class="game-board-container">
+            <div class="board-wrapper">
+                <canvas id="board" width="600" height="600"></canvas>
+                <div id="gridPoint" class="grid-point hidden"></div>
+                <div id="coordinatePreview" class="coordinate-preview"></div>
+                <div id="aiThinking" class="ai-thinking">
+                    <div class="thinking-text">AI Thinking<span class="thinking-dots"></span></div>
+                </div>
+                <div id="winnerOverlay" class="winner-overlay">
+                    <div class="winner-content">
+                        <h2 class="winner-text">VICTORY</h2>
+                        <div id="winnerPiece" class="winner-piece"></div>
+                        <p id="winnerMessage" style="font-size: 2rem; margin-bottom: 40px; color: #ffd700; position: relative; z-index: 2;"></p>
+                        <button id="restartBtn" class="btn btn-primary">
+                            <i class="fas fa-redo"></i> NEW GAME
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls-panel">
+            <h2 class="panel-title">CONTROL PANEL</h2>
+            
+            <div class="game-info">
+                <div class="player-info active" id="playerBlack">
+                    <div class="piece-preview black-piece"></div>
+                    <div class="player-details">
+                        <span class="player-name">BLACK</span>
+                        <span class="player-type" id="blackType">Player 1</span>
+                    </div>
+                    <span class="player-score" id="blackScore">0</span>
+                </div>
+                <div class="player-info" id="playerWhite">
+                    <div class="piece-preview white-piece"></div>
+                    <div class="player-details">
+                        <span class="player-name">WHITE</span>
+                        <span class="player-type" id="whiteType">Player 2</span>
+                    </div>
+                    <span class="player-score" id="whiteScore">0</span>
+                </div>
+            </div>
+            
+            <div class="status-container">
+                <div class="status-label">CURRENT TURN</div>
+                <div class="status-message" id="statusMessage">
+                    Black's Turn - Click to place a stone
+                </div>
+            </div>
+            
+            <div class="game-mode">
+                <div class="mode-title">GAME MODE</div>
+                <div class="mode-selector">
+                    <div class="mode-option active" data-mode="pvp">PLAYER VS PLAYER</div>
+                    <div class="mode-option" data-mode="pve">PLAYER VS AI</div>
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button id="restartButton" class="btn btn-primary">
+                    <i class="fas fa-play-circle"></i> NEW GAME
+                </button>
+                <button id="undoButton" class="btn btn-secondary">
+                    <i class="fas fa-undo"></i> UNDO
+                </button>
+                <button id="hintButton" class="btn btn-secondary">
+                    <i class="fas fa-lightbulb"></i> HINT
+                </button>
+            </div>
+            
+            <div class="settings">
+                <div class="setting-title">GAME SETTINGS</div>
+                <div class="setting-item">
+                    <span>Grid Point</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="pointToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <span>Sound Effects</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="soundToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <span>AI Difficulty</span>
+                    <select id="difficulty">
+                        <option value="easy">Easy</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="hard">Hard</option>
+                        <option value="expert">Expert</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <span>Visual Effects</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="effectsToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="history-panel">
+                <div class="history-title">MOVE HISTORY</div>
+                <div class="move-history" id="moveHistory">
+                    <!-- Move history will be displayed here -->
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>Shortcuts: <span class="key-shortcut">H</span> for Hint, <span class="key-shortcut">Backspace</span> for Undo, <span class="key-shortcut">R</span> to Restart</p>
+                <p>Shirley's GOMOKU &copy; 2023 | A Brain Teaser</p>
+            </div>
+        </div>
+    </div>
+
+    <audio id="placeSound" src="https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3" preload="auto"></audio>
+    <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
+    <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3" preload="auto"></audio>
+    <audio id="hintSound" src="https://assets.mixkit.co/sfx/preview/mixkit-magic-sparkle-306.mp3" preload="auto"></audio>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // 遊戲配置
+        const config = {
+            BOARD_SIZE: 15,
+            CELL_SIZE: 40,
+            BOARD_PADDING: 30,
+            STONE_RADIUS: 18,
+            currentPlayer: 'black',
+            gameActive: true,
+            board: Array(15).fill().map(() => Array(15).fill(null)),
+            moveHistory: [],
+            scores: { black: 0, white: 0 },
+            gameMode: 'pvp',
+            aiDifficulty: 'medium',
+            gridPointEnabled: true,
+            soundEnabled: true,
+            visualEffectsEnabled: true
+        };
+
+        // DOM 元素
+        const canvas = document.getElementById('board');
+        const ctx = canvas.getContext('2d');
+        const gridPoint = document.getElementById('gridPoint');
+        const coordinatePreview = document.getElementById('coordinatePreview');
+        const aiThinking = document.getElementById('aiThinking');
+        const winnerOverlay = document.getElementById('winnerOverlay');
+        const winnerPiece = document.getElementById('winnerPiece');
+        const winnerMessage = document.getElementById('winnerMessage');
+        const restartBtn = document.getElementById('restartBtn');
+        const playerBlack = document.getElementById('playerBlack');
+        const playerWhite = document.getElementById('playerWhite');
+        const blackScore = document.getElementById('blackScore');
+        const whiteScore = document.getElementById('whiteScore');
+        const statusMessage = document.getElementById('statusMessage');
+        const restartButton = document.getElementById('restartButton');
+        const undoButton = document.getElementById('undoButton');
+        const hintButton = document.getElementById('hintButton');
+        const modeOptions = document.querySelectorAll('.mode-option');
+        const pointToggle = document.getElementById('pointToggle');
+        const soundToggle = document.getElementById('soundToggle');
+        const effectsToggle = document.getElementById('effectsToggle');
+        const difficultySelect = document.getElementById('difficulty');
+        const moveHistory = document.getElementById('moveHistory');
+        const placeSound = document.getElementById('placeSound');
+        const winSound = document.getElementById('winSound');
+        const clickSound = document.getElementById('clickSound');
+        const hintSound = document.getElementById('hintSound');
+
+        // 初始化遊戲
+        function initGame() {
+            config.board = Array(15).fill().map(() => Array(15).fill(null));
+            config.currentPlayer = 'black';
+            config.gameActive = true;
+            config.moveHistory = [];
+            
+            updatePlayerUI();
+            updateStatusMessage("Black's Turn - Click to place a stone");
+            clearWinnerOverlay();
+            drawBoard();
+            updateMoveHistory();
+            gridPoint.classList.add('hidden');
+            
+            if (config.gameMode === 'pve' && config.currentPlayer === 'white') {
+                setTimeout(makeAIMove, 500);
+            }
+        }
+
+        // 繪製棋盤
+        function drawBoard() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 棋盤背景
+            ctx.fillStyle = '#d6cfb9';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 繪製網格線
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i < config.BOARD_SIZE; i++) {
+                // 垂直線
+                ctx.beginPath();
+                ctx.moveTo(config.BOARD_PADDING + i * config.CELL_SIZE, config.BOARD_PADDING);
+                ctx.lineTo(config.BOARD_PADDING + i * config.CELL_SIZE, 
+                          config.BOARD_PADDING + (config.BOARD_SIZE - 1) * config.CELL_SIZE);
+                ctx.stroke();
+                
+                // 水平線
+                ctx.beginPath();
+                ctx.moveTo(config.BOARD_PADDING, config.BOARD_PADDING + i * config.CELL_SIZE);
+                ctx.lineTo(config.BOARD_PADDING + (config.BOARD_SIZE - 1) * config.CELL_SIZE, 
+                          config.BOARD_PADDING + i * config.CELL_SIZE);
+                ctx.stroke();
+            }
+            
+            // 繪製天元和中星
+            const stars = [3, 7, 11];
+            ctx.fillStyle = '#000000';
+            for (let i of stars) {
+                for (let j of stars) {
+                    ctx.beginPath();
+                    ctx.arc(config.BOARD_PADDING + i * config.CELL_SIZE, 
+                           config.BOARD_PADDING + j * config.CELL_SIZE, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // 繪製棋子
+            for (let row = 0; row < config.BOARD_SIZE; row++) {
+                for (let col = 0; col < config.BOARD_SIZE; col++) {
+                    if (config.board[row][col]) {
+                        drawStone(col, row, config.board[row][col]);
+                    }
+                }
+            }
+        }
+
+        // 繪製棋子
+        function drawStone(x, y, color) {
+            const posX = config.BOARD_PADDING + x * config.CELL_SIZE;
+            const posY = config.BOARD_PADDING + y * config.CELL_SIZE;
+            
+            const gradient = ctx.createRadialGradient(
+                posX - config.STONE_RADIUS * 0.3, 
+                posY - config.STONE_RADIUS * 0.3, 
+                0,
+                posX, 
+                posY, 
+                config.STONE_RADIUS
+            );
+            
+            if (color === 'black') {
+                gradient.addColorStop(0, '#666666');
+                gradient.addColorStop(0.3, '#333333');
+                gradient.addColorStop(1, '#000000');
+            } else {
+                gradient.addColorStop(0, '#ffffff');
+                gradient.addColorStop(0.3, '#f0f0f0');
+                gradient.addColorStop(1, '#e0e0e0');
+            }
+            
+            ctx.beginPath();
+            ctx.arc(posX, posY, config.STONE_RADIUS, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // 高光效果
+            if (config.visualEffectsEnabled) {
+                ctx.beginPath();
+                ctx.arc(posX - config.STONE_RADIUS * 0.3, 
+                       posY - config.STONE_RADIUS * 0.3, 
+                       config.STONE_RADIUS * 0.3, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.fill();
+            }
+            
+            // 邊框
+            ctx.strokeStyle = color === 'black' ? '#333333' : '#cccccc';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        // 放置棋子
+        function placeStone(x, y) {
+            if (!config.gameActive || config.board[y][x]) return false;
+            
+            // 播放音效
+            if (config.soundEnabled) {
+                placeSound.currentTime = 0;
+                placeSound.play();
+            }
+            
+            // 更新棋盤狀態
+            config.board[y][x] = config.currentPlayer;
+            config.moveHistory.push({x, y, player: config.currentPlayer});
+            
+            // 繪製棋子
+            drawStone(x, y, config.currentPlayer);
+            
+            // 檢查勝利
+            if (checkWin(x, y)) {
+                handleWin();
+                return true;
+            }
+            
+            // 檢查平局
+            if (isDraw()) {
+                handleDraw();
+                return true;
+            }
+            
+            // 切換玩家
+            config.currentPlayer = config.currentPlayer === 'black' ? 'white' : 'black';
+            updatePlayerUI();
+            updateStatusMessage(`${config.currentPlayer === 'black' ? 'Black' : 'White'}'s Turn`);
+            updateMoveHistory();
+            
+            // AI 移動
+            if (config.gameActive && config.gameMode === 'pve' && config.currentPlayer === 'white') {
+                setTimeout(makeAIMove, 500);
+            }
+            
+            return true;
+        }
+
+        // 檢查勝利條件
+        function checkWin(x, y) {
+            const player = config.board[y][x];
+            const directions = [
+                [[1, 0], [-1, 0]],   // 水平
+                [[0, 1], [0, -1]],   // 垂直
+                [[1, 1], [-1, -1]],  // 對角線
+                [[1, -1], [-1, 1]]   // 反對角線
+            ];
+            
+            for (let dir of directions) {
+                let count = 1;
+                
+                for (let [dx, dy] of dir) {
+                    let newX = x + dx;
+                    let newY = y + dy;
+                    
+                    while (newX >= 0 && newX < config.BOARD_SIZE && 
+                           newY >= 0 && newY < config.BOARD_SIZE && 
+                           config.board[newY][newX] === player) {
+                        count++;
+                        newX += dx;
+                        newY += dy;
+                    }
+                }
+                
+                if (count >= 5) {
+                    // 高亮勝利棋子
+                    highlightWinningStones(x, y, dir);
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        // 檢查平局
+        function isDraw() {
+            for (let row = 0; row < config.BOARD_SIZE; row++) {
+                for (let col = 0; col < config.BOARD_SIZE; col++) {
+                    if (!config.board[row][col]) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // 處理勝利
+        function handleWin() {
+            config.gameActive = false;
+            config.scores[config.currentPlayer]++;
+            updateScores();
+            
+            if (config.soundEnabled) {
+                winSound.currentTime = 0;
+                winSound.play();
+            }
+            
+            // 顯示勝利畫面
+            showWinnerOverlay(config.currentPlayer);
+            updateStatusMessage(`${config.currentPlayer === 'black' ? 'Black' : 'White'} Wins!`);
+        }
+
+        // 處理平局
+        function handleDraw() {
+            config.gameActive = false;
+            
+            // 顯示平局畫面
+            showDrawOverlay();
+            updateStatusMessage("Game Draw!");
+        }
+
+        // 顯示勝利畫面
+        function showWinnerOverlay(winner) {
+            winnerOverlay.style.display = 'flex';
+            winnerPiece.className = 'winner-piece ' + (winner === 'black' ? 'black-piece' : 'white-piece');
+            winnerMessage.textContent = `${winner === 'black' ? 'BLACK' : 'WHITE'} WINS!`;
+        }
+
+        // 顯示平局畫面
+        function showDrawOverlay() {
+            winnerOverlay.style.display = 'flex';
+            winnerPiece.className = 'winner-piece';
+            winnerPiece.style.background = 'linear-gradient(45deg, #000000 50%, #ffffff 50%)';
+            winnerMessage.textContent = 'GAME DRAW!';
+        }
+
+        // 清除勝利畫面
+        function clearWinnerOverlay() {
+            winnerOverlay.style.display = 'none';
+        }
+
+        // AI 移動
+        function makeAIMove() {
+            if (!config.gameActive) return;
+            
+            aiThinking.classList.add('show');
+            
+            setTimeout(() => {
+                let move;
+                
+                switch (config.aiDifficulty) {
+                    case 'easy':
+                        move = getRandomMove();
+                        break;
+                    case 'medium':
+                        move = getMediumMove();
+                        break;
+                    case 'hard':
+                        move = getHardMove();
+                        break;
+                    case 'expert':
+                        move = getExpertMove();
+                        break;
+                    default:
+                        move = getRandomMove();
+                }
+                
+                if (move) {
+                    placeStone(move.x, move.y);
+                }
+                
+                aiThinking.classList.remove('show');
+            }, 800 + Math.random() * 700);
+        }
+
+        // 隨機移動 (簡單難度)
+        function getRandomMove() {
+            const emptyCells = [];
+            for (let y = 0; y < config.BOARD_SIZE; y++) {
+                for (let x = 0; x < config.BOARD_SIZE; x++) {
+                    if (!config.board[y][x]) emptyCells.push({x, y});
+                }
+            }
+            
+            return emptyCells.length > 0 ? 
+                   emptyCells[Math.floor(Math.random() * emptyCells.length)] : null;
+        }
+
+        // 中等難度 AI
+        function getMediumMove() {
+            // 先檢查是否有立即勝利
+            const winningMove = findCriticalMove('white');
+            if (winningMove) return winningMove;
+            
+            // 檢查是否需要防守
+            const defensiveMove = findCriticalMove('black');
+            if (defensiveMove) return defensiveMove;
+            
+            // 尋找有潛力的位置
+            const strategicMove = findStrategicMove();
+            if (strategicMove) return strategicMove;
+            
+            // 否則隨機選擇
+            return getRandomMove();
+        }
+
+        // 尋找關鍵位置
+        function findCriticalMove(player) {
+            for (let y = 0; y < config.BOARD_SIZE; y++) {
+                for (let x = 0; x < config.BOARD_SIZE; x++) {
+                    if (!config.board[y][x]) {
+                        config.board[y][x] = player;
+                        if (checkWin(x, y)) {
+                            config.board[y][x] = null;
+                            return {x, y};
+                        }
+                        config.board[y][x] = null;
+                    }
+                }
+            }
+            return null;
+        }
+
+        // 尋找戰略位置
+        function findStrategicMove() {
+            // 優先考慮中心位置
+            const center = Math.floor(config.BOARD_SIZE / 2);
+            if (!config.board[center][center]) return {x: center, y: center};
+            
+            // 尋找靠近現有棋子的位置
+            const candidates = [];
+            for (let y = 0; y < config.BOARD_SIZE; y++) {
+                for (let x = 0; x < config.BOARD_SIZE; x++) {
+                    if (!config.board[y][x]) {
+                        // 檢查附近是否有棋子
+                        for (let dy = -2; dy <= 2; dy++) {
+                            for (let dx = -2; dx <= 2; dx++) {
+                                const ny = y + dy;
+                                const nx = x + dx;
+                                if (ny >= 0 && ny < config.BOARD_SIZE && 
+                                    nx >= 0 && nx < config.BOARD_SIZE && 
+                                    config.board[ny][nx]) {
+                                    candidates.push({x, y});
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return candidates.length > 0 ? 
+                   candidates[Math.floor(Math.random() * candidates.length)] : null;
+        }
+
+        // 困難難度 AI
+        function getHardMove() {
+            return getMediumMove();
+        }
+
+        // 專家難度 AI
+        function getExpertMove() {
+            return getMediumMove();
+        }
+
+        // 更新玩家 UI
+        function updatePlayerUI() {
+            if (config.currentPlayer === 'black') {
+                playerBlack.classList.add('active');
+                playerWhite.classList.remove('active');
+            } else {
+                playerWhite.classList.add('active');
+                playerBlack.classList.remove('active');
+            }
+        }
+
+        // 更新分數
+        function updateScores() {
+            blackScore.textContent = config.scores.black;
+            whiteScore.textContent = config.scores.white;
+        }
+
+        // 更新狀態訊息
+        function updateStatusMessage(message) {
+            statusMessage.textContent = message;
+            statusMessage.classList.add('blink');
+            setTimeout(() => statusMessage.classList.remove('blink'), 1000);
+        }
+
+        // 更新移動歷史
+        function updateMoveHistory() {
+            moveHistory.innerHTML = '';
+            config.moveHistory.forEach((move, index) => {
+                const moveItem = document.createElement('div');
+                moveItem.className = 'move-item';
+                moveItem.innerHTML = `
+                    <span class="move-number">${index + 1}</span>
+                    <div class="move-details">
+                        <div class="piece-preview ${move.player === 'black' ? 'black-piece' : 'white-piece'}" 
+                             style="width:20px;height:20px;"></div>
+                        <span>${String.fromCharCode(65 + move.x)}${move.y + 1}</span>
+                        <span>${move.player === 'black' ? 'Black' : 'White'}</span>
+                    </div>
+                `;
+                
+                moveItem.addEventListener('click', () => {
+                    if (config.soundEnabled) {
+                        clickSound.currentTime = 0;
+                        clickSound.play();
+                    }
+                });
+                
+                moveHistory.appendChild(moveItem);
+            });
+            
+            // 滾動到底部
+            moveHistory.scrollTop = moveHistory.scrollHeight;
+        }
+
+        // 高亮勝利棋子
+        function highlightWinningStones(x, y, direction) {
+            if (!config.visualEffectsEnabled) return;
+            
+            const player = config.board[y][x];
+            const winningStones = [{x, y}];
+            
+            for (let [dx, dy] of direction) {
+                let newX = x + dx;
+                let newY = y + dy;
+                
+                while (newX >= 0 && newX < config.BOARD_SIZE && 
+                       newY >= 0 && newY < config.BOARD_SIZE && 
+                       config.board[newY][newX] === player) {
+                    winningStones.push({x: newX, y: newY});
+                    newX += dx;
+                    newY += dy;
+                }
+            }
+            
+            // 為勝利棋子添加動畫
+            winningStones.forEach((stone, index) => {
+                setTimeout(() => {
+                    const posX = config.BOARD_PADDING + stone.x * config.CELL_SIZE;
+                    const posY = config.BOARD_PADDING + stone.y * config.CELL_SIZE;
+                    
+                    // 繪製閃爍效果
+                    ctx.beginPath();
+                    ctx.arc(posX, posY, config.STONE_RADIUS * 1.2, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#ffd700';
+                    ctx.lineWidth = 4;
+                    ctx.stroke();
+                    
+                    // 恢復原狀
+                    setTimeout(() => {
+                        drawStone(stone.x, stone.y, player);
+                    }, 300);
+                }, index * 200);
+            });
+        }
+
+        // 事件監聽器 - 修復交叉點閃爍
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // 計算最接近的網格交叉點
+            let minDistance = Infinity;
+            let closestCol = -1;
+            let closestRow = -1;
+            
+            for (let col = 0; col < config.BOARD_SIZE; col++) {
+                for (let row = 0; row < config.BOARD_SIZE; row++) {
+                    const gridX = config.BOARD_PADDING + col * config.CELL_SIZE;
+                    const gridY = config.BOARD_PADDING + row * config.CELL_SIZE;
+                    const distance = Math.sqrt(Math.pow(x - gridX, 2) + Math.pow(y - gridY, 2));
+                    
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestCol = col;
+                        closestRow = row;
+                    }
+                }
+            }
+            
+            // 更新座標預覽
+            if (closestCol >= 0 && closestRow >= 0) {
+                coordinatePreview.textContent = `${String.fromCharCode(65 + closestCol)}${closestRow + 1}`;
+                coordinatePreview.style.display = 'block';
+                
+                // 計算交叉點像素位置
+                const gridX = config.BOARD_PADDING + closestCol * config.CELL_SIZE;
+                const gridY = config.BOARD_PADDING + closestRow * config.CELL_SIZE;
+                
+                // 更新交叉點閃爍光點
+                if (config.gridPointEnabled && config.gameActive && !config.board[closestRow][closestCol]) {
+                  
+                   // 👇 修改這裡：加上 canvas.offsetLeft 和 canvas.offsetTop 來補償外層 padding
+                    gridPoint.style.left = `${canvas.offsetLeft + gridX}px`;
+                    gridPoint.style.top = `${canvas.offsetTop + gridY}px`;
+                    
+                    gridPoint.classList.remove('hidden');
+                } else {
+                    gridPoint.classList.add('hidden');
+                }
+            } else {
+                coordinatePreview.style.display = 'none';
+                gridPoint.classList.add('hidden');
+            }
+        });
+
+        canvas.addEventListener('click', (e) => {
+            if (!config.gameActive) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // 計算最接近的網格交叉點
+            let minDistance = Infinity;
+            let closestCol = -1;
+            let closestRow = -1;
+            
+            for (let col = 0; col < config.BOARD_SIZE; col++) {
+                for (let row = 0; row < config.BOARD_SIZE; row++) {
+                    const gridX = config.BOARD_PADDING + col * config.CELL_SIZE;
+                    const gridY = config.BOARD_PADDING + row * config.CELL_SIZE;
+                    const distance = Math.sqrt(Math.pow(x - gridX, 2) + Math.pow(y - gridY, 2));
+                    
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestCol = col;
+                        closestRow = row;
+                    }
+                }
+            }
+            
+            if (closestCol >= 0 && closestRow >= 0) {
+                // 防止在 AI 回合時放置棋子
+                if (config.gameMode === 'pve' && config.currentPlayer === 'white') return;
+                
+                // 點擊位置必須靠近交叉點（在20像素範圍內）
+                const gridX = config.BOARD_PADDING + closestCol * config.CELL_SIZE;
+                const gridY = config.BOARD_PADDING + closestRow * config.CELL_SIZE;
+                const clickDistance = Math.sqrt(Math.pow(x - gridX, 2) + Math.pow(y - gridY, 2));
+                
+                if (clickDistance <= 20) {
+                    placeStone(closestCol, closestRow);
+                }
+            }
+        });
+
+        // 重新開始遊戲
+        restartButton.addEventListener('click', () => {
+            if (config.soundEnabled) {
+                clickSound.currentTime = 0;
+                clickSound.play();
+            }
+            initGame();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            if (config.soundEnabled) {
+                clickSound.currentTime = 0;
+                clickSound.play();
+            }
+            initGame();
+        });
+
+        // 撤消上一步
+        undoButton.addEventListener('click', () => {
+            if (config.moveHistory.length === 0 || !config.gameActive) return;
+            
+            if (config.soundEnabled) {
+                clickSound.currentTime = 0;
+                clickSound.play();
+            }
+            
+            // 移除最後一步
+            const lastMove = config.moveHistory.pop();
+            if (lastMove) {
+                config.board[lastMove.y][lastMove.x] = null;
+                config.currentPlayer = lastMove.player;
+                config.gameActive = true;
+                
+                updatePlayerUI();
+                updateStatusMessage(`${config.currentPlayer === 'black' ? 'Black' : 'White'}'s Turn`);
+                drawBoard();
+                updateMoveHistory();
+                
+                // 如果移除的是 AI 的移動，需要再移除玩家的上一步
+                if (config.gameMode === 'pve' && lastMove.player === 'white' && config.moveHistory.length > 0) {
+                    const secondLastMove = config.moveHistory.pop();
+                    if (secondLastMove) {
+                        config.board[secondLastMove.y][secondLastMove.x] = null;
+                        config.currentPlayer = secondLastMove.player;
+                        updateMoveHistory();
+                    }
+                }
+            }
+        });
+
+        // 提示功能
+        hintButton.addEventListener('click', () => {
+            if (!config.gameActive || config.gameMode === 'pve') return;
+            
+            if (config.soundEnabled) {
+                hintSound.currentTime = 0;
+                hintSound.play();
+            }
+            
+            // 尋找最佳移動建議
+            const suggestion = findCriticalMove(config.currentPlayer) || findStrategicMove() || getRandomMove();
+            if (suggestion) {
+                // 高亮提示位置
+                const posX = config.BOARD_PADDING + suggestion.x * config.CELL_SIZE;
+                const posY = config.BOARD_PADDING + suggestion.y * config.CELL_SIZE;
+                
+                if (config.visualEffectsEnabled) {
+                    let flashCount = 0;
+                    const flashInterval = setInterval(() => {
+                        ctx.beginPath();
+                        ctx.arc(posX, posY, config.STONE_RADIUS * 1.2, 0, Math.PI * 2);
+                        ctx.strokeStyle = flashCount % 2 === 0 ? '#ff4444' : '#ffd700';
+                        ctx.lineWidth = 3;
+                        ctx.stroke();
+                        
+                        flashCount++;
+                        if (flashCount >= 6) {
+                            clearInterval(flashInterval);
+                            drawBoard();
+                        }
+                    }, 300);
+                }
+                
+                updateStatusMessage(`Hint: Try ${String.fromCharCode(65 + suggestion.x)}${suggestion.y + 1}`);
+            }
+        });
+
+        // 遊戲模式切換
+        modeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                if (config.soundEnabled) {
+                    clickSound.currentTime = 0;
+                    clickSound.play();
+                }
+                
+                modeOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                config.gameMode = option.dataset.mode;
+                
+                // 更新玩家類型顯示
+                const whiteType = document.getElementById('whiteType');
+                whiteType.textContent = config.gameMode === 'pve' ? 'AI' : 'Player 2';
+                
+                // 重新開始遊戲
+                initGame();
+            });
+        });
+
+        // 設定切換
+        pointToggle.addEventListener('change', (e) => {
+            config.gridPointEnabled = e.target.checked;
+            if (!config.gridPointEnabled) {
+                gridPoint.classList.add('hidden');
+            }
+        });
+
+        soundToggle.addEventListener('change', (e) => {
+            config.soundEnabled = e.target.checked;
+        });
+
+        effectsToggle.addEventListener('change', (e) => {
+            config.visualEffectsEnabled = e.target.checked;
+            drawBoard();
+        });
+
+        difficultySelect.addEventListener('change', (e) => {
+            config.aiDifficulty = e.target.value;
+        });
+
+        // 鍵盤快捷鍵
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'r' || e.key === 'R') {
+                initGame();
+                if (config.soundEnabled) {
+                    clickSound.currentTime = 0;
+                    clickSound.play();
+                }
+            } else if (e.key === 'Backspace') {
+                undoButton.click();
+            } else if (e.key === 'h' || e.key === 'H') {
+                hintButton.click();
+            } else if (e.key === 'Escape') {
+                if (winnerOverlay.style.display === 'flex') {
+                    clearWinnerOverlay();
+                }
+            }
+        });
+
+        // 初始化
+        initGame();
+        drawBoard();
+        
+        // 添加初始動畫
+        setTimeout(() => {
+            statusMessage.classList.add('blink');
+            setTimeout(() => {
+                statusMessage.classList.remove('blink');
+            }, 2000);
+        }, 500);
+    });
+    </script>
+</body>
+</html>
