@@ -6,6 +6,7 @@
     <title>Shirley's Magic Cube</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* 基礎變量 - 修正顏色值確保顯示 */
         :root {
             --primary-gold: #FFD700;
             --dark-gold: #FFC107;
@@ -14,74 +15,77 @@
             --light-bg: #2a2a2a;
             --text-light: #f0f0f0;
             --text-muted: #aaaaaa;
-            --red: #FF5252;
-            --cyan: #26A69A;
-            --yellow: #FFC145;
-            --green: #05C793;
-            --blue: #0A7EA5;
-            --purple: #8A2BE2;
+            
+            /* 魔方顏色 - 使用更鮮豔的顏色確保可見性 */
+            --red: #FF3333;
+            --cyan: #00CCCC;
+            --yellow: #FFCC00;
+            --green: #00CC66;
+            --blue: #0066FF;
+            --purple: #9933FF;
+            --orange: #FF6600;
+            
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             --border-radius: 12px;
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
         
+        /* 重置與基礎樣式 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            -webkit-font-smoothing: antialiased;
         }
         
         body {
             background: linear-gradient(135deg, var(--dark-bg) 0%, var(--medium-bg) 100%);
             color: var(--text-light);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            overflow-x: hidden;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: clamp(10px, 3vw, 20px);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            overflow-x: hidden;
-            touch-action: manipulation;
+            padding: 10px;
         }
         
+        /* 標題區域 */
         .header {
             text-align: center;
-            margin-bottom: clamp(15px, 4vw, 25px);
+            margin-bottom: 15px;
             width: 100%;
             max-width: 900px;
         }
         
         h1 {
-            font-size: clamp(2rem, 6vw, 2.8rem);
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
             font-weight: 300;
             margin-bottom: 8px;
             background: linear-gradient(to right, var(--primary-gold), var(--dark-gold));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            letter-spacing: 1px;
         }
         
         .subtitle {
-            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            font-size: clamp(0.85rem, 3vw, 1rem);
             color: var(--text-muted);
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         
-        /* Platform indicator */
-        .platform-indicator {
+        /* 設備檢測指示器 */
+        .device-indicator {
             display: inline-flex;
+            gap: 8px;
             background: rgba(40, 40, 40, 0.7);
             border-radius: 20px;
-            padding: 5px;
+            padding: 6px;
             margin-top: 5px;
             border: 1px solid rgba(255, 215, 0, 0.2);
-            gap: 5px;
         }
         
-        .platform-icon {
+        .device-icon {
             width: 30px;
             height: 30px;
             display: flex;
@@ -89,46 +93,40 @@
             justify-content: center;
             border-radius: 50%;
             background: rgba(60, 60, 60, 0.5);
-            color: var(--primary-gold);
+            color: var(--text-muted);
             font-size: 0.9rem;
+            transition: all 0.3s ease;
         }
         
-        .platform-icon.active {
-            background: var(--primary-gold);
-            color: var(--dark-bg);
-        }
-        
+        /* 主遊戲容器 - 自適應佈局 */
         .game-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: clamp(20px, 4vw, 30px);
             width: 100%;
             max-width: 1400px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
             flex: 1;
         }
         
-        /* Enhanced Cube Container */
+        /* 魔方容器 - 簡單可靠的設計 */
         .cube-section {
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
-            flex: 1;
+            justify-content: center;
+            padding: 10px;
+            min-height: 300px;
+            position: relative;
         }
         
         .cube-display-container {
-            width: min(85vw, 500px, 75vh);
-            height: min(85vw, 500px, 75vh);
+            width: min(85vw, 350px, 70vh);
+            height: min(85vw, 350px, 70vh);
             position: relative;
-            perspective: 2000px;
+            perspective: 1200px;
             margin: 0 auto;
-            cursor: grab;
-        }
-        
-        .cube-display-container:active {
-            cursor: grabbing;
+            transform: translateZ(0); /* 強制硬體加速 */
         }
         
         .cube-3d {
@@ -136,10 +134,11 @@
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            transform: rotateX(-25deg) rotateY(-40deg);
+            transform: rotateX(-20deg) rotateY(-35deg);
             transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
         }
         
+        /* 立方體面 - 簡化設計確保兼容性 */
         .cube-face {
             position: absolute;
             width: 100%;
@@ -147,31 +146,25 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 2px;
-            padding: 2px;
-            border-radius: 3px;
-            background: rgba(10, 10, 10, 0.9);
+            gap: 3px;
+            padding: 5px;
+            border-radius: 5px;
+            background: rgba(25, 25, 25, 0.95);
             box-sizing: border-box;
-            box-shadow: 
-                inset 0 0 0 1px rgba(255, 255, 255, 0.05),
-                0 0 20px rgba(0, 0, 0, 0.5);
-            backface-visibility: hidden;
-            border: 2px solid rgba(30, 30, 30, 0.8);
+            backface-visibility: visible;
+            border: 2px solid rgba(60, 60, 60, 0.9);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
         
         .sticker {
-            border-radius: 4px;
+            border-radius: 5px;
             box-shadow: 
-                inset 0 0 15px rgba(0, 0, 0, 0.6),
-                0 2px 4px rgba(0, 0, 0, 0.3),
-                0 0 0 1px rgba(0, 0, 0, 0.2);
+                inset 0 0 8px rgba(0, 0, 0, 0.6),
+                0 2px 4px rgba(0, 0, 0, 0.3);
             transition: var(--transition);
             position: relative;
             overflow: hidden;
-            border-top: 1px solid rgba(255, 255, 255, 0.15);
-            border-left: 1px solid rgba(255, 255, 255, 0.15);
-            border-right: 1px solid rgba(0, 0, 0, 0.2);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(0, 0, 0, 0.3);
         }
         
         .sticker::after {
@@ -181,57 +174,40 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 30%);
-            border-radius: 4px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 40%);
+            border-radius: 5px;
             pointer-events: none;
         }
         
-        .front { 
-            transform: translateZ(calc(min(85vw, 500px, 75vh) / 2));
-            border-color: rgba(50, 50, 50, 0.9);
-        }
-        .back { 
-            transform: rotateY(180deg) translateZ(calc(min(85vw, 500px, 75vh) / 2));
-            border-color: rgba(50, 50, 50, 0.9);
-        }
-        .right { 
-            transform: rotateY(90deg) translateZ(calc(min(85vw, 500px, 75vh) / 2));
-            border-color: rgba(50, 50, 50, 0.9);
-        }
-        .left { 
-            transform: rotateY(-90deg) translateZ(calc(min(85vw, 500px, 75vh) / 2));
-            border-color: rgba(50, 50, 50, 0.9);
-        }
-        .top { 
-            transform: rotateX(90deg) translateZ(calc(min(85vw, 500px, 75vh) / 2));
-            border-color: rgba(50, 50, 50, 0.9);
-        }
-        .bottom { 
-            transform: rotateX(-90deg) translateZ(calc(min(85vw, 500px, 75vh) / 2));
-            border-color: rgba(50, 50, 50, 0.9);
-        }
+        /* 立方體面位置 */
+        .front { transform: translateZ(calc(min(85vw, 350px, 70vh) / 2)); }
+        .back { transform: rotateY(180deg) translateZ(calc(min(85vw, 350px, 70vh) / 2)); }
+        .right { transform: rotateY(90deg) translateZ(calc(min(85vw, 350px, 70vh) / 2)); }
+        .left { transform: rotateY(-90deg) translateZ(calc(min(85vw, 350px, 70vh) / 2)); }
+        .top { transform: rotateX(90deg) translateZ(calc(min(85vw, 350px, 70vh) / 2)); }
+        .bottom { transform: rotateX(-90deg) translateZ(calc(min(85vw, 350px, 70vh) / 2)); }
         
-        /* Controls section */
+        /* 控制區域 */
         .controls-section {
             width: 100%;
-            max-width: min(500px, 90vw);
+            max-width: 500px;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
         }
         
         .control-panel {
             background: rgba(30, 30, 30, 0.9);
             border-radius: var(--border-radius);
-            padding: clamp(15px, 4vw, 25px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(100, 100, 100, 0.2);
-            backdrop-filter: blur(10px);
         }
         
         .panel-title {
-            font-size: clamp(1.2rem, 4vw, 1.4rem);
-            margin-bottom: 20px;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
             color: var(--primary-gold);
             font-weight: 400;
             display: flex;
@@ -239,37 +215,34 @@
             gap: 10px;
         }
         
-        /* Buttons */
+        /* 按鈕組 - 適應不同設備 */
         .btn-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 15px;
         }
         
         .action-btn {
             background: linear-gradient(to bottom, var(--light-bg), #222);
             color: var(--text-light);
             border: none;
-            padding: clamp(12px, 3vw, 16px);
-            border-radius: var(--border-radius);
-            font-size: clamp(0.9rem, 3vw, 1rem);
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             border: 1px solid rgba(100, 100, 100, 0.2);
-            touch-action: manipulation;
-            min-height: 48px;
-            position: relative;
+            min-height: 50px;
         }
         
         .action-btn:hover {
             background: linear-gradient(to bottom, #3a3a3a, #2a2a2a);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
         .action-btn:active {
@@ -286,36 +259,24 @@
             background: linear-gradient(to bottom, #FFE44D, #FFCA28);
         }
         
-        /* Keyboard shortcut indicators */
-        .keyboard-shortcut {
-            position: absolute;
-            top: 4px;
-            right: 8px;
-            font-size: 0.7rem;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        /* Rotation controls */
+        /* 旋轉控制 */
         .rotation-controls {
-            margin-top: 20px;
+            margin-top: 15px;
         }
         
         .rotation-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: clamp(8px, 2vw, 12px);
+            gap: 8px;
             margin-top: 10px;
         }
         
         .rotation-btn {
             aspect-ratio: 1;
             padding: 12px;
-            font-size: clamp(1rem, 3vw, 1.2rem);
-            min-height: clamp(45px, 10vw, 60px);
+            font-size: 1.1rem;
+            min-height: 50px;
         }
         
         .center-btn {
@@ -324,27 +285,27 @@
             background: rgba(60, 60, 60, 0.7);
         }
         
-        /* View controls */
+        /* 視角控制 */
         .view-controls {
             display: flex;
             justify-content: center;
-            gap: 12px;
-            margin-top: 20px;
+            gap: 10px;
+            margin-top: 15px;
             flex-wrap: wrap;
         }
         
         .view-btn {
-            width: clamp(45px, 10vw, 55px);
-            height: clamp(45px, 10vw, 55px);
-            font-size: clamp(1rem, 3vw, 1.2rem);
+            width: 45px;
+            height: 45px;
+            font-size: 1.1rem;
         }
         
-        /* Stats */
+        /* 統計數據 */
         .stats-container {
             display: flex;
             justify-content: space-between;
-            margin-top: 25px;
-            padding-top: 20px;
+            margin-top: 20px;
+            padding-top: 15px;
             border-top: 1px solid rgba(100, 100, 100, 0.3);
         }
         
@@ -354,69 +315,24 @@
         }
         
         .stat-value {
-            font-size: clamp(1.4rem, 4vw, 1.8rem);
+            font-size: 1.6rem;
             font-weight: 300;
             color: var(--primary-gold);
             line-height: 1;
         }
         
         .stat-label {
-            font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+            font-size: 0.8rem;
             color: var(--text-muted);
-            margin-top: 5px;
+            margin-top: 4px;
         }
         
-        /* Control instructions for desktop */
-        .desktop-controls {
-            display: none;
-            background: rgba(40, 40, 40, 0.7);
-            border-radius: var(--border-radius);
-            padding: 15px;
-            margin-top: 15px;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-        }
-        
-        .desktop-controls h4 {
-            color: var(--primary-gold);
-            margin-bottom: 10px;
-            font-weight: 400;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .control-list {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-        }
-        
-        .control-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 10px;
-            background: rgba(50, 50, 50, 0.5);
-            border-radius: 6px;
-            font-size: 0.85rem;
-        }
-        
-        .key {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 3px 8px;
-            border-radius: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            font-family: monospace;
-            min-width: 30px;
-            text-align: center;
-        }
-        
-        /* Color legend */
+        /* 顏色圖例 */
         .color-legend {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            padding: 18px;
+            gap: 10px;
+            padding: 15px;
             background: rgba(40, 40, 40, 0.7);
             border-radius: var(--border-radius);
             border: 1px solid rgba(100, 100, 100, 0.2);
@@ -426,183 +342,84 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
         
         .color-sample {
-            width: clamp(28px, 7vw, 36px);
-            height: clamp(28px, 7vw, 36px);
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
         }
         
         .color-name {
-            font-size: clamp(0.7rem, 2.5vw, 0.85rem);
+            font-size: 0.75rem;
             color: var(--text-light);
             text-align: center;
             line-height: 1.2;
         }
         
-        /* Instructions */
-        .instructions {
-            margin-top: 20px;
-            font-size: clamp(0.85rem, 3vw, 0.95rem);
+        /* 控制說明 */
+        .control-instructions {
+            margin-top: 15px;
+            font-size: 0.85rem;
             color: var(--text-muted);
-            line-height: 1.6;
+            line-height: 1.5;
         }
         
-        .instructions h3 {
+        .control-instructions h4 {
             color: var(--primary-gold);
-            margin-bottom: 12px;
-            font-weight: 400;
-            font-size: clamp(1rem, 3.5vw, 1.1rem);
-        }
-        
-        .instructions ul {
-            padding-left: 20px;
-        }
-        
-        .instructions li {
             margin-bottom: 8px;
+            font-weight: 400;
+            font-size: 1rem;
         }
         
-        /* Touch instruction */
-        .touch-instruction {
+        .control-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+        }
+        
+        .control-item {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            gap: 8px;
-            padding: 12px 20px;
-            background: rgba(60, 60, 60, 0.5);
-            border-radius: var(--border-radius);
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            max-width: 300px;
+            padding: 5px 8px;
+            background: rgba(50, 50, 50, 0.5);
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+        
+        .key {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: monospace;
+            font-size: 0.75rem;
+            min-width: 25px;
             text-align: center;
-            animation: fadeIn 0.5s ease;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* 觸控提示 - 僅在觸控設備顯示 */
+        .touch-hint {
+            display: none;
+            background: rgba(60, 60, 60, 0.5);
+            padding: 10px 15px;
+            border-radius: 10px;
+            text-align: center;
+            color: var(--primary-gold);
+            font-size: 0.85rem;
+            margin-top: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
         }
         
-        /* Responsive layouts */
-        @media (min-width: 768px) {
-            .game-container {
-                flex-direction: row;
-                align-items: flex-start;
-                justify-content: center;
-                gap: clamp(25px, 5vw, 40px);
-            }
-            
-            .cube-section {
-                max-width: 50%;
-            }
-            
-            .controls-section {
-                max-width: 45%;
-            }
-            
-            /* Show desktop controls on larger screens */
-            .desktop-controls {
-                display: block;
-            }
+        /* 鍵盤提示 - 僅在桌面顯示 */
+        .keyboard-hint {
+            display: none;
         }
         
-        @media (min-width: 1200px) {
-            .cube-display-container {
-                width: min(500px, 40vw);
-                height: min(500px, 40vw);
-            }
-            
-            .front { transform: translateZ(calc(min(500px, 40vw) / 2)); }
-            .back { transform: rotateY(180deg) translateZ(calc(min(500px, 40vw) / 2)); }
-            .right { transform: rotateY(90deg) translateZ(calc(min(500px, 40vw) / 2)); }
-            .left { transform: rotateY(-90deg) translateZ(calc(min(500px, 40vw) / 2)); }
-            .top { transform: rotateX(90deg) translateZ(calc(min(500px, 40vw) / 2)); }
-            .bottom { transform: rotateX(-90deg) translateZ(calc(min(500px, 40vw) / 2)); }
-        }
-        
-        @media (max-width: 900px) and (orientation: landscape) {
-            body {
-                padding: 10px;
-            }
-            
-            .game-container {
-                flex-direction: row;
-                gap: 20px;
-            }
-            
-            .cube-section {
-                max-width: 50%;
-            }
-            
-            .controls-section {
-                max-width: 50%;
-            }
-            
-            .cube-display-container {
-                width: min(60vh, 45vw);
-                height: min(60vh, 45vw);
-            }
-            
-            .btn-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        @media (max-width: 480px) and (orientation: portrait) {
-            .btn-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .color-legend {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .cube-display-container {
-                width: min(90vw, 85vh);
-                height: min(90vw, 85vh);
-            }
-            
-            .cube-face {
-                gap: 1px;
-                padding: 1px;
-            }
-        }
-        
-        @media (max-width: 350px) {
-            .rotation-btn {
-                min-height: 40px;
-                font-size: 0.9rem;
-            }
-            
-            .action-btn {
-                padding: 10px;
-                font-size: 0.85rem;
-            }
-        }
-        
-        /* Desktop hover effects */
-        @media (hover: hover) and (pointer: fine) {
-            .action-btn:hover .keyboard-shortcut {
-                background: rgba(0, 0, 0, 0.5);
-            }
-            
-            .cube-display-container:hover {
-                cursor: grab;
-            }
-        }
-        
-        /* Prevent text selection */
-        .no-select {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        
-        /* Loading animation */
+        /* 加載動畫 */
         .loading {
             position: absolute;
             top: 50%;
@@ -617,49 +434,180 @@
             0%, 100% { opacity: 0.5; }
             50% { opacity: 1; }
         }
+        
+        /* 響應式佈局 */
+        /* 平板和桌面 - 橫向排列 */
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+                justify-content: center;
+            }
+            
+            .game-container {
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: center;
+                gap: 30px;
+                max-height: 90vh;
+            }
+            
+            .cube-section {
+                flex: 1;
+                max-width: 50%;
+                min-height: 400px;
+            }
+            
+            .controls-section {
+                flex: 1;
+                max-width: 45%;
+                margin: 0;
+            }
+            
+            .cube-display-container {
+                width: min(40vw, 400px);
+                height: min(40vw, 400px);
+            }
+            
+            .front { transform: translateZ(calc(min(40vw, 400px) / 2)); }
+            .back { transform: rotateY(180deg) translateZ(calc(min(40vw, 400px) / 2)); }
+            .right { transform: rotateY(90deg) translateZ(calc(min(40vw, 400px) / 2)); }
+            .left { transform: rotateY(-90deg) translateZ(calc(min(40vw, 400px) / 2)); }
+            .top { transform: rotateX(90deg) translateZ(calc(min(40vw, 400px) / 2)); }
+            .bottom { transform: rotateX(-90deg) translateZ(calc(min(40vw, 400px) / 2)); }
+        }
+        
+        /* 大型桌面 */
+        @media (min-width: 1200px) {
+            .game-container {
+                gap: 50px;
+            }
+            
+            .cube-display-container {
+                width: min(35vw, 450px);
+                height: min(35vw, 450px);
+            }
+        }
+        
+        /* 手機橫屏 */
+        @media (max-height: 600px) and (orientation: landscape) {
+            body {
+                padding: 10px;
+            }
+            
+            .game-container {
+                flex-direction: row;
+                gap: 20px;
+                max-height: 85vh;
+            }
+            
+            .cube-section {
+                max-width: 50%;
+                min-height: auto;
+            }
+            
+            .controls-section {
+                max-width: 45%;
+            }
+            
+            .cube-display-container {
+                width: min(70vh, 45vw);
+                height: min(70vh, 45vw);
+            }
+            
+            .btn-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                margin-bottom: 10px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* 小型手機 */
+        @media (max-width: 480px) and (orientation: portrait) {
+            .btn-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .color-legend {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .cube-display-container {
+                width: min(90vw, 320px);
+                height: min(90vw, 320px);
+            }
+            
+            .action-btn {
+                padding: 12px;
+                font-size: 0.9rem;
+                min-height: 45px;
+            }
+            
+            .rotation-btn {
+                min-height: 45px;
+                font-size: 1rem;
+            }
+        }
+        
+        /* 觸控設備樣式 */
+        @media (hover: none) and (pointer: coarse) {
+            .action-btn:hover {
+                transform: none;
+            }
+            
+            .touch-hint {
+                display: block;
+            }
+        }
+        
+        /* 桌面設備樣式 */
+        @media (hover: hover) and (pointer: fine) {
+            .keyboard-hint {
+                display: block;
+            }
+            
+            .action-btn {
+                cursor: pointer;
+            }
+        }
+        
+        /* 防止文字選擇 */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
     </style>
 </head>
 <body class="no-select">
     <div class="header">
         <h1>Shirley's Magic Cube</h1>
-        <p class="subtitle">A premium 3D puzzle experience</p>
-        
-        <div class="platform-indicator">
-            <div class="platform-icon" id="desktop-icon" title="Desktop Controls">
-                <i class="fas fa-desktop"></i>
-            </div>
-            <div class="platform-icon" id="mobile-icon" title="Mobile Controls">
-                <i class="fas fa-mobile-alt"></i>
-            </div>
+        <p class="subtitle">Adaptive 3D Puzzle Experience</p>
+        <div class="device-indicator" id="device-indicator">
+            <!-- Device icons will be added by JavaScript -->
         </div>
     </div>
     
     <div class="game-container">
-        <!-- Cube Display -->
         <div class="cube-section">
             <div class="cube-display-container" id="cube-container">
                 <div class="cube-3d" id="cube">
                     <!-- Cube faces will be generated by JavaScript -->
                 </div>
-                <div class="loading" id="cube-loading">Loading...</div>
+                <div class="loading" id="cube-loading">Loading Cube...</div>
             </div>
             
-            <div class="touch-instruction" id="touch-instruction">
-                <div style="display: flex; gap: 15px; margin-bottom: 8px;">
-                    <div style="width: 36px; height: 36px; background: rgba(255, 215, 0, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFD700;">
-                        <i class="fas fa-arrows-alt"></i>
-                    </div>
-                    <div style="width: 36px; height: 36px; background: rgba(255, 215, 0, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFD700;">
-                        <i class="fas fa-hand-pointer"></i>
-                    </div>
-                </div>
-                <div style="font-size: 0.85rem; color: #aaaaaa;">
-                    Drag to rotate • Tap buttons to rotate layers
-                </div>
+            <div class="touch-hint" id="touch-hint">
+                <i class="fas fa-hand-point-up"></i> Drag to rotate view
             </div>
         </div>
         
-        <!-- Controls -->
         <div class="controls-section">
             <div class="control-panel">
                 <h2 class="panel-title">
@@ -669,19 +617,15 @@
                 <div class="btn-grid">
                     <button class="action-btn primary-btn" id="scramble-btn">
                         <i class="fas fa-random"></i> Scramble Cube
-                        <span class="keyboard-shortcut">S</span>
                     </button>
                     <button class="action-btn" id="reset-btn">
                         <i class="fas fa-redo"></i> Reset Cube
-                        <span class="keyboard-shortcut">R</span>
                     </button>
                     <button class="action-btn" id="solve-btn">
                         <i class="fas fa-lightbulb"></i> Solution Hint
-                        <span class="keyboard-shortcut">H</span>
                     </button>
                     <button class="action-btn" id="undo-btn">
                         <i class="fas fa-undo"></i> Undo Move
-                        <span class="keyboard-shortcut">Z</span>
                     </button>
                 </div>
                 
@@ -691,49 +635,49 @@
                     </h3>
                     
                     <div class="rotation-grid">
-                        <button class="action-btn rotation-btn" data-rotation="U" data-key="U">
+                        <button class="action-btn rotation-btn" data-rotation="U">
                             <i class="fas fa-arrow-up"></i> U
                         </button>
-                        <button class="action-btn rotation-btn" data-rotation="F" data-key="F">
+                        <button class="action-btn rotation-btn" data-rotation="F">
                             <i class="fas fa-arrow-up"></i> F
                         </button>
-                        <button class="action-btn rotation-btn" data-rotation="R" data-key="R">
+                        <button class="action-btn rotation-btn" data-rotation="R">
                             <i class="fas fa-arrow-up"></i> R
                         </button>
                         
-                        <button class="action-btn rotation-btn" data-rotation="L" data-key="L">
+                        <button class="action-btn rotation-btn" data-rotation="L">
                             <i class="fas fa-arrow-left"></i> L
                         </button>
                         <button class="action-btn center-btn" id="center-view">
                             <i class="fas fa-arrows-alt"></i>
                         </button>
-                        <button class="action-btn rotation-btn" data-rotation="R'" data-key="Shift+R">
+                        <button class="action-btn rotation-btn" data-rotation="R'">
                             <i class="fas fa-arrow-right"></i> R'
                         </button>
                         
-                        <button class="action-btn rotation-btn" data-rotation="D" data-key="D">
+                        <button class="action-btn rotation-btn" data-rotation="D">
                             <i class="fas fa-arrow-down"></i> D
                         </button>
-                        <button class="action-btn rotation-btn" data-rotation="B" data-key="B">
+                        <button class="action-btn rotation-btn" data-rotation="B">
                             <i class="fas fa-arrow-down"></i> B
                         </button>
-                        <button class="action-btn rotation-btn" data-rotation="L'" data-key="Shift+L">
+                        <button class="action-btn rotation-btn" data-rotation="L'">
                             <i class="fas fa-arrow-down"></i> L'
                         </button>
                     </div>
                 </div>
                 
                 <div class="view-controls">
-                    <button class="action-btn view-btn" id="view-front" title="Front View" data-key="1">
+                    <button class="action-btn view-btn" id="view-front" title="Front View">
                         <i class="fas fa-eye"></i> F
                     </button>
-                    <button class="action-btn view-btn" id="view-right" title="Right View" data-key="2">
+                    <button class="action-btn view-btn" id="view-right" title="Right View">
                         <i class="fas fa-eye"></i> R
                     </button>
-                    <button class="action-btn view-btn" id="view-top" title="Top View" data-key="3">
+                    <button class="action-btn view-btn" id="view-top" title="Top View">
                         <i class="fas fa-eye"></i> U
                     </button>
-                    <button class="action-btn view-btn" id="view-reset" title="Reset View" data-key="0">
+                    <button class="action-btn view-btn" id="view-reset" title="Reset View">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
@@ -754,958 +698,1175 @@
                 </div>
             </div>
             
-            <!-- Desktop Controls Guide -->
-            <div class="desktop-controls">
-                <h4><i class="fas fa-keyboard"></i> Keyboard Controls</h4>
+            <!-- Control instructions based on device -->
+            <div class="control-panel control-instructions" id="device-instructions">
+                <!-- Instructions will be populated by JavaScript -->
+            </div>
+            
+            <!-- Color Legend -->
+            <div class="color-legend">
+                <div class="color-item">
+                    <div class="color-sample" style="background: linear-gradient(135deg, var(--red), #FF0000);"></div>
+                    <div class="color-name">Front (F)<br>Red</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-sample" style="background: linear-gradient(135deg, var(--cyan), #00AAAA);"></div>
+                    <div class="color-name">Back (B)<br>Cyan</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-sample" style="background: linear-gradient(135deg, var(--yellow), #FFAA00);"></div>
+                    <div class="color-name">Right (R)<br>Yellow</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-sample" style="background: linear-gradient(135deg, var(--green), #00AA55);"></div>
+                    <div class="color-name">Left (L)<br>Green</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-sample" style="background: linear-gradient(135deg, var(--blue), #0055FF);"></div>
+                    <div class="color-name">Top (U)<br>Blue</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-sample" style="background: linear-gradient(135deg, var(--purple), #7700FF);"></div>
+                    <div class="color-name">Bottom (D)<br>Purple</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // 設備檢測與自適應邏輯
+    document.addEventListener('DOMContentLoaded', function() {
+        // 檢測設備類型
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isTablet = /iPad|Tablet|PlayBook|Silk|Kindle/i.test(navigator.userAgent) || 
+                       (isMobile && window.innerWidth >= 768);
+        const isDesktop = !isMobile || window.innerWidth > 1024;
+        
+        // 檢測屏幕方向
+        const isPortrait = window.innerHeight > window.innerWidth;
+        
+        // 更新設備指示器
+        const deviceIndicator = document.getElementById('device-indicator');
+        const deviceIcons = {
+            'desktop': '<i class="fas fa-desktop"></i>',
+            'tablet': '<i class="fas fa-tablet-alt"></i>',
+            'mobile': '<i class="fas fa-mobile-alt"></i>',
+            'touch': '<i class="fas fa-hand-pointer"></i>',
+            'keyboard': '<i class="fas fa-keyboard"></i>'
+        };
+        
+        let deviceType = 'desktop';
+        if (isTablet) deviceType = 'tablet';
+        else if (isMobile) deviceType = 'mobile';
+        
+        // 添加設備圖標
+        deviceIndicator.innerHTML = `
+            <div class="device-icon active" title="${deviceType.charAt(0).toUpperCase() + deviceType.slice(1)}">
+                ${deviceIcons[deviceType]}
+            </div>
+            <div class="device-icon" title="${isTouchDevice ? 'Touch Device' : 'Mouse/Keyboard'}">
+                ${isTouchDevice ? deviceIcons.touch : deviceIcons.keyboard}
+            </div>
+            <div class="device-icon" title="${isPortrait ? 'Portrait' : 'Landscape'}">
+                <i class="fas fa-${isPortrait ? 'mobile-alt' : 'expand-alt'}"></i>
+            </div>
+        `;
+        
+        // 根據設備類型更新說明
+        const deviceInstructions = document.getElementById('device-instructions');
+        let instructionsHTML = '';
+        
+        if (isTouchDevice) {
+            instructionsHTML = `
+                <h4><i class="fas fa-mobile-alt"></i> Touch Controls</h4>
+                <div class="control-list">
+                    <div class="control-item">
+                        <span>Rotate Cube View</span>
+                        <div class="key"><i class="fas fa-hand-pointer"></i> Drag</div>
+                    </div>
+                    <div class="control-item">
+                        <span>Rotate Layers</span>
+                        <div class="key">Tap Buttons</div>
+                    </div>
+                    <div class="control-item">
+                        <span>Quick View Change</span>
+                        <div class="key">Eye Buttons</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            instructionsHTML = `
+                <h4><i class="fas fa-desktop"></i> Keyboard Controls</h4>
                 <div class="control-list">
                     <div class="control-item">
                         <span>Rotate Cube View</span>
                         <div class="key">Mouse Drag</div>
                     </div>
                     <div class="control-item">
-                        <span>Rotate Layers (U, F, R, L, D, B)</span>
-                        <div class="key">U F R L D B</div>
+                        <span>Rotate Layers</span>
+                        <div class="key">U, F, R, L, D, B</div>
                     </div>
                     <div class="control-item">
                         <span>Reverse Rotation</span>
-                        <div class="key">Shift + Letter</div>
+                        <div class="key">Shift + Key</div>
                     </div>
                     <div class="control-item">
                         <span>Change View</span>
                         <div class="key">1, 2, 3, 0</div>
                     </div>
                     <div class="control-item">
-                        <span>Scramble Cube</span>
+                        <span>Scramble</span>
                         <div class="key">S</div>
                     </div>
                     <div class="control-item">
-                        <span>Reset Cube</span>
+                        <span>Reset</span>
                         <div class="key">R</div>
                     </div>
                     <div class="control-item">
-                        <span>Show Hint</span>
+                        <span>Hint</span>
                         <div class="key">H</div>
                     </div>
                     <div class="control-item">
-                        <span>Undo Move</span>
+                        <span>Undo</span>
                         <div class="key">Z</div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Color Legend -->
-            <div class="color-legend">
-                <div class="color-item">
-                    <div class="color-sample" style="background: linear-gradient(135deg, var(--red), #FF3838);"></div>
-                    <div class="color-name">Front<br>Red</div>
-                </div>
-                <div class="color-item">
-                    <div class="color-sample" style="background: linear-gradient(135deg, var(--cyan), #1D968A);"></div>
-                    <div class="color-name">Back<br>Cyan</div>
-                </div>
-                <div class="color-item">
-                    <div class="color-sample" style="background: linear-gradient(135deg, var(--yellow), #FFB52E);"></div>
-                    <div class="color-name">Right<br>Yellow</div>
-                </div>
-                <div class="color-item">
-                    <div class="color-sample" style="background: linear-gradient(135deg, var(--green), #04B585);"></div>
-                    <div class="color-name">Left<br>Green</div>
-                </div>
-                <div class="color-item">
-                    <div class="color-sample" style="background: linear-gradient(135deg, var(--blue), #096F9A);"></div>
-                    <div class="color-name">Top<br>Blue</div>
-                </div>
-                <div class="color-item">
-                    <div class="color-sample" style="background: linear-gradient(135deg, var(--purple), #7A1FDF);"></div>
-                    <div class="color-name">Bottom<br>Purple</div>
-                </div>
-            </div>
-            
-            <!-- Instructions -->
-            <div class="control-panel instructions">
-                <h3>How to Play</h3>
-                <ul>
-                    <li><strong>Desktop:</strong> Drag with mouse to rotate view • Use keyboard shortcuts for quick control</li>
-                    <li><strong>Mobile:</strong> Drag with finger to rotate view • Tap buttons to rotate layers</li>
-                    <li><strong>U/F/R/L/D/B buttons/keys</strong> rotate layers clockwise</li>
-                    <li><strong>Buttons/keys with '</strong> rotate counterclockwise</li>
-                    <li><strong>Eye buttons/1,2,3,0 keys</strong> quickly change your view</li>
-                    <li><strong>Goal:</strong> Restore each face to a single color</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Enhanced cube with full desktop support
-        document.addEventListener('DOMContentLoaded', function() {
-            // Device detection
-            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            const isDesktop = !isMobile || window.innerWidth > 1024;
-            
-            // Update platform indicator
-            const desktopIcon = document.getElementById('desktop-icon');
-            const mobileIcon = document.getElementById('mobile-icon');
-            
-            if (isDesktop) {
-                desktopIcon.classList.add('active');
-            } else {
-                mobileIcon.classList.add('active');
+            `;
+        }
+        
+        deviceInstructions.innerHTML = instructionsHTML;
+        
+        // 初始化變數
+        const cube = document.getElementById('cube');
+        const cubeLoading = document.getElementById('cube-loading');
+        const moveCountElement = document.getElementById('move-count');
+        const timeCountElement = document.getElementById('time-count');
+        const cubeContainer = document.getElementById('cube-container');
+        
+        // 控制按鈕
+        const scrambleBtn = document.getElementById('scramble-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const solveBtn = document.getElementById('solve-btn');
+        const undoBtn = document.getElementById('undo-btn');
+        const rotationBtns = document.querySelectorAll('.rotation-btn');
+        const viewFrontBtn = document.getElementById('view-front');
+        const viewRightBtn = document.getElementById('view-right');
+        const viewTopBtn = document.getElementById('view-top');
+        const viewResetBtn = document.getElementById('view-reset');
+        const centerViewBtn = document.getElementById('center-view');
+        
+        // 遊戲狀態
+        let moveCount = 0;
+        let startTime = null;
+        let timerInterval = null;
+        let moveHistory = [];
+        let cubeRotationX = -20;
+        let cubeRotationY = -35;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        
+        // 顏色漸變映射
+        const COLOR_GRADIENTS = {
+            'F': 'linear-gradient(135deg, #FF3333, #FF0000)',
+            'B': 'linear-gradient(135deg, #00CCCC, #00AAAA)',
+            'R': 'linear-gradient(135deg, #FFCC00, #FFAA00)',
+            'L': 'linear-gradient(135deg, #00CC66, #00AA55)',
+            'U': 'linear-gradient(135deg, #0066FF, #0055FF)',
+            'D': 'linear-gradient(135deg, #9933FF, #7700FF)'
+        };
+        
+        // 魔方邏輯類
+        class RubiksCube {
+            constructor() {
+                // 初始化魔方狀態
+                // 每個面是一個 3x3 矩陣，用字符串表示顏色
+                this.state = {
+                    'U': Array(9).fill('U'),  // 上層 (白)
+                    'D': Array(9).fill('D'),  // 下層 (黃)
+                    'F': Array(9).fill('F'),  // 前層 (紅)
+                    'B': Array(9).fill('B'),  // 後層 (橙)
+                    'L': Array(9).fill('L'),  // 左層 (綠)
+                    'R': Array(9).fill('R')   // 右層 (藍)
+                };
+                
+                // 定義面的鄰接關係
+                this.adjacentFaces = {
+                    'U': { 'F': 0, 'L': 1, 'B': 2, 'R': 3 },
+                    'D': { 'F': 6, 'R': 7, 'B': 8, 'L': 9 },
+                    'F': { 'U': 0, 'R': 1, 'D': 2, 'L': 3 },
+                    'B': { 'U': 6, 'L': 7, 'D': 8, 'R': 9 },
+                    'L': { 'U': 0, 'F': 1, 'D': 2, 'B': 3 },
+                    'R': { 'U': 6, 'B': 7, 'D': 8, 'F': 9 }
+                };
             }
             
-            // Initialize variables
-            const cube = document.getElementById('cube');
-            const cubeContainer = document.getElementById('cube-container');
-            const cubeLoading = document.getElementById('cube-loading');
-            const touchInstruction = document.getElementById('touch-instruction');
-            const moveCountElement = document.getElementById('move-count');
-            const timeCountElement = document.getElementById('time-count');
-            
-            // Control buttons
-            const scrambleBtn = document.getElementById('scramble-btn');
-            const resetBtn = document.getElementById('reset-btn');
-            const solveBtn = document.getElementById('solve-btn');
-            const undoBtn = document.getElementById('undo-btn');
-            const rotationBtns = document.querySelectorAll('.rotation-btn');
-            const viewFrontBtn = document.getElementById('view-front');
-            const viewRightBtn = document.getElementById('view-right');
-            const viewTopBtn = document.getElementById('view-top');
-            const viewResetBtn = document.getElementById('view-reset');
-            const centerViewBtn = document.getElementById('center-view');
-            
-            // Game state
-            let moveCount = 0;
-            let startTime = null;
-            let timerInterval = null;
-            let moveHistory = [];
-            let cubeRotationX = -25;
-            let cubeRotationY = -40;
-            let isDragging = false;
-            let startX = 0;
-            let startY = 0;
-            
-            // Cube colors
-            const COLORS = {
-                'F': 'var(--red)',
-                'B': 'var(--cyan)',
-                'R': 'var(--yellow)',
-                'L': 'var(--green)',
-                'U': 'var(--blue)',
-                'D': 'var(--purple)'
-            };
-            
-            // Enhanced color variations for 3D effect
-            const COLOR_SHADES = {
-                'F': { light: '#FF6B6B', dark: '#D43A3A' },
-                'B': { light: '#4ECDC4', dark: '#1A968A' },
-                'R': { light: '#FFD166', dark: '#D4A642' },
-                'L': { light: '#06D6A0', dark: '#04966D' },
-                'U': { light: '#118AB2', dark: '#0A5A7A' },
-                'D': { light: '#9D4EDD', dark: '#6A1B9A' }
-            };
-            
-            // Cube state representation
-            let cubeState = {
-                'F': Array(9).fill('F'),
-                'B': Array(9).fill('B'),
-                'R': Array(9).fill('R'),
-                'L': Array(9).fill('L'),
-                'U': Array(9).fill('U'),
-                'D': Array(9).fill('D')
-            };
-            
-            // Initialize the cube
-            function initCube() {
-                cube.innerHTML = '';
-                cube.style.opacity = '0.8';
+            // 旋轉面的函數
+            rotateFace(face, clockwise = true) {
+                // 保存當前狀態
+                const history = JSON.parse(JSON.stringify(this.state));
                 
-                const sides = [
-                    { id: 'F', className: 'front' },
-                    { id: 'B', className: 'back' },
-                    { id: 'R', className: 'right' },
-                    { id: 'L', className: 'left' },
-                    { id: 'U', className: 'top' },
-                    { id: 'D', className: 'bottom' }
+                // 旋轉該面本身
+                this.rotateFaceStickers(face, clockwise);
+                
+                // 旋轉相鄰的邊塊
+                this.rotateAdjacentEdges(face, clockwise);
+                
+                return history;
+            }
+            
+            // 旋轉單個面的貼紙
+            rotateFaceStickers(face, clockwise) {
+                const faceState = this.state[face];
+                const newState = [...faceState];
+                
+                if (clockwise) {
+                    // 順時針旋轉
+                    newState[0] = faceState[6];
+                    newState[1] = faceState[3];
+                    newState[2] = faceState[0];
+                    newState[3] = faceState[7];
+                    newState[5] = faceState[1];
+                    newState[6] = faceState[8];
+                    newState[7] = faceState[5];
+                    newState[8] = faceState[2];
+                } else {
+                    // 逆時針旋轉
+                    newState[0] = faceState[2];
+                    newState[1] = faceState[5];
+                    newState[2] = faceState[8];
+                    newState[3] = faceState[1];
+                    newState[5] = faceState[7];
+                    newState[6] = faceState[0];
+                    newState[7] = faceState[3];
+                    newState[8] = faceState[6];
+                }
+                
+                this.state[face] = newState;
+            }
+            
+            // 旋轉相鄰邊塊
+            rotateAdjacentEdges(face, clockwise) {
+                // 根據不同的面處理相鄰邊塊
+                switch(face) {
+                    case 'U': // 上層
+                        this.rotateU(clockwise);
+                        break;
+                    case 'D': // 下層
+                        this.rotateD(clockwise);
+                        break;
+                    case 'F': // 前層
+                        this.rotateF(clockwise);
+                        break;
+                    case 'B': // 後層
+                        this.rotateB(clockwise);
+                        break;
+                    case 'L': // 左層
+                        this.rotateL(clockwise);
+                        break;
+                    case 'R': // 右層
+                        this.rotateR(clockwise);
+                        break;
+                }
+            }
+            
+            // U 層旋轉
+            rotateU(clockwise) {
+                const temp = [
+                    this.state['F'][0], this.state['F'][1], this.state['F'][2]
                 ];
                 
-                sides.forEach(side => {
-                    const sideDiv = document.createElement('div');
-                    sideDiv.className = `cube-face ${side.className}`;
-                    sideDiv.dataset.side = side.id;
+                if (clockwise) {
+                    // F -> R -> B -> L -> F
+                    this.state['F'][0] = this.state['L'][0];
+                    this.state['F'][1] = this.state['L'][1];
+                    this.state['F'][2] = this.state['L'][2];
                     
-                    for (let i = 0; i < 9; i++) {
-                        const sticker = document.createElement('div');
-                        sticker.className = 'sticker';
-                        sticker.dataset.side = side.id;
-                        sticker.dataset.position = i;
-                        sideDiv.appendChild(sticker);
+                    this.state['L'][0] = this.state['B'][0];
+                    this.state['L'][1] = this.state['B'][1];
+                    this.state['L'][2] = this.state['B'][2];
+                    
+                    this.state['B'][0] = this.state['R'][0];
+                    this.state['B'][1] = this.state['R'][1];
+                    this.state['B'][2] = this.state['R'][2];
+                    
+                    this.state['R'][0] = temp[0];
+                    this.state['R'][1] = temp[1];
+                    this.state['R'][2] = temp[2];
+                } else {
+                    // F -> L -> B -> R -> F
+                    this.state['F'][0] = this.state['R'][0];
+                    this.state['F'][1] = this.state['R'][1];
+                    this.state['F'][2] = this.state['R'][2];
+                    
+                    this.state['R'][0] = this.state['B'][0];
+                    this.state['R'][1] = this.state['B'][1];
+                    this.state['R'][2] = this.state['B'][2];
+                    
+                    this.state['B'][0] = this.state['L'][0];
+                    this.state['B'][1] = this.state['L'][1];
+                    this.state['B'][2] = this.state['L'][2];
+                    
+                    this.state['L'][0] = temp[0];
+                    this.state['L'][1] = temp[1];
+                    this.state['L'][2] = temp[2];
+                }
+            }
+            
+            // D 層旋轉
+            rotateD(clockwise) {
+                const temp = [
+                    this.state['F'][6], this.state['F'][7], this.state['F'][8]
+                ];
+                
+                if (clockwise) {
+                    // F -> L -> B -> R -> F
+                    this.state['F'][6] = this.state['R'][6];
+                    this.state['F'][7] = this.state['R'][7];
+                    this.state['F'][8] = this.state['R'][8];
+                    
+                    this.state['R'][6] = this.state['B'][6];
+                    this.state['R'][7] = this.state['B'][7];
+                    this.state['R'][8] = this.state['B'][8];
+                    
+                    this.state['B'][6] = this.state['L'][6];
+                    this.state['B'][7] = this.state['L'][7];
+                    this.state['B'][8] = this.state['L'][8];
+                    
+                    this.state['L'][6] = temp[0];
+                    this.state['L'][7] = temp[1];
+                    this.state['L'][8] = temp[2];
+                } else {
+                    // F -> R -> B -> L -> F
+                    this.state['F'][6] = this.state['L'][6];
+                    this.state['F'][7] = this.state['L'][7];
+                    this.state['F'][8] = this.state['L'][8];
+                    
+                    this.state['L'][6] = this.state['B'][6];
+                    this.state['L'][7] = this.state['B'][7];
+                    this.state['L'][8] = this.state['B'][8];
+                    
+                    this.state['B'][6] = this.state['R'][6];
+                    this.state['B'][7] = this.state['R'][7];
+                    this.state['B'][8] = this.state['R'][8];
+                    
+                    this.state['R'][6] = temp[0];
+                    this.state['R'][7] = temp[1];
+                    this.state['R'][8] = temp[2];
+                }
+            }
+            
+            // F 層旋轉
+            rotateF(clockwise) {
+                const tempU = [
+                    this.state['U'][6], this.state['U'][7], this.state['U'][8]
+                ];
+                const tempR = [
+                    this.state['R'][0], this.state['R'][3], this.state['R'][6]
+                ];
+                const tempD = [
+                    this.state['D'][0], this.state['D'][1], this.state['D'][2]
+                ];
+                const tempL = [
+                    this.state['L'][2], this.state['L'][5], this.state['L'][8]
+                ];
+                
+                if (clockwise) {
+                    // U -> R -> D -> L -> U
+                    this.state['U'][6] = tempL[2];
+                    this.state['U'][7] = tempL[1];
+                    this.state['U'][8] = tempL[0];
+                    
+                    this.state['R'][0] = tempU[0];
+                    this.state['R'][3] = tempU[1];
+                    this.state['R'][6] = tempU[2];
+                    
+                    this.state['D'][0] = tempR[2];
+                    this.state['D'][1] = tempR[1];
+                    this.state['D'][2] = tempR[0];
+                    
+                    this.state['L'][2] = tempD[0];
+                    this.state['L'][5] = tempD[1];
+                    this.state['L'][8] = tempD[2];
+                } else {
+                    // U -> L -> D -> R -> U
+                    this.state['U'][6] = tempR[0];
+                    this.state['U'][7] = tempR[1];
+                    this.state['U'][8] = tempR[2];
+                    
+                    this.state['R'][0] = tempD[2];
+                    this.state['R'][3] = tempD[1];
+                    this.state['R'][6] = tempD[0];
+                    
+                    this.state['D'][0] = tempL[2];
+                    this.state['D'][1] = tempL[1];
+                    this.state['D'][2] = tempL[0];
+                    
+                    this.state['L'][2] = tempU[2];
+                    this.state['L'][5] = tempU[1];
+                    this.state['L'][8] = tempU[0];
+                }
+            }
+            
+            // 其他層的旋轉方法類似，為了簡潔這裡實現關鍵的幾個
+            
+            // B 層旋轉
+            rotateB(clockwise) {
+                const tempU = [
+                    this.state['U'][0], this.state['U'][1], this.state['U'][2]
+                ];
+                const tempR = [
+                    this.state['R'][2], this.state['R'][5], this.state['R'][8]
+                ];
+                const tempD = [
+                    this.state['D'][6], this.state['D'][7], this.state['D'][8]
+                ];
+                const tempL = [
+                    this.state['L'][0], this.state['L'][3], this.state['L'][6]
+                ];
+                
+                if (clockwise) {
+                    // U -> L -> D -> R -> U
+                    this.state['U'][0] = tempR[2];
+                    this.state['U'][1] = tempR[1];
+                    this.state['U'][2] = tempR[0];
+                    
+                    this.state['R'][2] = tempD[0];
+                    this.state['R'][5] = tempD[1];
+                    this.state['R'][8] = tempD[2];
+                    
+                    this.state['D'][6] = tempL[2];
+                    this.state['D'][7] = tempL[1];
+                    this.state['D'][8] = tempL[0];
+                    
+                    this.state['L'][0] = tempU[2];
+                    this.state['L'][3] = tempU[1];
+                    this.state['L'][6] = tempU[0];
+                } else {
+                    // U -> R -> D -> L -> U
+                    this.state['U'][0] = tempL[0];
+                    this.state['U'][1] = tempL[1];
+                    this.state['U'][2] = tempL[2];
+                    
+                    this.state['R'][2] = tempU[0];
+                    this.state['R'][5] = tempU[1];
+                    this.state['R'][8] = tempU[2];
+                    
+                    this.state['D'][6] = tempR[2];
+                    this.state['D'][7] = tempR[1];
+                    this.state['D'][8] = tempR[0];
+                    
+                    this.state['L'][0] = tempD[2];
+                    this.state['L'][3] = tempD[1];
+                    this.state['L'][6] = tempD[0];
+                }
+            }
+            
+            // L 層旋轉
+            rotateL(clockwise) {
+                const tempU = [
+                    this.state['U'][0], this.state['U'][3], this.state['U'][6]
+                ];
+                const tempF = [
+                    this.state['F'][0], this.state['F'][3], this.state['F'][6]
+                ];
+                const tempD = [
+                    this.state['D'][0], this.state['D'][3], this.state['D'][6]
+                ];
+                const tempB = [
+                    this.state['B'][2], this.state['B'][5], this.state['B'][8]
+                ];
+                
+                if (clockwise) {
+                    // U -> F -> D -> B -> U
+                    this.state['U'][0] = tempB[2];
+                    this.state['U'][3] = tempB[1];
+                    this.state['U'][6] = tempB[0];
+                    
+                    this.state['F'][0] = tempU[0];
+                    this.state['F'][3] = tempU[1];
+                    this.state['F'][6] = tempU[2];
+                    
+                    this.state['D'][0] = tempF[0];
+                    this.state['D'][3] = tempF[1];
+                    this.state['D'][6] = tempF[2];
+                    
+                    this.state['B'][2] = tempD[2];
+                    this.state['B'][5] = tempD[1];
+                    this.state['B'][8] = tempD[0];
+                } else {
+                    // U -> B -> D -> F -> U
+                    this.state['U'][0] = tempF[0];
+                    this.state['U'][3] = tempF[1];
+                    this.state['U'][6] = tempF[2];
+                    
+                    this.state['F'][0] = tempD[0];
+                    this.state['F'][3] = tempD[1];
+                    this.state['F'][6] = tempD[2];
+                    
+                    this.state['D'][0] = tempB[2];
+                    this.state['D'][3] = tempB[1];
+                    this.state['D'][6] = tempB[0];
+                    
+                    this.state['B'][2] = tempU[2];
+                    this.state['B'][5] = tempU[1];
+                    this.state['B'][8] = tempU[0];
+                }
+            }
+            
+            // R 層旋轉
+            rotateR(clockwise) {
+                const tempU = [
+                    this.state['U'][2], this.state['U'][5], this.state['U'][8]
+                ];
+                const tempF = [
+                    this.state['F'][2], this.state['F'][5], this.state['F'][8]
+                ];
+                const tempD = [
+                    this.state['D'][2], this.state['D'][5], this.state['D'][8]
+                ];
+                const tempB = [
+                    this.state['B'][0], this.state['B'][3], this.state['B'][6]
+                ];
+                
+                if (clockwise) {
+                    // U -> B -> D -> F -> U
+                    this.state['U'][2] = tempF[0];
+                    this.state['U'][5] = tempF[1];
+                    this.state['U'][8] = tempF[2];
+                    
+                    this.state['F'][2] = tempD[0];
+                    this.state['F'][5] = tempD[1];
+                    this.state['F'][8] = tempD[2];
+                    
+                    this.state['D'][2] = tempB[2];
+                    this.state['D'][5] = tempB[1];
+                    this.state['D'][8] = tempB[0];
+                    
+                    this.state['B'][0] = tempU[2];
+                    this.state['B'][3] = tempU[1];
+                    this.state['B'][6] = tempU[0];
+                } else {
+                    // U -> F -> D -> B -> U
+                    this.state['U'][2] = tempB[2];
+                    this.state['U'][5] = tempB[1];
+                    this.state['U'][8] = tempB[0];
+                    
+                    this.state['F'][2] = tempU[0];
+                    this.state['F'][5] = tempU[1];
+                    this.state['F'][8] = tempU[2];
+                    
+                    this.state['D'][2] = tempF[0];
+                    this.state['D'][5] = tempF[1];
+                    this.state['D'][8] = tempF[2];
+                    
+                    this.state['B'][0] = tempD[2];
+                    this.state['B'][3] = tempD[1];
+                    this.state['B'][6] = tempD[0];
+                }
+            }
+            
+            // 檢查是否解決
+            isSolved() {
+                for (const face in this.state) {
+                    const faceArray = this.state[face];
+                    const firstColor = faceArray[0];
+                    for (let i = 1; i < 9; i++) {
+                        if (faceArray[i] !== firstColor) {
+                            return false;
+                        }
                     }
-                    
-                    cube.appendChild(sideDiv);
-                });
+                }
+                return true;
+            }
+            
+            // 獲取狀態用於顯示
+            getState() {
+                return JSON.parse(JSON.stringify(this.state));
+            }
+            
+            // 設置狀態
+            setState(newState) {
+                this.state = JSON.parse(JSON.stringify(newState));
+            }
+            
+            // 重置魔方
+            reset() {
+                this.state = {
+                    'U': Array(9).fill('U'),
+                    'D': Array(9).fill('D'),
+                    'F': Array(9).fill('F'),
+                    'B': Array(9).fill('B'),
+                    'L': Array(9).fill('L'),
+                    'R': Array(9).fill('R')
+                };
+            }
+            
+            // 隨機打亂
+            scramble(moveCount = 20) {
+                const moves = ['U', 'D', 'F', 'B', 'L', 'R'];
+                const history = [];
                 
-                // Initial animation
-                setTimeout(() => {
-                    cube.style.transition = 'transform 2s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.5s ease';
-                    cube.style.opacity = '1';
-                    cube.style.transform = 'rotateX(-25deg) rotateY(-40deg) rotateZ(0deg)';
+                for (let i = 0; i < moveCount; i++) {
+                    const move = moves[Math.floor(Math.random() * moves.length)];
+                    const clockwise = Math.random() > 0.5;
                     
-                    setTimeout(() => {
-                        cube.style.transition = 'transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)';
-                    }, 1500);
+                    history.push(this.rotateFace(move, clockwise));
+                }
+                
+                return history;
+            }
+        }
+        
+        // 創建魔方實例
+        const rubiksCube = new RubiksCube();
+        
+        // 初始化立方體
+        function initCube() {
+            cube.innerHTML = '';
+            cube.style.opacity = '0.8';
+            
+            const sides = [
+                { id: 'F', className: 'front' },
+                { id: 'B', className: 'back' },
+                { id: 'R', className: 'right' },
+                { id: 'L', className: 'left' },
+                { id: 'U', className: 'top' },
+                { id: 'D', className: 'bottom' }
+            ];
+            
+            sides.forEach(side => {
+                const sideDiv = document.createElement('div');
+                sideDiv.className = `cube-face ${side.className}`;
+                sideDiv.dataset.side = side.id;
+                
+                for (let i = 0; i < 9; i++) {
+                    const sticker = document.createElement('div');
+                    sticker.className = 'sticker';
+                    sticker.dataset.side = side.id;
+                    sticker.dataset.position = i;
+                    sideDiv.appendChild(sticker);
+                }
+                
+                cube.appendChild(sideDiv);
+            });
+            
+            // 初始動畫
+            setTimeout(() => {
+                cube.style.transition = 'transform 1.5s ease, opacity 0.5s ease';
+                cube.style.opacity = '1';
+                cube.style.transform = 'rotateX(-20deg) rotateY(-35deg)';
+                
+                // 添加初始旋轉動畫
+                setTimeout(() => {
+                    cube.style.transform = 'rotateX(-20deg) rotateY(-45deg)';
                 }, 100);
-            }
-            
-            // Update cube colors
-            function updateCubeColors() {
-                const sides = ['F', 'B', 'R', 'L', 'U', 'D'];
                 
-                sides.forEach(side => {
-                    const sideElement = document.querySelector(`.cube-face[data-side="${side}"]`);
-                    if (!sideElement) return;
-                    
-                    const stickers = sideElement.querySelectorAll('.sticker');
-                    
-                    stickers.forEach((sticker, index) => {
-                        const colorCode = cubeState[side][index];
-                        const shades = COLOR_SHADES[colorCode] || { light: COLORS[colorCode], dark: adjustColor(COLORS[colorCode], -30) };
-                        
-                        sticker.style.background = `linear-gradient(145deg, ${shades.light}, ${shades.dark})`;
-                        
-                        sticker.style.borderTop = '2px solid rgba(255, 255, 255, 0.2)';
-                        sticker.style.borderLeft = '2px solid rgba(255, 255, 255, 0.15)';
-                        sticker.style.borderRight = '2px solid rgba(0, 0, 0, 0.25)';
-                        sticker.style.borderBottom = '2px solid rgba(0, 0, 0, 0.3)';
-                    });
+                // 隱藏加載提示
+                cubeLoading.style.display = 'none';
+            }, 300);
+            
+            // 更新立方體顯示
+            updateCubeVisual();
+        }
+        
+        // 更新立方體視覺
+        function updateCubeVisual() {
+            const cubeState = rubiksCube.getState();
+            
+            for (const side in cubeState) {
+                const stickers = document.querySelectorAll(`.cube-face[data-side="${side}"] .sticker`);
+                stickers.forEach((sticker, index) => {
+                    const colorCode = cubeState[side][index];
+                    sticker.style.background = COLOR_GRADIENTS[colorCode] || COLOR_GRADIENTS[side];
                 });
             }
+        }
+        
+        // 旋轉立方體面
+        function rotateFace(face, clockwise = true) {
+            // 保存當前狀態到歷史記錄
+            moveHistory.push(rubiksCube.getState());
             
-            // Color adjustment utilities
-            function adjustColor(color, percent) {
-                if (color.startsWith('var(')) {
-                    return color;
-                }
-                
-                let hex = color.replace('#', '');
-                
-                let r = parseInt(hex.substring(0, 2), 16);
-                let g = parseInt(hex.substring(2, 4), 16);
-                let b = parseInt(hex.substring(4, 6), 16);
-                
-                const amount = Math.round(2.55 * percent);
-                r = Math.min(255, Math.max(0, r + amount));
-                g = Math.min(255, Math.max(0, g + amount));
-                b = Math.min(255, Math.max(0, b + amount));
-                
-                return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+            // 執行旋轉
+            rubiksCube.rotateFace(face, clockwise);
+            
+            // 更新移動計數
+            moveCount++;
+            moveCountElement.textContent = moveCount;
+            
+            // 更新顯示
+            updateCubeVisual();
+            
+            // 添加旋轉動畫效果
+            animateFaceRotation(face, clockwise);
+            
+            // 檢查是否完成
+            checkSolved();
+            
+            // 限制歷史記錄長度
+            if (moveHistory.length > 50) {
+                moveHistory.shift();
             }
+        }
+        
+        // 旋轉動畫
+        function animateFaceRotation(face, clockwise) {
+            const faceElement = document.querySelector(`.cube-face[data-side="${face}"]`);
+            if (!faceElement) return;
             
-            // Rotate a layer of the cube
-            function rotateLayer(layer) {
-                const newState = JSON.parse(JSON.stringify(cubeState));
+            const originalTransform = faceElement.style.transform;
+            
+            // 添加旋轉動畫
+            faceElement.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            
+            // 根據面確定旋轉軸
+            let axis = 'Z';
+            if (face === 'F' || face === 'B') axis = 'Y';
+            else if (face === 'R' || face === 'L') axis = 'X';
+            
+            faceElement.style.transform = `${originalTransform} rotate${axis}(${clockwise ? 90 : -90}deg)`;
+            
+            // 動畫完成後重置
+            setTimeout(() => {
+                faceElement.style.transition = 'none';
+                faceElement.style.transform = originalTransform;
                 
-                switch(layer) {
-                    case 'U': // Up clockwise
-                        newState.U = [
-                            cubeState.U[6], cubeState.U[3], cubeState.U[0],
-                            cubeState.U[7], cubeState.U[4], cubeState.U[1],
-                            cubeState.U[8], cubeState.U[5], cubeState.U[2]
-                        ];
-                        
-                        newState.F[0] = cubeState.R[0];
-                        newState.F[1] = cubeState.R[1];
-                        newState.F[2] = cubeState.R[2];
-                        
-                        newState.R[0] = cubeState.B[0];
-                        newState.R[1] = cubeState.B[1];
-                        newState.R[2] = cubeState.B[2];
-                        
-                        newState.B[0] = cubeState.L[0];
-                        newState.B[1] = cubeState.L[1];
-                        newState.B[2] = cubeState.L[2];
-                        
-                        newState.L[0] = cubeState.F[0];
-                        newState.L[1] = cubeState.F[1];
-                        newState.L[2] = cubeState.F[2];
-                        break;
-                        
-                    case "U'": // Up counterclockwise
-                        newState.U = [
-                            cubeState.U[2], cubeState.U[5], cubeState.U[8],
-                            cubeState.U[1], cubeState.U[4], cubeState.U[7],
-                            cubeState.U[0], cubeState.U[3], cubeState.U[6]
-                        ];
-                        
-                        newState.F[0] = cubeState.L[0];
-                        newState.F[1] = cubeState.L[1];
-                        newState.F[2] = cubeState.L[2];
-                        
-                        newState.R[0] = cubeState.F[0];
-                        newState.R[1] = cubeState.F[1];
-                        newState.R[2] = cubeState.F[2];
-                        
-                        newState.B[0] = cubeState.R[0];
-                        newState.B[1] = cubeState.R[1];
-                        newState.B[2] = cubeState.R[2];
-                        
-                        newState.L[0] = cubeState.B[0];
-                        newState.L[1] = cubeState.B[1];
-                        newState.L[2] = cubeState.B[2];
-                        break;
-                        
-                    case 'F': // Front clockwise
-                        newState.F = [
-                            cubeState.F[6], cubeState.F[3], cubeState.F[0],
-                            cubeState.F[7], cubeState.F[4], cubeState.F[1],
-                            cubeState.F[8], cubeState.F[5], cubeState.F[2]
-                        ];
-                        
-                        newState.U[6] = cubeState.L[8];
-                        newState.U[7] = cubeState.L[5];
-                        newState.U[8] = cubeState.L[2];
-                        
-                        newState.R[0] = cubeState.U[6];
-                        newState.R[3] = cubeState.U[7];
-                        newState.R[6] = cubeState.U[8];
-                        
-                        newState.D[0] = cubeState.R[6];
-                        newState.D[1] = cubeState.R[3];
-                        newState.D[2] = cubeState.R[0];
-                        
-                        newState.L[2] = cubeState.D[0];
-                        newState.L[5] = cubeState.D[1];
-                        newState.L[8] = cubeState.D[2];
-                        break;
-                    
-                    case "F'": // Front counterclockwise
-                        newState.F = [
-                            cubeState.F[2], cubeState.F[5], cubeState.F[8],
-                            cubeState.F[1], cubeState.F[4], cubeState.F[7],
-                            cubeState.F[0], cubeState.F[3], cubeState.F[6]
-                        ];
-                        
-                        newState.U[6] = cubeState.R[0];
-                        newState.U[7] = cubeState.R[3];
-                        newState.U[8] = cubeState.R[6];
-                        
-                        newState.R[0] = cubeState.D[2];
-                        newState.R[3] = cubeState.D[1];
-                        newState.R[6] = cubeState.D[0];
-                        
-                        newState.D[0] = cubeState.L[2];
-                        newState.D[1] = cubeState.L[5];
-                        newState.D[2] = cubeState.L[8];
-                        
-                        newState.L[2] = cubeState.U[8];
-                        newState.L[5] = cubeState.U[7];
-                        newState.L[8] = cubeState.U[6];
-                        break;
-                    
-                    case 'R': // Right clockwise
-                        newState.R = [
-                            cubeState.R[6], cubeState.R[3], cubeState.R[0],
-                            cubeState.R[7], cubeState.R[4], cubeState.R[1],
-                            cubeState.R[8], cubeState.R[5], cubeState.R[2]
-                        ];
-                        
-                        newState.U[2] = cubeState.F[2];
-                        newState.U[5] = cubeState.F[5];
-                        newState.U[8] = cubeState.F[8];
-                        
-                        newState.B[0] = cubeState.U[8];
-                        newState.B[3] = cubeState.U[5];
-                        newState.B[6] = cubeState.U[2];
-                        
-                        newState.D[2] = cubeState.B[6];
-                        newState.D[5] = cubeState.B[3];
-                        newState.D[8] = cubeState.B[0];
-                        
-                        newState.F[2] = cubeState.D[2];
-                        newState.F[5] = cubeState.D[5];
-                        newState.F[8] = cubeState.D[8];
-                        break;
-                    
-                    case "R'": // Right counterclockwise
-                        newState.R = [
-                            cubeState.R[2], cubeState.R[5], cubeState.R[8],
-                            cubeState.R[1], cubeState.R[4], cubeState.R[7],
-                            cubeState.R[0], cubeState.R[3], cubeState.R[6]
-                        ];
-                        
-                        newState.U[2] = cubeState.B[6];
-                        newState.U[5] = cubeState.B[3];
-                        newState.U[8] = cubeState.B[0];
-                        
-                        newState.B[0] = cubeState.D[8];
-                        newState.B[3] = cubeState.D[5];
-                        newState.B[6] = cubeState.D[2];
-                        
-                        newState.D[2] = cubeState.F[2];
-                        newState.D[5] = cubeState.F[5];
-                        newState.D[8] = cubeState.F[8];
-                        
-                        newState.F[2] = cubeState.U[2];
-                        newState.F[5] = cubeState.U[5];
-                        newState.F[8] = cubeState.U[8];
-                        break;
-                    
-                    case 'L': // Left clockwise
-                        newState.L = [
-                            cubeState.L[6], cubeState.L[3], cubeState.L[0],
-                            cubeState.L[7], cubeState.L[4], cubeState.L[1],
-                            cubeState.L[8], cubeState.L[5], cubeState.L[2]
-                        ];
-                        
-                        newState.U[0] = cubeState.B[8];
-                        newState.U[3] = cubeState.B[5];
-                        newState.U[6] = cubeState.B[2];
-                        
-                        newState.F[0] = cubeState.U[0];
-                        newState.F[3] = cubeState.U[3];
-                        newState.F[6] = cubeState.U[6];
-                        
-                        newState.D[0] = cubeState.F[0];
-                        newState.D[3] = cubeState.F[3];
-                        newState.D[6] = cubeState.F[6];
-                        
-                        newState.B[2] = cubeState.D[6];
-                        newState.B[5] = cubeState.D[3];
-                        newState.B[8] = cubeState.D[0];
-                        break;
-                    
-                    case "L'": // Left counterclockwise
-                        newState.L = [
-                            cubeState.L[2], cubeState.L[5], cubeState.L[8],
-                            cubeState.L[1], cubeState.L[4], cubeState.L[7],
-                            cubeState.L[0], cubeState.L[3], cubeState.L[6]
-                        ];
-                        
-                        newState.U[0] = cubeState.F[0];
-                        newState.U[3] = cubeState.F[3];
-                        newState.U[6] = cubeState.F[6];
-                        
-                        newState.F[0] = cubeState.D[0];
-                        newState.F[3] = cubeState.D[3];
-                        newState.F[6] = cubeState.D[6];
-                        
-                        newState.D[0] = cubeState.B[8];
-                        newState.D[3] = cubeState.B[5];
-                        newState.D[6] = cubeState.B[2];
-                        
-                        newState.B[2] = cubeState.U[6];
-                        newState.B[5] = cubeState.U[3];
-                        newState.B[8] = cubeState.U[0];
-                        break;
-                    
-                    case 'D': // Down clockwise
-                        newState.D = [
-                            cubeState.D[6], cubeState.D[3], cubeState.D[0],
-                            cubeState.D[7], cubeState.D[4], cubeState.D[1],
-                            cubeState.D[8], cubeState.D[5], cubeState.D[2]
-                        ];
-                        
-                        newState.F[6] = cubeState.L[6];
-                        newState.F[7] = cubeState.L[7];
-                        newState.F[8] = cubeState.L[8];
-                        
-                        newState.R[6] = cubeState.F[6];
-                        newState.R[7] = cubeState.F[7];
-                        newState.R[8] = cubeState.F[8];
-                        
-                        newState.B[6] = cubeState.R[6];
-                        newState.B[7] = cubeState.R[7];
-                        newState.B[8] = cubeState.R[8];
-                        
-                        newState.L[6] = cubeState.B[6];
-                        newState.L[7] = cubeState.B[7];
-                        newState.L[8] = cubeState.B[8];
-                        break;
-                    
-                    case "D'": // Down counterclockwise
-                        newState.D = [
-                            cubeState.D[2], cubeState.D[5], cubeState.D[8],
-                            cubeState.D[1], cubeState.D[4], cubeState.D[7],
-                            cubeState.D[0], cubeState.D[3], cubeState.D[6]
-                        ];
-                        
-                        newState.F[6] = cubeState.R[6];
-                        newState.F[7] = cubeState.R[7];
-                        newState.F[8] = cubeState.R[8];
-                        
-                        newState.R[6] = cubeState.B[6];
-                        newState.R[7] = cubeState.B[7];
-                        newState.R[8] = cubeState.B[8];
-                        
-                        newState.B[6] = cubeState.L[6];
-                        newState.B[7] = cubeState.L[7];
-                        newState.B[8] = cubeState.L[8];
-                        
-                        newState.L[6] = cubeState.F[6];
-                        newState.L[7] = cubeState.F[7];
-                        newState.L[8] = cubeState.F[8];
-                        break;
-                    
-                    case 'B': // Back clockwise
-                        newState.B = [
-                            cubeState.B[6], cubeState.B[3], cubeState.B[0],
-                            cubeState.B[7], cubeState.B[4], cubeState.B[1],
-                            cubeState.B[8], cubeState.B[5], cubeState.B[2]
-                        ];
-                        
-                        newState.U[0] = cubeState.R[2];
-                        newState.U[1] = cubeState.R[5];
-                        newState.U[2] = cubeState.R[8];
-                        
-                        newState.R[2] = cubeState.D[8];
-                        newState.R[5] = cubeState.D[7];
-                        newState.R[8] = cubeState.D[6];
-                        
-                        newState.D[6] = cubeState.L[0];
-                        newState.D[7] = cubeState.L[3];
-                        newState.D[8] = cubeState.L[6];
-                        
-                        newState.L[0] = cubeState.U[2];
-                        newState.L[3] = cubeState.U[1];
-                        newState.L[6] = cubeState.U[0];
-                        break;
-                    
-                    case "B'": // Back counterclockwise
-                        newState.B = [
-                            cubeState.B[2], cubeState.B[5], cubeState.B[8],
-                            cubeState.B[1], cubeState.B[4], cubeState.B[7],
-                            cubeState.B[0], cubeState.B[3], cubeState.B[6]
-                        ];
-                        
-                        newState.U[0] = cubeState.L[6];
-                        newState.U[1] = cubeState.L[3];
-                        newState.U[2] = cubeState.L[0];
-                        
-                        newState.R[2] = cubeState.U[0];
-                        newState.R[5] = cubeState.U[1];
-                        newState.R[8] = cubeState.U[2];
-                        
-                        newState.D[6] = cubeState.R[8];
-                        newState.D[7] = cubeState.R[5];
-                        newState.D[8] = cubeState.R[2];
-                        
-                        newState.L[0] = cubeState.D[6];
-                        newState.L[3] = cubeState.D[7];
-                        newState.L[6] = cubeState.D[8];
-                        break;
-                }
-                
-                cubeState = newState;
-                updateCubeColors();
-                
-                moveCount++;
-                moveCountElement.textContent = moveCount;
-                moveHistory.push(layer);
-                
-                if (moveCount === 1 && !startTime) {
-                    startTimer();
-                }
-                
-                cube.style.transition = 'transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
+                // 重置過渡
                 setTimeout(() => {
-                    cube.style.transition = 'transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)';
-                }, 300);
-            }
+                    faceElement.style.transition = '';
+                }, 50);
+            }, 400);
+        }
+        
+        // 打亂魔方
+        function scrambleCube() {
+            // 重置計時器
+            startTimer();
             
-            // Timer functions
-            function startTimer() {
-                if (timerInterval) clearInterval(timerInterval);
-                startTime = new Date();
+            // 清空歷史記錄
+            moveHistory = [];
+            moveCount = 0;
+            moveCountElement.textContent = moveCount;
+            
+            // 執行隨機打亂
+            rubiksCube.scramble(20);
+            
+            // 更新顯示
+            updateCubeVisual();
+            
+            // 顯示提示
+            showNotification('Cube scrambled! Ready to solve?', 'info');
+        }
+        
+        // 重置魔方
+        function resetCube() {
+            rubiksCube.reset();
+            moveHistory = [];
+            moveCount = 0;
+            moveCountElement.textContent = moveCount;
+            
+            updateCubeVisual();
+            
+            // 重置計時器
+            resetTimer();
+            
+            showNotification('Cube reset to solved state!', 'success');
+        }
+        
+        // 提示解法
+        function showHint() {
+            // 簡單的提示系統
+            const hints = [
+                "Try solving the white cross first",
+                "Look for edge pieces to complete the first layer",
+                "Remember: R U R' U' for the right algorithm",
+                "Check the corner orientations",
+                "Use F R U R' U' F' for edge orientation",
+                "Practice makes perfect! Keep trying!"
+            ];
+            
+            const randomHint = hints[Math.floor(Math.random() * hints.length)];
+            showNotification(`Hint: ${randomHint}`, 'hint');
+        }
+        
+        // 撤銷移動
+        function undoMove() {
+            if (moveHistory.length > 0) {
+                const previousState = moveHistory.pop();
+                rubiksCube.setState(previousState);
+                moveCount--;
+                moveCountElement.textContent = moveCount;
+                updateCubeVisual();
+                showNotification('Last move undone', 'info');
+            } else {
+                showNotification('No moves to undo', 'warning');
+            }
+        }
+        
+        // 檢查是否解決
+        function checkSolved() {
+            if (rubiksCube.isSolved()) {
+                // 如果解決了，顯示成功訊息
+                stopTimer();
+                showNotification('🎉 Congratulations! You solved the cube!', 'success');
+                
+                // 慶祝動畫
+                celebrate();
+                return true;
+            }
+            return false;
+        }
+        
+        // 慶祝動畫
+        function celebrate() {
+            const cubeElement = document.getElementById('cube');
+            
+            // 添加慶祝動畫
+            cubeElement.style.transition = 'transform 0.8s ease-in-out';
+            
+            // 旋轉動畫
+            let rotations = 0;
+            const spinInterval = setInterval(() => {
+                cubeRotationY += 180;
+                cubeElement.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
+                
+                rotations++;
+                if (rotations >= 4) {
+                    clearInterval(spinInterval);
+                }
+            }, 800);
+            
+            // 添加彩色閃爍效果
+            const stickers = document.querySelectorAll('.sticker');
+            stickers.forEach(sticker => {
+                sticker.style.transition = 'all 0.3s ease';
+                sticker.style.filter = 'brightness(1.5)';
+                
+                setTimeout(() => {
+                    sticker.style.filter = 'brightness(1)';
+                }, 300);
+            });
+        }
+        
+        // 顯示通知
+        function showNotification(message, type = 'info') {
+            // 創建通知元素
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'var(--green)' : 
+                            type === 'warning' ? 'var(--yellow)' : 
+                            type === 'hint' ? 'var(--blue)' : 'var(--medium-bg)'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                z-index: 1000;
+                transform: translateX(120%);
+                transition: transform 0.3s ease;
+                font-weight: 500;
+                max-width: 300px;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // 顯示動畫
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // 自動隱藏
+            setTimeout(() => {
+                notification.style.transform = 'translateX(120%)';
+                
+                // 移除元素
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // 計時器功能
+        function startTimer() {
+            if (!startTime) {
+                startTime = Date.now();
                 timerInterval = setInterval(updateTimer, 1000);
             }
+        }
+        
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+        
+        function resetTimer() {
+            stopTimer();
+            startTime = null;
+            timeCountElement.textContent = '00:00';
+        }
+        
+        function updateTimer() {
+            if (startTime) {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                timeCountElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+        
+        // 視角控制
+        function setView(view) {
+            const cubeElement = document.getElementById('cube');
+            cubeElement.style.transition = 'transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)';
             
-            function updateTimer() {
-                if (!startTime) {
-                    timeCountElement.textContent = '00:00';
-                    return;
-                }
-                
-                const now = new Date();
-                const diff = Math.floor((now - startTime) / 1000);
-                const minutes = Math.floor(diff / 60).toString().padStart(2, '0');
-                const seconds = (diff % 60).toString().padStart(2, '0');
-                
-                timeCountElement.textContent = `${minutes}:${seconds}`;
+            switch(view) {
+                case 'front':
+                    cubeRotationX = -10;
+                    cubeRotationY = 0;
+                    break;
+                case 'right':
+                    cubeRotationX = -10;
+                    cubeRotationY = -90;
+                    break;
+                case 'top':
+                    cubeRotationX = -80;
+                    cubeRotationY = -35;
+                    break;
+                case 'reset':
+                default:
+                    cubeRotationX = -20;
+                    cubeRotationY = -35;
+                    break;
             }
             
-            // Scramble the cube
-            function scrambleCube() {
-                cubeState = {
-                    'F': Array(9).fill('F'),
-                    'B': Array(9).fill('B'),
-                    'R': Array(9).fill('R'),
-                    'L': Array(9).fill('L'),
-                    'U': Array(9).fill('U'),
-                    'D': Array(9).fill('D')
-                };
-                
-                updateCubeColors();
-                
-                moveCount = 0;
-                moveCountElement.textContent = '0';
-                moveHistory = [];
-                
-                if (timerInterval) clearInterval(timerInterval);
-                startTime = null;
-                updateTimer();
-                
-                startTimer();
-                
-                const moves = ['U', "U'", 'F', "F'", 'R', "R'", 'L', "L'", 'D', "D'", 'B', "B'"];
-                
-                for (let i = 0; i < 20; i++) {
-                    const randomMove = moves[Math.floor(Math.random() * moves.length)];
-                    setTimeout(() => {
-                        rotateLayer(randomMove);
-                        moveCount--;
-                        moveCountElement.textContent = moveCount;
-                    }, i * 200);
-                }
-                
-                setTimeout(() => {
-                    moveCount = 20;
-                    moveCountElement.textContent = moveCount;
-                    document.getElementById('difficulty').textContent = 'Hard';
-                }, 20 * 200);
-            }
+            cubeElement.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
+        }
+        
+        // 中心視角
+        function centerView() {
+            const cubeElement = document.getElementById('cube');
+            cubeElement.style.transition = 'transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)';
+            cubeRotationX = -20;
+            cubeRotationY = -35;
+            cubeElement.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
+        }
+        
+        // 滑鼠/觸控拖拽旋轉
+        function initDragRotation() {
+            const cubeContainer = document.getElementById('cube-container');
             
-            // Reset the cube
-            function resetCube() {
-                cubeState = {
-                    'F': Array(9).fill('F'),
-                    'B': Array(9).fill('B'),
-                    'R': Array(9).fill('R'),
-                    'L': Array(9).fill('L'),
-                    'U': Array(9).fill('U'),
-                    'D': Array(9).fill('D')
-                };
-                
-                updateCubeColors();
-                
-                cubeRotationX = -25;
-                cubeRotationY = -40;
-                cube.style.transition = 'transform 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
-                cube.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
-                
-                moveCount = 0;
-                moveCountElement.textContent = '0';
-                
-                if (timerInterval) clearInterval(timerInterval);
-                startTime = null;
-                updateTimer();
-                
-                moveHistory = [];
-                
-                document.getElementById('difficulty').textContent = 'Medium';
-                
-                setTimeout(() => {
-                    cube.style.transition = 'transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)';
-                }, 1500);
-            }
+            // 滑鼠事件
+            cubeContainer.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
             
-            // Show solution hint
-            function showSolutionHint() {
-                alert(`Solution Guide:
-1. Make a white cross on the top
-2. Solve the white corners
-3. Solve the middle layer edges
-4. Make a yellow cross on top
-5. Position the yellow corners
-6. Orient the yellow corners
-7. Position the yellow edges
-
-Tip: Use the color legend to identify each face!`);
-            }
+            // 觸控事件
+            cubeContainer.addEventListener('touchstart', startDragTouch);
+            document.addEventListener('touchmove', dragTouch);
+            document.addEventListener('touchend', stopDrag);
             
-            // Undo last move
-            function undoMove() {
-                if (moveHistory.length === 0) return;
-                
-                const lastMove = moveHistory.pop();
-                let oppositeMove;
-                
-                switch(lastMove) {
-                    case 'U': oppositeMove = "U'"; break;
-                    case "U'": oppositeMove = 'U'; break;
-                    case 'F': oppositeMove = "F'"; break;
-                    case "F'": oppositeMove = 'F'; break;
-                    case 'R': oppositeMove = "R'"; break;
-                    case "R'": oppositeMove = 'R'; break;
-                    case 'L': oppositeMove = "L'"; break;
-                    case "L'": oppositeMove = 'L'; break;
-                    case 'D': oppositeMove = "D'"; break;
-                    case "D'": oppositeMove = 'D'; break;
-                    case 'B': oppositeMove = "B'"; break;
-                    case "B'": oppositeMove = 'B'; break;
-                    default: oppositeMove = lastMove;
-                }
-                
-                rotateLayer(oppositeMove);
-                
-                if (moveCount >= 2) {
-                    moveCount -= 2;
-                    moveCountElement.textContent = moveCount;
-                }
-            }
-            
-            // Set view angle
-            function setView(x, y) {
-                cubeRotationX = x;
-                cubeRotationY = y;
-                cube.style.transition = 'transform 1s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
-                cube.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
-                
-                setTimeout(() => {
-                    cube.style.transition = 'transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)';
-                }, 1000);
-            }
-            
-            // Handle drag rotation
             function startDrag(e) {
                 e.preventDefault();
                 isDragging = true;
-                
-                if (e.type.includes('touch')) {
+                startX = e.clientX;
+                startY = e.clientY;
+            }
+            
+            function startDragTouch(e) {
+                if (e.touches.length === 1) {
+                    e.preventDefault();
+                    isDragging = true;
                     startX = e.touches[0].clientX;
                     startY = e.touches[0].clientY;
-                } else {
-                    startX = e.clientX;
-                    startY = e.clientY;
-                }
-                
-                touchInstruction.style.opacity = '0';
-                
-                if (isTouchDevice) {
-                    document.addEventListener('touchmove', drag, { passive: false });
-                    document.addEventListener('touchend', stopDrag);
-                } else {
-                    document.addEventListener('mousemove', drag);
-                    document.addEventListener('mouseup', stopDrag);
                 }
             }
             
             function drag(e) {
                 if (!isDragging) return;
                 
-                let currentX, currentY;
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
                 
-                if (e.type.includes('touch')) {
-                    currentX = e.touches[0].clientX;
-                    currentY = e.touches[0].clientY;
-                } else {
-                    currentX = e.clientX;
-                    currentY = e.clientY;
-                }
+                cubeRotationY += deltaX * 0.5;
+                cubeRotationX -= deltaY * 0.5;
                 
-                const deltaX = currentX - startX;
-                const deltaY = currentY - startY;
+                // 限制垂直旋轉角度
+                cubeRotationX = Math.max(-89, Math.min(89, cubeRotationX));
                 
-                const speed = isMobile ? 0.5 : 0.7;
-                cubeRotationY += deltaX * speed;
-                cubeRotationX -= deltaY * speed;
-                
+                cube.style.transition = 'transform 0.1s linear';
                 cube.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
                 
-                startX = currentX;
-                startY = currentY;
+                startX = e.clientX;
+                startY = e.clientY;
+            }
+            
+            function dragTouch(e) {
+                if (!isDragging || e.touches.length !== 1) return;
+                
+                const deltaX = e.touches[0].clientX - startX;
+                const deltaY = e.touches[0].clientY - startY;
+                
+                cubeRotationY += deltaX * 0.5;
+                cubeRotationX -= deltaY * 0.5;
+                
+                // 限制垂直旋轉角度
+                cubeRotationX = Math.max(-89, Math.min(89, cubeRotationX));
+                
+                cube.style.transition = 'transform 0.1s linear';
+                cube.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
+                
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
             }
             
             function stopDrag() {
                 isDragging = false;
-                
-                if (isTouchDevice) {
-                    document.removeEventListener('touchmove', drag);
-                    document.removeEventListener('touchend', stopDrag);
-                } else {
-                    document.removeEventListener('mousemove', drag);
-                    document.removeEventListener('mouseup', stopDrag);
-                }
+                cube.style.transition = 'transform 0.3s cubic-bezier(0.23, 1, 0.32, 1)';
             }
+        }
+        
+        // 鍵盤控制
+        function initKeyboardControls() {
+            document.addEventListener('keydown', (e) => {
+                // 防止頁面滾動
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+                    e.preventDefault();
+                }
+                
+                const key = e.key.toLowerCase();
+                
+                // 魔方旋轉控制
+                if (['u', 'f', 'r', 'l', 'd', 'b'].includes(key)) {
+                    rotateFace(key.toUpperCase(), !e.shiftKey);
+                    startTimer();
+                }
+                
+                // 其他控制
+                switch(key) {
+                    case 's':
+                        scrambleCube();
+                        break;
+                    case 'r':
+                        if (e.ctrlKey) resetCube();
+                        break;
+                    case 'h':
+                        showHint();
+                        break;
+                    case 'z':
+                        if (e.ctrlKey) undoMove();
+                        break;
+                    case '1':
+                        setView('front');
+                        break;
+                    case '2':
+                        setView('right');
+                        break;
+                    case '3':
+                        setView('top');
+                        break;
+                    case '0':
+                        setView('reset');
+                        break;
+                    case ' ':
+                        centerView();
+                        break;
+                }
+            });
+        }
+        
+        // 事件監聽器
+        function initEventListeners() {
+            // 旋轉按鈕
+            rotationBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const rotation = btn.dataset.rotation;
+                    const face = rotation.replace("'", "");
+                    const clockwise = !rotation.includes("'");
+                    rotateFace(face, clockwise);
+                    startTimer();
+                });
+            });
             
-            // Initialize everything
-            initCube();
-            updateCubeColors();
-            
-            setTimeout(() => {
-                cubeLoading.style.display = 'none';
-                cube.style.opacity = '1';
-            }, 800);
-            
-            // Set up event listeners
+            // 控制按鈕
             scrambleBtn.addEventListener('click', scrambleCube);
             resetBtn.addEventListener('click', resetCube);
-            solveBtn.addEventListener('click', showSolutionHint);
+            solveBtn.addEventListener('click', showHint);
             undoBtn.addEventListener('click', undoMove);
             
-            // Rotation buttons
-            rotationBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const rotation = this.dataset.rotation;
-                    rotateLayer(rotation);
-                    
-                    if (isTouchDevice) {
-                        this.style.transform = 'scale(0.95)';
-                        setTimeout(() => {
-                            this.style.transform = '';
-                        }, 150);
-                    }
-                });
-            });
+            // 視角按鈕
+            viewFrontBtn.addEventListener('click', () => setView('front'));
+            viewRightBtn.addEventListener('click', () => setView('right'));
+            viewTopBtn.addEventListener('click', () => setView('top'));
+            viewResetBtn.addEventListener('click', () => setView('reset'));
+            centerViewBtn.addEventListener('click', centerView);
             
-            // View buttons
-            viewFrontBtn.addEventListener('click', () => setView(-25, 0));
-            viewRightBtn.addEventListener('click', () => setView(-25, -90));
-            viewTopBtn.addEventListener('click', () => setView(-70, -40));
-            viewResetBtn.addEventListener('click', () => setView(-25, -40));
-            centerViewBtn.addEventListener('click', () => setView(-25, -40));
-            
-            // Drag rotation
-            cubeContainer.addEventListener('mousedown', startDrag);
-            cubeContainer.addEventListener('touchstart', startDrag, { passive: false });
-            
-            // Hide touch instruction
-            setTimeout(() => {
-                touchInstruction.style.opacity = '0.7';
-                setTimeout(() => {
-                    touchInstruction.style.opacity = '0';
-                    setTimeout(() => {
-                        touchInstruction.style.display = 'none';
-                    }, 500);
-                }, 4000);
-            }, 2000);
-            
-            // Auto-scramble
-            setTimeout(scrambleCube, 2000);
-            
-            // Keyboard controls for desktop
-            document.addEventListener('keydown', function(e) {
-                // Don't trigger if user is typing in an input field
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                    return;
-                }
-                
-                const key = e.key.toUpperCase();
-                const shiftKey = e.shiftKey;
-                
-                // Prevent default for game control keys
-                if ('UFRDLBSHZ1230'.includes(key)) {
-                    e.preventDefault();
-                }
-                
-                // Cube layer rotations
-                if (key === 'U' || key === 'F' || key === 'R' || key === 'L' || key === 'D' || key === 'B') {
-                    const move = shiftKey ? `${key}'` : key;
-                    rotateLayer(move);
-                    
-                    // Visual feedback
-                    const btn = document.querySelector(`.rotation-btn[data-key="${shiftKey ? `Shift+${key}` : key}"]`);
-                    if (btn) {
-                        btn.style.transform = 'scale(0.95)';
-                        setTimeout(() => {
-                            btn.style.transform = '';
-                        }, 150);
-                    }
-                }
-                
-                // View controls
-                if (key === '1') {
-                    setView(-25, 0);
-                    viewFrontBtn.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        viewFrontBtn.style.transform = '';
-                    }, 150);
-                } else if (key === '2') {
-                    setView(-25, -90);
-                    viewRightBtn.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        viewRightBtn.style.transform = '';
-                    }, 150);
-                } else if (key === '3') {
-                    setView(-70, -40);
-                    viewTopBtn.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        viewTopBtn.style.transform = '';
-                    }, 150);
-                } else if (key === '0') {
-                    setView(-25, -40);
-                    viewResetBtn.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        viewResetBtn.style.transform = '';
-                    }, 150);
-                }
-                
-                // Action controls
-                if (key === 'S') {
-                    scrambleCube();
-                    scrambleBtn.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        scrambleBtn.style.transform = '';
-                    }, 150);
-                } else if (key === 'R') {
-                    resetCube();
-                    resetBtn.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        resetBtn.style.transform = '';
-                    }, 150);
-                } else if (key === 'H') {
-                    showSolutionHint();
-                    solveBtn.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        solveBtn.style.transform = '';
-                    }, 150);
-                } else if (key === 'Z') {
-                    undoMove();
-                    undoBtn.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        undoBtn.style.transform = '';
-                    }, 150);
-                }
-                
-                // Arrow keys for cube rotation (alternative to dragging)
-                if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    cubeRotationX -= 15;
-                    cube.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
-                } else if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    cubeRotationX += 15;
-                    cube.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
-                } else if (e.key === 'ArrowLeft') {
-                    e.preventDefault();
-                    cubeRotationY -= 15;
-                    cube.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
-                } else if (e.key === 'ArrowRight') {
-                    e.preventDefault();
-                    cubeRotationY += 15;
-                    cube.style.transform = `rotateX(${cubeRotationX}deg) rotateY(${cubeRotationY}deg)`;
-                }
-            });
-            
-            // Device-specific optimizations
-            if (isDesktop) {
-                // Desktop-specific adjustments
-                document.body.classList.add('desktop-device');
-                
-                // Change cursor for better UX
-                cubeContainer.style.cursor = 'grab';
-                
-                // Show keyboard shortcuts
-                document.querySelectorAll('.action-btn').forEach(btn => {
-                    const key = btn.getAttribute('data-key');
-                    if (key) {
-                        const shortcut = document.createElement('span');
-                        shortcut.className = 'keyboard-shortcut';
-                        shortcut.textContent = key;
-                        btn.appendChild(shortcut);
-                    }
-                });
+            // 初始化拖拽和鍵盤控制
+            initDragRotation();
+            if (!isTouchDevice) {
+                initKeyboardControls();
             }
+        }
+        
+        // 根據設備調整魔方大小
+        function adjustCubeSize() {
+            const cubeContainer = document.getElementById('cube-container');
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            if (isTablet && isPortrait) {
+                // 平板豎屏
+                cubeContainer.style.width = 'min(70vw, 400px)';
+                cubeContainer.style.height = 'min(70vw, 400px)';
+            } else if (isMobile && isPortrait) {
+                // 手機豎屏
+                cubeContainer.style.width = 'min(85vw, 320px)';
+                cubeContainer.style.height = 'min(85vw, 320px)';
+            } else if (isDesktop) {
+                // 桌面
+                cubeContainer.style.width = 'min(40vw, 450px)';
+                cubeContainer.style.height = 'min(40vw, 450px)';
+            } else {
+                // 橫屏模式
+                cubeContainer.style.width = 'min(70vh, 50vw)';
+                cubeContainer.style.height = 'min(70vh, 50vw)';
+            }
+        }
+        
+        // 窗口大小調整處理
+        window.addEventListener('resize', () => {
+            adjustCubeSize();
         });
+        
+        // 方向變化處理
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                adjustCubeSize();
+            }, 300);
+        });
+        
+        // 初始化應用
+        function initApp() {
+            adjustCubeSize();
+            initCube();
+            initEventListeners();
+            
+            // 顯示歡迎訊息
+            setTimeout(() => {
+                showNotification('Welcome to Shirley\'s Magic Cube! Drag to rotate, click buttons to play.', 'info');
+            }, 1000);
+        }
+        
+        // 啟動應用
+        initApp();
+    });
     </script>
 </body>
 </html>
