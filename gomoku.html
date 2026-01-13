@@ -1519,21 +1519,40 @@
         }
 
         // 事件監聽器 - 修復交叉點閃爍
-        canvas.addEventListener('mousemove', (e) => {
+// --- 核心修復：處理不同螢幕尺寸的座標縮放 (手機/平板/電腦通用) ---
+        function getScaledCoordinates(e) {
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            // 支援滑鼠(e.clientX) 與 觸控(e.touches)
+            const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+            const clientY = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : e.clientY;
             
-            // 計算最接近的網格交叉點
+            // 1. 取得點擊在「螢幕上」的視覺座標 (Visual)
+            const visualX = clientX - rect.left;
+            const visualY = clientY - rect.top;
+
+            // 2. 計算縮放比例 (Canvas內部解析度 600px / 實際顯示寬度)
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            // 3. 將視覺座標轉換為 Canvas 的「內部邏輯座標」 (Internal)
+            const internalX = visualX * scaleX;
+            const internalY = visualY * scaleY;
+
+            return { visualX, visualY, internalX, internalY, scaleX, scaleY };
+        }
+
+        // 尋找最近網格點的通用函式
+        function findClosestGrid(internalX, internalY) {
             let minDistance = Infinity;
             let closestCol = -1;
             let closestRow = -1;
-            
+
             for (let col = 0; col < config.BOARD_SIZE; col++) {
                 for (let row = 0; row < config.BOARD_SIZE; row++) {
+                    // 這裡用的是內部座標 (0~600)
                     const gridX = config.BOARD_PADDING + col * config.CELL_SIZE;
                     const gridY = config.BOARD_PADDING + row * config.CELL_SIZE;
-                    const distance = Math.sqrt(Math.pow(x - gridX, 2) + Math.pow(y - gridY, 2));
+                    const distance = Math.sqrt(Math.pow(internalX - gridX, 2) + Math.pow(internalY - gridY, 2));
                     
                     if (distance < minDistance) {
                         minDistance = distance;
@@ -1542,22 +1561,35 @@
                     }
                 }
             }
+            return { col: closestCol, row: closestRow };
+        }
+
+        // 1. 移動事件 (滑鼠移動 + 手指拖曳)
+        function handleInputMove(e) {
+            // 如果是手指在棋盤上拖曳，阻止網頁滾動，讓操作更順暢
+            if (e.type === 'touchmove') {
+                e.preventDefault(); 
+            }
+
+            const { internalX, internalY, scaleX, scaleY } = getScaledCoordinates(e);
+            const { col, row } = findClosestGrid(internalX, internalY);
             
-            // 更新座標預覽
-            if (closestCol >= 0 && closestRow >= 0) {
-                coordinatePreview.textContent = `${String.fromCharCode(65 + closestCol)}${closestRow + 1}`;
+            if (col >= 0 && row >= 0) {
+                coordinatePreview.textContent = `${String.fromCharCode(65 + col)}${row + 1}`;
                 coordinatePreview.style.display = 'block';
                 
-                // 計算交叉點像素位置
-                const gridX = config.BOARD_PADDING + closestCol * config.CELL_SIZE;
-                const gridY = config.BOARD_PADDING + closestRow * config.CELL_SIZE;
+                // 計算內部網格座標
+                const gridInternalX = config.BOARD_PADDING + col * config.CELL_SIZE;
+                const gridInternalY = config.BOARD_PADDING + row * config.CELL_SIZE;
                 
-                // 更新交叉點閃爍光點
-                if (config.gridPointEnabled && config.gameActive && !config.board[closestRow][closestCol]) {
-                  
-                   // 👇 修改這裡：加上 canvas.offsetLeft 和 canvas.offsetTop 來補償外層 padding
-                    gridPoint.style.left = `${canvas.offsetLeft + gridX}px`;
-                    gridPoint.style.top = `${canvas.offsetTop + gridY}px`;
+                if (config.gridPointEnabled && config.gameActive && !config.board[row][col]) {
+                    // ★ 關鍵修正：將內部座標「除以縮放比例」轉回螢幕顯示座標，給紅點定位用
+                    const visualGridX = gridInternalX / scaleX;
+                    const visualGridY = gridInternalY / scaleY;
+
+                    // 加上 canvas.offsetLeft 補償外層 padding
+                    gridPoint.style.left = `${canvas.offsetLeft + visualGridX}px`;
+                    gridPoint.style.top = `${canvas.offsetTop + visualGridY}px`;
                     
                     gridPoint.classList.remove('hidden');
                 } else {
@@ -1567,49 +1599,36 @@
                 coordinatePreview.style.display = 'none';
                 gridPoint.classList.add('hidden');
             }
-        });
+        }
 
-        canvas.addEventListener('click', (e) => {
+        // 2. 點擊/落子事件
+        function handleInputClick(e) {
             if (!config.gameActive) return;
             
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            // 這裡也必須使用縮放後的座標，不然落子會歪掉
+            const { internalX, internalY } = getScaledCoordinates(e);
+            const { col, row } = findClosestGrid(internalX, internalY);
             
-            // 計算最接近的網格交叉點
-            let minDistance = Infinity;
-            let closestCol = -1;
-            let closestRow = -1;
-            
-            for (let col = 0; col < config.BOARD_SIZE; col++) {
-                for (let row = 0; row < config.BOARD_SIZE; row++) {
-                    const gridX = config.BOARD_PADDING + col * config.CELL_SIZE;
-                    const gridY = config.BOARD_PADDING + row * config.CELL_SIZE;
-                    const distance = Math.sqrt(Math.pow(x - gridX, 2) + Math.pow(y - gridY, 2));
-                    
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        closestCol = col;
-                        closestRow = row;
-                    }
-                }
-            }
-            
-            if (closestCol >= 0 && closestRow >= 0) {
-                // 防止在 AI 回合時放置棋子
+            if (col >= 0 && row >= 0) {
+                // PVE 模式下輪到 AI 時不可點擊
                 if (config.gameMode === 'pve' && config.currentPlayer === 'white') return;
                 
-                // 點擊位置必須靠近交叉點（在20像素範圍內）
-                const gridX = config.BOARD_PADDING + closestCol * config.CELL_SIZE;
-                const gridY = config.BOARD_PADDING + closestRow * config.CELL_SIZE;
-                const clickDistance = Math.sqrt(Math.pow(x - gridX, 2) + Math.pow(y - gridY, 2));
+                const gridX = config.BOARD_PADDING + col * config.CELL_SIZE;
+                const gridY = config.BOARD_PADDING + row * config.CELL_SIZE;
+                
+                // 距離判定使用內部座標比較 (20px 是相對於原始 600px 大小的距離)
+                const clickDistance = Math.sqrt(Math.pow(internalX - gridX, 2) + Math.pow(internalY - gridY, 2));
                 
                 if (clickDistance <= 20) {
-                    placeStone(closestCol, closestRow);
+                    placeStone(col, row);
                 }
             }
-        });
+        }
 
+        // 綁定事件監聽器
+        canvas.addEventListener('mousemove', handleInputMove);
+        canvas.addEventListener('touchmove', handleInputMove, { passive: false }); // 新增：支援手機拖曳
+        canvas.addEventListener('click', handleInputClick);
         // 重新開始遊戲
         restartButton.addEventListener('click', () => {
             if (config.soundEnabled) {
