@@ -22,28 +22,61 @@
             padding: 12px 16px;
             color: #f0f8ff;
             touch-action: manipulation;
+            overflow: hidden;
         }
         
         .container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 22px;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
             padding: 24px;
             width: 100%;
             max-width: 780px;
             display: flex;
             gap: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
             overflow: hidden;
+            z-index: 10;
         }
         
+        /* 修改：當前時間顯示 - 移至右上並放大 */
+        .current-time-wrapper {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .current-time-label {
+            font-size: 0.7rem;
+            color: rgba(230, 216, 165, 0.6);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .current-time-display {
+            font-size: 2.2rem; /* 大幅增加字體大小 */
+            color: #e6d8a5;
+            letter-spacing: 2px;
+            font-weight: 300;
+            text-shadow: 0 0 15px rgba(230, 216, 165, 0.4);
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+
         .left-panel {
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            position: relative;
+            z-index: 2;
         }
         
         .right-panel {
@@ -51,61 +84,45 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            position: relative;
+            z-index: 2;
         }
         
+        /* 修改：月亮裝飾 - 移至左上以平衡畫面 */
         .moon-decoration {
             position: absolute;
-            top: 16px;
-            right: 16px;
+            top: 20px;
+            left: 20px; /* 改到左邊 */
             width: 56px;
             height: 56px;
             background: radial-gradient(circle at 30% 30%, #f9f3d7, #e6d8a5);
             border-radius: 50%;
-            box-shadow: 0 0 18px rgba(249, 243, 215, 0.5);
+            box-shadow: 0 0 25px rgba(249, 243, 215, 0.4);
             z-index: 1;
-        }
-        
-        .moon-decoration::before {
-            content: '';
-            position: absolute;
-            top: 14px;
-            left: 9px;
-            width: 14px;
-            height: 14px;
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
-        }
-        
-        .moon-decoration::after {
-            content: '';
-            position: absolute;
-            bottom: 18px;
-            right: 14px;
-            width: 9px;
-            height: 9px;
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
+            opacity: 0.8;
         }
         
         h1 {
             color: #e6d8a5;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+            margin-top: 30px; /* 增加頂部距離 */
             font-weight: 300;
-            font-size: 2.0rem;
-            letter-spacing: 1px;
-            text-shadow: 0 0 10px rgba(230, 216, 165, 0.5);
+            font-size: 2.2rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(230, 216, 165, 0.3);
             text-align: center;
         }
         
         .timer-display {
-            font-size: 3.8rem;
-            font-weight: 200;
-            color: #f0f8ff;
-            margin: 16px 0;
-            text-shadow: 0 0 15px rgba(240, 248, 255, 0.7);
-            letter-spacing: 3px;
+            font-size: 4.2rem;
+            font-weight: 100;
+            color: #ffffff;
+            margin: 10px 0;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+            letter-spacing: 4px;
             font-variant-numeric: tabular-nums;
             text-align: center;
+            line-height: 1;
         }
         
         .sandglass-container {
@@ -124,27 +141,29 @@
         .glass {
             width: 86px;
             height: 65px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 43px 43px 0 0;
             position: absolute;
             top: 0;
             overflow: hidden;
-            border: 2px solid rgba(230, 216, 165, 0.5);
+            border: 2px solid rgba(230, 216, 165, 0.4);
             border-bottom: none;
+            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
         }
         
         .glass.bottom {
             top: 65px;
             border-radius: 0 0 43px 43px;
             border-top: none;
-            border-bottom: 2px solid rgba(230, 216, 165, 0.5);
+            border-bottom: 2px solid rgba(230, 216, 165, 0.4);
         }
         
         .sand {
             position: absolute;
             width: 82px;
-            background: linear-gradient(to bottom, #e6d8a5, #b8a86d);
+            background: linear-gradient(to bottom, #e6d8a5, #cbb674);
             transition: height 1s linear;
+            box-shadow: 0 0 10px rgba(230, 216, 165, 0.4);
         }
         
         .sand.top {
@@ -162,156 +181,192 @@
         .neck {
             width: 20px;
             height: 20px;
-            background: rgba(230, 216, 165, 0.7);
+            background: rgba(230, 216, 165, 0.6);
             border-radius: 50%;
             position: absolute;
             top: 60px;
             left: 33px;
             z-index: 2;
+            box-shadow: 0 0 10px rgba(230, 216, 165, 0.4);
         }
         
         .time-buttons {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
             margin: 16px 0;
         }
         
         .time-btn {
-            background: rgba(230, 216, 165, 0.2);
-            border: 1px solid rgba(230, 216, 165, 0.3);
+            background: rgba(230, 216, 165, 0.15);
+            border: 1px solid rgba(230, 216, 165, 0.25);
             border-radius: 50px;
-            padding: 10px 18px;
-            font-size: 0.95rem;
+            padding: 12px 20px;
+            font-size: 0.9rem;
             color: #e6d8a5;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
-            min-width: 76px;
-            -webkit-user-select: none;
-            user-select: none;
-            touch-action: manipulation;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            min-width: 80px;
+            letter-spacing: 0.5px;
         }
         
         .time-btn:hover {
-            background: rgba(230, 216, 165, 0.3);
+            background: rgba(230, 216, 165, 0.25);
             transform: translateY(-2px);
-            box-shadow: 0 5px 8px rgba(0, 0, 0, 0.15);
-        }
-        
-        .time-btn:active {
-            transform: translateY(1px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            border-color: rgba(230, 216, 165, 0.5);
         }
         
         .custom-input {
             display: flex;
             justify-content: center;
-            margin: 12px 0;
+            margin: 16px 0;
         }
         
         .custom-input input {
             width: 130px;
-            padding: 10px 16px;
-            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(230, 216, 165, 0.3);
             border-radius: 50px 0 0 50px;
-            font-size: 0.95rem;
+            font-size: 1rem;
             text-align: center;
             outline: none;
             color: #f0f8ff;
+            transition: background 0.3s;
         }
         
-        .custom-input input::placeholder {
-            color: rgba(240, 248, 255, 0.6);
+        .custom-input input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(230, 216, 165, 0.6);
         }
         
         .custom-input button {
-            background: rgba(230, 216, 165, 0.3);
+            background: rgba(230, 216, 165, 0.25);
             color: #e6d8a5;
             border: 1px solid rgba(230, 216, 165, 0.3);
             border-left: none;
             border-radius: 0 50px 50px 0;
-            padding: 0 20px;
+            padding: 0 24px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
             font-size: 0.95rem;
+            letter-spacing: 0.5px;
         }
         
         .custom-input button:hover {
-            background: rgba(230, 216, 165, 0.4);
+            background: rgba(230, 216, 165, 0.35);
         }
         
         .control-buttons {
             display: flex;
             justify-content: center;
-            gap: 14px;
-            margin-top: 20px;
+            gap: 16px;
+            margin-top: 24px;
         }
         
         .control-btn {
-            padding: 12px 26px;
+            padding: 14px 32px;
             border: none;
             border-radius: 50px;
-            font-size: 1.05rem;
+            font-size: 1rem;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            font-weight: 600;
-            min-width: 110px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-weight: 500;
+            min-width: 120px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
         
         .start-btn {
-            background: linear-gradient(to right, #4a9, #5ba);
+            background: linear-gradient(135deg, rgba(74, 170, 153, 0.9), rgba(91, 187, 170, 0.9));
             color: white;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         
         .start-btn:hover {
-            background: linear-gradient(to right, #5ba, #6cb);
+            background: linear-gradient(135deg, rgba(91, 187, 170, 0.9), rgba(108, 203, 187, 0.9));
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 8px 20px rgba(74, 170, 153, 0.4);
         }
         
         .reset-btn {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
             color: #f0f8ff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
         
         .reset-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
         }
         
         .reset-btn:disabled {
-            background: rgba(255, 255, 255, 0.05);
-            color: rgba(240, 248, 255, 0.3);
+            opacity: 0.5;
             cursor: not-allowed;
             transform: none;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: none;
+        }
+        
+        /* 氣泡效果 */
+        .bubble {
+            position: absolute;
+            bottom: -20px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(230, 216, 165, 0.5), rgba(230, 216, 165, 0.1));
+            pointer-events: none;
+            z-index: 1;
+            animation: rise linear forwards;
+            box-shadow: 0 0 10px rgba(230, 216, 165, 0.2);
+        }
+
+        @keyframes rise {
+            0% {
+                bottom: -20px;
+                opacity: 0;
+                transform: translateX(0) scale(0.5);
+            }
+            10% {
+                opacity: 0.6;
+            }
+            50% {
+                transform: translateX(var(--sway)) scale(1);
+            }
+            100% {
+                bottom: 110%;
+                opacity: 0;
+                transform: translateX(calc(var(--sway) * -1)) scale(1.2);
+            }
         }
         
         .notification {
             position: fixed;
-            top: 20px;
+            top: 30px;
             left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(to right, #e6d8a5, #b8a86d);
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(230, 216, 165, 0.9);
             color: #0f2027;
-            padding: 16px 32px;
+            padding: 16px 40px;
             border-radius: 50px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             opacity: 0;
-            transition: opacity 0.4s;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 100;
-            font-weight: 600;
-            font-size: 1.05rem;
+            font-weight: 500;
+            font-size: 1.1rem;
             pointer-events: none;
+            backdrop-filter: blur(5px);
+            letter-spacing: 1px;
         }
         
         .notification.show {
             opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
         
         .stars {
@@ -332,136 +387,34 @@
         }
         
         @keyframes twinkle {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 1; }
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 0.8; transform: scale(1.2); }
         }
         
-        /* 响应式设计优化 */
+        /* 響應式調整 */
         @media (max-width: 768px) {
+            .current-time-wrapper {
+                position: static;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+            
+            .current-time-display {
+                font-size: 1.8rem;
+            }
+            
+            .moon-decoration {
+                display: none; /* 小螢幕隱藏裝飾以節省空間 */
+            }
+
             .container {
                 flex-direction: column;
                 max-width: 480px;
-                padding: 20px;
-                gap: 16px;
-            }
-            
-            .timer-display {
-                font-size: 3.3rem;
-                margin: 12px 0;
-            }
-            
-            .sandglass-container {
-                height: 110px;
-                margin: 12px auto;
-            }
-            
-            .sandglass {
-                width: 76px;
-                height: 110px;
-            }
-            
-            .glass, .glass.bottom {
-                width: 76px;
-                height: 55px;
-            }
-            
-            .sand.top, .sand.bottom {
-                width: 72px;
-            }
-            
-            .neck {
-                width: 18px;
-                height: 18px;
-                top: 52px;
-                left: 29px;
-            }
-            
-            .control-buttons {
-                gap: 12px;
-                margin-top: 16px;
-            }
-            
-            .control-btn {
-                padding: 10px 22px;
-                min-width: 100px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .container {
-                padding: 16px;
-                gap: 12px;
+                padding: 30px 20px;
             }
             
             h1 {
-                font-size: 1.8rem;
-                margin-bottom: 16px;
-            }
-            
-            .timer-display {
-                font-size: 2.8rem;
-            }
-            
-            .sandglass-container {
-                height: 90px;
-            }
-            
-            .sandglass {
-                width: 66px;
-                height: 90px;
-            }
-            
-            .glass, .glass.bottom {
-                width: 66px;
-                height: 45px;
-            }
-            
-            .sand.top, .sand.bottom {
-                width: 62px;
-            }
-            
-            .neck {
-                width: 16px;
-                height: 16px;
-                top: 42px;
-                left: 25px;
-            }
-            
-            .time-buttons {
-                gap: 8px;
-                margin: 12px 0;
-            }
-            
-            .time-btn {
-                padding: 8px 14px;
-                min-width: 70px;
-                font-size: 0.9rem;
-            }
-            
-            .custom-input input {
-                width: 110px;
-                padding: 8px 14px;
-            }
-            
-            .control-buttons {
-                gap: 10px;
-            }
-            
-            .control-btn {
-                padding: 10px 20px;
-                min-width: 90px;
-                font-size: 1rem;
-            }
-        }
-        
-        /* 触摸设备优化 */
-        @media (pointer: coarse) {
-            .time-btn,
-            .control-btn,
-            .custom-input button {
-                min-height: 48px;
-                padding-top: 14px;
-                padding-bottom: 14px;
+                margin-top: 10px;
             }
         }
     </style>
@@ -469,7 +422,12 @@
 <body>
     <div class="stars" id="stars"></div>
     
-    <div class="container">
+    <div class="container" id="mainContainer">
+        <div class="current-time-wrapper">
+            <span class="current-time-label">Current Time</span>
+            <div class="current-time-display" id="realTimeDisplay">--:--</div>
+        </div>
+        
         <div class="moon-decoration"></div>
         
         <div class="left-panel">
@@ -516,9 +474,9 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 创建星星背景
+            // 背景星星邏輯
             const starsContainer = document.getElementById('stars');
-            for (let i = 0; i < 35; i++) {
+            for (let i = 0; i < 40; i++) {
                 const star = document.createElement('div');
                 star.classList.add('star');
                 star.style.width = Math.random() * 2 + 1 + 'px';
@@ -529,8 +487,9 @@
                 starsContainer.appendChild(star);
             }
             
-            // 获取DOM元素
+            // DOM 元素獲取
             const timerDisplay = document.getElementById('timerDisplay');
+            const realTimeDisplay = document.getElementById('realTimeDisplay');
             const startBtn = document.getElementById('startBtn');
             const resetBtn = document.getElementById('resetBtn');
             const timeButtons = document.querySelectorAll('.time-btn');
@@ -539,17 +498,71 @@
             const topSand = document.getElementById('topSand');
             const bottomSand = document.getElementById('bottomSand');
             const notification = document.getElementById('notification');
+            const mainContainer = document.getElementById('mainContainer');
             
-            // 计时器状态变量
+            // 變數初始化
             let countdown = null;
             let totalSeconds = 0;
             let isRunning = false;
             let startTime = 0;
             let duration = 0;
             let audioContext = null;
-            let alarmSound = null;
+            let bubbleInterval = null;
 
-            // 设置时间
+            // 實時時鐘
+            function updateRealTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: true 
+                });
+                realTimeDisplay.textContent = timeString;
+            }
+            updateRealTime();
+            setInterval(updateRealTime, 1000);
+
+            // 氣泡特效
+            function createBubble() {
+                if (!isRunning) return;
+
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                
+                const size = Math.random() * 15 + 5 + 'px'; 
+                bubble.style.width = size;
+                bubble.style.height = size;
+                
+                bubble.style.left = Math.random() * 100 + '%';
+                
+                const animDuration = Math.random() * 4 + 3 + 's';
+                bubble.style.setProperty('--duration', animDuration);
+                bubble.style.animationDuration = animDuration;
+                
+                const sway = (Math.random() * 40 - 20) + 'px';
+                bubble.style.setProperty('--sway', sway);
+                
+                mainContainer.appendChild(bubble);
+                
+                setTimeout(() => {
+                    bubble.remove();
+                }, parseFloat(animDuration) * 1000);
+            }
+
+            function startBubbleEffect() {
+                if (bubbleInterval) clearInterval(bubbleInterval);
+                bubbleInterval = setInterval(createBubble, 400); 
+                createBubble();
+            }
+
+            function stopBubbleEffect() {
+                if (bubbleInterval) {
+                    clearInterval(bubbleInterval);
+                    bubbleInterval = null;
+                }
+            }
+
+            // 計時器邏輯
             function setTime(minutes) {
                 if (isRunning) return;
                 totalSeconds = minutes * 60;
@@ -560,7 +573,6 @@
                 resetBtn.disabled = true;
             }
 
-            // 更新显示
             function updateDisplay() {
                 const minutes = Math.floor(totalSeconds / 60);
                 const seconds = totalSeconds % 60;
@@ -568,7 +580,6 @@
                     `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
 
-            // 更新沙漏
             function updateSandglass(progress) {
                 const topHeight = 65 * (1 - progress);
                 const bottomHeight = 65 * progress;
@@ -576,7 +587,6 @@
                 bottomSand.style.height = `${bottomHeight}px`;
             }
 
-            // 开始计时
             function startTimer() {
                 if (totalSeconds <= 0) return;
                 isRunning = true;
@@ -586,9 +596,9 @@
                 duration = totalSeconds * 1000;
                 startTime = Date.now();
                 runCountdown();
+                startBubbleEffect();
             }
 
-            // 运行倒计时
             function runCountdown() {
                 countdown = setInterval(() => {
                     const elapsed = Date.now() - startTime;
@@ -606,23 +616,22 @@
                 }, 100);
             }
 
-            // 暂停计时
             function pauseTimer() {
                 clearInterval(countdown);
                 isRunning = false;
                 startBtn.textContent = 'Resume';
+                stopBubbleEffect();
             }
 
-            // 恢复计时
             function resumeTimer() {
                 isRunning = true;
                 startBtn.textContent = 'Pause';
                 const elapsed = Date.now() - (duration - totalSeconds * 1000);
                 startTime = Date.now() - (duration - totalSeconds * 1000 - elapsed);
                 runCountdown();
+                startBubbleEffect();
             }
 
-            // 切换计时器状态
             function toggleTimer() {
                 if (!isRunning) {
                     if (totalSeconds > 0 && totalSeconds < duration / 1000) {
@@ -635,14 +644,13 @@
                 }
             }
 
-            // 计时完成
             function timerComplete() {
                 isRunning = false;
                 startBtn.textContent = 'Start';
                 startBtn.disabled = true;
                 resetBtn.disabled = false;
+                stopBubbleEffect();
                 
-                // 同步显示通知和播放声音
                 notification.classList.add('show');
                 playAlarm();
                 
@@ -651,14 +659,11 @@
                 }, 4000);
             }
 
-            // 播放提醒声音
             function playAlarm() {
-                // 创建音频上下文（如果不存在）
                 if (!audioContext) {
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 }
                 
-                // 创建振荡器
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
                 
@@ -666,45 +671,36 @@
                 gainNode.connect(audioContext.destination);
                 
                 oscillator.type = 'sine';
-                oscillator.frequency.value = 800;
-                gainNode.gain.value = 0.3;
+                oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(440, audioContext.currentTime + 0.5);
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1.5);
                 
                 oscillator.start();
-                
-                // 添加淡出效果
-                setTimeout(() => {
-                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-                }, 300);
-                
-                // 停止振荡器
                 setTimeout(() => {
                     oscillator.stop();
-                }, 800);
+                }, 1500);
                 
-                // 语音提示
                 if (window.speechSynthesis) {
-                    // 取消任何正在进行的语音
                     window.speechSynthesis.cancel();
-                    
-                    // 创建新的语音
-                    const utterance = new SpeechSynthesisUtterance("Time's up");
+                    const utterance = new SpeechSynthesisUtterance("Time is up");
                     utterance.lang = 'en-US';
-                    utterance.volume = 1;
-                    utterance.rate = 1;
-                    utterance.pitch = 1;
-                    
-                    // 立即播放语音
+                    utterance.rate = 0.9;
                     speechSynthesis.speak(utterance);
                 }
             }
 
-            // 重置计时器
             function resetTimer() {
                 clearInterval(countdown);
                 isRunning = false;
                 totalSeconds = 0;
                 duration = 0;
                 startTime = 0;
+                stopBubbleEffect();
+                
+                document.querySelectorAll('.bubble').forEach(b => b.remove());
+                
                 updateDisplay();
                 updateSandglass(0);
                 startBtn.textContent = 'Start';
@@ -712,7 +708,7 @@
                 resetBtn.disabled = true;
             }
 
-            // 事件监听器
+            // 事件監聽
             startBtn.addEventListener('click', toggleTimer);
             resetBtn.addEventListener('click', resetTimer);
 
@@ -738,7 +734,6 @@
                 if (e.key === 'Enter') setCustomTimeBtn.click();
             });
 
-            // 防止双击缩放
             let lastTouchEnd = 0;
             document.addEventListener('touchend', function(e) {
                 const now = Date.now();
@@ -746,7 +741,6 @@
                 lastTouchEnd = now;
             }, { passive: false });
 
-            // 初始化显示
             updateDisplay();
         });
     </script>
