@@ -3,43 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>學生成績學術分析系統 - Shirley's Academic Edition</title>
+    <title>學生成績學術分析系統 - Matrix Edition (Max 5)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             /* 學術風配色 */
-            --primary-color: #1a365d; /* 深海軍藍 */
+            --primary-color: #1a365d; /* Navy Blue */
             --primary-light: #2c5282;
-            --accent-color: #c53030;  /* 學術紅 (用於強調) */
-            --accent-gold: #b7791f;   /* 榮譽金 (用於高分) */
-            --bg-color: #fdfbf7;      /* 象牙白/米色紙張質感 */
-            --text-main: #2d3748;     /* 深灰文字 */
+            --accent-color: #c53030;  /* Academic Red */
+            --accent-gold: #b7791f;   /* Honor Gold */
+            --bg-color: #fdfbf7;      /* Ivory Paper */
+            --text-main: #2d3748;
             --text-light: #718096;
             --border-color: #e2e8f0;
             --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             
-            /* 字體設定 */
             --font-serif: "Songti TC", "Noto Serif TC", "Georgia", "Times New Roman", serif;
             --font-sans: "Segoe UI", "Microsoft JhengHei", sans-serif;
         }
         
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
             line-height: 1.7;
-            font-family: var(--font-sans); /* 內文主要用無襯線體易讀 */
+            font-family: var(--font-sans);
             padding: clamp(10px, 2vw, 30px);
             min-height: 100vh;
         }
         
         h1, h2, h3, h4 {
-            font-family: var(--font-serif); /* 標題使用襯線體 */
+            font-family: var(--font-serif);
             color: var(--primary-color);
             font-weight: 700;
         }
@@ -48,7 +43,7 @@
             max-width: 1400px;
             margin: 0 auto;
             background-color: white;
-            border-radius: 4px; /* 較直角的邊緣 */
+            border-radius: 4px;
             box-shadow: var(--card-shadow);
             overflow: hidden;
             border: 1px solid rgba(0,0,0,0.05);
@@ -68,32 +63,16 @@
             position: absolute;
             bottom: -10px;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) rotate(45deg);
             width: 20px;
             height: 20px;
             background-color: var(--accent-gold);
-            transform: translateX(-50%) rotate(45deg);
         }
         
-        h1 {
-            color: white;
-            font-size: clamp(1.8rem, 4vw, 2.4rem);
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
+        h1 { color: white; margin-bottom: 10px; letter-spacing: 1px; }
+        .subtitle { font-family: var(--font-sans); opacity: 0.85; font-weight: 300; letter-spacing: 1px; }
         
-        .subtitle {
-            font-family: var(--font-sans);
-            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-            opacity: 0.85;
-            font-weight: 300;
-            letter-spacing: 1px;
-        }
-        
-        .content {
-            display: flex;
-            flex-wrap: wrap;
-        }
+        .content { display: flex; flex-wrap: wrap; }
         
         .input-section {
             flex: 1;
@@ -109,9 +88,7 @@
             padding: 30px;
         }
         
-        .form-group {
-            margin-bottom: 25px;
-        }
+        .form-group { margin-bottom: 25px; }
         
         label {
             display: block;
@@ -130,19 +107,15 @@
             font-size: 1rem;
             transition: all 0.3s;
             background-color: white;
-            font-family: 'Courier New', Courier, monospace; /* 輸入區使用等寬字體方便對齊 */
+            font-family: 'Courier New', Courier, monospace;
         }
+        
+        textarea { height: 300px; resize: vertical; white-space: pre; overflow-x: auto; }
         
         input:focus, select:focus, textarea:focus {
             border-color: var(--primary-color);
             outline: none;
             box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.1);
-        }
-        
-        textarea {
-            height: 180px;
-            resize: vertical;
-            line-height: 1.5;
         }
         
         button {
@@ -162,36 +135,17 @@
             text-transform: uppercase;
         }
         
-        button:hover {
-            background-color: var(--primary-light);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+        button:hover { background-color: var(--primary-light); transform: translateY(-1px); }
+        button:disabled { background-color: #cbd5e0; cursor: not-allowed; transform: none; }
         
-        button:disabled {
-            background-color: #cbd5e0;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 12px;
-        }
-        
-        .button-group button {
-            flex: 1;
-        }
-        
+        .button-group { display: flex; gap: 12px; }
+        .button-group button { flex: 1; }
         .secondary-button {
             background-color: white !important;
             color: var(--primary-color) !important;
             border: 1px solid var(--primary-color) !important;
         }
-        
-        .secondary-button:hover {
-            background-color: #edf2f7 !important;
-        }
+        .secondary-button:hover { background-color: #edf2f7 !important; }
         
         .chart-container {
             margin-top: 40px;
@@ -200,7 +154,6 @@
             background: white;
             padding: 15px;
             border: 1px solid var(--border-color);
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.01);
         }
         
         .analysis-section {
@@ -214,53 +167,34 @@
         .suggestion-section {
             margin-top: 30px;
             padding: 25px;
-            background-color: #fffbf0; /* 淡淡的米黃色 */
+            background-color: #fffbf0;
             border-left: 4px solid var(--accent-gold);
-            border-radius: 0 4px 4px 0;
         }
         
-        h2 {
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            font-size: 1.6rem;
+        h2 { border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px; font-size: 1.6rem; }
+        h3 { color: var(--primary-light); margin: 25px 0 15px; font-size: 1.3rem; }
+        
+        ul { padding-left: 20px; }
+        li { margin-bottom: 10px; color: #4a5568; }
+        
+        .hidden { display: none; }
+        
+        .input-example {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 8px;
+            font-style: italic;
+            background: #edf2f7;
+            padding: 10px;
+            border-radius: 4px;
         }
         
-        h3 {
-            color: var(--primary-light);
-            margin: 25px 0 15px;
-            font-size: 1.3rem;
+        .limit-warning {
+            color: var(--accent-color);
+            font-weight: bold;
+            font-style: normal;
         }
-        
-        ul {
-            padding-left: 20px;
-        }
-        
-        li {
-            margin-bottom: 10px;
-            color: #4a5568;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .student-list {
-            margin-top: 15px;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #e2e8f0;
-            padding: 0;
-        }
-        
-        .student-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 15px;
-            border-bottom: 1px solid #edf2f7;
-            font-size: 0.9rem;
-        }
-        
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -275,76 +209,9 @@
             text-align: center;
             transition: transform 0.2s;
         }
-        
-        .stat-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--primary-light);
-        }
-        
-        .stat-value {
-            font-family: var(--font-serif);
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin: 5px 0;
-            line-height: 1;
-        }
-        
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .input-example {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            margin-top: 8px;
-            font-style: italic;
-        }
-        
-        .exam-tabs {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-            flex-wrap: wrap;
-        }
-        
-        .exam-tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-            font-family: var(--font-serif);
-            color: var(--text-light);
-        }
-        
-        .exam-tab:hover {
-            color: var(--primary-color);
-            background-color: rgba(26, 54, 93, 0.05);
-        }
-        
-        .exam-tab.active {
-            border-bottom-color: var(--primary-color);
-            color: var(--primary-color);
-            font-weight: 700;
-            background-color: transparent;
-        }
-        
-        .exam-content {
-            display: none;
-            animation: fadeIn 0.3s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .exam-content.active {
-            display: block;
-        }
+        .stat-card:hover { transform: translateY(-3px); border-color: var(--primary-light); }
+        .stat-value { font-family: var(--font-serif); font-size: 2rem; font-weight: 700; color: var(--primary-color); margin: 5px 0; line-height: 1; }
+        .stat-label { font-size: 0.85rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; }
         
         .comparison-controls {
             display: flex;
@@ -358,63 +225,16 @@
             border-radius: 4px;
         }
         
-        .comparison-controls select {
-            flex: 1;
-            min-width: 150px;
-            border-color: #cbd5e0;
-        }
-        
-        .comparison-title {
-            width: 100%;
-            font-family: var(--font-serif);
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 10px;
-            display: block;
-        }
-        
-        .error-message {
-            color: var(--accent-color);
-            font-size: 0.85rem;
-            margin-top: 5px;
-            display: none;
-        }
-
-        /* 表格樣式優化 */
         .comparison-table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
             font-size: 0.95rem;
         }
+        .comparison-table th { background-color: var(--primary-color); color: white; padding: 12px; text-align: center; font-weight: 500; }
+        .comparison-table td { padding: 12px; text-align: center; border-bottom: 1px solid var(--border-color); }
+        .comparison-table tr:nth-child(even) { background-color: #f8fafc; }
         
-        .comparison-table th {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px;
-            text-align: center;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-        }
-        
-        .comparison-table td {
-            padding: 12px;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .comparison-table tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
-        
-        .comparison-table tr:hover {
-            background-color: #ebf4ff;
-        }
-        
-        .performance-better { color: #276749; font-weight: 600; }
-        .performance-worse { color: #c53030; font-weight: 600; }
-        .performance-same { color: var(--text-light); }
-
         .print-only { display: none; }
         
         @media print {
@@ -423,19 +243,14 @@
             .container { box-shadow: none; border: none; max-width: 100%; }
             .content { display: block; }
             .output-section { padding: 0; }
-            .analysis-section, .suggestion-section { 
-                page-break-inside: avoid; 
-                border: 1px solid #ddd;
-                box-shadow: none;
-            }
             body { background-color: white; }
             header { background: none; border-bottom: 2px solid black; color: black; padding: 10px 0; }
             header::after { display: none; }
-            h1 { color: black; font-size: 24pt; }
-            .chart-container { height: 300px !important; border: 1px solid #ccc; }
+            h1 { color: black; }
+            .chart-container { height: 300px !important; border: 1px solid #ccc; page-break-inside: avoid; }
+            .analysis-section, .suggestion-section { page-break-inside: avoid; border: 1px solid #ddd; }
         }
 
-        /* RWD Adjustments */
         @media (max-width: 1024px) {
             .content { flex-direction: column; }
             .input-section { border-right: none; border-bottom: 1px solid var(--border-color); }
@@ -445,8 +260,8 @@
 <body>
     <div class="container">
         <header class="no-print">
-            <h1>學生成績分析系統</h1>
-            <p class="subtitle">Multi-Assessment Academic Performance Analysis</p>
+            <h1>Shirley's 學生成績學術分析系統 (Multi Tests)</h1>
+            <p class="subtitle">Longitudinal Academic Performance Analysis</p>
         </header>
         
         <div class="content">
@@ -462,17 +277,18 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>考試數據輸入</label>
-                    <div class="exam-tabs" id="examTabs">
-                        <div class="exam-tab active" data-exam="1">Test 1</div>
-                        <div class="exam-tab" data-exam="2">Test 2</div>
-                        <div class="exam-tab" data-exam="3">Test 3</div>
-                        <div class="exam-tab" data-exam="4">Test 4</div>
-                        <div class="exam-tab" data-exam="5">Test 5</div>
+                    <label>成績數據矩陣輸入 (Matrix Input)</label>
+                    <textarea id="bulkInput" placeholder="直接從 Excel 複製貼上，最多支援 5 次成績，例如：
+姓名    第一次  第二次  第三次  第四次  第五次
+張三    85      90      88
+李四    92      85      96
+王五    78      82      80"></textarea>
+                    <div class="input-example">
+                        <strong>格式說明：</strong><br>
+                        第一欄：姓名<br>
+                        第二欄起：分數 (Test 1, Test 2...)<br>
+                        <span class="limit-warning">注意：本系統限制最多分析 5 次考試成績 (Max 5 Assessments)。</span>
                     </div>
-                    
-                    <div id="examInputsContainer">
-                        </div>
                 </div>
                 
                 <button id="generateBtn">生成分析報告</button>
@@ -481,31 +297,27 @@
                     <button id="printClassReport" class="secondary-button" disabled>列印班級報告</button>
                     <button id="printStudentReport" class="secondary-button" disabled>列印學生報告</button>
                 </div>
-                
-                <div class="student-list" id="studentList">
-                    </div>
             </div>
             
             <div class="output-section">
                 <div id="noDataMessage" style="text-align: center; padding: 40px; color: var(--text-light);">
                     <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 15px; color: var(--primary-light);">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="12" y1="18" x2="12" y2="12"></line>
-                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="3" y1="9" x2="21" y2="9"></line>
+                        <line x1="9" y1="21" x2="9" y2="9"></line>
                     </svg>
-                    <p>請於左側輸入班級資料與成績數據<br>直接從 Excel 複製貼上即可 (姓名 分數)</p>
+                    <p>請於左側貼上成績數據<br>支援 Excel 多欄直接複製 (姓名 + 最多5次成績)</p>
                 </div>
                 
                 <div id="chartsSection" class="hidden">
                     <div class="print-only">
                         <h1 id="printTitle" style="text-align: center; margin-bottom: 20px;">成績分析報告</h1>
-                        <div id="printHeader" style="margin-bottom: 30px;"></div>
+                        <div id="printHeader" style="margin-bottom: 30px; border-bottom: 1px solid black; padding-bottom: 10px;"></div>
                     </div>
                     
                     <div class="no-print">
                         <h2>成績趨勢視覺化 (Trend Analysis)</h2>
-                        <p style="color: var(--text-light); margin-bottom: 15px; font-size: 0.9rem;">此圖表顯示班級在所有已輸入考試中的整體表現趨勢。</p>
+                        <p style="color: var(--text-light); margin-bottom: 15px; font-size: 0.9rem;">顯示班級在所有已輸入考試中的整體表現趨勢。</p>
                         
                         <div class="chart-container">
                             <canvas id="progressChart"></canvas>
@@ -513,12 +325,11 @@
                         
                         <div class="analysis-section" style="margin-top: 30px; border-top: none; background: #f8fafc; border: 1px solid var(--border-color);">
                             <div class="comparison-controls">
-                                <span class="comparison-title">深度對比分析 (Comparative Study)</span>
-                                <label style="margin:0; font-size: 0.9rem; font-family: var(--font-sans);">基準：</label>
-                                <select id="exam1Select"></select>
-                                <label style="margin:0; font-size: 0.9rem; font-family: var(--font-sans);">對照：</label>
-                                <select id="exam2Select"></select>
-                                <button id="compareBtn" style="width: auto; margin: 0; padding: 8px 15px; font-size: 0.9rem;">執行比較</button>
+                                <span style="font-weight:bold; color:var(--primary-color);">深度對比 (Select to Compare)：</span>
+                                <select id="exam1Select" style="width: auto; flex:1;"></select>
+                                <span style="color:#718096">vs</span>
+                                <select id="exam2Select" style="width: auto; flex:1;"></select>
+                                <button id="compareBtn" style="width: auto; margin: 0; padding: 8px 15px;">執行分析</button>
                             </div>
                             <div class="chart-container" style="height: 300px; margin-top: 0; border: none; box-shadow: none;">
                                 <canvas id="comparisonChart"></canvas>
@@ -572,32 +383,10 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 初始化輸入框
-            const examInputsContainer = document.getElementById('examInputsContainer');
-            for (let i = 1; i <= 5; i++) {
-                const activeClass = i === 1 ? 'active' : '';
-                const placeholder = `直接從 Excel 貼上，例如：
-張三\t85
-李四\t92
-王五 78`;
-                
-                const div = document.createElement('div');
-                div.className = `exam-content ${activeClass}`;
-                div.id = `examContent${i}`;
-                div.innerHTML = `
-                    <label for="studentInfo${i}">第 ${i} 次考試成績 (姓名 分數)</label>
-                    <textarea id="studentInfo${i}" placeholder="${placeholder}"></textarea>
-                    <div class="input-example">支援 Tab 分隔或空格分隔，系統將自動解析。</div>
-                `;
-                examInputsContainer.appendChild(div);
-            }
-
             // 變數宣告
             const generateBtn = document.getElementById('generateBtn');
             const printClassReportBtn = document.getElementById('printClassReport');
             const printStudentReportBtn = document.getElementById('printStudentReport');
-            const examTabs = document.querySelectorAll('.exam-tab');
-            const examContents = document.querySelectorAll('.exam-content');
             const noDataMessage = document.getElementById('noDataMessage');
             const chartsSection = document.getElementById('chartsSection');
             const classReportContent = document.getElementById('classReportContent');
@@ -607,13 +396,12 @@
             const suggestionContent = document.getElementById('suggestionContent');
             const studentDetail = document.getElementById('studentDetail');
             const studentSelect = document.getElementById('studentSelect');
-            const studentSuggestionSection = document.getElementById('studentSuggestionSection');
             const studentSuggestionContent = document.getElementById('studentSuggestionContent');
             const compareBtn = document.getElementById('compareBtn');
             const exam1Select = document.getElementById('exam1Select');
             const exam2Select = document.getElementById('exam2Select');
             
-            let allExamData = {};
+            let allExamData = {}; // { 1: {name: 'Test 1', students: [...]}, ... }
             let progressChart = null;
             let comparisonChart = null;
             let printProgressChart = null;
@@ -621,42 +409,22 @@
             let currentSubject = '';
             let classAverages = {};
             
-            // Tab 切換邏輯
-            examTabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const examId = this.getAttribute('data-exam');
-                    examTabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    examContents.forEach(content => {
-                        content.classList.remove('active');
-                        if (content.id === `examContent${examId}`) content.classList.add('active');
-                    });
-                });
-            });
-            
             // 主要邏輯：生成報告
             generateBtn.addEventListener('click', function() {
                 currentClassName = document.getElementById('class').value.trim() || "未命名班級";
                 currentSubject = document.getElementById('subject').value.trim() || "綜合科目";
+                const bulkInput = document.getElementById('bulkInput').value;
                 
-                allExamData = {};
-                let hasData = false;
-                
-                for (let i = 1; i <= 5; i++) {
-                    const textarea = document.getElementById(`studentInfo${i}`);
-                    if (textarea && textarea.value.trim()) {
-                        const students = parseStudentData(textarea.value);
-                        if (students.length > 0) {
-                            allExamData[i] = { name: `第${i}次考試`, students: students };
-                            hasData = true;
-                        }
-                    }
-                }
-                
-                if (!hasData) {
-                    alert('請至少輸入一次考試的學生成績資訊！');
+                if (!bulkInput.trim()) {
+                    alert('請輸入成績數據！');
                     return;
                 }
+
+                // 解析數據
+                const parsedData = parseBulkData(bulkInput);
+                if (!parsedData) return; // 解析失敗
+
+                allExamData = parsedData;
                 
                 // UI 狀態更新
                 noDataMessage.classList.add('hidden');
@@ -678,38 +446,77 @@
                 // 更新列印資訊
                 document.getElementById('printTitle').textContent = `${currentClassName} ${currentSubject} 學術分析報告`;
                 document.getElementById('printHeader').innerHTML = `
-                    <p><strong>報告日期：</strong>${new Date().toLocaleDateString('zh-TW')}</p>
-                    <hr style="border-top: 1px solid #000;">
+                    <p><strong>報告日期：</strong>${new Date().toLocaleDateString('zh-TW')} &nbsp;|&nbsp; <strong>考試次數：</strong>${Object.keys(allExamData).length} 次</p>
                 `;
                 
                 // 預生成列印圖表
                 setTimeout(generatePrintChart, 500);
             });
 
-            // 智能解析函數 (支援 Excel Copy Paste)
-            function parseStudentData(input) {
-                const students = [];
+            // ★★★ 核心解析函數：處理矩陣輸入 ★★★
+            function parseBulkData(input) {
                 const lines = input.trim().split('\n');
-                
-                for (let line of lines) {
+                const tempExamData = {}; // { 1: [], 2: [], ... }
+                let maxExamsFound = 0;
+
+                // 第一遍掃描
+                lines.forEach((line, index) => {
                     line = line.trim();
-                    if (!line) continue;
+                    if (!line) return;
                     
-                    // 使用正則表達式分割：支援 Tab 或 多個空格
+                    // 支援 Tab 或 多空格 分隔
                     const parts = line.split(/[\t\s]+/);
                     
-                    if (parts.length >= 2) {
-                        // 假設最後一個部分是分數，前面的是名字（名字可能有空格）
-                        const scoreStr = parts.pop();
-                        const name = parts.join(' '); 
-                        const score = parseFloat(scoreStr);
-                        
-                        if (name && !isNaN(score)) {
-                            students.push({ name, score });
+                    let scores = [];
+                    let nameParts = [];
+                    
+                    // 從後往前遍歷找出分數
+                    for (let i = parts.length - 1; i >= 0; i--) {
+                        const val = parts[i];
+                        if (!isNaN(parseFloat(val)) && isFinite(val)) {
+                            scores.unshift(parseFloat(val));
+                        } else {
+                            nameParts = parts.slice(0, i + 1);
+                            break;
                         }
                     }
+                    
+                    if (nameParts.length === 0 && scores.length > 0) {
+                         const first = scores.shift(); 
+                         nameParts = [first.toString()];
+                    }
+
+                    // 修改點：強制限制最多5次
+                    if (scores.length > 5) {
+                        scores = scores.slice(0, 5);
+                    }
+
+                    if (scores.length > 0) {
+                        const name = nameParts.join(' ');
+                        if (scores.length > maxExamsFound) maxExamsFound = scores.length;
+                        
+                        scores.forEach((score, idx) => {
+                            const examId = idx + 1;
+                            if (!tempExamData[examId]) tempExamData[examId] = [];
+                            tempExamData[examId].push({ name, score });
+                        });
+                    }
+                });
+
+                if (maxExamsFound === 0) {
+                    alert("無法識別分數格式，請確認輸入格式為：姓名 分數1 分數2...");
+                    return null;
                 }
-                return students;
+
+                const result = {};
+                for (let i = 1; i <= maxExamsFound; i++) {
+                    result[i] = {
+                        name: `Test ${i}`,
+                        students: tempExamData[i] || []
+                    };
+                }
+                
+                return result;
             }
 
             function updateSelectors() {
@@ -728,7 +535,7 @@
                 // 考試比較選單
                 exam1Select.innerHTML = '';
                 exam2Select.innerHTML = '';
-                const examIds = Object.keys(allExamData).sort();
+                const examIds = Object.keys(allExamData).sort((a,b) => a-b);
                 
                 examIds.forEach(id => {
                     const opt1 = new Option(allExamData[id].name, id);
@@ -737,7 +544,6 @@
                     exam2Select.add(opt2);
                 });
 
-                // 預設選擇：比較第一次和最後一次（如果有多次）
                 if (examIds.length > 1) {
                     exam1Select.value = examIds[0];
                     exam2Select.value = examIds[examIds.length - 1];
@@ -755,10 +561,14 @@
                 const averages = [];
                 classAverages = {};
                 
-                Object.keys(allExamData).sort().forEach(id => {
+                const examIds = Object.keys(allExamData).sort((a,b) => a-b);
+                
+                examIds.forEach(id => {
                     const exam = allExamData[id];
                     labels.push(exam.name);
-                    const avg = exam.students.reduce((a, b) => a + b.score, 0) / exam.students.length;
+                    const avg = exam.students.length > 0 
+                        ? exam.students.reduce((a, b) => a + b.score, 0) / exam.students.length 
+                        : 0;
                     averages.push(avg);
                     classAverages[id] = avg;
                 });
@@ -772,11 +582,11 @@
                         datasets: [{
                             label: '班級平均分 (Class Average)',
                             data: averages,
-                            borderColor: '#1a365d', // Navy Blue
+                            borderColor: '#1a365d',
                             backgroundColor: 'rgba(26, 54, 93, 0.05)',
                             borderWidth: 3,
                             pointBackgroundColor: '#fff',
-                            pointBorderColor: '#c53030', // Accent Red points
+                            pointBorderColor: '#c53030',
                             pointBorderWidth: 2,
                             pointRadius: 6,
                             pointHoverRadius: 8,
@@ -788,25 +598,12 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: { font: { family: 'serif', size: 14 } }
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(26, 54, 93, 0.9)',
-                                titleFont: { family: 'serif', size: 14 },
-                                padding: 12
-                            }
+                            legend: { position: 'top', labels: { font: { family: 'serif', size: 14 } } },
+                            tooltip: { backgroundColor: 'rgba(26, 54, 93, 0.9)', titleFont: { family: 'serif' }, padding: 12 }
                         },
                         scales: {
-                            y: {
-                                beginAtZero: false,
-                                grid: { color: '#e2e8f0' },
-                                title: { display: true, text: '分數 Score' }
-                            },
-                            x: {
-                                grid: { display: false }
-                            }
+                            y: { beginAtZero: false, grid: { color: '#e2e8f0' }, title: { display: true, text: '分數 Score' } },
+                            x: { grid: { display: false } }
                         }
                     }
                 });
@@ -821,23 +618,19 @@
 
                 const ctx = document.getElementById('comparisonChart').getContext('2d');
                 
-                // 數據處理：找出兩次都有考的學生
                 const students1 = new Map(allExamData[id1].students.map(s => [s.name, s.score]));
                 const students2 = new Map(allExamData[id2].students.map(s => [s.name, s.score]));
                 
+                // 找出有第二次考試成績的學生進行比較
                 const names = [];
                 const scores1 = [];
                 const scores2 = [];
                 
-                // 取聯集或交集？這裡取聯集以便查看缺考情況，但為了圖表美觀，這裡只顯示共同學生或將缺考設為0
-                // 為了對比清晰，我們取共同名單並排序(按進步幅度)
                 const commonNames = [...students1.keys()].filter(n => students2.has(n));
-                
-                // 排序：進步最多的在左邊
                 commonNames.sort((a, b) => {
                     const diffA = students2.get(a) - students1.get(a);
                     const diffB = students2.get(b) - students1.get(b);
-                    return diffB - diffA;
+                    return diffB - diffA; // 進步多的在左邊
                 });
                 
                 commonNames.forEach(name => {
@@ -853,18 +646,8 @@
                     data: {
                         labels: names,
                         datasets: [
-                            {
-                                label: allExamData[id1].name,
-                                data: scores1,
-                                backgroundColor: '#cbd5e0', // Grey for baseline
-                                barPercentage: 0.6
-                            },
-                            {
-                                label: allExamData[id2].name,
-                                data: scores2,
-                                backgroundColor: '#1a365d', // Navy for new result
-                                barPercentage: 0.6
-                            }
+                            { label: allExamData[id1].name, data: scores1, backgroundColor: '#cbd5e0', barPercentage: 0.6 },
+                            { label: allExamData[id2].name, data: scores2, backgroundColor: '#1a365d', barPercentage: 0.6 }
                         ]
                     },
                     options: {
@@ -872,30 +655,30 @@
                         maintainAspectRatio: false,
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
-                            title: { display: true, text: '個別學生成績對照 (按進步幅度排序)' }
+                            title: { display: true, text: '個別學生成績對照 (Ranked by Improvement)' }
                         },
                         scales: {
                             y: { max: 100, grid: { color: '#f7fafc' } },
-                            x: { ticks: { maxRotation: 45, minRotation: 45 } }
+                            x: { ticks: { autoSkip: false, maxRotation: 90, minRotation: 45 } }
                         }
                     }
                 });
             }
 
             function generateProgressAnalysis() {
-                const examIds = Object.keys(allExamData).sort();
+                const examIds = Object.keys(allExamData).sort((a,b)=>a-b);
                 let html = '<div class="stats-grid">';
                 
-                // 計算關鍵指標
                 const latestId = examIds[examIds.length - 1];
                 const latestExam = allExamData[latestId];
+                if (!latestExam || latestExam.students.length === 0) return;
+
                 const scores = latestExam.students.map(s => s.score);
                 const avg = scores.reduce((a,b)=>a+b,0)/scores.length;
                 const max = Math.max(...scores);
                 const passRate = (scores.filter(s=>s>=60).length / scores.length * 100);
                 
-                // 趨勢判斷
-                let trendText = "數據不足以判斷趨勢";
+                let trendText = "數據不足";
                 if (examIds.length >= 2) {
                     const firstAvg = classAverages[examIds[0]];
                     const lastAvg = classAverages[latestId];
@@ -924,7 +707,6 @@
                     </div>
                 </div>`;
                 
-                // 詳細表格
                 html += `
                     <h3 style="margin-top:30px">歷次考試統計摘要</h3>
                     <table class="comparison-table">
@@ -933,7 +715,7 @@
                                 <th>考試場次</th>
                                 <th>平均分</th>
                                 <th>最高分</th>
-                                <th>標準差(估算)</th>
+                                <th>標準差(SD)</th>
                                 <th>及格率</th>
                             </tr>
                         </thead>
@@ -942,9 +724,10 @@
                 examIds.forEach(id => {
                     const e = allExamData[id];
                     const s = e.students.map(x=>x.score);
+                    if (s.length === 0) return;
+
                     const a = s.reduce((sum,v)=>sum+v,0)/s.length;
                     const m = Math.max(...s);
-                    // 簡易標準差
                     const variance = s.reduce((sum,v)=>sum+Math.pow(v-a,2),0)/s.length;
                     const stdDev = Math.sqrt(variance);
                     const pr = (s.filter(v=>v>=60).length/s.length*100);
@@ -964,9 +747,8 @@
             }
 
             function generateAllStudentsAnalysis() {
-                // 匯總所有學生數據
                 const studentMap = {};
-                Object.keys(allExamData).sort().forEach(examId => {
+                Object.keys(allExamData).sort((a,b)=>a-b).forEach(examId => {
                     allExamData[examId].students.forEach(s => {
                         if (!studentMap[s.name]) {
                             studentMap[s.name] = { name: s.name, scores: {}, count: 0, sum: 0 };
@@ -980,17 +762,18 @@
                 const students = Object.values(studentMap).map(s => {
                     s.avg = s.sum / s.count;
                     return s;
-                }).sort((a, b) => b.avg - a.avg); // 按平均分排序
+                }).sort((a, b) => b.avg - a.avg);
                 
                 let html = `
                     <h3>全體學生成績總表 (Ranked by Average)</h3>
+                    <div style="overflow-x:auto;">
                     <table class="comparison-table">
                         <thead>
                             <tr>
                                 <th>排名</th>
                                 <th>姓名</th>
                                 <th>平均分</th>
-                                ${Object.keys(allExamData).sort().map(id => `<th>${allExamData[id].name}</th>`).join('')}
+                                ${Object.keys(allExamData).sort((a,b)=>a-b).map(id => `<th>${allExamData[id].name}</th>`).join('')}
                             </tr>
                         </thead>
                         <tbody>`;
@@ -1001,14 +784,14 @@
                         <td>${idx + 1}</td>
                         <td style="text-align:left; padding-left:20px;">${s.name}</td>
                         <td>${s.avg.toFixed(1)}</td>
-                        ${Object.keys(allExamData).sort().map(id => {
+                        ${Object.keys(allExamData).sort((a,b)=>a-b).map(id => {
                             const sc = s.scores[id];
                             return `<td>${sc !== undefined ? sc : '-'}</td>`;
                         }).join('')}
                     </tr>`;
                 });
                 
-                html += `</tbody></table>`;
+                html += `</tbody></table></div>`;
                 allStudentsAnalysis.innerHTML = html;
             }
 
@@ -1025,7 +808,6 @@
             }
 
             function generateStudentSuggestion(name) {
-                // 這裡可以加入更複雜的邏輯判斷該學生的走勢
                 return `
                     <h3>${name} 個人學習診斷建議</h3>
                     <p>基於您的近期測驗數據分析，我們建議：</p>
@@ -1038,7 +820,6 @@
                 `;
             }
 
-            // 學生詳細視圖
             studentSelect.addEventListener('change', function() {
                 const name = this.value;
                 showStudentDetail(name);
@@ -1046,7 +827,7 @@
             });
 
             function showStudentDetail(name) {
-                const examIds = Object.keys(allExamData).sort();
+                const examIds = Object.keys(allExamData).sort((a,b)=>a-b);
                 const scores = [];
                 const labels = [];
                 
@@ -1056,6 +837,7 @@
                     const exam = allExamData[id];
                     const student = exam.students.find(s => s.name === name);
                     labels.push(exam.name);
+                    
                     if (student) {
                         scores.push(student.score);
                         const clsAvg = classAverages[id];
@@ -1079,13 +861,9 @@
                     }
                 });
                 html += `</div>`;
-                
-                // 學生個人趨勢圖
                 html += `<div style="height:250px; margin-top:20px;"><canvas id="studentCanvas"></canvas></div>`;
-                
                 studentDetail.innerHTML = html;
                 
-                // 繪製小圖
                 const ctx = document.getElementById('studentCanvas').getContext('2d');
                 new Chart(ctx, {
                     type: 'line',
@@ -1094,13 +872,13 @@
                         datasets: [{
                             label: '個人成績',
                             data: scores,
-                            borderColor: '#b7791f', // Gold
+                            borderColor: '#b7791f',
                             backgroundColor: 'rgba(183, 121, 31, 0.1)',
                             fill: true,
                             tension: 0.2
                         }, {
                             label: '班級均分',
-                            data: Object.values(classAverages),
+                            data: examIds.map(id => classAverages[id]),
                             borderColor: '#cbd5e0',
                             borderDash: [5, 5],
                             tension: 0.2,
@@ -1115,10 +893,8 @@
                 });
             }
             
-            // 比較按鈕
             compareBtn.addEventListener('click', updateComparisonChart);
             
-            // 列印報告邏輯
             printClassReportBtn.addEventListener('click', () => {
                 classReportContent.classList.remove('hidden');
                 studentReportContent.classList.add('hidden');
@@ -1129,20 +905,16 @@
                 if(!studentSelect.value) return alert('請先選擇學生');
                 classReportContent.classList.add('hidden');
                 studentReportContent.classList.remove('hidden');
-                
-                // 觸發一次更新確保內容正確
                 const event = new Event('change');
                 studentSelect.dispatchEvent(event);
-                
                 setTimeout(window.print, 300);
             });
 
             function generatePrintChart() {
                 if(printProgressChart) printProgressChart.destroy();
                 const ctx = document.getElementById('printProgressChart').getContext('2d');
-                // 複製主圖表的數據配置，但調整字體大小適合列印
-                const labels = Object.keys(allExamData).sort().map(id => allExamData[id].name);
-                const data = Object.keys(allExamData).sort().map(id => classAverages[id]);
+                const labels = Object.keys(allExamData).sort((a,b)=>a-b).map(id => allExamData[id].name);
+                const data = Object.keys(allExamData).sort((a,b)=>a-b).map(id => classAverages[id]);
                 
                 printProgressChart = new Chart(ctx, {
                     type: 'line',
@@ -1157,11 +929,7 @@
                             pointBackgroundColor: '#000'
                         }]
                     },
-                    options: {
-                        animation: false,
-                        responsive: false,
-                        maintainAspectRatio: false
-                    }
+                    options: { animation: false, responsive: false, maintainAspectRatio: false }
                 });
             }
         });
