@@ -2,746 +2,187 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0">
-    <title>Shirley's Ultimate Cube</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Playable Smooth Cube</title>
     <style>
         :root {
-            --primary-gold: #FFD700;
-            --dark-bg: #121212;
-            --panel-bg: rgba(30, 30, 30, 0.85);
-            --text-light: #f0f0f0;
-            
-            /* 魔方標準配色 */
-            --c-front: #FF3333;  /* 紅 */
-            --c-back: #FF8800;   /* 橙 (標準為橙，原版為青，這裡改為標準橙色以便區分) */
-            --c-right: #FFFF00;  /* 黃 */
-            --c-left: #ffffff;   /* 白 (標準配色調整) */
-            --c-top: #0055FF;    /* 藍 */
-            --c-bottom: #00AA55; /* 綠 */
-            
-            --cube-size: min(300px, 75vw);
+            --cube-size: 240px;
+            --cubie-size: 78px;
             --transition-speed: 0.3s;
         }
-
-        /* 核心重置，防止移動端滾動 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: none; /* 關鍵：禁止瀏覽器默認手勢 */
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        body {
-            background: radial-gradient(circle at center, #2a2a2a 0%, #000000 100%);
-            color: var(--text-light);
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* 頂部資訊欄 */
-        .header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 15px;
-            text-align: center;
-            z-index: 10;
-            pointer-events: none; /* 讓點擊穿透到背景 */
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            color: var(--primary-gold);
-            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
-            margin-bottom: 5px;
-            pointer-events: auto;
-        }
-
-        .stats-bar {
-            display: inline-flex;
-            gap: 15px;
-            background: rgba(0,0,0,0.5);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            backdrop-filter: blur(5px);
-            pointer-events: auto;
-        }
-
-        /* 3D 場景容器 */
-        .scene {
-            flex: 1;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            perspective: 1000px;
-            position: relative;
-            cursor: grab;
-        }
-
-        .scene:active {
-            cursor: grabbing;
-        }
-
-        /* 魔方本體 */
-        .cube {
-            width: var(--cube-size);
-            height: var(--cube-size);
-            position: relative;
-            transform-style: preserve-3d;
-            transform: rotateX(-30deg) rotateY(-45deg);
-            /* 移除過渡，通過 JS 控制以獲得更好性能 */
-        }
-
-        /* 魔方的面 */
-        .face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 4px; /* 魔塊間隙 */
-            padding: 4px;
-            background: black;
-            border-radius: 4px;
-            border: 2px solid #000;
-        }
-
-        /* 每個小色塊 */
-        .sticker {
-            border-radius: 3px;
-            background-color: #444; /* 默認色 */
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
-            position: relative;
-            /* 增加觸摸判定區域 */
-        }
+        body { background: #111; color: white; font-family: sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; align-items: center; }
+        .header { padding: 15px; text-align: center; }
+        .scene { flex: 1; width: 100%; perspective: 1200px; display: flex; justify-content: center; align-items: center; touch-action: none; }
+        .cube-wrapper { width: var(--cube-size); height: var(--cube-size); transform-style: preserve-3d; transform: rotateX(-30deg) rotateY(-45deg); }
+        .cubie { position: absolute; width: var(--cubie-size); height: var(--cubie-size); transform-style: preserve-3d; transition: transform var(--transition-speed) ease-out; }
+        .face { position: absolute; width: 100%; height: 100%; border: 3px solid black; border-radius: 6px; backface-visibility: hidden; cursor: pointer; }
         
-        .sticker::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 50%);
-            border-radius: 3px;
-        }
+        /* 配色 */
+        .face-F { background: #df0000; transform: rotateY(0deg) translateZ(39px); }
+        .face-B { background: #ff8000; transform: rotateY(180deg) translateZ(39px); }
+        .face-U { background: #0045ad; transform: rotateX(90deg) translateZ(39px); }
+        .face-D { background: #009b48; transform: rotateX(-90deg) translateZ(39px); }
+        .face-L { background: #ffffff; transform: rotateY(-90deg) translateZ(39px); }
+        .face-R { background: #ffd500; transform: rotateY(90deg) translateZ(39px); }
 
-        /* 面的位置定義 */
-        .face-F { transform: translateZ(calc(var(--cube-size) / 2)); }
-        .face-B { transform: rotateY(180deg) translateZ(calc(var(--cube-size) / 2)); }
-        .face-R { transform: rotateY(90deg) translateZ(calc(var(--cube-size) / 2)); }
-        .face-L { transform: rotateY(-90deg) translateZ(calc(var(--cube-size) / 2)); }
-        .face-U { transform: rotateX(90deg) translateZ(calc(var(--cube-size) / 2)); }
-        .face-D { transform: rotateX(-90deg) translateZ(calc(var(--cube-size) / 2)); }
-
-        /* 底部控制面板 */
-        .controls {
-            width: 100%;
-            padding: 20px;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 20;
-            margin-bottom: safe-area-inset-bottom;
-        }
-
-        .btn-row {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        button {
-            background: var(--panel-bg);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            backdrop-filter: blur(10px);
-        }
-
-        button:active {
-            transform: scale(0.95);
-            background: rgba(255, 215, 0, 0.2);
-        }
-
-        button i { color: var(--primary-gold); }
-
-        /* 提示覆蓋層 */
-        .notification {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.8);
-            background: rgba(0,0,0,0.85);
-            color: white;
-            padding: 20px 30px;
-            border-radius: 15px;
-            border: 1px solid var(--primary-gold);
-            text-align: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s;
-            z-index: 100;
-        }
-        
-        .notification.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        /* 幫助指引 */
-        .tutorial-hint {
-            position: absolute;
-            bottom: 100px;
-            width: 100%;
-            text-align: center;
-            color: rgba(255,255,255,0.6);
-            font-size: 0.9rem;
-            pointer-events: none;
-            animation: fadeOut 5s forwards 2s;
-        }
-
-        @keyframes fadeOut {
-            to { opacity: 0; }
-        }
-
-        /* 手機橫屏適配 */
-        @media (max-height: 500px) and (orientation: landscape) {
-            .cube { --cube-size: min(200px, 60vh); }
-            .header { padding: 5px; }
-            .controls { padding: 5px; }
-            h1 { display: none; }
-        }
+        .controls { padding: 20px; display: flex; gap: 10px; }
+        button { padding: 10px 20px; border-radius: 5px; border: none; background: #444; color: white; cursor: pointer; }
+        .hint { font-size: 12px; color: #888; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Shirley's Cube</h1>
-        <div class="stats-bar">
-            <span><i class="fas fa-shoe-prints"></i> <span id="move-count">0</span></span>
-            <span><i class="fas fa-stopwatch"></i> <span id="timer">00:00</span></span>
-        </div>
-    </div>
+<div class="header">
+    <h3>滑動方塊即可轉動！</h3>
+    <div class="hint">點擊背景旋轉視角 | 點擊方塊轉動魔方</div>
+</div>
 
-    <div class="scene" id="scene-container">
-        <div class="cube" id="cube">
-            </div>
-        <div class="tutorial-hint">
-            <i class="fas fa-hand-pointer"></i> Drag background to view • Swipe cube to rotate
-        </div>
-    </div>
+<div class="scene" id="scene">
+    <div class="cube-wrapper" id="cube"></div>
+</div>
 
-    <div class="controls">
-        <div class="btn-row">
-            <button onclick="game.scramble()"><i class="fas fa-random"></i> Scramble</button>
-            <button onclick="game.reset()"><i class="fas fa-undo"></i> Reset</button>
-            <button onclick="game.undo()"><i class="fas fa-arrow-left"></i> Undo</button>
-        </div>
-        <div class="btn-row" style="opacity: 0.6; transform: scale(0.8);">
-             <button onclick="game.toggleControls()" id="toggle-ctrl">Show Buttons</button>
-        </div>
-        <div class="btn-row" id="manual-controls" style="display: none;">
-            <button onclick="game.move('L')">L</button>
-            <button onclick="game.move('R')">R</button>
-            <button onclick="game.move('U')">U</button>
-            <button onclick="game.move('D')">D</button>
-            <button onclick="game.move('F')">F</button>
-            <button onclick="game.move('B')">B</button>
-        </div>
-    </div>
-
-    <div id="notification" class="notification">
-        <h3>Solved!</h3>
-        <p>Time: <span id="final-time"></span></p>
-    </div>
+<div class="controls">
+    <button onclick="cube.scramble()">隨機打亂</button>
+    <button onclick="cube.reset()">重置</button>
+</div>
 
 <script>
-/**
- * 核心遊戲邏輯
- * 優化重點：分離視角控制與魔方層旋轉，增加觸控慣性與Haptics
- */
-class CubeGame {
+class PlayableCube {
     constructor() {
-        this.cube = document.getElementById('cube');
-        this.scene = document.getElementById('scene-container');
+        this.wrapper = document.getElementById('cube');
+        this.cubies = [];
         this.isAnimating = false;
-        this.moveHistory = [];
-        
-        // 魔方狀態數據 (6面 x 9塊)
-        // 顏色代碼: F(紅), B(橙), R(黃), L(白), U(藍), D(綠) - 調整為標準競賽配色
-        this.state = {
-            F: Array(9).fill('F'),
-            B: Array(9).fill('B'),
-            R: Array(9).fill('R'),
-            L: Array(9).fill('L'),
-            U: Array(9).fill('U'),
-            D: Array(9).fill('D')
-        };
-
-        // 視角控制變量
-        this.view = { x: -30, y: -45 };
-        this.isDraggingView = false;
-        this.lastMouse = { x: 0, y: 0 };
-
-        // 觸控邏輯變量
-        this.touchStart = { x: 0, y: 0, target: null, time: 0 };
-        
-        // 顏色映射 CSS變量
-        this.colors = {
-            F: 'var(--c-front)',
-            B: 'var(--c-back)',
-            R: 'var(--c-right)',
-            L: 'var(--c-left)',
-            U: 'var(--c-top)',
-            D: 'var(--c-bottom)'
-        };
-
+        this.viewX = -30;
+        this.viewY = -45;
         this.init();
+        this.setupInteractions();
     }
 
     init() {
-        this.renderCube();
-        this.setupInputs();
-        this.startLoop();
-    }
-
-    // 渲染 DOM
-    renderCube() {
-        this.cube.innerHTML = '';
-        const faces = ['F', 'B', 'R', 'L', 'U', 'D'];
-        
-        faces.forEach(faceId => {
-            const faceEl = document.createElement('div');
-            faceEl.className = `face face-${faceId}`;
-            faceEl.dataset.face = faceId;
-
-            for (let i = 0; i < 9; i++) {
-                const sticker = document.createElement('div');
-                sticker.className = 'sticker';
-                sticker.dataset.index = i;
-                sticker.dataset.face = faceId;
-                // 設置顏色
-                const colorCode = this.state[faceId][i];
-                sticker.style.backgroundColor = this.colors[colorCode];
-                faceEl.appendChild(sticker);
-            }
-            this.cube.appendChild(faceEl);
-        });
-    }
-
-    // 更新現有 DOM 顏色 (比完全重繪更快)
-    updateColors() {
-        const stickers = document.querySelectorAll('.sticker');
-        stickers.forEach(s => {
-            const face = s.dataset.face;
-            const idx = parseInt(s.dataset.index);
-            const colorCode = this.state[face][idx];
-            s.style.backgroundColor = this.colors[colorCode];
-        });
-    }
-
-    // 輸入事件綁定
-    setupInputs() {
-        // 桌面鼠標
-        this.scene.addEventListener('mousedown', this.handleInputStart.bind(this));
-        document.addEventListener('mousemove', this.handleInputMove.bind(this));
-        document.addEventListener('mouseup', this.handleInputEnd.bind(this));
-
-        // 移動端觸控
-        this.scene.addEventListener('touchstart', this.handleInputStart.bind(this), {passive: false});
-        document.addEventListener('touchmove', this.handleInputMove.bind(this), {passive: false});
-        document.addEventListener('touchend', this.handleInputEnd.bind(this));
-    }
-
-    handleInputStart(e) {
-        // 阻止默認行為以防滾動
-        if(e.cancelable) e.preventDefault();
-
-        const input = e.touches ? e.touches[0] : e;
-        this.touchStart = {
-            x: input.clientX,
-            y: input.clientY,
-            target: e.target,
-            time: Date.now()
-        };
-
-        // 判斷是點擊了魔方塊(準備轉層) 還是 背景(準備轉視角)
-        if (e.target.classList.contains('sticker')) {
-            this.isDraggingView = false;
-        } else {
-            this.isDraggingView = true;
-            this.lastMouse = { x: input.clientX, y: input.clientY };
-        }
-    }
-
-    handleInputMove(e) {
-        if (!this.touchStart.time) return; // 沒按下
-
-        const input = e.touches ? e.touches[0] : e;
-        
-        if (this.isDraggingView) {
-            // 旋轉視角
-            const deltaX = input.clientX - this.lastMouse.x;
-            const deltaY = input.clientY - this.lastMouse.y;
-            
-            this.view.y += deltaX * 0.5;
-            this.view.x -= deltaY * 0.5;
-            // 限制 X 軸角度防止翻轉過頭
-            this.view.x = Math.max(-90, Math.min(90, this.view.x));
-            
-            this.lastMouse = { x: input.clientX, y: input.clientY };
-            this.applyView();
-        }
-    }
-
-    handleInputEnd(e) {
-        if (!this.touchStart.time) return;
-        const input = e.changedTouches ? e.changedTouches[0] : e;
-        const deltaX = input.clientX - this.touchStart.x;
-        const deltaY = input.clientY - this.touchStart.y;
-        const dist = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
-        const duration = Date.now() - this.touchStart.time;
-
-        // 如果不是轉視角，且滑動距離足夠，判斷為轉魔方層
-        if (!this.isDraggingView && dist > 30 && duration < 500) {
-            this.handleSwipe(this.touchStart.target, deltaX, deltaY);
-        }
-
-        this.touchStart = { x:0, y:0, target:null, time:0 };
-        this.isDraggingView = false;
-    }
-
-    // 🌟 核心：智慧滑動判斷
-    handleSwipe(target, dx, dy) {
-        if (this.isAnimating) return;
-
-        const face = target.dataset.face;
-        const idx = parseInt(target.dataset.index);
-        const row = Math.floor(idx / 3);
-        const col = idx % 3;
-        
-        // 判斷主方向
-        const isHorizontal = Math.abs(dx) > Math.abs(dy);
-        const dir = isHorizontal ? (dx > 0 ? 1 : -1) : (dy > 0 ? 1 : -1);
-
-        // 定義動作映射 (簡化版：基於標準視角)
-        // 這裡需要根據不同面的局部坐標系來決定轉動哪個層
-        let move = '';
-
-        // 邏輯矩陣：面 + 滑動方向 + 觸控位置 -> 旋轉指令
-        // 例如：在 F 面，橫向滑，若在第0行 -> U'，第2行 -> D
-        if (isHorizontal) {
-            // 橫向滑動
-            if (['F', 'B', 'L', 'R'].includes(face)) {
-                if (row === 0) move = (dir > 0) ? "U'" : "U"; // 上層
-                if (row === 2) move = (dir > 0) ? "D" : "D'"; // 下層
-                if (row === 1) { /* 中層暫不處理或轉整體Y */ } 
-            } else if (face === 'U') {
-                // 上面橫滑 -> 根據行轉動側邊 (S Slice effect or E)
-                // 簡化：在U面橫滑通常直觀感受是轉動頂層? 不，是轉動整個Y軸
-                // 為避免混淆，U面橫滑通常不做層旋轉，或者定義為轉動 UFace 本身 (即 U move)
-                // 這裡我們定義：手指在頂面做 "撥動" 動作 -> 觸發 U 旋轉
-                move = (dir > 0) ? "U'" : "U";
-            } else if (face === 'D') {
-                move = (dir > 0) ? "D" : "D'";
-            }
-        } else {
-            // 縱向滑動
-            if (['F', 'B'].includes(face)) {
-                if (col === 0) move = (dir > 0) ? "L'" : "L"; // 左列
-                if (col === 2) move = (dir > 0) ? "R" : "R'"; // 右列
-            } else if (['L', 'R'].includes(face)) {
-                // L/R 面的縱向滑動較複雜，因為它們的縱向對應 F/B 層的旋轉
-                if (face === 'L') {
-                    // 左面的縱向滑動 -> 轉動 F(前) 或 B(後) 
-                    // 這在手機上很難直觀對應。
-                    // 策略優化：如果滑動的是 L面的 "前" 列 -> F，"後" 列 -> B
-                    if (col === 2) move = (dir > 0) ? "F" : "F'"; // 靠近前的列
-                    if (col === 0) move = (dir > 0) ? "B'" : "B"; // 靠近後的列
-                } else { // R面
-                    if (col === 0) move = (dir > 0) ? "F" : "F'";
-                    if (col === 2) move = (dir > 0) ? "B'" : "B";
+        this.wrapper.innerHTML = '';
+        this.cubies = [];
+        for (let x = -1; x <= 1; x++) {
+            for (let y = -1; y <= 1; y++) {
+                for (let z = -1; z <= 1; z++) {
+                    const el = document.createElement('div');
+                    el.className = 'cubie';
+                    ['F','B','U','D','L','R'].forEach(f => {
+                        const face = document.createElement('div');
+                        face.className = `face face-${f}`;
+                        el.appendChild(face);
+                    });
+                    const cubieObj = { el, x, y, z, matrix: new DOMMatrix() };
+                    this.updateCSS(cubieObj);
+                    this.wrapper.appendChild(el);
+                    this.cubies.push(cubieObj);
                 }
-            } else if (['U', 'D'].includes(face)) {
-                if (col === 0) move = (dir > 0) ? "L'" : "L";
-                if (col === 2) move = (dir > 0) ? "R" : "R'";
             }
         }
-
-        if (move) this.move(move);
     }
 
-    // 應用視角變換
-    applyView() {
-        this.cube.style.transform = `rotateX(${this.view.x}deg) rotateY(${this.view.y}deg)`;
+    updateCSS(c) {
+        const offset = 81;
+        c.el.style.transform = `translate3d(${c.x*offset}px, ${c.y*offset}px, ${c.z*offset}px) ${c.matrix.toString()}`;
     }
 
-    // 執行旋轉動作
-    move(notation) {
+    rotateLayer(axis, layer, clockwise) {
         if (this.isAnimating) return;
         this.isAnimating = true;
+        const angle = clockwise ? 90 : -90;
+        const rotating = this.cubies.filter(c => Math.round(c[axis]) === layer);
 
-        // 1. 震動反饋 (僅手機)
-        if (navigator.vibrate) navigator.vibrate(10);
+        rotating.forEach(c => {
+            const m = new DOMMatrix();
+            if (axis === 'x') m.rotateSelf(angle, 0, 0);
+            if (axis === 'y') m.rotateSelf(0, -angle, 0);
+            if (axis === 'z') m.rotateSelf(0, 0, angle);
+            c.matrix = m.multiply(c.matrix);
 
-        // 2. 確定旋轉的面和方向
-        const faceChar = notation.charAt(0);
-        const isPrime = notation.includes("'");
-        const dir = isPrime ? -1 : 1;
-
-        // 3. 觸發 CSS 動畫
-        // 找到該面並旋轉它
-        const faceEl = document.querySelector(`.face-${faceChar}`);
-        
-        // 這裡做一個簡單的視覺騙術：
-        // 真正的魔方算法不轉動 DOM 面，而是交換顏色數據。
-        // 為了動畫，我們轉動 DOM，動畫結束後瞬間重置 DOM 並交換顏色。
-        
-        // 確定旋轉軸
-        let axis = 'Y';
-        if (['L', 'R'].includes(faceChar)) axis = 'X';
-        if (['F', 'B'].includes(faceChar)) axis = 'Z';
-        
-        // CSS變換
-        const currentTransform = getComputedStyle(faceEl).transform;
-        // 注意：這裡的動畫實現比較基礎，為了完美效果需要複雜的 DOM 分組 (Cubies)。
-        // 鑑於這是單文件輕量版，我們使用 "顏色瞬變" 模式，或者只更新數據。
-        // 為了保持流暢度，我們這裡直接更新數據，不做複雜的 3D 分組動畫 (那需要重構為 27 個獨立 div)。
-        // 如果要視覺旋轉，必須把整層的貼紙分組。
-        
-        // ** 優化決策 **：為了保證手機不卡頓，使用 "快速更新數據" 模式。
-        // 但為了給用戶反饋，我們會閃爍該面。
-        
-        this.calculateMove(faceChar, !isPrime);
-        this.updateColors();
-        this.moveHistory.push(notation);
-        this.updateStats();
-
-        // 動畫冷卻
-        setTimeout(() => {
-            this.isAnimating = false;
-        }, 150); // 150ms 非常快，感覺像實時
+            const ox = c.x, oy = c.y, oz = c.z;
+            if (axis === 'z') {
+                c.x = Math.round(ox * Math.cos(angle*Math.PI/180) - oy * Math.sin(angle*Math.PI/180));
+                c.y = Math.round(ox * Math.sin(angle*Math.PI/180) + oy * Math.cos(angle*Math.PI/180));
+            } else if (axis === 'x') {
+                c.y = Math.round(oy * Math.cos(angle*Math.PI/180) - oz * Math.sin(angle*Math.PI/180));
+                c.z = Math.round(oy * Math.sin(angle*Math.PI/180) + oz * Math.cos(angle*Math.PI/180));
+            } else if (axis === 'y') {
+                c.x = Math.round(ox * Math.cos(angle*Math.PI/180) + oz * Math.sin(angle*Math.PI/180));
+                c.z = Math.round(-ox * Math.sin(angle*Math.PI/180) + oz * Math.cos(angle*Math.PI/180));
+            }
+            this.updateCSS(c);
+        });
+        setTimeout(() => this.isAnimating = false, 310);
     }
 
-    // 數學邏輯：旋轉數組
-    calculateMove(face, clockwise) {
-        // 1. 旋轉面本身
-        this.rotateFaceArray(face, clockwise);
-        // 2. 旋轉相鄰邊
-        this.rotateAdjacent(face, clockwise);
-    }
-
-    rotateFaceArray(face, clockwise) {
-        const old = [...this.state[face]];
-        if (clockwise) {
-            this.state[face] = [old[6], old[3], old[0], old[7], old[4], old[1], old[8], old[5], old[2]];
+    handleSwipe(cubie, dx, dy) {
+        const adx = Math.abs(dx), ady = Math.abs(dy);
+        if (adx > ady) {
+            // 橫向滑動 -> 轉動 Y 軸層 (U, E, D)
+            this.rotateLayer('y', cubie.y, dx > 0);
         } else {
-            this.state[face] = [old[2], old[5], old[8], old[1], old[4], old[7], old[0], old[3], old[6]];
+            // 縱向滑動 -> 根據位置轉動 X 或 Z 軸層
+            // 這裡做一個簡單判定：點擊側邊轉 X，點擊正面轉 Z
+            if (Math.abs(this.viewY % 180) < 45) {
+                this.rotateLayer('x', cubie.x, dy > 0);
+            } else {
+                this.rotateLayer('z', cubie.z, dy > 0);
+            }
         }
     }
 
-    rotateAdjacent(face, cw) {
-        // 這是最繁瑣的部分，定義鄰接關係
-        const s = this.state;
-        let temp;
-        
-        if (face === 'U') {
-            if (cw) {
-                temp = [s.F[0], s.F[1], s.F[2]];
-                [s.F[0],s.F[1],s.F[2]] = [s.R[0],s.R[1],s.R[2]];
-                [s.R[0],s.R[1],s.R[2]] = [s.B[0],s.B[1],s.B[2]];
-                [s.B[0],s.B[1],s.B[2]] = [s.L[0],s.L[1],s.L[2]];
-                [s.L[0],s.L[1],s.L[2]] = temp;
+    setupInteractions() {
+        let isDragView = false, isDragCube = false;
+        let sx, sy, target;
+
+        const start = (e) => {
+            const p = e.touches ? e.touches[0] : e;
+            sx = p.pageX; sy = p.pageY;
+            if (e.target.classList.contains('face')) {
+                isDragCube = true;
+                target = this.cubies.find(c => c.el === e.target.parentElement);
             } else {
-                temp = [s.F[0], s.F[1], s.F[2]];
-                [s.F[0],s.F[1],s.F[2]] = [s.L[0],s.L[1],s.L[2]];
-                [s.L[0],s.L[1],s.L[2]] = [s.B[0],s.B[1],s.B[2]];
-                [s.B[0],s.B[1],s.B[2]] = [s.R[0],s.R[1],s.R[2]];
-                [s.R[0],s.R[1],s.R[2]] = temp;
+                isDragView = true;
             }
-        }
-        else if (face === 'D') {
-            if (cw) {
-                temp = [s.F[6], s.F[7], s.F[8]];
-                [s.F[6],s.F[7],s.F[8]] = [s.L[6],s.L[7],s.L[8]];
-                [s.L[6],s.L[7],s.L[8]] = [s.B[6],s.B[7],s.B[8]];
-                [s.B[6],s.B[7],s.B[8]] = [s.R[6],s.R[7],s.R[8]];
-                [s.R[6],s.R[7],s.R[8]] = temp;
-            } else {
-                temp = [s.F[6], s.F[7], s.F[8]];
-                [s.F[6],s.F[7],s.F[8]] = [s.R[6],s.R[7],s.R[8]];
-                [s.R[6],s.R[7],s.R[8]] = [s.B[6],s.B[7],s.B[8]];
-                [s.B[6],s.B[7],s.B[8]] = [s.L[6],s.L[7],s.L[8]];
-                [s.L[6],s.L[7],s.L[8]] = temp;
+        };
+
+        const move = (e) => {
+            if (!isDragView) return;
+            const p = e.touches ? e.touches[0] : e;
+            this.viewY += (p.pageX - sx) * 0.5;
+            this.viewX -= (p.pageY - sy) * 0.5;
+            this.wrapper.style.transform = `rotateX(${this.viewX}deg) rotateY(${this.viewY}deg)`;
+            sx = p.pageX; sy = p.pageY;
+        };
+
+        const end = (e) => {
+            if (isDragCube && target) {
+                const p = e.changedTouches ? e.changedTouches[0] : e;
+                this.handleSwipe(target, p.pageX - sx, p.pageY - sy);
             }
-        }
-        else if (face === 'F') {
-            if (cw) {
-                temp = [s.U[6], s.U[7], s.U[8]];
-                [s.U[6],s.U[7],s.U[8]] = [s.L[8],s.L[5],s.L[2]];
-                [s.L[2],s.L[5],s.L[8]] = [s.D[0],s.D[1],s.D[2]];
-                [s.D[0],s.D[1],s.D[2]] = [s.R[6],s.R[3],s.R[0]];
-                [s.R[0],s.R[3],s.R[6]] = temp;
-            } else {
-                temp = [s.U[6], s.U[7], s.U[8]];
-                [s.U[6],s.U[7],s.U[8]] = [s.R[0],s.R[3],s.R[6]];
-                [s.R[0],s.R[3],s.R[6]] = [s.D[2],s.D[1],s.D[0]];
-                [s.D[0],s.D[1],s.D[2]] = [s.L[2],s.L[5],s.L[8]];
-                [s.L[2],s.L[5],s.L[8]] = temp;
-            }
-        }
-        else if (face === 'B') {
-            if (cw) {
-                temp = [s.U[0], s.U[1], s.U[2]];
-                [s.U[0],s.U[1],s.U[2]] = [s.R[2],s.R[5],s.R[8]];
-                [s.R[2],s.R[5],s.R[8]] = [s.D[8],s.D[7],s.D[6]];
-                [s.D[6],s.D[7],s.D[8]] = [s.L[6],s.L[3],s.L[0]];
-                [s.L[0],s.L[3],s.L[6]] = temp;
-            } else {
-                temp = [s.U[0], s.U[1], s.U[2]];
-                [s.U[0],s.U[1],s.U[2]] = [s.L[6],s.L[3],s.L[0]];
-                [s.L[0],s.L[3],s.L[6]] = [s.D[6],s.D[7],s.D[8]];
-                [s.D[6],s.D[7],s.D[8]] = [s.R[8],s.R[5],s.R[2]];
-                [s.R[2],s.R[5],s.R[8]] = temp;
-            }
-        }
-        else if (face === 'L') {
-            if (cw) {
-                temp = [s.U[0], s.U[3], s.U[6]];
-                [s.U[0],s.U[3],s.U[6]] = [s.B[8],s.B[5],s.B[2]];
-                [s.B[2],s.B[5],s.B[8]] = [s.D[0],s.D[3],s.D[6]];
-                [s.D[0],s.D[3],s.D[6]] = [s.F[0],s.F[3],s.F[6]];
-                [s.F[0],s.F[3],s.F[6]] = temp;
-            } else {
-                temp = [s.U[0], s.U[3], s.U[6]];
-                [s.U[0],s.U[3],s.U[6]] = [s.F[0],s.F[3],s.F[6]];
-                [s.F[0],s.F[3],s.F[6]] = [s.D[0],s.D[3],s.D[6]];
-                [s.D[0],s.D[3],s.D[6]] = [s.B[8],s.B[5],s.B[2]];
-                [s.B[2],s.B[5],s.B[8]] = temp;
-            }
-        }
-        else if (face === 'R') {
-            if (cw) {
-                temp = [s.U[2], s.U[5], s.U[8]];
-                [s.U[2],s.U[5],s.U[8]] = [s.F[2],s.F[5],s.F[8]];
-                [s.F[2],s.F[5],s.F[8]] = [s.D[2],s.D[5],s.D[8]];
-                [s.D[2],s.D[5],s.D[8]] = [s.B[6],s.B[3],s.B[0]];
-                [s.B[0],s.B[3],s.B[6]] = temp;
-            } else {
-                temp = [s.U[2], s.U[5], s.U[8]];
-                [s.U[2],s.U[5],s.U[8]] = [s.B[6],s.B[3],s.B[0]];
-                [s.B[0],s.B[3],s.B[6]] = [s.D[2],s.D[5],s.D[8]];
-                [s.D[2],s.D[5],s.D[8]] = [s.F[2],s.F[5],s.F[8]];
-                [s.F[2],s.F[5],s.F[8]] = temp;
-            }
-        }
+            isDragView = isDragCube = false;
+        };
+
+        const s = document.getElementById('scene');
+        s.addEventListener('mousedown', start);
+        window.addEventListener('mousemove', move);
+        window.addEventListener('mouseup', end);
+        s.addEventListener('touchstart', start);
+        window.addEventListener('touchmove', move);
+        window.addEventListener('touchend', end);
     }
 
     scramble() {
-        if(this.isAnimating) return;
-        const moves = ['U','D','F','B','L','R'];
-        let count = 0;
-        this.resetStats();
-        
-        const interval = setInterval(() => {
-            const m = moves[Math.floor(Math.random()*moves.length)];
-            const suffix = Math.random() > 0.5 ? "'" : "";
-            this.move(m + suffix);
-            count++;
-            if(count > 20) {
-                clearInterval(interval);
-                this.moveHistory = []; // Scramble doesn't count as history for undo
-                this.updateStats(); // reset count
-                document.getElementById('move-count').innerText = "0";
-                this.startTime = null; // Reset timer
-            }
-        }, 50);
+        let c = 0;
+        const t = setInterval(() => {
+            this.rotateLayer(['x','y','z'][Math.floor(Math.random()*3)], [-1,0,1][Math.floor(Math.random()*3)], Math.random()>0.5);
+            if (++c > 10) clearInterval(t);
+        }, 350);
     }
 
-    reset() {
-        this.state = {
-            F: Array(9).fill('F'),
-            B: Array(9).fill('B'),
-            R: Array(9).fill('R'),
-            L: Array(9).fill('L'),
-            U: Array(9).fill('U'),
-            D: Array(9).fill('D')
-        };
-        this.updateColors();
-        this.view = { x: -30, y: -45 };
-        this.applyView();
-        this.resetStats();
-    }
-
-    undo() {
-        if (this.moveHistory.length === 0 || this.isAnimating) return;
-        const lastMove = this.moveHistory.pop();
-        // Reverse move: U -> U', U' -> U
-        let reverseMove = lastMove.includes("'") ? lastMove.replace("'", "") : lastMove + "'";
-        
-        // Execute directly without adding to history
-        this.calculateMove(reverseMove.charAt(0), !reverseMove.includes("'"));
-        this.updateColors();
-    }
-
-    // 統計與計時
-    updateStats() {
-        const countEl = document.getElementById('move-count');
-        countEl.innerText = this.moveHistory.length;
-        
-        if (!this.startTime && this.moveHistory.length > 0) {
-            this.startTime = Date.now();
-            this.timerInterval = setInterval(() => {
-                const delta = Math.floor((Date.now() - this.startTime) / 1000);
-                const m = Math.floor(delta / 60).toString().padStart(2, '0');
-                const s = (delta % 60).toString().padStart(2, '0');
-                document.getElementById('timer').innerText = `${m}:${s}`;
-            }, 1000);
-        }
-    }
-
-    resetStats() {
-        this.moveHistory = [];
-        document.getElementById('move-count').innerText = "0";
-        document.getElementById('timer').innerText = "00:00";
-        if (this.timerInterval) clearInterval(this.timerInterval);
-        this.startTime = null;
-    }
-
-    toggleControls() {
-        const el = document.getElementById('manual-controls');
-        el.style.display = el.style.display === 'none' ? 'flex' : 'none';
-        document.getElementById('toggle-ctrl').innerText = el.style.display === 'none' ? 'Show Buttons' : 'Hide Buttons';
-    }
-
-    startLoop() {
-        // Animation loop if needed for physics, currently handled by CSS/Events
-    }
+    reset() { this.init(); this.wrapper.style.transform = `rotateX(-30deg) rotateY(-45deg)`; }
 }
 
-// 啟動遊戲
-const game = new CubeGame();
-
+const cube = new PlayableCube();
 </script>
 </body>
 </html>
