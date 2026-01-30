@@ -2,56 +2,133 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Playable Smooth Cube</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Smooth Cube</title>
     <style>
         :root {
-            --cube-size: 240px;
-            --cubie-size: 78px;
-            --transition-speed: 0.3s;
+            /* 根據螢幕大小自動調整魔方尺寸 */
+            --cube-size: min(220px, 50vw);
+            --cubie-size: calc(var(--cube-size) / 3);
+            --offset: calc(var(--cubie-size) + 1px);
         }
-        body { background: #111; color: white; font-family: sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; align-items: center; }
-        .header { padding: 15px; text-align: center; }
-        .scene { flex: 1; width: 100%; perspective: 1200px; display: flex; justify-content: center; align-items: center; touch-action: none; }
-        .cube-wrapper { width: var(--cube-size); height: var(--cube-size); transform-style: preserve-3d; transform: rotateX(-30deg) rotateY(-45deg); }
-        .cubie { position: absolute; width: var(--cubie-size); height: var(--cubie-size); transform-style: preserve-3d; transition: transform var(--transition-speed) ease-out; }
-        .face { position: absolute; width: 100%; height: 100%; border: 3px solid black; border-radius: 6px; backface-visibility: hidden; cursor: pointer; }
-        
-        /* 配色 */
-        .face-F { background: #df0000; transform: rotateY(0deg) translateZ(39px); }
-        .face-B { background: #ff8000; transform: rotateY(180deg) translateZ(39px); }
-        .face-U { background: #0045ad; transform: rotateX(90deg) translateZ(39px); }
-        .face-D { background: #009b48; transform: rotateX(-90deg) translateZ(39px); }
-        .face-L { background: #ffffff; transform: rotateY(-90deg) translateZ(39px); }
-        .face-R { background: #ffd500; transform: rotateY(90deg) translateZ(39px); }
 
-        .controls { padding: 20px; display: flex; gap: 10px; }
-        button { padding: 10px 20px; border-radius: 5px; border: none; background: #444; color: white; cursor: pointer; }
-        .hint { font-size: 12px; color: #888; margin-top: 10px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body { 
+            background: #111; 
+            color: white; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden; /* 防止整個網頁晃動 */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 頂部控制區，確保在手機上絕對看得到 */
+        .top-bar {
+            padding-top: env(safe-area-inset-top);
+            background: rgba(40, 40, 40, 0.8);
+            padding: 15px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .stats { color: #FFD700; font-family: monospace; font-weight: bold; }
+
+        /* 中間遊戲區 */
+        .scene { 
+            flex: 1; 
+            width: 100%; 
+            perspective: 1000px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            touch-action: none; /* 禁用預設手勢 */
+        }
+
+        .cube-wrapper { 
+            width: var(--cube-size); 
+            height: var(--cube-size); 
+            transform-style: preserve-3d; 
+            transform: rotateX(-30deg) rotateY(-45deg); 
+            transition: transform 0.1s linear;
+        }
+
+        .cubie { 
+            position: absolute; 
+            width: var(--cubie-size); 
+            height: var(--cubie-size); 
+            transform-style: preserve-3d; 
+            transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); 
+        }
+
+        .face { 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            border: 2px solid black; 
+            border-radius: 4px; 
+            backface-visibility: hidden; 
+        }
+        
+        /* 半徑偏移量需動態計算 */
+        .face-F { background: #df0000; transform: rotateY(0deg) translateZ(calc(var(--cubie-size)/2)); }
+        .face-B { background: #ff8000; transform: rotateY(180deg) translateZ(calc(var(--cubie-size)/2)); }
+        .face-U { background: #0045ad; transform: rotateX(90deg) translateZ(calc(var(--cubie-size)/2)); }
+        .face-D { background: #009b48; transform: rotateX(-90deg) translateZ(calc(var(--cubie-size)/2)); }
+        .face-L { background: #ffffff; transform: rotateY(-90deg) translateZ(calc(var(--cubie-size)/2)); }
+        .face-R { background: #ffd500; transform: rotateY(90deg) translateZ(calc(var(--cubie-size)/2)); }
+
+        /* 底部操作區 */
+        .bottom-bar {
+            padding-bottom: env(safe-area-inset-bottom);
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        }
+
+        button { 
+            padding: 12px 20px; 
+            border-radius: 25px; 
+            border: none; 
+            background: #FFD700; 
+            color: black; 
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:active { transform: scale(0.95); opacity: 0.8; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h3>滑動方塊即可轉動！</h3>
-    <div class="hint">點擊背景旋轉視角 | 點擊方塊轉動魔方</div>
+<div class="top-bar">
+    <div class="stats">MOVES: <span id="count">0</span></div>
+    <button onclick="cube.scramble()">隨機打亂</button>
+    <button onclick="cube.reset()">重置</button>
 </div>
 
 <div class="scene" id="scene">
     <div class="cube-wrapper" id="cube"></div>
 </div>
 
-<div class="controls">
-    <button onclick="cube.scramble()">隨機打亂</button>
-    <button onclick="cube.reset()">重置</button>
+<div class="bottom-bar">
+    <p style="font-size: 12px; opacity: 0.6;">滑動背景轉視角 / 滑動魔方轉層</p>
 </div>
 
 <script>
-class PlayableCube {
+class MobileCube {
     constructor() {
         this.wrapper = document.getElementById('cube');
         this.cubies = [];
         this.isAnimating = false;
+        this.moves = 0;
         this.viewX = -30;
         this.viewY = -45;
         this.init();
@@ -61,6 +138,8 @@ class PlayableCube {
     init() {
         this.wrapper.innerHTML = '';
         this.cubies = [];
+        this.moves = 0;
+        document.getElementById('count').innerText = "0";
         for (let x = -1; x <= 1; x++) {
             for (let y = -1; y <= 1; y++) {
                 for (let z = -1; z <= 1; z++) {
@@ -81,8 +160,9 @@ class PlayableCube {
     }
 
     updateCSS(c) {
-        const offset = 81;
-        c.el.style.transform = `translate3d(${c.x*offset}px, ${c.y*offset}px, ${c.z*offset}px) ${c.matrix.toString()}`;
+        // 使用 getComputedStyle 確保動態讀取 CSS 變數中的長度
+        const size = document.body.clientWidth < 500 ? (window.innerWidth * 0.5 / 3) + 1 : 81;
+        c.el.style.transform = `translate3d(${c.x*size}px, ${c.y*size}px, ${c.z*size}px) ${c.matrix.toString()}`;
     }
 
     rotateLayer(axis, layer, clockwise) {
@@ -111,18 +191,18 @@ class PlayableCube {
             }
             this.updateCSS(c);
         });
-        setTimeout(() => this.isAnimating = false, 310);
+        this.moves++;
+        document.getElementById('count').innerText = this.moves;
+        setTimeout(() => this.isAnimating = false, 300);
     }
 
     handleSwipe(cubie, dx, dy) {
         const adx = Math.abs(dx), ady = Math.abs(dy);
         if (adx > ady) {
-            // 橫向滑動 -> 轉動 Y 軸層 (U, E, D)
             this.rotateLayer('y', cubie.y, dx > 0);
         } else {
-            // 縱向滑動 -> 根據位置轉動 X 或 Z 軸層
-            // 這裡做一個簡單判定：點擊側邊轉 X，點擊正面轉 Z
-            if (Math.abs(this.viewY % 180) < 45) {
+            // 手機端簡單邏輯：點擊位置靠近左右轉 X，中間轉 Z
+            if (Math.abs(cubie.x) > 0) {
                 this.rotateLayer('x', cubie.x, dy > 0);
             } else {
                 this.rotateLayer('z', cubie.z, dy > 0);
@@ -148,8 +228,8 @@ class PlayableCube {
         const move = (e) => {
             if (!isDragView) return;
             const p = e.touches ? e.touches[0] : e;
-            this.viewY += (p.pageX - sx) * 0.5;
-            this.viewX -= (p.pageY - sy) * 0.5;
+            this.viewY += (p.pageX - sx) * 0.7;
+            this.viewX -= (p.pageY - sy) * 0.7;
             this.wrapper.style.transform = `rotateX(${this.viewX}deg) rotateY(${this.viewY}deg)`;
             sx = p.pageX; sy = p.pageY;
         };
@@ -163,26 +243,29 @@ class PlayableCube {
         };
 
         const s = document.getElementById('scene');
+        s.addEventListener('touchstart', start, {passive: false});
+        window.addEventListener('touchmove', move, {passive: false});
+        window.addEventListener('touchend', end);
         s.addEventListener('mousedown', start);
         window.addEventListener('mousemove', move);
         window.addEventListener('mouseup', end);
-        s.addEventListener('touchstart', start);
-        window.addEventListener('touchmove', move);
-        window.addEventListener('touchend', end);
     }
 
     scramble() {
         let c = 0;
         const t = setInterval(() => {
             this.rotateLayer(['x','y','z'][Math.floor(Math.random()*3)], [-1,0,1][Math.floor(Math.random()*3)], Math.random()>0.5);
-            if (++c > 10) clearInterval(t);
-        }, 350);
+            if (++c > 15) {
+                clearInterval(t);
+                this.moves = 0; document.getElementById('count').innerText = "0";
+            }
+        }, 320);
     }
 
     reset() { this.init(); this.wrapper.style.transform = `rotateX(-30deg) rotateY(-45deg)`; }
 }
 
-const cube = new PlayableCube();
+const cube = new MobileCube();
 </script>
 </body>
 </html>
