@@ -3,143 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile Smooth Cube</title>
+    <title>Ultimate Smooth Cube v2.0</title>
     <style>
         :root {
-            /* 根據螢幕大小自動調整魔方尺寸 */
-            --cube-size: min(220px, 50vw);
+            --cube-size: min(260px, 60vw);
             --cubie-size: calc(var(--cube-size) / 3);
-            --offset: calc(var(--cubie-size) + 1px);
+            --gap: 1px;
+            --speed: 0.3s;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
-            background: #111; 
-            color: white; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            overflow: hidden; /* 防止整個網頁晃動 */
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
+            background: radial-gradient(circle at center, #222, #000); 
+            color: #fff; font-family: sans-serif; overflow: hidden; height: 100vh;
+            display: flex; flex-direction: column;
         }
 
-        /* 頂部控制區，確保在手機上絕對看得到 */
-        .top-bar {
-            padding-top: env(safe-area-inset-top);
-            background: rgba(40, 40, 40, 0.8);
-            padding: 15px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 100;
+        /* 頂部 UI */
+        .header {
+            padding: env(safe-area-inset-top) 20px 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.5); z-index: 10;
         }
+        .moves { font-family: monospace; color: #FFD700; font-size: 1.2rem; }
 
-        .stats { color: #FFD700; font-family: monospace; font-weight: bold; }
-
-        /* 中間遊戲區 */
+        /* 3D 遊戲區 */
         .scene { 
-            flex: 1; 
-            width: 100%; 
-            perspective: 1000px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            touch-action: none; /* 禁用預設手勢 */
+            flex: 1; width: 100%; perspective: 1200px; 
+            display: flex; justify-content: center; align-items: center; 
+            touch-action: none; 
         }
-
         .cube-wrapper { 
-            width: var(--cube-size); 
-            height: var(--cube-size); 
+            width: var(--cube-size); height: var(--cube-size); 
             transform-style: preserve-3d; 
-            transform: rotateX(-30deg) rotateY(-45deg); 
-            transition: transform 0.1s linear;
+            transform: rotateX(-30deg) rotateY(-45deg);
         }
 
+        /* 方塊實體 */
         .cubie { 
-            position: absolute; 
-            width: var(--cubie-size); 
-            height: var(--cubie-size); 
+            position: absolute; width: var(--cubie-size); height: var(--cubie-size); 
             transform-style: preserve-3d; 
-            transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); 
+            transition: transform var(--speed) cubic-bezier(0.25, 1, 0.5, 1);
         }
-
         .face { 
-            position: absolute; 
-            width: 100%; 
-            height: 100%; 
-            border: 2px solid black; 
-            border-radius: 4px; 
-            backface-visibility: hidden; 
-        }
-        
-        /* 半徑偏移量需動態計算 */
-        .face-F { background: #df0000; transform: rotateY(0deg) translateZ(calc(var(--cubie-size)/2)); }
-        .face-B { background: #ff8000; transform: rotateY(180deg) translateZ(calc(var(--cubie-size)/2)); }
-        .face-U { background: #0045ad; transform: rotateX(90deg) translateZ(calc(var(--cubie-size)/2)); }
-        .face-D { background: #009b48; transform: rotateX(-90deg) translateZ(calc(var(--cubie-size)/2)); }
-        .face-L { background: #ffffff; transform: rotateY(-90deg) translateZ(calc(var(--cubie-size)/2)); }
-        .face-R { background: #ffd500; transform: rotateY(90deg) translateZ(calc(var(--cubie-size)/2)); }
-
-        /* 底部操作區 */
-        .bottom-bar {
-            padding-bottom: env(safe-area-inset-bottom);
-            padding: 20px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            position: absolute; width: 100%; height: 100%; 
+            border: calc(var(--cubie-size) * 0.08) solid #000; 
+            border-radius: 12%; backface-visibility: hidden; 
         }
 
-        button { 
-            padding: 12px 20px; 
-            border-radius: 25px; 
-            border: none; 
-            background: #FFD700; 
-            color: black; 
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-        }
+        /* 國際標準配色 */
+        .f-F { background: #d50000; transform: rotateY(0deg)   translateZ(calc(var(--cubie-size)/2)); }
+        .f-B { background: #ff6d00; transform: rotateY(180deg) translateZ(calc(var(--cubie-size)/2)); }
+        .f-U { background: #0091ea; transform: rotateX(90deg)  translateZ(calc(var(--cubie-size)/2)); }
+        .f-D { background: #00c853; transform: rotateX(-90deg) translateZ(calc(var(--cubie-size)/2)); }
+        .f-L { background: #ffffff; transform: rotateY(-90deg) translateZ(calc(var(--cubie-size)/2)); }
+        .f-R { background: #ffd600; transform: rotateY(90deg)  translateZ(calc(var(--cubie-size)/2)); }
 
-        button:active { transform: scale(0.95); opacity: 0.8; }
+        /* 底部按鈕 */
+        .footer {
+            padding: 10px 10px calc(env(safe-area-inset-bottom) + 20px);
+            display: flex; gap: 15px; justify-content: center; z-index: 10;
+        }
+        button {
+            padding: 12px 25px; border: none; border-radius: 50px;
+            background: #FFD700; color: #000; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255,215,0,0.3); cursor: pointer;
+        }
+        button:active { transform: scale(0.9); }
+        .hint { position: absolute; bottom: 85px; font-size: 12px; opacity: 0.5; width: 100%; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="top-bar">
-    <div class="stats">MOVES: <span id="count">0</span></div>
-    <button onclick="cube.scramble()">隨機打亂</button>
-    <button onclick="cube.reset()">重置</button>
+<div class="header">
+    <div class="moves">MOVES: <span id="mCount">0</span></div>
+    <h2 style="font-size: 1rem; color: #888;">Ultimate Cube</h2>
 </div>
 
 <div class="scene" id="scene">
     <div class="cube-wrapper" id="cube"></div>
 </div>
 
-<div class="bottom-bar">
-    <p style="font-size: 12px; opacity: 0.6;">滑動背景轉視角 / 滑動魔方轉層</p>
+<div class="hint">撥動方塊轉動層，撥動背景轉視角</div>
+
+<div class="footer">
+    <button onclick="cube.scramble()">打亂魔方</button>
+    <button onclick="cube.reset()" style="background: #444; color: #fff;">重置</button>
 </div>
 
 <script>
-class MobileCube {
+/**
+ * 核心邏輯：空間座標矩陣變換
+ */
+class UltimateCube {
     constructor() {
         this.wrapper = document.getElementById('cube');
+        this.mDisplay = document.getElementById('mCount');
         this.cubies = [];
         this.isAnimating = false;
         this.moves = 0;
+        
         this.viewX = -30;
         this.viewY = -45;
+
         this.init();
-        this.setupInteractions();
+        this.bindEvents();
     }
 
     init() {
         this.wrapper.innerHTML = '';
         this.cubies = [];
         this.moves = 0;
-        document.getElementById('count').innerText = "0";
+        this.mDisplay.innerText = "0";
+
         for (let x = -1; x <= 1; x++) {
             for (let y = -1; y <= 1; y++) {
                 for (let z = -1; z <= 1; z++) {
@@ -147,99 +123,104 @@ class MobileCube {
                     el.className = 'cubie';
                     ['F','B','U','D','L','R'].forEach(f => {
                         const face = document.createElement('div');
-                        face.className = `face face-${f}`;
+                        face.className = `face f-${f}`;
                         el.appendChild(face);
                     });
-                    const cubieObj = { el, x, y, z, matrix: new DOMMatrix() };
-                    this.updateCSS(cubieObj);
+                    const obj = { el, x, y, z, matrix: new DOMMatrix() };
+                    this.updatePos(obj);
                     this.wrapper.appendChild(el);
-                    this.cubies.push(cubieObj);
+                    this.cubies.push(obj);
                 }
             }
         }
     }
 
-    updateCSS(c) {
-        // 使用 getComputedStyle 確保動態讀取 CSS 變數中的長度
-        const size = document.body.clientWidth < 500 ? (window.innerWidth * 0.5 / 3) + 1 : 81;
-        c.el.style.transform = `translate3d(${c.x*size}px, ${c.y*size}px, ${c.z*size}px) ${c.matrix.toString()}`;
+    updatePos(c) {
+        const s = (document.body.clientWidth < 500) ? (window.innerWidth * 0.6 / 3) : 87;
+        c.el.style.transform = `translate3d(${c.x*s}px, ${c.y*s}px, ${c.z*s}px) ${c.matrix.toString()}`;
     }
 
     rotateLayer(axis, layer, clockwise) {
         if (this.isAnimating) return;
         this.isAnimating = true;
+        
         const angle = clockwise ? 90 : -90;
-        const rotating = this.cubies.filter(c => Math.round(c[axis]) === layer);
+        const rad = (angle * Math.PI) / 180;
+        const cos = Math.round(Math.cos(rad));
+        const sin = Math.round(Math.sin(rad));
 
-        rotating.forEach(c => {
+        const targets = this.cubies.filter(c => Math.round(c[axis]) === layer);
+
+        targets.forEach(c => {
+            // 1. 矩陣物理旋轉
             const m = new DOMMatrix();
             if (axis === 'x') m.rotateSelf(angle, 0, 0);
             if (axis === 'y') m.rotateSelf(0, -angle, 0);
             if (axis === 'z') m.rotateSelf(0, 0, angle);
             c.matrix = m.multiply(c.matrix);
 
-            const ox = c.x, oy = c.y, oz = c.z;
-            if (axis === 'z') {
-                c.x = Math.round(ox * Math.cos(angle*Math.PI/180) - oy * Math.sin(angle*Math.PI/180));
-                c.y = Math.round(ox * Math.sin(angle*Math.PI/180) + oy * Math.cos(angle*Math.PI/180));
-            } else if (axis === 'x') {
-                c.y = Math.round(oy * Math.cos(angle*Math.PI/180) - oz * Math.sin(angle*Math.PI/180));
-                c.z = Math.round(oy * Math.sin(angle*Math.PI/180) + oz * Math.cos(angle*Math.PI/180));
+            // 2. 邏輯座標變換
+            const {x, y, z} = c;
+            if (axis === 'x') {
+                c.y = y * cos - z * sin;
+                c.z = y * sin + z * cos;
             } else if (axis === 'y') {
-                c.x = Math.round(ox * Math.cos(angle*Math.PI/180) + oz * Math.sin(angle*Math.PI/180));
-                c.z = Math.round(-ox * Math.sin(angle*Math.PI/180) + oz * Math.cos(angle*Math.PI/180));
+                c.x = x * cos + z * sin;
+                c.z = -x * sin + z * cos;
+            } else if (axis === 'z') {
+                c.x = x * cos - y * sin;
+                c.y = x * sin + y * cos;
             }
-            this.updateCSS(c);
+            this.updatePos(c);
         });
+
         this.moves++;
-        document.getElementById('count').innerText = this.moves;
-        setTimeout(() => this.isAnimating = false, 300);
+        this.mDisplay.innerText = this.moves;
+        setTimeout(() => { this.isAnimating = false; }, 320);
     }
 
-    handleSwipe(cubie, dx, dy) {
-        const adx = Math.abs(dx), ady = Math.abs(dy);
-        if (adx > ady) {
-            this.rotateLayer('y', cubie.y, dx > 0);
-        } else {
-            // 手機端簡單邏輯：點擊位置靠近左右轉 X，中間轉 Z
-            if (Math.abs(cubie.x) > 0) {
-                this.rotateLayer('x', cubie.x, dy > 0);
-            } else {
-                this.rotateLayer('z', cubie.z, dy > 0);
-            }
-        }
-    }
-
-    setupInteractions() {
-        let isDragView = false, isDragCube = false;
-        let sx, sy, target;
+    bindEvents() {
+        let isView = false, isCube = false;
+        let sx, sy, targetObj;
 
         const start = (e) => {
             const p = e.touches ? e.touches[0] : e;
             sx = p.pageX; sy = p.pageY;
             if (e.target.classList.contains('face')) {
-                isDragCube = true;
-                target = this.cubies.find(c => c.el === e.target.parentElement);
+                isCube = true;
+                targetObj = this.cubies.find(c => c.el === e.target.parentElement);
             } else {
-                isDragView = true;
+                isView = true;
             }
         };
 
         const move = (e) => {
-            if (!isDragView) return;
+            if (!isView) return;
             const p = e.touches ? e.touches[0] : e;
-            this.viewY += (p.pageX - sx) * 0.7;
-            this.viewX -= (p.pageY - sy) * 0.7;
+            this.viewY += (p.pageX - sx) * 0.5;
+            this.viewX -= (p.pageY - sy) * 0.5;
             this.wrapper.style.transform = `rotateX(${this.viewX}deg) rotateY(${this.viewY}deg)`;
             sx = p.pageX; sy = p.pageY;
         };
 
         const end = (e) => {
-            if (isDragCube && target) {
+            if (isCube && targetObj) {
                 const p = e.changedTouches ? e.changedTouches[0] : e;
-                this.handleSwipe(target, p.pageX - sx, p.pageY - sy);
+                const dx = p.pageX - sx, dy = p.pageY - sy;
+                if (Math.abs(dx) > 20 || Math.abs(dy) > 20) {
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        this.rotateLayer('y', targetObj.y, dx > 0);
+                    } else {
+                        // 根據點擊位置決定轉 X 還是 Z
+                        if (Math.abs(targetObj.x) >= Math.abs(targetObj.z)) {
+                            this.rotateLayer('x', targetObj.x, dy > 0);
+                        } else {
+                            this.rotateLayer('z', targetObj.z, dy > 0);
+                        }
+                    }
+                }
             }
-            isDragView = isDragCube = false;
+            isView = isCube = false;
         };
 
         const s = document.getElementById('scene');
@@ -252,20 +233,21 @@ class MobileCube {
     }
 
     scramble() {
-        let c = 0;
-        const t = setInterval(() => {
-            this.rotateLayer(['x','y','z'][Math.floor(Math.random()*3)], [-1,0,1][Math.floor(Math.random()*3)], Math.random()>0.5);
-            if (++c > 15) {
-                clearInterval(t);
-                this.moves = 0; document.getElementById('count').innerText = "0";
+        let count = 0;
+        const axes = ['x','y','z'];
+        const timer = setInterval(() => {
+            this.rotateLayer(axes[Math.floor(Math.random()*3)], Math.floor(Math.random()*3)-1, Math.random()>0.5);
+            if (++count > 15) {
+                clearInterval(timer);
+                this.moves = 0; this.mDisplay.innerText = "0";
             }
-        }, 320);
+        }, 350);
     }
 
     reset() { this.init(); this.wrapper.style.transform = `rotateX(-30deg) rotateY(-45deg)`; }
 }
 
-const cube = new MobileCube();
+const cube = new UltimateCube();
 </script>
 </body>
 </html>
