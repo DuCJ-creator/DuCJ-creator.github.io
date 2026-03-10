@@ -1,267 +1,643 @@
 <!DOCTYPE html>
-<html lang="zh-TW" id="htmlRoot">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Shirley's Pro Dice - Colorful Edition</title>
+  <title>Shirley's Dice — Realistic</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    :root { 
-      --bg:#f8f9fa; --surface:#ffffff; --text:#2d3436; 
-      --border:rgba(0,0,0,0.05); --dice-shadow: rgba(0,0,0,0.12);
+    :root {
+      --bg: #12100e; --text: #f5ede0; --text-muted: rgba(245,237,224,0.45);
+      --accent: #e8a870; --accent2: #c9643a;
+      --surface: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.08);
     }
-    .dark { 
-      --bg:#121212; --surface:#1e1e1e; --text:#f5f6fa; 
-      --border:rgba(255,255,255,0.08); --dice-shadow: rgba(0,0,0,0.4);
-    }
-
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    
     body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', system-ui, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; overflow: hidden;
     }
-
-    .dice-wrapper {
-      background: var(--surface);
-      padding: 2rem;
-      border-radius: 28px;
-      box-shadow: 0 25px 50px -12px var(--dice-shadow);
-      width: 90%;
-      max-width: 360px;
-      text-align: center;
-      border: 1px solid var(--border);
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 20% 80%, rgba(200,80,30,0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse 50% 60% at 80% 20%, rgba(232,168,112,0.08) 0%, transparent 60%);
+      pointer-events: none;
     }
-
+    #canvas-container { position: relative; width: 340px; height: 300px; }
+    canvas { display: block; border-radius: 20px; cursor: pointer; }
+    .ui { width: 340px; text-align: center; margin-top: 1rem; }
     h3 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.8rem;
-      margin-bottom: 1.5rem;
-      opacity: 0.9;
+      font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 900;
+      letter-spacing: -0.5px; margin-bottom: 0.2rem;
+      background: linear-gradient(135deg, #f5ede0 30%, rgba(245,237,224,0.5));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-
-    .select-container {
-      position: relative;
-      margin-bottom: 2.5rem;
+    .subtitle { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 1.2rem; }
+    .type-selector { display: flex; gap: 7px; justify-content: center; margin-bottom: 1.2rem; flex-wrap: wrap; }
+    .type-btn {
+      background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
+      padding: 7px 13px; border-radius: 100px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;
     }
-
-    select {
-      appearance: none;
-      background: var(--bg);
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 14px 20px;
-      border-radius: 16px;
-      width: 100%;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
+    .type-btn:hover { border-color: var(--accent); color: var(--text); }
+    .type-btn.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-color: transparent; color: white; box-shadow: 0 4px 14px rgba(232,168,112,0.3);
     }
-
-    select:hover { border-color: #a29bfe; }
-
-    .dice-stage {
-      width: 140px;
-      height: 140px;
-      margin: 0 auto 2.5rem;
-      perspective: 1000px;
-      cursor: pointer;
+    .result-area {
+      min-height: 52px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 2px; margin-bottom: 1rem;
     }
-
-    .dice {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.9s cubic-bezier(0.15, 0.9, 0.3, 1.15);
-      will-change: transform;
+    .result-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 3px; color: var(--text-muted); }
+    .result-value {
+      font-family: 'Playfair Display', serif; font-size: 2.6rem; font-weight: 900; line-height: 1;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      opacity: 0; transform: translateY(8px) scale(0.9);
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34,1.4,0.64,1);
     }
-
-    .dice-face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 20px;
-      backface-visibility: hidden;
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
-      border: 1px solid rgba(0,0,0,0.05);
+    .result-value.show { opacity: 1; transform: translateY(0) scale(1); }
+    .roll-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white;
+      border: none; padding: 13px 40px; border-radius: 100px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.92rem; font-weight: 500; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(232,168,112,0.3); transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
     }
-
-    /* 多面體通用樣式 */
-    .poly-face {
-      font-weight: 600;
-      font-size: 2.8rem;
-      color: white;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
-
-    .result-text {
-      font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--text);
-      opacity: 0.6;
-    }
-
-    .dot {
-      position: absolute;
-      width: 22px;
-      height: 22px;
-      background: #2d3436;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-    }
-
-    /* 動畫狀態 */
-    .rolling { filter: contrast(1.1) brightness(1.1); }
+    .roll-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(232,168,112,0.4); }
+    .roll-btn:active { transform: translateY(0); }
+    .roll-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .hint { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.6rem; }
   </style>
 </head>
 <body>
-
-  <div class="dice-wrapper">
-    <h3>Shirley's Dice</h3>
-    
-    <div class="select-container">
-      <select id="diceType">
-        <option value="4">d4 - 烈焰紅</option>
-        <option value="6" selected>d6 - 象牙白</option>
-        <option value="8">d8 - 寶石藍</option>
-        <option value="12">d12 - 翡翠綠</option>
-        <option value="20">d20 - 幻影紫</option>
-      </select>
-    </div>
-
-    <div class="dice-stage" id="trigger">
-      <div class="dice" id="dice"></div>
-    </div>
-
-    <div class="result-text" id="result">Tap to Roll</div>
+<div id="canvas-container"><canvas id="c"></canvas></div>
+<div class="ui">
+  <h3>Shirley's Dice</h3>
+  <p class="subtitle">Resin Series</p>
+  <div class="type-selector" id="typeSelector"></div>
+  <div class="result-area">
+    <div class="result-label" id="resultLabel">Click to roll</div>
+    <div class="result-value" id="resultValue"></div>
   </div>
+  <button class="roll-btn" id="rollBtn">Roll the Dice</button>
+  <p class="hint">or click the dice directly</p>
+</div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-  const dice = document.getElementById('dice');
-  const trigger = document.getElementById('trigger');
-  const resultDisplay = document.getElementById('result');
-  const diceTypeSelect = document.getElementById('diceType');
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// ════════════════════════════════════════════════════════════
+// RENDERER
+// ════════════════════════════════════════════════════════════
+const canvas = document.getElementById('c');
+const W = 340, H = 300;
+canvas.width = W * devicePixelRatio; canvas.height = H * devicePixelRatio;
+canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
 
-  // 顏色配置表
-  const config = {
-    4:  { name: 'd4',  color: 'linear-gradient(135deg, #ff7675, #d63031)', clip: 'polygon(50% 0%, 0% 100%, 100% 100%)' },
-    6:  { name: 'd6',  color: '#ffffff' },
-    8:  { name: 'd8',  color: 'linear-gradient(135deg, #74b9ff, #0984e3)', clip: 'polygon(50% 0%, 0% 100%, 100% 100%)' },
-    12: { name: 'd12', color: 'linear-gradient(135deg, #55efc4, #00b894)', clip: 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)' },
-    20: { name: 'd20', color: 'linear-gradient(135deg, #a29bfe, #6c5ce7)', clip: 'polygon(50% 0%, 0% 100%, 100% 100%)' }
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setSize(W, H); renderer.setPixelRatio(devicePixelRatio);
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.35;
+renderer.setClearColor(0x000000, 0);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(42, W/H, 0.1, 100);
+camera.position.set(0, 4, 6); camera.lookAt(0, 0, 0);
+
+// Camera animation state
+let camTargetY = 4, camTargetZ = 6, camLookY = 0;
+let camCurrentY = 4, camCurrentZ = 6, camCurrentLookY = 0;
+
+// ════════════════════════════════════════════════════════════
+// LIGHTING
+// ════════════════════════════════════════════════════════════
+const keyLight = new THREE.DirectionalLight(0xfff4e0, 3.0);
+keyLight.position.set(4, 9, 5); keyLight.castShadow = true;
+keyLight.shadow.mapSize.set(1024,1024);
+keyLight.shadow.camera.near=0.5; keyLight.shadow.camera.far=30;
+keyLight.shadow.camera.left=-4; keyLight.shadow.camera.right=4;
+keyLight.shadow.camera.top=4; keyLight.shadow.camera.bottom=-4;
+keyLight.shadow.radius=5; keyLight.shadow.bias=-0.001;
+scene.add(keyLight);
+const fillL = new THREE.DirectionalLight(0xb0caff, 0.55);
+fillL.position.set(-5,2,-3); scene.add(fillL);
+const rimL = new THREE.DirectionalLight(0xffe0a0, 0.9);
+rimL.position.set(0,-3,-6); scene.add(rimL);
+scene.add(new THREE.AmbientLight(0x2a1a08, 1.4));
+const ptL = new THREE.PointLight(0xff8c42, 0.4, 12);
+ptL.position.set(0,-1.5,2); scene.add(ptL);
+
+// ════════════════════════════════════════════════════════════
+// TABLE
+// ════════════════════════════════════════════════════════════
+const TABLE_Y = -1.1;
+const table = new THREE.Mesh(
+  new THREE.PlaneGeometry(20,20),
+  new THREE.MeshStandardMaterial({ color:0x1a1208, roughness:0.92, metalness:0.02 })
+);
+table.rotation.x = -Math.PI/2; table.position.y = TABLE_Y; table.receiveShadow = true;
+scene.add(table);
+
+// ════════════════════════════════════════════════════════════
+// CONFIGS
+// ════════════════════════════════════════════════════════════
+const CONFIGS = {
+  4:  { label:'d4',  sides:4,  hex:'#d63031', emissiveHex:'#2a0000', roughness:0.20, metalness:0.05, dark:false },
+  6:  { label:'d6',  sides:6,  hex:'#f0e8d8', emissiveHex:'#0a0500', roughness:0.14, metalness:0.04, dark:true  },
+  8:  { label:'d8',  sides:8,  hex:'#1a7fd4', emissiveHex:'#000a18', roughness:0.16, metalness:0.08, dark:false },
+  12: { label:'d12', sides:12, hex:'#00a67e', emissiveHex:'#001008', roughness:0.17, metalness:0.06, dark:false },
+  20: { label:'d20', sides:20, hex:'#7c6ce0', emissiveHex:'#080015', roughness:0.15, metalness:0.07, dark:false },
+};
+
+// ════════════════════════════════════════════════════════════
+// TEXTURE FACTORY
+// ════════════════════════════════════════════════════════════
+function makeDotTexture(cfg, value) {
+  const S = 256;
+  const c = document.createElement('canvas'); c.width=S; c.height=S;
+  const ctx = c.getContext('2d');
+
+  // Base + vignette
+  ctx.fillStyle = cfg.hex; ctx.fillRect(0,0,S,S);
+  const vg = ctx.createRadialGradient(S*.38,S*.32,0,S/2,S/2,S*.68);
+  vg.addColorStop(0,'rgba(255,255,255,0.14)'); vg.addColorStop(1,'rgba(0,0,0,0.22)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,S,S);
+
+  const layouts = {
+    1:[[.5,.5]],
+    2:[[.30,.30],[.70,.70]],
+    3:[[.28,.28],[.50,.50],[.72,.72]],
+    4:[[.28,.28],[.72,.28],[.28,.72],[.72,.72]],
+    5:[[.28,.28],[.72,.28],[.50,.50],[.28,.72],[.72,.72]],
+    6:[[.28,.22],[.72,.22],[.28,.50],[.72,.50],[.28,.78],[.72,.78]],
   };
 
-  let isRolling = false;
+  const r = S*0.083;
+  const dc = cfg.dark ? '#2a1200' : 'rgba(255,255,255,0.88)';
+  layouts[value].forEach(([fx,fy])=>{
+    const x=fx*S, y=fy*S;
+    // Shadow
+    ctx.beginPath(); ctx.arc(x,y+r*.18,r,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,0,0,0.28)'; ctx.fill();
+    // Dot
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.shadowColor='rgba(0,0,0,0.5)'; ctx.shadowBlur=5;
+    ctx.fillStyle=dc; ctx.fill(); ctx.shadowBlur=0;
+    // Specular
+    ctx.beginPath(); ctx.arc(x-r*.3,y-r*.3,r*.3,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.fill();
+  });
+  const t = new THREE.CanvasTexture(c); t.needsUpdate=true; return t;
+}
 
-  function playSound() {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.1);
-    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
-    osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+function makeNumberTexture(cfg, value) {
+  const S = 256;
+  const c = document.createElement('canvas'); c.width=S; c.height=S;
+  const ctx = c.getContext('2d');
+
+  ctx.fillStyle = cfg.hex; ctx.fillRect(0,0,S,S);
+  const vg = ctx.createRadialGradient(S*.38,S*.32,0,S/2,S/2,S*.68);
+  vg.addColorStop(0,'rgba(255,255,255,0.12)'); vg.addColorStop(1,'rgba(0,0,0,0.25)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,S,S);
+
+  const tc = cfg.dark ? '#1a0800' : 'rgba(255,255,255,0.92)';
+  ctx.shadowColor = cfg.dark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur = 7;
+  ctx.font = `bold ${Math.round(S*.50)}px Georgia, serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle = tc;
+  ctx.fillText(String(value), S/2, S/2 + S*.02);
+
+  // Underline 6 and 9
+  if (value===6||value===9) {
+    ctx.shadowBlur=0;
+    ctx.strokeStyle=tc; ctx.lineWidth=S*.024;
+    const tw = ctx.measureText(String(value)).width;
+    const uy = S/2 + S*.34;
+    ctx.beginPath(); ctx.moveTo(S/2-tw/2,uy); ctx.lineTo(S/2+tw/2,uy); ctx.stroke();
+  }
+  const t = new THREE.CanvasTexture(c); t.needsUpdate=true; return t;
+}
+
+// ════════════════════════════════════════════════════════════
+// D6 — BoxGeometry with 6 individual face materials
+// Face material index order in Three.js BoxGeometry:
+//   0=+X, 1=-X, 2=+Y, 3=-Y, 4=+Z, 5=-Z
+// Standard die (opposite faces sum to 7):
+//   +X=2, -X=5, +Y=4, -Y=3, +Z=1, -Z=6
+// Face normals (local): +X(1,0,0), -X(-1,0,0), +Y(0,1,0), -Y(0,-1,0), +Z(0,0,1), -Z(0,0,-1)
+// To show value V on top: rotate so face-normal-of-V aligns with world +Y
+// ════════════════════════════════════════════════════════════
+const D6_MAT_VALUES = [2,5,4,3,1,6];
+const D6_NORMALS = [
+  new THREE.Vector3( 1, 0, 0),
+  new THREE.Vector3(-1, 0, 0),
+  new THREE.Vector3( 0, 1, 0),
+  new THREE.Vector3( 0,-1, 0),
+  new THREE.Vector3( 0, 0, 1),
+  new THREE.Vector3( 0, 0,-1),
+];
+
+function d6UpQuat(value) {
+  const idx = D6_MAT_VALUES.indexOf(value);
+  const faceNorm = D6_NORMALS[idx];
+  const q = new THREE.Quaternion();
+  q.setFromUnitVectors(faceNorm, new THREE.Vector3(0,1,0));
+  return q;
+}
+
+function buildD6(cfg) {
+  const group = new THREE.Group();
+  const mats = D6_MAT_VALUES.map(v => new THREE.MeshStandardMaterial({
+    map: makeDotTexture(cfg, v),
+    roughness: cfg.roughness, metalness: cfg.metalness,
+    emissive: new THREE.Color(cfg.emissiveHex), emissiveIntensity: 0.4,
+  }));
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), mats);
+  mesh.castShadow = true; mesh.receiveShadow = true;
+  group.add(mesh);
+  // Edge darkening
+  const edgeMesh = new THREE.Mesh(
+    new THREE.BoxGeometry(1.003,1.003,1.003),
+    new THREE.MeshBasicMaterial({ color:0x000000, transparent:true, opacity:0.06, side:THREE.BackSide })
+  );
+  group.add(edgeMesh);
+  group.userData.type = 'd6';
+  return group;
+}
+
+// ════════════════════════════════════════════════════════════
+// POLY DICE — d4/d8/d12/d20
+// Strategy:
+//   1. Get Three.js built-in geometry
+//   2. Compute each unique face's average normal (grouped by similar normals)
+//   3. Assign values 1..N sorted by normal.y descending (highest-pointing face = 1)
+//   4. Place a number sprite at each face centroid, facing outward
+//   5. To show value V on top: quaternion from face-normal → +Y
+// ════════════════════════════════════════════════════════════
+
+function getFaceGroups(geo, tol=0.001) {
+  const pos = geo.attributes.position;
+  const tris = [];
+  for (let i=0; i<pos.count; i+=3) {
+    const a=new THREE.Vector3().fromBufferAttribute(pos,i);
+    const b=new THREE.Vector3().fromBufferAttribute(pos,i+1);
+    const c=new THREE.Vector3().fromBufferAttribute(pos,i+2);
+    const n=new THREE.Vector3().crossVectors(
+      new THREE.Vector3().subVectors(b,a),
+      new THREE.Vector3().subVectors(c,a)
+    ).normalize();
+    const cen=new THREE.Vector3().add(a).add(b).add(c).divideScalar(3);
+    tris.push({n,cen});
+  }
+  const groups=[], used=new Set();
+  for (let i=0;i<tris.length;i++) {
+    if (used.has(i)) continue;
+    const g=[tris[i]]; used.add(i);
+    for (let j=i+1;j<tris.length;j++) {
+      if (used.has(j)) continue;
+      if (tris[i].n.dot(tris[j].n)>1-tol) { g.push(tris[j]); used.add(j); }
+    }
+    const avgN=new THREE.Vector3(), avgC=new THREE.Vector3();
+    g.forEach(t=>{avgN.add(t.n);avgC.add(t.cen)});
+    avgN.divideScalar(g.length).normalize();
+    avgC.divideScalar(g.length);
+    groups.push({normal:avgN,centroid:avgC});
+  }
+  return groups;
+}
+
+function buildPolyDice(sides, cfg) {
+  const group = new THREE.Group();
+  const r = 0.76;
+  const geoMap = { 4:new THREE.TetrahedronGeometry(r), 8:new THREE.OctahedronGeometry(r),
+                   12:new THREE.DodecahedronGeometry(r), 20:new THREE.IcosahedronGeometry(r) };
+  const geo = geoMap[sides];
+
+  // Main mesh
+  const mat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(cfg.hex),
+    emissive: new THREE.Color(cfg.emissiveHex), emissiveIntensity: 0.45,
+    roughness: cfg.roughness, metalness: cfg.metalness,
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.castShadow=true; mesh.receiveShadow=true; group.add(mesh);
+
+  // Subtle wireframe edges
+  const wireMat = new THREE.MeshBasicMaterial({color:0x000000,wireframe:true,transparent:true,opacity:0.12});
+  group.add(new THREE.Mesh(geo.clone(), wireMat));
+
+  // Compute face groups
+  const faceGroups = getFaceGroups(geo);
+
+  // Sort by normal.y descending → value 1 = most upward-pointing face in base orientation
+  faceGroups.sort((a,b)=>b.normal.y-a.normal.y);
+  faceGroups.forEach((fg,i)=>{ fg.value=i+1; });
+
+  // Place number sprites on each face
+  const spriteScale = sides<=4 ? 0.40 : sides<=8 ? 0.36 : sides<=12 ? 0.30 : 0.27;
+  faceGroups.forEach(fg => {
+    const tex = makeNumberTexture(cfg, fg.value);
+    const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, depthWrite:false });
+    const sprite = new THREE.Sprite(mat);
+    const push = r * (sides<=4 ? 0.72 : sides<=8 ? 0.78 : 0.82);
+    sprite.position.copy(fg.normal.clone().multiplyScalar(push));
+    sprite.scale.set(spriteScale, spriteScale, spriteScale);
+    group.add(sprite);
+  });
+
+  group.userData.type='poly';
+  group.userData.faceGroups=faceGroups;
+  return group;
+}
+
+function polyUpQuat(faceGroups, value) {
+  const fg = faceGroups.find(f=>f.value===value);
+  if (!fg) return new THREE.Quaternion();
+  const q = new THREE.Quaternion();
+  q.setFromUnitVectors(fg.normal, new THREE.Vector3(0,1,0));
+  return q;
+}
+
+// ════════════════════════════════════════════════════════════
+// STATE + PHYSICS
+// ════════════════════════════════════════════════════════════
+let currentSides=6, diceGroup=null, isRolling=false, hasResult=false;
+let physY=0, physVelX=0, physVelY=0, physVelZ=0;
+let physAngX=0, physAngY=0, physAngZ=0;
+let physPhase='idle', bounceCount=0, settleStart=0;
+let targetQuat=new THREE.Quaternion(), finalValue=1;
+let accumEuler=new THREE.Euler(0,0,0,'XYZ');
+const FLOOR_Y = TABLE_Y + 0.54;
+
+// ════════════════════════════════════════════════════════════
+// AUDIO
+// ════════════════════════════════════════════════════════════
+let audioCtx=null;
+function getAudio(){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  return audioCtx;
+}
+function playRollSound(){
+  const ctx=getAudio(),now=ctx.currentTime;
+  for(let i=0;i<4;i++){
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type=i%2===0?'sawtooth':'triangle';
+    const t=now+i*0.065;
+    o.frequency.setValueAtTime(90+Math.random()*60,t);
+    o.frequency.exponentialRampToValueAtTime(30,t+0.09);
+    g.gain.setValueAtTime(0.07,t);g.gain.linearRampToValueAtTime(0,t+0.09);
+    o.start(t);o.stop(t+0.09);
+  }
+}
+function playBounceSound(intensity){
+  const ctx=getAudio(),now=ctx.currentTime;
+  const o=ctx.createOscillator(),g=ctx.createGain();
+  o.connect(g);g.connect(ctx.destination);o.type='sine';
+  o.frequency.setValueAtTime(160+intensity*100,now);
+  o.frequency.exponentialRampToValueAtTime(50,now+0.13);
+  g.gain.setValueAtTime(Math.min(intensity*0.28,0.28),now);
+  g.gain.linearRampToValueAtTime(0,now+0.15);
+  o.start(now);o.stop(now+0.15);
+  const o2=ctx.createOscillator(),g2=ctx.createGain();
+  o2.connect(g2);g2.connect(ctx.destination);
+  o2.type='square';o2.frequency.setValueAtTime(1400,now);
+  g2.gain.setValueAtTime(intensity*0.05,now);g2.gain.linearRampToValueAtTime(0,now+0.012);
+  o2.start(now);o2.stop(now+0.012);
+}
+function playLandSound(value,sides){
+  const ctx=getAudio(),now=ctx.currentTime;
+  const freq=180+(value/sides)*380;
+  const o=ctx.createOscillator(),g=ctx.createGain();
+  o.connect(g);g.connect(ctx.destination);o.type='sine';
+  o.frequency.setValueAtTime(freq,now);
+  o.frequency.exponentialRampToValueAtTime(freq*1.15,now+0.06);
+  o.frequency.exponentialRampToValueAtTime(freq*0.75,now+0.32);
+  g.gain.setValueAtTime(0.22,now);g.gain.linearRampToValueAtTime(0,now+0.38);
+  o.start(now);o.stop(now+0.38);
+}
+
+// ════════════════════════════════════════════════════════════
+// RESULT FACE HIGHLIGHT
+// A glowing golden plane that appears just above the winning face
+// ════════════════════════════════════════════════════════════
+let highlightMesh = null;
+
+function clearHighlight() {
+  if (highlightMesh) { scene.remove(highlightMesh); highlightMesh = null; }
+}
+
+function makeHighlightTexture() {
+  const S = 256;
+  const c = document.createElement('canvas'); c.width=S; c.height=S;
+  const ctx = c.getContext('2d');
+  // Radial gold glow fading to transparent
+  const g = ctx.createRadialGradient(S/2,S/2,0,S/2,S/2,S/2);
+  g.addColorStop(0,   'rgba(255,200,80,0.55)');
+  g.addColorStop(0.45,'rgba(255,160,40,0.30)');
+  g.addColorStop(0.75,'rgba(255,120,20,0.10)');
+  g.addColorStop(1,   'rgba(255,100,0,0)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,S,S);
+  const t = new THREE.CanvasTexture(c); t.needsUpdate=true; return t;
+}
+
+function highlightResultFace(value, sides) {
+  clearHighlight();
+  const geo = new THREE.PlaneGeometry(1.0, 1.0);
+  const mat = new THREE.MeshBasicMaterial({
+    map: makeHighlightTexture(),
+    transparent: true, opacity: 1.0,
+    depthWrite: false, side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending,
+  });
+  highlightMesh = new THREE.Mesh(geo, mat);
+
+  if (sides === 6) {
+    // Position it just above the top face (+Y offset = 0.502 above center)
+    highlightMesh.position.set(0, 0.502, 0);
+    highlightMesh.rotation.x = -Math.PI / 2; // lie flat
+    // Scale to cover full face
+    highlightMesh.scale.set(1.0, 1.0, 1.0);
+  } else {
+    // For poly dice: place above the group center, flat and large
+    highlightMesh.position.set(0, 0.85, 0);
+    highlightMesh.rotation.x = -Math.PI / 2;
+    highlightMesh.scale.set(1.2, 1.2, 1.2);
   }
 
-  function setupDice(sides) {
-    dice.innerHTML = '';
-    dice.style.transform = 'rotateX(0) rotateY(0)';
-    const c = config[sides];
+  diceGroup.add(highlightMesh); // attach to dice so it moves with it
 
-    if (sides === 6) {
-      // D6 特殊處理：六面體
-      const dotsMap = [
-        [[50,50]], [[25,25],[75,75]], [[25,25],[50,50],[75,75]],
-        [[25,25],[25,75],[75,25],[75,75]], [[25,25],[25,75],[75,25],[75,75],[50,50]],
-        [[25,20],[25,50],[25,80],[75,20],[75,50],[75,80]]
-      ];
-      const trans = [
-        'rotateY(0deg) translateZ(70px)', 'rotateY(90deg) translateZ(70px)',
-        'rotateY(180deg) translateZ(70px)', 'rotateY(-90deg) translateZ(70px)',
-        'rotateX(90deg) translateZ(70px)', 'rotateX(-90deg) translateZ(70px)'
-      ];
-      dotsMap.forEach((dots, i) => {
-        const face = document.createElement('div');
-        face.className = 'dice-face';
-        face.style.background = c.color;
-        face.style.transform = trans[i];
-        dots.forEach(([x, y]) => {
-          const dot = document.createElement('div');
-          dot.className = 'dot';
-          dot.style.left = `${x}%`; dot.style.top = `${y}%`;
-          face.appendChild(dot);
-        });
-        dice.appendChild(face);
-      });
-    } else {
-      // 多面體處理
-      const face = document.createElement('div');
-      face.className = 'dice-face poly-face';
-      face.style.background = c.color;
-      face.style.clipPath = c.clip;
-      face.textContent = '?';
-      dice.appendChild(face);
+  // Fade the highlight in
+  highlightMesh.material.opacity = 0;
+  let start = performance.now();
+  function fadeIn() {
+    if (!highlightMesh) return;
+    const t = Math.min((performance.now()-start)/400, 1);
+    highlightMesh.material.opacity = t;
+    if (t < 1) requestAnimationFrame(fadeIn);
+  }
+  fadeIn();
+}
+
+// ════════════════════════════════════════════════════════════
+// SPAWN + ROLL
+// ════════════════════════════════════════════════════════════
+function spawnDice(sides){
+  if(diceGroup){scene.remove(diceGroup);diceGroup=null;}
+  const cfg=CONFIGS[sides];
+  diceGroup = sides===6 ? buildD6(cfg) : buildPolyDice(sides,cfg);
+  diceGroup.position.set(0,FLOOR_Y,0);
+  scene.add(diceGroup);
+  physPhase='idle'; physY=FLOOR_Y;
+  accumEuler.set(0,0,0);
+  diceGroup.rotation.copy(accumEuler);
+}
+
+function startRoll(){
+  if(isRolling) return;
+  isRolling=true;
+  document.getElementById('rollBtn').disabled=true;
+  document.getElementById('resultLabel').textContent='Rolling…';
+  document.getElementById('resultValue').classList.remove('show');
+
+  finalValue=Math.floor(Math.random()*currentSides)+1;
+  clearHighlight();
+  playRollSound();
+
+  // Reset camera to normal angle
+  camTargetY = 4; camTargetZ = 6; camLookY = 0;
+
+  // Launch from above
+  physY=3.8; physVelY=-0.055;
+  physVelX=(Math.random()-.5)*.035; physVelZ=(Math.random()-.5)*.035;
+  physAngX=(Math.random()-.5)*.32; physAngY=(Math.random()-.5)*.32; physAngZ=(Math.random()-.5)*.22;
+  bounceCount=0; physPhase='falling';
+  accumEuler.set(Math.random()*Math.PI*2, Math.random()*Math.PI*2, Math.random()*Math.PI*2);
+  diceGroup.rotation.copy(accumEuler);
+
+  // Target quaternion: winning face pointing up
+  if(currentSides===6){
+    targetQuat=d6UpQuat(finalValue);
+  } else {
+    targetQuat=polyUpQuat(diceGroup.userData.faceGroups, finalValue);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// ANIMATION LOOP
+// ════════════════════════════════════════════════════════════
+function animate(){
+  requestAnimationFrame(animate);
+  if(!diceGroup){renderer.render(scene,camera);return;}
+
+  // Smooth camera position lerp
+  camCurrentY += (camTargetY - camCurrentY) * 0.06;
+  camCurrentZ += (camTargetZ - camCurrentZ) * 0.06;
+  camCurrentLookY += (camLookY - camCurrentLookY) * 0.06;
+  camera.position.set(0, camCurrentY, camCurrentZ);
+  camera.lookAt(0, camCurrentLookY, 0);
+
+  if(physPhase==='falling'){
+    physVelY-=0.009; physY+=physVelY;
+    accumEuler.x+=physAngX; accumEuler.y+=physAngY; accumEuler.z+=physAngZ;
+    diceGroup.rotation.copy(accumEuler);
+    diceGroup.position.x = Math.max(-.5,Math.min(.5, diceGroup.position.x+physVelX));
+    diceGroup.position.z = Math.max(-.5,Math.min(.5, diceGroup.position.z+physVelZ));
+    diceGroup.position.y = physY;
+
+    if(physY<=FLOOR_Y){
+      physY=FLOOR_Y; diceGroup.position.y=FLOOR_Y;
+      const impact=Math.abs(physVelY);
+      playBounceSound(Math.min(impact*5.5,1));
+      bounceCount++;
+      if(bounceCount>=3){
+        physPhase='settling'; settleStart=performance.now();
+      } else {
+        const rest=0.40-bounceCount*0.12;
+        physVelY=Math.abs(physVelY)*rest;
+        physVelX*=0.5; physVelZ*=0.5;
+        physAngX*=0.45; physAngY*=0.45; physAngZ*=0.45;
+      }
     }
   }
 
-  function roll() {
-    if (isRolling) return;
-    isRolling = true;
-    const sides = parseInt(diceTypeSelect.value);
-    
-    playSound();
-    resultDisplay.textContent = 'Rolling...';
-    dice.classList.add('rolling');
+  else if(physPhase==='settling'){
+    const elapsed=(performance.now()-settleStart)/1000;
 
-    const rx = Math.floor(Math.random() * 1000) + 720;
-    const ry = Math.floor(Math.random() * 1000) + 720;
-    dice.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${Math.random()*90}deg)`;
+    // Slerp to target face-up quaternion
+    diceGroup.quaternion.slerp(targetQuat, 0.09);
 
-    setTimeout(() => {
-      const val = Math.floor(Math.random() * sides) + 1;
-      if (sides === 6) {
-        const targets = [[0,0], [0,-90], [0,-180], [0,90], [-90,0], [90,0]];
-        const [tx, ty] = targets[val-1];
-        dice.style.transform = `rotateX(${Math.round(rx/360)*360 + tx}deg) rotateY(${Math.round(ry/360)*360 + ty}deg) rotateZ(0deg)`;
-      } else {
-        dice.querySelector('.poly-face').textContent = val;
-        dice.style.transform = `rotateX(0deg) rotateY(0deg) scale(1.1)`;
-        setTimeout(() => dice.style.transform = `rotateX(0deg) scale(1)`, 100);
-      }
-      resultDisplay.textContent = `Result: ${val}`;
-      dice.classList.remove('rolling');
-      isRolling = false;
-    }, 850);
+    // Decaying wobble
+    const wobble=Math.sin(elapsed*22)*0.016*Math.max(0,1-elapsed*1.5);
+    diceGroup.position.y=FLOOR_Y+Math.abs(wobble);
+    diceGroup.position.x*=0.88; diceGroup.position.z*=0.88;
+
+    if(elapsed>1.1){
+      physPhase='idle';
+      diceGroup.quaternion.copy(targetQuat);
+      diceGroup.position.set(0,FLOOR_Y,0);
+      onLanded();
+    }
   }
 
-  diceTypeSelect.addEventListener('change', (e) => setupDice(parseInt(e.target.value)));
-  trigger.addEventListener('click', roll);
-  setupDice(6); // 預設 D6
-
-  // Dark Mode Support
-  if (localStorage.getItem('theme') === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.getElementById('htmlRoot').classList.add('dark');
+  else if(physPhase==='idle'){
+    const t=performance.now()*0.0005;
+    diceGroup.position.y=FLOOR_Y+Math.sin(t)*0.01;
+    // Only spin before the first roll — once a result is shown, hold still
+    if(!hasResult){
+      const idleQ=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),0.003);
+      diceGroup.quaternion.multiply(idleQ);
+    }
   }
+
+  renderer.render(scene,camera);
+}
+
+function onLanded(){
+  playLandSound(finalValue,currentSides);
+  hasResult=true;
+  // Tilt camera down to show top face
+  camTargetY = 6.5; camTargetZ = 3.5; camLookY = 0.3;
+  // Show gold highlight on result face
+  highlightResultFace(finalValue, currentSides);
+  document.getElementById('resultLabel').textContent='Result';
+  const rv=document.getElementById('resultValue');
+  rv.textContent=finalValue; rv.classList.add('show');
+  document.getElementById('rollBtn').disabled=false;
+  isRolling=false;
+}
+
+// ════════════════════════════════════════════════════════════
+// UI
+// ════════════════════════════════════════════════════════════
+function buildTypeSelector(){
+  const sel=document.getElementById('typeSelector'); sel.innerHTML='';
+  Object.entries(CONFIGS).forEach(([sides,cfg])=>{
+    const btn=document.createElement('button');
+    btn.className='type-btn'+(parseInt(sides)===currentSides?' active':'');
+    btn.textContent=cfg.label;
+    btn.onclick=()=>{
+      if(isRolling) return;
+      currentSides=parseInt(sides);
+      hasResult=false;
+      clearHighlight();
+      camTargetY=4; camTargetZ=6; camLookY=0;
+      buildTypeSelector(); spawnDice(currentSides);
+      document.getElementById('resultLabel').textContent='Click to roll';
+      document.getElementById('resultValue').classList.remove('show');
+    };
+    sel.appendChild(btn);
+  });
+}
+
+canvas.addEventListener('click',()=>{if(!isRolling)startRoll();});
+document.getElementById('rollBtn').addEventListener('click',()=>{if(!isRolling)startRoll();});
+
+buildTypeSelector();
+spawnDice(6);
+animate();
 </script>
 </body>
 </html>
