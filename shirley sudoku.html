@@ -4,122 +4,117 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Shirley's Sudoku</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
+    *, *::before, *::after {
+      margin: 0; padding: 0;
       box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
       -webkit-tap-highlight-color: transparent;
       -webkit-touch-callout: none;
       user-select: none;
     }
 
-    html {
-      font-size: clamp(14px, 2.5vw, 18px);
+    :root {
+      --blue-dark:   #01579b;
+      --blue-mid:    #0288d1;
+      --blue-light:  #e1f5fe;
+      --blue-pale:   #f0f9ff;
+      --blue-select: #b3e5fc;
+      --green:       #4caf50;
+      --red:         #ef5350;
+      --red-light:   #ffcdd2;
+      --yellow:      #ffd54f;
+      --gray:        #b0bec5;
+      --erase:       #ff8a65;
+      --box-border:  #01579b;
+      --cell-border: #b3d9f0;
     }
 
+    html { font-size: clamp(13px, 2.2vw, 17px); }
+
     body {
-      background: #f0f9ff;
-      color: #01579b;
+      background: var(--blue-pale);
+      color: var(--blue-dark);
+      font-family: 'Nunito', sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 12px;
+      padding: 10px 12px 24px;
       min-height: 100vh;
     }
 
     h1 {
-      font-size: clamp(1.2rem, 4vw, 1.8rem);
-      margin: 10px 0;
-      color: #0288d1;
-      text-align: center;
+      font-size: clamp(1.3rem, 5vw, 2rem);
+      font-weight: 900;
+      color: var(--blue-mid);
+      margin: 8px 0 4px;
+      letter-spacing: -0.5px;
     }
 
+    /* ── Controls ── */
     .controls {
       display: flex;
-      gap: 6px;
-      margin: 10px 0;
+      gap: 5px;
+      margin: 8px 0;
       flex-wrap: wrap;
       justify-content: center;
-      max-width: 100%;
+      max-width: 520px;
+      width: 100%;
       align-items: center;
     }
 
     button {
-      padding: clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 12px);
+      padding: 7px 11px;
       border: none;
       border-radius: 8px;
-      font-weight: 600;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
       cursor: pointer;
-      font-size: clamp(0.8rem, 2.2vw, 0.95rem);
+      font-size: clamp(0.75rem, 2vw, 0.88rem);
       white-space: nowrap;
       -webkit-appearance: none;
       touch-action: manipulation;
+      transition: filter 0.15s, transform 0.1s;
     }
+    button:active { transform: scale(0.95); filter: brightness(0.9); }
 
-    .difficulty-btn {
-      background: #b3e5fc;
-      color: #01579b;
-    }
+    .difficulty-btn { background: #b3e5fc; color: var(--blue-dark); }
+    .difficulty-btn.active { background: var(--blue-mid); color: white; }
 
-    .difficulty-btn.active {
-      background: #0288d1;
-      color: white;
-    }
-
-    #reset-btn {
-      background: #4fc3f7;
-      color: white;
-    }
-
-    #check-btn {
-      background: #66bb6a;
-      color: white;
-    }
-
-    #undo-btn {
-      background: #b0bec5;
-      color: #01579b;
-    }
-
-    #note-btn {
-      background: #ffe082;
-      color: #5d4037;
-    }
-
-    #note-btn.active {
-      background: #ffca28;
-      color: #4e342e;
-    }
+    #reset-btn  { background: #4fc3f7; color: white; }
+    #undo-btn   { background: var(--gray); color: #263238; }
+    #erase-btn  { background: var(--erase); color: white; }
+    #note-btn   { background: var(--yellow); color: #5d4037; }
+    #note-btn.active { background: #ffa000; color: white; }
+    #check-btn  { background: var(--green); color: white; }
 
     .timer {
-      padding: clamp(6px, 1.5vw, 8px) clamp(10px, 2.2vw, 14px);
-      background: #e1f5fe;
-      color: #01579b;
+      padding: 7px 14px;
+      background: var(--blue-light);
+      color: var(--blue-dark);
       border-radius: 999px;
-      font-weight: 600;
-      font-size: clamp(0.8rem, 2.2vw, 0.95rem);
-      min-width: 90px;
+      font-weight: 700;
+      font-size: clamp(0.75rem, 2vw, 0.88rem);
+      min-width: 82px;
       text-align: center;
     }
 
+    /* ── Board ── */
     .sudoku-container {
-      margin: 12px 0;
+      margin: 10px 0 6px;
       background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      display: flex;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+      display: inline-flex;
       justify-content: center;
       overflow: hidden;
-      max-width: 100%;
     }
 
     .grid {
       display: grid;
-      background: #0288d1;
+      background: var(--box-border);
       padding: 2px;
-      gap: 0; /* 配合 cell border 畫線 */
+      gap: 0;
     }
 
     .cell {
@@ -127,168 +122,159 @@
       align-items: center;
       justify-content: center;
       background: white;
-      font-weight: bold;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
       cursor: pointer;
       touch-action: manipulation;
+      position: relative;
+      transition: background 0.1s;
     }
 
-    .cell.given {
-      color: #01579b;
-      background: #e1f5fe !important;
-    }
+    .cell.given   { color: var(--blue-dark); background: var(--blue-light) !important; }
+    .cell.user    { color: var(--blue-mid); }
+    .cell.error   { background: var(--red-light) !important; color: var(--red); }
+    .cell.selected { background: var(--blue-select) !important; outline: 2.5px solid var(--blue-mid); outline-offset: -1px; }
+    .cell.highlight { background: #e8f4fd; }  /* same row/col/box as selected */
+    .cell.same-num  { background: #c5e5f7; }   /* same number as selected */
 
-    .cell.user {
-      color: #0288d1;
-    }
-
-    .cell.error {
-      background: #ffcdd2 !important;
-      color: #c62828;
-    }
-
-    .cell.selected {
-      background: #b3e5fc !important;
-      outline: 2px solid #0288d1;
-    }
-
-    .cell.note-cell {
-      font-weight: normal;
-      color: #90a4ae;
-    }
-
-    .number-pad {
+    /* Note grid inside cell */
+    .note-grid {
       display: grid;
-      gap: 6px;
-      margin-top: 14px;
       width: 100%;
-      max-width: 500px;
+      height: 100%;
+      padding: 1px;
+    }
+    .note-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #607d8b;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .note-num.active { color: var(--blue-mid); }
+
+    /* ── Number pad ── */
+    .pad-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      justify-content: center;
+      width: 100%;
+      max-width: 520px;
     }
 
     .num-btn {
+      flex: 1;
       padding: clamp(8px, 2.5vw, 12px) 0;
-      background: #e1f5fe;
-      color: #01579b;
-      font-size: clamp(1rem, 3vw, 1.2rem);
-      font-weight: bold;
-      border-radius: 6px;
+      background: var(--blue-light);
+      color: var(--blue-dark);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(1rem, 3.5vw, 1.3rem);
+      font-weight: 800;
+      border-radius: 8px;
       border: none;
       cursor: pointer;
       touch-action: manipulation;
+      transition: background 0.15s, transform 0.1s;
     }
+    .num-btn:active { transform: scale(0.93); background: var(--blue-select); }
 
+    /* ── Victory overlay ── */
     .victory-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65);
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
       z-index: 1000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.4s ease;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.35s;
     }
-
-    .victory-overlay.show {
-      opacity: 1;
-      pointer-events: all;
-    }
+    .victory-overlay.show { opacity: 1; pointer-events: all; }
 
     .victory-content {
       background: white;
       border-radius: 20px;
-      padding: clamp(20px, 6vw, 30px);
+      padding: clamp(20px, 6vw, 32px) clamp(24px, 7vw, 40px);
       text-align: center;
       max-width: 90%;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
       transform: scale(0.8);
-      transition: transform 0.4s ease;
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
     }
+    .victory-overlay.show .victory-content { transform: scale(1); }
 
-    .victory-overlay.show .victory-content {
-      transform: scale(1);
-    }
-
+    .victory-emoji { font-size: clamp(2.5rem, 10vw, 4rem); margin-bottom: 8px; }
     .victory-title {
-      font-size: clamp(1.8rem, 8vw, 2.6rem);
-      font-weight: bold;
-      margin-bottom: clamp(15px, 4vw, 20px);
-      color: #0288d1;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      font-size: clamp(1.6rem, 7vw, 2.4rem);
+      font-weight: 900;
+      color: var(--blue-mid);
+      margin-bottom: 6px;
     }
-
-    .victory-message {
-      font-size: clamp(1.2rem, 5vw, 1.6rem);
-      margin-bottom: clamp(20px, 5vw, 30px);
-      color: #01579b;
+    .victory-time {
+      font-size: clamp(1rem, 4vw, 1.3rem);
+      color: #78909c;
+      margin-bottom: 20px;
     }
-
-    .confetti {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background-color: #f00;
-      opacity: 0.7;
-      animation: fall 5s linear forwards;
-    }
-
-    @keyframes fall {
-      0% {
-        transform: translateY(-100px) rotate(0deg);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(100vh) rotate(360deg);
-        opacity: 0;
-      }
-    }
-
     #close-victory {
-      background: #0288d1;
-      color: white;
-      padding: clamp(8px, 2vw, 10px) clamp(16px, 4vw, 20px);
-      border-radius: 10px;
-      font-size: clamp(1rem, 3vw, 1.2rem);
-      cursor: pointer;
-      border: none;
-      touch-action: manipulation;
+      background: var(--blue-mid); color: white;
+      padding: 10px 24px; border-radius: 10px;
+      font-size: clamp(0.95rem, 3vw, 1.1rem);
     }
 
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      top: -20px;
+      border-radius: 2px;
+      opacity: 0.85;
+      animation: fall linear forwards;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* ── Toast message ── */
     .message {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.8);
+      bottom: 30px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(1,87,155,0.92);
       color: white;
-      padding: 15px 30px;
-      border-radius: 10px;
-      font-size: clamp(1rem, 4vw, 1.4rem);
+      padding: 11px 26px;
+      border-radius: 12px;
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+      font-weight: 700;
       z-index: 1001;
       opacity: 0;
-      transition: opacity 0.3s;
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+      white-space: nowrap;
     }
+    .message.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    .message.show {
-      opacity: 1;
+    /* ── Keyboard hint ── */
+    .hint {
+      font-size: 0.72rem;
+      color: #90a4ae;
+      margin-top: 6px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <h1>Shirley's Sudoku</h1>
+  <h1>✏️ Shirley's Sudoku</h1>
 
   <div class="controls">
-    <button class="difficulty-btn" data-size="4">初學 (4×4)</button>
-    <button class="difficulty-btn active" data-size="6">輕鬆 (6×6)</button>
-    <button class="difficulty-btn" data-size="9">挑戰 (9×9)</button>
-    <button id="reset-btn">重置</button>
-    <button id="undo-btn">撤銷</button>
-    <button id="note-btn">筆記</button>
-    <button id="check-btn">完成確認</button>
+    <button class="difficulty-btn" data-size="4">初學 4×4</button>
+    <button class="difficulty-btn active" data-size="6">輕鬆 6×6</button>
+    <button class="difficulty-btn" data-size="9">挑戰 9×9</button>
+    <button id="reset-btn">🔄 重置</button>
+    <button id="undo-btn">↩ 撤銷</button>
+    <button id="erase-btn">🧹 清除</button>
+    <button id="note-btn">✏️ 筆記</button>
+    <button id="check-btn">✅ 完成確認</button>
     <span id="timer" class="timer">⌛ 00:00</span>
   </div>
 
@@ -296,120 +282,75 @@
     <div class="grid" id="sudoku-grid"></div>
   </div>
 
-  <div class="number-pad" id="number-pad"></div>
+  <div class="pad-row" id="number-pad"></div>
 
+  <p class="hint">方向鍵移動格子 · Delete/Space 清除 · 點同數字清除</p>
+
+  <!-- Victory overlay -->
   <div class="victory-overlay" id="victory-overlay">
     <div class="victory-content">
-      <div class="victory-title" id="victory-title">數獨高手</div>
-      <div class="victory-message">恭喜您成功完成數獨！</div>
-      <button id="close-victory">繼續遊戲</button>
+      <div class="victory-emoji">🎉</div>
+      <div class="victory-title" id="victory-title">數獨高手！</div>
+      <div class="victory-time" id="victory-time">完成時間：00:00</div>
+      <button id="close-victory">再玩一局</button>
     </div>
   </div>
 
-  <div class="message" id="message">再看一下</div>
-
-  <audio id="victory-sound" preload="auto">
-    <source src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" type="audio/mpeg">
-  </audio>
+  <div class="message" id="message"></div>
 
   <script>
-    // 🚫 阻止所有干扰操作
-    document.documentElement.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
-    document.documentElement.addEventListener('touchstart', (e) => {
-      if (e.touches.length > 1) e.preventDefault();
-    }, { passive: false });
-
-    // ✅ 防止双击缩放 (iOS)
+    // ── Prevent scroll / zoom interference ──
+    document.documentElement.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+    document.documentElement.addEventListener('touchstart', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
     let lastTouchEnd = 0;
-    document.addEventListener('touchend', (e) => {
+    document.addEventListener('touchend', e => {
       const now = Date.now();
       if (now - lastTouchEnd <= 300) e.preventDefault();
       lastTouchEnd = now;
     }, false);
 
-    // 全局状态
+    // ── Global state ──
     let currentSize = 6;
-    let board = [];
-    let solution = [];
-    let given = [];
-    let selectedCell = null;
-    let selectedPos = null;
-
-    // 筆記與撤銷
-    let notes = [];
+    let board = [], solution = [], given = [], notes = [];
     let history = [];
     let noteMode = false;
+    let selectedPos = null;      // { row, col }
 
-    // 計時
-    let timerInterval = null;
-    let elapsedSeconds = 0;
+    // Timer
+    let timerInterval = null, elapsedSeconds = 0;
 
-    // 标准数独区块定义
+    // Box dimensions
     const difficulties = {
       4: { boxH: 2, boxW: 2 },
       6: { boxH: 2, boxW: 3 },
       9: { boxH: 3, boxW: 3 }
     };
 
-    // ===== 計時相關 =====
-    function updateTimerDisplay() {
-      const timerEl = document.getElementById('timer');
-      const minutes = Math.floor(elapsedSeconds / 60);
-      const seconds = elapsedSeconds % 60;
-      const mm = String(minutes).padStart(2, '0');
-      const ss = String(seconds).padStart(2, '0');
-      timerEl.textContent = `⌛ ${mm}:${ss}`;
+    // ── Fisher-Yates shuffle (FIXED – old version was biased) ──
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
     }
 
+    // ── Timer ──
+    function updateTimerDisplay() {
+      const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+      const s = String(elapsedSeconds % 60).padStart(2, '0');
+      document.getElementById('timer').textContent = `⌛ ${m}:${s}`;
+    }
     function startTimer() {
       clearInterval(timerInterval);
       elapsedSeconds = 0;
       updateTimerDisplay();
-      timerInterval = setInterval(() => {
-        elapsedSeconds++;
-        updateTimerDisplay();
-      }, 1000);
+      timerInterval = setInterval(() => { elapsedSeconds++; updateTimerDisplay(); }, 1000);
     }
+    function stopTimer() { clearInterval(timerInterval); timerInterval = null; }
 
-    function stopTimer() {
-      clearInterval(timerInterval);
-      timerInterval = null;
-    }
-
-    // ====================
-
-    function updateNoteButtonUI() {
-      const noteBtn = document.getElementById('note-btn');
-      if (noteMode) {
-        noteBtn.classList.add('active');
-        noteBtn.textContent = '筆記中';
-      } else {
-        noteBtn.classList.remove('active');
-        noteBtn.textContent = '筆記';
-      }
-    }
-
-    function initGame(size) {
-      currentSize = size;
-      document.querySelectorAll('.difficulty-btn').forEach(btn => {
-        btn.classList.toggle('active', parseInt(btn.dataset.size) === size);
-      });
-      history = [];
-      noteMode = false;
-      updateNoteButtonUI();
-      generatePuzzle(size);
-      renderGrid();
-      renderNumberPad();
-      clearSelection();
-      // 每次新遊戲重新開始計時
-      startTimer();
-    }
-
-    function shuffle(arr) {
-      return [...arr].sort(() => Math.random() - 0.5);
-    }
-
-    // 修正：檢查時排除目前這一格本身
+    // ── Validation (excludes current cell) ──
     function isValid(grid, row, col, num, size) {
       if (num === 0) return true;
       for (let x = 0; x < size; x++) {
@@ -417,24 +358,21 @@
         if (grid[x][col] === num && x !== row) return false;
       }
       const { boxH, boxW } = difficulties[size];
-      const startRow = row - (row % boxH);
-      const startCol = col - (col % boxW);
-      for (let i = 0; i < boxH; i++) {
+      const r0 = row - (row % boxH), c0 = col - (col % boxW);
+      for (let i = 0; i < boxH; i++)
         for (let j = 0; j < boxW; j++) {
-          const r = startRow + i;
-          const c = startCol + j;
+          const r = r0 + i, c = c0 + j;
           if (grid[r][c] === num && (r !== row || c !== col)) return false;
         }
-      }
       return true;
     }
 
+    // ── Solver ──
     function solve(grid, size) {
-      for (let row = 0; row < size; row++) {
-        for (let col = 0; col < size; col++) {
+      for (let row = 0; row < size; row++)
+        for (let col = 0; col < size; col++)
           if (grid[row][col] === 0) {
-            const nums = shuffle([...Array(size).keys()].map(n => n + 1));
-            for (const num of nums) {
+            for (const num of shuffle([...Array(size).keys()].map(n => n + 1))) {
               if (isValid(grid, row, col, num, size)) {
                 grid[row][col] = num;
                 if (solve(grid, size)) return true;
@@ -443,44 +381,26 @@
             }
             return false;
           }
-        }
-      }
       return true;
     }
 
-    // 產題：保證每列、每行至少保留一個提示
+    // ── Puzzle generation ──
     function generatePuzzle(size) {
-      solution = Array(size).fill().map(() => Array(size).fill(0));
+      solution = Array.from({ length: size }, () => Array(size).fill(0));
       solve(solution, size);
-      board = solution.map(row => [...row]);
-      given = Array(size).fill().map(() => Array(size).fill(true));
+      board = solution.map(r => [...r]);
+      given = Array.from({ length: size }, () => Array(size).fill(true));
+      notes = Array.from({ length: size }, () => Array.from({ length: size }, () => new Set()));
 
-      // 初始化筆記
-      notes = Array(size).fill().map(() =>
-        Array(size).fill(null).map(() => new Set())
-      );
-
-      const totalCells = size * size;
-      const removeCount = size === 4 ? 8 : (size === 6 ? 14 : 42);
-
-      const allCells = [];
-      for (let i = 0; i < size; i++)
-        for (let j = 0; j < size; j++)
-          allCells.push([i, j]);
-
-      const shuffled = shuffle(allCells);
-
-      // 每列每行目前剩餘提示數
+      const removeCount = size === 4 ? 8 : size === 6 ? 14 : 42;
+      const shuffled = shuffle(Array.from({ length: size * size }, (_, k) => [Math.floor(k / size), k % size]));
       const rowCount = Array(size).fill(size);
       const colCount = Array(size).fill(size);
-
       let removed = 0;
-      for (let k = 0; k < shuffled.length && removed < removeCount; k++) {
-        const [i, j] = shuffled[k];
 
-        // 確保不要讓某一列或某一行全空
+      for (const [i, j] of shuffled) {
+        if (removed >= removeCount) break;
         if (rowCount[i] <= 1 || colCount[j] <= 1) continue;
-
         board[i][j] = 0;
         given[i][j] = false;
         rowCount[i]--;
@@ -489,146 +409,99 @@
       }
     }
 
+    // ── Cell sizing ──
+    function getCellSize() {
+      const containerWidth = Math.min(500, window.innerWidth - 24);
+      return Math.floor(containerWidth / currentSize);
+    }
+    function getFontSizes(cellSize) {
+      return {
+        base: Math.max(10, Math.floor(cellSize * 0.45)),
+        note: Math.max(6, Math.floor(cellSize * 0.22))
+      };
+    }
+
+    // ── Note rendering inside a cell ──
+    function renderNoteContent(cell, cellNotes, cellSize) {
+      const size = currentSize;
+      const { note: noteFontSize } = getFontSizes(cellSize);
+      // For size 4: 2×2 grid, size 6: 2×3 grid, size 9: 3×3 grid
+      const cols = size <= 4 ? 2 : size <= 6 ? 3 : 3;
+      const rows = Math.ceil(size / cols);
+
+      const grid = document.createElement('div');
+      grid.className = 'note-grid';
+      grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+      grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+      for (let n = 1; n <= size; n++) {
+        const span = document.createElement('span');
+        span.className = 'note-num' + (cellNotes.has(n) ? ' active' : '');
+        span.textContent = cellNotes.has(n) ? n : '';
+        span.style.fontSize = noteFontSize + 'px';
+        grid.appendChild(span);
+      }
+      cell.innerHTML = '';
+      cell.appendChild(grid);
+    }
+
+    // ── Render full grid ──
     function renderGrid() {
       const gridEl = document.getElementById('sudoku-grid');
       const size = currentSize;
       gridEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
       gridEl.innerHTML = '';
 
-      const containerWidth = Math.min(500, window.innerWidth - 24);
-      const cellSize = Math.floor(containerWidth / size);
-      const baseFontSize = Math.max(10, Math.floor(cellSize * 0.4));
-      const noteFontSize = Math.max(8, Math.floor(cellSize * 0.25));
-
+      const cellSize = getCellSize();
+      const { base: baseFontSize } = getFontSizes(cellSize);
       const { boxH, boxW } = difficulties[size];
 
       for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
           const cell = document.createElement('div');
           cell.className = 'cell';
-          cell.style.width = cellSize + 'px';
-          cell.style.height = cellSize + 'px';
-
-          // 基本細線
-          cell.style.border = '1px solid #b3e5fc';
-
-          // 粗線畫出每個區塊
-          if (i % boxH === 0) {
-            cell.style.borderTop = '3px solid #01579b';
-          }
-          if (j % boxW === 0) {
-            cell.style.borderLeft = '3px solid #01579b';
-          }
-          if (i === size - 1) {
-            cell.style.borderBottom = '3px solid #01579b';
-          }
-          if (j === size - 1) {
-            cell.style.borderRight = '3px solid #01579b';
-          }
-
           cell.dataset.row = i;
           cell.dataset.col = j;
+          cell.style.width  = cellSize + 'px';
+          cell.style.height = cellSize + 'px';
 
-          const value = board[i][j];
-          const cellNotes = notes[i][j];
+          // Borders: thin default, thick at box boundaries
+          cell.style.border = `1px solid var(--cell-border)`;
+          if (i % boxH === 0)    cell.style.borderTop    = '3px solid var(--box-border)';
+          if (j % boxW === 0)    cell.style.borderLeft   = '3px solid var(--box-border)';
+          if (i === size - 1)    cell.style.borderBottom = '3px solid var(--box-border)';
+          if (j === size - 1)    cell.style.borderRight  = '3px solid var(--box-border)';
 
-          if (given[i][j]) {
-            cell.textContent = value;
-            cell.classList.add('given');
-            cell.style.fontSize = baseFontSize + 'px';
-          } else if (value !== 0) {
-            cell.textContent = value;
-            cell.classList.add('user');
-            cell.style.fontSize = baseFontSize + 'px';
-            if (!isValid(board, i, j, value, currentSize)) {
-              cell.classList.add('error');
-            }
-          } else if (cellNotes && cellNotes.size > 0) {
-            cell.textContent = Array.from(cellNotes).sort((a, b) => a - b).join('');
-            cell.classList.add('note-cell');
-            cell.style.fontSize = noteFontSize + 'px';
-          } else {
-            cell.textContent = '';
-            cell.style.fontSize = baseFontSize + 'px';
-          }
+          fillCell(cell, i, j, cellSize, baseFontSize);
 
-          const handler = (e) => {
+          // Use only click (touchstart → click is handled natively on mobile too)
+          // BUG FIX: was binding BOTH touchstart and click, causing double-fire on mobile
+          cell.addEventListener('pointerdown', e => {
             e.preventDefault();
-            e.stopPropagation();
             selectCell(i, j);
-          };
-          cell.addEventListener('click', handler);
-          cell.addEventListener('touchstart', handler, { passive: false });
+          });
+
           gridEl.appendChild(cell);
         }
       }
+
+      // Restore selection highlight
+      if (selectedPos) applyHighlights();
     }
 
-    function renderNumberPad() {
-      const pad = document.getElementById('number-pad');
-      pad.innerHTML = '';
-      const size = currentSize;
-      const cols = size <= 6 ? size : 9; // 9x9 也用 9 列
-      pad.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    // ── Fill a single cell's content and classes ──
+    function fillCell(cell, row, col, cellSize, baseFontSize) {
+      cellSize  = cellSize  || getCellSize();
+      baseFontSize = baseFontSize || getFontSizes(cellSize).base;
 
-      for (let n = 1; n <= size; n++) {
-        const btn = document.createElement('button');
-        btn.className = 'num-btn';
-        btn.textContent = n;
-        const handler = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          inputNumber(n);
-        };
-        btn.addEventListener('click', handler);
-        btn.addEventListener('touchstart', handler, { passive: false });
-        pad.appendChild(btn);
-      }
-    }
-
-    function clearSelection() {
-      if (selectedCell) selectedCell.classList.remove('selected');
-      selectedCell = null;
-      selectedPos = null;
-    }
-
-    function selectCell(row, col) {
-      if (given[row][col]) return;
-      clearSelection();
-      selectedCell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
-      selectedPos = { row, col };
-      if (selectedCell) {
-        selectedCell.classList.add('selected');
-      }
-    }
-
-    function recordHistory(row, col, prevValue, newValue, prevNotesSet, newNotesSet) {
-      history.push({
-        row,
-        col,
-        prevValue,
-        newValue,
-        prevNotes: prevNotesSet ? Array.from(prevNotesSet) : [],
-        newNotes: newNotesSet ? Array.from(newNotesSet) : []
-      });
-    }
-
-    function updateCellDisplay(row, col) {
-      const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
-      if (!cell) return;
-
-      const size = currentSize;
-      const containerWidth = Math.min(500, window.innerWidth - 24);
-      const cellSize = Math.floor(containerWidth / size);
-      const baseFontSize = Math.max(10, Math.floor(cellSize * 0.4));
-      const noteFontSize = Math.max(8, Math.floor(cellSize * 0.25));
-
-      cell.classList.remove('user', 'error', 'note-cell');
+      // Remove state classes (keep structural/selection ones separate)
+      cell.classList.remove('given', 'user', 'error', 'note-cell');
+      cell.innerHTML = '';
+      cell.style.fontSize = baseFontSize + 'px';
 
       if (given[row][col]) {
         cell.textContent = board[row][col];
         cell.classList.add('given');
-        cell.style.fontSize = baseFontSize + 'px';
         return;
       }
 
@@ -638,38 +511,111 @@
       if (value !== 0) {
         cell.textContent = value;
         cell.classList.add('user');
-        cell.style.fontSize = baseFontSize + 'px';
-        if (!isValid(board, row, col, value, currentSize)) {
-          cell.classList.add('error');
-        }
+        if (!isValid(board, row, col, value, currentSize)) cell.classList.add('error');
       } else if (cellNotes && cellNotes.size > 0) {
-        cell.textContent = Array.from(cellNotes).sort((a, b) => a - b).join('');
         cell.classList.add('note-cell');
-        cell.style.fontSize = noteFontSize + 'px';
-      } else {
-        cell.textContent = '';
-        cell.style.fontSize = baseFontSize + 'px';
+        renderNoteContent(cell, cellNotes, cellSize);
       }
+      // else: empty, nothing to render
+    }
+
+    // ── Update a single cell's display ──
+    function updateCellDisplay(row, col) {
+      const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+      if (cell) fillCell(cell, row, col);
+    }
+
+    // ── Re-validate all user cells (for undo / erase ripple effect) ──
+    function refreshAllErrors() {
+      for (let i = 0; i < currentSize; i++)
+        for (let j = 0; j < currentSize; j++)
+          if (!given[i][j] && board[i][j] !== 0)
+            updateCellDisplay(i, j);
+    }
+
+    // ── Highlight related cells ──
+    function applyHighlights() {
+      document.querySelectorAll('.cell').forEach(c => c.classList.remove('highlight', 'same-num', 'selected'));
+      if (!selectedPos) return;
+
+      const { row, col } = selectedPos;
+      const { boxH, boxW } = difficulties[currentSize];
+      const r0 = row - (row % boxH), c0 = col - (col % boxW);
+      const selVal = board[row][col];
+
+      document.querySelectorAll('.cell').forEach(c => {
+        const r = +c.dataset.row, cl = +c.dataset.col;
+        if (r === row && cl === col) {
+          c.classList.add('selected');
+        } else if (r === row || cl === col || (r >= r0 && r < r0 + boxH && cl >= c0 && cl < c0 + boxW)) {
+          c.classList.add('highlight');
+        }
+        // Highlight same number
+        if (selVal !== 0 && board[r][cl] === selVal && !(r === row && cl === col)) {
+          c.classList.add('same-num');
+        }
+      });
+    }
+
+    // ── Selection ──
+    function selectCell(row, col) {
+      // FIX: even given cells can be selected (to see highlights); just can't be edited
+      selectedPos = { row, col };
+      applyHighlights();
+    }
+
+    function clearSelection() {
+      selectedPos = null;
+      document.querySelectorAll('.cell').forEach(c => c.classList.remove('highlight', 'same-num', 'selected'));
+    }
+
+    // ── Note pad ──
+    function renderNumberPad() {
+      const pad = document.getElementById('number-pad');
+      pad.innerHTML = '';
+      const size = currentSize;
+      for (let n = 1; n <= size; n++) {
+        const btn = document.createElement('button');
+        btn.className = 'num-btn';
+        btn.textContent = n;
+        btn.addEventListener('pointerdown', e => { e.preventDefault(); inputNumber(n); });
+        pad.appendChild(btn);
+      }
+    }
+
+    // ── History ──
+    function recordHistory(row, col, prevValue, newValue, prevNotes, newNotes) {
+      history.push({ row, col, prevValue, newValue,
+        prevNotes: new Set(prevNotes), newNotes: new Set(newNotes) });
+    }
+
+    // ── Input ──
+    function eraseCell() {
+      if (!selectedPos) return;
+      const { row, col } = selectedPos;
+      if (given[row][col]) return;
+      const prevValue = board[row][col];
+      const prevNotes = new Set(notes[row][col] || []);
+      if (prevValue === 0 && prevNotes.size === 0) return;
+      board[row][col] = 0;
+      notes[row][col] = new Set();
+      recordHistory(row, col, prevValue, 0, prevNotes, new Set());
+      updateCellDisplay(row, col);
+      refreshAllErrors();
+      applyHighlights();
     }
 
     function toggleNote(num) {
       if (!selectedPos) return;
       const { row, col } = selectedPos;
-      if (given[row][col]) return;
-      if (board[row][col] !== 0) return; // 有答案就不寫筆記
-
+      if (given[row][col] || board[row][col] !== 0) return;
       const cellNotes = notes[row][col] || new Set();
       const prevNotes = new Set(cellNotes);
-
-      if (cellNotes.has(num)) {
-        cellNotes.delete(num);
-      } else {
-        cellNotes.add(num);
-      }
+      cellNotes.has(num) ? cellNotes.delete(num) : cellNotes.add(num);
       notes[row][col] = cellNotes;
-
-      recordHistory(row, col, board[row][col], board[row][col], prevNotes, cellNotes);
+      recordHistory(row, col, 0, 0, prevNotes, cellNotes);
       updateCellDisplay(row, col);
+      applyHighlights();
     }
 
     function inputNumber(num) {
@@ -677,143 +623,183 @@
       const { row, col } = selectedPos;
       if (given[row][col]) return;
 
-      if (noteMode) {
-        toggleNote(num);
-        return;
-      }
+      if (noteMode) { toggleNote(num); return; }
 
       const prevValue = board[row][col];
       const prevNotes = new Set(notes[row][col] || []);
 
-      // 再點一次同一數字 → 清除該格
       if (prevValue === num) {
+        // Tap same number → erase  (FIX: keep as toggle)
         board[row][col] = 0;
         notes[row][col] = new Set();
         recordHistory(row, col, prevValue, 0, prevNotes, new Set());
       } else {
         board[row][col] = num;
-        notes[row][col] = new Set(); // 填答案時清掉筆記
+        notes[row][col] = new Set();
         recordHistory(row, col, prevValue, num, prevNotes, new Set());
       }
-
       updateCellDisplay(row, col);
-    }
+      // FIX: refresh related cells so their error state updates too
+      refreshAllErrors();
+      applyHighlights();
 
-    function handleKeyboardInput(key) {
-      if (!selectedPos) return;
-      const { row, col } = selectedPos;
-      if (['Delete', 'Backspace', ' '].includes(key)) {
-        if (given[row][col]) return;
-        const prevValue = board[row][col];
-        const prevNotes = new Set(notes[row][col] || []);
-        if (prevValue === 0 && prevNotes.size === 0) return;
-
-        board[row][col] = 0;
-        notes[row][col] = new Set();
-        recordHistory(row, col, prevValue, 0, prevNotes, new Set());
-        updateCellDisplay(row, col);
-        return;
-      }
-      const num = parseInt(key);
-      if (!isNaN(num) && num >= 1 && num <= currentSize) {
-        inputNumber(num);
+      // Auto-check if board is fully filled
+      if (isBoardFull()) {
+        if (checkSolution()) setTimeout(showVictory, 200);
       }
     }
 
-    function resetGame() {
-      initGame(currentSize);
+    // ── Solution check ──
+    function isBoardFull() {
+      for (let i = 0; i < currentSize; i++)
+        for (let j = 0; j < currentSize; j++)
+          if (board[i][j] === 0) return false;
+      return true;
     }
 
+    // FIX: was passing even with zeros if solution had zeros (impossible but safe anyway)
+    function checkSolution() {
+      for (let i = 0; i < currentSize; i++)
+        for (let j = 0; j < currentSize; j++)
+          if (board[i][j] === 0 || board[i][j] !== solution[i][j]) return false;
+      return true;
+    }
+
+    // ── Undo ──
     function undoLast() {
       const action = history.pop();
       if (!action) return;
       const { row, col, prevValue, prevNotes } = action;
       board[row][col] = prevValue;
-      notes[row][col] = new Set(prevNotes || []);
+      notes[row][col] = new Set(prevNotes);
       updateCellDisplay(row, col);
+      // FIX: refresh all so error states update for cells affected by this undo
+      refreshAllErrors();
+      applyHighlights();
     }
 
-    function checkSolution() {
-      for (let i = 0; i < currentSize; i++) {
-        for (let j = 0; j < currentSize; j++) {
-          if (board[i][j] !== solution[i][j]) return false;
-        }
+    // ── Keyboard navigation ──
+    window.addEventListener('keydown', e => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+        if (!selectedPos) { selectCell(0, 0); return; }
+        let { row, col } = selectedPos;
+        if (e.key === 'ArrowUp')    row = Math.max(0, row - 1);
+        if (e.key === 'ArrowDown')  row = Math.min(currentSize - 1, row + 1);
+        if (e.key === 'ArrowLeft')  col = Math.max(0, col - 1);
+        if (e.key === 'ArrowRight') col = Math.min(currentSize - 1, col + 1);
+        selectCell(row, col);
+        return;
       }
-      return true;
+
+      if (['Delete', 'Backspace', ' '].includes(e.key)) {
+        e.preventDefault();
+        eraseCell();
+        return;
+      }
+
+      const num = parseInt(e.key);
+      if (!isNaN(num) && num >= 1 && num <= currentSize) {
+        e.preventDefault();
+        inputNumber(num);
+      }
+    });
+
+    // ── Note mode toggle ──
+    function updateNoteButtonUI() {
+      const btn = document.getElementById('note-btn');
+      btn.classList.toggle('active', noteMode);
+      btn.textContent = noteMode ? '✏️ 筆記中' : '✏️ 筆記';
     }
 
+    // ── Init ──
+    function initGame(size) {
+      currentSize = size;
+      document.querySelectorAll('.difficulty-btn').forEach(b =>
+        b.classList.toggle('active', parseInt(b.dataset.size) === size));
+      history = [];
+      noteMode = false;
+      updateNoteButtonUI();
+      selectedPos = null;
+      generatePuzzle(size);
+      renderGrid();
+      renderNumberPad();
+      startTimer();
+    }
+
+    // ── Victory ──
     function showVictory() {
-      const overlay = document.getElementById('victory-overlay');
-      const title = document.getElementById('victory-title');
-      if (currentSize === 4) title.textContent = "數獨新手";
-      else if (currentSize === 6) title.textContent = "數獨高手";
-      else title.textContent = "數獨王者";
-
-      // 過關時停止計時
       stopTimer();
+      const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+      const s = String(elapsedSeconds % 60).padStart(2, '0');
 
-      document.getElementById('victory-sound').play().catch(e => console.log("Audio play failed:", e));
-      overlay.classList.add('show');
+      const titles = { 4: '數獨新手 🌱', 6: '數獨高手 🌟', 9: '數獨王者 👑' };
+      document.getElementById('victory-title').textContent = titles[currentSize];
+      document.getElementById('victory-time').textContent = `完成時間：${m}:${s}`;
+
+      // FIX: clear old confetti before adding new
+      document.querySelectorAll('.confetti').forEach(c => c.remove());
       createConfetti();
+
+      document.getElementById('victory-overlay').classList.add('show');
     }
 
     function createConfetti() {
-      const colors = ['#f44336','#e91e63','#9c27b0','#673ab7','#3f51b5','#2196f3','#03a9f4','#00bcd4','#009688','#4CAF50'];
-      const overlay = document.getElementById('victory-overlay');
-      for (let i = 0; i < 120; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.left = Math.random() * 100 + 'vw';
-        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        confetti.style.width = Math.random() * 10 + 5 + 'px';
-        confetti.style.height = Math.random() * 10 + 5 + 'px';
-        confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
-        confetti.style.animationDelay = Math.random() * 2 + 's';
-        overlay.appendChild(confetti);
-        setTimeout(() => confetti.remove(), 6000);
+      const colors = ['#f44336','#e91e63','#9c27b0','#3f51b5','#2196f3','#00bcd4','#4CAF50','#ff9800','#ffeb3b','#00e676'];
+      for (let i = 0; i < 100; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left   = Math.random() * 100 + 'vw';
+        c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        c.style.width  = (Math.random() * 8 + 6) + 'px';
+        c.style.height = (Math.random() * 8 + 6) + 'px';
+        c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        const dur = (Math.random() * 2.5 + 2).toFixed(1);
+        const delay = (Math.random() * 1.5).toFixed(1);
+        c.style.animationDuration = dur + 's';
+        c.style.animationDelay   = delay + 's';
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), (parseFloat(dur) + parseFloat(delay)) * 1000 + 200);
       }
     }
 
+    // ── Toast ──
+    let msgTimeout;
     function showMessage(text) {
       const msg = document.getElementById('message');
       msg.textContent = text;
+      clearTimeout(msgTimeout);
       msg.classList.add('show');
-      setTimeout(() => msg.classList.remove('show'), 1500);
+      msgTimeout = setTimeout(() => msg.classList.remove('show'), 1800);
     }
 
-    // 全局键盘监听
-    window.addEventListener('keydown', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      handleKeyboardInput(e.key);
-      e.preventDefault();
-    });
-
-    // UI 事件绑定（统一处理 click + touchstart）
-    function bindButton(el, callback) {
-      el.addEventListener('click', (e) => { e.preventDefault(); callback(); });
-      el.addEventListener('touchstart', (e) => { e.preventDefault(); callback(); }, { passive: false });
+    // ── Button bindings ──
+    // FIX: Use a single pointerdown handler to avoid click+touchstart double-fire
+    function bind(id, fn) {
+      document.getElementById(id).addEventListener('pointerdown', e => { e.preventDefault(); fn(); });
     }
 
     document.querySelectorAll('.difficulty-btn').forEach(btn => {
-      bindButton(btn, () => initGame(parseInt(btn.dataset.size)));
+      btn.addEventListener('pointerdown', e => { e.preventDefault(); initGame(parseInt(btn.dataset.size)); });
     });
 
-    bindButton(document.getElementById('reset-btn'), resetGame);
-    bindButton(document.getElementById('undo-btn'), undoLast);
-    bindButton(document.getElementById('note-btn'), () => {
-      noteMode = !noteMode;
-      updateNoteButtonUI();
-    });
-    bindButton(document.getElementById('check-btn'), () => {
+    bind('reset-btn',  () => initGame(currentSize));
+    bind('undo-btn',   undoLast);
+    bind('erase-btn',  eraseCell);
+    bind('note-btn',   () => { noteMode = !noteMode; updateNoteButtonUI(); });
+    bind('check-btn',  () => {
+      if (!isBoardFull()) { showMessage('還沒填完喔！'); return; }
       if (checkSolution()) showVictory();
-      else showMessage("再看一下");
+      else showMessage('再看一下 🤔');
     });
-    bindButton(document.getElementById('close-victory'), () => {
+    bind('close-victory', () => {
       document.getElementById('victory-overlay').classList.remove('show');
-      resetGame();
+      initGame(currentSize);
     });
 
-    // 初始化
+    // ── Start ──
     initGame(6);
   </script>
 </body>
