@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Story Reading Contest</title>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:     #fdf8f3;
+  --rose:      #c97b84;
+  --rose-lt:   #e8b4ba;
+  --rose-dk:   #9c5560;
+  --rose-bg:   #f9edf0;
+  --rose-pale: #fdf0f2;
+  --sage:      #7aaa8a;
+  --sage-lt:   #aecfb8;
+  --sage-bg:   #eef6f1;
+  --gold:      #c9a96e;
+  --gold-lt:   #e8d5b0;
+  --text:      #3d2a2e;
+  --muted:     #9c7e83;
+  --shadow:    rgba(140,70,80,0.11);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;width:100%;}
+
+body {
+  font-family:'Quicksand',sans-serif;
+  background:var(--cream);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* Soft background texture */
+body::before {
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 65% 55% at 12% 18%, rgba(201,123,132,0.14) 0%,transparent 68%),
+    radial-gradient(ellipse 60% 50% at 88% 78%, rgba(122,170,138,0.12) 0%,transparent 68%),
+    radial-gradient(ellipse 50% 45% at 52% 52%, rgba(201,169,110,0.07) 0%,transparent 68%);
+}
+body::after {
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(201,123,132,0.14) 1px,transparent 1px);
+  background-size:26px 26px;
+}
+
+/* ── HEADER ── */
+.header {
+  position:relative;z-index:2;flex-shrink:0;
+  text-align:center;padding:16px 24px 10px;
+  border-bottom:1px solid rgba(201,123,132,0.16);
+  background:rgba(253,248,243,0.88);backdrop-filter:blur(8px);
+}
+.header-eyebrow {
+  font-size:0.68rem;font-weight:700;letter-spacing:0.22em;
+  text-transform:uppercase;color:var(--rose-lt);margin-bottom:3px;
+}
+.header-title {
+  font-family:'Playfair Display',serif;font-size:1.75rem;font-weight:700;
+  color:var(--rose-dk);line-height:1.1;
+}
+.header-title em{font-style:italic;color:var(--gold);}
+.header-deco {
+  display:flex;align-items:center;justify-content:center;gap:10px;margin-top:5px;
+}
+.header-deco span{font-size:0.7rem;font-weight:600;letter-spacing:0.14em;color:var(--muted);text-transform:uppercase;}
+.deco-line{flex:1;max-width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--rose-lt),transparent);}
+
+/* ── MAIN LAYOUT ── */
+.main {
+  flex:1;min-height:0;display:flex;gap:0;position:relative;z-index:1;overflow:hidden;
+}
+.divider {
+  width:1px;flex-shrink:0;margin:14px 0;
+  background:linear-gradient(180deg,transparent,rgba(201,123,132,0.22),rgba(201,123,132,0.22),transparent);
+}
+
+/* ── PANELS ── */
+.panel {
+  flex:1;min-width:0;display:flex;flex-direction:column;
+  padding:16px 20px 14px;overflow:hidden;
+}
+.panel-label {
+  display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-shrink:0;
+}
+.panel-label-dot{width:6px;height:6px;border-radius:50%;background:var(--rose-lt);flex-shrink:0;}
+.panel-label-text{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--rose-dk);letter-spacing:0.02em;}
+.panel-label-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(201,123,132,0.28),transparent);}
+
+/* ════════════════════════════
+   LEFT PANEL — TIMER
+════════════════════════════ */
+.panel-left {
+  background:linear-gradient(155deg,rgba(249,237,240,0.65) 0%,rgba(253,248,243,0.4) 100%);
+  align-items:center;justify-content:center;gap:12px;
+}
+
+.illus-wrap{width:100%;max-width:256px;flex-shrink:0;}
+
+.timer-pill {
+  display:flex;align-items:center;gap:6px;
+  background:var(--cream);border:1.5px solid var(--rose-lt);border-radius:50px;
+  padding:6px 18px;font-size:0.8rem;font-weight:700;color:var(--rose-dk);
+  box-shadow:0 2px 8px var(--shadow);letter-spacing:0.05em;flex-shrink:0;
+}
+.timer-pill span{color:var(--rose-lt);}
+
+.ring-outer{position:relative;width:160px;height:160px;flex-shrink:0;}
+.ring-svg{width:100%;height:100%;transform:rotate(-90deg);}
+.ring-track{fill:none;stroke:rgba(232,180,186,0.25);stroke-width:13;}
+.ring-fill{
+  fill:none;stroke:var(--rose);stroke-width:13;stroke-linecap:round;
+  stroke-dasharray:439.82;stroke-dashoffset:0;
+  transition:stroke-dashoffset 1s linear,stroke 0.5s;
+  filter:drop-shadow(0 0 5px rgba(201,123,132,0.4));
+}
+.ring-fill.warn {stroke:var(--gold);filter:drop-shadow(0 0 5px rgba(201,169,110,0.45));}
+.ring-fill.alert{stroke:#e05568;filter:drop-shadow(0 0 8px rgba(224,85,104,0.55));animation:flashStroke 0.45s alternate infinite;}
+@keyframes flashStroke{from{opacity:1}to{opacity:0.3}}
+
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.timer-num{
+  font-family:'Playfair Display',serif;font-size:3rem;font-weight:700;
+  color:var(--rose-dk);line-height:1;letter-spacing:0.03em;transition:color 0.4s;
+}
+.timer-num.warn {color:var(--gold);}
+.timer-num.alert{color:#e05568;animation:flashNum 0.45s alternate infinite;}
+@keyframes flashNum{from{opacity:1}to{opacity:0.38}}
+.timer-sub{font-size:0.6rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--rose-lt);margin-top:2px;}
+
+.timer-btns{display:flex;gap:10px;flex-shrink:0;}
+.tbtn{
+  font-family:'Quicksand',sans-serif;font-weight:700;font-size:0.88rem;
+  padding:10px 22px;border:none;border-radius:50px;cursor:pointer;
+  letter-spacing:0.05em;min-width:92px;
+  transition:transform 0.13s,box-shadow 0.13s;
+}
+.tbtn:active{transform:scale(0.91)!important;}
+.tbtn-start{
+  background:linear-gradient(135deg,var(--rose),var(--rose-dk));color:#fff;
+  box-shadow:0 4px 0 #7a3e47,0 6px 16px rgba(156,85,96,0.28);
+}
+.tbtn-start:hover{transform:translateY(-2px);box-shadow:0 6px 0 #7a3e47,0 10px 22px rgba(156,85,96,0.36);}
+.tbtn-start:disabled{background:#ddd;color:#aaa;box-shadow:none;cursor:not-allowed;transform:none;}
+.tbtn-reset{
+  background:var(--cream);color:var(--muted);
+  border:1.5px solid var(--rose-lt);
+  box-shadow:0 4px 0 var(--rose-lt),0 4px 10px var(--shadow);
+}
+.tbtn-reset:hover{transform:translateY(-2px);}
+.tbtn-reset:disabled{opacity:0.38;cursor:not-allowed;transform:none;}
+
+.timer-hints{
+  font-size:0.7rem;font-weight:600;color:var(--muted);
+  text-align:center;line-height:2;letter-spacing:0.02em;flex-shrink:0;
+}
+.hdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:3px;vertical-align:middle;}
+
+/* ════════════════════════════
+   RIGHT PANEL — NAME PICKER
+════════════════════════════ */
+.panel-right{
+  background:linear-gradient(155deg,rgba(238,246,241,0.58) 0%,rgba(253,248,243,0.4) 100%);
+}
+.panel-right .panel-label-dot{background:var(--sage-lt);}
+.panel-right .panel-label-text{color:#4a7a5a;}
+.panel-right .panel-label-line{background:linear-gradient(90deg,rgba(122,170,138,0.28),transparent);}
+
+.name-grid{
+  flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+  overflow-y:auto;padding-right:3px;min-height:0;
+}
+.name-grid::-webkit-scrollbar{width:3px;}
+.name-grid::-webkit-scrollbar-thumb{background:var(--rose-lt);border-radius:3px;}
+
+.p-card{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;
+  background:rgba(255,255,255,0.85);
+  border:1.5px solid rgba(201,123,132,0.18);
+  border-radius:16px;padding:10px 6px 8px;cursor:pointer;
+  transition:all 0.22s cubic-bezier(0.34,1.4,0.64,1);
+  box-shadow:0 2px 8px var(--shadow);
+  position:relative;overflow:hidden;
+  aspect-ratio:1/1;
+}
+.p-card:hover{
+  transform:translateY(-4px) scale(1.07);
+  box-shadow:0 10px 24px rgba(140,70,80,0.2);
+  border-color:var(--rose-lt);
+  background:var(--rose-pale);
+}
+.p-card:hover .monster-emoji{ display:inline-block; animation:wiggle 0.4s ease; }
+@keyframes wiggle{0%{transform:rotate(0)}25%{transform:rotate(-14deg)}75%{transform:rotate(14deg)}100%{transform:rotate(0)}}
+.p-card.done{
+  opacity:0.3;pointer-events:none;
+  background:#f3f3f3;border-color:#e0e0e0;
+  filter:grayscale(0.5);
+}
+.monster-emoji{
+  font-size:1.7rem;line-height:1;display:block;
+}
+.p-card-num{
+  font-size:0.6rem;font-weight:700;
+  color:var(--muted);letter-spacing:0.05em;
+}
+.p-card-hint{
+  font-size:0.5rem;font-weight:600;
+  color:var(--rose-lt);letter-spacing:0.06em;
+  text-transform:uppercase;
+}
+
+.reset-picks{
+  flex-shrink:0;margin-top:10px;width:100%;
+  font-family:'Quicksand',sans-serif;font-size:0.76rem;font-weight:700;
+  letter-spacing:0.08em;padding:8px 0;
+  border:1.5px dashed var(--sage-lt);border-radius:50px;
+  background:transparent;color:var(--sage);cursor:pointer;transition:all 0.2s;
+}
+.reset-picks:hover{background:var(--sage-bg);border-color:var(--sage);}
+
+/* ════════════════════════════
+   SPOTLIGHT — inside right panel
+════════════════════════════ */
+/* The spotlight sits inside .panel-right, replacing the grid */
+.spotlight-panel {
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  flex:1;
+  min-height:0;
+  text-align:center;
+  padding:10px 6px;
+  animation:panelFadeIn 0.35s cubic-bezier(0.34,1.4,0.64,1);
+}
+.spotlight-panel.show { display:flex; }
+@keyframes panelFadeIn{from{opacity:0;transform:translateY(14px) scale(0.95)}to{opacity:1;transform:none}}
+
+/* Decorative top flourish */
+.spot-flourish{font-size:1.6rem;margin-bottom:6px;animation:floatPetal 3s ease-in-out infinite alternate;}
+@keyframes floatPetal{from{transform:translateY(0) rotate(-8deg)}to{transform:translateY(-6px) rotate(8deg)}}
+
+.spot-badge{
+  display:inline-block;background:var(--rose-bg);border:1px solid var(--rose-lt);
+  border-radius:50px;padding:4px 14px;
+  font-size:0.62rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--rose-dk);margin-bottom:10px;
+}
+.spot-id{font-size:0.72rem;font-weight:600;color:var(--sage);letter-spacing:0.08em;margin-bottom:4px;}
+
+.spot-zh{
+  font-family:'Playfair Display',serif;font-size:3.2rem;font-weight:700;
+  color:var(--rose-dk);line-height:1;letter-spacing:0.02em;
+  animation:nameGlow 2.5s ease-in-out infinite alternate;
+}
+@keyframes nameGlow{
+  from{text-shadow:0 0 10px rgba(201,123,132,0.3);}
+  to  {text-shadow:0 0 26px rgba(201,123,132,0.65),0 2px 36px rgba(201,169,110,0.22);}
+}
+.spot-en{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:1.5rem;color:var(--gold);margin-top:5px;letter-spacing:0.04em;
+}
+.spot-divider{
+  width:50px;height:1.5px;margin:12px auto;
+  background:linear-gradient(90deg,transparent,var(--rose-lt),transparent);border-radius:2px;
+}
+.spot-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.spot-btn{
+  font-family:'Quicksand',sans-serif;font-weight:700;font-size:0.84rem;
+  padding:9px 20px;border:none;border-radius:50px;cursor:pointer;
+  letter-spacing:0.05em;transition:transform 0.13s,box-shadow 0.13s;
+}
+.spot-btn:active{transform:scale(0.91)!important;}
+.spot-btn-next{
+  background:linear-gradient(135deg,var(--rose),var(--rose-dk));color:#fff;
+  box-shadow:0 4px 0 #7a3e47,0 6px 14px rgba(156,85,96,0.26);
+}
+.spot-btn-next:hover{transform:translateY(-2px);box-shadow:0 6px 0 #7a3e47,0 10px 20px rgba(156,85,96,0.34);}
+.spot-btn-next:disabled{background:#ddd;color:#aaa;box-shadow:none;cursor:not-allowed;transform:none;}
+.spot-btn-close{background:var(--sage-bg);color:var(--sage);border:1.5px solid var(--sage-lt);box-shadow:0 4px 0 var(--sage-lt);}
+.spot-btn-close:hover{transform:translateY(-2px);}
+
+/* Mini petal decorations around name */
+.spot-petals{
+  display:flex;gap:8px;justify-content:center;margin-top:8px;
+  font-size:1.1rem;opacity:0.6;
+}
+
+
+/* ── RESPONSIVE ── */
+@media(max-width:700px){
+  body{overflow:auto;}
+  .main{flex-direction:column;overflow:visible;}
+  .divider{width:calc(100% - 32px);height:1px;margin:0 16px;
+    background:linear-gradient(90deg,transparent,rgba(201,123,132,0.22),transparent);}
+  .panel{padding:14px 14px 12px;}
+  .panel-left{align-items:center;}
+  .illus-wrap{max-width:200px;}
+  .ring-outer{width:140px;height:140px;}
+  .timer-num{font-size:2.5rem;}
+  .name-grid{max-height:44vh;}
+}
+@media(max-width:440px){
+  .header-title{font-size:1.4rem;}
+  .timer-num{font-size:2.1rem;}
+  .name-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-eyebrow">✦ Competition ✦</div>
+  <h1 class="header-title">Story Reading <em>Contest</em></h1>
+  <div class="header-deco">
+    <div class="deco-line"></div>
+    <span>Timer &amp; Name Picker</span>
+    <div class="deco-line"></div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ── LEFT: TIMER ── -->
+  <section class="panel panel-left">
+    <div class="panel-label">
+      <div class="panel-label-dot"></div>
+      <span class="panel-label-text">Reading Timer</span>
+      <div class="panel-label-line"></div>
+    </div>
+
+    <!-- Illustration -->
+    <div class="illus-wrap">
+      <svg viewBox="0 0 260 150" fill="none" xmlns="http://www.w3.org/2000/svg" width="100%">
+        <ellipse cx="130" cy="145" rx="115" ry="8" fill="#aecfb8" opacity="0.4"/>
+        <!-- Tree -->
+        <rect x="120" y="72" width="18" height="73" rx="8" fill="#c4a882"/>
+        <circle cx="129" cy="60" r="42" fill="#aecfb8"/>
+        <circle cx="103" cy="72" r="30" fill="#c8dfc9"/>
+        <circle cx="155" cy="70" r="30" fill="#c8dfc9"/>
+        <circle cx="129" cy="38" r="32" fill="#d4ead5"/>
+        <!-- Blossoms -->
+        <circle cx="112" cy="52" r="7" fill="#e8b4ba" opacity="0.9"/>
+        <circle cx="112" cy="52" r="3.5" fill="#fdf0f2" opacity="0.7"/>
+        <circle cx="146" cy="55" r="6" fill="#e8b4ba" opacity="0.9"/>
+        <circle cx="146" cy="55" r="3" fill="#fdf0f2" opacity="0.7"/>
+        <circle cx="129" cy="38" r="5" fill="#f5dab8" opacity="0.85"/>
+        <!-- Petals -->
+        <ellipse cx="72" cy="95" rx="4" ry="6" fill="#e8b4ba" opacity="0.45" transform="rotate(-25 72 95)"/>
+        <ellipse cx="185" cy="88" rx="3" ry="5" fill="#e8b4ba" opacity="0.38" transform="rotate(20 185 88)"/>
+        <!-- Ground flowers -->
+        <circle cx="26" cy="143" r="5" fill="#e8b4ba"/><circle cx="26" cy="143" r="2.5" fill="#f5dab8"/>
+        <circle cx="38" cy="141" r="4" fill="#aecfb8"/><circle cx="38" cy="141" r="2" fill="#d4ead5"/>
+        <circle cx="220" cy="141" r="4" fill="#e8b4ba"/><circle cx="220" cy="141" r="2" fill="#f5dab8"/>
+        <circle cx="232" cy="143" r="5" fill="#aecfb8"/><circle cx="232" cy="143" r="2.5" fill="#d4ead5"/>
+
+        <!-- KID 1: sitting -->
+        <rect x="14" y="120" width="10" height="22" rx="5" fill="#c9a96e" opacity="0.85"/>
+        <rect x="30" y="120" width="10" height="22" rx="5" fill="#c9a96e" opacity="0.85"/>
+        <ellipse cx="19" cy="144" rx="8" ry="5" fill="#9c7e83"/>
+        <ellipse cx="35" cy="144" rx="8" ry="5" fill="#9c7e83"/>
+        <rect x="10" y="93" width="40" height="30" rx="13" fill="#e8c4c8"/>
+        <rect x="0"  y="107" width="14" height="7" rx="3.5" fill="#f5dab8"/>
+        <rect x="40" y="107" width="14" height="7" rx="3.5" fill="#f5dab8"/>
+        <rect x="2" y="112" width="52" height="30" rx="6" fill="#b8d4bc"/>
+        <rect x="2" y="112" width="25" height="30" rx="6" fill="#aecfb8"/>
+        <line x1="28" y1="112" x2="28" y2="142" stroke="white" stroke-width="1.5"/>
+        <rect x="6"  y="119" width="16" height="2.5" rx="1" fill="white" opacity="0.65"/>
+        <rect x="6"  y="124" width="12" height="2.5" rx="1" fill="white" opacity="0.65"/>
+        <rect x="32" y="119" width="16" height="2.5" rx="1" fill="white" opacity="0.65"/>
+        <circle cx="30" cy="79" r="17" fill="#f5dab8"/>
+        <path d="M13 75 Q30 58 47 75" fill="#9c7e83"/>
+        <circle cx="16" cy="77" r="6" fill="#9c7e83"/>
+        <circle cx="44" cy="77" r="6" fill="#9c7e83"/>
+        <ellipse cx="24" cy="81" rx="3" ry="2.5" fill="white"/><circle cx="25" cy="82.5" r="1.8" fill="#3d2a2e"/>
+        <ellipse cx="36" cy="81" rx="3" ry="2.5" fill="white"/><circle cx="37" cy="82.5" r="1.8" fill="#3d2a2e"/>
+        <path d="M24 88 Q30 93 36 88" stroke="#c9a96e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <ellipse cx="19" cy="86" rx="4" ry="2.3" fill="#e8b4ba" opacity="0.5"/>
+        <ellipse cx="41" cy="86" rx="4" ry="2.3" fill="#e8b4ba" opacity="0.5"/>
+
+        <!-- KID 2: standing, reading aloud -->
+        <rect x="117" y="118" width="11" height="28" rx="5.5" fill="#e8b4ba"/>
+        <rect x="133" y="118" width="11" height="28" rx="5.5" fill="#e8b4ba"/>
+        <ellipse cx="122" cy="147" rx="8" ry="5" fill="#9c5560"/>
+        <ellipse cx="138" cy="147" rx="8" ry="5" fill="#9c5560"/>
+        <path d="M109 91 Q102 108 104 121 L158 121 Q160 108 151 91Z" fill="#e8c4c8"/>
+        <rect x="113" y="80" width="34" height="17" rx="9" fill="#e8c4c8"/>
+        <rect x="97" y="50" width="66" height="42" rx="7" fill="#aecfb8"/>
+        <rect x="97" y="50" width="31" height="42" rx="7" fill="#8dc4a0"/>
+        <line x1="129" y1="50" x2="129" y2="92" stroke="white" stroke-width="2"/>
+        <rect x="101" y="57" width="20" height="3" rx="1.5" fill="white" opacity="0.62"/>
+        <rect x="101" y="63" width="15" height="3" rx="1.5" fill="white" opacity="0.62"/>
+        <rect x="133" y="57" width="20" height="3" rx="1.5" fill="white" opacity="0.62"/>
+        <circle cx="130" cy="66" r="19" fill="#f5dab8"/>
+        <circle cx="112" cy="60" r="9" fill="#c9a96e"/>
+        <circle cx="148" cy="60" r="9" fill="#c9a96e"/>
+        <path d="M112 51 Q130 44 148 51" fill="#c9a96e"/>
+        <circle cx="124" cy="66" r="3.8" fill="white"/><circle cx="125" cy="67.5" r="2.3" fill="#3d2a2e"/>
+        <circle cx="136" cy="66" r="3.8" fill="white"/><circle cx="137" cy="67.5" r="2.3" fill="#3d2a2e"/>
+        <path d="M123 75 Q130 81 137 75" stroke="#c9a96e" stroke-width="2" fill="#f5dab8" stroke-linecap="round"/>
+        <ellipse cx="117" cy="73" rx="5" ry="3" fill="#e8b4ba" opacity="0.48"/>
+        <ellipse cx="143" cy="73" rx="5" ry="3" fill="#e8b4ba" opacity="0.48"/>
+        <path d="M157 46 Q174 38 177 50 Q180 62 163 63 Q159 70 153 67 Q160 65 162 58 Q172 56 169 47 Q166 40 157 46Z" fill="white" stroke="#e8b4ba" stroke-width="1.5"/>
+        <text x="158" y="56" font-size="7.5" fill="#9c5560" font-family="Quicksand" font-weight="700">Once...</text>
+
+        <!-- KID 3: glasses -->
+        <ellipse cx="222" cy="138" rx="22" ry="11" fill="#c9a96e" opacity="0.78"/>
+        <ellipse cx="208" cy="142" rx="9" ry="5.5" fill="#b8956a"/>
+        <ellipse cx="236" cy="142" rx="9" ry="5.5" fill="#b8956a"/>
+        <rect x="210" y="98" width="36" height="34" rx="12" fill="#e8b4ba"/>
+        <rect x="198" y="111" width="14" height="8" rx="4" fill="#f5dab8"/>
+        <rect x="234" y="111" width="14" height="8" rx="4" fill="#f5dab8"/>
+        <rect x="200" y="118" width="44" height="27" rx="5" fill="#b8d4bc"/>
+        <rect x="200" y="118" width="21" height="27" rx="5" fill="#aecfb8"/>
+        <line x1="222" y1="118" x2="222" y2="145" stroke="white" stroke-width="1.5"/>
+        <rect x="204" y="125" width="13" height="2.5" rx="1" fill="white" opacity="0.62"/>
+        <rect x="204" y="131" width="10" height="2.5" rx="1" fill="white" opacity="0.62"/>
+        <circle cx="222" cy="86" r="17" fill="#f5dab8"/>
+        <path d="M205 82 L209 70 L213 81 L217 68 L220 80 L224 68 L228 81 L232 70 L236 82" fill="#7aaa8a" stroke="#7aaa8a" stroke-width="1" stroke-linejoin="round"/>
+        <rect x="211" y="83" width="9" height="7" rx="3" fill="none" stroke="#9c7e83" stroke-width="1.8"/>
+        <rect x="224" y="83" width="9" height="7" rx="3" fill="none" stroke="#9c7e83" stroke-width="1.8"/>
+        <line x1="220" y1="86" x2="224" y2="86" stroke="#9c7e83" stroke-width="1.8"/>
+        <circle cx="215.5" cy="86.5" r="2" fill="#3d2a2e"/>
+        <circle cx="228.5" cy="86.5" r="2" fill="#3d2a2e"/>
+        <path d="M215 94 Q222 99 229 94" stroke="#c9a96e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <ellipse cx="208" cy="91" rx="4" ry="2.3" fill="#e8b4ba" opacity="0.48"/>
+        <ellipse cx="236" cy="91" rx="4" ry="2.3" fill="#e8b4ba" opacity="0.48"/>
+      </svg>
+    </div>
+
+    <div class="timer-pill"><span>✦</span> 2 min 30 sec <span>✦</span></div>
+
+    <div class="ring-outer">
+      <svg class="ring-svg" viewBox="0 0 160 160">
+        <circle class="ring-track" cx="80" cy="80" r="70"/>
+        <circle class="ring-fill"  id="ringFill" cx="80" cy="80" r="70"/>
+      </svg>
+      <div class="ring-center">
+        <div class="timer-num" id="timerNum">2:30</div>
+        <div class="timer-sub">remaining</div>
+      </div>
+    </div>
+
+    <div class="timer-btns">
+      <button class="tbtn tbtn-start" id="startBtn" onclick="toggleTimer()">▶ Start</button>
+      <button class="tbtn tbtn-reset" id="resetBtn" onclick="resetTimer()" disabled>↺ Reset</button>
+    </div>
+
+    <div class="timer-hints">
+      <span class="hdot" style="background:var(--gold)"></span>Last 30s — amber &nbsp;
+      <span class="hdot" style="background:#e05568"></span>Last 15s — red<br>
+      <span class="hdot" style="background:var(--sage)"></span>Time's up — celebrate 🎉
+    </div>
+  </section>
+
+  <!-- DIVIDER -->
+  <div class="divider"></div>
+
+  <!-- ── RIGHT: NAME PICKER ── -->
+  <section class="panel panel-right">
+    <div class="panel-label">
+      <div class="panel-label-dot" style="background:var(--sage-lt)"></div>
+      <span class="panel-label-text" style="color:#4a7a5a">Participants</span>
+      <div class="panel-label-line" style="background:linear-gradient(90deg,rgba(122,170,138,0.28),transparent)"></div>
+    </div>
+
+    <!-- Grid view -->
+    <div class="name-grid" id="nameGrid"></div>
+    <button class="reset-picks" id="resetPicksBtn" onclick="resetAllPicks()">↺ Reset All Picks</button>
+
+    <!-- Spotlight view (replaces grid inside panel) -->
+    <div class="spotlight-panel" id="spotlightPanel">
+      <div class="spot-flourish">🌸</div>
+      <div class="spot-badge">📖 Now Reading</div>
+      <div class="spot-id" id="spotId"></div>
+      <div class="spot-zh" id="spotZh"></div>
+      <div class="spot-en" id="spotEn"></div>
+      <div class="spot-petals">🌸 ✦ 🌸</div>
+      <div class="spot-divider"></div>
+      <div class="spot-btns">
+        <button class="spot-btn spot-btn-next"  id="spotNext" onclick="pickNext()">Next ▶</button>
+        <button class="spot-btn spot-btn-close" onclick="closeSpotlight()">☰ List</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* DATA */
+const PARTICIPANTS = [
+  {id:"2031MSa33",zh:"劉奕均",en:"Amy"},
+  {id:"2031MSb35",zh:"蘇采妍",en:"Ivy"},
+  {id:"2031MSb33",zh:"戴晨洋",en:"Colin"},
+  {id:"2031MSa15",zh:"莊鈞雅",en:"Miya"},
+  {id:"2031MSb4", zh:"吳品慧",en:"Sandy"},
+  {id:"2031MSa7", zh:"沈紘旭",en:"Jason"},
+  {id:"2031MSa8", zh:"周禹仲",en:"Austin"},
+  {id:"2031MSa22",zh:"陳湜",  en:"Elise"},
+  {id:"2031MSa19",zh:"陳宥羽",en:"Yoyo"},
+  {id:"2031MSb11",zh:"涂宥謙",en:"Kenny"},
+  {id:"2031MSa32",zh:"劉忻霖",en:"Cindy"},
+  {id:"2031MSa34",zh:"鄭傑鴻",en:"Jin"},
+  {id:"2031MSb7", zh:"林采緹",en:"Eeyore"},
+  {id:"2031MSb29",zh:"鄭沛婕",en:"Melody"},
+  {id:"2031MSb10",zh:"徐莉雯",en:"Doris"},
+  {id:"2031MSb26",zh:"廖奕翔",en:"Louis"},
+];
+
+/* ── NAME PICKER ── */
+let donePicks = new Set();
+let currentIdx = -1;
+
+const MONSTERS = ['🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐙','🦄','🐲'];
+const CARD_BGSLIST = [
+  'rgba(249,237,240,0.9)','rgba(238,246,241,0.9)','rgba(255,248,230,0.9)',
+  'rgba(235,240,255,0.9)','rgba(255,240,245,0.9)','rgba(235,255,245,0.9)',
+  'rgba(255,245,230,0.9)','rgba(240,235,255,0.9)',
+];
+PARTICIPANTS.forEach((p, i) => {
+  const c = document.createElement('div');
+  c.className = 'p-card'; c.id = 'card-'+i;
+  c.style.background = CARD_BGSLIST[i % CARD_BGSLIST.length];
+  c.innerHTML = `
+    <span class="monster-emoji">${MONSTERS[i % MONSTERS.length]}</span>
+    <div class="p-card-num">No. ${i+1}</div>
+    <div class="p-card-hint">✦ tap ✦</div>`;
+  c.onclick = () => pickParticipant(i);
+  document.getElementById('nameGrid').appendChild(c);
+});
+
+const nameGrid      = document.getElementById('nameGrid');
+const resetPicksBtn = document.getElementById('resetPicksBtn');
+const spotlightPanel= document.getElementById('spotlightPanel');
+
+function showSpotlight() {
+  nameGrid.style.display      = 'none';
+  resetPicksBtn.style.display = 'none';
+  // re-trigger animation
+  spotlightPanel.classList.remove('show');
+  void spotlightPanel.offsetWidth;
+  spotlightPanel.classList.add('show');
+}
+function closeSpotlight() {
+  spotlightPanel.classList.remove('show');
+  nameGrid.style.display      = '';
+  resetPicksBtn.style.display = '';
+}
+
+function pickParticipant(idx) {
+  currentIdx = idx;
+  const p = PARTICIPANTS[idx];
+  document.getElementById('spotId').textContent = p.id;
+  document.getElementById('spotZh').textContent = p.zh;
+  document.getElementById('spotEn').textContent = p.en || '';
+  document.getElementById('spotNext').disabled  = false;
+  donePicks.add(idx); refreshCards();
+  showSpotlight();
+  shootConfetti();
+}
+
+function pickNext() {
+  let next = -1;
+  for (let i = currentIdx+1; i < PARTICIPANTS.length; i++) {
+    if (!donePicks.has(i)) { next = i; break; }
+  }
+  if (next === -1) { document.getElementById('spotNext').disabled = true; return; }
+  pickParticipant(next);
+}
+
+function refreshCards() {
+  PARTICIPANTS.forEach((_,i) => {
+    const el = document.getElementById('card-'+i);
+    if (el) el.classList.toggle('done', donePicks.has(i));
+  });
+}
+function resetAllPicks() { donePicks.clear(); currentIdx=-1; refreshCards(); closeSpotlight(); }
+
+/* ── TIMER ── */
+const TOTAL = 150, CIRC = 2*Math.PI*70;
+let remaining=TOTAL, running=false, interval=null, duration=TOTAL*1000, startTs=0, audioCtx=null;
+
+const timerNum = document.getElementById('timerNum');
+const ringFill  = document.getElementById('ringFill');
+const startBtn  = document.getElementById('startBtn');
+const resetBtn  = document.getElementById('resetBtn');
+
+ringFill.style.strokeDasharray  = CIRC;
+ringFill.style.strokeDashoffset = 0;
+
+function fmt(s){ return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
+
+function updateTimerUI() {
+  timerNum.textContent = fmt(remaining);
+  ringFill.style.strokeDashoffset = CIRC*(1-remaining/TOTAL);
+  const al = remaining<=15, wn = remaining<=30 && !al;
+  timerNum.classList.toggle('warn',wn); timerNum.classList.toggle('alert',al);
+  ringFill.classList.toggle('warn',wn); ringFill.classList.toggle('alert',al);
+}
+
+function startTimer() {
+  if (remaining<=0) return;
+  running=true; startBtn.textContent='⏸ Pause'; resetBtn.disabled=false;
+  duration=remaining*1000; startTs=Date.now();
+  interval=setInterval(tick,80);
+}
+function tick() {
+  remaining=Math.max(0,Math.ceil((duration-(Date.now()-startTs))/1000));
+  updateTimerUI();
+  if (remaining<=0){ clearInterval(interval); timerDone(); }
+}
+function pauseTimer() { clearInterval(interval); running=false; startBtn.textContent='▶ Resume'; }
+function toggleTimer() { if(!running) startTimer(); else pauseTimer(); }
+function timerDone() {
+  running=false; startBtn.textContent='▶ Start'; startBtn.disabled=true; resetBtn.disabled=false;
+  playAlarm(); shootConfetti();
+}
+function resetTimer() {
+  clearInterval(interval); running=false; remaining=TOTAL; duration=TOTAL*1000; startTs=0;
+  timerNum.classList.remove('warn','alert'); ringFill.classList.remove('warn','alert');
+  updateTimerUI(); startBtn.textContent='▶ Start'; startBtn.disabled=false; resetBtn.disabled=true;
+}
+function playAlarm() {
+  try {
+    if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    [880,660,880,1100].forEach((f,i)=>{
+      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.connect(g);g.connect(audioCtx.destination);
+      o.type='sine';o.frequency.value=f;g.gain.value=0.22;
+      const t=audioCtx.currentTime+i*0.26;
+      o.start(t);g.gain.exponentialRampToValueAtTime(0.001,t+0.24);o.stop(t+0.25);
+    });
+  }catch(e){}
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance("Time's up! Wonderful reading!");
+    u.lang='en-US';u.volume=1;u.rate=0.92;u.pitch=1.1;speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* CONFETTI */
+function shootConfetti() {
+  if(typeof confetti==='undefined') return;
+  const c=['#c97b84','#e8b4ba','#c9a96e','#e8d5b0','#7aaa8a','#aecfb8','#f5dab8'];
+  confetti({particleCount:90,spread:74,origin:{y:0.55},colors:c});
+  setTimeout(()=>confetti({particleCount:55,angle:60, spread:58,origin:{x:0,y:0.55},colors:c}),260);
+  setTimeout(()=>confetti({particleCount:55,angle:120,spread:58,origin:{x:1,y:0.55},colors:c}),520);
+}
+
+updateTimerUI();
+</script>
+</body>
+</html>
