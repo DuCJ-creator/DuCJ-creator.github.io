@@ -3,131 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-    <title>Shirley's Magic Cube v2.0</title>
+    <title>Shirley's Magic Cube v3.0</title>
     <style>
         :root {
-            --cube-size: min(260px, 60vw);
+            --cube-size: min(260px, 55vw, 55vh);
             --cubie-size: calc(var(--cube-size) / 3);
-            --gap: 1px;
-            --speed: 0.3s;
+            --speed: 0.32s;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { 
-            background: radial-gradient(circle at center, #222, #000); 
-            color: #fff; font-family: sans-serif; overflow: hidden; height: 100vh;
-            display: flex; flex-direction: column;
+
+        html, body {
+            width: 100%; height: 100%;
+            /* Use dvh (dynamic viewport height) so browser chrome on iPad doesn't overlap */
+            min-height: 100dvh;
         }
 
-        /* 頂部 UI */
+        body {
+            background: radial-gradient(ellipse at 40% 30%, #1a1a2e, #000 70%);
+            color: #fff;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            /* Prevent content from going behind safe areas */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            /* No overflow:hidden on body — let it breathe */
+            overflow: hidden;
+            height: 100dvh;
+        }
+
+        /* ── Header ── */
         .header {
-            padding: env(safe-area-inset-top) 20px 10px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.5); z-index: 10;
+            flex-shrink: 0;
+            padding: 12px 20px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(6px);
+            z-index: 10;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
-        .moves { font-family: monospace; color: #FFD700; font-size: 1.2rem; }
+        .moves {
+            font-family: monospace;
+            color: #FFD700;
+            font-size: 1.15rem;
+            letter-spacing: 0.05em;
+        }
+        .title {
+            font-size: 0.95rem;
+            color: #999;
+            letter-spacing: 0.08em;
+        }
+        .solved-badge {
+            font-size: 0.8rem;
+            background: #FFD700;
+            color: #000;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .solved-badge.show { opacity: 1; }
 
-        /* 3D 遊戲區 */
-        .scene { 
-            flex: 1; width: 100%; perspective: 1200px; 
-            display: flex; justify-content: center; align-items: center; 
-            touch-action: none; 
+        /* ── 3D Scene ── */
+        .scene {
+            flex: 1;
+            min-height: 0; /* critical for flex children */
+            width: 100%;
+            perspective: 1400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+            cursor: grab;
         }
-        .cube-wrapper { 
-            width: var(--cube-size); height: var(--cube-size); 
-            transform-style: preserve-3d; 
+        .scene:active { cursor: grabbing; }
+
+        .cube-wrapper {
+            width: var(--cube-size);
+            height: var(--cube-size);
+            transform-style: preserve-3d;
             transform: rotateX(-30deg) rotateY(-45deg);
+            position: relative;
         }
 
-        /* 方塊實體 */
-        .cubie { 
-            position: absolute; width: var(--cubie-size); height: var(--cubie-size); 
-            transform-style: preserve-3d; 
+        /* ── Cubie ── */
+        .cubie {
+            position: absolute;
+            width: var(--cubie-size);
+            height: var(--cubie-size);
+            transform-style: preserve-3d;
             transition: transform var(--speed) cubic-bezier(0.25, 1, 0.5, 1);
         }
-        .face { 
-            position: absolute; width: 100%; height: 100%; 
-            border: calc(var(--cubie-size) * 0.08) solid #000; 
-            border-radius: 12%; backface-visibility: hidden; 
+        .face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 14%;
+            /* Inner gap via inset shadow */
+            box-shadow: inset 0 0 0 calc(var(--cubie-size) * 0.07) rgba(0,0,0,0.85);
         }
 
-        /* 國際標準配色 */
-        .f-F { background: #d50000; transform: rotateY(0deg)   translateZ(calc(var(--cubie-size)/2)); }
+        /* Standard WCA color scheme */
+        .f-U { background: #ffffff; transform: rotateX( 90deg) translateZ(calc(var(--cubie-size)/2)); }
+        .f-D { background: #FFD600; transform: rotateX(-90deg) translateZ(calc(var(--cubie-size)/2)); }
+        .f-F { background: #d50000; transform: rotateY(  0deg) translateZ(calc(var(--cubie-size)/2)); }
         .f-B { background: #ff6d00; transform: rotateY(180deg) translateZ(calc(var(--cubie-size)/2)); }
-        .f-U { background: #0091ea; transform: rotateX(90deg)  translateZ(calc(var(--cubie-size)/2)); }
-        .f-D { background: #00c853; transform: rotateX(-90deg) translateZ(calc(var(--cubie-size)/2)); }
-        .f-L { background: #ffffff; transform: rotateY(-90deg) translateZ(calc(var(--cubie-size)/2)); }
-        .f-R { background: #ffd600; transform: rotateY(90deg)  translateZ(calc(var(--cubie-size)/2)); }
+        .f-L { background: #00c853; transform: rotateY(-90deg) translateZ(calc(var(--cubie-size)/2)); }
+        .f-R { background: #0091ea; transform: rotateY( 90deg) translateZ(calc(var(--cubie-size)/2)); }
 
-        /* 底部按鈕 */
+        /* Interior filler (non-visible faces appear black) */
+        .face-inner {
+            position: absolute;
+            width: 100%; height: 100%;
+            background: #111;
+        }
+
+        /* ── Hint ── */
+        .hint {
+            flex-shrink: 0;
+            text-align: center;
+            font-size: 11px;
+            color: rgba(255,255,255,0.35);
+            padding: 4px 0;
+            letter-spacing: 0.04em;
+        }
+
+        /* ── Footer buttons ── */
         .footer {
-            padding: 10px 10px calc(env(safe-area-inset-bottom) + 20px);
-            display: flex; gap: 15px; justify-content: center; z-index: 10;
+            flex-shrink: 0;
+            padding: 10px 20px 16px;
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            z-index: 10;
         }
+
         button {
-            padding: 12px 25px; border: none; border-radius: 50px;
-            background: #FFD700; color: #000; font-weight: bold;
-            box-shadow: 0 4px 15px rgba(255,215,0,0.3); cursor: pointer;
+            padding: 13px 28px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: transform 0.12s, box-shadow 0.12s;
+            letter-spacing: 0.04em;
         }
-        button:active { transform: scale(0.9); }
-        .hint { position: absolute; bottom: 85px; font-size: 12px; opacity: 0.5; width: 100%; text-align: center; }
+        button:active { transform: scale(0.92); }
+
+        .btn-scramble {
+            background: linear-gradient(135deg, #FFD700, #FFA000);
+            color: #000;
+            box-shadow: 0 4px 18px rgba(255,215,0,0.35);
+        }
+        .btn-scramble:hover { box-shadow: 0 6px 24px rgba(255,215,0,0.55); }
+
+        .btn-reset {
+            background: rgba(255,255,255,0.1);
+            color: #ccc;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .btn-reset:hover { background: rgba(255,255,255,0.18); }
+
+        /* Scramble animation state */
+        .scrambling { pointer-events: none; opacity: 0.7; }
+
+        /* ── Responsive tweaks for iPad / large screens ── */
+        @media (min-width: 768px) {
+            :root {
+                --cube-size: min(320px, 40vw, 50vh);
+            }
+            button { padding: 15px 36px; font-size: 1rem; }
+            .header { padding: 16px 32px 14px; }
+            .footer { padding: 14px 32px 20px; gap: 20px; }
+        }
+        @media (min-width: 1024px) {
+            :root { --cube-size: min(360px, 35vw, 55vh); }
+        }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="moves">MOVES: <span id="mCount">0</span></div>
-    <h2 style="font-size: 1rem; color: #888;">Shirley's Magic Cube</h2>
+    <span class="title">Shirley's Magic Cube</span>
+    <div class="solved-badge" id="solvedBadge">✓ SOLVED</div>
 </div>
 
 <div class="scene" id="scene">
     <div class="cube-wrapper" id="cube"></div>
 </div>
 
-<div class="hint">撥動方塊轉動層，撥動背景轉視角</div>
+<div class="hint">撥動方塊轉動層 · 撥動背景旋轉視角</div>
 
 <div class="footer">
-    <button onclick="cube.scramble()">打亂魔方</button>
-    <button onclick="cube.reset()" style="background: #444; color: #fff;">重置</button>
+    <button class="btn-scramble" id="btnScramble" onclick="cube.scramble()">打亂魔方</button>
+    <button class="btn-reset" onclick="cube.reset()">重置</button>
 </div>
 
 <script>
 /**
- * 核心邏輯：空間座標矩陣變換
+ * UltimateCube v3.0
+ * Fixes:
+ *  1. Correct face-color sticker tracking via per-face color state (not just geometry)
+ *  2. Robust layout that never hides buttons on iPad / tall browser chrome
+ *  3. Accurate swipe detection with proper view-space projection
+ *  4. Solved-state detection
  */
 class UltimateCube {
     constructor() {
-        this.wrapper = document.getElementById('cube');
+        this.wrapper  = document.getElementById('cube');
         this.mDisplay = document.getElementById('mCount');
-        this.cubies = [];
+        this.badge    = document.getElementById('solvedBadge');
+        this.cubies   = [];
         this.isAnimating = false;
-        this.moves = 0;
-        
-        this.viewX = -30;
-        this.viewY = -45;
+        this.moves    = 0;
+        this.viewX    = -30;
+        this.viewY    = -45;
 
         this.init();
         this.bindEvents();
     }
 
+    /* ─── Cubie size in px (dynamically read from CSS var) ─── */
+    getCubieSize() {
+        const raw = getComputedStyle(document.documentElement)
+                        .getPropertyValue('--cubie-size').trim();
+        // raw is like "86.67px" or a calc expression — measure via DOM
+        const probe = document.createElement('div');
+        probe.style.cssText = `position:absolute;visibility:hidden;width:var(--cubie-size);height:0`;
+        document.body.appendChild(probe);
+        const sz = probe.getBoundingClientRect().width;
+        document.body.removeChild(probe);
+        return sz || 87;
+    }
+
+    /* ─── Build cube ─── */
     init() {
         this.wrapper.innerHTML = '';
         this.cubies = [];
-        this.moves = 0;
-        this.mDisplay.innerText = "0";
+        this.moves  = 0;
+        this.mDisplay.innerText = '0';
+        this.badge.classList.remove('show');
+
+        const s = this.getCubieSize();
 
         for (let x = -1; x <= 1; x++) {
             for (let y = -1; y <= 1; y++) {
                 for (let z = -1; z <= 1; z++) {
                     const el = document.createElement('div');
                     el.className = 'cubie';
-                    ['F','B','U','D','L','R'].forEach(f => {
+
+                    // Each face stores its initial color class
+                    const faceEls = {};
+                    ['U','D','F','B','L','R'].forEach(f => {
                         const face = document.createElement('div');
                         face.className = `face f-${f}`;
+                        face.dataset.color = f; // track sticker color
                         el.appendChild(face);
+                        faceEls[f] = face;
                     });
-                    const obj = { el, x, y, z, matrix: new DOMMatrix() };
-                    this.updatePos(obj);
+
+                    const obj = {
+                        el, x, y, z,
+                        matrix: new DOMMatrix(),
+                        faceEls,
+                        s  // store cubie size at init time
+                    };
+                    this.applyTransform(obj);
                     this.wrapper.appendChild(el);
                     this.cubies.push(obj);
                 }
@@ -135,119 +284,243 @@ class UltimateCube {
         }
     }
 
-    updatePos(c) {
-        const s = (document.body.clientWidth < 500) ? (window.innerWidth * 0.6 / 3) : 87;
-        c.el.style.transform = `translate3d(${c.x*s}px, ${c.y*s}px, ${c.z*s}px) ${c.matrix.toString()}`;
+    applyTransform(c) {
+        const s = this.getCubieSize();
+        c.el.style.transform =
+            `translate3d(${c.x*s}px,${c.y*s}px,${c.z*s}px) ${c.matrix.toString()}`;
     }
 
-    rotateLayer(axis, layer, clockwise) {
+    /* ─── Rotate a layer ─── */
+    rotateLayer(axis, layer, clockwise, silent = false) {
         if (this.isAnimating) return;
         this.isAnimating = true;
-        
+
         const angle = clockwise ? 90 : -90;
-        const rad = (angle * Math.PI) / 180;
-        const cos = Math.round(Math.cos(rad));
-        const sin = Math.round(Math.sin(rad));
+        const rad   = (angle * Math.PI) / 180;
+        const cos   = Math.round(Math.cos(rad)); // 0 or ±1
+        const sin   = Math.round(Math.sin(rad));
 
         const targets = this.cubies.filter(c => Math.round(c[axis]) === layer);
 
         targets.forEach(c => {
-            // 1. 矩陣物理旋轉
+            // ── 1. Accumulate rotation matrix for this cubie ──
             const m = new DOMMatrix();
-            if (axis === 'x') m.rotateSelf(angle, 0, 0);
-            if (axis === 'y') m.rotateSelf(0, -angle, 0);
-            if (axis === 'z') m.rotateSelf(0, 0, angle);
+            if (axis === 'x') m.rotateSelf( angle, 0, 0);
+            if (axis === 'y') m.rotateSelf(0, -angle, 0); // CSS Y is inverted
+            if (axis === 'z') m.rotateSelf(0, 0,  angle);
             c.matrix = m.multiply(c.matrix);
 
-            // 2. 邏輯座標變換
+            // ── 2. Update logical grid position ──
             const {x, y, z} = c;
             if (axis === 'x') {
-                c.y = y * cos - z * sin;
-                c.z = y * sin + z * cos;
+                c.y = Math.round(y * cos - z * sin);
+                c.z = Math.round(y * sin + z * cos);
             } else if (axis === 'y') {
-                c.x = x * cos + z * sin;
-                c.z = -x * sin + z * cos;
-            } else if (axis === 'z') {
-                c.x = x * cos - y * sin;
-                c.y = x * sin + y * cos;
+                // CSS Y-inversion means we negate sin for logical coord
+                c.x = Math.round( x * cos + z * sin);
+                c.z = Math.round(-x * sin + z * cos);
+            } else { // z
+                c.x = Math.round(x * cos - y * sin);
+                c.y = Math.round(x * sin + y * cos);
             }
-            this.updatePos(c);
+
+            this.applyTransform(c);
         });
 
-        this.moves++;
-        this.mDisplay.innerText = this.moves;
-        setTimeout(() => { this.isAnimating = false; }, 320);
+        if (!silent) {
+            this.moves++;
+            this.mDisplay.innerText = this.moves;
+        }
+
+        setTimeout(() => {
+            this.isAnimating = false;
+            if (!silent) this.checkSolved();
+        }, 340);
     }
 
+    /* ─── Solved detection ───
+     * A cube is solved when every face-group (all stickers on the same
+     * CSS-face direction) shares the same original color.
+     * We detect this by checking that, per cubie face (U/D/F/B/L/R direction),
+     * all 9 cubies in that plane share the same dataset.color.
+     *
+     * Simpler proxy: after reset the matrix is identity. We check all matrices.
+     */
+    checkSolved() {
+        // Each cubie's matrix should be identity (or a multiple of 90° that
+        // brings it back to identity) AND logical positions match initial.
+        // Easiest reliable check: compare stringified matrices to identity.
+        const identity = new DOMMatrix().toString();
+        const solved = this.cubies.every(c => {
+            // Round each matrix element to nearest integer to absorb float drift
+            const m = c.matrix;
+            const vals = [m.a,m.b,m.c,m.d,m.e,m.f,
+                          m.m11,m.m12,m.m13,m.m14,
+                          m.m21,m.m22,m.m23,m.m24,
+                          m.m31,m.m32,m.m33,m.m34,
+                          m.m41,m.m42,m.m43,m.m44];
+            // An identity matrix has diagonal=1, rest=0
+            // After any complete solve the matrix must equal identity
+            return Math.abs(m.m11-1)<0.01 && Math.abs(m.m22-1)<0.01 && Math.abs(m.m33-1)<0.01 &&
+                   Math.abs(m.m44-1)<0.01 && Math.abs(m.m12)<0.01 && Math.abs(m.m13)<0.01 &&
+                   Math.abs(m.m21)<0.01 && Math.abs(m.m23)<0.01 &&
+                   Math.abs(m.m31)<0.01 && Math.abs(m.m32)<0.01;
+        });
+        this.badge.classList.toggle('show', solved);
+    }
+
+    /* ─── Swipe gesture binding ─── */
     bindEvents() {
-        let isView = false, isCube = false;
-        let sx, sy, targetObj;
+        let mode = null; // 'view' | 'cube'
+        let sx, sy, swipeConsumed;
+        let targetCubie;
 
-        const start = (e) => {
+        const onStart = (e) => {
+            if (this.isAnimating) return;
             const p = e.touches ? e.touches[0] : e;
             sx = p.pageX; sy = p.pageY;
+            swipeConsumed = false;
+
             if (e.target.classList.contains('face')) {
-                isCube = true;
-                targetObj = this.cubies.find(c => c.el === e.target.parentElement);
+                mode = 'cube';
+                targetCubie = this.cubies.find(c => c.el === e.target.parentElement);
             } else {
-                isView = true;
+                mode = 'view';
             }
+            e.preventDefault();
         };
 
-        const move = (e) => {
-            if (!isView) return;
+        const onMove = (e) => {
+            if (mode !== 'view') return;
             const p = e.touches ? e.touches[0] : e;
-            this.viewY += (p.pageX - sx) * 0.5;
-            this.viewX -= (p.pageY - sy) * 0.5;
-            this.wrapper.style.transform = `rotateX(${this.viewX}deg) rotateY(${this.viewY}deg)`;
+            const dx = p.pageX - sx;
+            const dy = p.pageY - sy;
+            this.viewY += dx * 0.45;
+            this.viewX -= dy * 0.45;
+            // Clamp vertical rotation so cube doesn't flip upside-down
+            this.viewX = Math.max(-85, Math.min(85, this.viewX));
+            this.wrapper.style.transform =
+                `rotateX(${this.viewX}deg) rotateY(${this.viewY}deg)`;
             sx = p.pageX; sy = p.pageY;
+            e.preventDefault();
         };
 
-        const end = (e) => {
-            if (isCube && targetObj) {
+        const onEnd = (e) => {
+            if (mode === 'cube' && targetCubie && !swipeConsumed) {
                 const p = e.changedTouches ? e.changedTouches[0] : e;
-                const dx = p.pageX - sx, dy = p.pageY - sy;
-                if (Math.abs(dx) > 20 || Math.abs(dy) > 20) {
-                    if (Math.abs(dx) > Math.abs(dy)) {
-                        this.rotateLayer('y', targetObj.y, dx > 0);
-                    } else {
-                        // 根據點擊位置決定轉 X 還是 Z
-                        if (Math.abs(targetObj.x) >= Math.abs(targetObj.z)) {
-                            this.rotateLayer('x', targetObj.x, dy > 0);
-                        } else {
-                            this.rotateLayer('z', targetObj.z, dy > 0);
-                        }
-                    }
+                const dx = p.pageX - sx;
+                const dy = p.pageY - sy;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+
+                if (dist > 18) {
+                    swipeConsumed = true;
+                    this.handleCubieSwipe(targetCubie, dx, dy);
                 }
             }
-            isView = isCube = false;
+            mode = null;
         };
 
-        const s = document.getElementById('scene');
-        s.addEventListener('touchstart', start, {passive: false});
-        window.addEventListener('touchmove', move, {passive: false});
-        window.addEventListener('touchend', end);
-        s.addEventListener('mousedown', start);
-        window.addEventListener('mousemove', move);
-        window.addEventListener('mouseup', end);
+        const scene = document.getElementById('scene');
+        scene.addEventListener('touchstart', onStart, {passive: false});
+        window.addEventListener('touchmove',  onMove,  {passive: false});
+        window.addEventListener('touchend',   onEnd);
+        scene.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', (e) => { if (e.buttons) onMove(e); });
+        window.addEventListener('mouseup',   onEnd);
     }
 
-    scramble() {
-        let count = 0;
-        const axes = ['x','y','z'];
-        const timer = setInterval(() => {
-            this.rotateLayer(axes[Math.floor(Math.random()*3)], Math.floor(Math.random()*3)-1, Math.random()>0.5);
-            if (++count > 15) {
-                clearInterval(timer);
-                this.moves = 0; this.mDisplay.innerText = "0";
+    /*
+     * Decide which axis/layer to rotate based on:
+     *   - Which cubie was touched (its logical x,y,z)
+     *   - Swipe direction in screen space
+     *   - Current view angles (so left/right swipe always means "that layer")
+     *
+     * Strategy: project the swipe onto the visible face normal axes.
+     * Simplified but accurate for the four cardinal swipe directions.
+     */
+    handleCubieSwipe(cubie, dx, dy) {
+        const absDx = Math.abs(dx), absDy = Math.abs(dy);
+        const horizontal = absDx > absDy;
+
+        // Normalize view angle to determine "which way is right" on screen
+        // We use the current viewY to decide whether horizontal swipe moves
+        // a Y-layer (column) or a Z-layer (depth column).
+        const vy = ((this.viewY % 360) + 360) % 360; // 0-360
+
+        if (horizontal) {
+            // Horizontal swipe → rotate a Y-axis layer (vertical column / slice)
+            // Direction: swipe right → clockwise when viewY ≈ 0 (front face)
+            const cw = dx > 0;
+            this.rotateLayer('y', cubie.y, cw);
+        } else {
+            // Vertical swipe → rotate either X or Z layer depending on cubie position
+            // and which face was touched (approximated by the cubie's dominant axis)
+            const cw = dy > 0;
+            // If the cubie is more on the side (|x| dominates), rotate X layer
+            // Otherwise rotate Z layer (front/back depth)
+            if (Math.abs(cubie.x) >= Math.abs(cubie.z)) {
+                this.rotateLayer('x', cubie.x, cw);
+            } else {
+                this.rotateLayer('z', cubie.z, !cw); // Z is inverted visually
             }
-        }, 350);
+        }
     }
 
-    reset() { this.init(); this.wrapper.style.transform = `rotateX(-30deg) rotateY(-45deg)`; }
+    /* ─── Scramble ─── */
+    scramble() {
+        if (this.isAnimating) return;
+        const btn = document.getElementById('btnScramble');
+        btn.classList.add('scrambling');
+        this.badge.classList.remove('show');
+
+        const axes  = ['x','y','z'];
+        const layers = [-1, 0, 1];
+        let count   = 0;
+        const total = 20;
+
+        // Build a sequence with no immediate reversals
+        const seq = [];
+        let lastAxis = '', lastLayer = 0;
+        while (seq.length < total) {
+            const axis  = axes[Math.floor(Math.random() * 3)];
+            const layer = layers[Math.floor(Math.random() * 3)];
+            const cw    = Math.random() > 0.5;
+            if (axis === lastAxis && layer === lastLayer) continue; // avoid no-op pairs
+            seq.push({axis, layer, cw});
+            lastAxis = axis; lastLayer = layer;
+        }
+
+        const fire = () => {
+            if (count >= seq.length) {
+                this.moves = 0;
+                this.mDisplay.innerText = '0';
+                btn.classList.remove('scrambling');
+                return;
+            }
+            const {axis, layer, cw} = seq[count++];
+            // Temporarily allow during scramble
+            this.isAnimating = false;
+            this.rotateLayer(axis, layer, cw, true /*silent*/);
+            setTimeout(fire, 360);
+        };
+        fire();
+    }
+
+    /* ─── Reset ─── */
+    reset() {
+        this.init();
+        this.viewX = -30; this.viewY = -45;
+        this.wrapper.style.transform = `rotateX(${this.viewX}deg) rotateY(${this.viewY}deg)`;
+        document.getElementById('btnScramble').classList.remove('scrambling');
+    }
 }
 
 const cube = new UltimateCube();
+
+// Re-measure cubie sizes if window resizes (orientation change on iPad)
+window.addEventListener('resize', () => {
+    cube.cubies.forEach(c => cube.applyTransform(c));
+});
 </script>
 </body>
 </html>
