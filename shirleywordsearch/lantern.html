@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lantern Festival Word Search</title>
+    <style>
+        :root {
+            --gold: #ffd700;
+            --red: #b30000;
+            --dark-red: #7a0000;
+            --bg: #1a0a0a;
+            --highlight: #ff4d4d;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            touch-action: none; 
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        h1 {
+            color: var(--gold);
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            margin: 20px 0 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.8rem;
+        }
+
+        .game-container {
+            width: 95vw;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-bottom: 40px;
+        }
+
+        /* Grid Styling */
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1px;
+            background: var(--gold);
+            border: 4px solid var(--gold);
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(179, 0, 0, 0.5);
+        }
+
+        .cell {
+            background: var(--red);
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: clamp(0.8rem, 3.5vw, 1.3rem);
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        /* Interaction States */
+        .cell.selecting { background: var(--highlight); }
+        .cell.found { background: var(--gold); color: var(--red); }
+
+        /* Word List Styling */
+        .word-list {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--gold);
+        }
+
+        .word-list h3 { 
+            margin-top: 0; 
+            color: var(--gold); 
+            text-align: center;
+            border-bottom: 1px solid var(--gold);
+            padding-bottom: 10px;
+        }
+
+        #list-items {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .word-item {
+            padding: 4px;
+            font-size: 0.85rem;
+            text-align: center;
+            color: #ddd;
+        }
+
+        .word-item.done {
+            text-decoration: line-through;
+            color: var(--gold);
+            font-weight: bold;
+            opacity: 0.6;
+        }
+
+        @media (max-width: 480px) {
+            #list-items { grid-template-columns: repeat(2, 1fr); }
+            h1 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🏮 Lantern Festival</h1>
+
+    <div class="game-container">
+        <div id="grid"></div>
+
+        <div class="word-list">
+            <h3>Word Bank</h3>
+            <ul id="list-items"></ul>
+        </div>
+    </div>
+
+    <script>
+        const GRID_SIZE = 12;
+        const WORDS = [
+            "LANTERN", "LIGHT", "RIDDLE", "MOON", "REUNION", 
+            "CELEBRATION", "TRADITION", "SWEET", "FAMILY", "GLOWING", 
+            "DECORATION", "PARADE", "FIREWORKS", "JOY", "HARMONY"
+        ];
+        
+        let grid = Array(GRID_SIZE * GRID_SIZE).fill(null);
+        let foundWords = [];
+        let isSelecting = false;
+        let selectedIndices = [];
+
+        function init() {
+            placeAllWords();
+            fillRandomLetters();
+            renderGrid();
+            renderList();
+            setupInteractions();
+        }
+
+        function placeAllWords() {
+            WORDS.sort((a, b) => b.length - a.length); // Place longest words first
+            WORDS.forEach(word => {
+                let placed = false;
+                let attempts = 0;
+                while (!placed && attempts < 100) {
+                    const direction = Math.floor(Math.random() * 3); // 0:Horiz, 1:Vert, 2:Diag
+                    const row = Math.floor(Math.random() * GRID_SIZE);
+                    const col = Math.floor(Math.random() * GRID_SIZE);
+                    
+                    if (canPlace(word, row, col, direction)) {
+                        for (let i = 0; i < word.length; i++) {
+                            let r = row, c = col;
+                            if (direction === 0) c += i;
+                            else if (direction === 1) r += i;
+                            else if (direction === 2) { r += i; c += i; }
+                            grid[r * GRID_SIZE + c] = word[i];
+                        }
+                        placed = true;
+                    }
+                    attempts++;
+                }
+            });
+        }
+
+        function canPlace(word, row, col, dir) {
+            for (let i = 0; i < word.length; i++) {
+                let r = row, c = col;
+                if (dir === 0) c += i;
+                else if (dir === 1) r += i;
+                else if (dir === 2) { r += i; c += i; }
+
+                if (r >= GRID_SIZE || c >= GRID_SIZE || (grid[r * GRID_SIZE + c] && grid[r * GRID_SIZE + c] !== word[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function fillRandomLetters() {
+            for (let i = 0; i < grid.length; i++) {
+                if (!grid[i]) grid[i] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+            }
+        }
+
+        function renderGrid() {
+            const gridEl = document.getElementById('grid');
+            grid.forEach((letter, i) => {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.innerText = letter;
+                cell.dataset.index = i;
+                gridEl.appendChild(cell);
+            });
+        }
+
+        function renderList() {
+            const listEl = document.getElementById('list-items');
+            WORDS.sort().forEach(word => {
+                const li = document.createElement('li');
+                li.className = 'word-item';
+                li.id = `word-${word}`;
+                li.innerText = word;
+                listEl.appendChild(li);
+            });
+        }
+
+        function setupInteractions() {
+            const gridEl = document.getElementById('grid');
+
+            const handleStart = (e) => {
+                isSelecting = true;
+                selectedIndices = [];
+                handleMove(e);
+            };
+
+            const handleMove = (e) => {
+                if (!isSelecting) return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const target = document.elementFromPoint(clientX, clientY);
+                
+                if (target && target.classList.contains('cell')) {
+                    const idx = parseInt(target.dataset.index);
+                    if (!selectedIndices.includes(idx)) {
+                        selectedIndices.push(idx);
+                        target.classList.add('selecting');
+                    }
+                }
+            };
+
+            const handleEnd = () => {
+                if (!isSelecting) return;
+                const currentStr = selectedIndices.map(i => grid[i]).join('');
+                const reversedStr = currentStr.split('').reverse().join('');
+                
+                WORDS.forEach(word => {
+                    if ((currentStr === word || reversedStr === word) && !foundWords.includes(word)) {
+                        foundWords.push(word);
+                        selectedIndices.forEach(i => {
+                            document.querySelector(`[data-index="${i}"]`).classList.add('found');
+                        });
+                        document.getElementById(`word-${word}`).classList.add('done');
+                    }
+                });
+
+                document.querySelectorAll('.cell').forEach(c => c.classList.remove('selecting'));
+                isSelecting = false;
+                
+                if (foundWords.length === WORDS.length) {
+                    setTimeout(() => alert('Happy Lantern Festival! You found all the words! 🏮'), 300);
+                }
+            };
+
+            gridEl.addEventListener('mousedown', handleStart);
+            window.addEventListener('mousemove', handleMove);
+            window.addEventListener('mouseup', handleEnd);
+
+            gridEl.addEventListener('touchstart', (e) => { e.preventDefault(); handleStart(e); }, {passive: false});
+            window.addEventListener('touchmove', (e) => { e.preventDefault(); handleMove(e); }, {passive: false});
+            window.addEventListener('touchend', handleEnd);
+        }
+
+        init();
+    </script>
+</body>
+</html>
