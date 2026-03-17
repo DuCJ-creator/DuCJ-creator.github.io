@@ -266,7 +266,7 @@ class RubiksCube {
 
   _bindEvents() {
     const scene = document.getElementById('scene');
-    let mode=null, sx=0, sy=0, mx=0, my=0, tc=null;
+    let mode=null, sx=0, sy=0, mx=0, my=0, tc=null, tf=-1;
     const pt = e => e.touches ? e.touches[0] : e;
 
     const onDown = e => {
@@ -274,7 +274,10 @@ class RubiksCube {
       const p=pt(e); sx=mx=p.pageX; sy=my=p.pageY; tc=null;
       if (e.target.classList.contains('f')) {
         mode='cube';
-        tc = this.cubies.find(c => c.el===e.target.parentElement) || null;
+        const par = e.target.parentElement;
+        tc = this.cubies.find(c => c.el===par) || null;
+        // Which face was touched? Index within the cubie's children
+        tf = tc ? Array.from(par.children).indexOf(e.target) : -1;
       } else { mode='view'; }
       scene.classList.add('g');
       e.preventDefault();
@@ -297,9 +300,9 @@ class RubiksCube {
       if (mode==='cube' && tc) {
         const p=e.changedTouches?e.changedTouches[0]:e;
         const dx=p.pageX-sx, dy=p.pageY-sy;
-        if (Math.hypot(dx,dy)>12) this._swipe(tc,dx,dy);
+        if (Math.hypot(dx,dy)>12) this._swipe(tc,tf,dx,dy);
       }
-      mode=null; tc=null;
+      mode=null; tc=null; tf=-1;
     };
 
     scene.addEventListener('touchstart',onDown,{passive:false});
@@ -310,12 +313,92 @@ class RubiksCube {
     window.addEventListener('mouseup',   onUp);
   }
 
-  _swipe(c, dx, dy) {
-    const H=Math.abs(dx)>=Math.abs(dy);
-    const ax=Math.abs(c.lx), ay=Math.abs(c.ly), az=Math.abs(c.lz);
-    if      (ay>=ax && ay>=az) { H?this.rotate('z',c.lz,dx>0):this.rotate('x',c.lx,dy>0); }
-    else if (az>=ax && az>=ay) { H?this.rotate('y',c.ly,dx>0):this.rotate('x',c.lx,dy>0); }
-    else                       { H?this.rotate('y',c.ly,dx>0):this.rotate('z',c.lz,dy>0); }
+  _swipe(c, faceIdx, dx, dy) {
+    /*
+      Face indices (fixed at build time):
+        0=front(+Z)  1=back(-Z)  2=top(-Y)  3=bottom(+Y)  4=left(-X)  5=right(+X)
+
+      For each face, a horizontal or vertical swipe should rotate a specific layer:
+
+      Touching FRONT or BACK face:
+        swipe horizontal → rotate Y layer (cy)   — spins that row left/right
+        swipe vertical   → rotate X layer (cx)   — spins that column up/down
+
+      Touching TOP or BOTTOM face:
+        swipe horizontal → rotate Z layer (cz)   — spins that depth-row
+        swipe vertical   → rotate... wait, on top face vertical = toward/away from viewer
+                           which maps to rotating Z... no.
+        On top face looking down: horizontal drag = rotate around Y, vertical drag = rotate around X... 
+        Actually: top face is the XZ plane. A horizontal swipe (screen X) on the top face
+        rotates around the Y axis. A vertical swipe (screen Y) on the top face rotates around Z.
+        But the view is tilted ~28° so approximate:
+        swipe horizontal → rotate Y layer (cy)
+        swipe vertical   → rotate Z layer (cz)   — negate because top-face vertical is inverted
+
+      Touching LEFT or RIGHT face:
+        swipe horizontal → rotate Y layer (cy)
+        swipe vertical   → rotate Z layer (cz)
+
+      Direction (cw): determined empirically per face to feel natural.
+    */
+    const H = Math.abs(dx) >= Math.abs(dy);
+
+    /*
+      Face indices: 0=front(+Z) 1=back(-Z) 2=top(-Y) 3=bottom(+Y) 4=left(-X) 5=right(+X)
+
+      For each visible face, map screen swipe direction to a layer rotation:
+
+      FRONT face (user sees XY plane, +Z normal):
+        swipe H → Y-axis layer (the row at ly)   right=yCW
+        swipe V → X-axis layer (the col at lx)   down=xCW
+
+      BACK face (mirrored X):
+        swipe H → Y-axis layer                   right=yCCW (mirrored)
+        swipe V → X-axis layer                   down=xCCW (mirrored)
+
+      TOP face (user looks down at XZ plane, -Y normal):
+        swipe H → Y-axis layer (whole top slice)  right=yCW
+        swipe V → Z-axis layer (the row at lz)    down=zCW (screen-down = away = +Z side shrinks)
+
+      BOTTOM face (mirrored top):
+        swipe H → Y-axis layer                    right=yCCW
+        swipe V → Z-axis layer                    down=zCCW
+
+      LEFT face (user sees YZ plane, -X normal):
+        swipe H → Z-axis layer (the col at lz)    right=zCW  (right on left face = toward +Z = front)
+        swipe V → X-axis layer (the row at lx)    down=xCCW  (down on left face = top goes back)
+
+      RIGHT face (mirrored left):
+        swipe H → Z-axis layer                    right=zCCW (mirrored)
+        swipe V → X-axis layer                    down=xCW
+    */
+    // face 0=front,1=back,2=top,3=bottom,4=left,5=right
+    switch(faceIdx) {
+      case 0: // front (+Z)
+        H ? this.rotate('y', c.ly,  dx>0)
+          : this.rotate('x', c.lx,  dy>0);
+        break;
+      case 1: // back (-Z) — X axis mirrored
+        H ? this.rotate('y', c.ly, dx<0)
+          : this.rotate('x', c.lx, dy<0);
+        break;
+      case 2: // top (-Y)
+        H ? this.rotate('y', c.ly,  dx>0)
+          : this.rotate('z', c.lz,  dy>0);
+        break;
+      case 3: // bottom (+Y)
+        H ? this.rotate('y', c.ly, dx<0)
+          : this.rotate('z', c.lz, dy<0);
+        break;
+      case 4: // left (-X)
+        H ? this.rotate('z', c.lz,  dx>0)
+          : this.rotate('x', c.lx, dy<0);
+        break;
+      case 5: // right (+X)
+        H ? this.rotate('z', c.lz, dx<0)
+          : this.rotate('x', c.lx,  dy>0);
+        break;
+    }
   }
 
   scramble() {
