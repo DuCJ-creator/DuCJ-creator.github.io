@@ -22702,7 +22702,7 @@ input::placeholder,textarea::placeholder { color:var(--ink-light); }
 <header>
   <div class="header-left">
     <div class="eyebrow" data-i18n="eyebrow">Academic Tools · For Educators</div>
-    <h1 data-i18n="h1">Shirley's Report Formatter</h1>
+    <h1 data-i18n="h1">Report Formatter</h1>
     <p data-i18n="subtitle">Fill in your content — download a perfectly formatted Word document instantly.</p>
   </div>
   <div class="lang-toggle">
@@ -23324,8 +23324,7 @@ async function generateDoc() {
       }]
     });
 
-    const buffer=await Packer.toBuffer(doc2);
-    const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+    const blob=await Packer.toBlob(doc2);
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url;
