@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shirley's Positive Energy Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --spring-yellow:  #F5C842;
+            --spring-peach:   #F2956A;
+            --spring-rose:    #E8849A;
+            --spring-lilac:   #C4A8D4;
+            --spring-sage:    #8EBF9E;
+            --spring-sky:     #88C0D0;
+            --spring-butter:  #F7E27A;
+            --bg: #FDF8F2;
+            --deep: #3D3530;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background: var(--bg);
+            background-image:
+                radial-gradient(circle at 10% 90%, rgba(245,200,66,0.12) 0%, transparent 45%),
+                radial-gradient(circle at 90% 8%,  rgba(196,168,212,0.12) 0%, transparent 45%),
+                radial-gradient(circle at 55% 55%, rgba(142,191,158,0.08) 0%, transparent 55%);
+            font-family: 'Nunito', sans-serif;
+            min-height: 100vh;
+            color: var(--deep);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ── FLOATING DECO SHAPES ── */
+        .deco-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .deco-circle {
+            position: absolute; border-radius: 50%; opacity: 0.09;
+            animation: floatDeco 8s ease-in-out infinite alternate;
+        }
+        @keyframes floatDeco {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-30px) rotate(20deg); }
+        }
+
+        /* ── SUN ── */
+        .sun-container {
+            position: relative; display: flex; justify-content: center; align-items: center;
+            padding: 40px 20px 4px; z-index: 10;
+        }
+        .sun-svg-wrap {
+            width: 160px; height: 160px; position: relative; flex-shrink: 0;
+            animation: sunFloat 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 22px rgba(245,180,60,0.38)) drop-shadow(0 0 48px rgba(242,149,106,0.2));
+        }
+        @keyframes sunFloat {
+            0%,100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-8px) scale(1.03); }
+        }
+        #sunRaysGroup { animation: raysRotate 18s linear infinite; transform-origin: 80px 80px; }
+        @keyframes raysRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        #sunGlint { animation: glintPop 3s ease-in-out infinite; transform-origin: 95px 55px; }
+        @keyframes glintPop { 0%,100%{opacity:0.5;transform:scale(1);} 50%{opacity:1;transform:scale(1.5);} }
+
+        header { text-align: center; padding: 6px 20px 20px; z-index: 10; position: relative; }
+        h1 {
+            font-family: 'Fredoka One', sans-serif;
+            font-size: clamp(1.6rem, 5.5vw, 3.2rem);
+            color: #A0522D;
+            line-height: 1.15; margin-bottom: 6px; letter-spacing: 0.5px;
+            filter: drop-shadow(0 2px 6px rgba(160,82,45,0.12));
+        }
+        h1 .zh { font-size: 0.7em; color: #C4784A; display: block; letter-spacing: 2px; }
+        .subtitle {
+            font-size: 0.95rem; color: #B07858; font-weight: 700; letter-spacing: 2px;
+            opacity: 0.85;
+        }
+
+        /* ── AREA SELECTION ── */
+        .section { width: 95%; max-width: 900px; margin: 0 auto 20px; z-index: 5; position: relative; }
+        .section-label {
+            font-size: 1.1rem; font-weight: 900; color: var(--deep); margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-label::after { content: ''; flex: 1; height: 2px; background: linear-gradient(90deg, var(--spring-peach), transparent); border-radius: 2px; }
+
+        .areas-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
+        .area-chip {
+            padding: 12px 20px; border-radius: 50px; font-weight: 800; font-size: 0.9rem;
+            cursor: pointer; border: 3px solid transparent; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            user-select: none; position: relative; overflow: hidden; white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .area-chip::before {
+            content: ''; position: absolute; inset: 0; opacity: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.6), transparent);
+            transition: opacity 0.2s;
+        }
+        .area-chip:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .area-chip:hover::before { opacity: 1; }
+        .area-chip.active { transform: translateY(-4px) scale(1.08); border-color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .area-chip.active::after { content: ' ✓'; }
+
+        /* Area chips — spring palette: soft, varied, not shouting */
+        .chip-0  { background: linear-gradient(135deg, #F2B47A, #E8957A); color: #5C2E00; }
+        .chip-1  { background: linear-gradient(135deg, #C4A8D4, #A888BC); color: #3A1A50; }
+        .chip-2  { background: linear-gradient(135deg, #F5D06A, #EBB84A); color: #5A3800; }
+        .chip-3  { background: linear-gradient(135deg, #8EBFB0, #6DA898); color: #1A3D35; }
+        .chip-4  { background: linear-gradient(135deg, #E8A4B0, #D4849A); color: #5A1A28; }
+        .chip-5  { background: linear-gradient(135deg, #F7D98A, #F2C260); color: #5A3800; }
+        .chip-6  { background: linear-gradient(135deg, #A8C8D8, #88AABF); color: #1A3040; }
+        .chip-7  { background: linear-gradient(135deg, #F2A888, #E08868); color: #5C2200; }
+        .chip-8  { background: linear-gradient(135deg, #B8D4A8, #96BC84); color: #1E3A14; }
+        .chip-9  { background: linear-gradient(135deg, #D4B8E0, #BC98CC); color: #3A1A50; }
+        .chip-10 { background: linear-gradient(135deg, #F0C898, #E0A870); color: #5C2E00; }
+        .chip-11 { background: linear-gradient(135deg, #98C8B8, #78B0A0); color: #1A3A30; }
+
+        /* ── BIG BUTTON ── */
+        .btn-zone { display: flex; justify-content: center; margin: 10px 0 30px; }
+        .btn-generate {
+            padding: 20px 48px; font-family: 'Fredoka One', sans-serif; font-size: 1.5rem;
+            background: linear-gradient(135deg, #E8957A 0%, #F5C842 50%, #8EBF9E 100%);
+            background-size: 200% 200%; animation: btnShimmer 3s ease infinite;
+            border: none; border-radius: 60px; color: white; cursor: pointer;
+            box-shadow: 0 6px 24px rgba(232,149,122,0.32), 0 2px 0 rgba(0,0,0,0.06);
+            transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden;
+            text-shadow: 0 1px 3px rgba(80,40,0,0.18); letter-spacing: 1px;
+        }
+        @keyframes btnShimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .btn-generate:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 12px 36px rgba(232,149,122,0.42), 0 2px 0 rgba(0,0,0,0.06); }
+        .btn-generate:active { transform: translateY(-1px) scale(0.99); }
+        .btn-generate:disabled { opacity: 0.7; cursor: not-allowed; animation: none; transform: none; }
+
+        /* ── OUTPUT NOTES WALL ── */
+        .output-section { width: 95%; max-width: 1000px; margin: 0 auto 80px; z-index: 5; position: relative; }
+        .output-label {
+            font-size: 1rem; font-weight: 900; color: #bbb; text-align: center;
+            margin-bottom: 20px; letter-spacing: 2px; text-transform: uppercase;
+        }
+        .notes-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; min-height: 60px; }
+
+        /* ── NOTE STICKERS ── */
+        .note-sticker {
+            width: 180px; min-height: 160px; padding: 20px 16px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; border-radius: 20px; position: relative;
+            font-weight: 800; font-size: 0.88rem; line-height: 1.5; color: #2D2A4A;
+            box-shadow: 6px 6px 0px rgba(0,0,0,0.08), 0 10px 30px rgba(0,0,0,0.08);
+            animation: stickerPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+            cursor: default; overflow: hidden;
+        }
+        .note-sticker::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+            background: rgba(255,255,255,0.5); border-radius: 20px 20px 0 0;
+        }
+        .sticker-emoji { font-size: 2.2rem; margin-bottom: 10px; display: block; animation: emojiWiggle 2s ease-in-out infinite; }
+        @keyframes emojiWiggle {
+            0%, 100% { transform: rotate(-5deg) scale(1); }
+            50% { transform: rotate(5deg) scale(1.1); }
+        }
+        .sticker-text-en { font-size: 0.85rem; font-weight: 800; margin-bottom: 4px; }
+        .sticker-text-zh { font-size: 0.82rem; font-weight: 700; color: #555; }
+
+        @keyframes stickerPop {
+            0% { opacity: 0; transform: rotate(var(--tilt)) scale(0.3) translateY(30px); }
+            100% { opacity: 1; transform: rotate(var(--tilt)) scale(1) translateY(0); }
+        }
+
+        /* Sticker color variants — spring garden */
+        .sn-yellow   { background: linear-gradient(145deg, #FEFAE8, #FAF0B8); border: 2px solid #E8C84A; }
+        .sn-pink     { background: linear-gradient(145deg, #FDF0F2, #F8D8DE); border: 2px solid #DCA0AE; }
+        .sn-green    { background: linear-gradient(145deg, #EFF8F2, #D4EDD9); border: 2px solid #8EBF9E; }
+        .sn-blue     { background: linear-gradient(145deg, #EEF6FA, #D0E8F2); border: 2px solid #88C0D0; }
+        .sn-lavender { background: linear-gradient(145deg, #F5F0FA, #E4D4F0); border: 2px solid #C4A8D4; }
+        .sn-peach    { background: linear-gradient(145deg, #FDF3EE, #F8D8C4); border: 2px solid #E8957A; }
+
+        /* ── ACCEPT BUTTON ── */
+        .accept-zone {
+            display: none; justify-content: center; margin-top: 36px;
+        }
+        .accept-zone.visible { display: flex; }
+        .btn-accept {
+            padding: 18px 44px; font-family: 'Fredoka One', sans-serif; font-size: 1.35rem;
+            background: linear-gradient(135deg, #8EBF9E 0%, #C4A8D4 60%, #E8A4B0 100%);
+            background-size: 200% 200%; animation: btnShimmer 4s ease infinite;
+            border: none; border-radius: 60px; color: white; cursor: pointer;
+            box-shadow: 0 6px 24px rgba(142,191,158,0.35), 0 2px 0 rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-shadow: 0 1px 3px rgba(40,40,60,0.15); letter-spacing: 0.5px;
+            animation: acceptPulse 2.5s ease-in-out infinite, stickerPop 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @keyframes acceptPulse {
+            0%,100% { box-shadow: 0 6px 24px rgba(142,191,158,0.35), 0 0 0 0 rgba(142,191,158,0.3); }
+            50%      { box-shadow: 0 8px 30px rgba(142,191,158,0.45), 0 0 0 10px rgba(142,191,158,0); }
+        }
+        .btn-accept:hover { transform: translateY(-4px) scale(1.04); }
+        .btn-accept:active { transform: scale(0.98); }
+
+        /* ── CELEBRATION MODAL ── */
+        .celebration-overlay {
+            position: fixed; inset: 0; z-index: 500;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(253,248,242,0.7); backdrop-filter: blur(10px);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        .celebration-overlay.show { opacity: 1; pointer-events: all; }
+
+        .celebration-card {
+            background: white;
+            border-radius: 32px;
+            padding: 52px 48px 44px;
+            text-align: center;
+            max-width: 480px; width: 90%;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.12), 0 0 0 1px rgba(200,180,160,0.15);
+            transform: scale(0.7) translateY(40px);
+            transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1);
+            position: relative; overflow: hidden;
+        }
+        .celebration-overlay.show .celebration-card { transform: scale(1) translateY(0); }
+
+        .celebration-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 6px;
+            background: linear-gradient(90deg, #F5C842, #E8957A, #C4A8D4, #8EBF9E, #88C0D0);
+        }
+
+        .celeb-emoji-row {
+            font-size: 3rem; margin-bottom: 16px; letter-spacing: 8px;
+            animation: emojiWiggle 2s ease-in-out infinite;
+        }
+        .celeb-title {
+            font-family: 'Fredoka One', sans-serif;
+            font-size: clamp(1.6rem, 5vw, 2.4rem);
+            color: #A0522D; line-height: 1.2; margin-bottom: 8px;
+        }
+        .celeb-title-zh {
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            color: #C4784A; font-weight: 900; margin-bottom: 20px; display: block;
+            letter-spacing: 2px;
+        }
+        .celeb-message {
+            font-size: 0.98rem; color: #7A6558; font-weight: 700;
+            line-height: 1.7; margin-bottom: 32px;
+        }
+        .btn-celeb-close {
+            padding: 14px 40px; font-family: 'Fredoka One', sans-serif; font-size: 1.1rem;
+            background: linear-gradient(135deg, #F5C842, #E8957A);
+            border: none; border-radius: 50px; color: white; cursor: pointer;
+            box-shadow: 0 4px 16px rgba(232,149,122,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .btn-celeb-close:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 8px 24px rgba(232,149,122,0.4); }
+
+        /* petal particles in modal */
+        .petal {
+            position: absolute; font-size: 1.4rem; pointer-events: none;
+            animation: petalFloat var(--pd) ease-in-out infinite alternate;
+        }
+        @keyframes petalFloat {
+            0%   { transform: translate(0,0) rotate(0deg) scale(1); opacity: 0.7; }
+            100% { transform: translate(var(--px), var(--py)) rotate(var(--pr)) scale(0.8); opacity: 0.4; }
+        }
+        .burst-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 200; overflow: hidden;
+        }
+        .burst-particle {
+            position: absolute; top: 50%; left: 50%; font-size: 1.8rem;
+            animation: burstFly var(--dur) cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+            pointer-events: none;
+        }
+        @keyframes burstFly {
+            0% { opacity: 1; transform: translate(-50%, -50%) translate(0, 0) scale(1) rotate(0deg); }
+            80% { opacity: 1; }
+            100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(0.5) rotate(var(--rot)); }
+        }
+
+        /* ── FLASH ── */
+        .flash-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; opacity: 0; pointer-events: none; z-index: 300;
+            animation: none;
+        }
+        .flash-overlay.active { animation: flashIn 0.8s ease-out forwards; }
+        @keyframes flashIn { 0% { opacity: 0.9; } 100% { opacity: 0; } }
+
+        /* ── CONFETTI ── */
+        .confetti-piece {
+            position: fixed; top: -20px; width: 10px; height: 14px; border-radius: 2px;
+            opacity: 0; pointer-events: none; z-index: 250;
+            animation: confettiFall var(--cfall) linear forwards;
+        }
+        @keyframes confettiFall {
+            0% { opacity: 1; transform: translateX(0) translateY(0) rotate(0deg); }
+            100% { opacity: 0.2; transform: translateX(var(--cx)) translateY(110vh) rotate(var(--cr)); }
+        }
+
+        /* ── HINT ── */
+        .hint { text-align: center; color: #bbb; font-size: 0.9rem; font-weight: 700; margin-top: -10px; margin-bottom: 20px; }
+
+        /* ── SPARKLES FLOATING ── */
+        .sparkle-float {
+            position: fixed; pointer-events: none; font-size: 1.4rem; opacity: 0; z-index: 1;
+            animation: sparkleRise 4s ease-out infinite;
+        }
+        @keyframes sparkleRise {
+            0% { opacity: 0; transform: translateY(0) scale(0.5); }
+            20% { opacity: 0.8; }
+            100% { opacity: 0; transform: translateY(-80px) scale(1.2); }
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state { text-align: center; color: #ccc; font-size: 1.1rem; font-weight: 700; padding: 40px; width: 100%; }
+        .empty-state span { font-size: 3rem; display: block; margin-bottom: 10px; }
+
+        /* responsive */
+        @media (max-width: 500px) {
+            .note-sticker { width: 150px; min-height: 140px; font-size: 0.82rem; }
+            .area-chip { font-size: 0.8rem; padding: 10px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="deco-bg" id="decoBg"></div>
+<div class="burst-overlay" id="burstOverlay"></div>
+<div class="flash-overlay" id="flashOverlay"></div>
+
+<!-- Floating sparkles -->
+<div class="sparkle-float" id="spark1" style="left:5%;bottom:20%;animation-delay:0s;">✨</div>
+<div class="sparkle-float" id="spark2" style="left:90%;bottom:30%;animation-delay:1.5s;">⭐</div>
+<div class="sparkle-float" id="spark3" style="left:50%;bottom:10%;animation-delay:3s;">🌟</div>
+<div class="sparkle-float" id="spark4" style="left:20%;bottom:40%;animation-delay:2s;">💫</div>
+<div class="sparkle-float" id="spark5" style="left:75%;bottom:60%;animation-delay:0.7s;">✨</div>
+
+<!-- SVG SUN -->
+<div class="sun-container">
+    <div class="sun-svg-wrap">
+        <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" width="160" height="160">
+            <defs>
+                <radialGradient id="coreGrad" cx="42%" cy="38%" r="58%">
+                    <stop offset="0%"   stop-color="#FFF9C4"/>
+                    <stop offset="28%"  stop-color="#FFE033"/>
+                    <stop offset="62%"  stop-color="#FFA800"/>
+                    <stop offset="100%" stop-color="#FF6A00"/>
+                </radialGradient>
+                <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%"   stop-color="#FFE566" stop-opacity="0.45"/>
+                    <stop offset="100%" stop-color="#FF8C00" stop-opacity="0"/>
+                </radialGradient>
+            </defs>
+            <!-- Soft outer glow -->
+            <circle cx="80" cy="80" r="78" fill="url(#glowGrad)"/>
+            <!-- Rotating rays group -->
+            <g id="sunRaysGroup">
+                <!-- 12 tapered rays -->
+                <polygon points="80,10 76,36 84,36"  fill="#FFD000" opacity="0.85"/>
+                <polygon points="80,10 76,36 84,36"  fill="#FFD000" opacity="0.85" transform="rotate(30,80,80)"/>
+                <polygon points="80,10 76,36 84,36"  fill="#FFC200" opacity="0.75" transform="rotate(60,80,80)"/>
+                <polygon points="80,10 76,36 84,36"  fill="#FFD000" opacity="0.85" transform="rotate(90,80,80)"/>
+                <polygon points="80,10 76,36 84,36"  fill="#FFC200" opacity="0.75" transform="rotate(120,80,80)"/>
+                <polygon points="80,10 76,36 84,36"  fill="#FFD000" opacity="0.85" transform="rotate(150,80,80)"/>
+                <polygon points="80,10 76,36 84,36"  fill="#FFC200" opacity="0.75" transform="rotate(180,80,80)"/>
+                <polygon points="80,10 76,36 84,36"  fill="#FFD000" opacity="0.85" transform="rotate(210,80,80)"/>
+                <polygon points="80,10 76,36 84,36"  fill="#FFC200" opacity="0.75" transform="rotate(240,80,80)"/>
+                <polygon points="80,10 76,36 84,36"  fill="#FFD000" opacity="0.85" transform="rotate(270,80,80)"/>
+                <polygon points="80,10 76,36 84,36"  fill="#FFC200" opacity="0.75" transform="rotate(300,80,80)"/>
+                <polygon points="80,10 76,36 84,36"  fill="#FFD000" opacity="0.85" transform="rotate(330,80,80)"/>
+            </g>
+            <!-- Sun body -->
+            <circle cx="80" cy="80" r="40" fill="url(#coreGrad)" stroke="#FFB300" stroke-width="1.5"/>
+            <!-- Cheek blush -->
+            <ellipse cx="62" cy="92" rx="7" ry="4" fill="#FF8C40" opacity="0.35"/>
+            <ellipse cx="98" cy="92" rx="7" ry="4" fill="#FF8C40" opacity="0.35"/>
+            <!-- Eyes -->
+            <ellipse cx="69" cy="76" rx="4.5" ry="5.5" fill="#7A3A00"/>
+            <ellipse cx="91" cy="76" rx="4.5" ry="5.5" fill="#7A3A00"/>
+            <!-- Eye shine -->
+            <circle cx="71" cy="74" r="1.5" fill="white" opacity="0.9"/>
+            <circle cx="93" cy="74" r="1.5" fill="white" opacity="0.9"/>
+            <!-- Happy smile -->
+            <path d="M67 89 Q80 102 93 89" stroke="#7A3A00" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+            <!-- Glint star -->
+            <g id="sunGlint">
+                <polygon points="95,50 96.5,55 102,55 97.5,58 99,63 95,60 91,63 92.5,58 88,55 93.5,55" fill="white" opacity="0.75"/>
+            </g>
+        </svg>
+    </div>
+</div>
+
+<header>
+    <h1>Shirley's Positive Energy Generator<span class="zh">Shirley 老師的正能量</span></h1>
+    <div class="subtitle">✦ Life may be tough — but YOU are tougher ✦</div>
+</header>
+
+<!-- AREA SELECTION -->
+<div class="section">
+    <div class="section-label">💪 What's on your mind? (pick all that apply)</div>
+    <div class="areas-grid" id="areasGrid"></div>
+</div>
+
+<div class="hint">Select one or more areas above, then hit the button! 👇</div>
+
+<!-- BUTTON -->
+<div class="btn-zone">
+    <button class="btn-generate" id="mainBtn" onclick="generate()">
+        ⚡ Provide me with Positive Energy<br><span style="font-size:1.1rem">我需要正能量！</span>
+    </button>
+</div>
+
+<!-- OUTPUT NOTES -->
+<div class="output-section" id="outputSection">
+    <div class="notes-grid" id="notesGrid">
+        <div class="empty-state"><span>🌸</span>Choose your feelings above and let the magic happen!</div>
+    </div>
+    <!-- ACCEPT BUTTON -->
+    <div class="accept-zone" id="acceptZone">
+        <button class="btn-accept" onclick="showCelebration()">
+            🌿 Accept &amp; Appreciate 接收/感恩
+        </button>
+    </div>
+</div>
+
+<!-- CELEBRATION MODAL -->
+<div class="celebration-overlay" id="celebrationOverlay">
+    <div class="celebration-card" id="celebCard">
+        <div class="celeb-emoji-row">🌸 ✨ 🌿</div>
+        <div class="celeb-title">Congratulations on<br>a Renewed You</div>
+        <span class="celeb-title-zh">煥然一新的你，值得被慶祝</span>
+        <p class="celeb-message">
+            You paused. You felt. You chose to receive light.<br>
+            That takes more courage than most people know.<br><br>
+            The world is a little brighter because <em>you</em> are in it.<br>
+            Keep going — one gentle day at a time. 🌱
+        </p>
+        <button class="btn-celeb-close" onclick="closeCelebration()">
+            Let's go! 出發吧！🚀
+        </button>
+    </div>
+</div>
+
+<script>
+// ── DATA ──
+const areas = [
+    { label: "📚 Academic Pressure\n學業壓力", key: "academic" },
+    { label: "👥 Peer Pressure\n同儕壓力", key: "peer" },
+    { label: "👨‍👩‍👧 Parenting Pressure\n家長壓力", key: "parenting" },
+    { label: "🌍 Concern about the World\n對世界的憂慮", key: "world" },
+    { label: "💔 Relationship & Friendship Puzzles\n人際關係困惑", key: "relationship" },
+    { label: "🔮 Uncertain about the Future\n對未來感到迷茫", key: "future" },
+    { label: "🌊 Overwhelmed\n被壓垮了", key: "overwhelmed" },
+    { label: "😴 Physically Exhausted\n身體疲憊", key: "exhausted" },
+    { label: "🌧️ Pessimistic\n悲觀", key: "pessimistic" },
+    { label: "🎭 Feeling Like a Fraud\n覺得自己不夠好", key: "impostor" },
+    { label: "📱 Social Media Anxiety\n社群媒體焦慮", key: "social" },
+    { label: "🧩 Lost & Purposeless\n迷失方向感", key: "lost" },
+];
+
+const notes = {
+    academic: [
+        { emoji:"📖", en:"One step at a time. Even mountains are climbed one breath at a time.", zh:"一步一步來。連高山也是一口氣一口氣地爬上去的。" },
+        { emoji:"🌱", en:"You are more than your grade. Your effort is already heroic.", zh:"你不只是一個分數。你的努力本身就已經很英勇了。" },
+        { emoji:"⚡", en:"Every hard question you face is making your brain stronger.", zh:"每一道難題都在讓你的大腦更強壯。" },
+        { emoji:"🏆", en:"The struggle is proof you are growing. Champions train hard.", zh:"掙扎是你正在成長的證明。冠軍都是苦練出來的。" },
+        { emoji:"☀️", en:"Bad tests happen. They do NOT define your brilliance.", zh:"考砸是會發生的事。那不代表你不閃亮。" },
+        { emoji:"🎯", en:"Progress, not perfection. Every lesson learned is a win.", zh:"求進步，不求完美。每一個學到的教訓都是勝利。" },
+        { emoji:"🔥", en:"You've survived 100% of your hard days so far. Amazing.", zh:"到目前為止，你撐過了所有的難關，100%！太厲害了。" },
+        { emoji:"💡", en:"Confusion means you are at the edge of understanding. Push a little more!", zh:"搞不清楚代表你正站在理解的邊緣。再推一把！" },
+        { emoji:"🌊", en:"Even the ocean rests between waves. Rest is part of success.", zh:"連大海都在浪與浪之間休息。休息也是成功的一部分。" },
+        { emoji:"🎨", en:"You are so much more than textbooks. Your curiosity is your superpower.", zh:"你遠不止是課本。你的好奇心是你的超能力。" },
+        { emoji:"🦋", en:"Caterpillars don't quit mid-cocoon. Keep transforming.", zh:"毛毛蟲不會在繭中途放棄。繼續蛻變吧。" },
+        { emoji:"⭐", en:"Every expert was once a confused beginner. You are on your way.", zh:"每個專家都曾是迷茫的初學者。你正走在那條路上。" },
+        { emoji:"🌟", en:"Showing up when it's hard is the most powerful thing you can do.", zh:"在最艱難的時候出現，是你能做最有力量的事。" },
+        { emoji:"🎵", en:"Your brain is composing something beautiful. Give it time to finish.", zh:"你的大腦正在譜寫美麗的樂章。給它時間完成。" },
+        { emoji:"🍀", en:"Hard work compounds. Every hour you put in counts.", zh:"努力是會累積的。你付出的每一小時都算數。" },
+        { emoji:"🌈", en:"The rainbow comes after the rain. Your breakthrough is coming.", zh:"彩虹在雨後出現。你的突破就快來了。" },
+        { emoji:"💪", en:"You didn't come this far to only come this far. Keep going!", zh:"你走了這麼遠，不是只為了停在這裡。繼續前進！" },
+        { emoji:"🚀", en:"Future you is cheering for every late night you push through.", zh:"未來的你正在為你每一個熬過的夜晚喝彩。" },
+    ],
+    peer: [
+        { emoji:"🫂", en:"You don't need everyone to like you. The right people will.", zh:"你不需要讓所有人喜歡你。對的人自然會。" },
+        { emoji:"🦁", en:"Be yourself — everyone else is already taken.", zh:"做你自己——其他角色都已經有人了。" },
+        { emoji:"🌻", en:"Sunflowers don't compete with roses. Bloom in your own way.", zh:"向日葵不和玫瑰比美。用你自己的方式盛開。" },
+        { emoji:"💎", en:"Pressure from others reveals diamonds. You are a diamond.", zh:"來自他人的壓力可以磨出鑽石。你就是那顆鑽石。" },
+        { emoji:"🎭", en:"Their opinion is just one story. Write your own.", zh:"他們的看法只是一個故事。寫你自己的。" },
+        { emoji:"🛡️", en:"Fitting in is easy. Standing out takes courage — and you have it.", zh:"融入很容易。脫穎而出需要勇氣——而你有。" },
+        { emoji:"🌊", en:"Waves can't move a lighthouse. Be your own lighthouse.", zh:"浪打不倒燈塔。做你自己的燈塔。" },
+        { emoji:"🦅", en:"Eagles don't flock with pigeons. Know your worth.", zh:"老鷹不和鴿子成群。認識你自己的價值。" },
+        { emoji:"🌹", en:"Your uniqueness is not a flaw. It's your greatest gift.", zh:"你的獨特不是缺陷。那是你最大的禮物。" },
+        { emoji:"🎯", en:"The only approval you need is your own.", zh:"你唯一需要的認可，是你自己給的。" },
+        { emoji:"🌟", en:"True friends lift you up. You deserve that kind.", zh:"真正的朋友會托起你。你值得擁有這樣的人。" },
+        { emoji:"🔑", en:"Saying no is a complete sentence. Your boundaries are valid.", zh:"「不要」本身就是完整的句子。你的界線是合理的。" },
+        { emoji:"🎵", en:"March to your own beat. The right people will dance with you.", zh:"按自己的節奏前進。對的人會和你一起起舞。" },
+        { emoji:"🌈", en:"Different is dazzling. Ordinary is forgettable. Be dazzling.", zh:"與眾不同是閃耀的。普通是容易被遺忘的。閃耀吧。" },
+        { emoji:"💫", en:"Your vibe attracts your tribe. Keep being authentically you.", zh:"你的氣場吸引你的夥伴。繼續做真實的自己。" },
+        { emoji:"🌱", en:"Growth sometimes means outgrowing people. That's okay.", zh:"成長有時意味著超越某些人。這沒關係。" },
+        { emoji:"🔥", en:"People who dim your light are afraid of your shine.", zh:"試圖讓你黯淡的人，其實是怕你的光芒。" },
+        { emoji:"☀️", en:"You are not too much. You are exactly enough.", zh:"你不是太多了。你剛剛好就足夠了。" },
+    ],
+    parenting: [
+        { emoji:"🤍", en:"Their high hopes come from their deep love. You are loved.", zh:"他們高標準的背後，是深沉的愛。你是被愛著的。" },
+        { emoji:"🌱", en:"You are writing your own story, chapter by chapter. Trust the process.", zh:"你正在寫自己的故事，一章一章地。相信這個過程。" },
+        { emoji:"🦋", en:"It's okay to disappoint sometimes. Perfection was never the goal.", zh:"偶爾讓人失望是沒關係的。完美從來不是目標。" },
+        { emoji:"💬", en:"Their worry is love in disguise. And your feelings are valid too.", zh:"他們的擔心是愛的偽裝。你的感受也同樣真實有效。" },
+        { emoji:"🌟", en:"You can love them AND have your own path. Both are true.", zh:"你可以愛他們，同時走自己的路。兩者都是真的。" },
+        { emoji:"🔥", en:"Future you will thank you for the boundaries you set today.", zh:"未來的你會感謝今天的你所設下的界線。" },
+        { emoji:"🌊", en:"You carry their dreams lightly, but your own dreams matter most.", zh:"你輕輕地承載著他們的夢，但你自己的夢最重要。" },
+        { emoji:"🎯", en:"Living to please others is exhausting. Your life belongs to you.", zh:"為了取悅別人而活很累。你的人生屬於你自己。" },
+        { emoji:"🏡", en:"Home is complicated sometimes. But you are still worthy of peace.", zh:"家有時候很複雜。但你依然值得擁有平靜。" },
+        { emoji:"💪", en:"Navigating family pressure builds resilience like nothing else.", zh:"應對家庭壓力所建立的韌性，是其他事給不了的。" },
+        { emoji:"🌈", en:"You are not your parents' unfinished dreams. You are YOUR dream.", zh:"你不是父母未竟的夢想。你是你自己的夢想。" },
+        { emoji:"🌻", en:"Their love language may be pressure. Yours is growth.", zh:"他們的愛之語也許是壓力。你的是成長。" },
+        { emoji:"🎵", en:"Communicate your heart. Brave conversations lead to understanding.", zh:"說出你心中所想。勇敢的對話帶來理解。" },
+        { emoji:"⭐", en:"You don't have to earn love. You already deserve it.", zh:"你不必靠努力去贏得愛。你本來就值得。" },
+        { emoji:"🦁", en:"Standing your ground takes more courage than giving in. You are brave.", zh:"守住立場比妥協需要更大的勇氣。你很勇敢。" },
+        { emoji:"💎", en:"The pressure they give you is shaping a brilliant, resilient gem.", zh:"他們給你的壓力，正在打磨出一顆閃亮、堅韌的寶石。" },
+        { emoji:"🌙", en:"Even if they don't understand you now, you understand yourself.", zh:"就算他們現在不理解你，你理解你自己。" },
+        { emoji:"🚀", en:"Your future is bigger than any box someone tries to put you in.", zh:"你的未來比任何人試圖框住你的框架都要大。" },
+    ],
+    world: [
+        { emoji:"🌍", en:"You caring about the world means your heart is enormous.", zh:"你在乎這個世界，代表你的心很大。" },
+        { emoji:"🕊️", en:"Small kindnesses ripple outward and change the world.", zh:"微小的善意會向外擴散，改變這個世界。" },
+        { emoji:"🌱", en:"Hope is a radical act. Planting it anyway is courage.", zh:"希望本身就是一種激進的行動。依然種下希望，是勇氣。" },
+        { emoji:"🌟", en:"One candle can light a thousand others. Be that candle.", zh:"一支蠟燭可以點亮一千支。做那支蠟燭吧。" },
+        { emoji:"🔥", en:"The world needs people who feel deeply. Don't stop feeling.", zh:"這個世界需要有深刻感受的人。不要停止感受。" },
+        { emoji:"🦋", en:"You cannot save everyone, but you can make a difference for someone.", zh:"你無法拯救所有人，但你可以為某些人帶來改變。" },
+        { emoji:"🌈", en:"History is full of dark chapters — and humans who wrote the dawn.", zh:"歷史裡有許多黑暗的篇章，也有寫下黎明的人類。" },
+        { emoji:"💪", en:"Your concern is the first step toward being part of the solution.", zh:"你的憂慮是成為解決方案一部分的第一步。" },
+        { emoji:"☀️", en:"The fact that you care makes you already part of what's good.", zh:"你在乎這件事，本身就讓你成為善良的一部分。" },
+        { emoji:"🌻", en:"Tend to your corner of the garden. It matters more than you know.", zh:"照顧好你那一角的花園。這比你想像的更重要。" },
+        { emoji:"🎯", en:"You don't have to fix it all today. Choose one thing and start.", zh:"你不必今天就全部解決。選一件事，然後開始。" },
+        { emoji:"💙", en:"Feeling overwhelmed by the world's pain means you are deeply human.", zh:"被世界的痛苦壓垮，代表你是一個非常有人性的人。" },
+        { emoji:"🌊", en:"The ocean looks huge, but it's made of drops — just like change.", zh:"海洋看起來龐大，但它是由一滴一滴組成的——改變也是。" },
+        { emoji:"🔑", en:"Take breaks from news. Protecting your mental health is activism too.", zh:"放下新聞休息一下。保護你的心理健康也是一種行動。" },
+        { emoji:"🌙", en:"Dark nights don't last forever. Sunrise always follows.", zh:"黑暗的夜晚不會永遠持續。黎明總會到來。" },
+        { emoji:"✨", en:"Being kind in a harsh world is a revolutionary act.", zh:"在冷漠的世界裡保持善良，是一種革命性的行為。" },
+        { emoji:"🦅", en:"Rise above despair. Your perspective from above brings clarity.", zh:"超越絕望。你從高處俯瞰的視角帶來清晰。" },
+        { emoji:"💫", en:"Your generation WILL find answers. We believe in you.", zh:"你們這一代人一定會找到答案的。我們相信你們。" },
+    ],
+    relationship: [
+        { emoji:"💛", en:"Not every connection is meant to last. Some teach, some stay.", zh:"不是每段關係都要長久。有些是來教你的，有些是來陪你的。" },
+        { emoji:"🌱", en:"Being misunderstood hurts. But the right people will get you.", zh:"被誤解很痛。但對的人會懂你。" },
+        { emoji:"🦋", en:"A friendship that feels like work might need to rest.", zh:"一段讓你覺得很費力的友誼，也許需要休息一下。" },
+        { emoji:"🌊", en:"You deserve friends who cheer for you. Keep looking — they exist.", zh:"你值得有為你喝彩的朋友。繼續找——他們存在的。" },
+        { emoji:"💪", en:"Reaching out first is brave. Vulnerability is a strength.", zh:"主動聯絡需要勇氣。脆弱是一種力量。" },
+        { emoji:"🌟", en:"Conflict is not the end. It's often the beginning of something deeper.", zh:"衝突不是結束。它往往是更深連結的開始。" },
+        { emoji:"🎯", en:"You can't control others — but you can control how you show up.", zh:"你無法控制別人，但你可以掌控你自己如何出現。" },
+        { emoji:"🔥", en:"Loving yourself makes you a better friend, partner, and human.", zh:"愛自己，讓你成為更好的朋友、伴侶和人。" },
+        { emoji:"🌈", en:"It's okay to outgrow some friendships. Growth isn't betrayal.", zh:"超越某些友誼是沒關係的。成長不是背叛。" },
+        { emoji:"🤍", en:"The loneliness you feel now won't last. Connection is coming.", zh:"你現在感受到的孤獨不會持續。連結即將到來。" },
+        { emoji:"💬", en:"Say what you mean gently. Honest love is the best love.", zh:"溫柔地說出你的心意。誠實的愛是最好的愛。" },
+        { emoji:"🌻", en:"Boundaries in friendship are healthy, not mean.", zh:"在友誼中設立界線是健康的，不是無情的。" },
+        { emoji:"✨", en:"You will find your people. Some friendships are worth waiting for.", zh:"你會找到你的同類。有些友誼值得等待。" },
+        { emoji:"🎵", en:"Every relationship teaches you more about the song you are.", zh:"每一段關係都讓你更了解你自己這首歌。" },
+        { emoji:"🦁", en:"Setting boundaries isn't building walls. It's building a gate.", zh:"設立界線不是築牆。是在建一扇門。" },
+        { emoji:"💎", en:"You are worthy of love. Exactly as you are. Today.", zh:"你值得被愛。就是現在的你。今天。" },
+        { emoji:"🌙", en:"Healing from a broken friendship takes time. Be gentle with yourself.", zh:"從破碎的友誼中療癒需要時間。對自己溫柔一點。" },
+        { emoji:"🚀", en:"The best relationship you'll ever have starts with yourself.", zh:"你將擁有的最好的關係，從與自己的關係開始。" },
+    ],
+    future: [
+        { emoji:"🔮", en:"Not knowing your path is not being lost. It's being open.", zh:"不知道前路不代表迷路。那代表你是開放的。" },
+        { emoji:"🚀", en:"Your future self is rooting for every brave step you take today.", zh:"未來的你正在為你今天每一個勇敢的步伐加油。" },
+        { emoji:"🌱", en:"Uncertainty is where possibility lives. Lean into it.", zh:"不確定性是可能性存在的地方。向它靠近。" },
+        { emoji:"🌟", en:"You don't need a 10-year plan. Just a next step.", zh:"你不需要十年計劃。只需要下一步。" },
+        { emoji:"🦋", en:"Some of the best chapters in life weren't planned at all.", zh:"人生中最好的篇章，往往是完全沒有計劃的。" },
+        { emoji:"🌊", en:"Rivers don't plan their path to the sea. They just flow.", zh:"河流不規劃通往大海的路徑。它們只是流淌。" },
+        { emoji:"💡", en:"Your curiosity is a compass. Follow what lights you up.", zh:"你的好奇心是指南針。追隨讓你發光的事物。" },
+        { emoji:"🎯", en:"The future is built from TODAY's small, brave choices.", zh:"未來是由今天每一個微小、勇敢的選擇建構的。" },
+        { emoji:"☀️", en:"You have survived every 'I don't know what to do' so far.", zh:"到目前為止，你撐過了每一個「我不知道該怎麼辦」。" },
+        { emoji:"🌈", en:"What feels like chaos now may be the origin story of something great.", zh:"現在感覺像混亂的，可能是某件偉大事物的起源故事。" },
+        { emoji:"💪", en:"Resilience is built exactly at the edge of your comfort zone.", zh:"韌性恰恰在你舒適圈的邊緣建立起來的。" },
+        { emoji:"🌻", en:"You are more prepared than you think. Trust your own story.", zh:"你比你想的更有準備。相信你自己的故事。" },
+        { emoji:"🎵", en:"Life is improvised jazz, not a written score. Play your notes.", zh:"人生是即興爵士，不是寫好的樂譜。演奏你的音符。" },
+        { emoji:"🦅", en:"Eagles soar highest when the winds are strongest. Rise.", zh:"老鷹在最強的風中飛得最高。振翅高飛吧。" },
+        { emoji:"✨", en:"Your potential is not limited by your current circumstances.", zh:"你的潛力不受限於你現在的處境。" },
+        { emoji:"💎", en:"Diamonds are made under pressure. Your future is brilliant.", zh:"鑽石在壓力下形成。你的未來閃閃發光。" },
+        { emoji:"🌙", en:"Stars only shine in the dark. Your moment is coming.", zh:"星星只在黑暗中閃亮。你的時刻正在到來。" },
+        { emoji:"🔥", en:"You have survived your worst day so far. Tomorrow holds new light.", zh:"你撐過了迄今最糟糕的一天。明天有新的光。" },
+    ],
+    overwhelmed: [
+        { emoji:"🌊", en:"You don't have to do it all today. Just breathe. Just today.", zh:"你不需要今天做完所有事。只要呼吸。只是今天。" },
+        { emoji:"🐢", en:"Slow is not failure. Even turtles finish the race.", zh:"慢不是失敗。連烏龜都能完成比賽。" },
+        { emoji:"🌱", en:"One thing. Just one tiny thing. Then rest. That's enough.", zh:"一件事。只是一件小事。然後休息。這就夠了。" },
+        { emoji:"🤍", en:"It's okay to ask for help. Strength knows when to reach out.", zh:"尋求幫助是可以的。力量知道何時要伸出手。" },
+        { emoji:"☀️", en:"You are not behind. You are exactly where you need to be.", zh:"你沒有落後。你正好在你需要在的地方。" },
+        { emoji:"🌙", en:"Rest is productive. Your body and mind need it to function.", zh:"休息是有生產力的。你的身心需要它才能運作。" },
+        { emoji:"🎯", en:"Prioritize ruthlessly. Not everything is equally urgent.", zh:"毫不留情地排優先順序。不是所有事都同樣緊急。" },
+        { emoji:"💙", en:"Feeling overwhelmed means you care deeply. That's beautiful.", zh:"感到被壓垮代表你深深在乎。這很美。" },
+        { emoji:"🌈", en:"Even storms pass. This weight will lift — promise.", zh:"連暴風雨也會過去。這份重量會減輕的——承諾。" },
+        { emoji:"🦋", en:"Chaos before clarity is normal. The butterfly knows.", zh:"清晰之前的混亂是正常的。蝴蝶懂得這道理。" },
+        { emoji:"🔥", en:"You are not behind in life. There is no universal schedule.", zh:"你在人生中沒有落後。人生沒有統一的時程表。" },
+        { emoji:"✨", en:"Every to-do list has a done list on the other side.", zh:"每個待辦清單的另一面，都有一張已完成清單。" },
+        { emoji:"💪", en:"You've handled 100% of your hardest days. This one too.", zh:"你解決了100%最艱難的日子。這個也一樣。" },
+        { emoji:"🌻", en:"Delete three things from your list. Permission granted.", zh:"從你的清單上刪掉三件事。許可已授予。" },
+        { emoji:"🎵", en:"Put on a song. Take 3 deep breaths. The world can wait 3 minutes.", zh:"放一首歌。深呼吸三次。世界可以等三分鐘。" },
+        { emoji:"🌟", en:"You are doing SO much more than you give yourself credit for.", zh:"你做的遠比你認可自己的多得多。" },
+        { emoji:"🏡", en:"Give yourself permission to be imperfect today. Tomorrow is fresh.", zh:"允許自己今天不完美。明天是嶄新的。" },
+        { emoji:"🦁", en:"Even lions sleep 20 hours a day. Rest is power.", zh:"連獅子每天都睡20小時。休息是力量。" },
+    ],
+    exhausted: [
+        { emoji:"😴", en:"Rest is not laziness. Rest is medicine.", zh:"休息不是懶惰。休息是藥。" },
+        { emoji:"🌙", en:"Your body is sending you love in the form of tiredness. Listen.", zh:"你的身體正在用疲憊的方式向你傳遞愛。聆聽它。" },
+        { emoji:"🛌", en:"Sleep is the most powerful recovery tool you own. Use it.", zh:"睡眠是你擁有的最強大的恢復工具。使用它。" },
+        { emoji:"🤍", en:"Pushing through is sometimes brave. Stopping is sometimes braver.", zh:"堅持有時候是勇敢的。停下來有時候是更勇敢的。" },
+        { emoji:"☀️", en:"Even the sun sets every night. Setting is not giving up.", zh:"連太陽每晚都會落下。落下不是放棄。" },
+        { emoji:"🌿", en:"Water yourself like a plant. Hydrate, rest, sunlight.", zh:"像澆花一樣照顧自己。補水、休息、曬曬太陽。" },
+        { emoji:"🌊", en:"The sea is always refilling. You can refill too.", zh:"大海永遠在補充自己。你也可以補充自己。" },
+        { emoji:"💪", en:"Your tiredness is evidence of your effort. That effort matters.", zh:"你的疲憊是你努力的證明。那份努力很重要。" },
+        { emoji:"🌱", en:"Even seeds need dark, still earth to grow. Rest and grow.", zh:"連種子也需要黑暗、靜止的土壤才能生長。休息，然後成長。" },
+        { emoji:"🔥", en:"You cannot pour from an empty cup. Refill first.", zh:"你無法從空的杯子倒出東西。先補充自己。" },
+        { emoji:"🎯", en:"Cancel something. One thing off the list won't break your world.", zh:"取消一件事。清單上少一件事不會讓你的世界崩潰。" },
+        { emoji:"💙", en:"Gentle movement, good food, kind thoughts. That's enough for today.", zh:"輕柔的活動、好的食物、善待自己的想法。今天這樣就夠了。" },
+        { emoji:"🌈", en:"You've been strong for so long. Let someone be strong for you today.", zh:"你已經堅強很久了。今天讓別人為你堅強一下。" },
+        { emoji:"🌟", en:"Resting and recharging IS productive. Don't let anyone tell you otherwise.", zh:"休息和充電就是有生產力的。不要讓任何人告訴你不是。" },
+        { emoji:"🦋", en:"Butterflies rest between flights too. Rest without guilt.", zh:"蝴蝶在飛行間也會休息。無愧地休息吧。" },
+        { emoji:"🎵", en:"Put down the weight for now. The world will still be there after your nap.", zh:"暫時放下這份重擔。睡完午覺後世界還在的。" },
+        { emoji:"✨", en:"Being tired is human. Be gentle with your very human self.", zh:"感到疲憊是人之常情。對你非常人性的自己溫柔一點。" },
+        { emoji:"🌙", en:"Tomorrow's you will have more energy. Give today's you some grace.", zh:"明天的你會有更多能量。今天的你，給自己一點寬容。" },
+    ],
+    pessimistic: [
+        { emoji:"🌱", en:"One green shoot in winter is proof spring is coming.", zh:"冬天裡的一抹嫩綠，是春天即將到來的證明。" },
+        { emoji:"🌈", en:"Your brain is protecting you with pessimism. Thank it, then let hope in.", zh:"你的大腦用悲觀保護你。感謝它，然後讓希望進來。" },
+        { emoji:"☀️", en:"The sun rises every single day — even after the darkest nights.", zh:"太陽每天都升起——即使在最黑暗的夜晚之後。" },
+        { emoji:"💛", en:"Hope is not naive. It's the most courageous thing there is.", zh:"希望不是幼稚。它是最勇敢的事情。" },
+        { emoji:"🌊", en:"Even the sea pulls back before it surges forward. So will you.", zh:"連大海在湧上來之前也會退後。你也一樣。" },
+        { emoji:"🔥", en:"Pessimism comes from pain. Your pain is real. So is your resilience.", zh:"悲觀來自痛苦。你的痛苦是真實的。你的韌性也是。" },
+        { emoji:"🌟", en:"Look for ONE small good thing today. Just one. It's there.", zh:"今天找一件小的好事。只要一件。它在那裡的。" },
+        { emoji:"🦋", en:"Transformation looks like destruction from the inside. Trust the process.", zh:"從內部看，蛻變看起來像毀滅。相信這個過程。" },
+        { emoji:"💎", en:"Dark times polish character like nothing else. You are being polished.", zh:"黑暗的時光像任何事都無法替代的方式磨礪品格。你正在被磨礪。" },
+        { emoji:"🎯", en:"Challenge one negative thought today. Just one. That's brave.", zh:"今天挑戰一個負面的想法。只要一個。這很勇敢。" },
+        { emoji:"💪", en:"You've been surprised by good things before. It can happen again.", zh:"你以前曾被好事驚喜過。這可以再次發生。" },
+        { emoji:"🌻", en:"Sunflowers always face the light. You can practice that too.", zh:"向日葵總是面向光。你也可以練習這樣做。" },
+        { emoji:"🎵", en:"Put on a song you love. Let beauty remind you it still exists.", zh:"放一首你喜歡的歌。讓美好提醒你它仍然存在。" },
+        { emoji:"🌙", en:"Night and day take turns. Your light turn is coming.", zh:"黑夜和白天輪流交替。屬於你的光明時刻即將到來。" },
+        { emoji:"🤍", en:"Being pessimistic doesn't make you weak. It makes you human.", zh:"悲觀不代表你軟弱。那代表你是人。" },
+        { emoji:"🌈", en:"You have survived your worst day before. You can again.", zh:"你以前撐過了最糟糕的一天。你可以再一次。" },
+        { emoji:"✨", en:"Hope isn't about certainty. It's about choosing to take the next step.", zh:"希望不是關於確定性。它是關於選擇邁出下一步。" },
+        { emoji:"🚀", en:"One day you'll look back and say: that was the turning point.", zh:"有一天你會回頭說：那是轉折點。" },
+    ],
+    impostor: [
+        { emoji:"💡", en:"The fact you question yourself shows you take quality seriously.", zh:"你質疑自己這件事，說明你認真對待品質。" },
+        { emoji:"🌟", en:"Everyone around you has doubts too. You are in good company.", zh:"你周圍的每個人也都有懷疑。你並不孤單。" },
+        { emoji:"💪", en:"You earned your place. Your achievements are real. Own them.", zh:"你贏得了你的位置。你的成就是真實的。擁有它們。" },
+        { emoji:"🔥", en:"Being a beginner is brave. Not everyone dares to start.", zh:"作為初學者是勇敢的。不是每個人都敢開始。" },
+        { emoji:"🌈", en:"You don't need to know everything. Curiosity is your credential.", zh:"你不需要什麼都懂。好奇心是你的資歷。" },
+        { emoji:"🌻", en:"Doubt yourself AND do it anyway. That's what courage looks like.", zh:"懷疑自己，同時依然去做。這就是勇氣的樣子。" },
+        { emoji:"💎", en:"You don't have to be the best. You just have to be your best.", zh:"你不必是最好的。你只需要是你最好的樣子。" },
+        { emoji:"🎯", en:"Mistakes are data, not verdicts. Keep experimenting.", zh:"錯誤是數據，不是判決。繼續實驗。" },
+        { emoji:"🌱", en:"Progress over perfection. You are already further than yesterday.", zh:"進步重於完美。你已經比昨天走得更遠了。" },
+        { emoji:"☀️", en:"You were chosen for a reason. Believe the people who believe in you.", zh:"你是有原因被選中的。相信那些相信你的人。" },
+        { emoji:"🦋", en:"Feeling like a fraud is a sign you care about doing good work.", zh:"感覺自己是騙子，是你在乎做好工作的信號。" },
+        { emoji:"🌊", en:"Even Olympic athletes feel nervous. Nerves mean you care.", zh:"就連奧運選手也會緊張。緊張意味著你在乎。" },
+        { emoji:"🎵", en:"Your voice, perspective, and experience are unique. Share them.", zh:"你的聲音、觀點和經驗是獨特的。分享它們。" },
+        { emoji:"💙", en:"You belong. Not because you're perfect, but because you're you.", zh:"你屬於這裡。不是因為你完美，而是因為你是你。" },
+        { emoji:"🚀", en:"The impostor feeling shrinks every time you push through it.", zh:"每次你克服它，冒牌者的感覺就會縮小一點。" },
+        { emoji:"🌙", en:"Be kind to the version of you that's still learning.", zh:"對還在學習中的那個版本的你溫柔一點。" },
+        { emoji:"🦁", en:"Show up as you are. Your authentic self is your greatest strength.", zh:"以真實的自己出現。真實的你是你最大的力量。" },
+        { emoji:"✨", en:"You are not a fraud. You are a work in progress. Big difference.", zh:"你不是騙子。你是一個還在進行中的作品。差別很大。" },
+    ],
+    social: [
+        { emoji:"📱", en:"Social media is a highlight reel, not real life. You know this.", zh:"社群媒體是精華片段，不是真實生活。你知道這一點。" },
+        { emoji:"💛", en:"You are enough, even when the algorithm says otherwise.", zh:"你已經足夠了，即使演算法說不是。" },
+        { emoji:"🌱", en:"Log off. Go outside. Touch grass. Seriously, it works.", zh:"登出。出去走走。接觸大自然。說真的，這有用。" },
+        { emoji:"🌟", en:"Your worth is not measured in likes, shares, or followers.", zh:"你的價值不是用按讚、分享或追蹤者來衡量的。" },
+        { emoji:"🔥", en:"Comparing your blooper reel to their highlights isn't fair to you.", zh:"用你的NG片段和別人的精華比較，對你不公平。" },
+        { emoji:"🦁", en:"Real connection beats virtual validation every single time.", zh:"真實的連結每次都勝過虛擬的認可。" },
+        { emoji:"☀️", en:"The 'perfect' life you see? It took 47 tries and a filter.", zh:"你看到的「完美」生活？它拍了47次，還加了濾鏡。" },
+        { emoji:"🌊", en:"Unfollow accounts that make you feel small. You deserve to feel big.", zh:"取消追蹤讓你感到渺小的帳號。你值得感到偉大。" },
+        { emoji:"💙", en:"Your authentic imperfect life is infinitely more interesting than a curated one.", zh:"你真實不完美的生活，比精心策劃的更有趣無數倍。" },
+        { emoji:"🌻", en:"The best moments in life can't be photographed. Live them.", zh:"生活中最美好的時刻是無法被拍照的。好好活在其中。" },
+        { emoji:"🎯", en:"Set a social media limit today. Your peace of mind will thank you.", zh:"今天設定社群媒體限制。你的內心平靜會感謝你。" },
+        { emoji:"🌈", en:"You don't owe anyone a performance. Just be.", zh:"你不欠任何人一場表演。只需要存在。" },
+        { emoji:"🎵", en:"Close the app. Open a book. Your brain needs different food.", zh:"關掉應用程式。打開一本書。你的大腦需要不同的養分。" },
+        { emoji:"✨", en:"Your life offline is your real life. Make it beautiful.", zh:"你線下的生活是你真實的生活。讓它變得美好。" },
+        { emoji:"🌙", en:"FOMO is a trick your brain plays. The party you miss is rarely that good.", zh:"FOMO是你大腦玩的把戲。你錯過的派對很少真的那麼好。" },
+        { emoji:"💪", en:"Confidence built on real experience outlasts any viral moment.", zh:"建立在真實經驗上的自信，比任何爆紅的時刻都更持久。" },
+        { emoji:"🌟", en:"Your story doesn't need an audience to be meaningful.", zh:"你的故事不需要觀眾就有意義。" },
+        { emoji:"🦋", en:"Growth happens in real life, not in comment sections.", zh:"成長發生在真實生活中，不是在留言區。" },
+    ],
+    lost: [
+        { emoji:"🧭", en:"Being lost means you left the familiar. That's already brave.", zh:"迷路意味著你離開了熟悉的地方。這本身就已經很勇敢了。" },
+        { emoji:"🌱", en:"Not knowing is the beginning of every great discovery.", zh:"不知道是每一個偉大發現的開始。" },
+        { emoji:"🔮", en:"Your purpose doesn't have to arrive fully formed. Let it evolve.", zh:"你的使命不必一開始就完整呈現。讓它慢慢演變。" },
+        { emoji:"💡", en:"What made you happy as a child? Follow that thread.", zh:"你小時候什麼讓你快樂？沿著那條線索走。" },
+        { emoji:"🌊", en:"Rivers don't ask where they're going. They just flow toward the ocean.", zh:"河流不問自己要去哪裡。它們只是流向大海。" },
+        { emoji:"🌟", en:"Purpose is found through action, not through waiting.", zh:"使命是透過行動找到的，不是透過等待。" },
+        { emoji:"🦋", en:"Being lost is just the in-between chapter before a breakthrough.", zh:"迷失只是突破之前的過渡篇章。" },
+        { emoji:"🎯", en:"Try things. Fail. Try again. Purpose reveals itself in the trying.", zh:"嘗試。失敗。再試。使命在嘗試中顯現自己。" },
+        { emoji:"🌈", en:"You are not behind. There is no map and no right timeline.", zh:"你沒有落後。沒有地圖，也沒有正確的時間表。" },
+        { emoji:"🔥", en:"The detours in life are often where the best stories happen.", zh:"人生中的彎路往往是最好故事發生的地方。" },
+        { emoji:"☀️", en:"Every great journey started with someone who didn't know where they were going.", zh:"每一段偉大的旅程，都從一個不知道自己要去哪裡的人開始。" },
+        { emoji:"💪", en:"You don't need to have it figured out. Just take the next step.", zh:"你不需要弄清楚所有事。只需邁出下一步。" },
+        { emoji:"🌻", en:"Water your interests. See which ones grow the tallest.", zh:"澆灌你的興趣。看看哪個長得最高。" },
+        { emoji:"🎵", en:"Some of the best songs were written by artists who had no plan.", zh:"有些最好的歌曲是沒有計劃的藝術家寫出來的。" },
+        { emoji:"🌙", en:"Rest in the not-knowing. The answer is composing itself.", zh:"在不知道中休息。答案正在醞釀中。" },
+        { emoji:"💎", en:"You're not lost — you're exploring. There's a difference.", zh:"你不是迷路了——你是在探索。這有區別。" },
+        { emoji:"✨", en:"Your path doesn't have to look like anyone else's. Make it yours.", zh:"你的路不必看起來像任何人的。讓它成為你的。" },
+        { emoji:"🚀", en:"The greatest adventures begin exactly where the map ends.", zh:"最偉大的冒險恰好在地圖結束的地方開始。" },
+    ],
+};
+
+const stickerColors = ['sn-yellow','sn-pink','sn-green','sn-blue','sn-lavender','sn-peach'];
+const burstEmojis = ['🌟','✨','💫','⭐','💛','🧡','❤️','🔥','☀️','🌸','🌺','🌻','💝','🌼','⚡','🎊','🎉','💖'];
+
+// ── INIT ──
+const areasGrid = document.getElementById('areasGrid');
+let selected = new Set();
+
+areas.forEach((area, i) => {
+    const chip = document.createElement('div');
+    chip.className = `area-chip chip-${i}`;
+    chip.textContent = area.label;
+    chip.style.whiteSpace = 'pre-line';
+    chip.onclick = () => {
+        if (selected.has(area.key)) {
+            selected.delete(area.key);
+            chip.classList.remove('active');
+        } else {
+            selected.add(area.key);
+            chip.classList.add('active');
+        }
+    };
+    areasGrid.appendChild(chip);
+});
+
+// ── DECO CIRCLES ──
+const decoBg = document.getElementById('decoBg');
+const decoColors = ['#F5C842','#E8957A','#C4A8D4','#8EBF9E','#88C0D0','#E8A4B0','#F7D98A','#98C8B8'];
+for (let i = 0; i < 8; i++) {
+    const c = document.createElement('div');
+    c.className = 'deco-circle';
+    const size = 80 + Math.random() * 200;
+    c.style.cssText = `
+        width:${size}px; height:${size}px;
+        background:${decoColors[i % decoColors.length]};
+        top:${Math.random()*100}%; left:${Math.random()*100}%;
+        animation-delay:${Math.random()*5}s;
+        animation-duration:${6+Math.random()*6}s;
+    `;
+    decoBg.appendChild(c);
+}
+
+// ── GENERATE ──
+function generate() {
+    if (selected.size === 0) {
+        shakeBtn();
+        return;
+    }
+
+    const btn = document.getElementById('mainBtn');
+    btn.disabled = true;
+    btn.innerHTML = '✨ Charging up... 充電中...';
+
+    // Play sparkle sound
+    playSparkleSound();
+
+    // Flash
+    const flash = document.getElementById('flashOverlay');
+    flash.classList.remove('active');
+    void flash.offsetWidth;
+    flash.classList.add('active');
+
+    // Burst particles
+    doBurst();
+
+    // Confetti rain
+    doConfetti();
+
+    setTimeout(() => {
+        // Pick 2-3 notes per selected area
+        const notesGrid = document.getElementById('notesGrid');
+        notesGrid.innerHTML = '';
+
+        const allPicked = [];
+        selected.forEach(key => {
+            const pool = notes[key];
+            if (!pool) return;
+            const shuffled = [...pool].sort(() => Math.random() - 0.5);
+            const count = 2 + Math.floor(Math.random() * 2); // 2 or 3
+            shuffled.slice(0, count).forEach(note => allPicked.push(note));
+        });
+
+        // Shuffle all picked
+        allPicked.sort(() => Math.random() - 0.5);
+
+        allPicked.forEach((note, i) => {
+            const tilt = (Math.random() * 12) - 6;
+            const colorClass = stickerColors[i % stickerColors.length];
+            const delay = i * 120;
+
+            const sticker = document.createElement('div');
+            sticker.className = `note-sticker ${colorClass}`;
+            sticker.style.cssText = `
+                --tilt: ${tilt}deg;
+                transform: rotate(${tilt}deg);
+                animation-delay: ${delay}ms;
+            `;
+            sticker.innerHTML = `
+                <span class="sticker-emoji" style="animation-delay:${Math.random()*1}s">${note.emoji}</span>
+                <div class="sticker-text-en">${note.en}</div>
+                <div class="sticker-text-zh">${note.zh}</div>
+            `;
+            notesGrid.appendChild(sticker);
+        });
+
+        // Scroll to notes
+        setTimeout(() => {
+            document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 300);
+
+        // Show accept button
+        const acceptZone = document.getElementById('acceptZone');
+        acceptZone.classList.remove('visible');
+        void acceptZone.offsetWidth;
+        setTimeout(() => acceptZone.classList.add('visible'), allPicked.length * 120 + 400);
+
+        btn.disabled = false;
+        btn.innerHTML = '⚡ Provide me with Positive Energy<br><span style="font-size:1.1rem">我需要正能量！</span>';
+    }, 900);
+}
+
+function shakeBtn() {
+    const btn = document.getElementById('mainBtn');
+    btn.style.animation = 'none';
+    btn.style.transform = 'translateX(-8px)';
+    setTimeout(() => btn.style.transform = 'translateX(8px)', 100);
+    setTimeout(() => btn.style.transform = 'translateX(-5px)', 200);
+    setTimeout(() => btn.style.transform = 'translateX(5px)', 300);
+    setTimeout(() => { btn.style.transform = ''; btn.style.animation = ''; }, 400);
+}
+
+function doBurst() {
+    const overlay = document.getElementById('burstOverlay');
+    overlay.innerHTML = '';
+    for (let i = 0; i < 30; i++) {
+        const p = document.createElement('div');
+        p.className = 'burst-particle';
+        p.textContent = burstEmojis[Math.floor(Math.random() * burstEmojis.length)];
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 30 + Math.random() * 45;
+        p.style.cssText = `
+            --tx: ${Math.cos(angle) * dist}vw;
+            --ty: ${Math.sin(angle) * dist}vh;
+            --rot: ${Math.random() * 720 - 360}deg;
+            --dur: ${0.8 + Math.random() * 0.8}s;
+            animation-delay: ${Math.random() * 0.3}s;
+            left: 50%; top: 50%;
+        `;
+        overlay.appendChild(p);
+        setTimeout(() => p.remove(), 2000);
+    }
+}
+
+function doConfetti() {
+    const colors = ['#F5C842','#E8957A','#C4A8D4','#8EBF9E','#88C0D0','#E8A4B0','#F7D98A','#98C8B8'];
+    for (let i = 0; i < 60; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti-piece';
+        c.style.cssText = `
+            left: ${Math.random() * 100}vw;
+            background: ${colors[Math.floor(Math.random() * colors.length)]};
+            --cx: ${(Math.random() - 0.5) * 200}px;
+            --cr: ${Math.random() * 720}deg;
+            --cfall: ${1 + Math.random() * 2}s;
+            animation-delay: ${Math.random() * 0.5}s;
+            transform: rotate(${Math.random() * 360}deg);
+        `;
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 3000);
+    }
+}
+
+// ── AUDIO ──
+let audioCtx;
+function getAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+}
+
+function playSparkleSound() {
+    try {
+        const ctx = getAudio();
+        const now = ctx.currentTime;
+        const masterGain = ctx.createGain();
+        masterGain.gain.value = 0.3;
+        masterGain.connect(ctx.destination);
+
+        // Happy ascending arpeggio
+        const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5, 1567.98];
+        notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0, now + i * 0.1);
+            gain.gain.linearRampToValueAtTime(0.4, now + i * 0.1 + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.4);
+            osc.connect(gain).connect(masterGain);
+            osc.start(now + i * 0.1);
+            osc.stop(now + i * 0.1 + 0.5);
+        });
+
+        // Shimmer high notes
+        for (let i = 0; i < 5; i++) {
+            const osc = ctx.createOscillator();
+            osc.type = 'triangle';
+            osc.frequency.value = 2000 + Math.random() * 1500;
+            const gain = ctx.createGain();
+            const t = now + 0.5 + Math.random() * 0.5;
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(0.15, t + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+            osc.connect(gain).connect(masterGain);
+            osc.start(t);
+            osc.stop(t + 0.3);
+        }
+    } catch(e) {}
+}
+
+// ── CELEBRATION ──
+const petalEmojis = ['🌸','🌼','🌿','✨','🍀','🌺','💐','🌷'];
+
+function showCelebration() {
+    // Seed petals inside the card
+    const card = document.getElementById('celebCard');
+    // Clear old petals
+    card.querySelectorAll('.petal').forEach(p => p.remove());
+    for (let i = 0; i < 10; i++) {
+        const p = document.createElement('div');
+        p.className = 'petal';
+        p.textContent = petalEmojis[i % petalEmojis.length];
+        const px = (Math.random() - 0.5) * 60 + 'px';
+        const py = (Math.random() - 0.5) * 40 + 'px';
+        const pr = (Math.random() * 60 - 30) + 'deg';
+        const pd = (2 + Math.random() * 3) + 's';
+        p.style.cssText = `
+            left:${Math.random()*90}%; top:${Math.random()*85}%;
+            --px:${px}; --py:${py}; --pr:${pr}; --pd:${pd};
+            animation-delay:${Math.random()*2}s;
+        `;
+        card.appendChild(p);
+    }
+
+    // Show overlay
+    const overlay = document.getElementById('celebrationOverlay');
+    overlay.classList.add('show');
+
+    // Play a warm chime
+    playCelebSound();
+
+    // Confetti burst
+    doConfetti();
+}
+
+function closeCelebration() {
+    const overlay = document.getElementById('celebrationOverlay');
+    overlay.classList.remove('show');
+
+    // Reset the page gracefully: hide accept btn, clear notes, scroll top
+    setTimeout(() => {
+        // Clear stickers
+        const notesGrid = document.getElementById('notesGrid');
+        notesGrid.innerHTML = '<div class="empty-state"><span>🌸</span>Choose your feelings above and let the magic happen!</div>';
+
+        // Hide accept button
+        document.getElementById('acceptZone').classList.remove('visible');
+
+        // Deselect all chips
+        selected.clear();
+        document.querySelectorAll('.area-chip.active').forEach(c => c.classList.remove('active'));
+
+        // Scroll back to top smoothly
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 400);
+}
+
+function playCelebSound() {
+    try {
+        const ctx = getAudio();
+        const now = ctx.currentTime;
+        const master = ctx.createGain();
+        master.gain.value = 0.28;
+        master.connect(ctx.destination);
+
+        // Warm bell-like chord: D major
+        const freqs = [293.66, 369.99, 440.00, 587.33, 739.99];
+        freqs.forEach((f, i) => {
+            const osc = ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = f;
+            const g = ctx.createGain();
+            g.gain.setValueAtTime(0, now + i * 0.06);
+            g.gain.linearRampToValueAtTime(0.5, now + i * 0.06 + 0.08);
+            g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 1.8);
+            osc.connect(g).connect(master);
+            osc.start(now + i * 0.06);
+            osc.stop(now + i * 0.06 + 2);
+        });
+
+        // Gentle shimmer
+        for (let i = 0; i < 4; i++) {
+            const osc = ctx.createOscillator();
+            osc.type = 'triangle';
+            osc.frequency.value = 1200 + i * 300;
+            const g = ctx.createGain();
+            const t = now + 0.3 + i * 0.15;
+            g.gain.setValueAtTime(0, t);
+            g.gain.linearRampToValueAtTime(0.12, t + 0.04);
+            g.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+            osc.connect(g).connect(master);
+            osc.start(t); osc.stop(t + 0.7);
+        }
+    } catch(e) {}
+}
+</script>
+</body>
+</html>
