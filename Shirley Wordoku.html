@@ -1,491 +1,698 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Shirley's Wordoku | 字母数独游戏</title>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none;}
-    body{background:#f8f4e5;padding:12px;display:flex;flex-direction:column;align-items:center;color:#5d4037;}
-    h1{font-size:22px;margin:10px 0;color:#3e2723;text-align:center;}
-    #msg{min-height:24px;font-size:16px;font-weight:bold;text-align:center;margin:6px 0;transition:opacity 0.3s;}
-    .ctrl{display:flex;gap:8px;margin:6px 0;flex-wrap:wrap;justify-content:center;}
-    button{padding:7px 12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer;font-size:13px;}
-    .d-btn{background:#ffecb3;color:#5d4037;}
-    .d-btn.a{background:#ffb300;color:white;}
-    #r, #chk{background:#ffd54f;color:#3e2723;}
-    .sc{margin:12px 0;background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);display:flex;justify-content:center;overflow:hidden;}
-    .g{display:grid;gap:1px;background:#e65100;padding:2px;}
-    .c{display:flex;align-items:center;justify-content:center;background:white;font-weight:bold;cursor:pointer;}
-    .c.given{color:#3e2723;background:#fff8e1 !important;}
-    .c.user{color:#e65100;}
-    .c.err{background:#ffcdd2 !important;color:#c62828;}
-    .c.sel{background:#ffe0b2 !important;outline:2px solid #e65100;}
-    .c.highlight{background:#e8f5e9 !important;color:#2e7d32 !important;font-weight:bold;}
-    .np{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:14px;width:100%;max-width:540px;}
-    .nb{padding:10px 0;background:#fff8e1;color:#5d4037;font-size:16px;font-weight:bold;border-radius:8px;border:none;cursor:pointer;opacity:0.7;}
-    .nb:hover{opacity:1;}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background: #fef7e8;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: #4e3b2c;
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 600;
+      margin: 6px 0 4px;
+      color: #c45b1c;
+      letter-spacing: 1px;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.05);
+    }
+
+    #msg {
+      min-height: 52px;
+      font-size: 15px;
+      font-weight: 500;
+      text-align: center;
+      margin: 6px 0;
+      padding: 6px 12px;
+      border-radius: 30px;
+      background: #fff6e0;
+      display: inline-block;
+      max-width: 90%;
+      transition: all 0.2s ease;
+      color: #a55d2a;
+    }
+
+    .ctrl {
+      display: flex;
+      gap: 12px;
+      margin: 8px 0 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.15s linear;
+      background: #ffefcf;
+      color: #7b4a2e;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    .d-btn {
+      background: #fae5b3;
+    }
+
+    .d-btn.a {
+      background: #ffb347;
+      color: white;
+      box-shadow: 0 2px 6px rgba(255, 140, 0, 0.3);
+    }
+
+    #r, #chk {
+      background: #ffe0a3;
+      color: #aa5e2b;
+      font-weight: 600;
+    }
+
+    .sc {
+      margin: 8px 0 12px;
+      background: #fef0dd;
+      border-radius: 24px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .g {
+      display: grid;
+      gap: 2px;
+      background: #d98e3a;
+      padding: 2px;
+      border-radius: 18px;
+    }
+
+    .c {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fffef7;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.05s linear;
+      border-radius: 8px;
+      font-family: monospace;
+      letter-spacing: 1px;
+    }
+
+    .c.given {
+      background: #fffaec !important;
+      color: #aa5f2c;
+      font-weight: 700;
+    }
+
+    .c.user {
+      color: #e66a2c;
+      font-weight: 700;
+      background: #ffffff;
+    }
+
+    .c.err {
+      background: #ffdedb !important;
+      color: #d32f2f;
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+    }
+
+    .c.sel {
+      background: #ffd9a5 !important;
+      outline: 3px solid #ff9124;
+      outline-offset: -1px;
+      transform: scale(0.98);
+    }
+
+    .c.highlight {
+      background: #c8e6d9 !important;
+      color: #1b5e2a !important;
+      font-weight: 800;
+      box-shadow: inset 0 0 0 1px #2e7d32;
+    }
+
+    .np {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 540px;
+      background: #fff1df;
+      padding: 12px 14px;
+      border-radius: 48px;
+    }
+
+    .nb {
+      background: #fff3e0;
+      color: #b45f2b;
+      font-size: 18px;
+      font-weight: 700;
+      border-radius: 60px;
+      padding: 12px 0;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      transition: 0.08s linear;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .nb:active {
+      background: #ffd58c;
+      transform: scale(0.94);
+    }
+
+    @media (max-width: 550px) {
+      .np {
+        gap: 8px;
+        padding: 10px;
+      }
+      .nb {
+        font-size: 16px;
+        padding: 10px 0;
+      }
+      .ctrl button {
+        padding: 6px 14px;
+        font-size: 13px;
+      }
+      h1 {
+        font-size: 22px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>Shirley's Wordoku</h1>
-  <div id="msg"></div>
-  <div class="ctrl">
-    <button class="d-btn a" data-s="3">輕鬆 (3×3)</button>
-    <button class="d-btn" data-s="6">挑戰 (6×6)</button>
-    <button class="d-btn" data-s="9">燒腦 (9×9)</button>
-    <button id="r">重置</button>
-    <button id="chk">完成檢查</button>
-  </div>
-  <div class="sc"><div class="g" id="g"></div></div>
-  <div class="np" id="np"></div>
+<h1>✨ Shirley's Wordoku ✨</h1>
+<div id="msg">⚡ 點擊格子再點字母盤</div>
+<div class="ctrl">
+  <button class="d-btn a" data-s="3">🍃 輕鬆 (3x3)</button>
+  <button class="d-btn" data-s="6">🌟 挑戰 (6x6)</button>
+  <button class="d-btn" data-s="9">🔥 燒腦 (9x9)</button>
+  <button id="r">🔄 重置</button>
+  <button id="chk">✅ 完成檢查</button>
+</div>
+<div class="sc"><div class="g" id="g"></div></div>
+<div class="np" id="np"></div>
 
-  <script>
-    // ========== 嚴格篩選：字母數 = N 且無重複 ==========
-    var w3 = "ACT,AGE,AIR,ARK,ARM,ASK,ATE,AWE,BAG,BAN,BED,BIG,BOX,BUS,BUT,BUY,CAN,CAP,CAR,CAT,COT,CUP,CUT,DRY,DUE,EAT,END,FAR,FAT,FIT,FLY,FOG,FOX,FUN,GUM,HAD,HAM,HAT,HIP,HIS,HOP,ICY,INK,JAM,JET,KEY,KID,LAP,LEG,LOG,MAN,MAP,MAT,NEW,NOW,OAR,OIL,ONE,OUR,OWL,OWN,PAD,PAN,PET,PIG,POP,POT,PUT,RAT,RED,ROW,RUN,SAD,SEA,SEE,SET,SIT,SIX,SKI,SOX,SUN,TAG,TAX,TEA,TEN,THE,TIN,TIP,TOP,TOY,URN,USE,VAN,VET,WAX,WET,YAK,YAW,YUM,ZOO";
-    
-    var w6 = "ACTION,AMIDST,AUTHOR,BLUELY,BRANCH,BREACH,BRIGHT,BUCKET,CANDID,CANYON,COLUMN,COMMIT,CONVEY,CREDIT,CUSTOM,CYCLER,DESERT,DESIGN,DIRECT,EDITOR,ENERGY,ENJOY,ENTIRE,FACTOR,FINITE,FOREST,FORMAT,FORTUNE,FRIGHT,FUTURE,GARDEN,GROUND,HARVEST,HONEST,IMPORT,ISLAND,JUNGLE,KIDNEY,KNIGHT,LABOUR,LEGACY,LENGTH,LESSON,MAKING,MANNER,MASTER,MEDIUM,MEMBER,METHOD,MINUTE,MOBILE,MODEL,MOMENT,MOTION,NOVELS,NUDGEY,ORANGE,OUTLET,PARADE,PENCIL,PEPPER,PERSON,PHRASE,PLASTIC,POCKET,POLICY,PRINCE,PROFIT,PROMPT,PROVIDE,PURPLE,PUTTER,QUARTZ,RATHER,REASON,RECENT,REFUND,REGION,REMOTE,RENDER,RESULT,RETAIL,REVIEW,ROLLER,SAFETY,SALUTE,SECRET,SENSOR,SERENE,SHAPE,SHADOW,SIGNET,SIMPLE,SINCERE,SIXTIES,SLIPPER,SOFTLY,SOLACE,SOURCE,SPHERE,SPLASH,SPRING,STATIC,STATUS,STEREO,STOCKY,STYLE,SUBMIT,SUCCESS,SUFFIX,SUMMER,SUPERB,SUPPLY,SURPRISE,SWITCH,SYMBOL,SYSTEM,TABOO,TACKLE,TAGGER,TALBOT,TANGLE,TARGET,TELEND,TEMPO,TENURE,THEORY,TONGUE,TOPAZ,TORQUE,TOXINS,TRANCE,TRANSLATE,TRAVEL,TRENCH,TRIAGE";
-    
-    var w9 = "EDUCATION,AMBULANCE,ABDUCTION,ABSOLUTELY,ADJUSTING,ALGORITHM,BLACKMAIL,BLUEPRINT,BRACKETS,BREWING,CHAMPIONS,COMPLAINS,CONFIDENT,COUGHING,CRACKLING,DESPERATE,DISCOVER,DOORBELL,DRAMATIC,EARTHLING,EMPATHIZE,ENCOUNTER,ENFORCED,ENGINEERS,EXEMPLARY,FACTORIZE,FAVORITES,FLAVORING,FORMULATE,FREIGHTER,GARNISHED,GLOWINGLY,GRACEFUL,GRATEFUL,HANDCUFFS,HARMONIZE,HOSPITAL,IMPOSTURE,INCENTIVE,INFORMANT,INTRIGUED,JUDGMENTS,JUNCTION,KALEIDOSCOPE,KILOBYTES,LANDSCAPE,LIGHTNING,LOGARITHM,MAGNIFIED,MALEFACTORS,MARATHONS,MENTALITY,MONKEYING,MOTHERLAND,MULTIFACED,MULTIPLAYER,MYSTIFIED,NEIGHBORS,NOTIFYING,NUTRITIVE,OBFUSCATED,OBSCURITY,OFFICIALS,OUTLINED,OVERHEARD,PACIFYING,PARALYZED,PARAMETERS,PASSIONATE,PERFECTLY,PHARMACIES,PHOTOGENIC,PLATINUM,PLAYGROUNDS,PLEADINGS,POETICALLY,POWERLESS,PROBLEMATIC,PROTECTIVE,QUADRUPLE,QUANTIZED,QUEASILY,QUESTIONED,QUICKLY,QUIVERING,RADIATION,REASONING,RECHARGED,RECOGNIZED,RECONCILED,REFORMING,REGISTERED,REGRETFUL,REJUVENATE,RELAXATION,REMARKABLY,RENDERING,REPLACEMENT,REPUBLICAN,RESPECTFUL,RESTORATION,REVERSIBLE,RIGHTFULLY,ROADBLOCKS,ROMANTIC,ROTUNDA,SAFEGUARD,SCANDALOUS,SCIENTIFIC,SCREENPLAY,SEAMANSHIP,SEGMENTED,SEMESTERS,SENSATION,SERIOUSLY,SHOCKWAVE,SHOWCASES,SIGNATURE,SIMPLIFIED,SKELETONS,SLAUGHTER,SLEEPWALK,SMOKESTACK,SOLITARY,SOUNDPROOF,SPECTACLE,SPHERICAL,STARGAZING,STEAMBOAT,STRAIGHTEN,STRATEGIC,STRENGTH,STRUCTURAL,SUBJECTED,SUBMARINE,SUCCESSFUL,SUFFERING,SUGGESTION,SUPERMARKET,SURPRISING,SWALLOWING,SYMMETRICAL,SYNCHRONIZE,SYNTHESIZE,TABLESPOON,TACTICALLY,TAILORED,TEACHABLE,TECHNICAL,TELEGRAPH,TELEPHONE,TEMPERATE,TENTACLES,TEXTBOOKS,THEORETICAL,TIGHTROPE,TIMBERLAND,TOLERANCE,TRANSLATE,TRIANGLE,TRIUMPHED,TRUSTWORTHY,TUNNELING,UNBELIEVABLE,UNCONSCIOUS,UNDERRATE,UNFRIENDLY,UNIQUELY,UPGRADED,VALIDATED,VALUABLE,VANDALIZED,VENTILATED,VERIFIABLE,VIRTUALLY,VOLATILITY,VOLUNTEERS,WANDERING,WARMLY,WEAPONIZED,WEIGHTLESS,WESTBOUND,WHEELCHAIR,WHISPERED,WILDFIRES,WILTING,WINDMILLS,WORKPLACE,YARDSTICK,YESTERDAY,ZEROGRAVITY";
+<script>
+  // ========================= 詞庫 (精心挑選) ==========================
+  const w3 = "ACT,AGE,AIR,ARK,ARM,ASK,ATE,AWE,BAG,BAN,BED,BIG,BOX,BUS,BUT,BUY,CAN,CAP,CAR,CAT,COT,CUP,CUT,DRY,DUE,EAT,END,FAR,FAT,FIT,FLY,FOG,FOX,FUN,GUM,HAD,HAM,HAT,HIP,HIS,HOP,ICY,INK,JAM,JET,KEY,KID,LAP,LEG,LOG,MAN,MAP,MAT,NEW,NOW,OAR,OIL,ONE,OUR,OWL,OWN,PAD,PAN,PET,PIG,POP,POT,PUT,RAT,RED,ROW,RUN,SAD,SEA,SEE,SET,SIT,SIX,SKI,SOX,SUN,TAG,TAX,TEA,TEN,THE,TIN,TIP,TOP,TOY,URN,USE,VAN,VET,WAX,WET,YAK,YAW,YUM,ZOO";
+  const w6 = "ACTION,AMIDST,AUTHOR,BLUELY,BRANCH,BREACH,BRIGHT,BUCKET,CANDID,CANYON,COLUMN,COMMIT,CONVEY,CREDIT,CUSTOM,CYCLER,DESERT,DESIGN,DIRECT,EDITOR,ENERGY,ENJOY,ENTIRE,FACTOR,FINITE,FOREST,FORMAT,FORTUNE,FRIGHT,FUTURE,GARDEN,GROUND,HARVEST,HONEST,IMPORT,ISLAND,JUNGLE,KIDNEY,KNIGHT,LABOUR,LEGACY,LENGTH,LESSON,MAKING,MANNER,MASTER,MEDIUM,MEMBER,METHOD,MINUTE,MOBILE,MODEL,MOMENT,MOTION,NOVELS,NUDGEY,ORANGE,OUTLET,PARADE,PENCIL,PEPPER,PERSON,PHRASE,PLASTIC,POCKET,POLICY,PRINCE,PROFIT,PROMPT,PROVIDE,PURPLE,PUTTER,QUARTZ,RATHER,REASON,RECENT,REFUND,REGION,REMOTE,RENDER,RESULT,RETAIL,REVIEW,ROLLER,SAFETY,SALUTE,SECRET,SENSOR,SERENE,SHAPE,SHADOW,SIGNET,SIMPLE,SINCERE,SIXTIES,SLIPPER,SOFTLY,SOLACE,SOURCE,SPHERE,SPLASH,SPRING,STATIC,STATUS,STEREO,STOCKY,STYLE,SUBMIT,SUCCESS,SUFFIX,SUMMER,SUPERB,SUPPLY,SURPRISE,SWITCH,SYMBOL,SYSTEM,TABOO,TACKLE,TAGGER,TALBOT,TANGLE,TARGET,TELEND,TEMPO,TENURE,THEORY,TONGUE,TOPAZ,TORQUE,TOXINS,TRANCE,TRANSLATE,TRAVEL,TRENCH,TRIAGE";
+  const w9 = "EDUCATION,AMBULANCE,ABDUCTION,ABSOLUTELY,ADJUSTING,ALGORITHM,BLACKMAIL,BLUEPRINT,BRACKETS,BREWING,CHAMPIONS,COMPLAINS,CONFIDENT,COUGHING,CRACKLING,DESPERATE,DISCOVER,DOORBELL,DRAMATIC,EARTHLING,EMPATHIZE,ENCOUNTER,ENFORCED,ENGINEERS,EXEMPLARY,FACTORIZE,FAVORITES,FLAVORING,FORMULATE,FREIGHTER,GARNISHED,GLOWINGLY,GRACEFUL,GRATEFUL,HANDCUFFS,HARMONIZE,HOSPITAL,IMPOSTURE,INCENTIVE,INFORMANT,INTRIGUED,JUDGMENTS,JUNCTION,KALEIDOSCOPE,KILOBYTES,LANDSCAPE,LIGHTNING,LOGARITHM,MAGNIFIED,MALEFACTORS,MARATHONS,MENTALITY,MONKEYING,MOTHERLAND,MULTIFACED,MULTIPLAYER,MYSTIFIED,NEIGHBORS,NOTIFYING,NUTRITIVE,OBFUSCATED,OBSCURITY,OFFICIALS,OUTLINED,OVERHEARD,PACIFYING,PARALYZED,PARAMETERS,PASSIONATE,PERFECTLY,PHARMACIES,PHOTOGENIC,PLATINUM,PLAYGROUNDS,PLEADINGS,POETICALLY,POWERLESS,PROBLEMATIC,PROTECTIVE,QUADRUPLE,QUANTIZED,QUEASILY,QUESTIONED,QUICKLY,QUIVERING,RADIATION,REASONING,RECHARGED,RECOGNIZED,RECONCILED,REFORMING,REGISTERED,REGRETFUL,REJUVENATE,RELAXATION,REMARKABLY,RENDERING,REPLACEMENT,REPUBLICAN,RESPECTFUL,RESTORATION,REVERSIBLE,RIGHTFULLY,ROADBLOCKS,ROMANTIC,ROTUNDA,SAFEGUARD,SCANDALOUS,SCIENTIFIC,SCREENPLAY,SEAMANSHIP,SEGMENTED,SEMESTERS,SENSATION,SERIOUSLY,SHOCKWAVE,SHOWCASES,SIGNATURE,SIMPLIFIED,SKELETONS,SLAUGHTER,SLEEPWALK,SMOKESTACK,SOLITARY,SOUNDPROOF,SPECTACLE,SPHERICAL,STARGAZING,STEAMBOAT,STRAIGHTEN,STRATEGIC,STRENGTH,STRUCTURAL,SUBJECTED,SUBMARINE,SUCCESSFUL,SUFFERING,SUGGESTION,SUPERMARKET,SURPRISING,SWALLOWING,SYMMETRICAL,SYNCHRONIZE,SYNTHESIZE,TABLESPOON,TACTICALLY,TAILORED,TEACHABLE,TECHNICAL,TELEGRAPH,TELEPHONE,TEMPERATE,TENTACLES,TEXTBOOKS,THEORETICAL,TIGHTROPE,TIMBERLAND,TOLERANCE,TRANSLATE,TRIANGLE,TRIUMPHED,TRUSTWORTHY,TUNNELING,UNBELIEVABLE,UNCONSCIOUS,UNDERRATE,UNFRIENDLY,UNIQUELY,UPGRADED,VALIDATED,VALUABLE,VANDALIZED,VENTILATED,VERIFIABLE,VIRTUALLY,VOLATILITY,VOLUNTEERS,WANDERING,WARMLY,WEAPONIZED,WEIGHTLESS,WESTBOUND,WHEELCHAIR,WHISPERED,WILDFIRES,WILTING,WINDMILLS,WORKPLACE,YARDSTICK,YESTERDAY,ZEROGRAVITY";
 
-    var bank = {3:w3.split(','), 6:w6.split(','), 9:w9.split(',')};
-    var total = {3:5, 6:8, 9:11};
-    var size = 3;
-    var bd = [], sol = [], gn = [], sc = null, sp = null, act = [], av = [], chosenWord = "";
+  const bank = { 3: w3.split(','), 6: w6.split(','), 9: w9.split(',') };
+  const totalPadCount = { 3: 5, 6: 8, 9: 11 };
 
-    document.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
-    document.addEventListener('touchstart', function(e) { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
-    var last = 0;
-    document.addEventListener('touchend', function(e) {
-      var now = Date.now();
-      if (now - last <= 300) e.preventDefault();
-      last = now;
-    }, false);
+  let currentSize = 3;          // 3,6,9
+  let board = [];               // 當前使用者盤面 (二維, 存字母或'')
+  let solution = [];            // 正確完整盤面
+  let isGiven = [];             // true = 預設固定格
+  let selectedCell = null;      // {row, col}
+  let activeLetters = [];       // 本局使用的字母集合 (size 個，來自單字+補充)
+  let availablePad = [];        // 下方按鈕字母列表 (總共 totalPadCount 個)
+  let currentWord = "";         // 本輪選中的單字
 
-    function uniq(s) {
-      var seen = {};
-      var res = [];
-      var up = s.toUpperCase();
-      for (var i = 0; i < up.length; i++) {
-        var c = up[i];
-        if (c >= 'A' && c <= 'Z' && !seen[c]) {
-          seen[c] = 1;
-          res.push(c);
-        }
+  // 輔助：提取字串中唯一大寫字母 (A-Z)
+  function getUniqueLetters(word) {
+    const seen = new Set();
+    const upperWord = word.toUpperCase();
+    const result = [];
+    for (let ch of upperWord) {
+      if (ch >= 'A' && ch <= 'Z' && !seen.has(ch)) {
+        seen.add(ch);
+        result.push(ch);
       }
-      return res;
     }
+    return result;
+  }
 
-    function supplement(base, n) {
-      var res = [];
-      for (var i = 0; i < base.length; i++) res.push(base[i]);
-      if (res.length >= n) {
-        for (var i = res.length - 1; i > 0; i--) {
-          var j = Math.floor(Math.random() * (i + 1));
-          var t = res[i]; res[i] = res[j]; res[j] = t;
-        }
-        return res.slice(0, n);
+  // 補充字母至 n 個 (隨機打亂)
+  function supplementLetters(baseLetters, n) {
+    const letters = [...baseLetters];
+    if (letters.length >= n) {
+      // 隨機打亂並取前 n 個
+      for (let i = letters.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [letters[i], letters[j]] = [letters[j], letters[i]];
       }
-      var all = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      for (var i = 0; i < all.length && res.length < n; i++) {
-        var c = all[i];
-        var found = 0;
-        for (var j = 0; j < res.length; j++) {
-          if (res[j] == c) { found = 1; break; }
-        }
-        if (!found) res.push(c);
-      }
-      for (var i = res.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var t = res[i]; res[i] = res[j]; res[j] = t;
-      }
-      return res.slice(0, n);
+      return letters.slice(0, n);
     }
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+    for (let ch of alphabet) {
+      if (!letters.includes(ch) && letters.length < n) letters.push(ch);
+      if (letters.length === n) break;
+    }
+    // 最後洗牌
+    for (let i = letters.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [letters[i], letters[j]] = [letters[j], letters[i]];
+    }
+    return letters;
+  }
 
-    function solve(g, s, letters) {
-      for (var r = 0; r < s; r++) {
-        for (var c = 0; c < s; c++) {
-          if (g[r][c] === '') {
-            var sh = [];
-            for (var i = 0; i < letters.length; i++) sh.push(letters[i]);
-            for (var i = sh.length - 1; i > 0; i--) {
-              var j = Math.floor(Math.random() * (i + 1));
-              var t = sh[i]; sh[i] = sh[j]; sh[j] = t;
+  // 遞迴回溯求解 (隨機順序，保證多解時隨機生成但僅取一組)
+  function solveSudoku(grid, n, letterSet) {
+    // 尋找空格
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (grid[r][c] === '') {
+          // 隨機嘗試字母順序 (提升趣味)
+          const shuffled = [...letterSet];
+          for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+          }
+          for (let L of shuffled) {
+            let ok = true;
+            // 行檢查
+            for (let x = 0; x < n; x++) {
+              if (grid[r][x] === L || grid[x][c] === L) { ok = false; break; }
             }
-            for (var k = 0; k < sh.length; k++) {
-              var L = sh[k];
-              var canPlace = true;
-              for (var x = 0; x < s; x++) {
-                if (g[r][x] === L || g[x][c] === L) { canPlace = false; break; }
-              }
-              if (canPlace && s > 3) {
-                var bh = (s === 6) ? 2 : 3;
-                var bw = (s === 6) ? 3 : 3;
-                var sr = r - (r % bh), scol = c - (c % bw);
-                for (var i = 0; i < bh; i++) {
-                  for (var j = 0; j < bw; j++) {
-                    if (g[sr + i][scol + j] === L) { canPlace = false; break; }
-                  }
-                  if (!canPlace) break;
+            if (!ok) continue;
+            // 宮檢查 (3x3, 6x6 宮格: 6x6為2x3, 9x9為3x3)
+            if (n > 3) {
+              const boxRows = (n === 6) ? 2 : 3;
+              const boxCols = (n === 6) ? 3 : 3;
+              const startRow = r - (r % boxRows);
+              const startCol = c - (c % boxCols);
+              for (let i = 0; i < boxRows; i++) {
+                for (let j = 0; j < boxCols; j++) {
+                  if (grid[startRow + i][startCol + j] === L) { ok = false; break; }
                 }
-              }
-              if (canPlace) {
-                g[r][c] = L;
-                if (solve(g, s, letters)) return true;
-                g[r][c] = '';
+                if (!ok) break;
               }
             }
-            return false;
+            if (ok) {
+              grid[r][c] = L;
+              if (solveSudoku(grid, n, letterSet)) return true;
+              grid[r][c] = '';
+            }
           }
-        }
-      }
-      return true;
-    }
-
-    function gen(s) {
-      var list = bank[s];
-      // 確保選到的單字有足夠不重複字母
-      var validWords = [];
-      for (var i = 0; i < list.length; i++) {
-        var u = uniq(list[i]);
-        if (u.length >= s) {
-          validWords.push(list[i]);
-        }
-      }
-      if (validWords.length === 0) validWords = list; // fallback
-      chosenWord = validWords[Math.floor(Math.random() * validWords.length)];
-      var ul = uniq(chosenWord);
-      act = supplement(ul, s);
-      av = supplement(ul, total[s]);
-
-      sol = [];
-      for (var i = 0; i < s; i++) {
-        sol[i] = [];
-        for (var j = 0; j < s; j++) sol[i][j] = '';
-      }
-      solve(sol, s, act);
-
-      bd = [];
-      gn = [];
-      for (var i = 0; i < s; i++) {
-        bd[i] = []; gn[i] = [];
-        for (var j = 0; j < s; j++) {
-          bd[i][j] = sol[i][j];
-          if (Math.random() < (s === 3 ? 0.4 : (s === 6 ? 0.3 : 0.25))) {
-            gn[i][j] = true;
-          } else {
-            gn[i][j] = false;
-            bd[i][j] = '';
-          }
-        }
-      }
-    }
-
-    function arraysEqual(a, b) {
-      if (a.length !== b.length) return false;
-      for (var i = 0; i < a.length; i++) {
-        if (a[i] !== b[i]) return false;
-      }
-      return true;
-    }
-
-    function checkHighlights() {
-      var grid = document.getElementById('g');
-      var cells = grid.querySelectorAll('.c');
-      cells.forEach(cell => cell.classList.remove('highlight'));
-
-      for (var i = 0; i < size; i++) {
-        var rowLetters = [];
-        var complete = true;
-        for (var j = 0; j < size; j++) {
-          var val = bd[i][j];
-          if (val === '') {
-            complete = false;
-            break;
-          }
-          rowLetters.push(val);
-        }
-        if (complete && arraysEqual(rowLetters, act)) {
-          for (var j = 0; j < size; j++) {
-            var cell = document.querySelector('.c[data-r="' + i + '"][data-c="' + j + '"]');
-            if (cell) cell.classList.add('highlight');
-          }
-        }
-      }
-
-      for (var j = 0; j < size; j++) {
-        var colLetters = [];
-        var complete = true;
-        for (var i = 0; i < size; i++) {
-          var val = bd[i][j];
-          if (val === '') {
-            complete = false;
-            break;
-          }
-          colLetters.push(val);
-        }
-        if (complete && arraysEqual(colLetters, act)) {
-          for (var i = 0; i < size; i++) {
-            var cell = document.querySelector('.c[data-r="' + i + '"][data-c="' + j + '"]');
-            if (cell) cell.classList.add('highlight');
-          }
-        }
-      }
-    }
-
-    function render() {
-      var ge = document.getElementById('g');
-      ge.style.gridTemplateColumns = 'repeat(' + size + ', 1fr)';
-      ge.innerHTML = '';
-
-      var containerWidth;
-      if (size === 3) containerWidth = 300;
-      else if (size === 6) containerWidth = 480;
-      else containerWidth = 540;
-
-      var cs = Math.floor(containerWidth / size);
-      var container = document.querySelector('.sc');
-      container.style.width = containerWidth + 'px';
-
-      for (var i = 0; i < size; i++) {
-        for (var j = 0; j < size; j++) {
-          var c = document.createElement('div');
-          c.className = 'c';
-          c.style.width = cs + 'px';
-          c.style.height = cs + 'px';
-          c.style.fontSize = Math.max(14, Math.floor(cs * 0.45)) + 'px';
-
-          if (gn[i][j] && bd[i][j]) {
-            c.textContent = bd[i][j];
-            c.classList.add('given');
-          } else if (bd[i][j]) {
-            c.textContent = bd[i][j];
-            c.classList.add('user');
-          }
-
-          c.dataset.r = i;
-          c.dataset.c = j;
-          c.addEventListener('click', function(e) {
-            e.preventDefault();
-            var r = parseInt(this.dataset.r);
-            var c = parseInt(this.dataset.c);
-            sel(r, c);
-          });
-          c.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            var r = parseInt(this.dataset.r);
-            var c = parseInt(this.dataset.c);
-            sel(r, c);
-          });
-          ge.appendChild(c);
-        }
-      }
-      checkHighlights();
-    }
-
-    function renderPad() {
-      var p = document.getElementById('np');
-      p.innerHTML = '';
-      var rows = Math.ceil(av.length / 6);
-      p.style.gridTemplateRows = 'repeat(' + rows + ', 1fr)';
-
-      for (var i = 0; i < av.length; i++) {
-        var b = document.createElement('button');
-        b.className = 'nb';
-        b.textContent = av[i];
-        b.addEventListener('click', function(e) {
-          e.preventDefault();
-          inL(this.textContent);
-        });
-        b.addEventListener('touchstart', function(e) {
-          e.preventDefault();
-          inL(this.textContent);
-        });
-        p.appendChild(b);
-      }
-    }
-
-    function clear() {
-      if (sc) sc.classList.remove('sel');
-      sc = null;
-      sp = null;
-    }
-
-    function sel(r, c) {
-      if (gn[r][c]) return;
-      clear();
-      sc = document.querySelector('.c[data-r="' + r + '"][data-c="' + c + '"]');
-      sp = {r: r, c: c};
-      if (sc) sc.classList.add('sel');
-    }
-
-    function isInputValid(r, c, L, s) {
-      if (L === '') return true;
-      if (!/^[A-Z]$/.test(L)) return false;
-
-      for (var j = 0; j < s; j++) {
-        if (j !== c && bd[r][j] !== '' && bd[r][j] === L) {
           return false;
         }
       }
-
-      for (var i = 0; i < s; i++) {
-        if (i !== r && bd[i][c] !== '' && bd[i][c] === L) {
-          return false;
-        }
-      }
-
-      if (s > 3) {
-        var bh = (s === 6) ? 2 : 3;
-        var bw = (s === 6) ? 3 : 3;
-        var sr = r - (r % bh);
-        var scol = c - (c % bw);
-        for (var i = 0; i < bh; i++) {
-          for (var j = 0; j < bw; j++) {
-            var rr = sr + i;
-            var cc = scol + j;
-            if ((rr !== r || cc !== c) && bd[rr][cc] !== '' && bd[rr][cc] === L) {
-              return false;
-            }
-          }
-        }
-      }
-
-      return true;
     }
+    return true;
+  }
 
-    function inL(L) {
-      if (!sp) return;
-      var r = sp.r, c = sp.c;
-      bd[r][c] = L;
-      if (sc) {
-        sc.textContent = L;
-        sc.classList.remove('err', 'user');
-        sc.classList.add('user');
-        if (!isInputValid(r, c, L, size)) {
-          sc.classList.add('err');
-        }
-      }
-      checkHighlights();
+  // 生成全新謎題 (隨機單字、隨機盤面)
+  function generatePuzzle(size) {
+    const wordList = bank[size];
+    // 過濾出至少有 size 個不同字母的單字，保證可玩
+    let validWords = wordList.filter(word => getUniqueLetters(word).length >= size);
+    if (validWords.length === 0) validWords = wordList; // 理論上不可能，但防呆
+    const chosen = validWords[Math.floor(Math.random() * validWords.length)];
+    currentWord = chosen;
+    const uniqueFromWord = getUniqueLetters(chosen);
+    // 決定本局使用的字母集 (必須正好 size 個)
+    activeLetters = supplementLetters(uniqueFromWord, size);
+    // 決定下方字母盤數量
+    const padNeeded = totalPadCount[size];
+    availablePad = supplementLetters(uniqueFromWord, padNeeded);
+
+    // 建立空盤面並求解
+    const emptyGrid = Array(size).fill().map(() => Array(size).fill(''));
+    if (!solveSudoku(emptyGrid, size, activeLetters)) {
+      // 極端情況: 若求解失敗，重新生成一次 (遞迴安全)
+      console.warn("求解失敗重試");
+      return generatePuzzle(size);
     }
+    solution = emptyGrid.map(row => [...row]); // 深拷貝正確答案
 
-    function showMessage(text, isSuccess) {
-      var msg = document.getElementById('msg');
-      msg.textContent = text;
-      msg.style.color = isSuccess ? '#2e7d32' : '#c62828';
-      setTimeout(function() {
-        msg.style.opacity = '0';
-        setTimeout(function() {
-          msg.textContent = '';
-          msg.style.opacity = '1';
-        }, 300);
-      }, 3000);
-    }
-
-    function checkComplete() {
-      for (var i = 0; i < size; i++) {
-        for (var j = 0; j < size; j++) {
-          if (bd[i][j] === '') {
-            showMessage("還有空格哦，請填滿再檢查！", false);
-            return;
-          }
-        }
-      }
-
-      var allCorrect = true;
-      for (var i = 0; i < size; i++) {
-        for (var j = 0; j < size; j++) {
-          if (bd[i][j] !== sol[i][j]) {
-            allCorrect = false;
-            break;
-          }
-        }
-        if (!allCorrect) break;
-      }
-
-      if (allCorrect) {
-        showMessage("單字：" + chosenWord + "\n🎉 恭喜！\n你是 ——\n獨孤求敗！", true);
-      } else {
-        showMessage("還有錯誤哦，加油！", false);
-      }
-    }
-
-    function reset() {
-      gen(size);
-      render();
-      renderPad();
-      clear();
-      document.getElementById('msg').textContent = '';
-    }
-
-    function init(s) {
-      size = s;
-      var btns = document.querySelectorAll('.d-btn');
-      for (var i = 0; i < btns.length; i++) {
-        if (btns[i].dataset.s == s) {
-          btns[i].classList.add('a');
+    // 生成 given 謎題 (根據難度隱藏部分格子)
+    const newBoard = solution.map(row => [...row]);
+    const newGiven = Array(size).fill().map(() => Array(size).fill(false));
+    let hideRatio = (size === 3) ? 0.4 : (size === 6 ? 0.35 : 0.3);
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+        if (Math.random() < hideRatio) {
+          newGiven[i][j] = true;   // 保留為給定提示
         } else {
-          btns[i].classList.remove('a');
+          newGiven[i][j] = false;
+          newBoard[i][j] = '';     // 清空待填
         }
       }
-      gen(s);
-      render();
-      renderPad();
-      clear();
-      document.getElementById('msg').textContent = '';
     }
+    // 確保至少有一個提示 (避免完全空白)
+    let hasGiven = false;
+    for (let i = 0; i < size && !hasGiven; i++) {
+      for (let j = 0; j < size; j++) {
+        if (newGiven[i][j]) { hasGiven = true; break; }
+      }
+    }
+    if (!hasGiven && size > 1) {
+      newGiven[0][0] = true;
+      newBoard[0][0] = solution[0][0];
+    }
+    return { board: newBoard, given: newGiven, solution, activeLetters, availablePad, currentWord: chosen };
+  }
 
-    window.addEventListener('keydown', function(e) {
-      if (!sp) return;
-      var k = e.key;
-      if (k == 'Delete' || k == 'Backspace' || k == ' ') {
-        var r = sp.r, c = sp.c;
-        if (!gn[r][c]) {
-          bd[r][c] = '';
-          if (sc) {
-            sc.textContent = '';
-            sc.classList.remove('err', 'user');
+  // 檢查行/列/宮是否衝突 (即時顯示錯誤)
+  function hasConflict(row, col, val, size, boardData) {
+    if (val === '') return false;
+    for (let j = 0; j < size; j++) {
+      if (j !== col && boardData[row][j] === val) return true;
+    }
+    for (let i = 0; i < size; i++) {
+      if (i !== row && boardData[i][col] === val) return true;
+    }
+    if (size > 3) {
+      const boxRows = (size === 6) ? 2 : 3;
+      const boxCols = (size === 6) ? 3 : 3;
+      const startRow = Math.floor(row / boxRows) * boxRows;
+      const startCol = Math.floor(col / boxCols) * boxCols;
+      for (let i = 0; i < boxRows; i++) {
+        for (let j = 0; j < boxCols; j++) {
+          const rr = startRow + i;
+          const cc = startCol + j;
+          if ((rr !== row || cc !== col) && boardData[rr][cc] === val) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  // 高亮完整行/列 (若某行或列包含所有 activeLetters 不重複)
+  function updateHighlights() {
+    const cells = document.querySelectorAll('#g .c');
+    cells.forEach(cell => cell.classList.remove('highlight'));
+    const n = currentSize;
+    // 檢查行
+    for (let r = 0; r < n; r++) {
+      const rowVals = [];
+      let full = true;
+      for (let c = 0; c < n; c++) {
+        const val = board[r][c];
+        if (val === '') { full = false; break; }
+        rowVals.push(val);
+      }
+      if (full && rowVals.length === n) {
+        const sortedRow = [...rowVals].sort();
+        const sortedActive = [...activeLetters].sort();
+        let match = true;
+        for (let i = 0; i < n; i++) if (sortedRow[i] !== sortedActive[i]) { match = false; break; }
+        if (match) {
+          for (let c = 0; c < n; c++) {
+            const cellDiv = document.querySelector(`.c[data-r='${r}'][data-c='${c}']`);
+            if (cellDiv) cellDiv.classList.add('highlight');
           }
-          checkHighlights();
         }
-        return;
       }
-      var up = k.toUpperCase();
-      if (/^[A-Z]$/.test(up)) {
-        inL(up);
-      }
-    });
-
-    var btns = document.querySelectorAll('.d-btn');
-    for (var i = 0; i < btns.length; i++) {
-      btns[i].addEventListener('click', function(e) {
-        e.preventDefault();
-        init(parseInt(this.dataset.s));
-      });
-      btns[i].addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        init(parseInt(this.dataset.s));
-      });
     }
+    // 檢查列
+    for (let c = 0; c < n; c++) {
+      const colVals = [];
+      let full = true;
+      for (let r = 0; r < n; r++) {
+        const val = board[r][c];
+        if (val === '') { full = false; break; }
+        colVals.push(val);
+      }
+      if (full && colVals.length === n) {
+        const sortedCol = [...colVals].sort();
+        const sortedActive = [...activeLetters].sort();
+        let match = true;
+        for (let i = 0; i < n; i++) if (sortedCol[i] !== sortedActive[i]) { match = false; break; }
+        if (match) {
+          for (let r = 0; r < n; r++) {
+            const cellDiv = document.querySelector(`.c[data-r='${r}'][data-c='${c}']`);
+            if (cellDiv) cellDiv.classList.add('highlight');
+          }
+        }
+      }
+    }
+  }
 
-    document.getElementById('r').addEventListener('click', function(e) {
-      e.preventDefault();
-      reset();
-    });
-    document.getElementById('r').addEventListener('touchstart', function(e) {
-      e.preventDefault();
-      reset();
-    });
+  // 渲染遊戲盤面 & 錯誤標記
+  function renderBoard() {
+    const gridContainer = document.getElementById('g');
+    const n = currentSize;
+    gridContainer.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+    gridContainer.innerHTML = '';
+    let containerWidth = n === 3 ? 300 : (n === 6 ? 480 : 540);
+    const scDiv = document.querySelector('.sc');
+    scDiv.style.width = containerWidth + 'px';
+    const cellSize = Math.floor(containerWidth / n);
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        const val = board[i][j];
+        const isGivenCell = isGiven[i][j];
+        const cell = document.createElement('div');
+        cell.className = 'c';
+        if (isGivenCell) cell.classList.add('given');
+        else if (val !== '') cell.classList.add('user');
+        cell.style.width = cellSize + 'px';
+        cell.style.height = cellSize + 'px';
+        cell.style.fontSize = Math.max(16, Math.floor(cellSize * 0.45)) + 'px';
+        cell.textContent = val || '';
+        cell.dataset.r = i;
+        cell.dataset.c = j;
+        // 標記錯誤 (只有非 given 且 非空 衝突)
+        if (!isGivenCell && val !== '' && hasConflict(i, j, val, n, board)) {
+          cell.classList.add('err');
+        } else {
+          cell.classList.remove('err');
+        }
+        // 高亮選中狀態
+        if (selectedCell && selectedCell.row === i && selectedCell.col === j) {
+          cell.classList.add('sel');
+        }
+        cell.addEventListener('click', (function(r, c) {
+          return function(e) { e.preventDefault(); selectCell(r, c); };
+        })(i, j));
+        gridContainer.appendChild(cell);
+      }
+    }
+    updateHighlights();
+  }
 
-    document.getElementById('chk').addEventListener('click', function(e) {
-      e.preventDefault();
-      checkComplete();
-    });
-    document.getElementById('chk').addEventListener('touchstart', function(e) {
-      e.preventDefault();
-      checkComplete();
-    });
+  function renderPad() {
+    const padDiv = document.getElementById('np');
+    padDiv.innerHTML = '';
+    const rowsNeeded = Math.ceil(availablePad.length / 6);
+    padDiv.style.gridTemplateRows = `repeat(${rowsNeeded}, auto)`;
+    for (let letter of availablePad) {
+      const btn = document.createElement('button');
+      btn.className = 'nb';
+      btn.textContent = letter;
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        inputLetter(letter);
+      });
+      padDiv.appendChild(btn);
+    }
+  }
 
-    init(3);
-  </script>
+  function selectCell(row, col) {
+    if (isGiven[row][col]) return; // 固定格不可選
+    if (selectedCell && selectedCell.row === row && selectedCell.col === col) {
+      // 取消選中? 不清除也可以但保留體驗: 可以再次點擊相同格子取消，但通常保留選中不影響
+      // 我們不取消選中，繼續保持，但無妨。
+    }
+    selectedCell = { row, col };
+    renderBoard(); // 重新渲染以高亮新選中
+  }
+
+  function inputLetter(letter) {
+    if (!selectedCell) {
+      showMessage("✨ 請先點擊一個空格子 ✨", false);
+      return;
+    }
+    const { row, col } = selectedCell;
+    if (isGiven[row][col]) {
+      showMessage("🔒 固定字母不能修改", false);
+      return;
+    }
+    // 更新板子
+    board[row][col] = letter;
+    // 實時檢查衝突
+    renderBoard();
+    // 檢查是否勝利 (所有格子非空且完全等於solution)
+    let allFilled = true;
+    for (let i = 0; i < currentSize; i++) {
+      for (let j = 0; j < currentSize; j++) {
+        if (board[i][j] === '') allFilled = false;
+      }
+    }
+    if (allFilled) {
+      let perfect = true;
+      for (let i = 0; i < currentSize; i++) {
+        for (let j = 0; j < currentSize; j++) {
+          if (board[i][j] !== solution[i][j]) { perfect = false; break; }
+        }
+      }
+      if (perfect) {
+        showMessage(`🎉 完美！單字「${currentWord}」🎉 你是獨孤求敗！`, true);
+      } else {
+        showMessage("📝 格子已填滿，但尚有錯誤，再檢查一下吧！", false);
+      }
+    } else {
+      // 簡單提示
+      if (hasConflict(row, col, letter, currentSize, board)) {
+        showMessage("⚠️ 字母衝突囉，同列/行/宮不能重複", false);
+      } else {
+        // 非衝突正常填寫不頻繁彈提示避免煩躁
+      }
+    }
+  }
+
+  function showMessage(text, isSuccess) {
+    const msgDiv = document.getElementById('msg');
+    msgDiv.textContent = text;
+    msgDiv.style.color = isSuccess ? '#1e6b2f' : '#c0392b';
+    msgDiv.style.background = isSuccess ? '#e0f2e3' : '#ffe6e5';
+    setTimeout(() => {
+      if (document.getElementById('msg').textContent === text) {
+        document.getElementById('msg').style.opacity = '0';
+        setTimeout(() => {
+          if (document.getElementById('msg').textContent === text) {
+            document.getElementById('msg').textContent = "⚡ 點擊格子再點字母盤";
+            document.getElementById('msg').style.color = '#a55d2a';
+            document.getElementById('msg').style.background = '#fff6e0';
+            document.getElementById('msg').style.opacity = '1';
+          }
+        }, 300);
+      }
+    }, 2500);
+  }
+
+  function resetGame() {
+    const { board: newB, given: newG, solution: newSol, activeLetters: newAct, availablePad: newAv, currentWord: newWord } = generatePuzzle(currentSize);
+    board = newB;
+    isGiven = newG;
+    solution = newSol;
+    activeLetters = newAct;
+    availablePad = newAv;
+    currentWord = newWord;
+    selectedCell = null;
+    renderBoard();
+    renderPad();
+    document.getElementById('msg').textContent = "🔄 新的一局！加油～";
+    document.getElementById('msg').style.color = '#a55d2a';
+    setTimeout(() => {
+      if (document.getElementById('msg').textContent === "🔄 新的一局！加油～")
+        document.getElementById('msg').textContent = "⚡ 點擊格子再點字母盤";
+    }, 1800);
+  }
+
+  function checkCompletion() {
+    for (let i = 0; i < currentSize; i++) {
+      for (let j = 0; j < currentSize; j++) {
+        if (board[i][j] === '') {
+          showMessage("❓ 還有空格未填，填完再檢查吧", false);
+          return;
+        }
+      }
+    }
+    let correct = true;
+    for (let i = 0; i < currentSize; i++) {
+      for (let j = 0; j < currentSize; j++) {
+        if (board[i][j] !== solution[i][j]) {
+          correct = false;
+          break;
+        }
+      }
+    }
+    if (correct) {
+      showMessage(`🏆 完美通關！單字：${currentWord} 🏆`, true);
+    } else {
+      showMessage("⚠️ 答案有誤，再檢查行列宮是否有重複或字母不對～", false);
+    }
+  }
+
+  function changeSize(newSize) {
+    currentSize = newSize;
+    // 更新按鈕樣式
+    document.querySelectorAll('.d-btn').forEach(btn => {
+      if (parseInt(btn.dataset.s) === newSize) btn.classList.add('a');
+      else btn.classList.remove('a');
+    });
+    const { board: newB, given: newG, solution: newSol, activeLetters: newAct, availablePad: newAv, currentWord: newWord } = generatePuzzle(newSize);
+    board = newB;
+    isGiven = newG;
+    solution = newSol;
+    activeLetters = newAct;
+    availablePad = newAv;
+    currentWord = newWord;
+    selectedCell = null;
+    renderBoard();
+    renderPad();
+    document.getElementById('msg').textContent = `✨ ${newSize}x${newSize} 全新挑戰 ✨`;
+    setTimeout(() => {
+      if (document.getElementById('msg').textContent.includes("全新挑戰"))
+        document.getElementById('msg').textContent = "⚡ 點擊格子再點字母盤";
+    }, 1500);
+  }
+
+  // 鍵盤支援 (電腦實體鍵盤)
+  function handleKeydown(e) {
+    if (!selectedCell) return;
+    const { row, col } = selectedCell;
+    if (isGiven[row][col]) return;
+    const key = e.key;
+    if (key === 'Delete' || key === 'Backspace' || key === ' ') {
+      e.preventDefault();
+      board[row][col] = '';
+      renderBoard();
+      return;
+    }
+    const upperKey = key.toUpperCase();
+    if (/^[A-Z]$/.test(upperKey)) {
+      e.preventDefault();
+      // 檢查該字母是否在 availablePad 中 (或至少邏輯允許)
+      if (availablePad.includes(upperKey) || activeLetters.includes(upperKey)) {
+        inputLetter(upperKey);
+      } else {
+        showMessage(`⚠️ 字母 ${upperKey} 不在本局字母盤中`, false);
+      }
+    }
+  }
+
+  // 初始化事件綁定
+  function bindEvents() {
+    document.getElementById('r').addEventListener('click', (e) => { e.preventDefault(); resetGame(); });
+    document.getElementById('chk').addEventListener('click', (e) => { e.preventDefault(); checkCompletion(); });
+    document.querySelectorAll('.d-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        changeSize(parseInt(btn.dataset.s));
+      });
+    });
+    window.addEventListener('keydown', handleKeydown);
+    // 防止觸屏雙指縮放干擾
+    document.body.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  }
+
+  // 啟動遊戲
+  function initGame() {
+    bindEvents();
+    changeSize(3);  // 默認3x3
+  }
+
+  initGame();
+</script>
 </body>
 </html>
