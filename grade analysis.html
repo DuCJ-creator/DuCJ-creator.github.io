@@ -464,7 +464,6 @@
         const sorted = [...scores].sort((a, b) => a - b); // 升序
         const n = sorted.length;
         const getPercentile = (p) => {
-            // p 為百分位數，例如 88 表示第88百分位數
             const idx = Math.floor((p / 100) * (n - 1));
             return sorted[Math.min(idx, n - 1)];
         };
@@ -477,7 +476,7 @@
         };
     }
 
-    // 根據五標判斷學生等級 (分數越高等級越好)
+    // 根據五標判斷學生等級 (使用統一的五標標準)
     function getFiveLevel(score, percentiles) {
         if (score >= percentiles.top) return { level: "頂標", class: "label-top", desc: "前12%頂尖學生" };
         if (score >= percentiles.front) return { level: "前標", class: "label-front", desc: "前25%優秀學生" };
@@ -530,12 +529,16 @@
         return [stats.avg, stability, topRatio, stats.passRate, potential, balance];
     }
 
-    function generateRankingTable(students, stats) {
+    function generateRankingTable(students, stats, globalPercentiles = null) {
         if (!students || students.length === 0) return "";
         const sorted = [...students].sort((a, b) => b.score - a.score);
         const avg = stats.avg;
-        const p = stats.percentiles;
+        // 使用全局五標標準（如果有）否則用班級自己的
+        const p = globalPercentiles || stats.percentiles;
         let html = `<h3>📊 學生成績排名表</h3>`;
+        if (globalPercentiles) {
+            html += `<p style="font-size:0.7rem; color:#6b4e2e; margin-bottom:6px;">※ 五標採用全校/全體統一標準：頂標${globalPercentiles.top.toFixed(0)}／前標${globalPercentiles.front.toFixed(0)}／均標${globalPercentiles.average.toFixed(0)}／後標${globalPercentiles.back.toFixed(0)}／底標${globalPercentiles.bottom.toFixed(0)}</p>`;
+        }
         html += `<div class="ranking-table-wrapper"><table class="ranking-table">`;
         html += `<thead><tr><th>名次</th><th>姓名</th><th>分數</th><th>與均差</th><th>五標等級</th></tr></thead><tbody>`;
         
@@ -546,11 +549,11 @@
             const diffSign = diff >= 0 ? `+${diff}` : diff;
             const level = getFiveLevel(student.score, p);
             html += `<tr class="${rankClass}"><td>${rank}</td><td style="text-align:left">${student.name}</td>
-                      <td><strong>${student.score}</strong></td><td>${diffSign}</td>
-                      <td><span class="${level.class}">${level.level}</span></td>
-                    </tr>`;
+                       <td><strong>${student.score}</strong></td><td>${diffSign}</td>
+                       <td><span class="${level.class}">${level.level}</span></td>
+                     </tr>`;
         });
-        html += `</tbody><table></div>`;
+        html += `</tbody></table></div>`;
         return html;
     }
 
@@ -566,16 +569,54 @@
         return text;
     }
 
+    // 班際對比：計算全體合併的五標，以及各班在統一標準下的分佈
     function generateMultiComparisonCritique(statsList, labels, subject) {
+        // 合併所有學生的分數
+        let allScores = [];
+        statsList.forEach(s => {
+            allScores = allScores.concat(s.students.map(st => st.score));
+        });
+        const globalPercentiles = calculateFivePercentiles(allScores);
+        
         let text = subject ? `科目：${subject}\n` : "";
-        text += `🏛️ ${statsList.length}個班級對比\n`;
+        text += `🏛️ ${statsList.length}個班級對比分析\n`;
+        text += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        text += `📊 【全體合併五標標準 (統一比較基準)】\n`;
+        text += `   頂標(88%): ${globalPercentiles.top.toFixed(0)}分 | 前標(75%): ${globalPercentiles.front.toFixed(0)}分 | 均標(50%): ${globalPercentiles.average.toFixed(0)}分 | 後標(25%): ${globalPercentiles.back.toFixed(0)}分 | 底標(12%): ${globalPercentiles.bottom.toFixed(0)}分\n\n`;
+        
+        text += `📈 【各班平均分對比】\n`;
         const avgRank = [...statsList].sort((a,b)=>b.avg - a.avg);
-        avgRank.forEach((s, i) => text += `${i===0?"🏆":(i===1?"🥈":"🥉")} ${s.className} ${s.avg.toFixed(1)}分\n`);
-        text += `\n📊 五標分數對比 (頂/前/均/後/底)：\n`;
-        statsList.forEach(s => text += `${s.className}: ${s.percentiles.top.toFixed(0)}/${s.percentiles.front.toFixed(0)}/${s.percentiles.average.toFixed(0)}/${s.percentiles.back.toFixed(0)}/${s.percentiles.bottom.toFixed(0)}\n`);
-        text += `\n📈 五標人數分佈 (頂/前/均/後/底/流)：\n`;
-        statsList.forEach(s => text += `${s.className}: ${s.topCount}/${s.frontCount}/${s.avgCount}/${s.backCount}/${s.bottomCount}/${s.failCount}\n`);
-        return text;
+        avgRank.forEach((s, i) => {
+            const medal = i === 0 ? "🏆" : (i === 1 ? "🥈" : "🥉");
+            text += `   ${medal} ${s.className}：${s.avg.toFixed(1)}分\n`;
+        });
+        
+        text += `\n📊 【各班在統一五標下的人數分佈】\n`;
+        text += `   ┌──────────┬──────┬──────┬──────┬──────┬──────┬──────┐\n`;
+        text += `   │ 班級     │ 頂標 │ 前標 │ 均標 │ 後標 │ 底標 │ 流標 │\n`;
+        text += `   ├──────────┼──────┼──────┼──────┼──────┼──────┼──────┤\n`;
+        statsList.forEach(s => {
+            // 根據全局五標計算各班人數分佈
+            let topC=0, frontC=0, avgC=0, backC=0, bottomC=0, failC=0;
+            s.students.forEach(st => {
+                if (st.score >= globalPercentiles.top) topC++;
+                else if (st.score >= globalPercentiles.front) frontC++;
+                else if (st.score >= globalPercentiles.average) avgC++;
+                else if (st.score >= globalPercentiles.back) backC++;
+                else if (st.score >= globalPercentiles.bottom) bottomC++;
+                else failC++;
+            });
+            text += `   │ ${s.className.padEnd(8)}│ ${String(topC).padStart(4)} │ ${String(frontC).padStart(4)} │ ${String(avgC).padStart(4)} │ ${String(backC).padStart(4)} │ ${String(bottomC).padStart(4)} │ ${String(failC).padStart(4)} │\n`;
+        });
+        text += `   └──────────┴──────┴──────┴──────┴──────┴──────┴──────┘\n`;
+        
+        text += `\n📊 【各班原始五標分數對比 (僅供參考)】\n`;
+        statsList.forEach(s => {
+            const p = s.percentiles;
+            text += `   ${s.className}: 頂${p.top.toFixed(0)}／前${p.front.toFixed(0)}／均${p.average.toFixed(0)}／後${p.back.toFixed(0)}／底${p.bottom.toFixed(0)}\n`;
+        });
+        
+        return { text, globalPercentiles };
     }
 
     function generateTrackCritique(statsList, labels, cohort) {
@@ -592,7 +633,7 @@
                     <td>${p.top.toFixed(0)}</td><td>${p.front.toFixed(0)}</td>
                     <td>${p.average.toFixed(0)}</td><td>${p.back.toFixed(0)}</td><td>${p.bottom.toFixed(0)}</td>
                     <td style="font-size:0.7rem;">${s.topCount}/${s.frontCount}/${s.avgCount}/${s.backCount}/${s.bottomCount}/${s.failCount}</td>
-                 </tr>`;
+                  </tr>`;
         });
         html += `</tbody></table></div>`;
         const change = statsList[statsList.length-1].avg - statsList[0].avg;
@@ -605,11 +646,13 @@
         return html;
     }
 
-    function showStudentReport(student, classStats) {
+    function showStudentReport(student, classStats, globalPercentiles = null) {
         const modalDiv = document.createElement('div');
         modalDiv.className = 'student-modal-overlay';
         const diff = classStats ? (student.score - classStats.avg).toFixed(1) : "—";
-        const level = getFiveLevel(student.score, classStats.percentiles);
+        // 優先使用全局五標標準
+        const p = globalPercentiles || classStats.percentiles;
+        const level = getFiveLevel(student.score, p);
         let advice = "";
         if (level.level === "頂標") advice = "頂標學生 (前12%)！保持卓越，建議深化專題研究，挑戰更高層次。";
         else if (level.level === "前標") advice = "前標優秀學生 (前25%)，建立錯題本，針對弱項加強即可更上一層。";
@@ -657,7 +700,7 @@
                 <div class="stat-card"><div class="stat-val">${s.stdDev.toFixed(1)}</div><div class="stat-label">標準差</div></div>
             `;
         } else if(mode === "multi") {
-            statGrid.innerHTML = statsList.map((s,i)=>`<div class="stat-card"><div class="stat-val">${s.avg.toFixed(1)}</div><div class="stat-label">${labels[i]}<br>頂${s.percentiles.top.toFixed(0)}</div></div>`).join('');
+            statGrid.innerHTML = statsList.map((s,i)=>`<div class="stat-card"><div class="stat-val">${s.avg.toFixed(1)}</div><div class="stat-label">${labels[i]}<br>平均</div></div>`).join('');
         } else {
             statGrid.innerHTML = statsList.map((s,i)=>`<div class="stat-card"><div class="stat-val">${s.avg.toFixed(1)}</div><div class="stat-label">${labels[i]}</div></div>`).join('');
         }
@@ -706,19 +749,35 @@
         currentCharts.distribution = distChart;
 
         const critiqueDiv = document.getElementById("academicCritique");
-        if(mode === "solo") critiqueDiv.innerHTML = `<strong>📐 學術評鑑報告 (五標／流標)</strong><br>${generateSoloCritique(statsList[0])}`;
-        else if(mode === "multi") critiqueDiv.innerHTML = `<strong>🏛️ 班際橫向對比</strong><br>${generateMultiComparisonCritique(statsList, labels, extraInfo?.subject || "")}`;
-        else critiqueDiv.innerHTML = `<strong>📈 縱向追蹤評鑑</strong><br>${generateTrackCritique(statsList, labels, extraInfo?.cohort || "")}`;
+        if(mode === "solo") {
+            critiqueDiv.innerHTML = `<strong>📐 學術評鑑報告 (五標／流標)</strong><br>${generateSoloCritique(statsList[0])}`;
+        } else if(mode === "multi") {
+            const result = generateMultiComparisonCritique(statsList, labels, extraInfo?.subject || "");
+            critiqueDiv.innerHTML = `<strong>🏛️ 班際橫向對比 (統一五標標準)</strong><br>${result.text}`;
+            // 儲存全局五標供排名表和學生報告使用
+            currentGlobalPercentiles = result.globalPercentiles;
+        } else {
+            critiqueDiv.innerHTML = `<strong>📈 縱向追蹤評鑑</strong><br>${generateTrackCritique(statsList, labels, extraInfo?.cohort || "")}`;
+        }
 
         const rankingSection = document.getElementById("rankingSection");
         if (mode === "solo" && statsList[0]?.students) {
             rankingSection.innerHTML = generateRankingTable(statsList[0].students, statsList[0]);
+        } else if (mode === "multi" && statsList.length > 0 && currentGlobalPercentiles) {
+            // 班際對比模式：為每個班級生成排名表（使用統一五標標準）
+            let allRankingsHtml = `<h3>📊 各班學生成績排名 (統一五標標準)</h3>`;
+            statsList.forEach(s => {
+                allRankingsHtml += `<div style="margin-top: 20px;"><h4 style="color:#6b4e2e; margin:10px 0 5px;">${s.className}</h4>`;
+                allRankingsHtml += generateRankingTable(s.students, s, currentGlobalPercentiles);
+                allRankingsHtml += `</div>`;
+            });
+            rankingSection.innerHTML = allRankingsHtml;
         } else {
             rankingSection.innerHTML = "";
         }
 
         const studentContainer = document.getElementById("studentListInsight");
-        if(mode === "solo" && statsList[0]?.students) {
+        if (mode === "solo" && statsList[0]?.students) {
             const students = statsList[0].students;
             const p = statsList[0].percentiles;
             studentContainer.innerHTML = `<div style="font-weight:600; margin-bottom:6px; font-size:0.8rem;">🎓 學生名冊 (點擊查看五標診斷報告)</div>` + 
@@ -733,10 +792,34 @@
                     showStudentReport({ name, score }, statsList[0]);
                 });
             });
+        } else if (mode === "multi" && statsList.length > 0 && currentGlobalPercentiles) {
+            // 班際對比模式：顯示所有學生（可點擊），使用統一五標標準
+            let allStudentsHtml = `<div style="font-weight:600; margin-bottom:6px; font-size:0.8rem;">🎓 全體學生名冊 (點擊查看統一五標診斷報告)</div>`;
+            statsList.forEach(s => {
+                allStudentsHtml += `<div style="margin-top:8px;"><strong style="color:#6b4e2e;">${s.className}</strong><br>`;
+                s.students.forEach(student => {
+                    const level = getFiveLevel(student.score, currentGlobalPercentiles);
+                    allStudentsHtml += `<span class="student-badge" data-name="${student.name}" data-score="${student.score}" data-class="${s.className}">📌 ${student.name} ${student.score} (${level.level})</span>`;
+                });
+                allStudentsHtml += `</div>`;
+            });
+            studentContainer.innerHTML = allStudentsHtml;
+            document.querySelectorAll('.student-badge').forEach(el => {
+                el.addEventListener('click', () => {
+                    const name = el.getAttribute('data-name');
+                    const score = parseFloat(el.getAttribute('data-score'));
+                    // 找到對應的班級統計
+                    const className = el.getAttribute('data-class');
+                    const classStats = statsList.find(s => s.className === className);
+                    showStudentReport({ name, score }, classStats, currentGlobalPercentiles);
+                });
+            });
         } else {
             studentContainer.innerHTML = "";
         }
     }
+
+    let currentGlobalPercentiles = null;
 
     function printReport() { if (!currentReportPayload) { alert("請先生成報告"); return; } window.print(); }
 
@@ -770,7 +853,7 @@
         }
         if(statsList.length < 2) { alert("至少兩個有效班級"); return false; }
         const radarSets = statsList.map((st,i)=> ({ label: labels[i], data: radarDimensions(st), borderColor: getColor(i,1), backgroundColor: getColor(i,0.15), fill: false }));
-        renderFullReport("multi", { statsList, labels, titleText: "班際橫向對比 · 五標分析", subText: `${statsList.length}個班級 ${subject?`· ${subject}`:""}`, radarDatasets: radarSets, extraInfo: { subject } });
+        renderFullReport("multi", { statsList, labels, titleText: "班際橫向對比 · 統一五標標準", subText: `${statsList.length}個班級 ${subject?`· ${subject}`:""}`, radarDatasets: radarSets, extraInfo: { subject } });
         return true;
     }
 
@@ -836,6 +919,7 @@
                 document.getElementById("welcomePlaceholder").classList.remove("hidden");
                 document.getElementById("dynamicReport").classList.add("hidden");
                 currentReportPayload = null;
+                currentGlobalPercentiles = null;
             });
         });
         buildDynamicForms();
