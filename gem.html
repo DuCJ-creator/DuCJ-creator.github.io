@@ -1,4 +1,5 @@
 
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 #root{display:flex;flex-direction:column;align-items:center;padding:14px 8px;gap:10px;font-family:var(--font-sans)}
@@ -9,6 +10,9 @@
 .gls-gem-icon{width:22px;height:22px;flex-shrink:0}
 .gls-name{font-size:12px;font-weight:500;color:#e8f0f8}
 .gls-desc{font-size:10px;color:#7a9ab8;line-height:1.3;margin-top:1px}
+.gls-super{background:rgba(255,220,80,0.1);border-radius:6px;padding:4px 2px;margin-bottom:4px}
+.gls-super .gls-name{color:#ffd740}
+.gls-super .gls-desc{color:#b8a060}
 #board-col{display:flex;flex-direction:column;align-items:center;gap:8px}
 #hud{display:flex;gap:10px}
 .hud-box{background:#0d1b2a;border-radius:8px;padding:6px 14px;text-align:center}
@@ -26,7 +30,7 @@ button:hover{background:rgba(255,255,255,0.06)}
 <div id="root">
   <div id="main-row">
     <div id="gem-glossary">
-      <div class="gls-title">Shirley's Gem Glossary</div>
+      <div class="gls-title">Gem Glossary</div>
       <div id="gls-list"></div>
     </div>
     <div id="board-col">
@@ -51,41 +55,50 @@ button:hover{background:rgba(255,255,255,0.06)}
 <script>
 (function(){
 const COLS=8,ROWS=8,CELL=54;
+const SUPER=-2;
 const CV=document.getElementById('board');
 const ctx=CV.getContext('2d');
-CV.width=COLS*CELL; CV.height=ROWS*CELL;
+CV.width=COLS*CELL;CV.height=ROWS*CELL;
 
 const GEMS=[
-  {name:'Jade',     color:'#c8f5c8',mid:'#4caf50',dark:'#1b5e20',shine:'#f0fff0',label:'Pale green mineral',   words:['green','soft','smooth','opaque','carved']},
-  {name:'Diamond',  color:'#e8f4ff',mid:'#90caf9',dark:'#1565c0',shine:'#ffffff',label:'Hardest natural gem',  words:['clear','hard','faceted','brilliant','rare']},
-  {name:'Ruby',     color:'#ff1744',mid:'#b71c1c',dark:'#7f0000',shine:'#ff8a80',label:'Deep red corundum',    words:['red','fiery','precious','glowing','intense']},
-  {name:'Sapphire', color:'#1565c0',mid:'#0d47a1',dark:'#002171',shine:'#82b1ff',label:'Blue corundum gem',    words:['blue','deep','royal','lustrous','velvety']},
-  {name:'Emerald',  color:'#00c853',mid:'#1b5e20',dark:'#003300',shine:'#b9f6ca',label:'Vivid green beryl',    words:['vivid','lush','mossy','rich','prized']},
-  {name:'Amethyst', color:'#9c27b0',mid:'#6a1b9a',dark:'#38006b',shine:'#ea80fc',label:'Purple quartz gem',   words:['purple','violet','regal','calming','crystal']},
-  {name:'Topaz',    color:'#ff8f00',mid:'#e65100',dark:'#bf360c',shine:'#fff8e1',label:'Golden silicate gem',  words:['golden','warm','glassy','bright','clear']},
-  {name:'Opal',     color:'#00bcd4',mid:'#006064',dark:'#002f33',shine:'#e0f7fa',label:'Iridescent hydrated silica',words:['iridescent','milky','shifting','colorful','unique']},
+  {name:'Jade',     color:'#c8f5c8',mid:'#4caf50',dark:'#1b5e20',shine:'#f0fff0',words:['green','soft','smooth','opaque','carved']},
+  {name:'Diamond',  color:'#e8f4ff',mid:'#90caf9',dark:'#1565c0',shine:'#ffffff',words:['clear','hard','faceted','brilliant','rare']},
+  {name:'Ruby',     color:'#ff1744',mid:'#b71c1c',dark:'#7f0000',shine:'#ff8a80',words:['red','fiery','precious','glowing','intense']},
+  {name:'Sapphire', color:'#1565c0',mid:'#0d47a1',dark:'#002171',shine:'#82b1ff',words:['blue','deep','royal','lustrous','velvety']},
+  {name:'Emerald',  color:'#00c853',mid:'#1b5e20',dark:'#003300',shine:'#b9f6ca',words:['vivid','lush','mossy','rich','prized']},
+  {name:'Amethyst', color:'#9c27b0',mid:'#6a1b9a',dark:'#38006b',shine:'#ea80fc',words:['purple','violet','regal','calming','crystal']},
+  {name:'Topaz',    color:'#ff8f00',mid:'#e65100',dark:'#bf360c',shine:'#fff8e1',words:['golden','warm','glassy','bright','clear']},
+  {name:'Opal',     color:'#00bcd4',mid:'#006064',dark:'#002f33',shine:'#e0f7fa',words:['iridescent','milky','shifting','colorful','unique']},
 ];
 
 const HOORAY=['Good!','Super!','Unbelievable!','Invincible!','Unstoppable!','Unbreakable!'];
 const SCORES={3:10,4:20,5:40,6:80,7:100,8:200};
 
 let grid=[],sel=null,score=0,combo=0,best=0,phase='idle';
-let hoorayT=null;
-let hintCells=null,hintAnim=0,hintRaf=null;
+let hoorayT=null,hintCells=null,hintAnim=0,hintRaf=null,autoHintTimer=null;
+let superAnim=0,superRaf=null;
 
 function buildGlossary(){
   const list=document.getElementById('gls-list');
   list.innerHTML='';
+  // Super gem entry first
+  const si=document.createElement('div');
+  si.className='gls-item gls-super';
+  const sic=document.createElement('canvas');
+  sic.className='gls-gem-icon';sic.width=44;sic.height=44;
+  drawSuper(sic.getContext('2d'),22,22,1,22,0);
+  const stx=document.createElement('div');
+  stx.innerHTML=`<div class="gls-name">Super Gem</div><div class="gls-desc">wild — matches any gem</div>`;
+  si.appendChild(sic);si.appendChild(stx);list.appendChild(si);
+
   GEMS.forEach((g,i)=>{
-    const item=document.createElement('div');
-    item.className='gls-item';
+    const item=document.createElement('div');item.className='gls-item';
     const ic=document.createElement('canvas');
     ic.className='gls-gem-icon';ic.width=44;ic.height=44;
     drawGem(ic.getContext('2d'),22,22,i,1,1,22);
     const tx=document.createElement('div');
     tx.innerHTML=`<div class="gls-name">${g.name}</div><div class="gls-desc">${g.words.join(', ')}</div>`;
-    item.appendChild(ic);item.appendChild(tx);
-    list.appendChild(item);
+    item.appendChild(ic);item.appendChild(tx);list.appendChild(item);
   });
 }
 
@@ -106,7 +119,7 @@ function playMatchSound(n){
   }catch(e){}
 }
 
-function playHooray(text){
+function playHoorayAudio(text){
   if(!window.speechSynthesis)return;
   const u=new SpeechSynthesisUtterance(text);
   u.lang='en-US';u.rate=0.9;u.pitch=1.2;
@@ -115,24 +128,100 @@ function playHooray(text){
 
 function rnd(){return Math.floor(Math.random()*GEMS.length);}
 
-function newGrid(){
-  grid=[];
-  for(let r=0;r<ROWS;r++){grid[r]=[];for(let c=0;c<COLS;c++)grid[r][c]=rnd();}
-  let it=0;
-  while(hasMatch()&&it++<60){
-    const mk=findMarks();
-    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(mk[r][c])grid[r][c]=rnd();
+function ensureSuperOnBoard(){
+  // Check if any super gem exists; if not, place one at a random cell
+  let found=false;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(grid[r][c]===SUPER){found=true;break;}
+  if(!found){
+    const r=Math.floor(Math.random()*ROWS);
+    const c=Math.floor(Math.random()*COLS);
+    grid[r][c]=SUPER;
   }
 }
 
-function hasMatch(){return findMarks().some(r=>r.some(v=>v));}
+function newGrid(){
+  grid=[];
+  for(let r=0;r<ROWS;r++){grid[r]=[];for(let c=0;c<COLS;c++)grid[r][c]=rnd();}
+  // Place exactly one super gem
+  const sr=Math.floor(Math.random()*ROWS);
+  const sc=Math.floor(Math.random()*COLS);
+  grid[sr][sc]=SUPER;
+  let it=0;
+  // Break any pre-existing normal matches (don't touch super cell)
+  while(hasNormalMatch()&&it++<80){
+    const mk=findMarksIgnoreSuper();
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(mk[r][c]&&grid[r][c]!==SUPER)grid[r][c]=rnd();
+  }
+}
+
+// Match logic: SUPER acts as wildcard
+// For matching purposes, treat SUPER as matching any adjacent same-type gem
+function effectiveType(r,c){
+  // returns actual type; SUPER is handled in run detection
+  return grid[r][c];
+}
 
 function findMarks(){
   const m=Array.from({length:ROWS},()=>new Array(COLS).fill(false));
-  for(let r=0;r<ROWS;r++){let c=0;while(c<COLS){let e=c+1;while(e<COLS&&grid[r][e]===grid[r][c])e++;if(e-c>=3)for(let x=c;x<e;x++)m[r][x]=true;c=e;}}
-  for(let c=0;c<COLS;c++){let r=0;while(r<ROWS){let e=r+1;while(e<ROWS&&grid[e][c]===grid[r][c])e++;if(e-r>=3)for(let y=r;y<e;y++)m[y][c]=true;r=e;}}
+  // horizontal
+  for(let r=0;r<ROWS;r++){
+    let c=0;
+    while(c<COLS){
+      // find run starting at c
+      let runType=grid[r][c]===SUPER?-99:grid[r][c];
+      let e=c+1;
+      while(e<COLS){
+        const t=grid[r][e];
+        if(t===SUPER){e++;continue;} // super extends any run
+        if(runType===-99){runType=t;e++;continue;} // first real type
+        if(t===runType){e++;continue;}
+        break;
+      }
+      // check if run e-c has >=3 and contains at least one non-super
+      if(e-c>=3&&runType!==-99){
+        for(let x=c;x<e;x++)m[r][x]=true;
+      }
+      c=e;
+    }
+  }
+  // vertical
+  for(let c=0;c<COLS;c++){
+    let r=0;
+    while(r<ROWS){
+      let runType=grid[r][c]===SUPER?-99:grid[r][c];
+      let e=r+1;
+      while(e<ROWS){
+        const t=grid[e][c];
+        if(t===SUPER){e++;continue;}
+        if(runType===-99){runType=t;e++;continue;}
+        if(t===runType){e++;continue;}
+        break;
+      }
+      if(e-r>=3&&runType!==-99){
+        for(let y=r;y<e;y++)m[y][c]=true;
+      }
+      r=e;
+    }
+  }
   return m;
 }
+
+function hasNormalMatch(){
+  // Only check non-super gems
+  const m=Array.from({length:ROWS},()=>new Array(COLS).fill(false));
+  for(let r=0;r<ROWS;r++){let c=0;while(c<COLS){let e=c+1;while(e<COLS&&grid[r][e]===grid[r][c]&&grid[r][c]!==SUPER)e++;if(e-c>=3&&grid[r][c]!==SUPER)for(let x=c;x<e;x++)m[r][x]=true;c=e;}}
+  for(let c=0;c<COLS;c++){let r=0;while(r<ROWS){let e=r+1;while(e<ROWS&&grid[e][c]===grid[r][c]&&grid[r][c]!==SUPER)e++;if(e-r>=3&&grid[r][c]!==SUPER)for(let y=r;y<e;y++)m[y][c]=true;r=e;}}
+  return m.some(row=>row.some(v=>v));
+}
+
+function findMarksIgnoreSuper(){
+  const m=Array.from({length:ROWS},()=>new Array(COLS).fill(false));
+  for(let r=0;r<ROWS;r++){let c=0;while(c<COLS){let e=c+1;while(e<COLS&&grid[r][e]===grid[r][c]&&grid[r][c]!==SUPER)e++;if(e-c>=3&&grid[r][c]!==SUPER)for(let x=c;x<e;x++)m[r][x]=true;c=e;}}
+  for(let c=0;c<COLS;c++){let r=0;while(r<ROWS){let e=r+1;while(e<ROWS&&grid[e][c]===grid[r][c]&&grid[r][c]!==SUPER)e++;if(e-r>=3&&grid[r][c]!==SUPER)for(let y=r;y<e;y++)m[y][c]=true;r=e;}}
+  return m;
+}
+
+function hasMatch(){return findMarks().some(r=>r.some(v=>v));}
 
 function maxRun(mark){
   let mx=0;
@@ -149,6 +238,7 @@ function findHint(){
   return null;
 }
 
+// Draw regular gem
 function drawGem(cx,x,y,type,alpha,scale,cellH){
   const g=GEMS[type];if(!g)return;
   const r=(cellH/2-3)*scale;
@@ -173,15 +263,56 @@ function drawGem(cx,x,y,type,alpha,scale,cellH){
   cx.restore();
 }
 
+// Draw super gem — a star with rainbow rotating halo
+function drawSuper(cx,x,y,alpha,cellH,tick){
+  const R=(cellH/2-2);
+  cx.save();cx.translate(x,y);cx.globalAlpha=alpha;
+  // Spinning rainbow ring
+  const ringColors=['#ff4444','#ff9900','#ffee00','#44dd44','#4488ff','#aa44ff','#ff44cc','#ff4444'];
+  for(let i=0;i<8;i++){
+    const a1=Math.PI*2/8*i+tick*0.04;
+    const a2=Math.PI*2/8*(i+1)+tick*0.04;
+    cx.beginPath();cx.moveTo(0,0);
+    cx.arc(0,0,R*0.95,a1,a2);cx.closePath();
+    cx.fillStyle=ringColors[i]+'bb';cx.fill();
+  }
+  // White star body
+  cx.beginPath();
+  const pts=8,outerR=R*0.75,innerR=R*0.35;
+  for(let i=0;i<pts*2;i++){
+    const a=Math.PI/pts*i-Math.PI/2+tick*0.015;
+    const rr=i%2===0?outerR:innerR;
+    i===0?cx.moveTo(Math.cos(a)*rr,Math.sin(a)*rr):cx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);
+  }
+  cx.closePath();
+  const sg=cx.createRadialGradient(0,-outerR*0.3,1,0,0,outerR);
+  sg.addColorStop(0,'#ffffff');sg.addColorStop(0.5,'#ffe080');sg.addColorStop(1,'#ffaa00');
+  cx.fillStyle=sg;cx.fill();
+  cx.strokeStyle='#fff8';cx.lineWidth=1;cx.stroke();
+  // Centre bright dot
+  cx.beginPath();cx.arc(0,0,R*0.14,0,Math.PI*2);
+  cx.fillStyle='#ffffff';cx.fill();
+  // Sparkle crosses
+  for(let i=0;i<4;i++){
+    const a=Math.PI/4*i+tick*0.02;
+    const len=R*0.55;
+    cx.beginPath();cx.moveTo(Math.cos(a)*R*0.1,Math.sin(a)*R*0.1);
+    cx.lineTo(Math.cos(a)*len,Math.sin(a)*len);
+    cx.strokeStyle='#ffffffcc';cx.lineWidth=1.2;cx.stroke();
+  }
+  cx.restore();
+}
+
 function drawBoard(mark,prog,ph){
   ctx.clearRect(0,0,CV.width,CV.height);
+  // Grid background
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     ctx.fillStyle=(r+c)%2===0?'#0d1b2a':'#112233';
     rrect(ctx,c*CELL+1,r*CELL+1,CELL-2,CELL-2,5);ctx.fill();
   }
   const hpulse=hintCells?0.55+0.45*Math.sin(hintAnim*0.12):0;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
-    const t=grid[r][c];if(t<0)continue;
+    const t=grid[r][c];if(t<-2)continue;
     const cx=c*CELL+CELL/2,cy=r*CELL+CELL/2;
     let alpha=1,scale=1;
     if(mark&&mark[r][c]&&ph==='out'){alpha=1-prog;scale=1-prog*0.5;}
@@ -201,7 +332,13 @@ function drawBoard(mark,prog,ph){
       rrect(ctx,c*CELL+3,r*CELL+3,CELL-6,CELL-6,5);ctx.stroke();ctx.restore();
       scale=1+0.08*Math.sin(hintAnim*0.12);
     }
-    drawGem(ctx,cx,cy,t,alpha,scale,CELL);
+    if(t===SUPER){
+      ctx.save();ctx.translate(cx,cy);ctx.scale(scale,scale);ctx.translate(-cx,-cy);
+      drawSuper(ctx,cx,cy,alpha,CELL/2,superAnim);
+      ctx.restore();
+    } else {
+      drawGem(ctx,cx,cy,t,alpha,scale,CELL);
+    }
   }
 }
 
@@ -213,7 +350,7 @@ function showHooray(txt,n){
   if(hoorayT)clearTimeout(hoorayT);
   hoorayT=setTimeout(()=>el.style.opacity='0',1400);
   playMatchSound(n);
-  setTimeout(()=>playHooray(txt),180);
+  setTimeout(()=>playHoorayAudio(txt),180);
 }
 
 function setMsg(t){document.getElementById('msg-el').textContent=t;}
@@ -223,19 +360,15 @@ function updHUD(){
   if(score>best){best=score;document.getElementById('hv-best').textContent=best;}
 }
 
+// Super gem animation loop (always running)
+function startSuperAnim(){
+  function tick(){superAnim++;drawBoard();requestAnimationFrame(tick);}
+  requestAnimationFrame(tick);
+}
+
 function clearHint(){
   hintCells=null;
   if(hintRaf){cancelAnimationFrame(hintRaf);hintRaf=null;}
-}
-
-function startHintAnim(){
-  if(hintRaf)return;
-  function tick(){
-    if(!hintCells){hintRaf=null;return;}
-    hintAnim++;drawBoard();
-    hintRaf=requestAnimationFrame(tick);
-  }
-  hintRaf=requestAnimationFrame(tick);
 }
 
 function showHint(){
@@ -244,23 +377,19 @@ function showHint(){
   const h=findHint();
   if(!h){setMsg('No moves available!');return;}
   hintCells=h;hintAnim=0;
-  const g1=GEMS[grid[h[0][0]][h[0][1]]].name;
-  const g2=GEMS[grid[h[1][0]][h[1][1]]].name;
-  setMsg(`Hint: swap ${g1} ↔ ${g2}`);
-  startHintAnim();
-  setTimeout(()=>{clearHint();drawBoard();},3500);
+  const n1=grid[h[0][0]][h[0][1]]===SUPER?'Super Gem':GEMS[grid[h[0][0]][h[0][1]]].name;
+  const n2=grid[h[1][0]][h[1][1]]===SUPER?'Super Gem':GEMS[grid[h[1][0]][h[1][1]]].name;
+  setMsg(`Hint: swap ${n1} ↔ ${n2}`);
+  setTimeout(()=>{clearHint();},3500);
 }
 
 function autoHint(){
   if(phase!=='idle'||hintCells)return;
-  const h=findHint();
-  if(!h)return;
+  const h=findHint();if(!h)return;
   hintCells=h;hintAnim=0;
-  startHintAnim();
-  setTimeout(()=>{clearHint();if(phase==='idle')drawBoard();},3000);
+  setTimeout(()=>{clearHint();},3000);
 }
 
-let autoHintTimer=null;
 function resetAutoHint(){
   if(autoHintTimer)clearTimeout(autoHintTimer);
   autoHintTimer=setTimeout(autoHint,5000);
@@ -269,7 +398,11 @@ function resetAutoHint(){
 function resolve(cb){
   clearHint();
   const mark=findMarks();
-  if(!mark.some(r=>r.some(v=>v))){cb&&cb();return;}
+  if(!mark.some(r=>r.some(v=>v))){
+    ensureSuperOnBoard();
+    cb&&cb();return;
+  }
+  // If super gem is consumed, it will respawn after gravity
   const run=maxRun(mark);
   const pts=SCORES[Math.min(run,8)]||200;
   score+=pts;combo++;updHUD();
@@ -297,10 +430,11 @@ function doGravity(cb){
     }
     for(let r=0;r<ROWS;r++)if(grid[r][c]===-1)grid[r][c]=rnd();
   }
+  ensureSuperOnBoard();
   let t0=null;
   function animFall(ts){
     if(!t0)t0=ts;const p=Math.min((ts-t0)/220,1);
-    drawBoard(null,p,'fall');
+    drawBoard();
     if(p<1)requestAnimationFrame(animFall);
     else{drawBoard();cb&&cb();}
   }
@@ -328,18 +462,15 @@ CV.addEventListener('click',function(e){
   const[r,c]=cellAt(px,py);
   if(r<0||r>=ROWS||c<0||c>=COLS)return;
   clearHint();resetAutoHint();
+  const tname=grid[r][c]===SUPER?'Super Gem':GEMS[grid[r][c]].name;
   if(!sel){
     sel=[r,c];drawBoard();
-    setMsg(`${GEMS[grid[r][c]].name} selected — tap an adjacent gem`);
+    setMsg(`${tname} selected — tap adjacent gem`);
     return;
   }
   const[sr,sc]=sel;
   if(sr===r&&sc===c){sel=null;drawBoard();setMsg('Select a gem to begin');resetAutoHint();return;}
-  if(!adj(sr,sc,r,c)){
-    sel=[r,c];drawBoard();
-    setMsg(`${GEMS[grid[r][c]].name} selected — tap an adjacent gem`);
-    return;
-  }
+  if(!adj(sr,sc,r,c)){sel=[r,c];drawBoard();setMsg(`${tname} selected — tap adjacent gem`);return;}
   sel=null;phase='anim';
   sw(sr,sc,r,c);drawBoard();
   if(!hasMatch()){sw(sr,sc,r,c);drawBoard();phase='idle';setMsg('No match! Try another swap');resetAutoHint();return;}
@@ -351,21 +482,19 @@ CV.addEventListener('click',function(e){
   });
 });
 
-document.getElementById('btn-hint').addEventListener('click',()=>{
-  if(phase!=='idle')return;
-  clearHint();showHint();
-});
+document.getElementById('btn-hint').addEventListener('click',()=>{if(phase!=='idle')return;clearHint();showHint();});
 document.getElementById('btn-new').addEventListener('click',startGame);
 
 function startGame(){
   score=0;combo=0;sel=null;phase='idle';
   clearHint();if(autoHintTimer)clearTimeout(autoHintTimer);
-  updHUD();newGrid();drawBoard();
+  updHUD();newGrid();
   setMsg('Select a gem to begin');
   resetAutoHint();
 }
 
 buildGlossary();
 startGame();
+startSuperAnim();
 })();
 </script>
