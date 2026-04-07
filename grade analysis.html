@@ -160,7 +160,6 @@
         .btn-run:hover { background: #7c5535; }
         .btn-print:hover { background: #4a5a3a; }
 
-        /* 緊湊的統計卡片 */
         .stat-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(85px, 1fr));
@@ -211,7 +210,6 @@
             white-space: pre-line;
         }
 
-        /* 緊湊排名表格 - 節省紙張 */
         .ranking-section {
             margin: 16px 0;
         }
@@ -252,7 +250,13 @@
         .rank-2 { background: #faf0e0; }
         .rank-3 { background: #f5ebe0; }
 
-        /* 縱向追蹤表格 */
+        .label-top { background: #1a5d1a; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; }
+        .label-front { background: #2c6e2c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; }
+        .label-average { background: #9b6a42; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; }
+        .label-back { background: #c08530; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; }
+        .label-bottom { background: #c53030; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; }
+        .label-fail { background: #8b4513; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; }
+
         .table-wrapper {
             overflow-x: auto;
             margin: 16px 0;
@@ -261,7 +265,7 @@
         }
         .track-summary-table {
             width: 100%;
-            min-width: 700px;
+            min-width: 800px;
             border-collapse: collapse;
             font-size: 0.75rem;
         }
@@ -327,29 +331,14 @@
         .hidden { display: none !important; }
         .info-note { font-size: 0.65rem; color: #9a8a70; margin-top: 5px; }
 
-        /* ========== 節省紙張的列印樣式 ========== */
         @media print {
             .no-print, .tabs, .input-panel, .btn-run, .btn-print, 
             .student-badge, .student-detail-list, .tab-btn,
             .student-modal-overlay, .close-modal {
                 display: none !important;
             }
-            
-            .report-panel {
-                padding: 0 !important;
-                margin: 0 !important;
-                max-height: none !important;
-                overflow: visible !important;
-            }
-            
-            .academic-container {
-                box-shadow: none;
-                border: none;
-                margin: 0;
-                padding: 0;
-            }
-            
-            /* 緊湊列印，減少空白 */
+            .report-panel { padding: 0 !important; margin: 0 !important; max-height: none !important; overflow: visible !important; }
+            .academic-container { box-shadow: none; border: none; margin: 0; padding: 0; }
             .stat-card { padding: 4px; }
             .stat-card .stat-val { font-size: 1rem; }
             .chart-box { padding: 8px; margin: 10px 0; }
@@ -357,34 +346,14 @@
             .ranking-table { font-size: 8pt; }
             .ranking-table th, .ranking-table td { padding: 3px 5px; }
             .track-summary-table { font-size: 8pt; }
-            .track-summary-table th, .track-summary-table td { padding: 4px 5px; }
-            
             h2 { font-size: 14pt; margin: 8px 0; }
-            h3 { font-size: 11pt; margin: 6px 0; }
-            p { margin: 4px 0; }
-            
-            /* 避免不必要的分頁 */
-            .chart-box, .stat-grid, .academic-critique, 
-            .ranking-section, .table-wrapper {
+            .chart-box, .stat-grid, .academic-critique, .ranking-section, .table-wrapper {
                 break-inside: avoid;
                 page-break-inside: avoid;
             }
-            
-            /* 統一的頁面邊距 */
-            @page {
-                margin: 0.8cm 0.6cm;
-                size: A4;
-            }
-            
-            body {
-                background: white;
-                padding: 0;
-                margin: 0;
-            }
-            
-            /* 強制背景色 */
-            .stat-card, .academic-critique, .ranking-table th,
-            .track-summary-table th {
+            @page { margin: 0.8cm 0.6cm; size: A4; }
+            body { background: white; padding: 0; margin: 0; }
+            .stat-card, .academic-critique, .ranking-table th, .track-summary-table th {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
@@ -400,7 +369,7 @@
 <div class="academic-container">
     <header class="no-print">
         <h1>Shirley's Grade Analysis Tools</h1>
-        <p class="sub">五標診斷 · 節紙版學術評鑑</p>
+        <p class="sub">五標學術評鑑 · 頂標/前標/均標/後標/底標/流標</p>
     </header>
 
     <div class="tabs no-print">
@@ -433,7 +402,6 @@
                 
                 <div class="academic-critique" id="academicCritique"></div>
                 
-                <!-- 排名表格將放在這裡（僅單班模式） -->
                 <div id="rankingSection" class="ranking-section"></div>
                 
                 <div id="studentListInsight" class="student-detail-list"></div>
@@ -485,15 +453,38 @@
         return students;
     }
 
+    // 正確的五標計算：
+    // 頂標：第88百分位數 (前12%學生)
+    // 前標：第75百分位數 (前25%學生)
+    // 均標：第50百分位數 (前50%學生)
+    // 後標：第25百分位數 (前75%學生)
+    // 底標：第12百分位數 (前88%學生)
     function calculateFivePercentiles(scores) {
         if (!scores.length) return { top: 0, front: 0, average: 0, back: 0, bottom: 0 };
-        const sorted = [...scores].sort((a, b) => b - a);
+        const sorted = [...scores].sort((a, b) => a - b); // 升序
         const n = sorted.length;
-        const getPS = (p) => sorted[Math.floor((p / 100) * n)] || sorted[0];
-        return {
-            top: getPS(12), front: getPS(25), average: getPS(50),
-            back: getPS(75), bottom: getPS(88)
+        const getPercentile = (p) => {
+            // p 為百分位數，例如 88 表示第88百分位數
+            const idx = Math.floor((p / 100) * (n - 1));
+            return sorted[Math.min(idx, n - 1)];
         };
+        return {
+            top: getPercentile(88),     // 頂標：第88百分位數
+            front: getPercentile(75),   // 前標：第75百分位數
+            average: getPercentile(50), // 均標：第50百分位數
+            back: getPercentile(25),    // 後標：第25百分位數
+            bottom: getPercentile(12)   // 底標：第12百分位數
+        };
+    }
+
+    // 根據五標判斷學生等級 (分數越高等級越好)
+    function getFiveLevel(score, percentiles) {
+        if (score >= percentiles.top) return { level: "頂標", class: "label-top", desc: "前12%頂尖學生" };
+        if (score >= percentiles.front) return { level: "前標", class: "label-front", desc: "前25%優秀學生" };
+        if (score >= percentiles.average) return { level: "均標", class: "label-average", desc: "前50%中等學生" };
+        if (score >= percentiles.back) return { level: "後標", class: "label-back", desc: "前75%後段學生" };
+        if (score >= percentiles.bottom) return { level: "底標", class: "label-bottom", desc: "前88%邊緣學生" };
+        return { level: "流標", class: "label-fail", desc: "未達底標，需重點輔導" };
     }
 
     function computeStats(students, className = "") {
@@ -506,57 +497,70 @@
         const minVal = Math.min(...scores);
         const passCount = scores.filter(s=>s>=60).length;
         const passRate = (passCount/scores.length)*100;
-        const excellentCount = scores.filter(s=>s>=90).length;
-        const goodCount = scores.filter(s=>s>=80 && s<90).length;
-        const mediumCount = scores.filter(s=>s>=70 && s<80).length;
-        const lowPassCount = scores.filter(s=>s>=60 && s<70).length;
-        const failCount = scores.filter(s=>s<60).length;
         const variance = scores.reduce((sum,val)=>sum + Math.pow(val-avg,2),0)/scores.length;
         const stdDev = Math.sqrt(variance);
         const skewRaw = scores.reduce((sum,val)=>sum+Math.pow((val-avg)/stdDev,3),0)/scores.length;
         const skewness = isNaN(skewRaw) ? 0 : skewRaw;
-        const gradeDist = [failCount, lowPassCount, mediumCount, goodCount, excellentCount];
         const percentiles = calculateFivePercentiles(scores);
-        return { className, avg, median, maxVal, minVal, passRate, excellentCount, goodCount, mediumCount, lowPassCount, failCount, stdDev, skewness, gradeDist, total: students.length, students, percentiles };
+        
+        // 五標各層人數
+        let topCount = 0, frontCount = 0, avgCount = 0, backCount = 0, bottomCount = 0, failCount = 0;
+        students.forEach(s => {
+            if (s.score >= percentiles.top) topCount++;
+            else if (s.score >= percentiles.front) frontCount++;
+            else if (s.score >= percentiles.average) avgCount++;
+            else if (s.score >= percentiles.back) backCount++;
+            else if (s.score >= percentiles.bottom) bottomCount++;
+            else failCount++;
+        });
+        
+        const gradeDist = [failCount, bottomCount, backCount, avgCount, frontCount, topCount];
+        
+        return { className, avg, median, maxVal, minVal, passRate, stdDev, skewness, 
+                 gradeDist, total: students.length, students, percentiles,
+                 topCount, frontCount, avgCount, backCount, bottomCount, failCount };
     }
 
     function radarDimensions(stats) {
         if(!stats) return [0,0,0,0,0,0];
         const stability = stats.stdDev > 20 ? 35 : (stats.stdDev > 15 ? 55 : (stats.stdDev > 10 ? 70 : 88));
-        const topRatio = (stats.students.filter(s => s.score >= stats.percentiles.top).length / stats.total) * 100;
+        const topRatio = (stats.topCount / stats.total) * 100;
         let potential = stats.skewness < -0.6 ? 88 : (stats.skewness > 0.7 ? 42 : 70);
         const balance = 100 - Math.min(30, Math.abs(stats.avg - stats.median)*1.8);
         return [stats.avg, stability, topRatio, stats.passRate, potential, balance];
     }
 
-    // 緊湊排名表格 (節省空間)
     function generateRankingTable(students, stats) {
         if (!students || students.length === 0) return "";
         const sorted = [...students].sort((a, b) => b.score - a.score);
         const avg = stats.avg;
-        let html = `<h3>📊 學生成績排名</h3>`;
-        html += `<div class="ranking-table-wrapper">`;
-        html += `<table class="ranking-table">`;
-        html += `<thead><tr><th>名次</th><th>姓名</th><th>分數</th><th>與均差</th><th>評級</th></tr></thead><tbody>`;
+        const p = stats.percentiles;
+        let html = `<h3>📊 學生成績排名表</h3>`;
+        html += `<div class="ranking-table-wrapper"><table class="ranking-table">`;
+        html += `<thead><tr><th>名次</th><th>姓名</th><th>分數</th><th>與均差</th><th>五標等級</th></tr></thead><tbody>`;
         
         sorted.forEach((student, idx) => {
             const rank = idx + 1;
             let rankClass = rank === 1 ? "rank-1" : (rank === 2 ? "rank-2" : (rank === 3 ? "rank-3" : ""));
             const diff = (student.score - avg).toFixed(1);
             const diffSign = diff >= 0 ? `+${diff}` : diff;
-            let grade = student.score >= 90 ? "優" : (student.score >= 80 ? "甲" : (student.score >= 70 ? "乙" : (student.score >= 60 ? "丙" : "丁")));
-            html += `<tr class="${rankClass}"><td>${rank}</td><td style="text-align:left">${student.name}</td><td><strong>${student.score}</strong></td><td>${diffSign}</td><td>${grade}</td></tr>`;
+            const level = getFiveLevel(student.score, p);
+            html += `<tr class="${rankClass}"><td>${rank}</td><td style="text-align:left">${student.name}</td>
+                      <td><strong>${student.score}</strong></td><td>${diffSign}</td>
+                      <td><span class="${level.class}">${level.level}</span></td>
+                    </tr>`;
         });
-        html += `</tbody></table></div>`;
+        html += `</tbody><table></div>`;
         return html;
     }
 
     function generateSoloCritique(stats) {
         const p = stats.percentiles;
-        let text = `📊 平均 ${stats.avg.toFixed(1)}分 | 中位數 ${stats.median.toFixed(1)} | 標準差 ${stats.stdDev.toFixed(1)}\n`;
-        text += `🎯 五標：頂標 ${p.top.toFixed(0)}／前標 ${p.front.toFixed(0)}／均標 ${p.average.toFixed(0)}／後標 ${p.back.toFixed(0)}／底標 ${p.bottom.toFixed(0)}\n`;
-        text += `🔖 及格率 ${stats.passRate.toFixed(1)}% | 頂標以上 ${((stats.students.filter(s=>s.score>=p.top).length)/stats.total*100).toFixed(1)}%`;
-        if(stats.failCount > 0) text += ` | 待加強 ${stats.failCount}人`;
+        let text = `📊 統計摘要：平均 ${stats.avg.toFixed(1)}分 | 中位數 ${stats.median.toFixed(1)} | 標準差 ${stats.stdDev.toFixed(1)}\n`;
+        text += `🎯 【五標分數】頂標(88%):${p.top.toFixed(0)}／前標(75%):${p.front.toFixed(0)}／均標(50%):${p.average.toFixed(0)}／後標(25%):${p.back.toFixed(0)}／底標(12%):${p.bottom.toFixed(0)}\n`;
+        text += `📈 【五標人數】頂標 ${stats.topCount}人／前標 ${stats.frontCount}人／均標 ${stats.avgCount}人／後標 ${stats.backCount}人／底標 ${stats.bottomCount}人／流標 ${stats.failCount}人\n`;
+        text += `🔖 及格率 ${stats.passRate.toFixed(1)}% | 頂標以上佔比 ${(stats.topCount/stats.total*100).toFixed(1)}%`;
+        if(stats.failCount > 0) text += ` | ⚠️ 流標 ${stats.failCount}人 (未達底標)`;
         if(stats.stdDev > 18) text += `\n⚠️ 成績極度離散，建議分組教學。`;
         else if(stats.stdDev > 12) text += `\n📌 成績差異中等，可採用差異化作業。`;
         return text;
@@ -567,8 +571,10 @@
         text += `🏛️ ${statsList.length}個班級對比\n`;
         const avgRank = [...statsList].sort((a,b)=>b.avg - a.avg);
         avgRank.forEach((s, i) => text += `${i===0?"🏆":(i===1?"🥈":"🥉")} ${s.className} ${s.avg.toFixed(1)}分\n`);
-        text += `\n五標對比：\n`;
-        statsList.forEach(s => text += `${s.className}: 頂${s.percentiles.top.toFixed(0)}/前${s.percentiles.front.toFixed(0)}/均${s.percentiles.average.toFixed(0)}\n`);
+        text += `\n📊 五標分數對比 (頂/前/均/後/底)：\n`;
+        statsList.forEach(s => text += `${s.className}: ${s.percentiles.top.toFixed(0)}/${s.percentiles.front.toFixed(0)}/${s.percentiles.average.toFixed(0)}/${s.percentiles.back.toFixed(0)}/${s.percentiles.bottom.toFixed(0)}\n`);
+        text += `\n📈 五標人數分佈 (頂/前/均/後/底/流)：\n`;
+        statsList.forEach(s => text += `${s.className}: ${s.topCount}/${s.frontCount}/${s.avgCount}/${s.backCount}/${s.bottomCount}/${s.failCount}\n`);
         return text;
     }
 
@@ -576,20 +582,25 @@
         if(statsList.length < 2) return "至少需要兩次測驗";
         let html = cohort ? `<p><strong>對象：</strong>${cohort}</p>` : "";
         html += `<div class="table-wrapper"><table class="track-summary-table">`;
-        html += `<thead><tr><th>測驗</th><th>平均</th><th>及格率</th><th>頂標</th><th>前標</th><th>均標</th><th>後標</th><th>底標</th></tr></thead><tbody>`;
+        html += `<thead><tr><th>測驗</th><th>平均</th><th>及格率</th><th>頂標(88%)</th><th>前標(75%)</th><th>均標(50%)</th><th>後標(25%)</th><th>底標(12%)</th><th>頂/前/均/後/底/流</th></tr></thead><tbody>`;
         statsList.forEach((s, i) => {
             const p = s.percentiles;
             const trend = (i>0 && s.avg !== statsList[i-1].avg) ? (s.avg > statsList[i-1].avg ? " ▲" : " ▼") : "";
-            html += `<tr><td><strong>${labels[i]}</strong>${trend}</td>
+            html += `<tr>
+                    <td><strong>${labels[i]}</strong>${trend}</td>
                     <td>${s.avg.toFixed(1)}</td><td>${s.passRate.toFixed(1)}%</td>
                     <td>${p.top.toFixed(0)}</td><td>${p.front.toFixed(0)}</td>
-                    <td>${p.average.toFixed(0)}</td><td>${p.back.toFixed(0)}</td><td>${p.bottom.toFixed(0)}</td></tr>`;
+                    <td>${p.average.toFixed(0)}</td><td>${p.back.toFixed(0)}</td><td>${p.bottom.toFixed(0)}</td>
+                    <td style="font-size:0.7rem;">${s.topCount}/${s.frontCount}/${s.avgCount}/${s.backCount}/${s.bottomCount}/${s.failCount}</td>
+                 </tr>`;
         });
         html += `</tbody></table></div>`;
         const change = statsList[statsList.length-1].avg - statsList[0].avg;
+        const failChange = statsList[statsList.length-1].failCount - statsList[0].failCount;
         html += `<div style="margin-top:10px; padding:8px; background:#f0f4f0; border-radius:8px; font-size:0.8rem;">`;
-        html += `<strong>📈 趨勢：</strong>起始 ${statsList[0].avg.toFixed(1)} → 最新 ${statsList[statsList.length-1].avg.toFixed(1)} `;
+        html += `<strong>📈 趨勢：</strong>起始平均 ${statsList[0].avg.toFixed(1)} → 最新 ${statsList[statsList.length-1].avg.toFixed(1)} `;
         html += (change > 3 ? `顯著進步 +${change.toFixed(1)}` : (change < -3 ? `明顯退步 ${change.toFixed(1)}` : `維持穩定`));
+        if(failChange !== 0) html += ` | 流標人數 ${failChange>0 ? `增加 ${failChange}` : `減少 ${-failChange}`}`;
         html += `</div>`;
         return html;
     }
@@ -598,15 +609,21 @@
         const modalDiv = document.createElement('div');
         modalDiv.className = 'student-modal-overlay';
         const diff = classStats ? (student.score - classStats.avg).toFixed(1) : "—";
-        const advice = student.score >= 90 ? "卓越表現！建議深化專題研究。" :
-                      student.score >= 80 ? "表現良好，建立錯題本。" :
-                      student.score >= 70 ? "基礎穩固，加強弱項。" :
-                      student.score >= 60 ? "及格邊緣，從基礎複習。" : "基礎薄弱，優先釐清概念。";
+        const level = getFiveLevel(student.score, classStats.percentiles);
+        let advice = "";
+        if (level.level === "頂標") advice = "頂標學生 (前12%)！保持卓越，建議深化專題研究，挑戰更高層次。";
+        else if (level.level === "前標") advice = "前標優秀學生 (前25%)，建立錯題本，針對弱項加強即可更上一層。";
+        else if (level.level === "均標") advice = "均標學生 (前50%)，基礎穩固，加強弱項單元，每日固定複習。";
+        else if (level.level === "後標") advice = "後標學生 (前75%)，需加強基礎，從課本例題重新推演。";
+        else if (level.level === "底標") advice = "底標學生 (前88%)，建議參與課後輔導，優先掌握核心概念。";
+        else advice = "流標學生 (未達底標)，基礎薄弱，優先釐清核心概念，尋求一對一指導。";
+        
         modalDiv.innerHTML = `
             <div class="student-modal-card">
                 <h3>📋 ${student.name}</h3>
                 <div style="display:flex; justify-content:space-between; margin:12px 0; background:#faf5e8; padding:12px; border-radius:16px;">
                     <span><strong>成績</strong><br><span style="font-size:1.8rem; color:#9b6a42;">${student.score}</span></span>
+                    <span><strong>五標等級</strong><br><span class="${level.class}" style="font-size:1rem; padding:4px 12px;">${level.level}</span></span>
                     <span><strong>班級均差</strong><br>${diff}</span>
                 </div>
                 <div><strong>📌 學習策略</strong><br>${advice}</div>
@@ -631,11 +648,11 @@
             const s = statsList[0], p = s.percentiles;
             statGrid.innerHTML = `
                 <div class="stat-card"><div class="stat-val">${s.avg.toFixed(1)}</div><div class="stat-label">平均</div></div>
-                <div class="stat-card"><div class="stat-val">${p.top.toFixed(0)}</div><div class="stat-label">頂標</div></div>
-                <div class="stat-card"><div class="stat-val">${p.front.toFixed(0)}</div><div class="stat-label">前標</div></div>
-                <div class="stat-card"><div class="stat-val">${p.average.toFixed(0)}</div><div class="stat-label">均標</div></div>
-                <div class="stat-card"><div class="stat-val">${p.back.toFixed(0)}</div><div class="stat-label">後標</div></div>
-                <div class="stat-card"><div class="stat-val">${p.bottom.toFixed(0)}</div><div class="stat-label">底標</div></div>
+                <div class="stat-card"><div class="stat-val">${p.top.toFixed(0)}</div><div class="stat-label">頂標88%</div></div>
+                <div class="stat-card"><div class="stat-val">${p.front.toFixed(0)}</div><div class="stat-label">前標75%</div></div>
+                <div class="stat-card"><div class="stat-val">${p.average.toFixed(0)}</div><div class="stat-label">均標50%</div></div>
+                <div class="stat-card"><div class="stat-val">${p.back.toFixed(0)}</div><div class="stat-label">後標25%</div></div>
+                <div class="stat-card"><div class="stat-val">${p.bottom.toFixed(0)}</div><div class="stat-label">底標12%</div></div>
                 <div class="stat-card"><div class="stat-val">${s.passRate.toFixed(0)}%</div><div class="stat-label">及格率</div></div>
                 <div class="stat-card"><div class="stat-val">${s.stdDev.toFixed(1)}</div><div class="stat-label">標準差</div></div>
             `;
@@ -653,7 +670,7 @@
         const ctx1 = document.getElementById("chartPrimary").getContext("2d");
         let primaryChart;
         if(mode === "solo") {
-            primaryChart = new Chart(ctx1, { type: 'bar', data: { labels: ['不及格','60-69','70-79','80-89','90-100'], datasets: [{ label: '人數', data: statsList[0].gradeDist, backgroundColor: '#9b6a42' }] } });
+            primaryChart = new Chart(ctx1, { type: 'bar', data: { labels: ['流標','底標','後標','均標','前標','頂標'], datasets: [{ label: '人數', data: statsList[0].gradeDist, backgroundColor: ['#8b4513','#c53030','#c08530','#9b6a42','#2c6e2c','#1a5d1a'] }] } });
         } else if(mode === "multi") {
             primaryChart = new Chart(ctx1, { type: 'bar', data: { labels, datasets: [{ label: '平均分', data: statsList.map(s=>s.avg), backgroundColor: statsList.map((_,i)=>getColor(i,0.7)) }] } });
         } else {
@@ -680,7 +697,7 @@
         const ctxDist = document.getElementById("chartDistribution").getContext("2d");
         let distChart;
         if(mode === "solo") {
-            distChart = new Chart(ctxDist, { type: 'pie', data: { labels: ['不及格','60-69','70-79','80-89','90-100'], datasets: [{ data: statsList[0].gradeDist, backgroundColor: ['#aa7c54','#c29a6b','#dbb88c','#ecd7b0','#f8ecda'] }] } });
+            distChart = new Chart(ctxDist, { type: 'pie', data: { labels: ['流標','底標','後標','均標','前標','頂標'], datasets: [{ data: statsList[0].gradeDist, backgroundColor: ['#8b4513','#c53030','#c08530','#9b6a42','#2c6e2c','#1a5d1a'] }] } });
         } else if(mode === "track") {
             distChart = new Chart(ctxDist, { type: 'line', data: { labels, datasets: [{ label: '及格率%', data: statsList.map(s=>s.passRate), borderColor: '#276749', fill: true }, { label: '頂標', data: statsList.map(s=>s.percentiles.top), borderColor: '#9b6a42', borderDash: [5,5] }] } });
         } else {
@@ -689,11 +706,10 @@
         currentCharts.distribution = distChart;
 
         const critiqueDiv = document.getElementById("academicCritique");
-        if(mode === "solo") critiqueDiv.innerHTML = `<strong>📐 學術評鑑</strong><br>${generateSoloCritique(statsList[0])}`;
-        else if(mode === "multi") critiqueDiv.innerHTML = `<strong>🏛️ 班際對比</strong><br>${generateMultiComparisonCritique(statsList, labels, extraInfo?.subject || "")}`;
-        else critiqueDiv.innerHTML = `<strong>📈 縱向追蹤</strong><br>${generateTrackCritique(statsList, labels, extraInfo?.cohort || "")}`;
+        if(mode === "solo") critiqueDiv.innerHTML = `<strong>📐 學術評鑑報告 (五標／流標)</strong><br>${generateSoloCritique(statsList[0])}`;
+        else if(mode === "multi") critiqueDiv.innerHTML = `<strong>🏛️ 班際橫向對比</strong><br>${generateMultiComparisonCritique(statsList, labels, extraInfo?.subject || "")}`;
+        else critiqueDiv.innerHTML = `<strong>📈 縱向追蹤評鑑</strong><br>${generateTrackCritique(statsList, labels, extraInfo?.cohort || "")}`;
 
-        // 排名表格 (僅單班，緊湊顯示)
         const rankingSection = document.getElementById("rankingSection");
         if (mode === "solo" && statsList[0]?.students) {
             rankingSection.innerHTML = generateRankingTable(statsList[0].students, statsList[0]);
@@ -704,8 +720,12 @@
         const studentContainer = document.getElementById("studentListInsight");
         if(mode === "solo" && statsList[0]?.students) {
             const students = statsList[0].students;
-            studentContainer.innerHTML = `<div style="font-weight:600; margin-bottom:6px; font-size:0.8rem;">🎓 學生名冊 (點擊看報告)</div>` + 
-                students.map(s => `<span class="student-badge" data-name="${s.name}" data-score="${s.score}">📌 ${s.name} ${s.score}</span>`).join('');
+            const p = statsList[0].percentiles;
+            studentContainer.innerHTML = `<div style="font-weight:600; margin-bottom:6px; font-size:0.8rem;">🎓 學生名冊 (點擊查看五標診斷報告)</div>` + 
+                students.map(s => {
+                    const level = getFiveLevel(s.score, p);
+                    return `<span class="student-badge" data-name="${s.name}" data-score="${s.score}">📌 ${s.name} ${s.score} (${level.level})</span>`;
+                }).join('');
             document.querySelectorAll('.student-badge').forEach(el => {
                 el.addEventListener('click', () => {
                     const name = el.getAttribute('data-name');
@@ -718,10 +738,7 @@
         }
     }
 
-    function printReport() {
-        if (!currentReportPayload) { alert("請先生成報告"); return; }
-        window.print();
-    }
+    function printReport() { if (!currentReportPayload) { alert("請先生成報告"); return; } window.print(); }
 
     function runSolo() {
         const className = document.getElementById("soloClassName")?.value || "班級";
@@ -732,7 +749,7 @@
         if(students.length===0) { alert("無效數據"); return false; }
         const stats = computeStats(students, className);
         const dim = radarDimensions(stats);
-        renderFullReport("solo", { statsList: [stats], labels: [className], titleText: `${className} · ${subject}`, subText: `樣本 ${students.length}人 | ${new Date().toLocaleDateString()}`, radarDatasets: [{ label: className, data: dim, borderColor: '#b7791f', backgroundColor: 'rgba(183,121,31,0.2)' }] });
+        renderFullReport("solo", { statsList: [stats], labels: [className], titleText: `${className} · ${subject} 五標分析`, subText: `樣本 ${students.length}人 | ${new Date().toLocaleDateString()}`, radarDatasets: [{ label: className, data: dim, borderColor: '#b7791f', backgroundColor: 'rgba(183,121,31,0.2)' }] });
         return true;
     }
 
@@ -753,7 +770,7 @@
         }
         if(statsList.length < 2) { alert("至少兩個有效班級"); return false; }
         const radarSets = statsList.map((st,i)=> ({ label: labels[i], data: radarDimensions(st), borderColor: getColor(i,1), backgroundColor: getColor(i,0.15), fill: false }));
-        renderFullReport("multi", { statsList, labels, titleText: "班際橫向對比", subText: `${statsList.length}個班級 ${subject?`· ${subject}`:""}`, radarDatasets: radarSets, extraInfo: { subject } });
+        renderFullReport("multi", { statsList, labels, titleText: "班際橫向對比 · 五標分析", subText: `${statsList.length}個班級 ${subject?`· ${subject}`:""}`, radarDatasets: radarSets, extraInfo: { subject } });
         return true;
     }
 
@@ -774,7 +791,7 @@
         }
         if(statsList.length < 2) { alert("請至少輸入兩次測驗"); return false; }
         const lastDim = radarDimensions(statsList[statsList.length-1]);
-        renderFullReport("track", { statsList, labels, titleText: "縱向追蹤", subText: `${statsList.length}次測驗 ${cohort?`· ${cohort}`:""}`, radarDatasets: [{ label: "最新指標", data: lastDim, borderColor: '#9b6a42' }], extraInfo: { cohort } });
+        renderFullReport("track", { statsList, labels, titleText: "縱向追蹤 · 五標演化", subText: `${statsList.length}次測驗 ${cohort?`· ${cohort}`:""}`, radarDatasets: [{ label: "最新指標", data: lastDim, borderColor: '#9b6a42' }], extraInfo: { cohort } });
         return true;
     }
 
@@ -789,7 +806,7 @@
         if(activeMode === "solo") {
             panel.innerHTML = `<div class="input-card"><h4>📌 班級資訊</h4><input id="soloClassName" placeholder="班級名稱"><input id="soloSubject" placeholder="科目"></div>
             <div class="input-card"><h4>📝 成績輸入</h4><textarea id="soloRawData" rows="6" placeholder="王小明 92&#10;林雅筑 87"></textarea><div class="info-note">姓名 分數，空格/Tab/逗號分隔</div></div>
-            <button class="btn-run" id="dynamicRunBtn">生成報告</button>`;
+            <button class="btn-run" id="dynamicRunBtn">生成五標報告</button>`;
         } else if(activeMode === "multi") {
             let html = `<div class="input-card"><h4>📌 科目</h4><input id="multiSubject" placeholder="科目名稱"></div>`;
             for(let i=1;i<=5;i++) html += `<div class="input-card"><h4>班級 ${i}</h4><input id="multiName${i}" placeholder="班級名稱"><textarea id="multiData${i}" rows="2" placeholder="姓名 分數"></textarea></div>`;
@@ -822,10 +839,7 @@
             });
         });
         buildDynamicForms();
-        setTimeout(() => {
-            const printBtn = document.getElementById("printReportBtn");
-            if(printBtn) printBtn.addEventListener("click", printReport);
-        }, 100);
+        setTimeout(() => { const printBtn = document.getElementById("printReportBtn"); if(printBtn) printBtn.addEventListener("click", printReport); }, 100);
     }
     initTabs();
 </script>
