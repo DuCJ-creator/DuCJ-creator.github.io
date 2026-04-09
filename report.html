@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Academic Report Formatter | Drag & Drop</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-<!-- Load docx library from multiple CDN sources -->
-<script src="https://cdn.jsdelivr.net/npm/docx@9.5.0/build/index.umd.js"></script>
-<script src="https://unpkg.com/docx@9.5.0/build/index.umd.js" onerror="console.warn('Primary CDN failed, trying fallback')"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -212,7 +209,7 @@ const T = {
     lblTblCaption:'Table caption <span class="opt">(optional)</span>', phTblCaption:'e.g. Table 1. Summary',
     tblBtnAddRow:'+ Row', tblBtnAddCol:'+ Column', tblBtnDelRow:'− Row', tblBtnDelCol:'− Column', tblHeaderPh:'Header', tblCellPh:'Cell',
     docAuthor:'Author:', docClass:'Class/Course:', docSeat:'Seat No.:', docInstructor:'Instructor:', docDate:'Date:',
-    statusOk:'✓ Document downloaded successfully!', statusErr:'Error generating document: ', needTitle:'Please enter a title before downloading.',
+    statusOk:'✓ Document downloaded successfully!', statusErr:'Error: ', needTitle:'Please enter a title before downloading.',
   },
   zh: {
     eyebrow:'學術工具 · 教師專用', h1:'報告格式化工具', subtitle:'拖曳區塊把手即可重新排序 — 一鍵下載完美排版 Word 文件。',
@@ -229,7 +226,7 @@ const T = {
     lblTblCaption:'表格說明 <span class="opt">（選填）</span>', phTblCaption:'例：表一、實驗結果摘要',
     tblBtnAddRow:'+ 新增列', tblBtnAddCol:'+ 新增欄', tblBtnDelRow:'− 刪除列', tblBtnDelCol:'− 刪除欄', tblHeaderPh:'標題', tblCellPh:'儲存格',
     docAuthor:'作者：', docClass:'班級／課程：', docSeat:'座號：', docInstructor:'授課教師：', docDate:'日期：',
-    statusOk:'✓ 文件下載成功！', statusErr:'產生文件時發生錯誤：', needTitle:'請先輸入標題再下載。',
+    statusOk:'✓ 文件下載成功！', statusErr:'錯誤：', needTitle:'請先輸入標題再下載。',
   }
 };
 
@@ -269,7 +266,7 @@ function refreshBlockLabels(id, type) {
 function val(id){ let e = document.getElementById(id); return e ? e.value.trim() : ''; }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function formatDate(d){ if(!d) return ''; try { if(lang==='zh'){ let dt=new Date(d+'T12:00:00'); return `${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日`; } return new Date(d+'T12:00:00').toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}); } catch(e){ return d; } }
-function setStatus(msg,isErr){ let b=document.getElementById('statusBar'); b.textContent=msg; b.className='status-bar visible'+(isErr?' error':''); setTimeout(()=>{ if(b.className.includes('visible')) b.className='status-bar'; }, 4000); }
+function setStatus(msg,isErr){ let b=document.getElementById('statusBar'); b.textContent=msg; b.className='status-bar visible'+(isErr?' error':''); setTimeout(()=>{ if(b.className.includes('visible')) b.className='status-bar'; }, 5000); }
 function clearStatus(){ document.getElementById('statusBar').className='status-bar'; }
 
 // ========== DRAG & DROP ==========
@@ -356,7 +353,7 @@ function handleImageUpload(id, input){
 // ========== TABLE ==========
 function renderTableEditor(id){
   let tb = tableStore[id]; if(!tb) return '';
-  let html = '<table>';
+  let html = '<tr>';
   tb.rows.forEach((row,ri) => { html += '<tr>' + row.map((cell,ci)=>`<td class="${ri===0?'tbl-head-cell':''}"><input type="text" value="${esc(cell)}" placeholder="${ri===0?t('tblHeaderPh'):t('tblCellPh')}" oninput="updateCell(${id},${ri},${ci},this.value)"/></td>`).join('') + '</tr>'; });
   return html+'</table>';
 }
@@ -404,8 +401,8 @@ function updatePreview(){
     } else if(b.type==='table'){
       let tb = tableStore[b.id]; if(!tb) return;
       let cap = val('tblCaption-'+b.id);
-      let tbl = `<div class="prev-tbl-wrap"><table class="prev-tbl">`;
-      tb.rows.forEach((row,ri)=>{ tbl+=`<tr class="${ri===0?'prev-tbl-head':''}">${row.map(c=>`<td>${esc(c)}</td>`).join('')}</td>`; });
+      let tbl = `<div class="prev-tbl-wrap"><table class="prev-tbl" border="1" cellpadding="4" cellspacing="0" style="border-collapse:collapse;">`;
+      tb.rows.forEach((row,ri)=>{ tbl+=`<tr>${row.map(c=>`<td ${ri===0?'style="font-weight:bold;background:#f5f5f0;"':''}>${esc(c)}</td>`).join('')}</tr>`; });
       tbl+=`</table>${cap?`<div class="prev-caption">${esc(cap)}</div>`:''}</div>`;
       html+=tbl;
     }
@@ -413,118 +410,124 @@ function updatePreview(){
   contentEl.innerHTML = html;
 }
 
-// ========== DOCX GENERATION ==========
-async function generateDoc(){
+// ========== DOCX GENERATION (No external libraries - HTML to Word) ==========
+function generateDoc() {
   let title = val('fTitle');
   if(!title){ setStatus(t('needTitle'), true); return; }
+  
   let btn = document.getElementById('genBtn');
-  btn.disabled = true; btn.textContent = t('btnGenerating'); clearStatus();
+  btn.disabled = true; btn.textContent = t('btnGenerating');
+  clearStatus();
   
   try {
-    // Check if docx is loaded
-    if (!window.docx || !window.docx.Document) {
-      throw new Error('docx library not loaded. Please check your internet connection and refresh the page.');
-    }
+    // Build HTML content for Word document
+    let docHtml = `<!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>${esc(title)}</title>
+      <style>
+        body { 
+          font-family: 'Times New Roman', Times, serif; 
+          margin: 2.54cm; 
+          font-size: 12pt;
+          line-height: 1.5;
+        }
+        h1 { font-size: 20pt; font-weight: bold; text-align: center; margin: 0.5em 0; }
+        h2 { font-size: 18pt; font-weight: bold; text-align: center; margin: 0.4em 0; }
+        .meta { text-align: center; font-size: 11pt; margin: 0.5em 0; color: #444; }
+        hr { border: none; border-top: 1.5px solid #888; margin: 0.7em 0; }
+        .section-h1 { font-size: 16pt; font-weight: bold; margin: 1em 0 0.3em 0; }
+        .section-h2 { font-size: 14pt; font-weight: bold; margin: 0.8em 0 0.2em 0; }
+        .section-h3 { font-size: 12pt; font-weight: bold; font-style: italic; margin: 0.7em 0 0.2em 0; }
+        .paragraph { text-align: justify; margin: 0 0 0.8em 0; }
+        .image-block { text-align: center; margin: 1em 0; }
+        .image-block img { max-width: 100%; height: auto; }
+        .caption { font-size: 10pt; font-style: italic; text-align: center; color: #555; margin-top: 0.2em; }
+        table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+        td, th { border: 1px solid #888; padding: 4px 8px; vertical-align: top; }
+        th { background: #f5f5f0; font-weight: bold; }
+        .table-caption { font-size: 10pt; font-style: italic; text-align: center; margin: 0.2em 0 0.8em 0; }
+      </style>
+    </head>
+    <body>`;
     
-    const { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, AlignmentType, LineRuleType, ShadingType, VerticalAlign } = window.docx;
-    
-    let children = [];
     // Title
-    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 }, children: [new TextRun({ text: title, bold: true, size: 40, font: "Times New Roman" })] }));
-    let sub = val('fSubtitle');
-    if(sub) children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 }, children: [new TextRun({ text: sub, bold: true, size: 36, font: "Times New Roman" })] }));
+    docHtml += `<h1>${esc(title)}</h1>`;
+    let subtitle = val('fSubtitle');
+    if(subtitle) docHtml += `<h2>${esc(subtitle)}</h2>`;
+    
     // Metadata
     let author = val('fAuthor'), date = val('fDate'), cls = val('fClass'), seat = val('fSeat'), teacher = val('fTeacher');
-    let meta = [];
-    if(author) meta.push(`${t('docAuthor')} ${author}`);
-    if(cls) meta.push(`${t('docClass')} ${cls}`);
-    if(seat) meta.push(`${t('docSeat')} ${seat}`);
-    if(teacher) meta.push(`${t('docInstructor')} ${teacher}`);
-    if(date) meta.push(`${t('docDate')} ${formatDate(date)}`);
-    for(let m of meta){
-      children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: m, size: 22, font: "Times New Roman", color: "444444" })] }));
-    }
-    if(meta.length) children.push(new Paragraph({ spacing: { after: 200 }, children: [] }));
-    children.push(new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "888888" } }, spacing: { after: 280 }, children: [] }));
-    // Blocks
-    for(let b of blocks){
+    let metaLines = [];
+    if(author) metaLines.push(`${t('docAuthor')} ${esc(author)}`);
+    if(cls) metaLines.push(`${t('docClass')} ${esc(cls)}`);
+    if(seat) metaLines.push(`${t('docSeat')} ${esc(seat)}`);
+    if(teacher) metaLines.push(`${t('docInstructor')} ${esc(teacher)}`);
+    if(date) metaLines.push(`${t('docDate')} ${esc(formatDate(date))}`);
+    if(metaLines.length) docHtml += `<div class="meta">${metaLines.join('<br/>')}</div>`;
+    if(title || metaLines.length) docHtml += `<hr/>`;
+    
+    // Body blocks
+    for(let b of blocks) {
       let v = ['h1','h2','h3','body'].includes(b.type) ? val('input-'+b.id) : null;
-      if(b.type === 'h1' && v) children.push(new Paragraph({ spacing: { before: 240, after: 100 }, children: [new TextRun({ text: v, bold: true, size: 32, font: "Times New Roman" })] }));
-      else if(b.type === 'h2' && v) children.push(new Paragraph({ spacing: { before: 180, after: 80 }, children: [new TextRun({ text: v, bold: true, size: 28, font: "Times New Roman" })] }));
-      else if(b.type === 'h3' && v) children.push(new Paragraph({ spacing: { before: 140, after: 60 }, children: [new TextRun({ text: v, bold: true, italics: true, size: 24, font: "Times New Roman" })] }));
-      else if(b.type === 'body' && v){
-        let paras = v.split('\n\n');
-        for(let p of paras){
-          if(!p.trim()) continue;
-          children.push(new Paragraph({ alignment: AlignmentType.BOTH, spacing: { line: 360, lineRule: LineRuleType.AUTO, after: 80 }, children: [new TextRun({ text: p.trim(), size: 24, font: "Times New Roman" })] }));
+      if(b.type === 'h1' && v) {
+        docHtml += `<div class="section-h1">${esc(v)}</div>`;
+      } else if(b.type === 'h2' && v) {
+        docHtml += `<div class="section-h2">${esc(v)}</div>`;
+      } else if(b.type === 'h3' && v) {
+        docHtml += `<div class="section-h3">${esc(v)}</div>`;
+      } else if(b.type === 'body' && v) {
+        let paragraphs = v.split('\n\n');
+        for(let p of paragraphs) {
+          if(p.trim()) docHtml += `<div class="paragraph">${esc(p).replace(/\n/g,'<br/>')}</div>`;
         }
-      }
-      else if(b.type === 'image'){
+      } else if(b.type === 'image') {
         let img = imageStore[b.id];
-        if(img){
-          let base64 = img.dataUrl.split(',')[1];
-          let binary = atob(base64);
-          let bytes = new Uint8Array(binary.length);
-          for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
-          let pxPerCm = 96/2.54;
-          let wCm = parseFloat(document.getElementById('imgW-'+b.id)?.value || 10);
-          let hCm = parseFloat(document.getElementById('imgH-'+b.id)?.value || 7);
-          let wPx = Math.round(wCm * pxPerCm);
-          let hPx = Math.round(hCm * pxPerCm);
-          let ext = (img.name.split('.').pop()||'png').toLowerCase();
-          let typeMap = {jpg:'jpg',jpeg:'jpg',png:'png',gif:'gif',bmp:'bmp',webp:'webp'};
-          let imgRun = new ImageRun({ data: bytes, transformation: { width: wPx, height: hPx }, type: typeMap[ext] || 'png' });
-          children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 120, after: 60 }, children: [imgRun] }));
-          let cap = val('imgCaption-'+b.id);
-          if(cap) children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 160 }, children: [new TextRun({ text: cap, italics: true, size: 20, font: "Times New Roman", color: "555555" })] }));
+        let cap = val('imgCaption-'+b.id);
+        if(img) {
+          docHtml += `<div class="image-block"><img src="${img.dataUrl}"/>`;
+          if(cap) docHtml += `<div class="caption">${esc(cap)}</div>`;
+          docHtml += `</div>`;
         }
-      }
-      else if(b.type === 'table'){
-        let tb = tableStore[b.id]; if(!tb) continue;
+      } else if(b.type === 'table') {
+        let tb = tableStore[b.id];
         let cap = val('tblCaption-'+b.id);
-        let cols = tb.rows[0]?.length || 1;
-        let tblW = 8026;
-        let colW = Math.floor(tblW / cols);
-        let colWidths = Array(cols).fill(colW);
-        let brd = { style: BorderStyle.SINGLE, size: 4, color: "888888" };
-        let allBorders = { top: brd, bottom: brd, left: brd, right: brd };
-        let tableRows = tb.rows.map((row, ri) => new TableRow({ children: row.map((cell, ci) => new TableCell({ borders: allBorders, width: { size: colWidths[ci], type: WidthType.DXA }, shading: ri===0 ? { fill: "F0EDE0", type: ShadingType.CLEAR } : undefined, margins: { top: 80, bottom: 80, left: 100, right: 100 }, verticalAlign: VerticalAlign.CENTER, children: [new Paragraph({ children: [new TextRun({ text: cell || '', size: 22, font: "Times New Roman", bold: ri===0 })] })] })) }));
-        children.push(new Table({ width: { size: tblW, type: WidthType.DXA }, columnWidths: colWidths, rows: tableRows }));
-        if(cap) children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 80, after: 200 }, children: [new TextRun({ text: cap, italics: true, size: 20, font: "Times New Roman", color: "555555" })] }));
+        if(tb && tb.rows && tb.rows.length) {
+          docHtml += `<table>`;
+          tb.rows.forEach((row, ri) => {
+            docHtml += `<tr>`;
+            row.forEach(cell => {
+              docHtml += `<td ${ri === 0 ? 'style="background:#f5f5f0;font-weight:bold;"' : ''}>${esc(cell)}</td>`;
+            });
+            docHtml += `</tr>`;
+          });
+          docHtml += `</table>`;
+          if(cap) docHtml += `<div class="table-caption">${esc(cap)}</div>`;
+        }
       }
     }
-    const doc = new Document({ styles: { default: { document: { run: { font: "Times New Roman", size: 24 } } } }, sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children }] });
-    const blob = await Packer.toBlob(doc);
+    
+    docHtml += `</body></html>`;
+    
+    // Create blob and download
+    const blob = new Blob([docHtml], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = (title.replace(/[^a-z0-9\u4e00-\u9fff]/gi,'_').slice(0,40) || 'report') + '.docx'; a.click();
+    a.href = url;
+    a.download = (title.replace(/[^a-z0-9\u4e00-\u9fff]/gi,'_').slice(0,40) || 'report') + '.doc';
+    a.click();
     URL.revokeObjectURL(url);
+    
     setStatus(t('statusOk'), false);
-  } catch(err){
+  } catch(err) {
     console.error(err);
     setStatus(t('statusErr') + err.message, true);
   } finally {
-    btn.disabled = false; btn.textContent = t('btnGenerate');
+    btn.disabled = false;
+    btn.textContent = t('btnGenerate');
   }
 }
-
-// Wait for libraries to load before enabling features
-window.addEventListener('load', function() {
-  // Check if docx loaded
-  if (window.docx && window.docx.Document) {
-    console.log('docx library loaded successfully');
-  } else {
-    console.warn('docx library not loaded - download may fail');
-    setStatus('⚠️ Word export library loading... Please wait a moment.', false);
-    setTimeout(() => {
-      if (window.docx && window.docx.Document) {
-        setStatus('✓ Ready to generate documents!', false);
-      } else {
-        setStatus('⚠️ Network issue: Word export may not work. Refresh the page.', true);
-      }
-    }, 2000);
-  }
-});
 
 // init
 document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
