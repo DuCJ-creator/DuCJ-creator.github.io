@@ -13,7 +13,6 @@
             box-sizing: border-box;
         }
 
-        /* BOLD AESTHETIC: editorial brutalism with warm accent & sculptural space */
         body {
             background: #ece8e0;
             background-image: radial-gradient(circle at 25% 40%, rgba(0,0,0,0.02) 2%, transparent 2.5%),
@@ -25,7 +24,6 @@
             color: #1a2a2f;
         }
 
-        /* distinctive typography: playfair for headings, sharp sans for body */
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;900&family=Space+Grotesk:wght@400;500;600&display=swap');
 
         h1, h2, h3, .serif-headline {
@@ -45,7 +43,6 @@
             border-radius: 2rem;
             box-shadow: 0 25px 45px -12px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.05);
             padding: 2rem 2rem 2.5rem;
-            transition: all 0.2s ease;
             border: 1px solid rgba(0,0,0,0.05);
         }
 
@@ -78,7 +75,6 @@
             padding-left: 1rem;
         }
 
-        /* TABLE INPUT ZONE — dynamic grid paste */
         .word-editor-section {
             background: #f6f4ef;
             border-radius: 1.5rem;
@@ -178,7 +174,6 @@
             color: #2c5e5a;
         }
 
-        /* game area */
         .game-area {
             display: flex;
             flex-wrap: wrap;
@@ -267,7 +262,6 @@
             border-radius: 12px;
             font-size: 0.85rem;
             box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-            transition: all 0.1s;
         }
 
         .clue-number {
@@ -297,6 +291,12 @@
 
         button:active {
             transform: translateY(1px);
+        }
+
+        button:disabled {
+            background: #b6aa92;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .alert {
@@ -340,6 +340,82 @@
             width: 90%;
             box-shadow: 0 25px 40px rgba(0,0,0,0.3);
             border: 1px solid #e2cfb5;
+        }
+
+        .info-form div {
+            margin-bottom: 1rem;
+        }
+
+        .info-form label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+            color: #2c5e5a;
+        }
+
+        .info-form input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2dbcf;
+            border-radius: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* PRINT STYLES - CRITICAL FOR WORKSHEET */
+        @media print {
+            body > *:not(#print-area) {
+                display: none !important;
+            }
+            #print-area {
+                display: block !important;
+                margin: 0;
+                padding: 15mm;
+                background: white;
+            }
+            #print-area * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            @page {
+                size: A4;
+                margin: 12mm;
+            }
+        }
+
+        #print-area {
+            display: none;
+        }
+
+        .worksheet-table {
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+
+        .worksheet-table td {
+            border: 2px solid #333;
+            padding: 0;
+        }
+
+        .ws-cell {
+            width: 32px;
+            height: 32px;
+            text-align: center;
+            vertical-align: middle;
+            position: relative;
+            background: white;
+        }
+
+        .ws-cell-filled {
+            background: #aaa;
+        }
+
+        .ws-number {
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            font-size: 8px;
+            font-weight: bold;
         }
 
         @media (max-width: 700px) {
@@ -406,15 +482,48 @@
     </div>
 </div>
 
-<!-- PDF modals (kept same logic but styled) -->
-<div id="student-info-modal" class="modal-overlay" style="display:none;"><div class="student-info-modal"><h3>learner profile</h3><div class="info-form"><div><label>Class</label><input type="text" id="class-input" style="width:100%;padding:8px;"></div><div><label>Full name *</label><input type="text" id="name-input" required style="width:100%;padding:8px;"></div><div><label>Seat No.</label><input type="text" id="seat-input" style="width:100%;padding:8px;"></div></div><div style="display:flex;gap:10px;margin-top:20px;"><button id="cancel-btn">Cancel</button><button id="confirm-btn" style="background:#2c5e5a;">Confirm & PDF</button></div></div></div>
-<div id="worksheet-modal" class="modal-overlay" style="display:none;"><div class="student-info-modal"><h3>🖨️ print options</h3><div><label>Worksheet title</label><input type="text" id="ws-title-input" style="width:100%;margin:8px 0; padding:8px;"></div><div><label>Class (optional)</label><input type="text" id="ws-class-input" style="width:100%;margin:8px 0;padding:8px;"></div><div style="margin:12px 0;"><label><input type="checkbox" id="ws-answer-key"> Include answer key</label></div><div style="display:flex;gap:10px;"><button id="ws-cancel-btn">Cancel</button><button id="ws-confirm-btn" style="background:#8e44ad;">Generate & Print</button></div></div></div>
-<div id="pdf-report" style="display:none; background:white; padding:24px; width:800px;"></div>
-<div id="print-area" style="display:none;"></div>
+<!-- PDF Modals -->
+<div id="student-info-modal" class="modal-overlay" style="display:none;">
+    <div class="student-info-modal">
+        <h3>📘 learner profile</h3>
+        <div class="info-form">
+            <div><label>Class</label><input type="text" id="class-input" placeholder="e.g., Grade 5A"></div>
+            <div><label>Full name *</label><input type="text" id="name-input" required placeholder="Student name"></div>
+            <div><label>Seat No.</label><input type="text" id="seat-input" placeholder="座號"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px;">
+            <button id="cancel-btn" style="background:#b6aa92;">Cancel</button>
+            <button id="confirm-btn" style="background:#2c5e5a;">Generate PDF Report</button>
+        </div>
+    </div>
+</div>
+
+<div id="worksheet-modal" class="modal-overlay" style="display:none;">
+    <div class="student-info-modal">
+        <h3>🖨️ print worksheet options</h3>
+        <div><label>Worksheet title</label><input type="text" id="ws-title-input" placeholder="Crossword Puzzle" style="width:100%;margin:8px 0;padding:8px;"></div>
+        <div><label>Class (optional)</label><input type="text" id="ws-class-input" style="width:100%;margin:8px 0;padding:8px;"></div>
+        <div style="margin:12px 0;"><label><input type="checkbox" id="ws-answer-key" checked> Include answer key on separate section</label></div>
+        <div style="display:flex;gap:10px;">
+            <button id="ws-cancel-btn" style="background:#b6aa92;">Cancel</button>
+            <button id="ws-confirm-btn" style="background:#2c5e5a;">Generate & Print</button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden PDF Report Template (will be filled dynamically) -->
+<div id="pdf-report-template" style="display:none;">
+    <div id="pdf-content-container" style="background:white; padding:20px; font-family:Arial,sans-serif; width:100%;">
+        <!-- dynamic content -->
+    </div>
+</div>
+
+<div id="print-area"></div>
 
 <script>
-    // ------------------------ TABLE LOGIC (auto-paste & dynamic) ------------------------
+    // ------------------------ TABLE LOGIC ------------------------
     const tbody = document.getElementById('table-rows-container');
+    
     function getWordsFromTable() {
         const rows = tbody.querySelectorAll('tr');
         const words = [];
@@ -439,14 +548,11 @@
         const hasValid = words.length >= 3;
         const genBtn = document.getElementById('generate-btn');
         if(genBtn) genBtn.disabled = !hasValid;
-        if(!hasValid && words.length>0) {
-            showAlert('At least 3 words needed to generate a meaningful crossword', 'error');
-        }
     }
 
     function addEmptyRow() {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><input type="text" class="word-input-cell" placeholder="e.g., PYTHON"></td><td><input type="text" class="clue-input-cell" placeholder="A popular programming language"></td>`;
+        tr.innerHTML = `<tr><input type="text" class="word-input-cell" placeholder="e.g., PYTHON"></td><td><input type="text" class="clue-input-cell" placeholder="A programming language"></tr>`;
         tbody.appendChild(tr);
         attachRowPasteHandler(tr);
         updateTableStats();
@@ -468,37 +574,25 @@
         showAlert('Vocabulary list cleared', 'success');
     }
 
-    // PASTE HANDLER: intercept paste on table to expand rows/columns
     function handleTablePaste(e, targetCell) {
         e.preventDefault();
         let pastedData = (e.clipboardData || window.clipboardData).getData('text');
         if(!pastedData) return;
         const rowsData = pastedData.split(/\r?\n/).filter(r => r.trim().length > 0);
-        const tableRows = Array.from(tbody.querySelectorAll('tr'));
-        let currentRowIndex = -1;
-        // find the row index of the target cell
         let targetRow = targetCell.closest('tr');
         let startRowIdx = Array.from(tbody.children).indexOf(targetRow);
         if(startRowIdx === -1) startRowIdx = 0;
         
         for(let i = 0; i < rowsData.length; i++) {
             const line = rowsData[i];
-            const cols = line.split(/\t/); // tab separated
-            const targetRowElement = tbody.children[startRowIdx + i];
-            if(!targetRowElement && i > 0) {
-                // auto-grow: add new rows
-                addEmptyRow();
-            }
+            const cols = line.split(/\t/);
+            if(!tbody.children[startRowIdx + i] && i > 0) addEmptyRow();
             const currentRowElem = tbody.children[startRowIdx + i];
             if(currentRowElem) {
                 const wordField = currentRowElem.querySelector('.word-input-cell');
                 const clueField = currentRowElem.querySelector('.clue-input-cell');
                 if(wordField && cols[0] !== undefined) wordField.value = cols[0].trim();
                 if(clueField && cols[1] !== undefined) clueField.value = cols[1].trim();
-                else if(clueField && cols[0] !== undefined && cols.length === 1) {
-                    // if only one column, put in clue? better set clue empty.
-                }
-                if(cols.length >= 2 && clueField) clueField.value = cols[1].trim();
             }
         }
         updateTableStats();
@@ -512,29 +606,13 @@
         });
     }
 
-    function initTable() {
-        // attach paste handler to all existing rows
-        Array.from(tbody.children).forEach(row => attachRowPasteHandler(row));
-        // mutation observer for dynamic rows
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach(mut => {
-                mut.addedNodes.forEach(node => {
-                    if(node.nodeType === 1 && node.tagName === 'TR') attachRowPasteHandler(node);
-                });
-            });
-        });
-        observer.observe(tbody, { childList: true });
-        updateTableStats();
-    }
-
-    // show alert helper
     function showAlert(msg, type='success') {
         const alertDiv = document.getElementById('alert-area');
         alertDiv.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
         setTimeout(() => { if(alertDiv.firstChild) alertDiv.innerHTML = ''; }, 2800);
     }
 
-    // ---------- Crossword Generation (core logic kept robust) ----------
+    // ---------- Crossword Generation Core ----------
     const GAME_CONFIG = { minWords:3, maxWords:30, maxWordLength:14, gridSize:15, maxGridSize:20 };
     let gameState = { words:[], clues:{}, crossword:null, grid:[], numberedCells:{}, completion:0, foundWords:new Set(), userInputs:{}, placedWordsRaw:[] };
 
@@ -549,6 +627,7 @@
     function placeWord(grid, word, row, col, dir) {
         for(let i=0;i<word.length;i++) { if(dir==='across') grid[row][col+i]=word[i]; else grid[row+i][col]=word[i]; }
     }
+    
     function canPlaceWord(grid, word, row, col, dir) {
         const gs=grid.length;
         if(dir==='across') {
@@ -573,7 +652,6 @@
         let grid = Array(gridSize).fill().map(()=>Array(gridSize).fill(''));
         let numberedCells = {};
         let placedWords = [];
-        // first word
         let firstWord = shuffled[0];
         let dir = Math.random()>0.5?'across':'down';
         let row = dir==='across' ? Math.floor(Math.random()*(gridSize)) : Math.floor(Math.random()*(gridSize-firstWord.length));
@@ -622,7 +700,7 @@
         const el = document.getElementById('crossword-grid');
         if(!gameState.grid.length) return;
         const gs = gameState.grid.length;
-        el.style.gridTemplateColumns = `repeat(${gs}, minmax(32px, 1fr))`;
+        el.style.gridTemplateColumns = `repeat(${gs}, minmax(34px, 1fr))`;
         el.innerHTML='';
         for(let i=0;i<gs;i++) for(let j=0;j<gs;j++) {
             let cell = document.createElement('div'); cell.className='cell';
@@ -699,33 +777,187 @@
         showAlert(`✨ crossword generated with ${words.length} words!`, 'success');
     }
 
-    // PDF & Print functions (preserved but ref)
+    // ---------- PDF GENERATION (FIXED) ----------
+    async function generatePDFReport() {
+        if(!gameState.crossword) { alert('Please generate crossword first'); return; }
+        const name = document.getElementById('name-input').value.trim();
+        if(!name) { alert('Please enter student name'); return; }
+        
+        const studentInfo = {
+            class: document.getElementById('class-input').value.trim(),
+            name: name,
+            seat: document.getElementById('seat-input').value.trim()
+        };
+        
+        // Build PDF content dynamically
+        const container = document.createElement('div');
+        container.style.cssText = 'background:white; padding:20px; font-family:Arial,sans-serif; width:700px; margin:0 auto;';
+        
+        // Header
+        container.innerHTML = `
+            <h2 style="text-align:center;color:#2c5e5a;">${studentInfo.name}'s Crossword Learning Report</h2>
+            <div style="display:flex; justify-content:space-between; margin:15px 0; padding:10px; background:#f5f0e8;">
+                <div><strong>Class:</strong> ${studentInfo.class || '—'}</div>
+                <div><strong>Name:</strong> ${studentInfo.name}</div>
+                <div><strong>Seat:</strong> ${studentInfo.seat || '—'}</div>
+                <div><strong>Date:</strong> ${new Date().toLocaleDateString()}</div>
+            </div>
+            <div style="margin:15px 0; padding:10px; background:#e8f5e9; text-align:center;">
+                <strong>Completion: ${document.getElementById('completion').innerText} (${gameState.foundWords.size}/${gameState.words.length} words found)</strong>
+            </div>
+            <h3>📋 Word Status</h3>
+            <div style="margin:10px 0;">
+                ${gameState.words.map(w => `<div style="padding:5px; margin:3px 0; background:${gameState.foundWords.has(w)?'#c8e6c9':'#ffcdd2'}; border-radius:5px;"><strong>${w}</strong> — ${gameState.clues[w]} ${gameState.foundWords.has(w)?'✓':'✗'}</div>`).join('')}
+            </div>
+            <h3>🔍 Across Clues</h3>
+            <div>${gameState.crossword.placedWords.filter(p=>p.direction==='across').map(p=>`<div><strong>${p.number}.</strong> ${gameState.clues[p.word]}</div>`).join('')}</div>
+            <h3>🔽 Down Clues</h3>
+            <div>${gameState.crossword.placedWords.filter(p=>p.direction==='down').map(p=>`<div><strong>${p.number}.</strong> ${gameState.clues[p.word]}</div>`).join('')}</div>
+            <h3>📚 Review (Not completed)</h3>
+            <div>${gameState.words.filter(w=>!gameState.foundWords.has(w)).map(w=>`<div><strong>${w}</strong>: ${gameState.clues[w]}</div>`).join('') || '🎉 All words completed! Great job!'}</div>
+            <div style="margin-top:20px; padding:10px; background:#f9f9f9;">
+                <strong>Learning Tips:</strong> Review the uncompleted words, practice spelling, and try to use them in sentences.
+            </div>
+        `;
+        
+        document.body.appendChild(container);
+        const canvas = await html2canvas(container, { scale: 2, backgroundColor: '#ffffff' });
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgWidth = 190;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+        pdf.save(`${studentInfo.name}_crossword_report.pdf`);
+        document.body.removeChild(container);
+    }
+
+    // ---------- PRINT WORKSHEET (FIXED WITH GRID) ----------
+    function buildWorksheetHTML() {
+        const title = document.getElementById('ws-title-input').value.trim() || 'Crossword Puzzle';
+        const wsClass = document.getElementById('ws-class-input').value.trim();
+        const showAnswerKey = document.getElementById('ws-answer-key').checked;
+        const grid = gameState.grid;
+        const numberedCells = gameState.numberedCells;
+        const placedWords = gameState.crossword.placedWords;
+        const clues = gameState.clues;
+        
+        // Find bounding box of non-empty cells
+        let minRow = grid.length, maxRow = 0, minCol = grid[0].length, maxCol = 0;
+        for(let i=0;i<grid.length;i++) for(let j=0;j<grid[0].length;j++) {
+            if(grid[i][j] !== '') {
+                if(i<minRow) minRow=i; if(i>maxRow) maxRow=i;
+                if(j<minCol) minCol=j; if(j>maxCol) maxCol=j;
+            }
+        }
+        
+        // Build grid HTML as table
+        let gridHTML = '<table style="border-collapse:collapse; margin:0 auto;">';
+        for(let i=minRow; i<=maxRow; i++) {
+            gridHTML += '<tr>';
+            for(let j=minCol; j<=maxCol; j++) {
+                const cellKey = `${i},${j}`;
+                const isFilled = grid[i][j] === '';
+                if(isFilled) {
+                    gridHTML += `<td style="width:34px; height:34px; border:2px solid #333; background:#bbb;"></td>`;
+                } else {
+                    const hasNumber = numberedCells[cellKey];
+                    gridHTML += `<td style="width:34px; height:34px; border:2px solid #333; background:white; text-align:center; vertical-align:middle; position:relative;">
+                        ${hasNumber ? `<span style="position:absolute; top:2px; left:3px; font-size:8px; font-weight:bold;">${hasNumber}</span>` : ''}
+                        <span style="font-size:14px; font-weight:bold;">&nbsp;</span>
+                    </td>`;
+                }
+            }
+            gridHTML += '</tr>';
+        }
+        gridHTML += '</table>';
+        
+        // Clues
+        const across = placedWords.filter(p=>p.direction==='across').sort((a,b)=>a.number-b.number);
+        const down = placedWords.filter(p=>p.direction==='down').sort((a,b)=>a.number-b.number);
+        
+        let cluesHTML = `<div style="flex:1; margin-left:20px;">
+            <h3>⟶ ACROSS</h3>${across.map(p=>`<div style="margin:5px 0;"><strong>${p.number}.</strong> ${clues[p.word]}</div>`).join('')}
+            <h3 style="margin-top:15px;">↓ DOWN</h3>${down.map(p=>`<div style="margin:5px 0;"><strong>${p.number}.</strong> ${clues[p.word]}</div>`).join('')}
+        </div>`;
+        
+        let answerKeyHTML = '';
+        if(showAnswerKey) {
+            const allSorted = [...placedWords].sort((a,b)=>a.number-b.number);
+            answerKeyHTML = `<div style="margin-top:20px; border-top:2px dashed #aaa; padding-top:12px;">
+                <h3 style="text-align:center;">🔑 ANSWER KEY</h3>
+                <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">
+                    ${allSorted.map(p=>`<span style="padding:2px 8px; border:1px solid #ccc; border-radius:4px;">${p.number}${p.direction==='across'?'A':'D'}. ${p.word}</span>`).join('')}
+                </div>
+            </div>`;
+        }
+        
+        return `
+            <div style="font-family:Arial,sans-serif; max-width:1000px; margin:0 auto;">
+                <div style="text-align:center; margin-bottom:20px; border-bottom:2px solid #333; padding-bottom:10px;">
+                    <h2>${title}</h2>
+                    <div style="display:flex; justify-content:space-around; margin-top:10px;">
+                        <div>Name: _________________________</div>
+                        ${wsClass ? `<div>Class: ${wsClass}</div>` : '<div>Class: _________</div>'}
+                        <div>Date: ${new Date().toLocaleDateString()}</div>
+                    </div>
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center;">
+                    <div style="flex:0 0 auto;">${gridHTML}</div>
+                    ${cluesHTML}
+                </div>
+                <div style="margin-top:20px; font-size:11px; color:#666; text-align:center;">Fill in the blanks with capital letters using the clues above.</div>
+                ${answerKeyHTML}
+            </div>
+        `;
+    }
+    
+    function printWorksheet() {
+        if(!gameState.crossword) { alert('Please generate crossword first'); return; }
+        document.getElementById('worksheet-modal').style.display = 'none';
+        const printArea = document.getElementById('print-area');
+        printArea.innerHTML = buildWorksheetHTML();
+        window.print();
+        setTimeout(() => { printArea.innerHTML = ''; }, 500);
+    }
+
+    // Event bindings
     document.getElementById('generate-btn').onclick = generateGame;
     document.getElementById('add-row-btn').onclick = addEmptyRow;
     document.getElementById('remove-last-row').onclick = removeLastRow;
     document.getElementById('clear-table-btn').onclick = clearTable;
-
-    // reuse pdf and print modal handlers
-    document.getElementById('download-pdf-btn').onclick = ()=>{ if(gameState.crossword) document.getElementById('student-info-modal').style.display='flex'; else alert('generate first'); };
-    document.getElementById('print-worksheet-btn').onclick = ()=>{ if(gameState.crossword) document.getElementById('worksheet-modal').style.display='flex'; else alert('generate first'); };
-    document.getElementById('cancel-btn').onclick = ()=>document.getElementById('student-info-modal').style.display='none';
-    document.getElementById('confirm-btn').onclick = async ()=>{
-        let name = document.getElementById('name-input').value.trim();
-        if(!name) { alert('enter name'); return; }
-        document.getElementById('student-info-modal').style.display='none';
-        alert('PDF generation ready (simulated, full engine intact)');
-        // full pdf logic would call original (kept but simplified for brevity, real version uses html2canvas)
-        const {jsPDF}=window.jspdf; const pdf=new jsPDF(); pdf.text(`${name}'s crossword`,10,10); pdf.save('crossword_report.pdf');
+    document.getElementById('download-pdf-btn').onclick = () => {
+        if(!gameState.crossword) { alert('Generate crossword first'); return; }
+        document.getElementById('student-info-modal').style.display = 'flex';
     };
-    document.getElementById('ws-cancel-btn').onclick = ()=>document.getElementById('worksheet-modal').style.display='none';
-    document.getElementById('ws-confirm-btn').onclick = ()=>{
-        document.getElementById('worksheet-modal').style.display='none';
-        alert('print worksheet triggered (real print simulation)');
-        window.print();
+    document.getElementById('print-worksheet-btn').onclick = () => {
+        if(!gameState.crossword) { alert('Generate crossword first'); return; }
+        document.getElementById('worksheet-modal').style.display = 'flex';
     };
+    document.getElementById('cancel-btn').onclick = () => document.getElementById('student-info-modal').style.display = 'none';
+    document.getElementById('confirm-btn').onclick = async () => {
+        document.getElementById('student-info-modal').style.display = 'none';
+        await generatePDFReport();
+    };
+    document.getElementById('ws-cancel-btn').onclick = () => document.getElementById('worksheet-modal').style.display = 'none';
+    document.getElementById('ws-confirm-btn').onclick = printWorksheet;
+    
+    // Initialize
     initTable();
     updateTableStats();
-    // attach paste protection globally
+    
+    function initTable() {
+        Array.from(tbody.children).forEach(row => attachRowPasteHandler(row));
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach(mut => {
+                mut.addedNodes.forEach(node => {
+                    if(node.nodeType === 1 && node.tagName === 'TR') attachRowPasteHandler(node);
+                });
+            });
+        });
+        observer.observe(tbody, { childList: true });
+        updateTableStats();
+    }
 </script>
 </body>
 </html>
