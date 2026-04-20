@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Beat the ET · 單字挑戰</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void: #04060d;
+  --void2: #080e1c;
+  --panel: #0d1525;
+  --panel2: #121d31;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --acid: #c8f53e;
+  --acid2: #e5ff74;
+  --acid-dim: rgba(200,245,62,0.15);
+  --plasma: #ff4e6a;
+  --plasma2: #ff7589;
+  --plasma-dim: rgba(255,78,106,0.15);
+  --ice: #38d9ff;
+  --ice-dim: rgba(56,217,255,0.12);
+  --gold: #f5c842;
+  --muted: rgba(255,255,255,0.38);
+  --body: rgba(255,255,255,0.75);
+  --head: #ffffff;
+  --r: 16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--void);
+  background-image:
+    radial-gradient(ellipse 800px 500px at 20% -10%, #0a1a3a 0%, transparent 60%),
+    radial-gradient(ellipse 600px 400px at 80% 100%, #0f0820 0%, transparent 60%);
+  font-family:'Space Grotesk',sans-serif;
+  color:var(--body);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── STARS ── */
+.stars{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;overflow:hidden;}
+.star{position:absolute;border-radius:50%;background:white;animation:twinkle var(--d) ease-in-out infinite;}
+@keyframes twinkle{0%,100%{opacity:var(--lo);}50%{opacity:var(--hi);}}
+
+/* ── LAYOUT ── */
+.scene{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:28px 18px 60px;}
+
+/* ── HEADER ── */
+.hdr{text-align:center;padding:0 0 36px;}
+.hdr-badge{display:inline-flex;align-items:center;gap:7px;background:var(--acid-dim);border:1px solid rgba(200,245,62,0.3);border-radius:40px;padding:5px 16px;margin-bottom:18px;font-size:12px;font-weight:600;color:var(--acid);letter-spacing:0.08em;text-transform:uppercase;}
+.hdr h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(54px,12vw,88px);letter-spacing:0.04em;line-height:0.9;color:var(--head);}
+.hdr h1 span{color:var(--acid);-webkit-text-stroke:0px;filter:drop-shadow(0 0 20px rgba(200,245,62,0.5));}
+.hdr-sub{font-size:13px;color:var(--muted);margin-top:10px;letter-spacing:0.03em;}
+
+/* ── LEVEL SELECTOR ── */
+.selector-card{
+  background:var(--panel);
+  border:1px solid var(--border2);
+  border-radius:var(--r);
+  padding:28px 24px 32px;
+  margin-bottom:20px;
+}
+.selector-label{font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.level-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.lv-btn{
+  background:var(--panel2);
+  border:1px solid var(--border2);
+  border-radius:10px;
+  padding:10px 18px;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:13px;font-weight:600;
+  color:var(--body);cursor:pointer;
+  transition:all 0.15s;
+  flex:1;min-width:60px;
+}
+.lv-btn:hover{border-color:var(--acid);color:var(--acid);}
+.lv-btn.active{background:var(--acid-dim);border-color:var(--acid);color:var(--acid);}
+.lv-btn.all-lvs{flex:2;font-size:12px;}
+
+.launch-btn{
+  width:100%;
+  background:var(--acid);
+  color:var(--void);
+  border:none;
+  border-radius:12px;
+  padding:16px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;
+  letter-spacing:0.08em;
+  cursor:pointer;
+  transition:all 0.15s;
+  position:relative;overflow:hidden;
+}
+.launch-btn::after{content:'';position:absolute;inset:0;background:white;opacity:0;transition:opacity 0.1s;}
+.launch-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(200,245,62,0.3);}
+.launch-btn:active::after{opacity:0.15;}
+.launch-btn:disabled{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.25);cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* ── INFO STRIP ── */
+.info-strip{display:flex;gap:10px;margin-bottom:20px;}
+.info-chip{flex:1;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 14px;text-align:center;}
+.info-chip .val{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--acid);line-height:1;}
+.info-chip .lbl{font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:0.06em;}
+
+/* ── GAME ARENA ── */
+#gameArena{display:none;}
+#gameArena.active{display:block;}
+
+.arena-hud{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:10px;}
+.hud-score{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--head);line-height:1;}
+.hud-score span{font-size:13px;font-family:'Space Grotesk',sans-serif;color:var(--muted);display:block;font-weight:600;margin-bottom:2px;}
+.hud-combo{background:var(--plasma-dim);border:1px solid rgba(255,78,106,0.3);border-radius:40px;padding:7px 18px;font-size:13px;font-weight:700;color:var(--plasma2);}
+.hud-combo.hot{animation:comboPulse 0.4s ease;}
+@keyframes comboPulse{0%{transform:scale(1);}50%{transform:scale(1.15);}100%{transform:scale(1);}}
+
+/* ── TIMER RING ── */
+.timer-wrap{position:relative;width:64px;height:64px;flex-shrink:0;}
+.timer-wrap svg{transform:rotate(-90deg);}
+.timer-ring-bg{fill:none;stroke:var(--panel2);stroke-width:5;}
+.timer-ring-fg{fill:none;stroke:var(--acid);stroke-width:5;stroke-linecap:round;stroke-dasharray:163.4;stroke-dashoffset:0;transition:stroke-dashoffset 0.9s linear,stroke 0.3s;}
+.timer-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--head);}
+
+/* ── WORD CARD ── */
+.word-card{
+  background:var(--panel);
+  border:1px solid var(--border2);
+  border-radius:20px;
+  padding:32px 24px 28px;
+  text-align:center;
+  margin-bottom:16px;
+  position:relative;overflow:hidden;
+}
+.word-card::before{
+  content:'';position:absolute;top:-40px;left:50%;transform:translateX(-50%);
+  width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle, rgba(200,245,62,0.06) 0%, transparent 70%);
+  pointer-events:none;
+}
+.word-pos{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.word-main{font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,10vw,70px);letter-spacing:0.04em;color:var(--head);line-height:1;margin-bottom:10px;}
+.word-ref{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:rgba(255,255,255,0.06);display:inline-block;padding:3px 10px;border-radius:20px;}
+.word-audio-btn{
+  background:transparent;border:1px solid var(--border2);
+  border-radius:40px;padding:7px 16px;margin-top:14px;
+  font-size:12px;font-weight:600;color:var(--body);cursor:pointer;
+  transition:all 0.15s;
+}
+.word-audio-btn:hover{border-color:var(--ice);color:var(--ice);}
+
+/* ── OPTIONS ── */
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.opt{
+  background:var(--panel);
+  border:1px solid var(--border2);
+  border-radius:14px;
+  padding:16px 14px;
+  font-size:13px;font-weight:600;
+  color:var(--body);cursor:pointer;
+  display:flex;align-items:flex-start;gap:9px;
+  text-align:left;
+  transition:all 0.12s;
+  position:relative;overflow:hidden;
+}
+.opt-prefix{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--muted);flex-shrink:0;line-height:1.1;}
+.opt:hover:not(:disabled){border-color:var(--acid);background:var(--acid-dim);color:var(--head);}
+.opt:hover:not(:disabled) .opt-prefix{color:var(--acid);}
+.opt.correct{background:rgba(100,220,120,0.15);border-color:#4cd98a;color:#a8f0c2;pointer-events:none;}
+.opt.correct .opt-prefix{color:#4cd98a;}
+.opt.wrong{background:rgba(255,78,106,0.12);border-color:var(--plasma);color:var(--plasma2);pointer-events:none;}
+.opt.wrong .opt-prefix{color:var(--plasma);}
+.opt:disabled{pointer-events:none;}
+
+/* ── GAMEOVER ── */
+#gameoverPanel{display:none;}
+#gameoverPanel.active{display:flex;flex-direction:column;align-items:center;text-align:center;}
+.go-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(42px,10vw,72px);color:var(--plasma);letter-spacing:0.06em;filter:drop-shadow(0 0 20px rgba(255,78,106,0.4));}
+.go-score-wrap{margin:14px 0 8px;}
+.go-score{font-family:'Bebas Neue',sans-serif;font-size:clamp(64px,16vw,100px);color:var(--head);letter-spacing:0.04em;line-height:1;}
+.go-score-lbl{font-size:13px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;}
+.go-stats{display:flex;gap:10px;margin:20px 0 28px;width:100%;}
+.go-stat{flex:1;background:var(--panel);border:1px solid var(--border2);border-radius:14px;padding:14px 10px;}
+.go-stat .n{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--acid);}
+.go-stat .l{font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:0.06em;}
+.go-actions{display:flex;gap:10px;width:100%;}
+.go-btn{flex:1;border:none;border-radius:12px;padding:14px;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;}
+.go-btn-primary{background:var(--acid);color:var(--void);}
+.go-btn-primary:hover{box-shadow:0 8px 24px rgba(200,245,62,0.3);transform:translateY(-2px);}
+.go-btn-ghost{background:var(--panel);border:1px solid var(--border2);color:var(--body);}
+.go-btn-ghost:hover{border-color:var(--border2);background:var(--panel2);}
+
+/* ── HINT TEXT ── */
+.hint-line{text-align:center;font-size:12px;color:var(--muted);padding:6px 0 0;}
+
+/* ── LOAD ── */
+.loading-state{text-align:center;padding:60px 0;font-size:14px;color:var(--muted);}
+.loading-state .spinner{width:32px;height:32px;border:2px solid var(--border2);border-top-color:var(--acid);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 14px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── WARNING FLASH ── */
+.timer-wrap.urgent .timer-ring-fg{stroke:var(--plasma);}
+.timer-wrap.urgent .timer-center{color:var(--plasma);}
+@keyframes urgentPulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+.timer-wrap.urgent{animation:urgentPulse 0.5s infinite;}
+</style>
+</head>
+<body>
+
+<!-- Star field -->
+<div class="stars" id="stars"></div>
+
+<div class="scene">
+
+  <!-- Header -->
+  <div class="hdr">
+    <div class="hdr-badge">👽 Vocab Challenge</div>
+    <h1>BEAT<br>THE <span>ET</span></h1>
+    <p class="hdr-sub">5秒限時 · 連續 COMBO · 答錯即終</p>
+  </div>
+
+  <!-- Level Selector -->
+  <div id="selectorView">
+    <div class="selector-card">
+      <div class="selector-label">Select Challenge Level</div>
+      <div class="level-row" id="levelRow">
+        <button class="lv-btn" data-lv="1">L1</button>
+        <button class="lv-btn" data-lv="2">L2</button>
+        <button class="lv-btn" data-lv="3">L3</button>
+        <button class="lv-btn" data-lv="4">L4</button>
+        <button class="lv-btn" data-lv="5">L5</button>
+        <button class="lv-btn" data-lv="6">L6</button>
+        <button class="lv-btn all-lvs" data-lv="all">🌍 All Levels</button>
+      </div>
+      <button class="launch-btn" id="launchBtn" disabled>LAUNCH CHALLENGE ↗</button>
+    </div>
+    <div class="hint-line">連擊越高，每題加分越爆炸 · 答錯即 GAME OVER</div>
+  </div>
+
+  <!-- Game Arena -->
+  <div id="gameArena">
+    <div class="arena-hud">
+      <div class="hud-score"><span>SCORE</span><span id="hudScore">0</span></div>
+      <div class="timer-wrap" id="timerWrap">
+        <svg viewBox="0 0 64 64" width="64" height="64">
+          <circle class="timer-ring-bg" cx="32" cy="32" r="26"/>
+          <circle class="timer-ring-fg" id="timerRing" cx="32" cy="32" r="26"/>
+        </svg>
+        <div class="timer-center" id="timerNum">5</div>
+      </div>
+      <div class="hud-combo" id="hudCombo">COMBO ×0</div>
+    </div>
+
+    <div class="word-card">
+      <div class="word-pos" id="wordPos"></div>
+      <div class="word-main" id="wordMain"></div>
+      <div class="word-ref" id="wordRef"></div>
+      <button class="word-audio-btn" id="audioBtn">🔊 Pronounce</button>
+    </div>
+
+    <div class="options-grid" id="optionsGrid"></div>
+    <div class="hint-line" id="arenaHint">⚡ Select the correct meaning before time runs out</div>
+  </div>
+
+  <!-- Game Over -->
+  <div id="gameoverPanel">
+    <div class="go-title">GAME OVER</div>
+    <div class="go-score-wrap">
+      <div class="go-score" id="goScore">0</div>
+      <div class="go-score-lbl">Final Score</div>
+    </div>
+    <div class="go-stats">
+      <div class="go-stat"><div class="n" id="goCombo">0</div><div class="l">Best Combo</div></div>
+      <div class="go-stat"><div class="n" id="goCorrect">0</div><div class="l">Correct</div></div>
+      <div class="go-stat"><div class="n" id="goWords">0</div><div class="l">Words Seen</div></div>
+    </div>
+    <div class="go-actions">
+      <button class="go-btn go-btn-primary" id="retryBtn">↺ RETRY</button>
+      <button class="go-btn go-btn-ghost" id="menuBtn">⬅ Menu</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" id="loadingState" style="display:none;">
+    <div class="spinner"></div>
+    Loading vocabulary…
+  </div>
+
+</div>
+
+<script>
+const BASE = 'https://ducj-creator.github.io/iVocab-Self-Practice/';
+const cache = {};
+
+/* ── Stars ── */
+(function(){
+  const c = document.getElementById('stars');
+  for(let i=0;i<90;i++){
+    const s = document.createElement('div');
+    s.className='star';
+    const sz = Math.random()*2+0.5;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;
+      --d:${2+Math.random()*4}s;--lo:${0.05+Math.random()*0.15};--hi:${0.5+Math.random()*0.5};`;
+    c.appendChild(s);
+  }
+})();
+
+/* ── Data ── */
+async function loadLevel(lv){
+  if(cache[lv]) return cache[lv];
+  const res = await fetch(BASE+'level'+lv+'.csv');
+  if(!res.ok) throw new Error('Failed to load L'+lv);
+  const text = await res.text();
+  const rows = text.trim().split(/\r?\n/).slice(1);
+  const data = rows.map(l=>{
+    const p = l.split(',');
+    if(p.length<6) return null;
+    return {Level:p[0].trim(),Unit:p[1].trim(),No:p[2].trim(),Word:p[3].trim(),POS:p[4].trim(),Meaning:p.slice(5).join(',').trim()};
+  }).filter(Boolean);
+  cache[lv]=data; return data;
+}
+
+async function buildBank(level){
+  if(!level||level==='all'){
+    let all=[];
+    for(let i=1;i<=6;i++) all.push(...(await loadLevel(String(i))));
+    return all;
+  }
+  return await loadLevel(level);
+}
+
+/* ── Speech ── */
+function speak(word){
+  if(!word||!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(word);
+  u.lang='en-US'; u.rate=0.85;
+  speechSynthesis.speak(u);
+}
+
+/* ── State ── */
+let bank=[], selectedLv=null;
+let score=0, combo=0, bestCombo=0, correctCount=0, wordsCount=0;
+let timerInterval=null, timeLeft=5, waiting=false, gameActive=false;
+let currentWord=null, currentOptions=[];
+const RING_FULL = 2*Math.PI*26; // circumference
+
+/* ── Level select ── */
+document.querySelectorAll('.lv-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.lv-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedLv = btn.dataset.lv==='all' ? null : btn.dataset.lv;
+    document.getElementById('launchBtn').disabled=false;
+  };
+});
+
+document.getElementById('launchBtn').onclick=()=>startGame();
+
+/* ── Scoring ── */
+function calcPoints(){
+  let pts=5;
+  if(combo>=2) pts+=2;
+  if(combo>=5) pts+=5;
+  if(combo>=10) pts+=8;
+  if(combo>=15) pts+=12;
+  return pts;
+}
+
+/* ── Timer ring ── */
+function setRing(frac){
+  const ring=document.getElementById('timerRing');
+  const offset = RING_FULL*(1-frac);
+  ring.style.strokeDashoffset=offset;
+}
+
+/* ── Render question ── */
+function pickWord(){
+  return bank[Math.floor(Math.random()*bank.length)];
+}
+function genOptions(correct){
+  const pool = bank.filter(w=>w.Word!==correct.Word).sort(()=>0.5-Math.random());
+  const seen=new Set([correct.Meaning]);
+  const opts=[correct.Meaning];
+  for(const w of pool){
+    if(!seen.has(w.Meaning)&&opts.length<4){opts.push(w.Meaning);seen.add(w.Meaning);}
+  }
+  while(opts.length<4) opts.push('No matching meaning');
+  return opts.sort(()=>0.5-Math.random());
+}
+
+function renderQuestion(){
+  if(!gameActive) return;
+  currentWord = pickWord();
+  currentOptions = genOptions(currentWord);
+  wordsCount++;
+
+  document.getElementById('wordPos').textContent = currentWord.POS;
+  document.getElementById('wordMain').textContent = currentWord.Word;
+  document.getElementById('wordRef').textContent = `L${currentWord.Level} · U${currentWord.Unit}`;
+
+  const grid=document.getElementById('optionsGrid');
+  grid.innerHTML='';
+  currentOptions.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt';
+    btn.innerHTML=`<span class="opt-prefix">${'ABCD'[i]}</span><span>${esc(opt)}</span>`;
+    btn.onclick=()=>handleAnswer(opt,btn);
+    grid.appendChild(btn);
+  });
+
+  speak(currentWord.Word);
+  startTimer();
+  waiting=true;
+}
+
+/* ── Timer ── */
+function startTimer(){
+  clearInterval(timerInterval);
+  timeLeft=5;
+  const wrap=document.getElementById('timerWrap');
+  wrap.classList.remove('urgent');
+  setRing(1);
+  document.getElementById('timerNum').textContent='5';
+
+  timerInterval=setInterval(()=>{
+    timeLeft--;
+    document.getElementById('timerNum').textContent=Math.max(0,timeLeft);
+    setRing(Math.max(0,timeLeft/5));
+    if(timeLeft<=2) wrap.classList.add('urgent');
+    if(timeLeft<=0){
+      clearInterval(timerInterval);
+      if(gameActive&&waiting){ waiting=false; triggerGameOver(); }
+    }
+  },1000);
+}
+function stopTimer(){ clearInterval(timerInterval); }
+
+/* ── Answer ── */
+function handleAnswer(selected, btnEl){
+  if(!waiting||!gameActive) return;
+  waiting=false;
+  stopTimer();
+
+  const correct = selected===currentWord.Meaning;
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.disabled=true;
+    const txt=b.querySelector('span:last-child').textContent;
+    if(txt===currentWord.Meaning) b.classList.add('correct');
+    if(b===btnEl&&!correct) b.classList.add('wrong');
+  });
+
+  if(correct){
+    combo++;
+    if(combo>bestCombo) bestCombo=combo;
+    correctCount++;
+    score+=calcPoints();
+    updateHUD();
+    const hud=document.getElementById('hudCombo');
+    hud.classList.remove('hot');
+    void hud.offsetWidth;
+    hud.classList.add('hot');
+    setTimeout(renderQuestion,420);
+  } else {
+    setTimeout(triggerGameOver,550);
+  }
+}
+
+/* ── HUD ── */
+function updateHUD(){
+  document.getElementById('hudScore').textContent=score;
+  document.getElementById('hudCombo').textContent=`COMBO ×${combo}`;
+}
+
+/* ── Game over ── */
+function triggerGameOver(){
+  if(!gameActive) return;
+  gameActive=false; waiting=false; stopTimer();
+
+  document.getElementById('goScore').textContent=score;
+  document.getElementById('goCombo').textContent=bestCombo;
+  document.getElementById('goCorrect').textContent=correctCount;
+  document.getElementById('goWords').textContent=wordsCount;
+
+  document.getElementById('gameArena').classList.remove('active');
+  const go=document.getElementById('gameoverPanel');
+  go.style.display='';
+  go.classList.add('active');
+}
+
+/* ── Start ── */
+async function startGame(){
+  const loading=document.getElementById('loadingState');
+  document.getElementById('selectorView').style.display='none';
+  loading.style.display='block';
+
+  try{
+    bank=await buildBank(selectedLv);
+    if(!bank.length) throw new Error('empty');
+  } catch(e){
+    alert('Failed to load vocab. Check your connection.');
+    document.getElementById('selectorView').style.display='block';
+    loading.style.display='none';
+    return;
+  }
+
+  loading.style.display='none';
+  document.getElementById('gameoverPanel').classList.remove('active');
+  document.getElementById('gameoverPanel').style.display='none';
+
+  score=0; combo=0; bestCombo=0; correctCount=0; wordsCount=0;
+  updateHUD();
+  gameActive=true;
+  document.getElementById('gameArena').classList.add('active');
+  renderQuestion();
+}
+
+/* ── Retry / Menu ── */
+document.getElementById('retryBtn').onclick=()=>{
+  document.getElementById('gameoverPanel').classList.remove('active');
+  document.getElementById('gameoverPanel').style.display='none';
+  startGame();
+};
+document.getElementById('menuBtn').onclick=()=>{
+  stopTimer(); gameActive=false;
+  document.getElementById('gameoverPanel').classList.remove('active');
+  document.getElementById('gameoverPanel').style.display='none';
+  document.getElementById('gameArena').classList.remove('active');
+  document.getElementById('selectorView').style.display='block';
+};
+document.getElementById('audioBtn').onclick=()=>{ if(currentWord) speak(currentWord.Word); };
+
+/* ── Utils ── */
+function esc(s){ return (s||'').replace(/[&<>]/g,m=>m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
+</script>
+</body>
+</html>
