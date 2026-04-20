@@ -3,535 +3,697 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Academic Report Formatter | Drag & Drop</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<title>Folio · Academic Report Formatter</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --ink: #1a1814; --ink-mid: #4a4540; --ink-light: #8a8480;
-  --parchment: #faf8f3; --cream: #f2ede3;
-  --gold: #b8943f; --gold-pale: #f5eed8; --border: #d8cfb8;
-  --accent: #2c4a3e; --accent-light: #d4e8df; --danger: #8b3a2a;
-  --drag-over: rgba(184,148,63,.18);
-}
-body { font-family:'DM Sans',sans-serif; background:var(--parchment); color:var(--ink); min-height:100vh; display:flex; flex-direction:column; }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-header { background:var(--ink); padding:1.1rem 2.5rem; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between; }
-header::before { content:''; position:absolute; top:0;left:0;right:0; height:3px; background:linear-gradient(90deg,var(--gold),#e8c96a,var(--gold)); }
-.header-left .eyebrow { font-size:.6rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:.2rem; font-weight:500; }
-.header-left h1 { font-family:'Cormorant Garamond',serif; font-size:1.6rem; font-weight:600; color:#f5f0e8; line-height:1.2; }
-.header-left p { font-size:.75rem; color:#9a8f7e; margin-top:.18rem; font-weight:300; }
+  :root {
+    --paper: #fefcf5;
+    --ink-rich: #1f1b16;
+    --ink-soft: #49433c;
+    --ink-faint: #8b857a;
+    --border-stroke: #e2dbcf;
+    --gold-mark: #c2a15b;
+    --gold-glow: #eedbac;
+    --accent-slate: #3b4b46;
+    --accent-mist: #e6ede9;
+    --danger-rose: #bc5a3c;
+    --shadow-subtle: 0 12px 28px -8px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.01);
+    --grain-noise: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJmIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjUiIG51bU9jdGF2ZXM9IjIiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjZikiIG9wYWNpdHk9IjAuMDYiLz48L3N2Zz4=');
+  }
 
-.lang-toggle { display:flex; gap:0; border:1px solid rgba(184,148,63,.5); border-radius:5px; overflow:hidden; flex-shrink:0; z-index:1; }
-.lang-btn { font-family:'DM Sans',sans-serif; font-size:.75rem; font-weight:500; padding:.4rem .9rem; background:transparent; border:none; cursor:pointer; color:#9a8f7e; transition:all .15s; letter-spacing:.03em; }
-.lang-btn.active { background:var(--gold); color:var(--ink); }
-.lang-btn:not(.active):hover { background:rgba(184,148,63,.15); color:var(--gold); }
+  body {
+    background: var(--paper);
+    color: var(--ink-rich);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 400;
+    line-height: 1.45;
+    min-height: 100vh;
+    position: relative;
+  }
 
-.layout { display:grid; grid-template-columns:1fr 1fr; flex:1; max-height:calc(100vh - 98px); }
-.panel { padding:1.4rem 1.8rem; overflow-y:auto; display:flex; flex-direction:column; gap:1rem; }
-.panel-left { border-right:1px solid var(--border); background:#faf8f3; }
-.panel-right { background:var(--cream); }
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-image: var(--grain-noise);
+    opacity: 0.35;
+    z-index: 999;
+  }
 
-.section-label { font-size:.6rem; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-light); font-weight:500; margin-bottom:.2rem; display:flex; align-items:center; gap:.35rem; }
-.req { color:var(--gold); font-size:.65rem; letter-spacing:0; text-transform:none; }
-.opt { color:var(--ink-light); font-size:.6rem; letter-spacing:0; text-transform:none; font-style:italic; }
-.field-group { display:flex; flex-direction:column; gap:.2rem; }
-input[type="text"],input[type="date"],input[type="number"],textarea,select {
-  width:100%; font-family:'DM Sans',sans-serif; font-size:.83rem; color:var(--ink);
-  background:#fff; border:1px solid var(--border); border-radius:4px;
-  padding:.45rem .7rem; outline:none; transition:border-color .15s; resize:vertical;
-}
-input:focus,textarea:focus,select:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(184,148,63,.12); }
-input::placeholder,textarea::placeholder { color:var(--ink-light); }
-.row-2 { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; }
-.divider { border:none; border-top:1px solid var(--border); margin:.1rem 0; }
-.panel-title { font-family:'Cormorant Garamond',serif; font-size:.98rem; font-weight:600; letter-spacing:.04em; color:var(--ink-mid); }
+  /* header — refined press bar */
+  .press-header {
+    background: var(--ink-rich);
+    padding: 1.2rem 2.8rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(194, 161, 91, 0.35);
+    position: relative;
+    z-index: 10;
+  }
 
-/* Drag-and-drop blocks */
-.body-block {
-  background:#fff; border:1px solid var(--border); border-radius:6px; padding:.7rem .8rem;
-  cursor:default; user-select:none;
-  transition: box-shadow .15s, border-color .15s, opacity .15s;
-}
-.body-block.is-dragging {
-  opacity:.45; border-color:var(--gold); box-shadow:0 4px 16px rgba(0,0,0,.12);
-}
-.body-block.drag-over-top {
-  border-top:2px solid var(--gold);
-}
-.body-block.drag-over-bottom {
-  border-bottom:2px solid var(--gold);
-}
-.drag-handle {
-  cursor:grab; color:var(--ink-light); font-size:.95rem; line-height:1;
-  padding:0 .3rem 0 0; margin-right:.1rem; flex-shrink:0;
-  touch-action:none; display:flex; align-items:center;
-}
-.drag-handle:active { cursor:grabbing; }
-.drag-handle svg { pointer-events:none; }
+  .title-group .eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold-mark);
+    font-weight: 400;
+    margin-bottom: 0.25rem;
+  }
 
-.block-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:.4rem; }
-.block-header-left { display:flex; align-items:center; gap:.2rem; }
-.type-badge { font-family:'DM Sans',sans-serif; font-size:.56rem; letter-spacing:.08em; text-transform:uppercase; padding:.12rem .42rem; border-radius:3px; font-weight:500; }
-.badge-h1{background:#e8e0f4;color:#5a3d8a} .badge-h2{background:#daeaf5;color:#1e5a82}
-.badge-h3{background:#fde8d0;color:#8a4a1a} .badge-body{background:#e8f0e4;color:#2e5a28}
-.badge-image{background:#fce8f0;color:#8a1a4a} .badge-table{background:#e0eefc;color:#1a4a7a}
-.remove-btn { background:none; border:none; cursor:pointer; color:var(--ink-light); font-size:.88rem; padding:0 .15rem; transition:color .15s; line-height:1; }
-.remove-btn:hover { color:var(--danger); }
+  .title-group h1 {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-size: 2.1rem;
+    letter-spacing: -0.01em;
+    color: #f4efe4;
+    line-height: 1.1;
+  }
 
-.add-block-row { display:flex; gap:.35rem; flex-wrap:wrap; }
-.add-btn { font-family:'DM Sans',sans-serif; font-size:.68rem; font-weight:500; border:1px dashed var(--border); background:transparent; color:var(--ink-mid); border-radius:4px; padding:.3rem .7rem; cursor:pointer; transition:all .15s; }
-.add-btn:hover { border-color:var(--gold); color:var(--gold); background:var(--gold-pale); }
+  .title-group .sub {
+    font-size: 0.75rem;
+    color: #a69f92;
+    font-weight: 350;
+    margin-top: 0.25rem;
+  }
 
-.img-upload-area { border:2px dashed var(--border); border-radius:4px; padding:.8rem; text-align:center; cursor:pointer; color:var(--ink-light); font-size:.76rem; transition:all .15s; position:relative; overflow:hidden; }
-.img-upload-area:hover { border-color:var(--gold); color:var(--gold); background:var(--gold-pale); }
-.img-upload-area input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
-.img-preview-thumb { max-width:100%; max-height:100px; object-fit:contain; border-radius:3px; margin:.3rem auto 0; display:block; }
-.img-size-row { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin-top:.4rem; }
-.img-size-row label { font-size:.68rem; color:var(--ink-light); display:flex; flex-direction:column; gap:.1rem; }
+  .lang-switch {
+    display: flex;
+    gap: 0;
+    border: 0.5px solid rgba(194, 161, 91, 0.5);
+    border-radius: 40px;
+    overflow: hidden;
+    backdrop-filter: blur(2px);
+  }
 
-.tbl-editor { overflow-x:auto; margin:.3rem 0; border:1px solid var(--border); border-radius:3px; }
-.tbl-editor table { border-collapse:collapse; width:100%; font-size:.76rem; }
-.tbl-editor td { border:1px solid var(--border); padding:0; }
-.tbl-editor td input { border:none; outline:none; width:100%; font-size:.76rem; font-family:'DM Sans',sans-serif; background:transparent; color:var(--ink); padding:.22rem .35rem; }
-.tbl-head-cell { background:#f5f0e6; }
-.tbl-controls { display:flex; gap:.35rem; flex-wrap:wrap; margin-top:.35rem; }
-.tbl-btn { font-family:'DM Sans',sans-serif; font-size:.64rem; border:1px solid var(--border); background:#fff; color:var(--ink-mid); border-radius:3px; padding:.2rem .5rem; cursor:pointer; transition:all .15s; }
-.tbl-btn:hover { border-color:var(--gold); color:var(--gold); }
-.tbl-btn.danger:hover { border-color:var(--danger); color:var(--danger); }
+  .lang-btn {
+    background: transparent;
+    border: none;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.4rem 1rem;
+    color: #bcb4a7;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.03em;
+  }
 
-.generate-btn { font-family:'DM Sans',sans-serif; font-size:.83rem; font-weight:500; background:var(--ink); color:#f5f0e8; border:none; border-radius:4px; padding:.75rem 2rem; cursor:pointer; width:100%; margin-top:.3rem; transition:background .15s; letter-spacing:.04em; position:relative; overflow:hidden; }
-.generate-btn:hover { background:#2d2a25; }
-.generate-btn:disabled { background:var(--ink-light); cursor:not-allowed; }
-.generate-btn::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; background:linear-gradient(90deg,var(--gold),#e8c96a,var(--gold)); }
-.status-bar { border-radius:4px; padding:.45rem .8rem; font-size:.74rem; display:none; }
-.status-bar.visible { display:block; background:var(--accent-light); border:1px solid #b0d4c8; color:var(--accent); }
-.status-bar.visible.error { background:#faeae6; border-color:#e0b8b0; color:var(--danger); }
+  .lang-btn.active {
+    background: var(--gold-mark);
+    color: var(--ink-rich);
+  }
 
-.preview-shell { background:#fff; border:1px solid var(--border); border-radius:6px; min-height:460px; padding:1.8rem 2.2rem; font-family:'Times New Roman',Times,serif; box-shadow:0 2px 10px rgba(0,0,0,.05); position:relative; }
-.preview-shell::before { content:'PREVIEW'; position:absolute; top:.6rem; right:.8rem; font-family:'DM Sans',sans-serif; font-size:.54rem; letter-spacing:.15em; color:var(--border); font-weight:500; }
-.prev-title { font-size:20pt; font-weight:bold; text-align:center; margin-bottom:.25rem; color:#111; line-height:1.25; }
-.prev-subtitle { font-size:18pt; font-weight:bold; text-align:center; margin-bottom:.35rem; color:#222; }
-.prev-meta { font-size:11pt; text-align:left; color:#444; margin-bottom:1rem; line-height:1.8; }
-.prev-rule { border:none; border-top:1.5px solid #888; margin:.7rem 0 1rem; }
-.prev-h1 { font-size:16pt; font-weight:bold; margin:1rem 0 .32rem; color:#111; }
-.prev-h2 { font-size:14pt; font-weight:bold; margin:.85rem 0 .25rem; color:#222; }
-.prev-h3 { font-size:12pt; font-weight:bold; font-style:italic; margin:.7rem 0 .2rem; color:#333; }
-.prev-body { font-size:12pt; line-height:1.5; text-align:justify; margin-bottom:1.2em; color:#111; }
-.prev-img-block { text-align:center; margin:.9rem 0; }
-.prev-img-block img { max-width:100%; max-height:170px; object-fit:contain; }
-.prev-caption { font-size:10pt; font-style:italic; color:#555; text-align:center; margin-top:.25rem; }
-.prev-tbl-wrap { margin:.9rem 0; }
-.prev-tbl { border-collapse:collapse; width:100%; font-size:10.5pt; }
-.prev-tbl td { border:1px solid #888; padding:.16rem .42rem; }
-.prev-tbl-head td { font-weight:bold; background:#f5f5f0; }
-.empty-preview { display:flex; flex-direction:column; align-items:center; justify-content:center; height:360px; gap:.4rem; color:var(--border); }
-.empty-preview .icon { font-size:2.2rem; font-family:'Cormorant Garamond',serif; font-style:italic; }
-.empty-preview p { font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; }
-.drag-hint { font-size:.58rem; color:var(--ink-light); text-align:center; letter-spacing:.06em; padding:.15rem 0 0; opacity:.7; }
-.zh .section-label { letter-spacing:.04em; font-size:.68rem; }
+  /* 2‑column layout — editorial */
+  .editorial-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    min-height: calc(100vh - 98px);
+  }
+
+  .editor-panel {
+    padding: 2rem 2.2rem;
+    overflow-y: auto;
+    background: var(--paper);
+    border-right: 1px solid var(--border-stroke);
+  }
+
+  .preview-panel {
+    padding: 2rem 2rem;
+    background: #fbf9f4;
+    overflow-y: auto;
+    box-shadow: inset 0 0 0 1px rgba(226, 219, 207, 0.4);
+  }
+
+  /* Typography & form refinement */
+  .section-caption {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 500;
+    margin-bottom: 0.45rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .required {
+    color: var(--gold-mark);
+    font-size: 0.6rem;
+  }
+
+  .optional {
+    color: var(--ink-faint);
+    font-style: italic;
+    font-size: 0.6rem;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    background: white;
+    border: 1px solid var(--border-stroke);
+    border-radius: 10px;
+    padding: 0.6rem 0.9rem;
+    font-family: 'Manrope', monospace;
+    font-size: 0.85rem;
+    color: var(--ink-rich);
+    transition: all 0.2s;
+    outline: none;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--gold-mark);
+    box-shadow: 0 0 0 3px rgba(194, 161, 91, 0.15);
+  }
+
+  .row-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  hr.divider {
+    margin: 1rem 0;
+    border: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border-stroke), transparent);
+  }
+
+  /* block drag styling — tactile */
+  .body-block {
+    background: white;
+    border-radius: 14px;
+    border: 1px solid var(--border-stroke);
+    padding: 1rem;
+    transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  }
+
+  .body-block.is-dragging {
+    opacity: 0.5;
+    box-shadow: var(--shadow-subtle);
+    border-color: var(--gold-mark);
+  }
+
+  .drag-over-top {
+    border-top: 2px solid var(--gold-mark);
+  }
+
+  .drag-over-bottom {
+    border-bottom: 2px solid var(--gold-mark);
+  }
+
+  .drag-handle {
+    cursor: grab;
+    color: var(--ink-faint);
+    display: inline-flex;
+    align-items: center;
+    padding-right: 0.25rem;
+    touch-action: none;
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
+  }
+
+  .block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+  }
+
+  .type-badge {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.6rem;
+    border-radius: 30px;
+    background: #f1ede6;
+    color: var(--ink-soft);
+  }
+
+  .remove-btn {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--ink-faint);
+    transition: color 0.15s;
+    line-height: 1;
+  }
+
+  .remove-btn:hover {
+    color: var(--danger-rose);
+  }
+
+  .add-btn {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    background: transparent;
+    border: 1px dashed var(--border-stroke);
+    padding: 0.4rem 1rem;
+    border-radius: 30px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .add-btn:hover {
+    border-color: var(--gold-mark);
+    background: var(--gold-glow);
+    color: var(--ink-rich);
+  }
+
+  .img-upload-area {
+    border: 1.5px dashed var(--border-stroke);
+    border-radius: 16px;
+    padding: 1rem;
+    text-align: center;
+    background: #fefbf5;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .img-upload-area:hover {
+    border-color: var(--gold-mark);
+    background: #fffaf0;
+  }
+
+  .img-preview-thumb {
+    max-width: 100%;
+    max-height: 100px;
+    object-fit: contain;
+    margin-top: 0.6rem;
+    border-radius: 8px;
+  }
+
+  .tbl-editor {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border-stroke);
+  }
+
+  .tbl-editor table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+  }
+
+  .tbl-editor td {
+    border: 1px solid var(--border-stroke);
+    padding: 0;
+  }
+
+  .tbl-editor input {
+    border: none;
+    padding: 0.45rem 0.6rem;
+    border-radius: 0;
+    background: white;
+  }
+
+  .tbl-head-cell {
+    background: #f3efe8;
+  }
+
+  .tbl-btn {
+    font-size: 0.65rem;
+    background: white;
+    border: 1px solid var(--border-stroke);
+    border-radius: 20px;
+    padding: 0.2rem 0.8rem;
+    margin-right: 0.3rem;
+    cursor: pointer;
+  }
+
+  .generate-btn {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600;
+    background: var(--ink-rich);
+    color: #fefcf5;
+    border: none;
+    border-radius: 40px;
+    padding: 0.9rem 1.8rem;
+    width: 100%;
+    margin-top: 1rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .generate-btn:hover {
+    background: #2f2a24;
+    transform: translateY(-1px);
+  }
+
+  /* PREVIEW — editorial elegance */
+  .preview-shell {
+    background: white;
+    border-radius: 24px;
+    box-shadow: var(--shadow-subtle);
+    padding: 2rem 2rem;
+    min-height: 560px;
+    position: relative;
+    font-family: 'Instrument Serif', Georgia, serif;
+    border: 1px solid #e9e2d6;
+  }
+
+  .preview-shell::after {
+    content: '⚘  preview';
+    position: absolute;
+    bottom: 1rem;
+    right: 1.5rem;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: #cfc7bb;
+    text-transform: uppercase;
+  }
+
+  .prev-title {
+    font-size: 26pt;
+    font-weight: 500;
+    text-align: center;
+    font-family: 'Instrument Serif', serif;
+    letter-spacing: -0.3px;
+    margin-bottom: 0.2rem;
+    color: #1e1914;
+  }
+
+  .prev-subtitle {
+    font-size: 18pt;
+    font-weight: 400;
+    text-align: center;
+    font-family: 'Instrument Serif', serif;
+    color: #4d443a;
+    margin-bottom: 0.5rem;
+  }
+
+  .prev-meta {
+    font-size: 10pt;
+    text-align: center;
+    font-family: 'Manrope', sans-serif;
+    color: #5c554b;
+    line-height: 1.6;
+    margin: 1rem 0 0.5rem;
+  }
+
+  .prev-rule {
+    border: none;
+    height: 1px;
+    background: #d8cfc0;
+    margin: 0.8rem 0 1rem;
+  }
+
+  .prev-h1 {
+    font-size: 18pt;
+    font-weight: 500;
+    font-family: 'Instrument Serif', serif;
+    margin: 1.2rem 0 0.3rem;
+    letter-spacing: -0.2px;
+  }
+
+  .prev-h2 {
+    font-size: 15pt;
+    font-weight: 500;
+    font-family: 'Instrument Serif', serif;
+    margin: 1rem 0 0.2rem;
+    color: #2d2a24;
+  }
+
+  .prev-h3 {
+    font-size: 13pt;
+    font-weight: 500;
+    font-style: italic;
+    font-family: 'Instrument Serif', serif;
+    margin: 0.8rem 0 0.2rem;
+  }
+
+  .prev-body {
+    font-size: 11.5pt;
+    line-height: 1.55;
+    text-align: justify;
+    font-family: 'Instrument Serif', serif;
+    margin-bottom: 1rem;
+    color: #2a241e;
+  }
+
+  .prev-img-block {
+    text-align: center;
+    margin: 1rem 0;
+    background: #fcf9f2;
+    border-radius: 12px;
+    padding: 0.8rem;
+  }
+
+  .prev-caption {
+    font-size: 9pt;
+    font-style: italic;
+    font-family: 'Manrope', sans-serif;
+    color: #6b6256;
+    margin-top: 0.3rem;
+  }
+
+  .status-bar {
+    margin: 0.5rem 0;
+    font-size: 0.75rem;
+    border-radius: 40px;
+    padding: 0.5rem 1rem;
+    background: var(--accent-mist);
+    color: var(--accent-slate);
+    display: none;
+  }
+
+  .status-bar.visible {
+    display: block;
+  }
+
+  .status-bar.error {
+    background: #f8e2db;
+    color: var(--danger-rose);
+  }
+
+  .drag-hint {
+    font-size: 0.6rem;
+    text-align: center;
+    color: var(--ink-faint);
+    margin: 0.2rem 0;
+    letter-spacing: 0.3px;
+  }
+
+  @media (max-width: 800px) {
+    .editorial-layout {
+      grid-template-columns: 1fr;
+    }
+    .editor-panel {
+      border-right: none;
+      border-bottom: 1px solid var(--border-stroke);
+    }
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="header-left">
-    <div class="eyebrow" data-i18n="eyebrow">Academic Tools · For Educators</div>
+<div class="press-header">
+  <div class="title-group">
+    <div class="eyebrow" data-i18n="eyebrow">ACADEMIC PRESS · FOLIO</div>
     <h1 data-i18n="h1">Report Formatter</h1>
-    <p data-i18n="subtitle">Drag to reorder blocks — download perfectly formatted Word document.</p>
+    <div class="sub" data-i18n="subtitle">drag blocks · typographic precision · word export</div>
   </div>
-  <div class="lang-toggle">
-    <button class="lang-btn active" onclick="setLang('en')">English</button>
-    <button class="lang-btn" onclick="setLang('zh')">繁體中文</button>
+  <div class="lang-switch">
+    <button class="lang-btn active" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('zh')">繁中</button>
   </div>
-</header>
+</div>
 
-<div class="layout">
-  <div class="panel panel-left">
-    <p class="panel-title" data-i18n="panelTitle">Report Content</p>
-    <div class="field-group">
-      <div class="section-label" data-i18n="lblTitle">Title <span class="req">✦ required</span></div>
+<div class="editorial-layout">
+  <div class="editor-panel">
+    <div class="section-caption" data-i18n="panelTitle">REPORT CONTENT</div>
+
+    <div class="field-group" style="margin-bottom: 1rem;">
+      <div class="section-caption" data-i18n="lblTitle">Title <span class="required">✦</span></div>
       <input type="text" id="fTitle" data-i18n-ph="phTitle" oninput="updatePreview()"/>
     </div>
-    <div class="field-group">
-      <div class="section-label" data-i18n="lblSubtitle">Subtitle <span class="opt">(optional)</span></div>
+    <div class="field-group" style="margin-bottom: 1rem;">
+      <div class="section-caption" data-i18n="lblSubtitle">Subtitle <span class="optional">(optional)</span></div>
       <input type="text" id="fSubtitle" data-i18n-ph="phSubtitle" oninput="updatePreview()"/>
     </div>
     <hr class="divider"/>
-    <div class="row-2">
-      <div class="field-group"><div class="section-label" data-i18n="lblAuthor">Author <span class="req">✦</span></div><input type="text" id="fAuthor" data-i18n-ph="phAuthor" oninput="updatePreview()"/></div>
-      <div class="field-group"><div class="section-label" data-i18n="lblDate">Date</div><input type="date" id="fDate" oninput="updatePreview()"/></div>
+    <div class="row-split" style="margin-bottom: 0.8rem;">
+      <div class="field-group"><div class="section-caption" data-i18n="lblAuthor">Author <span class="required">✦</span></div><input type="text" id="fAuthor" data-i18n-ph="phAuthor" oninput="updatePreview()"/></div>
+      <div class="field-group"><div class="section-caption" data-i18n="lblDate">Date</div><input type="date" id="fDate" oninput="updatePreview()"/></div>
     </div>
-    <div class="row-2">
-      <div class="field-group"><div class="section-label" data-i18n="lblClass">Class / Course <span class="opt">(optional)</span></div><input type="text" id="fClass" data-i18n-ph="phClass" oninput="updatePreview()"/></div>
-      <div class="field-group"><div class="section-label" data-i18n="lblSeat">Seat No. <span class="opt">(optional)</span></div><input type="text" id="fSeat" data-i18n-ph="phSeat" oninput="updatePreview()"/></div>
+    <div class="row-split" style="margin-bottom: 0.8rem;">
+      <div class="field-group"><div class="section-caption" data-i18n="lblClass">Class / Course</div><input type="text" id="fClass" data-i18n-ph="phClass" oninput="updatePreview()"/></div>
+      <div class="field-group"><div class="section-caption" data-i18n="lblSeat">Seat No.</div><input type="text" id="fSeat" data-i18n-ph="phSeat" oninput="updatePreview()"/></div>
     </div>
-    <div class="field-group"><div class="section-label" data-i18n="lblInstructor">Instructor <span class="opt">(optional)</span></div><input type="text" id="fTeacher" data-i18n-ph="phInstructor" oninput="updatePreview()"/></div>
+    <div class="field-group" style="margin-bottom: 1.2rem;">
+      <div class="section-caption" data-i18n="lblInstructor">Instructor</div>
+      <input type="text" id="fTeacher" data-i18n-ph="phInstructor" oninput="updatePreview()"/>
+    </div>
     <hr class="divider"/>
-    <div><div class="section-label" style="margin-bottom:.5rem" data-i18n="lblBody">Body Content</div>
-    <div id="blocksContainer" style="display:flex;flex-direction:column;gap:.55rem;"></div>
-    <div id="dragHint" class="drag-hint" style="display:none;" data-i18n="dragHint">⠿ drag the handle to reorder blocks</div>
-    <div class="add-block-row" style="margin-top:.65rem;" id="addBtnRow">
+
+    <div><div class="section-caption" style="margin-bottom: 0.6rem;" data-i18n="lblBody">BODY COMPOSITION</div>
+    <div id="blocksContainer" style="display:flex;flex-direction:column;gap:0.8rem;"></div>
+    <div id="dragHint" class="drag-hint" style="display:none;" data-i18n="dragHint">⟡ drag handle to reorder blocks</div>
+    <div class="add-block-row" style="display:flex; gap:0.5rem; flex-wrap:wrap; margin: 1rem 0 0.4rem;">
       <button class="add-btn" onclick="addBlock('h1')" data-i18n="btnH1">+ Heading 1</button>
       <button class="add-btn" onclick="addBlock('h2')" data-i18n="btnH2">+ Heading 2</button>
       <button class="add-btn" onclick="addBlock('h3')" data-i18n="btnH3">+ Heading 3</button>
       <button class="add-btn" onclick="addBlock('body')" data-i18n="btnPara">+ Paragraph</button>
       <button class="add-btn" onclick="addBlock('image')" data-i18n="btnImage">+ Image</button>
       <button class="add-btn" onclick="addBlock('table')" data-i18n="btnTable">+ Table</button>
-    </div></div>
+    </div>
+    </div>
     <div id="statusBar" class="status-bar"></div>
     <button class="generate-btn" onclick="generateDoc()" id="genBtn" data-i18n="btnGenerate">↓ Download Formatted Report (.docx)</button>
   </div>
-  <div class="panel panel-right">
-    <p class="panel-title" data-i18n="previewTitle">Live Preview</p>
+  <div class="preview-panel">
+    <div class="section-caption" data-i18n="previewTitle">LIVE PROOF</div>
     <div class="preview-shell">
-      <div class="empty-preview" id="emptyState"><div class="icon">¶</div><p data-i18n="emptyHint">Start typing to see preview</p></div>
+      <div id="emptyState" class="empty-preview" style="display:flex; align-items:center; justify-content:center; height:300px; flex-direction:column; color:#bcb2a5;"><span style="font-size:2rem;">¶</span><p data-i18n="emptyHint">Begin writing — preview appears</p></div>
       <div id="previewContent" style="display:none;"></div>
     </div>
   </div>
 </div>
 
 <script>
-// ========== TRANSLATIONS ==========
-const T = {
-  en: {
-    eyebrow:'Academic Tools · For Educators', h1:'Report Formatter', subtitle:'Drag to reorder blocks — download perfectly formatted Word document.',
-    panelTitle:'Report Content', previewTitle:'Live Preview', emptyHint:'Start typing to see preview', dragHint:'⠿ drag the handle to reorder blocks',
-    lblTitle:'Title <span class="req">✦ required</span>', lblSubtitle:'Subtitle <span class="opt">(optional)</span>', lblAuthor:'Author <span class="req">✦</span>', lblDate:'Date',
-    lblClass:'Class / Course <span class="opt">(optional)</span>', lblSeat:'Seat No. <span class="opt">(optional)</span>', lblInstructor:'Instructor <span class="opt">(optional)</span>', lblBody:'Body Content',
-    phTitle:'e.g. The Effects of Climate Change on Coral Reefs', phSubtitle:'e.g. A Study of the Indo-Pacific Region', phAuthor:'e.g. Jane Chen',
-    phClass:'e.g. Biology 101', phSeat:'e.g. 12', phInstructor:'e.g. Mr. Smith',
-    btnH1:'+ Heading 1', btnH2:'+ Heading 2', btnH3:'+ Heading 3', btnPara:'+ Paragraph', btnImage:'+ Image', btnTable:'+ Table',
-    btnGenerate:'↓ Download Formatted Report (.docx)', btnGenerating:'⟳ Building document…',
-    badgeH1:'Heading 1', badgeH2:'Heading 2', badgeH3:'Heading 3', badgeBody:'Paragraph', badgeImage:'Image', badgeTable:'Table',
-    phH1:'e.g. Introduction', phH2:'e.g. 1.1 Background', phH3:'e.g. 1.1.1 Data Sources', phPara:'Write your paragraph here…',
-    phImgUpload:'Click or drag to upload an image', lblImgW:'Width (cm)', lblImgH:'Height (cm)', lblFigCaption:'Figure caption <span class="opt">(optional)</span>', phFigCaption:'e.g. Figure 1. Distribution',
-    lblTblCaption:'Table caption <span class="opt">(optional)</span>', phTblCaption:'e.g. Table 1. Summary',
-    tblBtnAddRow:'+ Row', tblBtnAddCol:'+ Column', tblBtnDelRow:'− Row', tblBtnDelCol:'− Column', tblHeaderPh:'Header', tblCellPh:'Cell',
-    docAuthor:'Author:', docClass:'Class/Course:', docSeat:'Seat No.:', docInstructor:'Instructor:', docDate:'Date:',
-    statusOk:'✓ Document downloaded successfully!', statusErr:'Error: ', needTitle:'Please enter a title before downloading.',
-  },
-  zh: {
-    eyebrow:'學術工具 · 教師專用', h1:'報告格式化工具', subtitle:'拖曳區塊把手即可重新排序 — 一鍵下載完美排版 Word 文件。',
-    panelTitle:'報告內容', previewTitle:'即時預覽', emptyHint:'開始輸入以查看預覽', dragHint:'⠿ 拖曳把手以重新排列區塊',
-    lblTitle:'標題 <span class="req">✦ 必填</span>', lblSubtitle:'副標題 <span class="opt">（選填）</span>', lblAuthor:'作者 <span class="req">✦</span>', lblDate:'日期',
-    lblClass:'班級／課程 <span class="opt">（選填）</span>', lblSeat:'座號 <span class="opt">（選填）</span>', lblInstructor:'授課教師 <span class="opt">（選填）</span>', lblBody:'內文',
-    phTitle:'例：氣候變遷對珊瑚礁的影響', phSubtitle:'例：以印度洋—太平洋地區為例', phAuthor:'例：陳小明',
-    phClass:'例：生物 101', phSeat:'例：12', phInstructor:'例：王老師',
-    btnH1:'+ 一級標題', btnH2:'+ 二級標題', btnH3:'+ 三級標題', btnPara:'+ 段落', btnImage:'+ 圖片', btnTable:'+ 表格',
-    btnGenerate:'↓ 下載格式化報告（.docx）', btnGenerating:'⟳ 正在產生文件…',
-    badgeH1:'一級標題', badgeH2:'二級標題', badgeH3:'三級標題', badgeBody:'段落', badgeImage:'圖片', badgeTable:'表格',
-    phH1:'例：壹、前言', phH2:'例：一、研究背景', phH3:'例：（一）資料來源', phPara:'在此輸入段落內容…',
-    phImgUpload:'點擊或拖曳以上傳圖片', lblImgW:'寬度（公分）', lblImgH:'高度（公分）', lblFigCaption:'圖片說明 <span class="opt">（選填）</span>', phFigCaption:'例：圖一、珊瑚白化事件',
-    lblTblCaption:'表格說明 <span class="opt">（選填）</span>', phTblCaption:'例：表一、實驗結果摘要',
-    tblBtnAddRow:'+ 新增列', tblBtnAddCol:'+ 新增欄', tblBtnDelRow:'− 刪除列', tblBtnDelCol:'− 刪除欄', tblHeaderPh:'標題', tblCellPh:'儲存格',
-    docAuthor:'作者：', docClass:'班級／課程：', docSeat:'座號：', docInstructor:'授課教師：', docDate:'日期：',
-    statusOk:'✓ 文件下載成功！', statusErr:'錯誤：', needTitle:'請先輸入標題再下載。',
-  }
-};
-
-let lang = 'en';
-let blockId = 0;
-let blocks = [];
-const imageStore = {};
-const tableStore = {};
-
-function t(key) { return T[lang][key] || T.en[key] || key; }
-
-function setLang(l) {
-  lang = l;
-  document.documentElement.lang = l === 'zh' ? 'zh-TW' : 'en';
-  document.body.classList.toggle('zh', l === 'zh');
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent.trim() === (l==='en'?'English':'繁體中文')));
-  document.querySelectorAll('[data-i18n]').forEach(el => el.innerHTML = t(el.getAttribute('data-i18n')));
-  document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = t(el.getAttribute('data-i18n-ph')));
-  blocks.forEach(b => refreshBlockLabels(b.id, b.type));
-  updatePreview();
-}
-
-function refreshBlockLabels(id, type) {
-  const badge = document.getElementById('badge-' + id); if(badge) badge.textContent = t('badge' + type[0].toUpperCase() + type.slice(1)) || type;
-  const inp = document.getElementById('input-' + id); if(inp && ['h1','h2','h3','body'].includes(type)) inp.placeholder = t('ph' + type.toUpperCase());
-  const upl = document.getElementById('uploadLabel-'+id); if(upl && !imageStore[id]) upl.textContent = t('phImgUpload');
-  const wl = document.getElementById('imgWLabel-'+id); if(wl) wl.textContent = t('lblImgW');
-  const hl = document.getElementById('imgHLabel-'+id); if(hl) hl.textContent = t('lblImgH');
-  const fcl = document.getElementById('figCapLabel-'+id); if(fcl) fcl.innerHTML = t('lblFigCaption');
-  const fcp = document.getElementById('imgCaption-'+id); if(fcp) fcp.placeholder = t('phFigCaption');
-  const tcl = document.getElementById('tblCapLabel-'+id); if(tcl) tcl.innerHTML = t('lblTblCaption');
-  const tcp = document.getElementById('tblCaption-'+id); if(tcp) tcp.placeholder = t('phTblCaption');
-  ['addRow','addCol','delRow','delCol'].forEach(op => { let btn = document.getElementById(`tblBtn-${op}-${id}`); if(btn) btn.textContent = t('tblBtn'+op[0].toUpperCase()+op.slice(1)); });
-  if(type === 'table'){ let ed = document.getElementById('tblEditor-'+id); if(ed) ed.innerHTML = renderTableEditor(id); }
-}
-
-function val(id){ let e = document.getElementById(id); return e ? e.value.trim() : ''; }
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function formatDate(d){ if(!d) return ''; try { if(lang==='zh'){ let dt=new Date(d+'T12:00:00'); return `${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日`; } return new Date(d+'T12:00:00').toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}); } catch(e){ return d; } }
-function setStatus(msg,isErr){ let b=document.getElementById('statusBar'); b.textContent=msg; b.className='status-bar visible'+(isErr?' error':''); setTimeout(()=>{ if(b.className.includes('visible')) b.className='status-bar'; }, 5000); }
-function clearStatus(){ document.getElementById('statusBar').className='status-bar'; }
-
-// ========== DRAG & DROP ==========
-let dragSrcId = null;
-function makeDragHandle(){
-  return `<span class="drag-handle" draggable="false" title="Drag to reorder">
-    <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="3" cy="3"  r="1.5" fill="currentColor"/>
-      <circle cx="7" cy="3"  r="1.5" fill="currentColor"/>
-      <circle cx="3" cy="8"  r="1.5" fill="currentColor"/>
-      <circle cx="7" cy="8"  r="1.5" fill="currentColor"/>
-      <circle cx="3" cy="13" r="1.5" fill="currentColor"/>
-      <circle cx="7" cy="13" r="1.5" fill="currentColor"/>
-    </svg>
-  </span>`;
-}
-function attachDragEvents(el, id){
-  el.setAttribute('draggable', 'true');
-  el.addEventListener('dragstart', e => { dragSrcId = id; el.classList.add('is-dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(id)); });
-  el.addEventListener('dragend', () => { el.classList.remove('is-dragging'); document.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(x => x.classList.remove('drag-over-top','drag-over-bottom')); dragSrcId = null; });
-  el.addEventListener('dragover', e => { if(dragSrcId === null || dragSrcId === id) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; let rect = el.getBoundingClientRect(); let mid = rect.top + rect.height/2; el.classList.toggle('drag-over-top', e.clientY < mid); el.classList.toggle('drag-over-bottom', e.clientY >= mid); });
-  el.addEventListener('dragleave', () => { el.classList.remove('drag-over-top','drag-over-bottom'); });
-  el.addEventListener('drop', e => { if(dragSrcId === null || dragSrcId === id) return; e.preventDefault(); el.classList.remove('drag-over-top','drag-over-bottom'); let rect = el.getBoundingClientRect(); let before = e.clientY < rect.top + rect.height/2; let srcIdx = blocks.findIndex(b => b.id === dragSrcId); let destIdx = blocks.findIndex(b => b.id === id); if(srcIdx === -1 || destIdx === -1) return; let [moved] = blocks.splice(srcIdx,1); let newDest = blocks.findIndex(b => b.id === id); blocks.splice(before ? newDest : newDest+1, 0, moved); let container = document.getElementById('blocksContainer'); blocks.forEach(b => { let dom = document.getElementById('block-'+b.id); if(dom) container.appendChild(dom); }); updatePreview(); });
-}
-
-// ========== BLOCK MANAGEMENT ==========
-function addBlock(type){
-  let id = blockId++;
-  blocks.push({ id, type });
-  let div = document.createElement('div');
-  div.className = 'body-block'; div.id = 'block-'+id;
-  let badgeKey = 'badge' + type[0].toUpperCase() + type.slice(1);
-  let inner = `<div class="block-header"><div class="block-header-left">${makeDragHandle()}<span class="type-badge badge-${type}" id="badge-${id}">${t(badgeKey)}</span></div><button class="remove-btn" onclick="removeBlock(${id})" title="Remove">✕</button></div>`;
-  if(type === 'body') inner += `<textarea id="input-${id}" rows="3" placeholder="${t('phPara')}" oninput="updatePreview()"></textarea>`;
-  else if(['h1','h2','h3'].includes(type)) inner += `<input type="text" id="input-${id}" placeholder="${t('ph'+type.toUpperCase())}" oninput="updatePreview()"/>`;
-  else if(type === 'image'){
-    inner += `<div class="img-upload-area" id="uploadArea-${id}"><input type="file" accept="image/*" onchange="handleImageUpload(${id},this)"/><div id="uploadLabel-${id}">${t('phImgUpload')}</div><img id="imgThumb-${id}" class="img-preview-thumb" style="display:none;"/></div>
-    <div class="img-size-row" id="imgSizeRow-${id}" style="display:none;"><label><span id="imgWLabel-${id}">${t('lblImgW')}</span><input type="number" id="imgW-${id}" min="1" max="16" step="0.5" value="10" oninput="updatePreview()"/></label><label><span id="imgHLabel-${id}">${t('lblImgH')}</span><input type="number" id="imgH-${id}" min="1" max="22" step="0.5" value="7" oninput="updatePreview()"/></label></div>
-    <div style="margin-top:.4rem;"><div class="section-label" id="figCapLabel-${id}">${t('lblFigCaption')}</div><input type="text" id="imgCaption-${id}" placeholder="${t('phFigCaption')}" oninput="updatePreview()"/></div>`;
-  } else if(type === 'table'){
-    tableStore[id] = { rows: [['Header 1','Header 2','Header 3'],['','',''],['','','']] };
-    inner += `<div class="tbl-editor" id="tblEditor-${id}">${renderTableEditor(id)}</div>
-    <div class="tbl-controls"><button class="tbl-btn" id="tblBtn-addRow-${id}" onclick="tblOp(${id},'addRow')">${t('tblBtnAddRow')}</button><button class="tbl-btn" id="tblBtn-addCol-${id}" onclick="tblOp(${id},'addCol')">${t('tblBtnAddCol')}</button><button class="tbl-btn danger" id="tblBtn-delRow-${id}" onclick="tblOp(${id},'delRow')">${t('tblBtnDelRow')}</button><button class="tbl-btn danger" id="tblBtn-delCol-${id}" onclick="tblOp(${id},'delCol')">${t('tblBtnDelCol')}</button></div>
-    <div style="margin-top:.42rem;"><div class="section-label" id="tblCapLabel-${id}">${t('lblTblCaption')}</div><input type="text" id="tblCaption-${id}" placeholder="${t('phTblCaption')}" oninput="updatePreview()"/></div>`;
-  }
-  div.innerHTML = inner;
-  document.getElementById('blocksContainer').appendChild(div);
-  attachDragEvents(div, id);
-  if(blocks.length >= 2) document.getElementById('dragHint').style.display = 'block';
-  let inp = document.getElementById('input-'+id); if(inp) inp.focus();
-  updatePreview();
-}
-function removeBlock(id){
-  let idx = blocks.findIndex(b => b.id === id); if(idx !== -1) blocks.splice(idx,1);
-  delete imageStore[id]; delete tableStore[id];
-  let el = document.getElementById('block-'+id); if(el) el.remove();
-  if(blocks.length < 2) document.getElementById('dragHint').style.display = 'none';
-  updatePreview();
-}
-
-// ========== IMAGE ==========
-function handleImageUpload(id, input){
-  let file = input.files[0]; if(!file) return;
-  let reader = new FileReader();
-  reader.onload = e => {
-    let dataUrl = e.target.result;
-    let img = new Image();
-    img.onload = () => {
-      imageStore[id] = { dataUrl, name:file.name, origW:img.width, origH:img.height };
-      let thumb=document.getElementById('imgThumb-'+id); if(thumb){ thumb.src=dataUrl; thumb.style.display='block'; }
-      let lbl=document.getElementById('uploadLabel-'+id); if(lbl) lbl.textContent=file.name;
-      let sRow=document.getElementById('imgSizeRow-'+id); if(sRow) sRow.style.display='grid';
-      let maxW=13, wCm=Math.min(maxW,Math.round(img.width*2.54/96*10)/10);
-      let hCm=Math.round(wCm*img.height/img.width*10)/10;
-      let wEl=document.getElementById('imgW-'+id), hEl=document.getElementById('imgH-'+id);
-      if(wEl) wEl.value=wCm; if(hEl) hEl.value=hCm;
-      updatePreview();
-    };
-    img.src=dataUrl;
+  // ---------- TRANSLATIONS (refined) ----------
+  const T = {
+    en: {
+      eyebrow: "ACADEMIC PRESS · FOLIO", h1: "Shirley's Report Formatter", subtitle: "drag blocks · typographic precision · word export",
+      panelTitle: "REPORT CONTENT", previewTitle: "LIVE PROOF", emptyHint: "Begin writing — preview appears", dragHint: "⟡ drag handle to reorder blocks",
+      lblTitle: "Title", lblSubtitle: "Subtitle", lblAuthor: "Author", lblDate: "Date",
+      lblClass: "Class / Course", lblSeat: "Seat No.", lblInstructor: "Instructor", lblBody: "BODY COMPOSITION",
+      phTitle: "The Architecture of Memory", phSubtitle: "a spatial inquiry", phAuthor: "Alexandra Chen",
+      phClass: "ARC 402", phSeat: "12", phInstructor: "Prof. Rivera",
+      btnH1: "+ Heading 1", btnH2: "+ Heading 2", btnH3: "+ Heading 3", btnPara: "+ Paragraph", btnImage: "+ Image", btnTable: "+ Table",
+      btnGenerate: "↓ Download Formatted Report (.docx)", btnGenerating: "⟳ Building document…",
+      badgeH1: "H1", badgeH2: "H2", badgeH3: "H3", badgeBody: "P", badgeImage: "IMG", badgeTable: "TBL",
+      phH1: "e.g., Introduction", phH2: "e.g., 1.1 Background", phH3: "e.g., 1.1.1 Data", phPara: "Write narrative here...",
+      phImgUpload: "click or drag image", lblImgW: "Width (cm)", lblImgH: "Height (cm)", lblFigCaption: "Figure caption", phFigCaption: "Fig. 1 — Diagram",
+      lblTblCaption: "Table caption", phTblCaption: "Table 1 — Summary",
+      tblBtnAddRow: "+ Row", tblBtnAddCol: "+ Col", tblBtnDelRow: "− Row", tblBtnDelCol: "− Col", tblHeaderPh: "Header", tblCellPh: "Cell",
+      docAuthor: "Author:", docClass: "Course:", docSeat: "Seat:", docInstructor: "Instructor:", docDate: "Date:",
+      statusOk: "✓ Report exported successfully", statusErr: "Error: ", needTitle: "Title required before export."
+    },
+    zh: {
+      eyebrow: "學術出版社 · 文檔", h1: "報告排版工具", subtitle: "拖曳區塊 · 字體精排 · Word輸出",
+      panelTitle: "報告內容", previewTitle: "即時校樣", emptyHint: "開始輸入 — 預覽即時呈現", dragHint: "⟡ 拖曳把手重新排序區塊",
+      lblTitle: "標題", lblSubtitle: "副標題", lblAuthor: "作者", lblDate: "日期",
+      lblClass: "班級／課程", lblSeat: "座號", lblInstructor: "指導教師", lblBody: "內文結構",
+      phTitle: "記憶的建築", phSubtitle: "空間性考察", phAuthor: "陳雅琳",
+      phClass: "建築 402", phSeat: "12", phInstructor: "林教授",
+      btnH1: "+ 一級標題", btnH2: "+ 二級標題", btnH3: "+ 三級標題", btnPara: "+ 段落", btnImage: "+ 圖片", btnTable: "+ 表格",
+      btnGenerate: "↓ 下載格式化報告 (.docx)", btnGenerating: "⟳ 生成文件中…",
+      badgeH1: "H1", badgeH2: "H2", badgeH3: "H3", badgeBody: "P", badgeImage: "圖", badgeTable: "表",
+      phH1: "例：緒論", phH2: "例：1.1 研究背景", phH3: "例：1.1.1 資料來源", phPara: "在此撰寫段落內容…",
+      phImgUpload: "點擊或拖曳圖片", lblImgW: "寬度 (公分)", lblImgH: "高度 (公分)", lblFigCaption: "圖說", phFigCaption: "圖一 — 概念圖",
+      lblTblCaption: "表格說明", phTblCaption: "表一 — 綜合比較",
+      tblBtnAddRow: "+ 新增列", tblBtnAddCol: "+ 新增欄", tblBtnDelRow: "− 刪除列", tblBtnDelCol: "− 刪除欄", tblHeaderPh: "標題", tblCellPh: "儲存格",
+      docAuthor: "作者：", docClass: "課程：", docSeat: "座號：", docInstructor: "教師：", docDate: "日期：",
+      statusOk: "✓ 報告匯出成功", statusErr: "錯誤：", needTitle: "請先填寫標題。"
+    }
   };
-  reader.readAsDataURL(file);
-}
 
-// ========== TABLE ==========
-function renderTableEditor(id){
-  let tb = tableStore[id]; if(!tb) return '';
-  let html = '<tr>';
-  tb.rows.forEach((row,ri) => { html += '<tr>' + row.map((cell,ci)=>`<td class="${ri===0?'tbl-head-cell':''}"><input type="text" value="${esc(cell)}" placeholder="${ri===0?t('tblHeaderPh'):t('tblCellPh')}" oninput="updateCell(${id},${ri},${ci},this.value)"/></td>`).join('') + '</tr>'; });
-  return html+'</table>';
-}
-function updateCell(id,ri,ci,v){ if(tableStore[id]) tableStore[id].rows[ri][ci]=v; updatePreview(); }
-function tblOp(id,op){
-  let tb = tableStore[id]; if(!tb) return;
-  let cols = tb.rows[0]?.length||1;
-  if(op==='addRow') tb.rows.push(Array(cols).fill(''));
-  else if(op==='addCol') tb.rows.forEach(r=>r.push(''));
-  else if(op==='delRow'){ if(tb.rows.length>1) tb.rows.pop(); }
-  else if(op==='delCol'){ if(cols>1) tb.rows.forEach(r=>r.pop()); }
-  let el = document.getElementById('tblEditor-'+id); if(el) el.innerHTML = renderTableEditor(id);
-  updatePreview();
-}
+  let lang = 'en';
+  let blockId = 0;
+  let blocks = [];
+  const imageStore = {};
+  const tableStore = {};
 
-// ========== LIVE PREVIEW ==========
-function updatePreview(){
-  let title = val('fTitle'), subtitle = val('fSubtitle');
-  let author = val('fAuthor'), date = val('fDate'), cls = val('fClass'), seat = val('fSeat'), teacher = val('fTeacher');
-  let hasContent = title || author || blocks.length>0;
-  let emptyEl = document.getElementById('emptyState'), contentEl = document.getElementById('previewContent');
-  if(!hasContent){ emptyEl.style.display='flex'; contentEl.style.display='none'; return; }
-  emptyEl.style.display='none'; contentEl.style.display='block';
-  let html = '';
-  if(title) html+=`<div class="prev-title">${esc(title)}</div>`;
-  if(subtitle) html+=`<div class="prev-subtitle">${esc(subtitle)}</div>`;
-  let metaRows=[];
-  if(author) metaRows.push(`<b>${esc(t('docAuthor'))}</b> ${esc(author)}`);
-  if(cls) metaRows.push(`<b>${esc(t('docClass'))}</b> ${esc(cls)}`);
-  if(seat) metaRows.push(`<b>${esc(t('docSeat'))}</b> ${esc(seat)}`);
-  if(teacher) metaRows.push(`<b>${esc(t('docInstructor'))}</b> ${esc(teacher)}`);
-  if(date) metaRows.push(`<b>${esc(t('docDate'))}</b> ${esc(formatDate(date))}`);
-  if(metaRows.length) html+=`<div class="prev-meta">${metaRows.join('<br/>')}</div>`;
-  if(title||metaRows.length) html+=`<hr class="prev-rule"/>`;
-  blocks.forEach(b => {
-    let v = ['h1','h2','h3','body'].includes(b.type) ? val('input-'+b.id) : null;
-    if(b.type==='h1' && v) html+=`<div class="prev-h1">${esc(v)}</div>`;
-    else if(b.type==='h2' && v) html+=`<div class="prev-h2">${esc(v)}</div>`;
-    else if(b.type==='h3' && v) html+=`<div class="prev-h3">${esc(v)}</div>`;
-    else if(b.type==='body' && v) v.split('\n\n').forEach(p=>{ if(p.trim()) html+=`<div class="prev-body">${esc(p).replace(/\n/g,'<br/>')}</div>`; });
-    else if(b.type==='image'){
-      let img = imageStore[b.id], cap = val('imgCaption-'+b.id);
-      if(img) html+=`<div class="prev-img-block"><img src="${img.dataUrl}"/><div class="prev-caption">${esc(cap)}</div></div>`;
-      else html+=`<div class="prev-img-block" style="border:2px dashed #ccc;padding:.7rem;color:#aaa;font-size:10pt;">[${esc(t('phImgUpload'))}]${cap?`<div class="prev-caption">${esc(cap)}</div>`:''}</div>`;
-    } else if(b.type==='table'){
-      let tb = tableStore[b.id]; if(!tb) return;
-      let cap = val('tblCaption-'+b.id);
-      let tbl = `<div class="prev-tbl-wrap"><table class="prev-tbl" border="1" cellpadding="4" cellspacing="0" style="border-collapse:collapse;">`;
-      tb.rows.forEach((row,ri)=>{ tbl+=`<tr>${row.map(c=>`<td ${ri===0?'style="font-weight:bold;background:#f5f5f0;"':''}>${esc(c)}</td>`).join('')}</tr>`; });
-      tbl+=`</table>${cap?`<div class="prev-caption">${esc(cap)}</div>`:''}</div>`;
-      html+=tbl;
-    }
-  });
-  contentEl.innerHTML = html;
-}
+  function t(key) { return T[lang][key] || T.en[key] || key; }
 
-// ========== DOCX GENERATION (No external libraries - HTML to Word) ==========
-function generateDoc() {
-  let title = val('fTitle');
-  if(!title){ setStatus(t('needTitle'), true); return; }
-  
-  let btn = document.getElementById('genBtn');
-  btn.disabled = true; btn.textContent = t('btnGenerating');
-  clearStatus();
-  
-  try {
-    // Build HTML content for Word document
-    let docHtml = `<!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <title>${esc(title)}</title>
-      <style>
-        body { 
-          font-family: 'Times New Roman', Times, serif; 
-          margin: 2.54cm; 
-          font-size: 12pt;
-          line-height: 1.5;
-        }
-        h1 { font-size: 20pt; font-weight: bold; text-align: center; margin: 0.5em 0; }
-        h2 { font-size: 18pt; font-weight: bold; text-align: center; margin: 0.4em 0; }
-        .meta { text-align: center; font-size: 11pt; margin: 0.5em 0; color: #444; }
-        hr { border: none; border-top: 1.5px solid #888; margin: 0.7em 0; }
-        .section-h1 { font-size: 16pt; font-weight: bold; margin: 1em 0 0.3em 0; }
-        .section-h2 { font-size: 14pt; font-weight: bold; margin: 0.8em 0 0.2em 0; }
-        .section-h3 { font-size: 12pt; font-weight: bold; font-style: italic; margin: 0.7em 0 0.2em 0; }
-        .paragraph { text-align: justify; margin: 0 0 0.8em 0; }
-        .image-block { text-align: center; margin: 1em 0; }
-        .image-block img { max-width: 100%; height: auto; }
-        .caption { font-size: 10pt; font-style: italic; text-align: center; color: #555; margin-top: 0.2em; }
-        table { border-collapse: collapse; width: 100%; margin: 1em 0; }
-        td, th { border: 1px solid #888; padding: 4px 8px; vertical-align: top; }
-        th { background: #f5f5f0; font-weight: bold; }
-        .table-caption { font-size: 10pt; font-style: italic; text-align: center; margin: 0.2em 0 0.8em 0; }
-      </style>
-    </head>
-    <body>`;
-    
-    // Title
-    docHtml += `<h1>${esc(title)}</h1>`;
-    let subtitle = val('fSubtitle');
-    if(subtitle) docHtml += `<h2>${esc(subtitle)}</h2>`;
-    
-    // Metadata
-    let author = val('fAuthor'), date = val('fDate'), cls = val('fClass'), seat = val('fSeat'), teacher = val('fTeacher');
-    let metaLines = [];
-    if(author) metaLines.push(`${t('docAuthor')} ${esc(author)}`);
-    if(cls) metaLines.push(`${t('docClass')} ${esc(cls)}`);
-    if(seat) metaLines.push(`${t('docSeat')} ${esc(seat)}`);
-    if(teacher) metaLines.push(`${t('docInstructor')} ${esc(teacher)}`);
-    if(date) metaLines.push(`${t('docDate')} ${esc(formatDate(date))}`);
-    if(metaLines.length) docHtml += `<div class="meta">${metaLines.join('<br/>')}</div>`;
-    if(title || metaLines.length) docHtml += `<hr/>`;
-    
-    // Body blocks
-    for(let b of blocks) {
-      let v = ['h1','h2','h3','body'].includes(b.type) ? val('input-'+b.id) : null;
-      if(b.type === 'h1' && v) {
-        docHtml += `<div class="section-h1">${esc(v)}</div>`;
-      } else if(b.type === 'h2' && v) {
-        docHtml += `<div class="section-h2">${esc(v)}</div>`;
-      } else if(b.type === 'h3' && v) {
-        docHtml += `<div class="section-h3">${esc(v)}</div>`;
-      } else if(b.type === 'body' && v) {
-        let paragraphs = v.split('\n\n');
-        for(let p of paragraphs) {
-          if(p.trim()) docHtml += `<div class="paragraph">${esc(p).replace(/\n/g,'<br/>')}</div>`;
-        }
-      } else if(b.type === 'image') {
-        let img = imageStore[b.id];
-        let cap = val('imgCaption-'+b.id);
-        if(img) {
-          docHtml += `<div class="image-block"><img src="${img.dataUrl}"/>`;
-          if(cap) docHtml += `<div class="caption">${esc(cap)}</div>`;
-          docHtml += `</div>`;
-        }
-      } else if(b.type === 'table') {
-        let tb = tableStore[b.id];
-        let cap = val('tblCaption-'+b.id);
-        if(tb && tb.rows && tb.rows.length) {
-          docHtml += `<table>`;
-          tb.rows.forEach((row, ri) => {
-            docHtml += `<tr>`;
-            row.forEach(cell => {
-              docHtml += `<td ${ri === 0 ? 'style="background:#f5f5f0;font-weight:bold;"' : ''}>${esc(cell)}</td>`;
-            });
-            docHtml += `</tr>`;
-          });
-          docHtml += `</table>`;
-          if(cap) docHtml += `<div class="table-caption">${esc(cap)}</div>`;
-        }
-      }
-    }
-    
-    docHtml += `</body></html>`;
-    
-    // Create blob and download
-    const blob = new Blob([docHtml], { type: 'application/msword' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = (title.replace(/[^a-z0-9\u4e00-\u9fff]/gi,'_').slice(0,40) || 'report') + '.doc';
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    setStatus(t('statusOk'), false);
-  } catch(err) {
-    console.error(err);
-    setStatus(t('statusErr') + err.message, true);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = t('btnGenerate');
+  function setLang(l) {
+    lang = l;
+    document.documentElement.lang = l === 'zh' ? 'zh-TW' : 'en';
+    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.toggle('active', btn.innerText === (l==='en'?'EN':'繁中')));
+    document.querySelectorAll('[data-i18n]').forEach(el => el.innerHTML = t(el.getAttribute('data-i18n')));
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = t(el.getAttribute('data-i18n-ph')));
+    blocks.forEach(b => refreshBlockLabels(b.id, b.type));
+    updatePreview();
   }
-}
 
-// init
-document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
-updatePreview();
+  function refreshBlockLabels(id, type) {
+    const badge = document.getElementById('badge-'+id); if(badge) badge.textContent = t('badge'+type[0].toUpperCase()+type.slice(1)) || type;
+    const inp = document.getElementById('input-'+id); if(inp && ['h1','h2','h3','body'].includes(type)) inp.placeholder = t('ph'+type.toUpperCase());
+    const upl = document.getElementById('uploadLabel-'+id); if(upl && !imageStore[id]) upl.textContent = t('phImgUpload');
+    const wl = document.getElementById('imgWLabel-'+id); if(wl) wl.textContent = t('lblImgW');
+    const hl = document.getElementById('imgHLabel-'+id); if(hl) hl.textContent = t('lblImgH');
+    const fcl = document.getElementById('figCapLabel-'+id); if(fcl) fcl.innerHTML = t('lblFigCaption');
+    const tcl = document.getElementById('tblCapLabel-'+id); if(tcl) tcl.innerHTML = t('lblTblCaption');
+    const tcp = document.getElementById('tblCaption-'+id); if(tcp) tcp.placeholder = t('phTblCaption');
+    ['addRow','addCol','delRow','delCol'].forEach(op => { let btn = document.getElementById(`tblBtn-${op}-${id}`); if(btn) btn.textContent = t('tblBtn'+op[0].toUpperCase()+op.slice(1)); });
+    if(type === 'table'){ let ed = document.getElementById('tblEditor-'+id); if(ed) ed.innerHTML = renderTableEditor(id); }
+  }
+
+  function val(id){ let e = document.getElementById(id); return e ? e.value : ''; }
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function formatDate(d){ if(!d) return ''; try { if(lang==='zh'){ let dt=new Date(d+'T12:00:00'); return `${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日`; } return new Date(d+'T12:00:00').toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}); } catch(e){ return d; } }
+  function setStatus(msg,isErr){ let b=document.getElementById('statusBar'); b.textContent=msg; b.className='status-bar visible'+(isErr?' error':''); setTimeout(()=>{ if(b.className.includes('visible')) b.className='status-bar'; }, 4200); }
+
+  // DRAG
+  let dragSrcId = null;
+  function attachDragEvents(el, id){
+    el.setAttribute('draggable', 'true');
+    el.addEventListener('dragstart', e => { dragSrcId = id; el.classList.add('is-dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(id)); });
+    el.addEventListener('dragend', () => { el.classList.remove('is-dragging'); document.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(x => x.classList.remove('drag-over-top','drag-over-bottom')); dragSrcId = null; });
+    el.addEventListener('dragover', e => { if(dragSrcId === null || dragSrcId === id) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; let rect = el.getBoundingClientRect(); let mid = rect.top + rect.height/2; el.classList.toggle('drag-over-top', e.clientY < mid); el.classList.toggle('drag-over-bottom', e.clientY >= mid); });
+    el.addEventListener('dragleave', () => { el.classList.remove('drag-over-top','drag-over-bottom'); });
+    el.addEventListener('drop', e => { if(dragSrcId === null || dragSrcId === id) return; e.preventDefault(); el.classList.remove('drag-over-top','drag-over-bottom'); let rect = el.getBoundingClientRect(); let before = e.clientY < rect.top + rect.height/2; let srcIdx = blocks.findIndex(b => b.id === dragSrcId); let destIdx = blocks.findIndex(b => b.id === id); if(srcIdx === -1 || destIdx === -1) return; let [moved] = blocks.splice(srcIdx,1); let newDest = blocks.findIndex(b => b.id === id); blocks.splice(before ? newDest : newDest+1, 0, moved); let container = document.getElementById('blocksContainer'); blocks.forEach(b => { let dom = document.getElementById('block-'+b.id); if(dom) container.appendChild(dom); }); updatePreview(); });
+  }
+
+  function addBlock(type){
+    let id = blockId++;
+    blocks.push({ id, type });
+    let div = document.createElement('div'); div.className = 'body-block'; div.id = 'block-'+id;
+    let inner = `<div class="block-header"><div class="block-header-left"><span class="drag-handle"><svg width="12" height="14" viewBox="0 0 12 14" fill="none"><circle cx="3" cy="3" r="1.2" fill="currentColor"/><circle cx="8" cy="3" r="1.2" fill="currentColor"/><circle cx="3" cy="7" r="1.2" fill="currentColor"/><circle cx="8" cy="7" r="1.2" fill="currentColor"/><circle cx="3" cy="11" r="1.2" fill="currentColor"/><circle cx="8" cy="11" r="1.2" fill="currentColor"/></svg></span><span class="type-badge" id="badge-${id}">${t('badge'+type[0].toUpperCase()+type.slice(1))}</span></div><button class="remove-btn" onclick="removeBlock(${id})">✕</button></div>`;
+    if(type === 'body') inner += `<textarea id="input-${id}" rows="3" placeholder="${t('phPara')}" oninput="updatePreview()"></textarea>`;
+    else if(['h1','h2','h3'].includes(type)) inner += `<input type="text" id="input-${id}" placeholder="${t('ph'+type.toUpperCase())}" oninput="updatePreview()"/>`;
+    else if(type === 'image'){
+      inner += `<div class="img-upload-area" id="uploadArea-${id}"><input type="file" accept="image/*" onchange="handleImageUpload(${id},this)"/><div id="uploadLabel-${id}">${t('phImgUpload')}</div><img id="imgThumb-${id}" class="img-preview-thumb" style="display:none;"/></div>
+      <div class="img-size-row" style="display:grid; gap:0.5rem; grid-template-columns:1fr 1fr; margin-top:0.5rem;" id="imgSizeRow-${id}" style="display:none;"><label><span id="imgWLabel-${id}">${t('lblImgW')}</span><input type="number" id="imgW-${id}" min="1" max="16" step="0.5" value="10" oninput="updatePreview()"/></label><label><span id="imgHLabel-${id}">${t('lblImgH')}</span><input type="number" id="imgH-${id}" min="1" max="22" step="0.5" value="7" oninput="updatePreview()"/></label></div>
+      <div style="margin-top:.4rem;"><div class="section-caption" id="figCapLabel-${id}">${t('lblFigCaption')}</div><input type="text" id="imgCaption-${id}" placeholder="${t('phFigCaption')}" oninput="updatePreview()"/></div>`;
+    } else if(type === 'table'){
+      tableStore[id] = { rows: [['Variable','Estimate','p-value'],['x1','0.42','0.03'],['x2','-0.18','0.21']] };
+      inner += `<div class="tbl-editor" id="tblEditor-${id}">${renderTableEditor(id)}</div>
+      <div class="tbl-controls" style="margin:0.5rem 0 0;"><button class="tbl-btn" id="tblBtn-addRow-${id}" onclick="tblOp(${id},'addRow')">${t('tblBtnAddRow')}</button><button class="tbl-btn" id="tblBtn-addCol-${id}" onclick="tblOp(${id},'addCol')">${t('tblBtnAddCol')}</button><button class="tbl-btn danger" id="tblBtn-delRow-${id}" onclick="tblOp(${id},'delRow')">${t('tblBtnDelRow')}</button><button class="tbl-btn danger" id="tblBtn-delCol-${id}" onclick="tblOp(${id},'delCol')">${t('tblBtnDelCol')}</button></div>
+      <div style="margin-top:.5rem;"><div class="section-caption" id="tblCapLabel-${id}">${t('lblTblCaption')}</div><input type="text" id="tblCaption-${id}" placeholder="${t('phTblCaption')}" oninput="updatePreview()"/></div>`;
+    }
+    div.innerHTML = inner;
+    document.getElementById('blocksContainer').appendChild(div);
+    attachDragEvents(div, id);
+    if(blocks.length >= 2) document.getElementById('dragHint').style.display = 'block';
+    updatePreview();
+  }
+
+  function removeBlock(id){ let idx = blocks.findIndex(b=>b.id===id); if(idx!==-1) blocks.splice(idx,1); delete imageStore[id]; delete tableStore[id]; let el = document.getElementById('block-'+id); if(el) el.remove(); if(blocks.length<2) document.getElementById('dragHint').style.display='none'; updatePreview(); }
+
+  function handleImageUpload(id, input){ let file = input.files[0]; if(!file) return; let reader = new FileReader(); reader.onload = e => { let dataUrl = e.target.result; let img = new Image(); img.onload = () => { imageStore[id] = { dataUrl, name:file.name, origW:img.width, origH:img.height }; let thumb=document.getElementById('imgThumb-'+id); if(thumb){ thumb.src=dataUrl; thumb.style.display='block'; } let sRow=document.getElementById('imgSizeRow-'+id); if(sRow) sRow.style.display='grid'; let wEl=document.getElementById('imgW-'+id), hEl=document.getElementById('imgH-'+id); if(wEl) wEl.value=Math.min(13,Math.round(img.width*2.54/96*10)/10); updatePreview(); }; img.src=dataUrl; }; reader.readAsDataURL(file); }
+  function renderTableEditor(id){ let tb = tableStore[id]; if(!tb) return '<table>...</table>'; let html = '<table>'; tb.rows.forEach((row,ri)=>{ html+='<tr>'+row.map((cell,ci)=>`<td class="${ri===0?'tbl-head-cell':''}"><input type="text" value="${esc(cell)}" placeholder="${ri===0?t('tblHeaderPh'):t('tblCellPh')}" oninput="updateCell(${id},${ri},${ci},this.value)"/></td>`).join('')+'</tr>'; }); return html+'</table>'; }
+  function updateCell(id,ri,ci,v){ if(tableStore[id]) tableStore[id].rows[ri][ci]=v; updatePreview(); }
+  function tblOp(id,op){ let tb = tableStore[id]; if(!tb) return; let cols = tb.rows[0]?.length||1; if(op==='addRow') tb.rows.push(Array(cols).fill('')); if(op==='addCol') tb.rows.forEach(r=>r.push('')); if(op==='delRow' && tb.rows.length>1) tb.rows.pop(); if(op==='delCol' && cols>1) tb.rows.forEach(r=>r.pop()); let el = document.getElementById('tblEditor-'+id); if(el) el.innerHTML = renderTableEditor(id); updatePreview(); }
+  function updatePreview(){ let title=val('fTitle'), subtitle=val('fSubtitle'); let author=val('fAuthor'), date=val('fDate'), cls=val('fClass'), seat=val('fSeat'), teacher=val('fTeacher'); let emptyEl=document.getElementById('emptyState'), contentEl=document.getElementById('previewContent'); if(!title && !author && blocks.length===0){ emptyEl.style.display='flex'; contentEl.style.display='none'; return; } emptyEl.style.display='none'; contentEl.style.display='block'; let html=''; if(title) html+=`<div class="prev-title">${esc(title)}</div>`; if(subtitle) html+=`<div class="prev-subtitle">${esc(subtitle)}</div>`; let meta=[]; if(author) meta.push(`<b>${t('docAuthor')}</b> ${esc(author)}`); if(cls) meta.push(`<b>${t('docClass')}</b> ${esc(cls)}`); if(seat) meta.push(`<b>${t('docSeat')}</b> ${esc(seat)}`); if(teacher) meta.push(`<b>${t('docInstructor')}</b> ${esc(teacher)}`); if(date) meta.push(`<b>${t('docDate')}</b> ${esc(formatDate(date))}`); if(meta.length) html+=`<div class="prev-meta">${meta.join(' · ')}</div>`; if(title||meta.length) html+=`<hr class="prev-rule"/>`; blocks.forEach(b=>{ let v = ['h1','h2','h3','body'].includes(b.type) ? val('input-'+b.id) : null; if(b.type==='h1' && v) html+=`<div class="prev-h1">${esc(v)}</div>`; else if(b.type==='h2' && v) html+=`<div class="prev-h2">${esc(v)}</div>`; else if(b.type==='h3' && v) html+=`<div class="prev-h3">${esc(v)}</div>`; else if(b.type==='body' && v) v.split('\n\n').forEach(p=>{ if(p.trim()) html+=`<div class="prev-body">${esc(p).replace(/\n/g,'<br/>')}</div>`; }); else if(b.type==='image'){ let img=imageStore[b.id], cap=val('imgCaption-'+b.id); html+=`<div class="prev-img-block">${img?`<img src="${img.dataUrl}" style="max-width:100%;"/>`:`<div style="border:1px dashed #ccc;padding:0.6rem;">${t('phImgUpload')}</div>`}${cap?`<div class="prev-caption">${esc(cap)}</div>`:''}</div>`; } else if(b.type==='table'){ let tb=tableStore[b.id]; if(tb){ let cap=val('tblCaption-'+b.id); let tbl='<div class="prev-tbl-wrap"><table class="prev-tbl" style="border-collapse:collapse; width:100%; border:1px solid #d8cfc0;">'; tb.rows.forEach((row,ri)=>{ tbl+='<tr>'+row.map(c=>`<td style="border:1px solid #d8cfc0; padding:0.25rem 0.5rem; ${ri===0?'background:#f5efe8; font-weight:600;':''}">${esc(c)}</td>`).join('')+'</tr>'; }); tbl+='</table>'; if(cap) tbl+=`<div class="prev-caption">${esc(cap)}</div>`; html+=tbl+'</div>'; } } }); contentEl.innerHTML=html; }
+  function generateDoc(){ if(!val('fTitle')){ setStatus(t('needTitle'), true); return; } let btn=document.getElementById('genBtn'); btn.disabled=true; btn.textContent=t('btnGenerating'); let htmlContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${esc(val('fTitle'))}</title><style>body{font-family:'Times New Roman',serif; margin:2.54cm; font-size:12pt;} h1{font-size:20pt;text-align:center;} .meta{text-align:center;} .section-h1{font-size:16pt;font-weight:bold;} .section-h2{font-size:14pt;} .paragraph{text-align:justify;} table{border-collapse:collapse;width:100%;} td,th{border:1px solid #888;padding:4px;}</style></head><body><h1>${esc(val('fTitle'))}</h1>${val('fSubtitle')?`<h2>${esc(val('fSubtitle'))}</h2>`:''}<div class="meta">${[val('fAuthor'),val('fClass'),val('fSeat'),val('fTeacher'),formatDate(val('fDate'))].filter(Boolean).join(' · ')}</div><hr/>`; blocks.forEach(b=>{ let v = ['h1','h2','h3','body'].includes(b.type)?val('input-'+b.id):null; if(b.type==='h1' && v) htmlContent+=`<div class="section-h1">${esc(v)}</div>`; else if(b.type==='h2' && v) htmlContent+=`<div class="section-h2">${esc(v)}</div>`; else if(b.type==='h3' && v) htmlContent+=`<div class="section-h3"><i>${esc(v)}</i></div>`; else if(b.type==='body' && v) v.split('\n\n').forEach(p=>{ if(p.trim()) htmlContent+=`<div class="paragraph">${esc(p).replace(/\n/g,'<br/>')}</div>`; }); else if(b.type==='image' && imageStore[b.id]) htmlContent+=`<div style="text-align:center;"><img src="${imageStore[b.id].dataUrl}" style="max-width:100%;"/><div><i>${esc(val('imgCaption-'+b.id))}</i></div></div>`; else if(b.type==='table' && tableStore[b.id]){ htmlContent+='<table>'; tableStore[b.id].rows.forEach(row=>{ htmlContent+='<tr>'+row.map(c=>`<td>${esc(c)}</td>`).join('')+'</tr>'; }); htmlContent+=`</table><div><i>${esc(val('tblCaption-'+b.id))}</i></div>`; } }); htmlContent+=`</body></html>`; const blob=new Blob([htmlContent],{type:'application/msword'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=(val('fTitle').replace(/[^a-z0-9]/gi,'_').slice(0,40)||'report')+'.doc'; a.click(); URL.revokeObjectURL(url); setStatus(t('statusOk'),false); btn.disabled=false; btn.textContent=t('btnGenerate'); }
+  document.getElementById('fDate').valueAsDate=new Date();
+  updatePreview();
 </script>
 </body>
 </html>
