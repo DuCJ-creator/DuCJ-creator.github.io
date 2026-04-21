@@ -6,506 +6,205 @@
 <title>Folio · Academic Report Formatter</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
+  * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
-    --paper: #fefcf5;
-    --ink-rich: #1f1b16;
-    --ink-soft: #49433c;
-    --ink-faint: #8b857a;
-    --border-stroke: #e2dbcf;
-    --gold-mark: #c2a15b;
-    --gold-glow: #eedbac;
-    --accent-slate: #3b4b46;
-    --accent-mist: #e6ede9;
-    --danger-rose: #bc5a3c;
-    --shadow-subtle: 0 12px 28px -8px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.01);
+    --paper: #fefcf5; --ink-rich: #1f1b16; --ink-soft: #49433c; --ink-faint: #8b857a;
+    --border-stroke: #e2dbcf; --gold-mark: #c2a15b; --gold-glow: #eedbac;
+    --accent-slate: #3b4b46; --accent-mist: #e6ede9; --danger-rose: #bc5a3c;
+    --shadow-subtle: 0 12px 28px -8px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.01);
     --grain-noise: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJmIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjUiIG51bU9jdGF2ZXM9IjIiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjZikiIG9wYWNpdHk9IjAuMDYiLz48L3N2Zz4=');
   }
+  body { background: var(--paper); color: var(--ink-rich); font-family: 'Manrope', sans-serif; font-weight: 400; line-height: 1.45; min-height: 100vh; position: relative; }
+  body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background-image: var(--grain-noise); opacity: 0.35; z-index: 999; }
 
-  body {
-    background: var(--paper);
-    color: var(--ink-rich);
-    font-family: 'Manrope', sans-serif;
-    font-weight: 400;
-    line-height: 1.45;
-    min-height: 100vh;
-    position: relative;
+  .press-header { background: var(--ink-rich); padding: 1.2rem 2.8rem; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; border-bottom: 1px solid rgba(194,161,91,0.35); position: relative; z-index: 10; gap: 1rem; }
+  .title-group .eyebrow { font-size: 0.7rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold-mark); font-weight: 400; margin-bottom: 0.25rem; }
+  .title-group h1 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 2.1rem; letter-spacing: -0.01em; color: #f4efe4; line-height: 1.1; }
+  .title-group .sub { font-size: 0.75rem; color: #a69f92; font-weight: 350; margin-top: 0.25rem; }
+  .header-right { display: flex; align-items: center; gap: 1rem; }
+  .lang-switch { display: flex; gap: 0; border: 0.5px solid rgba(194,161,91,0.5); border-radius: 40px; overflow: hidden; }
+  .lang-btn { background: transparent; border: none; font-family: 'Manrope', sans-serif; font-size: 0.7rem; font-weight: 500; padding: 0.4rem 1rem; color: #bcb4a7; cursor: pointer; transition: all 0.2s ease; letter-spacing: 0.03em; }
+  .lang-btn.active { background: var(--gold-mark); color: var(--ink-rich); }
+
+  /* SMART PASTE TRIGGER BUTTON */
+  .smart-paste-trigger {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: linear-gradient(135deg, #c2a15b 0%, #e0c07a 50%, #c2a15b 100%);
+    background-size: 200% 200%;
+    animation: shimmerGold 3s ease infinite;
+    border: none; border-radius: 40px; padding: 0.45rem 1.2rem;
+    font-family: 'Manrope', sans-serif; font-size: 0.72rem; font-weight: 600;
+    color: var(--ink-rich); cursor: pointer; letter-spacing: 0.02em;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 12px rgba(194,161,91,0.4);
   }
+  .smart-paste-trigger:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(194,161,91,0.55); }
+  @keyframes shimmerGold { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  .smart-paste-trigger svg { width: 14px; height: 14px; }
 
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    background-image: var(--grain-noise);
-    opacity: 0.35;
-    z-index: 999;
+  .editorial-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: calc(100vh - 98px); }
+  .editor-panel { padding: 2rem 2.2rem; overflow-y: auto; background: var(--paper); border-right: 1px solid var(--border-stroke); }
+  .preview-panel { padding: 2rem 2rem; background: #fbf9f4; overflow-y: auto; }
+
+  .section-caption { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); font-weight: 500; margin-bottom: 0.45rem; display: flex; align-items: center; gap: 0.5rem; }
+  .required { color: var(--gold-mark); font-size: 0.6rem; }
+  .optional { color: var(--ink-faint); font-style: italic; font-size: 0.6rem; }
+  input, textarea, select { width: 100%; background: white; border: 1px solid var(--border-stroke); border-radius: 10px; padding: 0.6rem 0.9rem; font-family: 'Manrope', monospace; font-size: 0.85rem; color: var(--ink-rich); transition: all 0.2s; outline: none; }
+  input:focus, textarea:focus, select:focus { border-color: var(--gold-mark); box-shadow: 0 0 0 3px rgba(194,161,91,0.15); }
+  .row-split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  hr.divider { margin: 1rem 0; border: 0; height: 1px; background: linear-gradient(90deg, var(--border-stroke), transparent); }
+  .body-block { background: white; border-radius: 14px; border: 1px solid var(--border-stroke); padding: 1rem; transition: all 0.2s cubic-bezier(0.2,0.9,0.4,1.1); box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+  .body-block.is-dragging { opacity: 0.5; border-color: var(--gold-mark); }
+  .drag-over-top { border-top: 2px solid var(--gold-mark); }
+  .drag-over-bottom { border-bottom: 2px solid var(--gold-mark); }
+  .drag-handle { cursor: grab; color: var(--ink-faint); display: inline-flex; align-items: center; padding-right: 0.25rem; touch-action: none; }
+  .drag-handle:active { cursor: grabbing; }
+  .block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+  .block-header-left { display: flex; align-items: center; gap: 0.4rem; }
+  .type-badge { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.2rem 0.6rem; border-radius: 30px; background: #f1ede6; color: var(--ink-soft); }
+  .remove-btn { background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--ink-faint); transition: color 0.15s; line-height: 1; }
+  .remove-btn:hover { color: var(--danger-rose); }
+  .add-btn { font-family: 'Manrope', sans-serif; font-size: 0.7rem; font-weight: 500; background: transparent; border: 1px dashed var(--border-stroke); padding: 0.4rem 1rem; border-radius: 30px; color: var(--ink-soft); cursor: pointer; transition: all 0.2s; }
+  .add-btn:hover { border-color: var(--gold-mark); background: var(--gold-glow); color: var(--ink-rich); }
+  .img-upload-area { border: 1.5px dashed var(--border-stroke); border-radius: 16px; padding: 1rem; text-align: center; background: #fefbf5; transition: all 0.2s; position: relative; }
+  .img-upload-area:hover { border-color: var(--gold-mark); background: #fffaf0; }
+  .img-preview-thumb { max-width: 100%; max-height: 100px; object-fit: contain; margin-top: 0.6rem; border-radius: 8px; }
+  .tbl-editor { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-stroke); }
+  .tbl-editor table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+  .tbl-editor td { border: 1px solid var(--border-stroke); padding: 0; }
+  .tbl-editor input { border: none; padding: 0.45rem 0.6rem; border-radius: 0; background: white; }
+  .tbl-head-cell { background: #f3efe8; }
+  .tbl-btn { font-size: 0.65rem; background: white; border: 1px solid var(--border-stroke); border-radius: 20px; padding: 0.2rem 0.8rem; margin-right: 0.3rem; cursor: pointer; }
+  .generate-btn { font-family: 'Manrope', sans-serif; font-weight: 600; background: var(--ink-rich); color: #fefcf5; border: none; border-radius: 40px; padding: 0.9rem 1.8rem; width: 100%; margin-top: 1rem; cursor: pointer; font-size: 0.85rem; letter-spacing: 0.02em; transition: all 0.2s; }
+  .generate-btn:hover { background: #2f2a24; transform: translateY(-1px); }
+  .preview-shell { background: white; border-radius: 24px; box-shadow: var(--shadow-subtle); padding: 2rem 2rem; min-height: 560px; position: relative; font-family: 'Instrument Serif', Georgia, serif; border: 1px solid #e9e2d6; }
+  .preview-shell::after { content: '⚘  preview'; position: absolute; bottom: 1rem; right: 1.5rem; font-family: 'Manrope', sans-serif; font-size: 0.55rem; letter-spacing: 0.2em; color: #cfc7bb; text-transform: uppercase; }
+  .prev-title { font-size: 26pt; font-weight: 500; text-align: center; font-family: 'Instrument Serif', serif; letter-spacing: -0.3px; margin-bottom: 0.2rem; color: #1e1914; }
+  .prev-subtitle { font-size: 18pt; font-weight: 400; text-align: center; font-family: 'Instrument Serif', serif; color: #4d443a; margin-bottom: 0.5rem; }
+  .prev-meta { font-size: 10pt; text-align: center; font-family: 'Manrope', sans-serif; color: #5c554b; line-height: 1.6; margin: 1rem 0 0.5rem; }
+  .prev-rule { border: none; height: 1px; background: #d8cfc0; margin: 0.8rem 0 1rem; }
+  .prev-h1 { font-size: 18pt; font-weight: 500; font-family: 'Instrument Serif', serif; margin: 1.2rem 0 0.3rem; letter-spacing: -0.2px; }
+  .prev-h2 { font-size: 15pt; font-weight: 500; font-family: 'Instrument Serif', serif; margin: 1rem 0 0.2rem; color: #2d2a24; }
+  .prev-h3 { font-size: 13pt; font-weight: 500; font-style: italic; font-family: 'Instrument Serif', serif; margin: 0.8rem 0 0.2rem; }
+  .prev-body { font-size: 11.5pt; line-height: 1.55; text-align: justify; font-family: 'Instrument Serif', serif; margin-bottom: 1rem; color: #2a241e; }
+  .prev-img-block { text-align: center; margin: 1rem 0; background: #fcf9f2; border-radius: 12px; padding: 0.8rem; }
+  .prev-caption { font-size: 9pt; font-style: italic; font-family: 'Manrope', sans-serif; color: #6b6256; margin-top: 0.3rem; }
+  .status-bar { margin: 0.5rem 0; font-size: 0.75rem; border-radius: 40px; padding: 0.5rem 1rem; background: var(--accent-mist); color: var(--accent-slate); display: none; }
+  .status-bar.visible { display: block; }
+  .status-bar.error { background: #f8e2db; color: var(--danger-rose); }
+  .drag-hint { font-size: 0.6rem; text-align: center; color: var(--ink-faint); margin: 0.2rem 0; letter-spacing: 0.3px; }
+
+  /* ===== SMART PASTE MODAL ===== */
+  .sp-backdrop {
+    position: fixed; inset: 0; background: rgba(15,12,9,0.72);
+    z-index: 1000; display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    backdrop-filter: blur(3px);
   }
-
-  /* header — refined press bar */
-  .press-header {
-    background: var(--ink-rich);
-    padding: 1.2rem 2.8rem;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    border-bottom: 1px solid rgba(194, 161, 91, 0.35);
-    position: relative;
-    z-index: 10;
-  }
-
-  .title-group .eyebrow {
-    font-size: 0.7rem;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    color: var(--gold-mark);
-    font-weight: 400;
-    margin-bottom: 0.25rem;
-  }
-
-  .title-group h1 {
-    font-family: 'Instrument Serif', serif;
-    font-weight: 400;
-    font-size: 2.1rem;
-    letter-spacing: -0.01em;
-    color: #f4efe4;
-    line-height: 1.1;
-  }
-
-  .title-group .sub {
-    font-size: 0.75rem;
-    color: #a69f92;
-    font-weight: 350;
-    margin-top: 0.25rem;
-  }
-
-  .lang-switch {
-    display: flex;
-    gap: 0;
-    border: 0.5px solid rgba(194, 161, 91, 0.5);
-    border-radius: 40px;
-    overflow: hidden;
-    backdrop-filter: blur(2px);
-  }
-
-  .lang-btn {
-    background: transparent;
-    border: none;
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 500;
-    padding: 0.4rem 1rem;
-    color: #bcb4a7;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    letter-spacing: 0.03em;
-  }
-
-  .lang-btn.active {
-    background: var(--gold-mark);
-    color: var(--ink-rich);
-  }
-
-  /* 2‑column layout — editorial */
-  .editorial-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-    min-height: calc(100vh - 98px);
-  }
-
-  .editor-panel {
-    padding: 2rem 2.2rem;
-    overflow-y: auto;
-    background: var(--paper);
-    border-right: 1px solid var(--border-stroke);
-  }
-
-  .preview-panel {
-    padding: 2rem 2rem;
-    background: #fbf9f4;
-    overflow-y: auto;
-    box-shadow: inset 0 0 0 1px rgba(226, 219, 207, 0.4);
-  }
-
-  /* Typography & form refinement */
-  .section-caption {
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    font-weight: 500;
-    margin-bottom: 0.45rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .required {
-    color: var(--gold-mark);
-    font-size: 0.6rem;
-  }
-
-  .optional {
-    color: var(--ink-faint);
-    font-style: italic;
-    font-size: 0.6rem;
-  }
-
-  input, textarea, select {
-    width: 100%;
-    background: white;
+  .sp-backdrop.open { opacity: 1; pointer-events: all; }
+  .sp-modal {
+    background: var(--paper); border-radius: 24px; width: min(680px, 94vw);
+    max-height: 90vh; overflow: hidden; display: flex; flex-direction: column;
     border: 1px solid var(--border-stroke);
-    border-radius: 10px;
-    padding: 0.6rem 0.9rem;
-    font-family: 'Manrope', monospace;
-    font-size: 0.85rem;
-    color: var(--ink-rich);
-    transition: all 0.2s;
-    outline: none;
+    box-shadow: 0 40px 80px -20px rgba(0,0,0,0.5), 0 0 0 1px rgba(194,161,91,0.1);
+    transform: translateY(16px) scale(0.98); transition: transform 0.25s cubic-bezier(0.2,0.9,0.4,1);
   }
-
-  input:focus, textarea:focus, select:focus {
-    border-color: var(--gold-mark);
-    box-shadow: 0 0 0 3px rgba(194, 161, 91, 0.15);
+  .sp-backdrop.open .sp-modal { transform: translateY(0) scale(1); }
+  .sp-modal-header {
+    padding: 1.4rem 1.8rem 1rem;
+    border-bottom: 1px solid var(--border-stroke);
+    display: flex; justify-content: space-between; align-items: flex-start;
+    background: linear-gradient(to bottom, #fffdf6, var(--paper));
   }
-
-  .row-split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+  .sp-modal-title { font-family: 'Instrument Serif', serif; font-size: 1.5rem; color: var(--ink-rich); }
+  .sp-modal-desc { font-size: 0.75rem; color: var(--ink-faint); margin-top: 0.2rem; }
+  .sp-close-btn { background: none; border: 1px solid var(--border-stroke); border-radius: 50%; width: 28px; height: 28px; cursor: pointer; color: var(--ink-faint); font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+  .sp-close-btn:hover { background: #f5efe4; color: var(--ink-rich); }
+  .sp-modal-body { padding: 1.4rem 1.8rem; overflow-y: auto; flex: 1; }
+  .sp-textarea {
+    width: 100%; min-height: 180px; background: white; border: 1px solid var(--border-stroke);
+    border-radius: 14px; padding: 1rem 1.1rem; font-family: 'Manrope', sans-serif;
+    font-size: 0.85rem; color: var(--ink-rich); resize: vertical; outline: none;
+    transition: all 0.2s; line-height: 1.6;
   }
-
-  hr.divider {
-    margin: 1rem 0;
-    border: 0;
-    height: 1px;
-    background: linear-gradient(90deg, var(--border-stroke), transparent);
+  .sp-textarea:focus { border-color: var(--gold-mark); box-shadow: 0 0 0 3px rgba(194,161,91,0.15); }
+  .sp-options { margin: 1rem 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .sp-chip {
+    font-size: 0.68rem; font-weight: 500; padding: 0.3rem 0.9rem; border-radius: 30px;
+    border: 1px solid var(--border-stroke); background: white; cursor: pointer;
+    color: var(--ink-soft); transition: all 0.18s; display: flex; align-items: center; gap: 0.35rem;
+    user-select: none;
   }
-
-  /* block drag styling — tactile */
-  .body-block {
-    background: white;
-    border-radius: 14px;
-    border: 1px solid var(--border-stroke);
-    padding: 1rem;
-    transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  .sp-chip.selected { background: var(--gold-glow); border-color: var(--gold-mark); color: var(--ink-rich); }
+  .sp-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: none; }
+  .sp-chip.selected .dot { display: block; }
+  .sp-insert-mode { margin: 0.8rem 0; }
+  .sp-insert-mode .section-caption { margin-bottom: 0.5rem; }
+  .sp-radio-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .sp-radio {
+    font-size: 0.7rem; font-weight: 500; padding: 0.3rem 1rem; border-radius: 30px;
+    border: 1px solid var(--border-stroke); background: white; cursor: pointer;
+    color: var(--ink-soft); transition: all 0.18s;
   }
-
-  .body-block.is-dragging {
-    opacity: 0.5;
-    box-shadow: var(--shadow-subtle);
-    border-color: var(--gold-mark);
+  .sp-radio.active { background: var(--ink-rich); color: #fefcf5; border-color: var(--ink-rich); }
+  .sp-modal-footer { padding: 1rem 1.8rem 1.4rem; border-top: 1px solid var(--border-stroke); display: flex; gap: 0.75rem; align-items: center; }
+  .sp-run-btn {
+    font-family: 'Manrope', sans-serif; font-weight: 600;
+    background: var(--gold-mark); color: var(--ink-rich); border: none;
+    border-radius: 40px; padding: 0.75rem 1.8rem; font-size: 0.82rem;
+    cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em; display: flex; align-items: center; gap: 0.5rem;
   }
-
-  .drag-over-top {
-    border-top: 2px solid var(--gold-mark);
+  .sp-run-btn:hover:not(:disabled) { background: #b8943f; transform: translateY(-1px); }
+  .sp-run-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+  .sp-cancel-btn {
+    font-family: 'Manrope', sans-serif; font-size: 0.78rem; background: none;
+    border: 1px solid var(--border-stroke); border-radius: 40px; padding: 0.75rem 1.2rem;
+    color: var(--ink-soft); cursor: pointer; transition: all 0.2s;
   }
-
-  .drag-over-bottom {
-    border-bottom: 2px solid var(--gold-mark);
+  .sp-cancel-btn:hover { background: #f5efe4; }
+  .sp-status { flex: 1; font-size: 0.72rem; color: var(--ink-faint); }
+  .sp-progress {
+    margin: 0.8rem 0; padding: 0.8rem 1rem; background: white; border: 1px solid var(--border-stroke);
+    border-radius: 12px; font-size: 0.75rem; color: var(--ink-soft); display: none;
+    align-items: center; gap: 0.6rem;
   }
-
-  .drag-handle {
-    cursor: grab;
-    color: var(--ink-faint);
-    display: inline-flex;
-    align-items: center;
-    padding-right: 0.25rem;
-    touch-action: none;
+  .sp-progress.visible { display: flex; }
+  .sp-spinner { width: 14px; height: 14px; border: 2px solid var(--gold-glow); border-top-color: var(--gold-mark); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .sp-preview-result {
+    margin-top: 0.8rem; padding: 1rem; background: #fffdf7; border: 1px solid #e8dfc8;
+    border-radius: 12px; font-size: 0.78rem; color: var(--ink-soft); display: none;
+    max-height: 200px; overflow-y: auto;
   }
-
-  .drag-handle:active {
-    cursor: grabbing;
+  .sp-preview-result.visible { display: block; }
+  .sp-preview-result .sp-block-pill {
+    display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.62rem; font-weight: 600;
+    padding: 0.15rem 0.5rem; border-radius: 20px; background: #f1ede6; color: var(--ink-soft); margin: 2px;
   }
-
-  .block-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.8rem;
+  .sp-preview-result .sp-block-pill.h1 { background: #e8e0f0; color: #3d2d6b; }
+  .sp-preview-result .sp-block-pill.h2 { background: #e0eaf5; color: #1c3d5e; }
+  .sp-preview-result .sp-block-pill.h3 { background: #e0f0e8; color: #1b4a2f; }
+  .sp-preview-result .sp-block-pill.body { background: #f5f0e8; color: #4a3a20; }
+  .sp-preview-result .sp-block-pill.table { background: #f0e8f5; color: #3a1f5e; }
+  .sp-confirm-row { margin-top: 0.8rem; display: flex; gap: 0.5rem; display: none; }
+  .sp-confirm-row.visible { display: flex; }
+  .sp-apply-btn {
+    font-family: 'Manrope', sans-serif; font-weight: 600; font-size: 0.78rem;
+    background: #3b4b46; color: white; border: none; border-radius: 30px;
+    padding: 0.55rem 1.3rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.4rem;
   }
-
-  .type-badge {
-    font-size: 0.6rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    padding: 0.2rem 0.6rem;
-    border-radius: 30px;
-    background: #f1ede6;
-    color: var(--ink-soft);
+  .sp-apply-btn:hover { background: #2a3830; }
+  .sp-retry-btn {
+    font-family: 'Manrope', sans-serif; font-size: 0.75rem; background: none;
+    border: 1px solid var(--border-stroke); border-radius: 30px; padding: 0.55rem 1rem;
+    color: var(--ink-soft); cursor: pointer; transition: all 0.2s;
   }
-
-  .remove-btn {
-    background: none;
-    border: none;
-    font-size: 1rem;
-    cursor: pointer;
-    color: var(--ink-faint);
-    transition: color 0.15s;
-    line-height: 1;
-  }
-
-  .remove-btn:hover {
-    color: var(--danger-rose);
-  }
-
-  .add-btn {
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 500;
-    background: transparent;
-    border: 1px dashed var(--border-stroke);
-    padding: 0.4rem 1rem;
-    border-radius: 30px;
-    color: var(--ink-soft);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .add-btn:hover {
-    border-color: var(--gold-mark);
-    background: var(--gold-glow);
-    color: var(--ink-rich);
-  }
-
-  .img-upload-area {
-    border: 1.5px dashed var(--border-stroke);
-    border-radius: 16px;
-    padding: 1rem;
-    text-align: center;
-    background: #fefbf5;
-    transition: all 0.2s;
-    position: relative;
-  }
-
-  .img-upload-area:hover {
-    border-color: var(--gold-mark);
-    background: #fffaf0;
-  }
-
-  .img-preview-thumb {
-    max-width: 100%;
-    max-height: 100px;
-    object-fit: contain;
-    margin-top: 0.6rem;
-    border-radius: 8px;
-  }
-
-  .tbl-editor {
-    overflow-x: auto;
-    border-radius: 12px;
-    border: 1px solid var(--border-stroke);
-  }
-
-  .tbl-editor table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.75rem;
-  }
-
-  .tbl-editor td {
-    border: 1px solid var(--border-stroke);
-    padding: 0;
-  }
-
-  .tbl-editor input {
-    border: none;
-    padding: 0.45rem 0.6rem;
-    border-radius: 0;
-    background: white;
-  }
-
-  .tbl-head-cell {
-    background: #f3efe8;
-  }
-
-  .tbl-btn {
-    font-size: 0.65rem;
-    background: white;
-    border: 1px solid var(--border-stroke);
-    border-radius: 20px;
-    padding: 0.2rem 0.8rem;
-    margin-right: 0.3rem;
-    cursor: pointer;
-  }
-
-  .generate-btn {
-    font-family: 'Manrope', sans-serif;
-    font-weight: 600;
-    background: var(--ink-rich);
-    color: #fefcf5;
-    border: none;
-    border-radius: 40px;
-    padding: 0.9rem 1.8rem;
-    width: 100%;
-    margin-top: 1rem;
-    cursor: pointer;
-    font-size: 0.85rem;
-    letter-spacing: 0.02em;
-    transition: all 0.2s;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  }
-
-  .generate-btn:hover {
-    background: #2f2a24;
-    transform: translateY(-1px);
-  }
-
-  /* PREVIEW — editorial elegance */
-  .preview-shell {
-    background: white;
-    border-radius: 24px;
-    box-shadow: var(--shadow-subtle);
-    padding: 2rem 2rem;
-    min-height: 560px;
-    position: relative;
-    font-family: 'Instrument Serif', Georgia, serif;
-    border: 1px solid #e9e2d6;
-  }
-
-  .preview-shell::after {
-    content: '⚘  preview';
-    position: absolute;
-    bottom: 1rem;
-    right: 1.5rem;
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.55rem;
-    letter-spacing: 0.2em;
-    color: #cfc7bb;
-    text-transform: uppercase;
-  }
-
-  .prev-title {
-    font-size: 26pt;
-    font-weight: 500;
-    text-align: center;
-    font-family: 'Instrument Serif', serif;
-    letter-spacing: -0.3px;
-    margin-bottom: 0.2rem;
-    color: #1e1914;
-  }
-
-  .prev-subtitle {
-    font-size: 18pt;
-    font-weight: 400;
-    text-align: center;
-    font-family: 'Instrument Serif', serif;
-    color: #4d443a;
-    margin-bottom: 0.5rem;
-  }
-
-  .prev-meta {
-    font-size: 10pt;
-    text-align: center;
-    font-family: 'Manrope', sans-serif;
-    color: #5c554b;
-    line-height: 1.6;
-    margin: 1rem 0 0.5rem;
-  }
-
-  .prev-rule {
-    border: none;
-    height: 1px;
-    background: #d8cfc0;
-    margin: 0.8rem 0 1rem;
-  }
-
-  .prev-h1 {
-    font-size: 18pt;
-    font-weight: 500;
-    font-family: 'Instrument Serif', serif;
-    margin: 1.2rem 0 0.3rem;
-    letter-spacing: -0.2px;
-  }
-
-  .prev-h2 {
-    font-size: 15pt;
-    font-weight: 500;
-    font-family: 'Instrument Serif', serif;
-    margin: 1rem 0 0.2rem;
-    color: #2d2a24;
-  }
-
-  .prev-h3 {
-    font-size: 13pt;
-    font-weight: 500;
-    font-style: italic;
-    font-family: 'Instrument Serif', serif;
-    margin: 0.8rem 0 0.2rem;
-  }
-
-  .prev-body {
-    font-size: 11.5pt;
-    line-height: 1.55;
-    text-align: justify;
-    font-family: 'Instrument Serif', serif;
-    margin-bottom: 1rem;
-    color: #2a241e;
-  }
-
-  .prev-img-block {
-    text-align: center;
-    margin: 1rem 0;
-    background: #fcf9f2;
-    border-radius: 12px;
-    padding: 0.8rem;
-  }
-
-  .prev-caption {
-    font-size: 9pt;
-    font-style: italic;
-    font-family: 'Manrope', sans-serif;
-    color: #6b6256;
-    margin-top: 0.3rem;
-  }
-
-  .status-bar {
-    margin: 0.5rem 0;
-    font-size: 0.75rem;
-    border-radius: 40px;
-    padding: 0.5rem 1rem;
-    background: var(--accent-mist);
-    color: var(--accent-slate);
-    display: none;
-  }
-
-  .status-bar.visible {
-    display: block;
-  }
-
-  .status-bar.error {
-    background: #f8e2db;
-    color: var(--danger-rose);
-  }
-
-  .drag-hint {
-    font-size: 0.6rem;
-    text-align: center;
-    color: var(--ink-faint);
-    margin: 0.2rem 0;
-    letter-spacing: 0.3px;
-  }
+  .sp-retry-btn:hover { background: #f5efe4; }
 
   @media (max-width: 800px) {
-    .editorial-layout {
-      grid-template-columns: 1fr;
-    }
-    .editor-panel {
-      border-right: none;
-      border-bottom: 1px solid var(--border-stroke);
-    }
+    .editorial-layout { grid-template-columns: 1fr; }
+    .editor-panel { border-right: none; border-bottom: 1px solid var(--border-stroke); }
+    .press-header { padding: 1rem 1.4rem; }
   }
 </style>
 </head>
@@ -515,18 +214,76 @@
   <div class="title-group">
     <div class="eyebrow" data-i18n="eyebrow">ACADEMIC PRESS · FOLIO</div>
     <h1 data-i18n="h1">Shirley's Report Formatter</h1>
-    <div class="sub" data-i18n="subtitle">drag blocks · typographic precision · word export</div>
+    <div class="sub" data-i18n="subtitle">drag blocks · smart paste · typographic precision · word export</div>
   </div>
-  <div class="lang-switch">
-    <button class="lang-btn active" onclick="setLang('en')">EN</button>
-    <button class="lang-btn" onclick="setLang('zh')">繁中</button>
+  <div class="header-right">
+    <button class="smart-paste-trigger" onclick="openSmartPaste()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M2 4h7M2 8h9M2 12h5"/>
+        <path d="M11 9l3 3-3 3M14 12H9" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span data-i18n="btnSmartPaste">Smart Paste</span>
+    </button>
+    <div class="lang-switch">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('zh')">繁中</button>
+    </div>
+  </div>
+</div>
+
+<!-- SMART PASTE MODAL -->
+<div class="sp-backdrop" id="spBackdrop" onclick="handleBackdropClick(event)">
+  <div class="sp-modal" id="spModal">
+    <div class="sp-modal-header">
+      <div>
+        <div class="sp-modal-title" data-i18n="spTitle">Smart Paste</div>
+        <div class="sp-modal-desc" data-i18n="spDesc">Paste raw text — AI detects structure and formats into blocks automatically</div>
+      </div>
+      <button class="sp-close-btn" onclick="closeSmartPaste()">✕</button>
+    </div>
+    <div class="sp-modal-body">
+      <textarea class="sp-textarea" id="spText" data-i18n-ph="spPh" placeholder="Paste your text here — paragraphs, headings, bullet points, data, anything…"></textarea>
+
+      <div class="sp-options">
+        <div class="section-caption" style="width:100%; margin-bottom:0;" data-i18n="spDetect">DETECT</div>
+        <div class="sp-chip selected" data-type="headings" onclick="toggleChip(this)" data-i18n-chip="spChipHeadings"><span class="dot"></span>Headings</div>
+        <div class="sp-chip selected" data-type="paragraphs" onclick="toggleChip(this)" data-i18n-chip="spChipParagraphs"><span class="dot"></span>Paragraphs</div>
+        <div class="sp-chip selected" data-type="tables" onclick="toggleChip(this)" data-i18n-chip="spChipTables"><span class="dot"></span>Tables / Lists</div>
+        <div class="sp-chip selected" data-type="metadata" onclick="toggleChip(this)" data-i18n-chip="spChipMeta"><span class="dot"></span>Title / Author / Date</div>
+      </div>
+
+      <div class="sp-insert-mode">
+        <div class="section-caption" data-i18n="spInsertMode">INSERT MODE</div>
+        <div class="sp-radio-row">
+          <div class="sp-radio active" data-mode="append" onclick="setInsertMode(this)" data-i18n="spModeAppend">Append to end</div>
+          <div class="sp-radio" data-mode="replace" onclick="setInsertMode(this)" data-i18n="spModeReplace">Replace all blocks</div>
+          <div class="sp-radio" data-mode="cursor" onclick="setInsertMode(this)" data-i18n="spModeCursor">After last block</div>
+        </div>
+      </div>
+
+      <div class="sp-preview-result" id="spPreviewResult"></div>
+      <div class="sp-confirm-row" id="spConfirmRow">
+        <button class="sp-apply-btn" onclick="applyParsedBlocks()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,7 5,10 11,3"/></svg>
+          <span data-i18n="spApply">Apply Blocks</span>
+        </button>
+        <button class="sp-retry-btn" onclick="runSmartPaste()" data-i18n="spRetry">Re-analyse</button>
+      </div>
+    </div>
+    <div class="sp-modal-footer">
+      <button class="sp-run-btn" id="spRunBtn" onclick="runSmartPaste()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="3,1 12,6.5 3,12" fill="currentColor" stroke="none"/></svg>
+        <span data-i18n="spRun">Analyse & Format</span>
+      </button>
+      <button class="sp-cancel-btn" onclick="closeSmartPaste()" data-i18n="spCancel">Cancel</button>
+      <span class="sp-status" id="spStatusMsg"></span>
+    </div>
   </div>
 </div>
 
 <div class="editorial-layout">
   <div class="editor-panel">
     <div class="section-caption" data-i18n="panelTitle">REPORT CONTENT</div>
-
     <div class="field-group" style="margin-bottom: 1rem;">
       <div class="section-caption" data-i18n="lblTitle">Title <span class="required">✦</span></div>
       <input type="text" id="fTitle" data-i18n-ph="phTitle" oninput="updatePreview()"/>
@@ -549,18 +306,18 @@
       <input type="text" id="fTeacher" data-i18n-ph="phInstructor" oninput="updatePreview()"/>
     </div>
     <hr class="divider"/>
-
-    <div><div class="section-caption" style="margin-bottom: 0.6rem;" data-i18n="lblBody">BODY COMPOSITION</div>
-    <div id="blocksContainer" style="display:flex;flex-direction:column;gap:0.8rem;"></div>
-    <div id="dragHint" class="drag-hint" style="display:none;" data-i18n="dragHint">⟡ drag handle to reorder blocks</div>
-    <div class="add-block-row" style="display:flex; gap:0.5rem; flex-wrap:wrap; margin: 1rem 0 0.4rem;">
-      <button class="add-btn" onclick="addBlock('h1')" data-i18n="btnH1">+ Heading 1</button>
-      <button class="add-btn" onclick="addBlock('h2')" data-i18n="btnH2">+ Heading 2</button>
-      <button class="add-btn" onclick="addBlock('h3')" data-i18n="btnH3">+ Heading 3</button>
-      <button class="add-btn" onclick="addBlock('body')" data-i18n="btnPara">+ Paragraph</button>
-      <button class="add-btn" onclick="addBlock('image')" data-i18n="btnImage">+ Image</button>
-      <button class="add-btn" onclick="addBlock('table')" data-i18n="btnTable">+ Table</button>
-    </div>
+    <div>
+      <div class="section-caption" style="margin-bottom: 0.6rem;" data-i18n="lblBody">BODY COMPOSITION</div>
+      <div id="blocksContainer" style="display:flex;flex-direction:column;gap:0.8rem;"></div>
+      <div id="dragHint" class="drag-hint" style="display:none;" data-i18n="dragHint">⟡ drag handle to reorder blocks</div>
+      <div class="add-block-row" style="display:flex; gap:0.5rem; flex-wrap:wrap; margin: 1rem 0 0.4rem;">
+        <button class="add-btn" onclick="addBlock('h1')" data-i18n="btnH1">+ Heading 1</button>
+        <button class="add-btn" onclick="addBlock('h2')" data-i18n="btnH2">+ Heading 2</button>
+        <button class="add-btn" onclick="addBlock('h3')" data-i18n="btnH3">+ Heading 3</button>
+        <button class="add-btn" onclick="addBlock('body')" data-i18n="btnPara">+ Paragraph</button>
+        <button class="add-btn" onclick="addBlock('image')" data-i18n="btnImage">+ Image</button>
+        <button class="add-btn" onclick="addBlock('table')" data-i18n="btnTable">+ Table</button>
+      </div>
     </div>
     <div id="statusBar" class="status-bar"></div>
     <button class="generate-btn" onclick="generateDoc()" id="genBtn" data-i18n="btnGenerate">↓ Download Formatted Report (.docx)</button>
@@ -568,132 +325,441 @@
   <div class="preview-panel">
     <div class="section-caption" data-i18n="previewTitle">LIVE PROOF</div>
     <div class="preview-shell">
-      <div id="emptyState" class="empty-preview" style="display:flex; align-items:center; justify-content:center; height:300px; flex-direction:column; color:#bcb2a5;"><span style="font-size:2rem;">¶</span><p data-i18n="emptyHint">Begin writing — preview appears</p></div>
+      <div id="emptyState" style="display:flex; align-items:center; justify-content:center; height:300px; flex-direction:column; color:#bcb2a5;"><span style="font-size:2rem;">¶</span><p data-i18n="emptyHint">Begin writing — preview appears</p></div>
       <div id="previewContent" style="display:none;"></div>
     </div>
   </div>
 </div>
 
 <script>
-  // ---------- TRANSLATIONS (refined) ----------
-  const T = {
-    en: {
-      eyebrow: "ACADEMIC PRESS · FOLIO", h1: "Shirley's Report Formatter", subtitle: "drag blocks · typographic precision · word export",
-      panelTitle: "REPORT CONTENT", previewTitle: "LIVE PROOF", emptyHint: "Begin writing — preview appears", dragHint: "⟡ drag handle to reorder blocks",
-      lblTitle: "Title", lblSubtitle: "Subtitle", lblAuthor: "Author", lblDate: "Date",
-      lblClass: "Class / Course", lblSeat: "Seat No.", lblInstructor: "Instructor", lblBody: "BODY COMPOSITION",
-      phTitle: "The Architecture of Memory", phSubtitle: "a spatial inquiry", phAuthor: "Alexandra Chen",
-      phClass: "ARC 402", phSeat: "12", phInstructor: "Prof. Rivera",
-      btnH1: "+ Heading 1", btnH2: "+ Heading 2", btnH3: "+ Heading 3", btnPara: "+ Paragraph", btnImage: "+ Image", btnTable: "+ Table",
-      btnGenerate: "↓ Download Formatted Report (.docx)", btnGenerating: "⟳ Building document…",
-      badgeH1: "H1", badgeH2: "H2", badgeH3: "H3", badgeBody: "P", badgeImage: "IMG", badgeTable: "TBL",
-      phH1: "e.g., Introduction", phH2: "e.g., 1.1 Background", phH3: "e.g., 1.1.1 Data", phPara: "Write narrative here...",
-      phImgUpload: "click or drag image", lblImgW: "Width (cm)", lblImgH: "Height (cm)", lblFigCaption: "Figure caption", phFigCaption: "Fig. 1 — Diagram",
-      lblTblCaption: "Table caption", phTblCaption: "Table 1 — Summary",
-      tblBtnAddRow: "+ Row", tblBtnAddCol: "+ Col", tblBtnDelRow: "− Row", tblBtnDelCol: "− Col", tblHeaderPh: "Header", tblCellPh: "Cell",
-      docAuthor: "Author:", docClass: "Course:", docSeat: "Seat:", docInstructor: "Instructor:", docDate: "Date:",
-      statusOk: "✓ Report exported successfully", statusErr: "Error: ", needTitle: "Title required before export."
-    },
-    zh: {
-      eyebrow: "學術出版社 · 文檔", h1: "報告排版工具", subtitle: "拖曳區塊 · 字體精排 · Word輸出",
-      panelTitle: "報告內容", previewTitle: "即時校樣", emptyHint: "開始輸入 — 預覽即時呈現", dragHint: "⟡ 拖曳把手重新排序區塊",
-      lblTitle: "標題", lblSubtitle: "副標題", lblAuthor: "作者", lblDate: "日期",
-      lblClass: "班級／課程", lblSeat: "座號", lblInstructor: "指導教師", lblBody: "內文結構",
-      phTitle: "記憶的建築", phSubtitle: "空間性考察", phAuthor: "陳雅琳",
-      phClass: "建築 402", phSeat: "12", phInstructor: "林教授",
-      btnH1: "+ 一級標題", btnH2: "+ 二級標題", btnH3: "+ 三級標題", btnPara: "+ 段落", btnImage: "+ 圖片", btnTable: "+ 表格",
-      btnGenerate: "↓ 下載格式化報告 (.docx)", btnGenerating: "⟳ 生成文件中…",
-      badgeH1: "H1", badgeH2: "H2", badgeH3: "H3", badgeBody: "P", badgeImage: "圖", badgeTable: "表",
-      phH1: "例：緒論", phH2: "例：1.1 研究背景", phH3: "例：1.1.1 資料來源", phPara: "在此撰寫段落內容…",
-      phImgUpload: "點擊或拖曳圖片", lblImgW: "寬度 (公分)", lblImgH: "高度 (公分)", lblFigCaption: "圖說", phFigCaption: "圖一 — 概念圖",
-      lblTblCaption: "表格說明", phTblCaption: "表一 — 綜合比較",
-      tblBtnAddRow: "+ 新增列", tblBtnAddCol: "+ 新增欄", tblBtnDelRow: "− 刪除列", tblBtnDelCol: "− 刪除欄", tblHeaderPh: "標題", tblCellPh: "儲存格",
-      docAuthor: "作者：", docClass: "課程：", docSeat: "座號：", docInstructor: "教師：", docDate: "日期：",
-      statusOk: "✓ 報告匯出成功", statusErr: "錯誤：", needTitle: "請先填寫標題。"
-    }
-  };
-
-  let lang = 'en';
-  let blockId = 0;
-  let blocks = [];
-  const imageStore = {};
-  const tableStore = {};
-
-  function t(key) { return T[lang][key] || T.en[key] || key; }
-
-  function setLang(l) {
-    lang = l;
-    document.documentElement.lang = l === 'zh' ? 'zh-TW' : 'en';
-    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.toggle('active', btn.innerText === (l==='en'?'EN':'繁中')));
-    document.querySelectorAll('[data-i18n]').forEach(el => el.innerHTML = t(el.getAttribute('data-i18n')));
-    document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = t(el.getAttribute('data-i18n-ph')));
-    blocks.forEach(b => refreshBlockLabels(b.id, b.type));
-    updatePreview();
+const T = {
+  en: {
+    eyebrow:"ACADEMIC PRESS · FOLIO", h1:"Shirley's Report Formatter", subtitle:"drag blocks · smart paste · typographic precision · word export",
+    panelTitle:"REPORT CONTENT", previewTitle:"LIVE PROOF", emptyHint:"Begin writing — preview appears", dragHint:"⟡ drag handle to reorder blocks",
+    lblTitle:"Title", lblSubtitle:"Subtitle", lblAuthor:"Author", lblDate:"Date",
+    lblClass:"Class / Course", lblSeat:"Seat No.", lblInstructor:"Instructor", lblBody:"BODY COMPOSITION",
+    phTitle:"The Architecture of Memory", phSubtitle:"a spatial inquiry", phAuthor:"Alexandra Chen",
+    phClass:"ARC 402", phSeat:"12", phInstructor:"Prof. Rivera",
+    btnH1:"+ Heading 1", btnH2:"+ Heading 2", btnH3:"+ Heading 3", btnPara:"+ Paragraph", btnImage:"+ Image", btnTable:"+ Table",
+    btnGenerate:"↓ Download Formatted Report (.docx)", btnGenerating:"⟳ Building document…",
+    btnSmartPaste:"Smart Paste",
+    badgeH1:"H1", badgeH2:"H2", badgeH3:"H3", badgeBody:"P", badgeImage:"IMG", badgeTable:"TBL",
+    phH1:"e.g., Introduction", phH2:"e.g., 1.1 Background", phH3:"e.g., 1.1.1 Data", phPara:"Write narrative here...",
+    phImgUpload:"click or drag image", lblImgW:"Width (cm)", lblImgH:"Height (cm)", lblFigCaption:"Figure caption", phFigCaption:"Fig. 1 — Diagram",
+    lblTblCaption:"Table caption", phTblCaption:"Table 1 — Summary",
+    tblBtnAddRow:"+ Row", tblBtnAddCol:"+ Col", tblBtnDelRow:"− Row", tblBtnDelCol:"− Col", tblHeaderPh:"Header", tblCellPh:"Cell",
+    docAuthor:"Author:", docClass:"Course:", docSeat:"Seat:", docInstructor:"Instructor:", docDate:"Date:",
+    statusOk:"✓ Report exported successfully", statusErr:"Error: ", needTitle:"Title required before export.",
+    spTitle:"Smart Paste", spDesc:"Paste raw text — auto-detects headings, paragraphs, lists & tables instantly",
+    spPh:"Paste your text here — paragraphs, headings, bullet points, data, anything…",
+    spDetect:"DETECT", spChipHeadings:"Headings", spChipParagraphs:"Paragraphs", spChipTables:"Tables / Lists", spChipMeta:"Title / Author / Date",
+    spInsertMode:"INSERT MODE", spModeAppend:"Append to end", spModeReplace:"Replace all blocks", spModeCursor:"After last block",
+    spProcessing:"Analysing structure…", spRun:"Analyse & Format", spCancel:"Cancel",
+    spApply:"Apply Blocks", spRetry:"Re-analyse",
+    spEmpty:"Please paste some text first.", spNoBlocks:"No structured blocks detected. Try more text.",
+    spSuccess:"blocks ready to apply", spErr:"Analysis failed — check console",
+    spMetaFilled:"Metadata fields updated from text."
+  },
+  zh: {
+    eyebrow:"學術出版社 · 文檔", h1:"報告排版工具", subtitle:"拖曳區塊 · 智慧貼上 · 字體精排 · Word輸出",
+    panelTitle:"報告內容", previewTitle:"即時校樣", emptyHint:"開始輸入 — 預覽即時呈現", dragHint:"⟡ 拖曳把手重新排序區塊",
+    lblTitle:"標題", lblSubtitle:"副標題", lblAuthor:"作者", lblDate:"日期",
+    lblClass:"班級／課程", lblSeat:"座號", lblInstructor:"指導教師", lblBody:"內文結構",
+    phTitle:"記憶的建築", phSubtitle:"空間性考察", phAuthor:"陳雅琳",
+    phClass:"建築 402", phSeat:"12", phInstructor:"林教授",
+    btnH1:"+ 一級標題", btnH2:"+ 二級標題", btnH3:"+ 三級標題", btnPara:"+ 段落", btnImage:"+ 圖片", btnTable:"+ 表格",
+    btnGenerate:"↓ 下載格式化報告 (.docx)", btnGenerating:"⟳ 生成文件中…",
+    btnSmartPaste:"智慧貼上",
+    badgeH1:"H1", badgeH2:"H2", badgeH3:"H3", badgeBody:"P", badgeImage:"圖", badgeTable:"表",
+    phH1:"例：緒論", phH2:"例：1.1 研究背景", phH3:"例：1.1.1 資料來源", phPara:"在此撰寫段落內容…",
+    phImgUpload:"點擊或拖曳圖片", lblImgW:"寬度 (公分)", lblImgH:"高度 (公分)", lblFigCaption:"圖說", phFigCaption:"圖一 — 概念圖",
+    lblTblCaption:"表格說明", phTblCaption:"表一 — 綜合比較",
+    tblBtnAddRow:"+ 新增列", tblBtnAddCol:"+ 新增欄", tblBtnDelRow:"− 刪除列", tblBtnDelCol:"− 刪除欄", tblHeaderPh:"標題", tblCellPh:"儲存格",
+    docAuthor:"作者：", docClass:"課程：", docSeat:"座號：", docInstructor:"教師：", docDate:"日期：",
+    statusOk:"✓ 報告匯出成功", statusErr:"錯誤：", needTitle:"請先填寫標題。",
+    spTitle:"智慧貼上", spDesc:"貼上原始文字 — 自動偵測標題、段落、清單與表格，即時轉換",
+    spPh:"在此貼上文字 — 段落、標題、項目符號、資料皆可…",
+    spDetect:"偵測項目", spChipHeadings:"標題", spChipParagraphs:"段落", spChipTables:"表格 / 清單", spChipMeta:"標題 / 作者 / 日期",
+    spInsertMode:"插入模式", spModeAppend:"附加到末尾", spModeReplace:"取代所有區塊", spModeCursor:"在最後區塊之後",
+    spProcessing:"分析結構中…", spRun:"分析並格式化", spCancel:"取消",
+    spApply:"套用區塊", spRetry:"重新分析",
+    spEmpty:"請先貼上一些文字。", spNoBlocks:"未偵測到結構化區塊，請輸入更多文字。",
+    spSuccess:"個區塊準備套用", spErr:"分析失敗，請查看主控台",
+    spMetaFilled:"已從文字更新元資料欄位。"
   }
+};
 
-  function refreshBlockLabels(id, type) {
-    const badge = document.getElementById('badge-'+id); if(badge) badge.textContent = t('badge'+type[0].toUpperCase()+type.slice(1)) || type;
-    const inp = document.getElementById('input-'+id); if(inp && ['h1','h2','h3','body'].includes(type)) inp.placeholder = t('ph'+type.toUpperCase());
-    const upl = document.getElementById('uploadLabel-'+id); if(upl && !imageStore[id]) upl.textContent = t('phImgUpload');
-    const wl = document.getElementById('imgWLabel-'+id); if(wl) wl.textContent = t('lblImgW');
-    const hl = document.getElementById('imgHLabel-'+id); if(hl) hl.textContent = t('lblImgH');
-    const fcl = document.getElementById('figCapLabel-'+id); if(fcl) fcl.innerHTML = t('lblFigCaption');
-    const tcl = document.getElementById('tblCapLabel-'+id); if(tcl) tcl.innerHTML = t('lblTblCaption');
-    const tcp = document.getElementById('tblCaption-'+id); if(tcp) tcp.placeholder = t('phTblCaption');
-    ['addRow','addCol','delRow','delCol'].forEach(op => { let btn = document.getElementById(`tblBtn-${op}-${id}`); if(btn) btn.textContent = t('tblBtn'+op[0].toUpperCase()+op.slice(1)); });
-    if(type === 'table'){ let ed = document.getElementById('tblEditor-'+id); if(ed) ed.innerHTML = renderTableEditor(id); }
-  }
+let lang = 'en';
+let blockId = 0;
+let blocks = [];
+const imageStore = {};
+const tableStore = {};
+let parsedBlocks = [];
+let spInsertMode = 'append';
 
-  function val(id){ let e = document.getElementById(id); return e ? e.value : ''; }
-  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  function formatDate(d){ if(!d) return ''; try { if(lang==='zh'){ let dt=new Date(d+'T12:00:00'); return `${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日`; } return new Date(d+'T12:00:00').toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}); } catch(e){ return d; } }
-  function setStatus(msg,isErr){ let b=document.getElementById('statusBar'); b.textContent=msg; b.className='status-bar visible'+(isErr?' error':''); setTimeout(()=>{ if(b.className.includes('visible')) b.className='status-bar'; }, 4200); }
+function t(key) { return T[lang][key] || T.en[key] || key; }
 
-  // DRAG
-  let dragSrcId = null;
-  function attachDragEvents(el, id){
-    el.setAttribute('draggable', 'true');
-    el.addEventListener('dragstart', e => { dragSrcId = id; el.classList.add('is-dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(id)); });
-    el.addEventListener('dragend', () => { el.classList.remove('is-dragging'); document.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(x => x.classList.remove('drag-over-top','drag-over-bottom')); dragSrcId = null; });
-    el.addEventListener('dragover', e => { if(dragSrcId === null || dragSrcId === id) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; let rect = el.getBoundingClientRect(); let mid = rect.top + rect.height/2; el.classList.toggle('drag-over-top', e.clientY < mid); el.classList.toggle('drag-over-bottom', e.clientY >= mid); });
-    el.addEventListener('dragleave', () => { el.classList.remove('drag-over-top','drag-over-bottom'); });
-    el.addEventListener('drop', e => { if(dragSrcId === null || dragSrcId === id) return; e.preventDefault(); el.classList.remove('drag-over-top','drag-over-bottom'); let rect = el.getBoundingClientRect(); let before = e.clientY < rect.top + rect.height/2; let srcIdx = blocks.findIndex(b => b.id === dragSrcId); let destIdx = blocks.findIndex(b => b.id === id); if(srcIdx === -1 || destIdx === -1) return; let [moved] = blocks.splice(srcIdx,1); let newDest = blocks.findIndex(b => b.id === id); blocks.splice(before ? newDest : newDest+1, 0, moved); let container = document.getElementById('blocksContainer'); blocks.forEach(b => { let dom = document.getElementById('block-'+b.id); if(dom) container.appendChild(dom); }); updatePreview(); });
-  }
-
-  function addBlock(type){
-    let id = blockId++;
-    blocks.push({ id, type });
-    let div = document.createElement('div'); div.className = 'body-block'; div.id = 'block-'+id;
-    let inner = `<div class="block-header"><div class="block-header-left"><span class="drag-handle"><svg width="12" height="14" viewBox="0 0 12 14" fill="none"><circle cx="3" cy="3" r="1.2" fill="currentColor"/><circle cx="8" cy="3" r="1.2" fill="currentColor"/><circle cx="3" cy="7" r="1.2" fill="currentColor"/><circle cx="8" cy="7" r="1.2" fill="currentColor"/><circle cx="3" cy="11" r="1.2" fill="currentColor"/><circle cx="8" cy="11" r="1.2" fill="currentColor"/></svg></span><span class="type-badge" id="badge-${id}">${t('badge'+type[0].toUpperCase()+type.slice(1))}</span></div><button class="remove-btn" onclick="removeBlock(${id})">✕</button></div>`;
-    if(type === 'body') inner += `<textarea id="input-${id}" rows="3" placeholder="${t('phPara')}" oninput="updatePreview()"></textarea>`;
-    else if(['h1','h2','h3'].includes(type)) inner += `<input type="text" id="input-${id}" placeholder="${t('ph'+type.toUpperCase())}" oninput="updatePreview()"/>`;
-    else if(type === 'image'){
-      inner += `<div class="img-upload-area" id="uploadArea-${id}"><input type="file" accept="image/*" onchange="handleImageUpload(${id},this)"/><div id="uploadLabel-${id}">${t('phImgUpload')}</div><img id="imgThumb-${id}" class="img-preview-thumb" style="display:none;"/></div>
-      <div class="img-size-row" style="display:grid; gap:0.5rem; grid-template-columns:1fr 1fr; margin-top:0.5rem;" id="imgSizeRow-${id}" style="display:none;"><label><span id="imgWLabel-${id}">${t('lblImgW')}</span><input type="number" id="imgW-${id}" min="1" max="16" step="0.5" value="10" oninput="updatePreview()"/></label><label><span id="imgHLabel-${id}">${t('lblImgH')}</span><input type="number" id="imgH-${id}" min="1" max="22" step="0.5" value="7" oninput="updatePreview()"/></label></div>
-      <div style="margin-top:.4rem;"><div class="section-caption" id="figCapLabel-${id}">${t('lblFigCaption')}</div><input type="text" id="imgCaption-${id}" placeholder="${t('phFigCaption')}" oninput="updatePreview()"/></div>`;
-    } else if(type === 'table'){
-      tableStore[id] = { rows: [['Variable','Estimate','p-value'],['x1','0.42','0.03'],['x2','-0.18','0.21']] };
-      inner += `<div class="tbl-editor" id="tblEditor-${id}">${renderTableEditor(id)}</div>
-      <div class="tbl-controls" style="margin:0.5rem 0 0;"><button class="tbl-btn" id="tblBtn-addRow-${id}" onclick="tblOp(${id},'addRow')">${t('tblBtnAddRow')}</button><button class="tbl-btn" id="tblBtn-addCol-${id}" onclick="tblOp(${id},'addCol')">${t('tblBtnAddCol')}</button><button class="tbl-btn danger" id="tblBtn-delRow-${id}" onclick="tblOp(${id},'delRow')">${t('tblBtnDelRow')}</button><button class="tbl-btn danger" id="tblBtn-delCol-${id}" onclick="tblOp(${id},'delCol')">${t('tblBtnDelCol')}</button></div>
-      <div style="margin-top:.5rem;"><div class="section-caption" id="tblCapLabel-${id}">${t('lblTblCaption')}</div><input type="text" id="tblCaption-${id}" placeholder="${t('phTblCaption')}" oninput="updatePreview()"/></div>`;
-    }
-    div.innerHTML = inner;
-    document.getElementById('blocksContainer').appendChild(div);
-    attachDragEvents(div, id);
-    if(blocks.length >= 2) document.getElementById('dragHint').style.display = 'block';
-    updatePreview();
-  }
-
-  function removeBlock(id){ let idx = blocks.findIndex(b=>b.id===id); if(idx!==-1) blocks.splice(idx,1); delete imageStore[id]; delete tableStore[id]; let el = document.getElementById('block-'+id); if(el) el.remove(); if(blocks.length<2) document.getElementById('dragHint').style.display='none'; updatePreview(); }
-
-  function handleImageUpload(id, input){ let file = input.files[0]; if(!file) return; let reader = new FileReader(); reader.onload = e => { let dataUrl = e.target.result; let img = new Image(); img.onload = () => { imageStore[id] = { dataUrl, name:file.name, origW:img.width, origH:img.height }; let thumb=document.getElementById('imgThumb-'+id); if(thumb){ thumb.src=dataUrl; thumb.style.display='block'; } let sRow=document.getElementById('imgSizeRow-'+id); if(sRow) sRow.style.display='grid'; let wEl=document.getElementById('imgW-'+id), hEl=document.getElementById('imgH-'+id); if(wEl) wEl.value=Math.min(13,Math.round(img.width*2.54/96*10)/10); updatePreview(); }; img.src=dataUrl; }; reader.readAsDataURL(file); }
-  function renderTableEditor(id){ let tb = tableStore[id]; if(!tb) return '<table>...</table>'; let html = '<table>'; tb.rows.forEach((row,ri)=>{ html+='<tr>'+row.map((cell,ci)=>`<td class="${ri===0?'tbl-head-cell':''}"><input type="text" value="${esc(cell)}" placeholder="${ri===0?t('tblHeaderPh'):t('tblCellPh')}" oninput="updateCell(${id},${ri},${ci},this.value)"/></td>`).join('')+'</tr>'; }); return html+'</table>'; }
-  function updateCell(id,ri,ci,v){ if(tableStore[id]) tableStore[id].rows[ri][ci]=v; updatePreview(); }
-  function tblOp(id,op){ let tb = tableStore[id]; if(!tb) return; let cols = tb.rows[0]?.length||1; if(op==='addRow') tb.rows.push(Array(cols).fill('')); if(op==='addCol') tb.rows.forEach(r=>r.push('')); if(op==='delRow' && tb.rows.length>1) tb.rows.pop(); if(op==='delCol' && cols>1) tb.rows.forEach(r=>r.pop()); let el = document.getElementById('tblEditor-'+id); if(el) el.innerHTML = renderTableEditor(id); updatePreview(); }
-  function updatePreview(){ let title=val('fTitle'), subtitle=val('fSubtitle'); let author=val('fAuthor'), date=val('fDate'), cls=val('fClass'), seat=val('fSeat'), teacher=val('fTeacher'); let emptyEl=document.getElementById('emptyState'), contentEl=document.getElementById('previewContent'); if(!title && !author && blocks.length===0){ emptyEl.style.display='flex'; contentEl.style.display='none'; return; } emptyEl.style.display='none'; contentEl.style.display='block'; let html=''; if(title) html+=`<div class="prev-title">${esc(title)}</div>`; if(subtitle) html+=`<div class="prev-subtitle">${esc(subtitle)}</div>`; let meta=[]; if(author) meta.push(`<b>${t('docAuthor')}</b> ${esc(author)}`); if(cls) meta.push(`<b>${t('docClass')}</b> ${esc(cls)}`); if(seat) meta.push(`<b>${t('docSeat')}</b> ${esc(seat)}`); if(teacher) meta.push(`<b>${t('docInstructor')}</b> ${esc(teacher)}`); if(date) meta.push(`<b>${t('docDate')}</b> ${esc(formatDate(date))}`); if(meta.length) html+=`<div class="prev-meta">${meta.join(' · ')}</div>`; if(title||meta.length) html+=`<hr class="prev-rule"/>`; blocks.forEach(b=>{ let v = ['h1','h2','h3','body'].includes(b.type) ? val('input-'+b.id) : null; if(b.type==='h1' && v) html+=`<div class="prev-h1">${esc(v)}</div>`; else if(b.type==='h2' && v) html+=`<div class="prev-h2">${esc(v)}</div>`; else if(b.type==='h3' && v) html+=`<div class="prev-h3">${esc(v)}</div>`; else if(b.type==='body' && v) v.split('\n\n').forEach(p=>{ if(p.trim()) html+=`<div class="prev-body">${esc(p).replace(/\n/g,'<br/>')}</div>`; }); else if(b.type==='image'){ let img=imageStore[b.id], cap=val('imgCaption-'+b.id); html+=`<div class="prev-img-block">${img?`<img src="${img.dataUrl}" style="max-width:100%;"/>`:`<div style="border:1px dashed #ccc;padding:0.6rem;">${t('phImgUpload')}</div>`}${cap?`<div class="prev-caption">${esc(cap)}</div>`:''}</div>`; } else if(b.type==='table'){ let tb=tableStore[b.id]; if(tb){ let cap=val('tblCaption-'+b.id); let tbl='<div class="prev-tbl-wrap"><table class="prev-tbl" style="border-collapse:collapse; width:100%; border:1px solid #d8cfc0;">'; tb.rows.forEach((row,ri)=>{ tbl+='<tr>'+row.map(c=>`<td style="border:1px solid #d8cfc0; padding:0.25rem 0.5rem; ${ri===0?'background:#f5efe8; font-weight:600;':''}">${esc(c)}</td>`).join('')+'</tr>'; }); tbl+='</table>'; if(cap) tbl+=`<div class="prev-caption">${esc(cap)}</div>`; html+=tbl+'</div>'; } } }); contentEl.innerHTML=html; }
-  function generateDoc(){ if(!val('fTitle')){ setStatus(t('needTitle'), true); return; } let btn=document.getElementById('genBtn'); btn.disabled=true; btn.textContent=t('btnGenerating'); let htmlContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${esc(val('fTitle'))}</title><style>body{font-family:'Times New Roman',serif; margin:2.54cm; font-size:12pt;} h1{font-size:20pt;text-align:center;} .meta{text-align:center;} .section-h1{font-size:16pt;font-weight:bold;} .section-h2{font-size:14pt;} .paragraph{text-align:justify;} table{border-collapse:collapse;width:100%;} td,th{border:1px solid #888;padding:4px;}</style></head><body><h1>${esc(val('fTitle'))}</h1>${val('fSubtitle')?`<h2>${esc(val('fSubtitle'))}</h2>`:''}<div class="meta">${[val('fAuthor'),val('fClass'),val('fSeat'),val('fTeacher'),formatDate(val('fDate'))].filter(Boolean).join(' · ')}</div><hr/>`; blocks.forEach(b=>{ let v = ['h1','h2','h3','body'].includes(b.type)?val('input-'+b.id):null; if(b.type==='h1' && v) htmlContent+=`<div class="section-h1">${esc(v)}</div>`; else if(b.type==='h2' && v) htmlContent+=`<div class="section-h2">${esc(v)}</div>`; else if(b.type==='h3' && v) htmlContent+=`<div class="section-h3"><i>${esc(v)}</i></div>`; else if(b.type==='body' && v) v.split('\n\n').forEach(p=>{ if(p.trim()) htmlContent+=`<div class="paragraph">${esc(p).replace(/\n/g,'<br/>')}</div>`; }); else if(b.type==='image' && imageStore[b.id]) htmlContent+=`<div style="text-align:center;"><img src="${imageStore[b.id].dataUrl}" style="max-width:100%;"/><div><i>${esc(val('imgCaption-'+b.id))}</i></div></div>`; else if(b.type==='table' && tableStore[b.id]){ htmlContent+='<table>'; tableStore[b.id].rows.forEach(row=>{ htmlContent+='<tr>'+row.map(c=>`<td>${esc(c)}</td>`).join('')+'</tr>'; }); htmlContent+=`</table><div><i>${esc(val('tblCaption-'+b.id))}</i></div>`; } }); htmlContent+=`</body></html>`; const blob=new Blob([htmlContent],{type:'application/msword'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=(val('fTitle').replace(/[^a-z0-9]/gi,'_').slice(0,40)||'report')+'.doc'; a.click(); URL.revokeObjectURL(url); setStatus(t('statusOk'),false); btn.disabled=false; btn.textContent=t('btnGenerate'); }
-  document.getElementById('fDate').valueAsDate=new Date();
+function setLang(l) {
+  lang = l;
+  document.documentElement.lang = l === 'zh' ? 'zh-TW' : 'en';
+  document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.toggle('active', btn.innerText === (l==='en'?'EN':'繁中')));
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
+  document.querySelectorAll('[data-i18n-chip]').forEach(el => {
+    const dot = el.querySelector('.dot');
+    el.innerHTML = ''; 
+    if(dot) el.appendChild(dot);
+    el.appendChild(document.createTextNode(t(el.getAttribute('data-i18n-chip'))));
+  });
+  blocks.forEach(b => refreshBlockLabels(b.id, b.type));
   updatePreview();
+}
+
+function refreshBlockLabels(id, type) {
+  const badge = document.getElementById('badge-'+id); if(badge) badge.textContent = t('badge'+type[0].toUpperCase()+type.slice(1));
+  const inp = document.getElementById('input-'+id); if(inp && ['h1','h2','h3','body'].includes(type)) inp.placeholder = t('ph'+type.toUpperCase());
+  const upl = document.getElementById('uploadLabel-'+id); if(upl && !imageStore[id]) upl.textContent = t('phImgUpload');
+  const wl = document.getElementById('imgWLabel-'+id); if(wl) wl.textContent = t('lblImgW');
+  const hl = document.getElementById('imgHLabel-'+id); if(hl) hl.textContent = t('lblImgH');
+  const fcl = document.getElementById('figCapLabel-'+id); if(fcl) fcl.innerHTML = t('lblFigCaption');
+  const tcl = document.getElementById('tblCapLabel-'+id); if(tcl) tcl.innerHTML = t('lblTblCaption');
+  const tcp = document.getElementById('tblCaption-'+id); if(tcp) tcp.placeholder = t('phTblCaption');
+  ['addRow','addCol','delRow','delCol'].forEach(op => { let btn = document.getElementById(`tblBtn-${op}-${id}`); if(btn) btn.textContent = t('tblBtn'+op[0].toUpperCase()+op.slice(1)); });
+  if(type==='table'){ let ed = document.getElementById('tblEditor-'+id); if(ed) ed.innerHTML = renderTableEditor(id); }
+}
+
+function val(id) { let e = document.getElementById(id); return e ? e.value : ''; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatDate(d) { if(!d) return ''; try { if(lang==='zh'){ let dt=new Date(d+'T12:00:00'); return `${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日`; } return new Date(d+'T12:00:00').toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}); } catch(e){ return d; } }
+function setStatus(msg,isErr) { let b=document.getElementById('statusBar'); b.textContent=msg; b.className='status-bar visible'+(isErr?' error':''); setTimeout(()=>{ b.className='status-bar'; }, 4200); }
+
+// DRAG
+let dragSrcId = null;
+function attachDragEvents(el, id) {
+  el.setAttribute('draggable','true');
+  el.addEventListener('dragstart', e => { dragSrcId=id; el.classList.add('is-dragging'); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',String(id)); });
+  el.addEventListener('dragend', () => { el.classList.remove('is-dragging'); document.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(x=>x.classList.remove('drag-over-top','drag-over-bottom')); dragSrcId=null; });
+  el.addEventListener('dragover', e => { if(dragSrcId===null||dragSrcId===id) return; e.preventDefault(); e.dataTransfer.dropEffect='move'; let rect=el.getBoundingClientRect(); let mid=rect.top+rect.height/2; el.classList.toggle('drag-over-top',e.clientY<mid); el.classList.toggle('drag-over-bottom',e.clientY>=mid); });
+  el.addEventListener('dragleave', () => { el.classList.remove('drag-over-top','drag-over-bottom'); });
+  el.addEventListener('drop', e => { if(dragSrcId===null||dragSrcId===id) return; e.preventDefault(); el.classList.remove('drag-over-top','drag-over-bottom'); let rect=el.getBoundingClientRect(); let before=e.clientY<rect.top+rect.height/2; let srcIdx=blocks.findIndex(b=>b.id===dragSrcId); let destIdx=blocks.findIndex(b=>b.id===id); if(srcIdx===-1||destIdx===-1) return; let [moved]=blocks.splice(srcIdx,1); let newDest=blocks.findIndex(b=>b.id===id); blocks.splice(before?newDest:newDest+1,0,moved); let container=document.getElementById('blocksContainer'); blocks.forEach(b=>{ let dom=document.getElementById('block-'+b.id); if(dom) container.appendChild(dom); }); updatePreview(); });
+}
+
+function addBlock(type, prefillValue) {
+  let id = blockId++;
+  blocks.push({ id, type });
+  let div = document.createElement('div'); div.className='body-block'; div.id='block-'+id;
+  let inner = `<div class="block-header"><div class="block-header-left"><span class="drag-handle"><svg width="12" height="14" viewBox="0 0 12 14" fill="none"><circle cx="3" cy="3" r="1.2" fill="currentColor"/><circle cx="8" cy="3" r="1.2" fill="currentColor"/><circle cx="3" cy="7" r="1.2" fill="currentColor"/><circle cx="8" cy="7" r="1.2" fill="currentColor"/><circle cx="3" cy="11" r="1.2" fill="currentColor"/><circle cx="8" cy="11" r="1.2" fill="currentColor"/></svg></span><span class="type-badge" id="badge-${id}">${t('badge'+type[0].toUpperCase()+type.slice(1))}</span></div><button class="remove-btn" onclick="removeBlock(${id})">✕</button></div>`;
+  if(type==='body') inner+=`<textarea id="input-${id}" rows="3" placeholder="${t('phPara')}" oninput="updatePreview()"></textarea>`;
+  else if(['h1','h2','h3'].includes(type)) inner+=`<input type="text" id="input-${id}" placeholder="${t('ph'+type.toUpperCase())}" oninput="updatePreview()"/>`;
+  else if(type==='image') {
+    inner+=`<div class="img-upload-area" id="uploadArea-${id}"><input type="file" accept="image/*" onchange="handleImageUpload(${id},this)"/><div id="uploadLabel-${id}">${t('phImgUpload')}</div><img id="imgThumb-${id}" class="img-preview-thumb" style="display:none;"/></div>
+    <div style="display:grid;gap:0.5rem;grid-template-columns:1fr 1fr;margin-top:0.5rem;" id="imgSizeRow-${id}"><label><span id="imgWLabel-${id}">${t('lblImgW')}</span><input type="number" id="imgW-${id}" min="1" max="16" step="0.5" value="10" oninput="updatePreview()"/></label><label><span id="imgHLabel-${id}">${t('lblImgH')}</span><input type="number" id="imgH-${id}" min="1" max="22" step="0.5" value="7" oninput="updatePreview()"/></label></div>
+    <div style="margin-top:.4rem;"><div class="section-caption" id="figCapLabel-${id}">${t('lblFigCaption')}</div><input type="text" id="imgCaption-${id}" placeholder="${t('phFigCaption')}" oninput="updatePreview()"/></div>`;
+  } else if(type==='table') {
+    const initRows = prefillValue && prefillValue.rows ? prefillValue.rows : [['Variable','Estimate','p-value'],['x1','0.42','0.03'],['x2','-0.18','0.21']];
+    tableStore[id] = { rows: initRows };
+    inner+=`<div class="tbl-editor" id="tblEditor-${id}">${renderTableEditor(id)}</div>
+    <div class="tbl-controls" style="margin:0.5rem 0 0;"><button class="tbl-btn" id="tblBtn-addRow-${id}" onclick="tblOp(${id},'addRow')">${t('tblBtnAddRow')}</button><button class="tbl-btn" id="tblBtn-addCol-${id}" onclick="tblOp(${id},'addCol')">${t('tblBtnAddCol')}</button><button class="tbl-btn" id="tblBtn-delRow-${id}" onclick="tblOp(${id},'delRow')">${t('tblBtnDelRow')}</button><button class="tbl-btn" id="tblBtn-delCol-${id}" onclick="tblOp(${id},'delCol')">${t('tblBtnDelCol')}</button></div>
+    <div style="margin-top:.5rem;"><div class="section-caption" id="tblCapLabel-${id}">${t('lblTblCaption')}</div><input type="text" id="tblCaption-${id}" placeholder="${t('phTblCaption')}" oninput="updatePreview()"/></div>`;
+  }
+  div.innerHTML = inner;
+  document.getElementById('blocksContainer').appendChild(div);
+  attachDragEvents(div, id);
+  // Prefill value after DOM insert
+  if(prefillValue && typeof prefillValue === 'string') {
+    const inp = document.getElementById('input-'+id);
+    if(inp) { inp.value = prefillValue; }
+  }
+  if(blocks.length >= 2) document.getElementById('dragHint').style.display = 'block';
+  updatePreview();
+  return id;
+}
+
+function removeBlock(id) { let idx=blocks.findIndex(b=>b.id===id); if(idx!==-1) blocks.splice(idx,1); delete imageStore[id]; delete tableStore[id]; let el=document.getElementById('block-'+id); if(el) el.remove(); if(blocks.length<2) document.getElementById('dragHint').style.display='none'; updatePreview(); }
+function handleImageUpload(id, input) { let file=input.files[0]; if(!file) return; let reader=new FileReader(); reader.onload=e=>{ let dataUrl=e.target.result; let img=new Image(); img.onload=()=>{ imageStore[id]={dataUrl,name:file.name,origW:img.width,origH:img.height}; let thumb=document.getElementById('imgThumb-'+id); if(thumb){thumb.src=dataUrl;thumb.style.display='block';} let wEl=document.getElementById('imgW-'+id); if(wEl) wEl.value=Math.min(13,Math.round(img.width*2.54/96*10)/10); updatePreview(); }; img.src=dataUrl; }; reader.readAsDataURL(file); }
+function renderTableEditor(id) { let tb=tableStore[id]; if(!tb) return ''; let html='<table>'; tb.rows.forEach((row,ri)=>{ html+='<tr>'+row.map((cell,ci)=>`<td class="${ri===0?'tbl-head-cell':''}"><input type="text" value="${esc(cell)}" placeholder="${ri===0?t('tblHeaderPh'):t('tblCellPh')}" oninput="updateCell(${id},${ri},${ci},this.value)"/></td>`).join('')+'</tr>'; }); return html+'</table>'; }
+function updateCell(id,ri,ci,v) { if(tableStore[id]) tableStore[id].rows[ri][ci]=v; updatePreview(); }
+function tblOp(id,op) { let tb=tableStore[id]; if(!tb) return; let cols=tb.rows[0]?.length||1; if(op==='addRow') tb.rows.push(Array(cols).fill('')); if(op==='addCol') tb.rows.forEach(r=>r.push('')); if(op==='delRow'&&tb.rows.length>1) tb.rows.pop(); if(op==='delCol'&&cols>1) tb.rows.forEach(r=>r.pop()); let el=document.getElementById('tblEditor-'+id); if(el) el.innerHTML=renderTableEditor(id); updatePreview(); }
+
+function updatePreview() {
+  let title=val('fTitle'), subtitle=val('fSubtitle'), author=val('fAuthor'), date=val('fDate'), cls=val('fClass'), seat=val('fSeat'), teacher=val('fTeacher');
+  let emptyEl=document.getElementById('emptyState'), contentEl=document.getElementById('previewContent');
+  if(!title&&!author&&blocks.length===0){ emptyEl.style.display='flex'; contentEl.style.display='none'; return; }
+  emptyEl.style.display='none'; contentEl.style.display='block';
+  let html='';
+  if(title) html+=`<div class="prev-title">${esc(title)}</div>`;
+  if(subtitle) html+=`<div class="prev-subtitle">${esc(subtitle)}</div>`;
+  let meta=[]; if(author) meta.push(`<b>${t('docAuthor')}</b> ${esc(author)}`); if(cls) meta.push(`<b>${t('docClass')}</b> ${esc(cls)}`); if(seat) meta.push(`<b>${t('docSeat')}</b> ${esc(seat)}`); if(teacher) meta.push(`<b>${t('docInstructor')}</b> ${esc(teacher)}`); if(date) meta.push(`<b>${t('docDate')}</b> ${esc(formatDate(date))}`);
+  if(meta.length) html+=`<div class="prev-meta">${meta.join(' · ')}</div>`;
+  if(title||meta.length) html+=`<hr class="prev-rule"/>`;
+  blocks.forEach(b=>{
+    let v=['h1','h2','h3','body'].includes(b.type)?val('input-'+b.id):null;
+    if(b.type==='h1'&&v) html+=`<div class="prev-h1">${esc(v)}</div>`;
+    else if(b.type==='h2'&&v) html+=`<div class="prev-h2">${esc(v)}</div>`;
+    else if(b.type==='h3'&&v) html+=`<div class="prev-h3">${esc(v)}</div>`;
+    else if(b.type==='body'&&v) v.split('\n\n').forEach(p=>{ if(p.trim()) html+=`<div class="prev-body">${esc(p).replace(/\n/g,'<br/>')}</div>`; });
+    else if(b.type==='image'){ let img=imageStore[b.id],cap=val('imgCaption-'+b.id); html+=`<div class="prev-img-block">${img?`<img src="${img.dataUrl}" style="max-width:100%;"/>`:`<div style="border:1px dashed #ccc;padding:0.6rem;">${t('phImgUpload')}</div>`}${cap?`<div class="prev-caption">${esc(cap)}</div>`:''}</div>`; }
+    else if(b.type==='table'){ let tb=tableStore[b.id]; if(tb){ let cap=val('tblCaption-'+b.id); let tbl='<table style="border-collapse:collapse;width:100%;border:1px solid #d8cfc0;">'; tb.rows.forEach((row,ri)=>{ tbl+='<tr>'+row.map(c=>`<td style="border:1px solid #d8cfc0;padding:0.25rem 0.5rem;${ri===0?'background:#f5efe8;font-weight:600;':''}">${esc(c)}</td>`).join('')+'</tr>'; }); tbl+='</table>'; if(cap) tbl+=`<div class="prev-caption">${esc(cap)}</div>`; html+=tbl; } }
+  });
+  contentEl.innerHTML = html;
+}
+
+function generateDoc() {
+  if(!val('fTitle')){ setStatus(t('needTitle'),true); return; }
+  let btn=document.getElementById('genBtn'); btn.disabled=true; btn.textContent=t('btnGenerating');
+  let htmlContent=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${esc(val('fTitle'))}</title><style>body{font-family:'Times New Roman',serif;margin:2.54cm;font-size:12pt;}h1{font-size:20pt;text-align:center;}.meta{text-align:center;}.section-h1{font-size:16pt;font-weight:bold;}.section-h2{font-size:14pt;}.paragraph{text-align:justify;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #888;padding:4px;}</style></head><body><h1>${esc(val('fTitle'))}</h1>${val('fSubtitle')?`<h2>${esc(val('fSubtitle'))}</h2>`:''}<div class="meta">${[val('fAuthor'),val('fClass'),val('fSeat'),val('fTeacher'),formatDate(val('fDate'))].filter(Boolean).join(' · ')}</div><hr/>`;
+  blocks.forEach(b=>{
+    let v=['h1','h2','h3','body'].includes(b.type)?val('input-'+b.id):null;
+    if(b.type==='h1'&&v) htmlContent+=`<div class="section-h1">${esc(v)}</div>`;
+    else if(b.type==='h2'&&v) htmlContent+=`<div class="section-h2">${esc(v)}</div>`;
+    else if(b.type==='h3'&&v) htmlContent+=`<div class="section-h3"><i>${esc(v)}</i></div>`;
+    else if(b.type==='body'&&v) v.split('\n\n').forEach(p=>{ if(p.trim()) htmlContent+=`<div class="paragraph">${esc(p).replace(/\n/g,'<br/>')}</div>`; });
+    else if(b.type==='image'&&imageStore[b.id]) htmlContent+=`<div style="text-align:center;"><img src="${imageStore[b.id].dataUrl}" style="max-width:100%;"/><div><i>${esc(val('imgCaption-'+b.id))}</i></div></div>`;
+    else if(b.type==='table'&&tableStore[b.id]){ htmlContent+='<table>'; tableStore[b.id].rows.forEach(row=>{ htmlContent+='<tr>'+row.map(c=>`<td>${esc(c)}</td>`).join('')+'</tr>'; }); htmlContent+=`</table><div><i>${esc(val('tblCaption-'+b.id))}</i></div>`; }
+  });
+  htmlContent+=`</body></html>`;
+  const blob=new Blob([htmlContent],{type:'application/msword'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=(val('fTitle').replace(/[^a-z0-9]/gi,'_').slice(0,40)||'report')+'.doc'; a.click(); URL.revokeObjectURL(url);
+  setStatus(t('statusOk'),false); btn.disabled=false; btn.textContent=t('btnGenerate');
+}
+
+// ===== SMART PASTE =====
+function openSmartPaste() {
+  document.getElementById('spBackdrop').classList.add('open');
+  document.getElementById('spText').focus();
+  resetSmartPasteUI();
+}
+function closeSmartPaste() { document.getElementById('spBackdrop').classList.remove('open'); }
+function handleBackdropClick(e) { if(e.target === document.getElementById('spBackdrop')) closeSmartPaste(); }
+
+function resetSmartPasteUI() {
+  document.getElementById('spPreviewResult').classList.remove('visible');
+  document.getElementById('spConfirmRow').classList.remove('visible');
+  document.getElementById('spStatusMsg').textContent = '';
+  document.getElementById('spRunBtn').disabled = false;
+  parsedBlocks = [];
+}
+
+function toggleChip(el) { el.classList.toggle('selected'); }
+function setInsertMode(el) {
+  document.querySelectorAll('.sp-radio').forEach(r => r.classList.remove('active'));
+  el.classList.add('active');
+  spInsertMode = el.getAttribute('data-mode');
+}
+
+function getActiveChips() {
+  const chips = {};
+  document.querySelectorAll('.sp-chip').forEach(c => {
+    chips[c.getAttribute('data-type')] = c.classList.contains('selected');
+  });
+  return chips;
+}
+
+function runSmartPaste() {
+  const text = document.getElementById('spText').value.trim();
+  if(!text) { document.getElementById('spStatusMsg').textContent = t('spEmpty'); return; }
+
+  const chips = getActiveChips();
+  const previewResult = document.getElementById('spPreviewResult');
+  const confirmRow = document.getElementById('spConfirmRow');
+  const statusMsg = document.getElementById('spStatusMsg');
+  statusMsg.textContent = '';
+  previewResult.classList.remove('visible');
+  confirmRow.classList.remove('visible');
+  parsedBlocks = [];
+
+  const meta = { title:null, subtitle:null, author:null, date:null, class:null, instructor:null };
+
+  // ── helpers ──────────────────────────────────────────────
+  const META_RE = /^(title|subtitle|author|date|class|course|instructor|teacher|student|name|seat|no\.?|number)\s*[:：]\s*(.+)$/i;
+  const DATE_RE = /^(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})$|^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/;
+  const NUMBERED_H = /^(\d+(\.\d+)*\.?)\s+\S/;   // "1. Intro" "1.2 Background" "1.2.3 Detail"
+  const HASH_H     = /^(#{1,3})\s+(.+)/;
+  const BULLET_RE  = /^[\-\*\•\·\–\—]\s+(.+)/;
+  const NUMBERED_ITEM = /^\d+[\.\)]\s+(.+)/;
+  const TAB_RE     = /\t/;
+  const PIPE_RE    = /\|/;
+  const ALL_CAPS   = /^[A-Z0-9\s\:\-\/\,\.]{4,}$/;
+
+  function depth(line) {
+    const m = line.match(/^(\d+(?:\.\d+)*)\.?\s/);
+    if(!m) return 1;
+    return m[1].split('.').length;
+  }
+
+  function isShortLine(line) { return line.length < 80 && !line.endsWith('.') && !line.endsWith('，') && !line.endsWith('。'); }
+  function looksLikeHeading(line) {
+    if(HASH_H.test(line)) return true;
+    if(NUMBERED_H.test(line) && isShortLine(line)) return true;
+    if(ALL_CAPS.test(line) && line.length < 60) return true;
+    if(isShortLine(line) && line.length < 55 && !/[,，;；]/.test(line)) return true;
+    return false;
+  }
+  function headingLevel(line) {
+    const hm = line.match(HASH_H);
+    if(hm) return Math.min(hm[1].length, 3);
+    const d = depth(line);
+    return Math.min(d, 3);
+  }
+  function cleanHeading(line) { return line.replace(/^#+\s+/,'').replace(/^\d+(\.\d+)*\.?\s+/,'').trim(); }
+
+  function parseTable(lines) {
+    // tab-separated or pipe-separated
+    return lines.map(l => {
+      if(PIPE_RE.test(l)) return l.split('|').map(c=>c.trim()).filter(c=>c!=='' || true);
+      if(TAB_RE.test(l)) return l.split('\t').map(c=>c.trim());
+      return [l.trim()];
+    });
+  }
+
+  // ── split into logical line groups ──────────────────────
+  const rawLines = text.split('\n');
+  // Group consecutive blank-line-separated chunks
+  const chunks = []; let cur = [];
+  for(const raw of rawLines) {
+    const line = raw.trimEnd();
+    if(line === '') { if(cur.length) { chunks.push(cur); cur=[]; } }
+    else cur.push(line);
+  }
+  if(cur.length) chunks.push(cur);
+
+  // ── process each chunk ──────────────────────────────────
+  for(const chunk of chunks) {
+    const single = chunk.length === 1 ? chunk[0] : null;
+
+    // ── metadata detection ──
+    if(chips.metadata && single) {
+      const mm = single.match(META_RE);
+      if(mm) {
+        const key = mm[1].toLowerCase().replace(/[\s\.]/g,'');
+        const val2 = mm[2].trim();
+        if(/title/.test(key))      { meta.title = meta.title || val2; continue; }
+        if(/subtitle/.test(key))   { meta.subtitle = meta.subtitle || val2; continue; }
+        if(/author|name|student/.test(key)) { meta.author = meta.author || val2; continue; }
+        if(/date/.test(key))       { meta.date = meta.date || val2; continue; }
+        if(/class|course/.test(key)){ meta.class = meta.class || val2; continue; }
+        if(/instructor|teacher/.test(key)){ meta.instructor = meta.instructor || val2; continue; }
+        if(/seat|no/.test(key))    { /* seat goes to meta but not a block field here */ continue; }
+      }
+      // bare date line
+      if(DATE_RE.test(single.trim())) { meta.date = meta.date || single.trim(); continue; }
+    }
+
+    // ── pipe/tab table ──
+    const isTabular = chunk.every(l => TAB_RE.test(l) || PIPE_RE.test(l));
+    if(chips.tables && chunk.length >= 2 && isTabular) {
+      parsedBlocks.push({ type:'table', caption:'', rows: parseTable(chunk) });
+      continue;
+    }
+
+    // ── bullet / numbered list → table ──
+    const isBulletList = chunk.every(l => BULLET_RE.test(l) || NUMBERED_ITEM.test(l));
+    if(chips.tables && chunk.length >= 2 && isBulletList) {
+      const rows = [['#', 'Item']];
+      chunk.forEach((l, i) => {
+        const m = l.match(BULLET_RE) || l.match(NUMBERED_ITEM);
+        const content = m ? m[1].trim() : l.trim();
+        // check if item has a colon split → two columns
+        const colonIdx = content.indexOf(':');
+        if(colonIdx > 0 && colonIdx < 40) {
+          if(i === 0) rows[0] = ['Item', 'Description'];
+          rows.push([content.slice(0,colonIdx).trim(), content.slice(colonIdx+1).trim()]);
+        } else {
+          if(i === 0) rows[0] = ['#', 'Item'];
+          rows.push([String(i+1), content]);
+        }
+      });
+      parsedBlocks.push({ type:'table', caption:'', rows });
+      continue;
+    }
+
+    // ── single heading line ──
+    if(chips.headings && single && looksLikeHeading(single)) {
+      const lvl = headingLevel(single);
+      parsedBlocks.push({ type: 'h'+lvl, content: cleanHeading(single) });
+      continue;
+    }
+
+    // ── mixed chunk: may have heading on first line then body ──
+    if(chips.headings && chunk.length > 1 && looksLikeHeading(chunk[0])) {
+      const lvl = headingLevel(chunk[0]);
+      parsedBlocks.push({ type:'h'+lvl, content: cleanHeading(chunk[0]) });
+      const bodyText = chunk.slice(1).join('\n').trim();
+      if(bodyText) parsedBlocks.push({ type:'body', content: bodyText });
+      continue;
+    }
+
+    // ── paragraph(s) ──
+    if(chips.paragraphs) {
+      // join the chunk as one paragraph (blank lines already split chunks)
+      parsedBlocks.push({ type:'body', content: chunk.join('\n').trim() });
+    }
+  }
+
+  // ── try to lift first h1 as title if metadata field empty ──
+  if(chips.metadata && !meta.title) {
+    const firstH1 = parsedBlocks.findIndex(b => b.type === 'h1');
+    if(firstH1 === 0) { meta.title = parsedBlocks[0].content; parsedBlocks.splice(0,1); }
+  }
+
+  if(parsedBlocks.length === 0 && !Object.values(meta).some(Boolean)) {
+    statusMsg.textContent = t('spNoBlocks'); return;
+  }
+
+  // ── show preview pills ──
+  let previewHtml = `<div style="margin-bottom:0.5rem;font-size:0.7rem;font-weight:600;color:var(--ink-soft);">${parsedBlocks.length} ${t('spSuccess')}</div><div style="line-height:2;">`;
+  parsedBlocks.forEach(b => {
+    const snippet = b.type==='table' ? (b.caption||'[ table ]') : (b.content||'').slice(0,45)+((b.content||'').length>45?'…':'');
+    previewHtml += `<span class="sp-block-pill ${b.type}">${b.type.toUpperCase()}</span> <span style="font-size:0.7rem;color:var(--ink-soft);">${snippet.replace(/</g,'&lt;')}</span><br/>`;
+  });
+  previewHtml += '</div>';
+
+  const metaFills = Object.entries(meta).filter(([,v])=>v).map(([k])=>k);
+  if(metaFills.length > 0 && chips.metadata) {
+    previewHtml += `<div style="margin-top:0.6rem;padding:0.5rem 0.8rem;background:#f0ede8;border-radius:8px;font-size:0.68rem;color:var(--ink-soft);">✦ ${t('spMetaFilled')} (${metaFills.join(', ')})</div>`;
+  }
+
+  previewResult.innerHTML = previewHtml;
+  previewResult.classList.add('visible');
+  confirmRow.classList.add('visible');
+  window._spParsedMeta = chips.metadata ? meta : {};
+}
+
+function applyParsedBlocks() {
+  const meta = window._spParsedMeta || {};
+
+  // Fill metadata fields
+  if(meta.title && !val('fTitle')) document.getElementById('fTitle').value = meta.title;
+  if(meta.subtitle && !val('fSubtitle')) document.getElementById('fSubtitle').value = meta.subtitle;
+  if(meta.author && !val('fAuthor')) document.getElementById('fAuthor').value = meta.author;
+  if(meta.date) { try { document.getElementById('fDate').value = meta.date; } catch(e){} }
+  if(meta.class && !val('fClass')) document.getElementById('fClass').value = meta.class;
+  if(meta.instructor && !val('fTeacher')) document.getElementById('fTeacher').value = meta.instructor;
+
+  // Handle insert mode
+  if(spInsertMode === 'replace') {
+    [...blocks].forEach(b => removeBlock(b.id));
+  }
+
+  // Add blocks
+  parsedBlocks.forEach(b => {
+    if(b.type === 'table') {
+      const id = addBlock('table', { rows: b.rows || [] });
+      const capEl = document.getElementById('tblCaption-'+id);
+      if(capEl && b.caption) capEl.value = b.caption;
+    } else if(['h1','h2','h3','body'].includes(b.type)) {
+      addBlock(b.type, b.content || '');
+    }
+  });
+
+  updatePreview();
+  closeSmartPaste();
+  setStatus(`✓ ${parsedBlocks.length} ${t('spSuccess')}`, false);
+}
+
+document.getElementById('fDate').valueAsDate = new Date();
+updatePreview();
 </script>
 </body>
 </html>
