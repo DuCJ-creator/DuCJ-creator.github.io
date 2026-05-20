@@ -1648,6 +1648,19 @@ watch,v.,看(電視) `;
             }
 
             gameOverScreen.classList.add('active');
+            const resultPayload = {
+      type: "LUNAR_MISSION_RESULT",
+      mission: "Mission 5: iVocab Words",
+      score: score,
+      correct: 0,
+      wrong: 0
+    };
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(resultPayload, "*");
+    }
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage(resultPayload, "*");
+    }
         }
 
         function restartGame() {
