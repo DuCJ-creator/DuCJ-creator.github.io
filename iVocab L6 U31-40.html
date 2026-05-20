@@ -1430,6 +1430,19 @@ vitality,n,活力;生命力`;
                     gameScreen.style.animation = '';
                 }, 300);
             }
+            const resultPayload = {
+      type: "LUNAR_MISSION_RESULT",
+      mission: "Mission 5: iVocab Words",
+      score: score,
+      correct: 0,
+      wrong: 0
+    };
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(resultPayload, "*");
+    }
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage(resultPayload, "*");
+    }
         }
         
         // 重新開始遊戲（回到設定畫面）
