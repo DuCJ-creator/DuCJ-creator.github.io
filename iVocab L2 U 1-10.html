@@ -1769,6 +1769,20 @@ waitress,n,女服務生
             
             gameScreen.classList.add('hidden');
             endScreen.classList.add('active');
+            // 回傳成績給 Moonlight 任務系統
+const resultPayload = {
+  type: "LUNAR_MISSION_RESULT",
+  mission: "Mission 5: iVocab Words",
+  score: score,
+  correct: 0,
+  wrong: 0
+};
+if (window.parent && window.parent !== window) {
+  window.parent.postMessage(resultPayload, "*");
+}
+if (window.opener && !window.opener.closed) {
+  window.opener.postMessage(resultPayload, "*");
+}
         }
         
         // 播放音效
