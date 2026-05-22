@@ -812,6 +812,9 @@
           vocabulary = normalized;
           $("loading").textContent = `${normalized.length} vocabulary items loaded.`;
         }
+      } catch (error) {
+        $("loading").textContent = "Using built-in sample vocabulary. Replace or add vocab.json for your full word bank.";
+      }
     }
 
     $("startBtn").addEventListener("click", startGame);
