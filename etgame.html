@@ -117,7 +117,8 @@
     }
 
     .launch-card {
-      width: min(620px, 100%);
+      width: min(520px, 100%);
+      padding: clamp(16px, 4vw, 26px);
       text-align: center;
     }
 
@@ -153,10 +154,10 @@
     }
 
     h1 {
-      margin: 18px 0 24px;
-      font-size: clamp(2.8rem, 9vw, 6.6rem);
-      line-height: 0.9;
-      letter-spacing: -0.08em;
+      margin: 10px 0 16px;
+      font-size: clamp(1.9rem, 5vw, 3.1rem);
+      line-height: 0.98;
+      letter-spacing: -0.045em;
     }
 
     .gradient-text {
@@ -196,7 +197,7 @@
     }
 
     .mascot {
-      width: min(220px, 60vw);
+      width: min(96px, 22vw);
       aspect-ratio: 1;
       margin: 0 auto 20px;
       border-radius: 38% 62% 55% 45% / 48% 42% 58% 52%;
@@ -227,8 +228,8 @@
     .mascot::after { right: 36%; }
 
     .mascot span {
-      transform: translateY(34px);
-      font-size: 2rem;
+      transform: translateY(20px);
+      font-size: 1.25rem;
     }
 
     .field-label {
@@ -241,9 +242,10 @@
 
     .level-grid {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 8px;
-      margin-bottom: 20px;
+      max-width: 420px;
+      margin: 0 auto 16px;
     }
 
     .level-btn,
@@ -505,29 +507,26 @@
         min-height: auto;
       }
 
-      .hero-copy,
-      .setup-card,
-      .game-card,
-      .result-card {
-        border-radius: 22px;
+      .launch-card {
+        width: min(440px, 100%);
+        padding: 16px;
+      }
+
+      h1 {
+        margin: 8px 0 12px;
+        font-size: clamp(1.7rem, 7vw, 2.35rem);
+        line-height: 1;
+        letter-spacing: -0.04em;
+      }
+
+      .mascot {
+        width: min(82px, 22vw);
+        margin-bottom: 6px;
       }
 
       .level-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-
-      .topbar,
-      .summary-grid {
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 8px;
-      }
-
-      .stat {
-        padding: 10px 8px;
-      }
-
-      .stat-label {
-        font-size: 0.66rem;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        max-width: 360px;
       }
 
       .answers {
@@ -541,6 +540,10 @@
     }
 
     @media (max-width: 380px) {
+      h1 {
+        font-size: clamp(1.55rem, 8vw, 2.05rem);
+      }
+
       .level-grid {
         grid-template-columns: repeat(2, 1fr);
       }
