@@ -1,1511 +1,467 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Shirley's Pop Quiz Maker - 學習單生成器與互動答題系統">
-    <title>Shirley's Pop Quiz Maker</title>
-    <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2980b9;
-            --accent-color: #e74c3c;
-            --correct-color: #2ecc71;
-            --incorrect-color: #e74c3c;
-            --light-color: #f8f9fa;
-            --dark-color: #343a40;
-            --border-color: #dee2e6;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            --border-radius: 10px;
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: "Microsoft JhengHei", "微軟正黑體", Arial, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-            padding: 20px;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-        }
-        
-        h1 {
-            font-size: clamp(1.8rem, 4vw, 2.2rem);
-            margin-bottom: 10px;
-        }
-        
-        .app-description {
-            font-size: clamp(1rem, 2vw, 1.1rem);
-            max-width: 800px;
-            margin: 0 auto;
-            opacity: 0.9;
-        }
-        
-        .tab-container {
-            display: flex;
-            margin-bottom: 20px;
-            background: white;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 15px;
-            text-align: center;
-            background: #e9ecef;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: bold;
-            font-size: clamp(0.9rem, 2vw, 1rem);
-        }
-        
-        .tab.active {
-            background: var(--primary-color);
-            color: white;
-        }
-        
-        .content-section {
-            display: none;
-            background: white;
-            padding: 25px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-        }
-        
-        .content-section.active {
-            display: block;
-        }
-        
-        .app-content {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 25px;
-        }
-        
-        .input-panel, .preview-panel {
-            background: white;
-            padding: 25px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-        }
-        
-        .preview-panel {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: var(--dark-color);
-        }
-        
-        input, textarea, select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border 0.3s, box-shadow 0.3s;
-        }
-        
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-        }
-        
-        textarea {
-            min-height: 180px;
-            resize: vertical;
-        }
-        
-        .btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s, transform 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-        }
-        
-        .btn:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
-        .btn-print {
-            background-color: var(--accent-color);
-            margin-top: 15px;
-        }
-        
-        .btn-print:hover {
-            background-color: #c0392b;
-        }
-        
-        .btn-check {
-            background-color: var(--correct-color);
-            margin-top: 15px;
-        }
-        
-        .btn-check:hover {
-            background-color: #27ae60;
-        }
-        
-        .worksheet {
-            background: white;
-            padding: 25px;
-            border: 1px solid var(--border-color);
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* 縮減標題區域 */
-        .worksheet-header {
-            text-align: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--primary-color);
-        }
-        
-        .worksheet-header h2 {
-            font-size: clamp(1.3rem, 3vw, 1.5rem);
-            margin-bottom: 5px;
-        }
-        
-        .worksheet-header p {
-            font-size: clamp(0.8rem, 2vw, 0.9rem);
-            margin: 0;
-        }
-        
-        /* 縮減資訊區域 */
-        .worksheet-info, .student-info {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-            font-size: clamp(0.75rem, 2vw, 0.875rem);
-        }
-        
-        .info-item, .student-field {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 0;
-            border-bottom: 1px dashed var(--border-color);
-        }
-        
-        .student-field {
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        /* 縮減分數資訊 */
-        .score-info {
-            background-color: #fff3cd;
-            padding: 8px 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            border-left: 4px solid #ffc107;
-            font-weight: bold;
-            font-size: clamp(0.75rem, 2vw, 0.875rem);
-        }
-        
-        /* 縮減表情評分區域 */
-        .performance-rating {
-            margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background-color: #f9f9f9;
-        }
-        
-        .performance-title {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: var(--dark-color);
-            font-size: clamp(0.75rem, 2vw, 0.875rem);
-        }
-        
-        .emoji-container {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-        }
-        
-        .emoji-option {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            transition: transform 0.2s;
-            padding: 3px;
-        }
-        
-        .emoji-option:hover {
-            transform: scale(1.1);
-        }
-        
-        .emoji {
-            font-size: clamp(1.5rem, 4vw, 2rem);
-            margin-bottom: 2px;
-        }
-        
-        .emoji-option.selected .emoji {
-            transform: scale(1.2);
-            filter: drop-shadow(0 0 3px rgba(52, 152, 219, 0.5));
-        }
-        
-        .questions-section, .answers-section {
-            margin-bottom: 20px;
-        }
-        
-        .section-title {
-            background-color: var(--light-color);
-            padding: 8px 12px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            border-left: 4px solid var(--primary-color);
-            border-radius: 4px;
-            font-size: clamp(0.75rem, 2vw, 0.875rem);
-        }
-        
-        .questions-grid, .answers-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 12px;
-        }
-        
-        .question-item, .answer-item {
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background-color: #f9f9f9;
-            page-break-inside: avoid;
-            font-size: clamp(0.75rem, 2vw, 0.875rem);
-        }
-        
-        .answer-item {
-            border: 1px dashed var(--border-color);
-            background-color: #f0f8ff;
-        }
-        
-        .question-number {
-            font-weight: bold;
-            margin-right: 6px;
-            color: var(--primary-color);
-        }
-        
-        .worksheet-footer {
-            margin-top: auto;
-            padding-top: 15px;
-            text-align: center;
-            font-size: clamp(0.7rem, 2vw, 0.75rem);
-            color: #666;
-            border-top: 1px solid var(--border-color);
-        }
-        
-        .compact-mode .questions-grid,
-        .compact-mode .answers-grid {
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        }
-        
-        .compact-mode .question-item,
-        .compact-mode .answer-item {
-            padding: 8px;
-            font-size: 0.8rem;
-        }
-        
-        .very-compact-mode .questions-grid,
-        .very-compact-mode .answers-grid {
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        }
-        
-        .very-compact-mode .question-item,
-        .very-compact-mode .answer-item {
-            padding: 6px;
-            font-size: 0.75rem;
-        }
-        
-        .very-compact-mode .section-title {
-            padding: 6px 10px;
-            font-size: 0.8rem;
-        }
-        
-        /* 分頁符樣式 */
-        .page-break {
-            page-break-before: always;
-            break-before: page;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px dashed var(--border-color);
-        }
-        
-        /* 互動答題區域樣式 */
-        .answer-input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-        }
-        
-        .result-section {
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-        }
-        
-        .result-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 4px;
-            background-color: white;
-        }
-        
-        .result-item.correct {
-            border-left: 4px solid var(--correct-color);
-        }
-        
-        .result-item.incorrect {
-            border-left: 4px solid var(--incorrect-color);
-        }
-        
-        .result-icon {
-            margin-right: 10px;
-            font-size: 20px;
-        }
-        
-        .correct .result-icon {
-            color: var(--correct-color);
-        }
-        
-        .incorrect .result-icon {
-            color: var(--incorrect-color);
-        }
-        
-        .score-display {
-            font-size: clamp(1rem, 3vw, 1.125rem);
-            font-weight: bold;
-            text-align: center;
-            margin-top: 15px;
-            padding: 10px;
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .score-display:hover {
-            background-color: var(--secondary-color);
-            transform: scale(1.02);
-        }
-        
-        .answer-feedback {
-            margin-left: auto;
-            font-size: clamp(0.75rem, 2vw, 0.875rem);
-            color: #666;
-        }
-        
-        /* 答題卷列印樣式 */
-        .answer-sheet-print {
-            background: white;
-            padding: 20px;
-            border: 1px solid var(--border-color);
-        }
-        
-        .answer-sheet-header {
-            text-align: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--primary-color);
-        }
-        
-        .answer-sheet-results {
-            margin-bottom: 20px;
-        }
-        
-        .answer-sheet-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-            font-size: clamp(0.75rem, 2vw, 0.875rem);
-        }
-        
-        .answer-sheet-item.correct {
-            background-color: rgba(46, 204, 113, 0.1);
-        }
-        
-        .answer-sheet-item.incorrect {
-            background-color: rgba(231, 76, 60, 0.1);
-        }
-        
-        .answer-sheet-icon {
-            margin-right: 8px;
-            font-size: clamp(0.875rem, 2vw, 1rem);
-        }
-        
-        .answer-sheet-score {
-            font-size: clamp(0.875rem, 2vw, 1rem);
-            font-weight: bold;
-            text-align: center;
-            margin-top: 15px;
-            padding: 8px;
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 4px;
-        }
-        
-        /* 超緊湊模式樣式 */
-        .answer-sheet-very-compact .answer-sheet-item {
-            padding: 6px;
-            font-size: 0.75rem;
-            margin-bottom: 6px;
-        }
-        
-        .answer-sheet-very-compact .answer-sheet-icon {
-            font-size: 0.875rem;
-            margin-right: 6px;
-        }
-        
-        .answer-sheet-very-compact .answer-sheet-header {
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-        }
-        
-        .answer-sheet-very-compact .worksheet-info,
-        .answer-sheet-very-compact .student-info {
-            margin-bottom: 15px;
-            font-size: 0.875rem;
-        }
-        
-        .answer-sheet-very-compact .section-title {
-            padding: 8px 12px;
-            font-size: 0.875rem;
-            margin-bottom: 10px;
-        }
-        
-        .format-options {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .format-btn {
-            flex: 1;
-            padding: 10px;
-            background: #e9ecef;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s;
-            font-size: clamp(0.8rem, 2vw, 0.9rem);
-        }
-        
-        .format-btn.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-        
-        .quiz-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .quiz-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .quiz-question {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background-color: #f9f9f9;
-        }
-        
-        .quiz-options {
-            margin-top: 10px;
-        }
-        
-        .quiz-option {
-            margin-bottom: 8px;
-        }
-        
-        .quiz-input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-        }
-        
-        .quiz-result {
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-        }
-        
-        .quiz-score {
-            font-size: clamp(1rem, 3vw, 1.125rem);
-            font-weight: bold;
-            text-align: center;
-            margin-top: 15px;
-            padding: 10px;
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .quiz-score:hover {
-            background-color: var(--secondary-color);
-            transform: scale(1.02);
-        }
-        
-        /* 響應式設計 */
-        @media (max-width: 900px) {
-            .app-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .worksheet-info, .student-info {
-                grid-template-columns: 1fr;
-            }
-            
-            .questions-grid, .answers-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .compact-mode .questions-grid,
-            .compact-mode .answers-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .very-compact-mode .questions-grid,
-            .very-compact-mode .answers-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .format-options {
-                flex-direction: column;
-            }
-        }
-        
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            
-            .container {
-                padding: 0;
-            }
-            
-            .input-panel, .preview-panel, .content-section {
-                padding: 15px;
-            }
-            
-            .tab-container {
-                flex-direction: column;
-            }
-            
-            .tab {
-                padding: 12px;
-            }
-            
-            .worksheet {
-                padding: 15px;
-            }
-            
-            .emoji-container {
-                flex-wrap: wrap;
-            }
-            
-            .emoji-option {
-                margin: 5px;
-            }
-        }
-        
-        @media print {
-            body {
-                background: white;
-                padding: 0;
-                margin: 0;
-            }
-            
-            .container {
-                max-width: 100%;
-                box-shadow: none;
-            }
-            
-            .tab-container, .input-panel, .btn {
-                display: none !important;
-            }
-            
-            .content-section {
-                display: block !important;
-                box-shadow: none;
-                padding: 0;
-            }
-            
-            .preview-panel {
-                box-shadow: none;
-                padding: 0;
-            }
-            
-            .worksheet {
-                border: none;
-                padding: 0;
-            }
-            
-            .page-break {
-                page-break-before: always;
-                margin-top: 0;
-                padding-top: 20px;
-                border-top: none;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shirley's Pop Quiz Maker</title>
+  <style>
+    :root{
+      --ink:#1f2a24;
+      --muted:#6f756d;
+      --paper:#fbf7ef;
+      --card:#fffdf8;
+      --field:#fffaf1;
+      --line:#ded3c1;
+      --soft:#f0e5d2;
+      --sage:#566a50;
+      --sage-2:#829879;
+      --terra:#b86649;
+      --gold:#e5c070;
+      --green:#477b62;
+      --red:#b45145;
+      --shadow:0 18px 46px rgba(55,42,25,.12);
+      --radius:26px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family:"Iowan Old Style","Noto Serif TC","Songti TC","Microsoft JhengHei",serif;
+      background:
+        radial-gradient(circle at 0 0, rgba(229,192,112,.36), transparent 36rem),
+        radial-gradient(circle at 90% 10%, rgba(130,152,121,.24), transparent 30rem),
+        linear-gradient(135deg,#f4ead8 0%,#fbf7ef 50%,#eef3ea 100%);
+      min-height:100vh;
+    }
+    body:before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.14;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.34'/%3E%3C/svg%3E");
+      mix-blend-mode:multiply;
+    }
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    .shell{position:relative;width:min(1280px,calc(100% - 32px));margin:0 auto;padding:26px 0 56px}
+    .hero{
+      border:1px solid rgba(95,80,50,.14);
+      border-radius:34px;
+      background:linear-gradient(135deg,rgba(255,253,248,.93),rgba(244,234,216,.82));
+      box-shadow:var(--shadow);
+      padding:28px;
+      overflow:hidden;
+      position:relative;
+    }
+    .hero:after{
+      content:"POP QUIZ";
+      position:absolute;
+      right:-18px;
+      top:-8px;
+      font-size:clamp(4rem,12vw,9rem);
+      font-weight:950;
+      line-height:.8;
+      letter-spacing:-.09em;
+      color:rgba(130,152,121,.14);
+      transform:rotate(-3deg);
+      pointer-events:none;
+    }
+    .eyebrow{display:inline-flex;gap:10px;align-items:center;color:var(--sage);font-size:.8rem;font-weight:950;letter-spacing:.09em;text-transform:uppercase}
+    .eyebrow:before{content:"";width:34px;height:2px;background:var(--terra);border-radius:999px}
+    h1{margin:10px 0 0;font-size:clamp(2.2rem,5vw,4.8rem);line-height:.92;letter-spacing:-.06em;max-width:780px}
+    .stack{display:grid;gap:18px;margin-top:18px}
+    .panel{
+      border:1px solid rgba(95,80,50,.15);
+      border-radius:var(--radius);
+      background:rgba(255,253,248,.9);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .panel-head{padding:22px 26px 14px;border-bottom:1px solid rgba(95,80,50,.12)}
+    .kicker{margin:0 0 4px;color:var(--terra);font-size:.78rem;font-weight:950;letter-spacing:.1em;text-transform:uppercase}
+    h2{margin:0;font-size:clamp(1.55rem,3vw,2.6rem);line-height:1.05;letter-spacing:-.04em}
+    .panel-body{padding:22px 26px 26px}
+    .source-table-wrap{border:1px solid rgba(95,80,50,.2);border-radius:20px;overflow:hidden;background:var(--field)}
+    .qa-table{width:100%;border-collapse:collapse;table-layout:fixed}
+    .qa-table th{text-align:left;padding:12px 14px;background:#efe4d0;color:var(--ink);font-weight:950;border-bottom:1px solid rgba(95,80,50,.14)}
+    .qa-table th:first-child{width:52%}
+    .qa-table th:nth-child(2){width:40%}
+    .qa-table th:last-child{width:8%;text-align:center}
+    .qa-table td{border-bottom:1px solid rgba(95,80,50,.12);padding:0;vertical-align:top}
+    .qa-table tr:last-child td{border-bottom:0}
+    .cell-input{min-height:48px;padding:12px 14px;outline:none;white-space:pre-wrap;word-break:break-word;font-size:1.03rem}
+    .cell-input:focus{background:#fffdf8;box-shadow:inset 0 0 0 3px rgba(130,152,121,.18)}
+    .cell-input:empty:before{content:attr(data-placeholder);color:#9a9080}
+    .row-del{width:100%;min-height:48px;border:0;background:transparent;color:#a7654c;font-size:1.1rem;font-weight:950}
+    .row-del:hover{background:#f4e2d8}
+    .tools{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .small-btn,.btn,.mode-btn{border:0;border-radius:16px;padding:12px 15px;font-weight:950;transition:.2s ease}
+    .small-btn{background:#efe4d0;color:var(--ink)}
+    .small-btn:hover,.btn:hover,.mode-btn:hover{transform:translateY(-1px);filter:brightness(.98)}
+    .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .mode-btn{min-height:76px;text-align:left;background:#efe4d0;color:var(--ink);border:1px solid rgba(95,80,50,.15)}
+    .mode-btn strong{display:block;font-size:1.18rem;letter-spacing:-.02em}
+    .mode-btn span{display:block;color:var(--muted);font-size:.9rem;margin-top:2px}
+    .mode-btn.active{background:var(--ink);color:#fff8e9;box-shadow:0 12px 26px rgba(31,42,36,.18)}
+    .mode-btn.active span{color:rgba(255,248,233,.75)}
+    .control-panel{display:none}
+    .control-panel.active{display:block}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .field{margin-bottom:14px}
+    .field label{display:block;margin-bottom:7px;font-weight:950}
+    input,select{width:100%;border:1px solid rgba(95,80,50,.22);border-radius:16px;background:var(--field);color:var(--ink);padding:13px 14px;outline:none}
+    input:focus,select:focus{border-color:var(--sage-2);box-shadow:0 0 0 4px rgba(130,152,121,.18);background:#fffdf8}
+    .format-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .chip input{display:none}
+    .chip span{display:block;text-align:center;border:1px solid rgba(95,80,50,.18);border-radius:999px;background:#f4ead8;color:var(--muted);padding:10px 8px;font-weight:950}
+    .chip input:checked + span{background:var(--sage);border-color:var(--sage);color:#fff8e9}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .btn{background:var(--ink);color:#fffdf8;box-shadow:0 12px 24px rgba(31,42,36,.16)}
+    .btn.sage{background:var(--sage)}
+    .btn.terra{background:var(--terra)}
+    .btn.ghost{background:#efe4d0;color:var(--ink);box-shadow:none}
+    .preview-wrap{padding:18px}
+    .worksheet{background:#fffdf8;border:1px solid rgba(95,80,50,.18);border-radius:26px;padding:26px;box-shadow:inset 0 0 0 8px rgba(244,234,216,.46)}
+    .sheet-header{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:end;padding-bottom:18px;border-bottom:3px double rgba(86,106,80,.35)}
+    .sheet-title{margin:0;font-size:clamp(1.8rem,4vw,3.6rem);line-height:.95;letter-spacing:-.06em}
+    .sheet-meta{text-align:right;color:var(--muted);font-weight:850}
+    .student-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}
+    .blank{border-bottom:1px solid var(--line);padding:8px 4px;min-height:38px;color:var(--muted);font-weight:850}
+    .score-banner{border-left:8px solid var(--gold);background:#fff1bd;border-radius:16px;padding:12px 14px;margin-bottom:16px;font-weight:950}
+    .rating{display:flex;gap:10px;flex-wrap:wrap;padding:12px;border:1px dashed rgba(86,106,80,.35);border-radius:18px;background:#f7f1e6;margin-bottom:18px}
+    .rating strong{margin-right:auto}.rating span{font-size:1.3rem}
+    .section-label{display:flex;align-items:center;gap:10px;margin:20px 0 12px;font-weight:950;color:var(--sage)}
+    .section-label:before{content:"";width:42px;height:2px;background:var(--terra)}
+    .question-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--card-width,250px),1fr));gap:10px}
+    .q-card{border:1px solid var(--line);border-radius:16px;background:#fffaf1;padding:12px;break-inside:avoid;min-height:54px}
+    .q-card strong{color:var(--terra);margin-right:6px}.answer-key .q-card{background:#f1f5ec}
+    .worksheet.compact{--card-width:190px;font-size:.9rem}.worksheet.ultra{--card-width:145px;font-size:.8rem;padding:18px}.worksheet.ultra .rating{display:none}
+    .empty{text-align:center;color:var(--muted);padding:62px 18px;border:1px dashed rgba(95,80,50,.22);border-radius:24px;background:rgba(244,234,216,.36)}
+    .quiz-stage{padding:18px}.quiz-card{border:1px solid rgba(95,80,50,.14);border-radius:22px;background:#fffdf8;padding:18px;margin-bottom:12px;box-shadow:0 10px 25px rgba(55,42,25,.08)}
+    .quiz-card .prompt{font-size:1.08rem;font-weight:950}.quiz-card input{margin-top:12px;background:white}
+    .score-big{border-radius:26px;padding:22px;background:var(--ink);color:#fff8e9;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+    .score-big strong{font-size:clamp(2.2rem,6vw,4.6rem);line-height:1;letter-spacing:-.07em}.score-big span{color:rgba(255,248,233,.72);font-weight:850}
+    .result-grid{display:grid;gap:10px}.result{display:grid;grid-template-columns:auto 1fr;gap:10px;border:1px solid var(--line);border-radius:18px;padding:12px;background:#fffdf8}.result.correct{border-left:8px solid var(--green)}.result.incorrect{border-left:8px solid var(--red)}
+    .output{display:none}.output.active{display:block;animation:fadeUp .32s ease both}
+    .toast{position:fixed;right:22px;bottom:22px;background:#263029;color:#fff8e9;padding:13px 16px;border-radius:16px;box-shadow:var(--shadow);opacity:0;transform:translateY(16px);pointer-events:none;transition:.28s ease;z-index:40;font-weight:950}.toast.show{opacity:1;transform:translateY(0)}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    @media(max-width:760px){.shell{width:min(100% - 20px,1280px);padding-top:10px}.hero{padding:23px;border-radius:26px}.mode-grid,.grid-2,.student-strip{grid-template-columns:1fr}.format-row{grid-template-columns:1fr}.sheet-header{grid-template-columns:1fr}.sheet-meta{text-align:left}.worksheet{padding:18px;border-radius:20px}.qa-table th:first-child,.qa-table th:nth-child(2),.qa-table th:last-child{width:auto}.qa-table{font-size:.93rem}}
+    @media print{body{background:white}body:before,.hero,.source-panel,.mode-panel,.control-panel,.toast,.no-print{display:none!important}.shell{width:100%;padding:0}.panel{border:0;box-shadow:none;background:white}.preview-wrap{padding:0}.worksheet{border:0;box-shadow:none;border-radius:0;padding:10mm}.answer-key{break-before:page;page-break-before:always}.output{display:none!important}#worksheetOutput{display:block!important}}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Shirley's Pop Quiz Maker</h1>
-            <p class="app-description">學習單生成器與互動答題系統 - 響應式設計，適用於各種設備</p>
-        </header>
-        
-        <div class="tab-container">
-            <div class="tab active" data-tab="worksheet">學習單生成器</div>
-            <div class="tab" data-tab="quiz">互動答題系統</div>
-        </div>
-        
-        <!-- 學習單生成器 -->
-        <div class="content-section active" id="worksheet-section">
-            <div class="app-content">
-                <div class="input-panel">
-                    <div class="form-group">
-                        <label for="topic">主題 (Topic):</label>
-                        <input type="text" id="topic" placeholder="輸入學習單主題">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="teacher">教師 (Teacher):</label>
-                        <input type="text" id="teacher" placeholder="輸入教師姓名">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="score">分數分配:</label>
-                        <input type="text" id="score" placeholder="例如: 每題5分，共100分">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="questions">題目與答案 (從Excel/Google Sheets複製):</label>
-                        <textarea id="questions" placeholder="請從Excel或Google Sheets複製兩欄資料，第一欄為題目，第二欄為答案，用Tab分隔"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>格式選擇 (節省紙張):</label>
-                        <div class="format-options">
-                            <div class="format-btn active" data-format="normal">標準</div>
-                            <div class="format-btn" data-format="compact">緊湊</div>
-                            <div class="format-btn" data-format="very-compact">超緊湊</div>
-                        </div>
-                    </div>
-                    
-                    <button id="generate-btn" class="btn">
-                        <span>生成學習單</span>
-                    </button>
-                </div>
-                
-                <div class="preview-panel">
-                    <div class="worksheet" id="worksheet">
-                        <div class="worksheet-header">
-                            <h2 id="worksheet-topic">學習單主題</h2>
-                            <p id="worksheet-teacher">教師: </p>
-                        </div>
-                        
-                        <div class="score-info" id="score-display">
-                            分數分配: 
-                        </div>
-                        
-                        <div class="worksheet-info">
-                            <div class="info-item">
-                                <span>班級:</span>
-                                <span>__________</span>
-                            </div>
-                            <div class="info-item">
-                                <span>座號:</span>
-                                <span>__________</span>
-                            </div>
-                            <div class="info-item">
-                                <span>日期:</span>
-                                <span>__________</span>
-                            </div>
-                        </div>
-                        
-                        <div class="student-info">
-                            <div class="student-field">
-                                <span>姓名(中文):</span>
-                                <span>__________</span>
-                            </div>
-                            <div class="student-field">
-                                <span>姓名(英文):</span>
-                                <span>__________</span>
-                            </div>
-                            <div class="student-field">
-                                <span>分數:</span>
-                                <span>__________</span>
-                            </div>
-                        </div>
-                        
-                        <!-- 學習表現評分區域 -->
-                        <div class="performance-rating">
-                            <div class="performance-title">學習表現自我評量</div>
-                            <div class="emoji-container">
-                                <div class="emoji-option" data-rating="1">
-                                    <div class="emoji">😞</div>
-                                </div>
-                                <div class="emoji-option" data-rating="2">
-                                    <div class="emoji">😐</div>
-                                </div>
-                                <div class="emoji-option" data-rating="3">
-                                    <div class="emoji">😊</div>
-                                </div>
-                                <div class="emoji-option" data-rating="4">
-                                    <div class="emoji">😄</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="questions-section">
-                            <div class="section-title">題目卷</div>
-                            <div class="questions-grid" id="questions-list">
-                                <!-- 題目將在這裡生成 -->
-                            </div>
-                        </div>
-                        
-                        <!-- 分頁符 -->
-                        <div class="page-break"></div>
-                        
-                        <div class="answers-section">
-                            <div class="section-title">答案卷</div>
-                            <div class="answers-grid" id="answers-list">
-                                <!-- 答案將在這裡生成 -->
-                            </div>
-                        </div>
-                        
-                        <div class="worksheet-footer">
-                            <p>學習單生成日期: <span id="generation-date"></span></p>
-                        </div>
-                    </div>
-                    
-                    <button id="print-btn" class="btn btn-print">
-                        <span>列印學習單</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 互動答題系統 -->
-        <div class="content-section" id="quiz-section">
-            <div class="quiz-container">
-                <div class="quiz-header">
-                    <h2>互動答題系統</h2>
-                    <p>請在下方輸入題目和答案，然後開始答題</p>
-                </div>
-                
-                <div class="input-panel">
-                    <div class="form-group">
-                        <label for="quiz-questions">題目與答案 (從Excel/Google Sheets複製):</label>
-                        <textarea id="quiz-questions" placeholder="請從Excel或Google Sheets複製兩欄資料，第一欄為題目，第二欄為答案，用Tab分隔"></textarea>
-                    </div>
-                    
-                    <button id="start-quiz-btn" class="btn">
-                        <span>開始答題</span>
-                    </button>
-                </div>
-                
-                <div id="quiz-area" style="display: none;">
-                    <div id="quiz-questions-list">
-                        <!-- 互動題目將在這裡生成 -->
-                    </div>
-                    
-                    <button id="submit-quiz-btn" class="btn btn-check">
-                        <span>提交答案</span>
-                    </button>
-                    
-                    <div class="quiz-result" id="quiz-result" style="display: none;">
-                        <div class="section-title">答題結果</div>
-                        <div id="quiz-results-list">
-                            <!-- 答題結果將在這裡生成 -->
-                        </div>
-                        <div class="quiz-score" id="quiz-score-display">
-                            <!-- 分數顯示將在這裡生成 -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  <main class="shell">
+    <section class="hero no-print">
+      <div class="eyebrow">Quiz Maker｜測驗製作</div>
+      <h1>Shirley's Pop Quiz Maker</h1>
+    </section>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 切換標籤頁
-            const tabs = document.querySelectorAll('.tab');
-            const contentSections = document.querySelectorAll('.content-section');
-            
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
-                    
-                    // 更新標籤狀態
-                    tabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // 更新內容區域
-                    contentSections.forEach(section => {
-                        section.classList.remove('active');
-                        if (section.id === `${tabId}-section`) {
-                            section.classList.add('active');
-                        }
-                    });
-                });
-            });
-            
-            // 學習單生成器功能
-            const generateBtn = document.getElementById('generate-btn');
-            const printBtn = document.getElementById('print-btn');
-            const formatButtons = document.querySelectorAll('.format-btn');
-            const worksheet = document.getElementById('worksheet');
-            
-            // 設置生成日期
-            const generationDate = document.getElementById('generation-date');
-            const today = new Date();
-            generationDate.textContent = today.toLocaleDateString('zh-TW');
-            
-            // 格式選擇
-            formatButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    formatButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // 移除所有格式類
-                    worksheet.classList.remove('compact-mode', 'very-compact-mode');
-                    
-                    // 添加選中的格式類
-                    const format = this.getAttribute('data-format');
-                    if (format !== 'normal') {
-                        worksheet.classList.add(`${format}-mode`);
-                    }
-                });
-            });
-            
-            // 學習表現評分功能
-            const emojiOptions = document.querySelectorAll('.emoji-option');
-            let selectedEmoji = null;
-            
-            emojiOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    // 移除之前選擇的狀態
-                    emojiOptions.forEach(opt => opt.classList.remove('selected'));
-                    
-                    // 添加當前選擇的狀態
-                    this.classList.add('selected');
-                    selectedEmoji = this.getAttribute('data-rating');
-                    
-                    // 添加動畫效果
-                    const emoji = this.querySelector('.emoji');
-                    emoji.style.transform = 'scale(1.3)';
-                    setTimeout(() => {
-                        emoji.style.transform = 'scale(1.2)';
-                    }, 200);
-                });
-            });
-            
-            generateBtn.addEventListener('click', generateWorksheet);
-            printBtn.addEventListener('click', printWorksheet);
-            
-            function generateWorksheet() {
-                // 獲取輸入值
-                const topic = document.getElementById('topic').value || '學習單主題';
-                const teacher = document.getElementById('teacher').value || '教師姓名';
-                const score = document.getElementById('score').value || '分數分配';
-                const questionsInput = document.getElementById('questions').value;
-                
-                // 更新學習單標題和教師信息
-                document.getElementById('worksheet-topic').textContent = topic;
-                document.getElementById('worksheet-teacher').textContent = `教師: ${teacher}`;
-                
-                // 更新分數分配顯示
-                document.getElementById('score-display').textContent = `分數分配: ${score}`;
-                
-                // 解析題目和答案
-                const questionsList = document.getElementById('questions-list');
-                const answersList = document.getElementById('answers-list');
-                
-                // 清空現有內容
-                questionsList.innerHTML = '';
-                answersList.innerHTML = '';
-                
-                if (questionsInput.trim() === '') {
-                    questionsList.innerHTML = '<p>請輸入題目資料</p>';
-                    answersList.innerHTML = '<p>請輸入題目資料</p>';
-                    return;
-                }
-                
-                // 解析複製的資料
-                const lines = questionsInput.trim().split('\n');
-                let questionNumber = 1;
-                
-                lines.forEach(line => {
-                    const columns = line.split('\t');
-                    if (columns.length >= 1) {
-                        const question = columns[0].trim();
-                        const answer = columns.length >= 2 ? columns[1].trim() : '';
-                        
-                        // 添加題目
-                        const questionItem = document.createElement('div');
-                        questionItem.className = 'question-item';
-                        questionItem.innerHTML = `<span class="question-number">${questionNumber}.</span> ${question}`;
-                        questionsList.appendChild(questionItem);
-                        
-                        // 添加答案
-                        const answerItem = document.createElement('div');
-                        answerItem.className = 'answer-item';
-                        answerItem.innerHTML = `<span class="question-number">${questionNumber}.</span> ${answer || '________________'}`;
-                        answersList.appendChild(answerItem);
-                        
-                        questionNumber++;
-                    }
-                });
-            }
-            
-            function printWorksheet() {
-                const worksheetContent = document.getElementById('worksheet').innerHTML;
-                const printWindow = window.open('', '_blank', 'width=800,height=600');
-                
-                printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>列印學習單</title>
-                        <meta charset="UTF-8">
-                        <style>
-                            body { 
-                                font-family: "Microsoft JhengHei", "微軟正黑體", Arial, sans-serif; 
-                                margin: 0;
-                                padding: 15px;
-                                background: white;
-                                color: #333;
-                                line-height: 1.6;
-                            }
-                            .worksheet { 
-                                background: white; 
-                                padding: 20px;
-                                border: 1px solid #dee2e6;
-                            }
-                            .worksheet-header { 
-                                text-align: center; 
-                                margin-bottom: 15px; 
-                                padding-bottom: 10px; 
-                                border-bottom: 2px solid #3498db; 
-                            }
-                            .worksheet-header h2 {
-                                font-size: 1.5rem;
-                                margin-bottom: 5px;
-                            }
-                            .worksheet-header p {
-                                font-size: 0.9rem;
-                                margin: 0;
-                            }
-                            .worksheet-info, .student-info {
-                                display: grid;
-                                grid-template-columns: repeat(3, 1fr);
-                                gap: 10px;
-                                margin-bottom: 15px;
-                                font-size: 14px;
-                            }
-                            .info-item, .student-field {
-                                display: flex;
-                                justify-content: space-between;
-                                padding: 5px 0;
-                                border-bottom: 1px dashed #dee2e6;
-                            }
-                            .student-field {
-                                border-bottom: 1px solid #dee2e6;
-                            }
-                            .score-info {
-                                background-color: #fff3cd;
-                                padding: 8px 12px;
-                                border-radius: 6px;
-                                margin-bottom: 15px;
-                                border-left: 4px solid #ffc107;
-                                font-weight: bold;
-                                font-size: 14px;
-                            }
-                            .performance-rating {
-                                margin-bottom: 15px;
-                                padding: 10px;
-                                border: 1px solid #dee2e6;
-                                border-radius: 6px;
-                                background-color: #f9f9f9;
-                            }
-                            .performance-title {
-                                text-align: center;
-                                font-weight: bold;
-                                margin-bottom: 10px;
-                                color: #343a40;
-                                font-size: 14px;
-                            }
-                            .emoji-container {
-                                display: flex;
-                                justify-content: space-around;
-                                align-items: center;
-                            }
-                            .emoji-option {
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                                padding: 3px;
-                            }
-                            .emoji {
-                                font-size: 2rem;
-                                margin-bottom: 2px;
-                            }
-                            .emoji-option.selected .emoji {
-                                transform: scale(1.2);
-                                filter: drop-shadow(0 0 3px rgba(52, 152, 219, 0.5));
-                            }
-                            .section-title {
-                                background-color: #f8f9fa;
-                                padding: 8px 12px;
-                                font-weight: bold;
-                                margin-bottom: 12px;
-                                border-left: 4px solid #3498db;
-                                border-radius: 4px;
-                                font-size: 14px;
-                            }
-                            .questions-grid, .answers-grid { 
-                                display: grid; 
-                                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
-                                gap: 12px; 
-                            }
-                            .question-item, .answer-item { 
-                                padding: 10px; 
-                                border: 1px solid #dee2e6; 
-                                border-radius: 6px; 
-                                margin-bottom: 10px; 
-                                background-color: #f9f9f9;
-                                break-inside: avoid;
-                                font-size: 14px;
-                            }
-                            .answer-item {
-                                border: 1px dashed #dee2e6;
-                                background-color: #f0f8ff;
-                            }
-                            .question-number {
-                                font-weight: bold;
-                                margin-right: 6px;
-                                color: #3498db;
-                            }
-                            .page-break { 
-                                page-break-before: always; 
-                                margin-top: 20px; 
-                                padding-top: 20px; 
-                                border-top: 2px dashed #dee2e6;
-                            }
-                            .worksheet-footer {
-                                margin-top: auto;
-                                padding-top: 15px;
-                                text-align: center;
-                                font-size: 12px;
-                                color: #666;
-                                border-top: 1px solid #dee2e6;
-                            }
-                            @media print { 
-                                body { 
-                                    margin: 0; 
-                                    padding: 0;
-                                } 
-                                .worksheet {
-                                    border: none;
-                                    padding: 15px;
-                                }
-                                .page-break { 
-                                    page-break-before: always; 
-                                    margin-top: 0; 
-                                    padding-top: 20px; 
-                                    border-top: none;
-                                } 
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        ${worksheetContent}
-                        <script>
-                            setTimeout(() => {
-                                window.print();
-                                // 可選：列印後自動關閉窗口
-                                // setTimeout(() => window.close(), 500);
-                            }, 500);
-                        <\/script>
-                    </body>
-                    </html>
-                `);
-                
-                printWindow.document.close();
-            }
-            
-            // 互動答題系統功能
-            const startQuizBtn = document.getElementById('start-quiz-btn');
-            const submitQuizBtn = document.getElementById('submit-quiz-btn');
-            const quizArea = document.getElementById('quiz-area');
-            const quizResult = document.getElementById('quiz-result');
-            const quizScoreDisplay = document.getElementById('quiz-score-display');
-            
-            let quizData = [];
-            
-            startQuizBtn.addEventListener('click', startQuiz);
-            submitQuizBtn.addEventListener('click', submitQuiz);
-            quizScoreDisplay.addEventListener('click', printAnswerSheet);
-            
-            function startQuiz() {
-                const questionsInput = document.getElementById('quiz-questions').value;
-                const quizQuestionsList = document.getElementById('quiz-questions-list');
-                
-                // 清空現有內容
-                quizQuestionsList.innerHTML = '';
-                quizResult.style.display = 'none';
-                quizData = [];
-                
-                if (questionsInput.trim() === '') {
-                    quizQuestionsList.innerHTML = '<p>請輸入題目資料</p>';
-                    return;
-                }
-                
-                // 解析複製的資料
-                const lines = questionsInput.trim().split('\n');
-                let questionNumber = 1;
-                
-                lines.forEach(line => {
-                    const columns = line.split('\t');
-                    if (columns.length >= 1) {
-                        const question = columns[0].trim();
-                        const answer = columns.length >= 2 ? columns[1].trim() : '';
-                        
-                        // 存儲題目和答案
-                        quizData.push({
-                            number: questionNumber,
-                            question: question,
-                            answer: answer
-                        });
-                        
-                        // 添加互動題目
-                        const quizItem = document.createElement('div');
-                        quizItem.className = 'quiz-question';
-                        quizItem.innerHTML = `
-                            <div><span class="question-number">${questionNumber}.</span> ${question}</div>
-                            <input type="text" class="quiz-input" id="quiz-answer-${questionNumber}" placeholder="請輸入答案">
-                        `;
-                        quizQuestionsList.appendChild(quizItem);
-                        
-                        questionNumber++;
-                    }
-                });
-                
-                // 顯示答題區域
-                quizArea.style.display = 'block';
-                
-                // 滾動到答題區域
-                quizArea.scrollIntoView({ behavior: 'smooth' });
-            }
-            
-            function submitQuiz() {
-                const quizResultsList = document.getElementById('quiz-results-list');
-                
-                // 清空現有結果
-                quizResultsList.innerHTML = '';
-                
-                let correctCount = 0;
-                
-                // 檢查每個答案
-                quizData.forEach(item => {
-                    const userAnswer = document.getElementById(`quiz-answer-${item.number}`).value.trim();
-                    const isCorrect = userAnswer.toLowerCase() === item.answer.toLowerCase();
-                    
-                    if (isCorrect) {
-                        correctCount++;
-                    }
-                    
-                    // 創建結果項目
-                    const resultItem = document.createElement('div');
-                    resultItem.className = `result-item ${isCorrect ? 'correct' : 'incorrect'}`;
-                    resultItem.innerHTML = `
-                        <span class="result-icon">${isCorrect ? '☑️' : '✖️'}</span>
-                        <div>
-                            <strong>${item.number}.</strong> ${item.question}
-                            <div>你的答案: ${userAnswer || '(未填寫)'}</div>
-                        </div>
-                        <div class="answer-feedback">
-                            ${isCorrect ? '' : `正確答案: ${item.answer}`}
-                        </div>
-                    `;
-                    
-                    quizResultsList.appendChild(resultItem);
-                });
-                
-                // 計算分數
-                const totalQuestions = quizData.length;
-                const scorePercentage = Math.round((correctCount / totalQuestions) * 100);
-                
-                // 顯示分數
-                quizScoreDisplay.textContent = `得分: ${correctCount}/${totalQuestions} (${scorePercentage}%) - 點擊此處列印答題卷`;
-                
-                // 顯示結果區域
-                quizResult.style.display = 'block';
-                
-                // 滾動到結果區域
-                quizResult.scrollIntoView({ behavior: 'smooth' });
-            }
-            
-            function printAnswerSheet() {
-                let correctCount = 0;
-                let answerSheetHTML = '';
-                
-                // 生成答題卷內容
-                quizData.forEach(item => {
-                    const userAnswer = document.getElementById(`quiz-answer-${item.number}`).value.trim();
-                    const isCorrect = userAnswer.toLowerCase() === item.answer.toLowerCase();
-                    
-                    if (isCorrect) {
-                        correctCount++;
-                    }
-                    
-                    answerSheetHTML += `
-                        <div class="answer-sheet-item ${isCorrect ? 'correct' : 'incorrect'}">
-                            <span class="answer-sheet-icon">${isCorrect ? '☑️' : '✖️'}</span>
-                            <div>
-                                <strong>${item.number}.</strong> 
-                                <span>你的答案: ${userAnswer || '(未填寫)'}</span>
-                                ${isCorrect ? '' : `<span> | 正確答案: ${item.answer}</span>`}
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                const totalQuestions = quizData.length;
-                const scorePercentage = Math.round((correctCount / totalQuestions) * 100);
-                
-                const fullAnswerSheetHTML = `
-                    <div class="answer-sheet-print answer-sheet-very-compact">
-                        <div class="answer-sheet-header">
-                            <h2>互動答題結果</h2>
-                            <p>答題日期: ${new Date().toLocaleDateString('zh-TW')}</p>
-                        </div>
-                        
-                        <div class="student-info">
-                            <div class="student-field">
-                                <span>姓名:</span>
-                                <span>__________</span>
-                            </div>
-                            <div class="student-field">
-                                <span>班級:</span>
-                                <span>__________</span>
-                            </div>
-                            <div class="student-field">
-                                <span>座號:</span>
-                                <span>__________</span>
-                            </div>
-                        </div>
-                        
-                        <div class="section-title">答題結果</div>
-                        
-                        <div class="answer-sheet-results">
-                            ${answerSheetHTML}
-                        </div>
-                        
-                        <div class="answer-sheet-score">
-                            總分: ${correctCount}/${totalQuestions} (${scorePercentage}%)
-                        </div>
-                        
-                        <div class="worksheet-footer">
-                            <p>答題卷生成日期: ${new Date().toLocaleDateString('zh-TW')}</p>
-                        </div>
-                    </div>
-                `;
-                
-                const printWindow = window.open('', '_blank', 'width=800,height=600');
-                
-                printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>列印答題結果</title>
-                        <meta charset="UTF-8">
-                        <style>
-                            body { 
-                                font-family: "Microsoft JhengHei", "微軟正黑體", Arial, sans-serif; 
-                                margin: 0;
-                                padding: 15px;
-                                background: white;
-                                color: #333;
-                                line-height: 1.6;
-                            }
-                            .answer-sheet-print { 
-                                background: white; 
-                                padding: 20px;
-                                border: 1px solid #dee2e6;
-                            }
-                            .answer-sheet-header { 
-                                text-align: center; 
-                                margin-bottom: 15px; 
-                                padding-bottom: 10px; 
-                                border-bottom: 2px solid #3498db; 
-                            }
-                            .student-info {
-                                display: grid;
-                                grid-template-columns: repeat(3, 1fr);
-                                gap: 15px;
-                                margin-bottom: 15px;
-                                font-size: 14px;
-                            }
-                            .student-field {
-                                display: flex;
-                                justify-content: space-between;
-                                padding: 8px 0;
-                                border-bottom: 1px solid #dee2e6;
-                            }
-                            .section-title {
-                                background-color: #f8f9fa;
-                                padding: 8px 12px;
-                                font-weight: bold;
-                                margin-bottom: 10px;
-                                border-left: 5px solid #3498db;
-                                border-radius: 4px;
-                                font-size: 14px;
-                            }
-                            .answer-sheet-results {
-                                margin-bottom: 20px;
-                            }
-                            .answer-sheet-item {
-                                display: flex;
-                                align-items: center;
-                                margin-bottom: 6px;
-                                padding: 6px;
-                                border-radius: 4px;
-                                border: 1px solid #dee2e6;
-                                font-size: 12px;
-                            }
-                            .answer-sheet-item.correct {
-                                background-color: rgba(46, 204, 113, 0.1);
-                            }
-                            .answer-sheet-item.incorrect {
-                                background-color: rgba(231, 76, 60, 0.1);
-                            }
-                            .answer-sheet-icon {
-                                margin-right: 6px;
-                                font-size: 14px;
-                            }
-                            .answer-sheet-score {
-                                font-size: 16px;
-                                font-weight: bold;
-                                text-align: center;
-                                margin-top: 15px;
-                                padding: 8px;
-                                background-color: #3498db;
-                                color: white;
-                                border-radius: 4px;
-                            }
-                            .worksheet-footer {
-                                margin-top: auto;
-                                padding-top: 20px;
-                                text-align: center;
-                                font-size: 14px;
-                                color: #666;
-                                border-top: 1px solid #dee2e6;
-                            }
-                            @media print { 
-                                body { 
-                                    margin: 0; 
-                                    padding: 0;
-                                } 
-                                .answer-sheet-print {
-                                    border: none;
-                                    padding: 15px;
-                                }
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        ${fullAnswerSheetHTML}
-                        <script>
-                            setTimeout(() => {
-                                window.print();
-                                // 可選：列印後自動關閉窗口
-                                // setTimeout(() => window.close(), 500);
-                            }, 500);
-                        <\/script>
-                    </body>
-                    </html>
-                `);
-                
-                printWindow.document.close();
-            }
-            
-            // 初始生成一次學習單
-            generateWorksheet();
-        });
-    </script>
+    <section class="stack">
+      <section class="panel source-panel">
+        <div class="panel-head">
+          <p class="kicker">Input｜輸入</p>
+          <h2>Questions + Answers<br>題目與答案</h2>
+        </div>
+        <div class="panel-body">
+          <div class="source-table-wrap" id="sourceTableWrap">
+            <table class="qa-table" aria-label="Questions and answers table">
+              <thead>
+                <tr>
+                  <th>Question｜題目</th>
+                  <th>Answer｜答案</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="sourceTableBody"></tbody>
+            </table>
+          </div>
+          <div class="tools">
+            <button type="button" class="small-btn" id="addRowBtn">+ Row｜新增</button>
+            <button type="button" class="small-btn" id="pasteReplaceBtn">Paste replaces all｜貼上取代</button>
+            <button type="button" class="small-btn" id="clearBtn">Clear｜清除</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel mode-panel no-print">
+        <div class="panel-body">
+          <div class="mode-grid" aria-label="Mode selection">
+            <button type="button" class="mode-btn active" data-mode="worksheet">
+              <strong>Worksheet｜學習單</strong>
+              <span>printable quiz sheet</span>
+            </button>
+            <button type="button" class="mode-btn" data-mode="quiz">
+              <strong>Online Quiz｜線上答題</strong>
+              <span>student answers on screen</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel control-panel active no-print" id="worksheetControls">
+        <div class="panel-head">
+          <p class="kicker">Worksheet Settings｜學習單設定</p>
+          <h2>Print setup<br>列印設定</h2>
+        </div>
+        <div class="panel-body">
+          <div class="grid-2">
+            <div class="field"><label for="topic">Topic｜主題</label><input id="topic" value="Vocabulary Pop Quiz｜單字隨堂測驗" /></div>
+            <div class="field"><label for="teacher">Teacher｜教師</label><input id="teacher" value="Shirley" /></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label for="scoreRule">Score｜分數</label><input id="scoreRule" value="5 points each｜每題 5 分" /></div>
+            <div class="field"><label for="dateField">Date｜日期</label><input id="dateField" type="date" /></div>
+          </div>
+          <div class="field">
+            <label>Layout｜版面</label>
+            <div class="format-row">
+              <label class="chip"><input type="radio" name="density" value="normal" checked><span>Roomy｜舒適</span></label>
+              <label class="chip"><input type="radio" name="density" value="compact"><span>Compact｜緊湊</span></label>
+              <label class="chip"><input type="radio" name="density" value="ultra"><span>Ultra｜省紙</span></label>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn sage" id="previewWorksheetBtn">Preview｜預覽</button>
+            <button class="btn terra" id="printBtn">Print｜列印</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel control-panel no-print" id="quizControls">
+        <div class="panel-head">
+          <p class="kicker">Online Quiz｜線上答題</p>
+          <h2>Start quiz<br>開始答題</h2>
+        </div>
+        <div class="panel-body">
+          <div class="actions">
+            <button class="btn terra" id="startQuizBtn">Start｜開始</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel output-panel">
+        <div id="worksheetOutput" class="output active">
+          <div class="preview-wrap">
+            <article class="worksheet" id="worksheet">
+              <header class="sheet-header">
+                <div>
+                  <p class="kicker">Pop Quiz｜隨堂測驗</p>
+                  <h2 class="sheet-title" id="sheetTopic">Vocabulary Pop Quiz｜單字隨堂測驗</h2>
+                </div>
+                <div class="sheet-meta">
+                  <div id="sheetTeacher">Teacher｜教師：Shirley</div>
+                  <div id="sheetDate">Date｜日期：</div>
+                </div>
+              </header>
+              <section class="student-strip">
+                <div class="blank">Class｜班級：</div>
+                <div class="blank">No.｜座號：</div>
+                <div class="blank">Name｜姓名：</div>
+                <div class="blank">Score｜分數：</div>
+              </section>
+              <div class="score-banner" id="sheetScore">Score｜分數：5 points each｜每題 5 分</div>
+              <div class="rating"><strong>Self-check｜學習表現自我評量</strong><span>😞</span><span>😐</span><span>😊</span><span>😄</span></div>
+              <section>
+                <div class="section-label">Question Sheet｜題目卷</div>
+                <div class="question-grid" id="questionList"><div class="empty">Enter questions above.<br>請在上方輸入題目。</div></div>
+              </section>
+              <section class="answer-key">
+                <div class="section-label">Answer Key｜答案卷</div>
+                <div class="question-grid" id="answerList"><div class="empty">Answer key.<br>答案。</div></div>
+              </section>
+            </article>
+          </div>
+        </div>
+
+        <div id="quizOutput" class="output">
+          <div class="quiz-stage" id="quizStage"><div class="empty">Click Start.<br>按開始。</div></div>
+        </div>
+      </section>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+    let quizItems = [];
+    let mode = 'worksheet';
+
+    function escapeHTML(value){
+      return String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+    }
+    function todayISO(){
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function splitRow(line){
+      if(line.includes('\t')) return line.split('\t');
+      if(line.includes(',')) return line.split(',');
+      return [line];
+    }
+    function pastedTextToRows(text){
+      return String(text || '').split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => {
+          const cells = splitRow(line).map(cell => cell.trim()).filter(Boolean);
+          return { question: cells[0] || '', answer: cells.slice(1).join(' / ') };
+        })
+        .filter(row => row.question || row.answer);
+    }
+    function setToast(message){
+      const toast = $('#toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+    function createEditableCell(type, value=''){
+      const div = document.createElement('div');
+      div.className = 'cell-input';
+      div.contentEditable = 'true';
+      div.dataset.type = type;
+      div.dataset.placeholder = type === 'question' ? 'apple' : '蘋果';
+      div.textContent = value;
+      div.addEventListener('input', syncAll);
+      div.addEventListener('paste', handleTablePaste);
+      return div;
+    }
+    function addTableRow(question='', answer=''){
+      const tr = document.createElement('tr');
+      const qTd = document.createElement('td');
+      const aTd = document.createElement('td');
+      const dTd = document.createElement('td');
+      qTd.appendChild(createEditableCell('question', question));
+      aTd.appendChild(createEditableCell('answer', answer));
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'row-del';
+      del.textContent = '×';
+      del.setAttribute('aria-label', 'Delete row');
+      del.addEventListener('click', () => { tr.remove(); ensureBlankRows(); syncAll(); });
+      dTd.appendChild(del);
+      tr.append(qTd, aTd, dTd);
+      $('#sourceTableBody').appendChild(tr);
+      return tr;
+    }
+    function ensureBlankRows(minRows=6){ while($('#sourceTableBody').children.length < minRows) addTableRow(); }
+    function loadRows(rows){
+      $('#sourceTableBody').innerHTML = '';
+      rows.forEach(row => addTableRow(row.question, row.answer));
+      ensureBlankRows();
+      syncAll();
+    }
+    function handleTablePaste(event){
+      const text = event.clipboardData?.getData('text/plain') || '';
+      if(!text) return;
+      const isBulk = text.includes('\n') || text.includes('\t') || text.includes(',');
+      if(!isBulk) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const rows = pastedTextToRows(text);
+      if(rows.length){ loadRows(rows); setToast('Pasted｜已貼上'); }
+    }
+    function getTableItems(){
+      return $$('#sourceTableBody tr').map((tr,index) => {
+        const q = tr.querySelector('[data-type="question"]')?.textContent.trim() || '';
+        const a = tr.querySelector('[data-type="answer"]')?.textContent.trim() || '';
+        return { number:index + 1, question:q, answer:a };
+      }).filter(item => item.question || item.answer)
+        .map((item,index) => ({...item, number:index + 1}));
+    }
+    function syncAll(){
+      quizItems = getTableItems();
+      updateWorksheet();
+    }
+    function updateWorksheet(){
+      const topic = $('#topic').value.trim() || 'Pop Quiz｜隨堂測驗';
+      const teacher = $('#teacher').value.trim() || 'Shirley';
+      const score = $('#scoreRule').value.trim() || '5 points each｜每題 5 分';
+      const date = $('#dateField').value || todayISO();
+      const density = document.querySelector('input[name="density"]:checked').value;
+      $('#sheetTopic').textContent = topic;
+      $('#sheetTeacher').textContent = `Teacher｜教師：${teacher}`;
+      $('#sheetDate').textContent = `Date｜日期：${date}`;
+      $('#sheetScore').textContent = `Score｜分數：${score}`;
+      $('#worksheet').classList.remove('compact','ultra');
+      if(density !== 'normal') $('#worksheet').classList.add(density);
+      if(!quizItems.length){
+        $('#questionList').innerHTML = '<div class="empty">Enter questions above.<br>請在上方輸入題目。</div>';
+        $('#answerList').innerHTML = '<div class="empty">Answer key.<br>答案。</div>';
+        return;
+      }
+      $('#questionList').innerHTML = quizItems.map(item => `<div class="q-card"><strong>${item.number}.</strong>${escapeHTML(item.question)}</div>`).join('');
+      $('#answerList').innerHTML = quizItems.map(item => `<div class="q-card"><strong>${item.number}.</strong>${escapeHTML(item.answer || '________________')}</div>`).join('');
+    }
+    function setMode(nextMode){
+      mode = nextMode;
+      $$('.mode-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
+      $('#worksheetControls').classList.toggle('active', mode === 'worksheet');
+      $('#quizControls').classList.toggle('active', mode === 'quiz');
+      $('#worksheetOutput').classList.toggle('active', mode === 'worksheet');
+      $('#quizOutput').classList.toggle('active', mode === 'quiz');
+      syncAll();
+      if(mode === 'quiz') $('#quizOutput').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+    function startQuiz(){
+      syncAll();
+      setMode('quiz');
+      if(!quizItems.length){
+        $('#quizStage').innerHTML = '<div class="empty">No questions yet.<br>請先輸入題目。</div>';
+        setToast('No questions｜尚無題目');
+        return;
+      }
+      $('#quizStage').innerHTML = `
+        <div class="score-big no-print"><div><strong>${quizItems.length}</strong><span> questions ready｜題已準備</span></div><button class="btn terra" id="submitQuizBtn">Submit｜提交</button></div>
+        <form id="quizForm">${quizItems.map(item => `<div class="quiz-card"><div class="prompt"><span>${item.number}.</span> ${escapeHTML(item.question)}</div><input autocomplete="off" data-number="${item.number}" placeholder="Your answer｜請輸入答案"></div>`).join('')}</form>
+        <div id="quizResult"></div>`;
+      $('#submitQuizBtn').addEventListener('click', gradeQuiz);
+      setToast('Quiz ready｜測驗已建立');
+    }
+    function normalizeAnswer(value){ return String(value || '').trim().replace(/\s+/g,' ').toLowerCase(); }
+    function gradeQuiz(){
+      const answers = Object.fromEntries($$('#quizForm input').map(input => [Number(input.dataset.number), input.value]));
+      let correct = 0;
+      const rows = quizItems.map(item => {
+        const user = answers[item.number] || '';
+        const ok = normalizeAnswer(user) === normalizeAnswer(item.answer);
+        if(ok) correct++;
+        return `<div class="result ${ok ? 'correct' : 'incorrect'}"><strong>${ok ? '✓' : '×'}</strong><div><b>${item.number}. ${escapeHTML(item.question)}</b><br>User｜作答：${escapeHTML(user || '—')}${ok ? '' : `<br>Answer｜答案：${escapeHTML(item.answer || '—')}`}</div></div>`;
+      }).join('');
+      const percent = quizItems.length ? Math.round(correct / quizItems.length * 100) : 0;
+      $('#quizResult').innerHTML = `<div class="score-big"><div><strong>${percent}%</strong><span>${correct}/${quizItems.length} correct｜答對 ${correct}/${quizItems.length} 題</span></div><button class="btn sage" onclick="window.print()">Print｜列印</button></div><div class="result-grid">${rows}</div>`;
+      $('#quizResult').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+    function clearAll(){
+      loadRows([]);
+      $('#quizStage').innerHTML = '<div class="empty">Click Start.<br>按開始。</div>';
+      setToast('Cleared｜已清除');
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      $('#dateField').value = todayISO();
+      ensureBlankRows();
+      syncAll();
+      $$('.mode-btn').forEach(btn => btn.addEventListener('click', () => setMode(btn.dataset.mode)));
+      ['topic','teacher','scoreRule','dateField'].forEach(id => $('#' + id).addEventListener('input', syncAll));
+      $$('input[name="density"]').forEach(input => input.addEventListener('change', syncAll));
+      $('#addRowBtn').addEventListener('click', () => { addTableRow(); syncAll(); });
+      $('#pasteReplaceBtn').addEventListener('click', async () => {
+        try{
+          const text = await navigator.clipboard.readText();
+          const rows = pastedTextToRows(text);
+          if(rows.length){ loadRows(rows); setToast('Pasted｜已貼上'); }
+          else setToast('Nothing to paste｜沒有可貼上的內容');
+        }catch(e){ setToast('Paste into table｜請直接貼到表格'); }
+      });
+      $('#sourceTableWrap').addEventListener('paste', handleTablePaste);
+      $('#clearBtn').addEventListener('click', clearAll);
+      $('#previewWorksheetBtn').addEventListener('click', () => { syncAll(); setMode('worksheet'); $('#worksheetOutput').scrollIntoView({behavior:'smooth', block:'start'}); });
+      $('#printBtn').addEventListener('click', () => { syncAll(); setMode('worksheet'); setTimeout(() => window.print(), 80); });
+      $('#startQuizBtn').addEventListener('click', startQuiz);
+    });
+  </script>
 </body>
 </html>
