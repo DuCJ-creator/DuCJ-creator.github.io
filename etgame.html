@@ -471,6 +471,7 @@
     }
 
     .loading {
+      display: none;
       text-align: center;
       color: var(--muted);
       font-weight: 800;
@@ -573,7 +574,7 @@
           <h1><span class="gradient-text">Cosmic Vocab</span><br />Challenge</h1>
           <div id="levelGrid" class="level-grid" role="group" aria-label="Select vocabulary level"></div>
           <button id="startBtn" class="main-btn">Start Game 🚀</button>
-          <div id="loading" class="loading">Vocabulary ready.</div>
+          <div id="loading" class="loading" aria-live="polite"></div>
         </div>
       </div>
     </section>
@@ -903,7 +904,8 @@
       const startBtn = $("startBtn");
       startBtn.disabled = true;
       startBtn.textContent = "Loading CSV...";
-      $("loading").textContent = "Loading level1.csv～level6.csv...";
+      $("loading").style.display = "none";
+      $("loading").textContent = "";
 
       try {
         const levelData = await Promise.all(CSV_LEVELS.map(loadLevelCsv));
@@ -917,7 +919,9 @@
           return `L${lv}: ${count}`;
         }).join(" · ");
 
-        $("loading").textContent = `${vocabulary.length} CSV vocabulary items loaded. ${levelCounts}`;
+        // CSV loaded successfully; keep the status hidden for students.
+        $("loading").style.display = "none";
+        $("loading").textContent = "";
         startBtn.disabled = false;
         startBtn.textContent = "Start Game 🚀";
       } catch (error) {
@@ -925,6 +929,7 @@
         vocabulary = [];
         startBtn.disabled = true;
         startBtn.textContent = "CSV Load Failed";
+        $("loading").style.display = "block";
         $("loading").textContent = `CSV loading failed: ${error.message}`;
         console.error(error);
       }
