@@ -620,29 +620,10 @@
 
   <script>
     const ROUND_SECONDS = 8;
+    const CSV_BASE = "https://ducj-creator.github.io/iVocab-Self-Practice/";
+    const CSV_LEVELS = ["1", "2", "3", "4", "5", "6"];
 
-    const fallbackWords = [
-      { level: "L1", word: "brave", part: "adj.", meaning: "勇敢的" },
-      { level: "L1", word: "quiet", part: "adj.", meaning: "安靜的" },
-      { level: "L1", word: "borrow", part: "v.", meaning: "借入" },
-      { level: "L2", word: "journey", part: "n.", meaning: "旅程" },
-      { level: "L2", word: "protect", part: "v.", meaning: "保護" },
-      { level: "L2", word: "valuable", part: "adj.", meaning: "有價值的" },
-      { level: "L3", word: "ancient", part: "adj.", meaning: "古代的" },
-      { level: "L3", word: "discover", part: "v.", meaning: "發現" },
-      { level: "L3", word: "energy", part: "n.", meaning: "能量" },
-      { level: "L4", word: "confident", part: "adj.", meaning: "有自信的" },
-      { level: "L4", word: "solution", part: "n.", meaning: "解決方法" },
-      { level: "L4", word: "reduce", part: "v.", meaning: "減少" },
-      { level: "L5", word: "evidence", part: "n.", meaning: "證據" },
-      { level: "L5", word: "significant", part: "adj.", meaning: "重要的；顯著的" },
-      { level: "L5", word: "persuade", part: "v.", meaning: "說服" },
-      { level: "L6", word: "phenomenon", part: "n.", meaning: "現象" },
-      { level: "L6", word: "approximate", part: "adj.", meaning: "大約的" },
-      { level: "L6", word: "sustainable", part: "adj.", meaning: "永續的" }
-    ];
-
-    let vocabulary = [...fallbackWords];
+    let vocabulary = [];
     let selectedLevel = "All";
     let currentQuestion = null;
     let wordQueue = [];
@@ -657,6 +638,7 @@
     let timerId = null;
     let deadline = 0;
     let acceptingAnswers = false;
+    let vocabReady = false;
 
     const $ = (id) => document.getElementById(id);
     const screens = { menu: $("menu"), game: $("game"), result: $("result") };
@@ -671,6 +653,8 @@
       btn.type = "button";
       btn.addEventListener("click", () => {
         selectedLevel = level;
+        wordQueue = [];
+        activeQueueKey = "";
         [...levelGrid.children].forEach(child => child.classList.remove("active"));
         btn.classList.add("active");
       });
@@ -683,14 +667,15 @@
     }
 
     function getPool() {
-      const pool = selectedLevel === "All"
+      return selectedLevel === "All"
         ? vocabulary
         : vocabulary.filter(item => item.level === selectedLevel);
-      return pool.length >= 4 ? pool : vocabulary;
     }
 
     function getQueueKey(pool) {
-      return `${selectedLevel}:${pool.length}:${vocabulary.length}`;
+      const first = pool[0]?.word || "";
+      const last = pool[pool.length - 1]?.word || "";
+      return `${selectedLevel}:${pool.length}:${vocabulary.length}:${first}:${last}`;
     }
 
     function refillWordQueue(pool) {
@@ -707,20 +692,48 @@
     }
 
     function shuffle(array) {
-      return [...array].sort(() => Math.random() - 0.5);
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function uniqueByMeaning(words) {
+      const seenMeanings = new Set();
+      return words.filter(item => {
+        if (!item.meaning || seenMeanings.has(item.meaning)) return false;
+        seenMeanings.add(item.meaning);
+        return true;
+      });
     }
 
     function makeQuestion() {
       const pool = getPool();
+      if (!pool.length) throw new Error("No vocabulary in the selected level.");
+
+      // Answer words come only from the selected range. The queue is depleted before it is refilled,
+      // so words do not repeat during a challenge until every word in that range has appeared once.
       const answer = getNextWord(pool);
-      const distractors = shuffle(vocabulary.filter(item => item.meaning !== answer.meaning)).slice(0, 3);
-      return {
-        ...answer,
-        options: shuffle([answer, ...distractors].map(item => item.meaning))
-      };
+
+      // Distractors can come from the full CSV bank so a small selected range still has four choices.
+      const distractorSource = uniqueByMeaning(vocabulary.filter(item => item.meaning !== answer.meaning));
+      const distractors = shuffle(distractorSource).slice(0, 3);
+      const options = shuffle([answer.meaning, ...distractors.map(item => item.meaning)]);
+
+      return { ...answer, options };
     }
 
     function startGame() {
+      if (!vocabReady || vocabulary.length < 4) {
+        alert("Vocabulary CSV is still loading, or fewer than 4 words were loaded.");
+        return;
+      }
+      if (!getPool().length) {
+        alert(`No words found for ${selectedLevel}.`);
+        return;
+      }
       wordQueue = [];
       activeQueueKey = "";
       gameStartedAt = performance.now();
@@ -823,28 +836,97 @@
       showScreen("result");
     }
 
-    // Optional external vocabulary support:
-    // If your old page already loads vocab.json, this keeps working. If not, fallbackWords are used.
-    async function loadVocabulary() {
-      try {
-        const response = await fetch("vocab.json", { cache: "no-store" });
-        if (!response.ok) throw new Error("No external vocabulary file");
-        const data = await response.json();
-        const normalized = data
-          .map(item => ({
-            level: item.level || item.Level || "L1",
-            word: item.word || item.Word || item.vocab || item.Vocab,
-            part: item.part || item.pos || item.Part || "",
-            meaning: item.meaning || item.chinese || item.definition || item.Meaning
-          }))
-          .filter(item => item.word && item.meaning);
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let inQuotes = false;
 
-        if (normalized.length >= 4) {
-          vocabulary = normalized;
-          $("loading").textContent = `${normalized.length} vocabulary items loaded.`;
+      for (let i = 0; i < text.length; i += 1) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (ch === '"') {
+          if (inQuotes && next === '"') {
+            cell += '"';
+            i += 1;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (ch === ',' && !inQuotes) {
+          row.push(cell);
+          cell = "";
+        } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+          if (ch === '\r' && next === '\n') i += 1;
+          row.push(cell);
+          if (row.some(value => value.trim() !== "")) rows.push(row);
+          row = [];
+          cell = "";
+        } else {
+          cell += ch;
         }
+      }
+
+      row.push(cell);
+      if (row.some(value => value.trim() !== "")) rows.push(row);
+      return rows;
+    }
+
+    function normalizeLevel(raw) {
+      const cleaned = String(raw || "").trim().replace(/^L/i, "");
+      return cleaned ? `L${cleaned}` : "L1";
+    }
+
+    function normalizeCsvRows(rows, fallbackLevel) {
+      const body = rows.slice(1);
+      return body.map(cols => {
+        if (cols.length < 6) return null;
+        return {
+          level: normalizeLevel(cols[0] || fallbackLevel),
+          unit: String(cols[1] || "").trim(),
+          no: String(cols[2] || "").trim(),
+          word: String(cols[3] || "").trim(),
+          part: String(cols[4] || "").trim(),
+          meaning: cols.slice(5).join(",").trim()
+        };
+      }).filter(item => item && item.word && item.meaning);
+    }
+
+    async function loadLevelCsv(levelNumber) {
+      const response = await fetch(`${CSV_BASE}level${levelNumber}.csv`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`Cannot load level${levelNumber}.csv`);
+      const text = await response.text();
+      return normalizeCsvRows(parseCsv(text), levelNumber);
+    }
+
+    async function loadVocabulary() {
+      const startBtn = $("startBtn");
+      startBtn.disabled = true;
+      startBtn.textContent = "Loading CSV...";
+      $("loading").textContent = "Loading level1.csv～level6.csv...";
+
+      try {
+        const levelData = await Promise.all(CSV_LEVELS.map(loadLevelCsv));
+        vocabulary = levelData.flat();
+        vocabReady = vocabulary.length >= 4;
+
+        if (!vocabReady) throw new Error("CSV vocabulary count is fewer than 4.");
+
+        const levelCounts = CSV_LEVELS.map(lv => {
+          const count = vocabulary.filter(item => item.level === `L${lv}`).length;
+          return `L${lv}: ${count}`;
+        }).join(" · ");
+
+        $("loading").textContent = `${vocabulary.length} CSV vocabulary items loaded. ${levelCounts}`;
+        startBtn.disabled = false;
+        startBtn.textContent = "Start Game 🚀";
       } catch (error) {
-        $("loading").textContent = "Using built-in sample vocabulary. Replace or add vocab.json for your full word bank.";
+        vocabReady = false;
+        vocabulary = [];
+        startBtn.disabled = true;
+        startBtn.textContent = "CSV Load Failed";
+        $("loading").textContent = `CSV loading failed: ${error.message}`;
+        console.error(error);
       }
     }
 
