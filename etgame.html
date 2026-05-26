@@ -211,7 +211,57 @@
     .ghost-btn:hover{transform:translateY(-2px)}
 
     /* -- RESULT -- */
-    .result-card{text-align:center;padding:clamp(18px,4vw,34px)}
+    .result-card{
+      position:relative;
+      text-align:center;
+      padding:clamp(18px,4vw,34px);
+      padding-top:clamp(112px,18vw,132px);
+    }
+    .student-info-box{
+      position:absolute;
+      top:clamp(14px,3vw,22px);
+      right:clamp(14px,3vw,22px);
+      width:min(270px,calc(100% - 28px));
+      padding:10px;
+      border:1px solid var(--line);
+      border-radius:var(--radius-md);
+      background:rgba(255,255,255,.78);
+      box-shadow:0 10px 24px rgba(15,23,42,.08);
+      text-align:left;
+    }
+    .student-info-title{
+      margin:0 0 8px;
+      color:var(--primary-dark);
+      font-size:.7rem;
+      font-weight:1000;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .student-info-grid{display:grid;grid-template-columns:1fr;gap:7px}
+    .student-field{display:grid;grid-template-columns:72px 1fr;align-items:center;gap:7px}
+    .student-field label{
+      color:var(--muted);
+      font-size:.7rem;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .student-field input{
+      width:100%;
+      min-height:30px;
+      padding:5px 8px;
+      border:1px solid rgba(15,23,42,.14);
+      border-radius:10px;
+      background:#fff;
+      color:var(--ink);
+      font:inherit;
+      font-size:.86rem;
+      font-weight:700;
+      outline:none;
+    }
+    .student-field input:focus{
+      border-color:rgba(124,58,237,.45);
+      box-shadow:0 0 0 3px rgba(124,58,237,.12);
+    }
     .result-label{
       display:inline-flex;align-items:center;gap:8px;
       padding:7px 12px;border-radius:999px;
@@ -244,6 +294,9 @@
       .answers{grid-template-columns:1fr}
       .answer-btn{min-height:50px;text-align:left}
       .summary-grid{grid-template-columns:repeat(2,1fr)}
+      .result-card{padding-top:clamp(148px,34vw,176px)}
+      .student-info-box{left:14px;right:14px;width:auto}
+      .student-info-grid{grid-template-columns:1fr}
     }
     @media(max-width:380px){
       .level-grid{grid-template-columns:repeat(2,1fr)}
@@ -317,6 +370,23 @@
   <!-- RESULT -->
   <section id="result" class="screen">
     <div class="result-card">
+      <div class="student-info-box" aria-label="Student information for screenshot">
+        <p class="student-info-title">Student Info</p>
+        <div class="student-info-grid">
+          <div class="student-field">
+            <label for="studentClass">Class</label>
+            <input id="studentClass" type="text" autocomplete="off" />
+          </div>
+          <div class="student-field">
+            <label for="studentName">Name</label>
+            <input id="studentName" type="text" autocomplete="off" />
+          </div>
+          <div class="student-field">
+            <label for="studentSeat">Seat No.</label>
+            <input id="studentSeat" type="text" inputmode="numeric" autocomplete="off" />
+          </div>
+        </div>
+      </div>
       <span class="result-label" id="resultLabel">Mission Complete</span>
       <h2 class="result-title"><span class="gradient-text" id="resultTitle">Game Over</span></h2>
       <div id="finalScore" class="score-big">0</div>
