@@ -6,940 +6,643 @@
   <title>Vocab Challenge · Beat the ET</title>
   <style>
     :root {
-      --bg-1: #fff7ed;
-      --bg-2: #ecfeff;
-      --bg-3: #eef2ff;
-      --ink: #172033;
-      --muted: #64748b;
-      --card: rgba(255, 255, 255, 0.82);
-      --card-solid: #ffffff;
-      --line: rgba(15, 23, 42, 0.1);
-      --primary: #7c3aed;
-      --primary-dark: #5b21b6;
-      --secondary: #06b6d4;
-      --success: #16a34a;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --shadow: 0 24px 80px rgba(79, 70, 229, 0.16);
-      --radius-xl: 28px;
-      --radius-lg: 20px;
-      --radius-md: 14px;
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --bg-1:#fff7ed; --bg-2:#ecfeff; --bg-3:#eef2ff;
+      --ink:#172033; --muted:#64748b;
+      --card:rgba(255,255,255,0.82); --card-solid:#ffffff;
+      --line:rgba(15,23,42,0.1);
+      --primary:#7c3aed; --primary-dark:#5b21b6;
+      --secondary:#06b6d4;
+      --success:#16a34a; --danger:#ef4444; --warning:#f59e0b;
+      --shadow:0 24px 80px rgba(79,70,229,0.16);
+      --radius-xl:28px; --radius-lg:20px; --radius-md:14px;
+      --safe-bottom:env(safe-area-inset-bottom,0px);
     }
-
-    * { box-sizing: border-box; }
-
-    html, body {
-      margin: 0;
-      min-height: 100%;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--ink);
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;min-height:100%;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--ink);
       background:
-        radial-gradient(circle at top left, rgba(252, 211, 77, 0.45), transparent 34rem),
-        radial-gradient(circle at top right, rgba(34, 211, 238, 0.45), transparent 30rem),
-        linear-gradient(135deg, var(--bg-1), var(--bg-2) 48%, var(--bg-3));
-      overflow-x: hidden;
+        radial-gradient(circle at top left,rgba(252,211,77,.45),transparent 34rem),
+        radial-gradient(circle at top right,rgba(34,211,238,.45),transparent 30rem),
+        linear-gradient(135deg,var(--bg-1),var(--bg-2) 48%,var(--bg-3));
+      overflow-x:hidden;
+    }
+    body::before,body::after{
+      content:"";position:fixed;border-radius:999px;pointer-events:none;z-index:0;filter:blur(2px);opacity:.5;
+    }
+    body::before{width:18rem;height:18rem;right:-5rem;bottom:10%;background:rgba(124,58,237,.16)}
+    body::after {width:14rem;height:14rem;left:-4rem;bottom:-3rem;background:rgba(6,182,212,.18)}
+    button,select{font:inherit}
+    button{cursor:pointer;border:0;-webkit-tap-highlight-color:transparent}
+
+    .app{
+      position:relative;z-index:1;
+      width:min(1120px,100%);min-height:100dvh;
+      margin:0 auto;padding:clamp(16px,4vw,42px);
+      display:grid;place-items:center;
+    }
+    .screen{width:100%;display:none;animation:rise 420ms ease both}
+    .screen.active{display:block}
+    @keyframes rise{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
+
+    /* ── MENU ── */
+    .instant-start{min-height:min(720px,calc(100dvh - 32px));display:grid;place-items:center}
+    .launch-card{width:min(520px,100%);padding:clamp(16px,4vw,26px);text-align:center}
+    .setup-card{
+      background:var(--card);border:1px solid rgba(255,255,255,.72);
+      box-shadow:var(--shadow);backdrop-filter:blur(18px);border-radius:var(--radius-xl);
+    }
+    .mascot{
+      width:min(82px,20vw);aspect-ratio:1;margin:0 auto 16px;
+      border-radius:38% 62% 55% 45%/48% 42% 58% 52%;
+      display:grid;place-items:center;
+      background:radial-gradient(circle at 35% 32%,#fff 0 8%,transparent 9%),
+        radial-gradient(circle at 63% 33%,#fff 0 8%,transparent 9%),
+        linear-gradient(140deg,#a78bfa,#22d3ee 55%,#fde68a);
+      box-shadow:0 16px 40px rgba(124,58,237,.28);position:relative;isolation:isolate;
+    }
+    .mascot::before,.mascot::after{
+      content:"";position:absolute;top:32%;width:15px;height:15px;
+      border-radius:999px;background:#172033;z-index:2;
+    }
+    .mascot::before{left:36%} .mascot::after{right:36%}
+    .mascot span{transform:translateY(18px);font-size:1.1rem}
+
+    h1{margin:8px 0 14px;font-size:clamp(1.7rem,5vw,2.8rem);line-height:.98;letter-spacing:-.045em}
+    .gradient-text{
+      background:linear-gradient(110deg,var(--primary),var(--secondary),var(--warning));
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+    }
+    .subtitle{max-width:56ch;color:var(--muted);font-size:clamp(.95rem,2.2vw,1.15rem);line-height:1.6;text-align:center;margin:12px 0 0}
+
+    .field-label{display:block;margin-bottom:8px;color:#475569;font-weight:800;font-size:.9rem}
+    .level-grid{
+      display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:8px;max-width:400px;margin:0 auto 14px;
+    }
+    .level-btn{
+      min-height:44px;border-radius:var(--radius-md);font-weight:900;
+      background:rgba(255,255,255,.75);color:#475569;border:1px solid var(--line);
+      transition:transform 160ms ease,box-shadow 160ms ease,background 160ms ease;
+    }
+    .level-btn.active{
+      background:linear-gradient(135deg,var(--primary),var(--secondary));
+      color:#fff;box-shadow:0 10px 22px rgba(124,58,237,.24);
+    }
+    .level-btn:hover{transform:translateY(-2px)}
+    .main-btn{
+      width:100%;min-height:52px;border-radius:var(--radius-md);font-weight:900;letter-spacing:.04em;
+      color:#fff;background:linear-gradient(135deg,var(--primary),var(--secondary));
+      box-shadow:0 16px 32px rgba(124,58,237,.28);
+      transition:transform 160ms ease,box-shadow 160ms ease;
+    }
+    .main-btn:hover{transform:translateY(-2px)}
+    .loading{display:none;text-align:center;color:var(--muted);font-weight:800;margin-top:10px}
+
+    /* ── GAME ── */
+    .game-card,.result-card{
+      width:min(820px,100%);margin:0 auto;
+      background:var(--card);border:1px solid rgba(255,255,255,.72);
+      box-shadow:var(--shadow);backdrop-filter:blur(18px);border-radius:var(--radius-xl);
+      padding:clamp(14px,3.5vw,28px);
     }
 
-    body::before,
-    body::after {
-      content: "";
-      position: fixed;
-      border-radius: 999px;
-      pointer-events: none;
-      z-index: 0;
-      filter: blur(2px);
-      opacity: 0.5;
+    /* compact topbar: stats + inline timer + pause */
+    .topbar{
+      display:flex;align-items:stretch;gap:8px;margin-bottom:12px;
     }
-
-    body::before {
-      width: 18rem;
-      height: 18rem;
-      right: -5rem;
-      bottom: 10%;
-      background: rgba(124, 58, 237, 0.16);
+    .stat{
+      flex:1;padding:8px 6px;border:1px solid var(--line);border-radius:var(--radius-md);
+      background:rgba(255,255,255,.72);text-align:center;
     }
+    .stat-label{color:var(--muted);font-size:.65rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;display:block}
+    .stat-value{display:block;margin-top:2px;font-size:clamp(1rem,4vw,1.5rem);font-weight:1000;letter-spacing:-.03em}
 
-    body::after {
-      width: 14rem;
-      height: 14rem;
-      left: -4rem;
-      bottom: -3rem;
-      background: rgba(6, 182, 212, 0.18);
+    /* compact inline timer */
+    .timer-wrap{
+      display:flex;align-items:center;justify-content:center;
+      padding:6px 10px;border:1px solid var(--line);border-radius:var(--radius-md);
+      background:rgba(255,255,255,.72);min-width:60px;
     }
-
-    button, select {
-      font: inherit;
+    .timer-ring-sm{
+      width:clamp(34px,8vw,46px);aspect-ratio:1;border-radius:50%;
+      display:grid;place-items:center;
+      background:conic-gradient(var(--primary) calc(var(--progress,1)*360deg),rgba(15,23,42,.08) 0deg);
+      flex-shrink:0;
     }
-
-    button {
-      cursor: pointer;
-      border: 0;
-      -webkit-tap-highlight-color: transparent;
+    .timer-ring-sm.urgent{
+      background:conic-gradient(var(--danger) calc(var(--progress,1)*360deg),rgba(15,23,42,.08) 0deg) !important;
+      animation:shake-t .35s ease infinite;
     }
-
-    .app {
-      position: relative;
-      z-index: 1;
-      width: min(1120px, 100%);
-      min-height: 100dvh;
-      margin: 0 auto;
-      padding: clamp(16px, 4vw, 42px);
-      display: grid;
-      place-items: center;
+    @keyframes shake-t{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg)}}
+    .timer-core-sm{
+      width:70%;aspect-ratio:1;border-radius:50%;
+      display:grid;place-items:center;background:#fff;
+      box-shadow:inset 0 0 0 1px var(--line);
     }
+    .timer-number-sm{font-size:clamp(.9rem,3.5vw,1.3rem);font-weight:1000;letter-spacing:-.04em;color:var(--primary-dark)}
 
-    .screen {
-      width: 100%;
-      display: none;
-      animation: rise 420ms ease both;
+    /* pause button */
+    .pause-btn{
+      min-height:0;padding:6px 12px;border-radius:var(--radius-md);
+      background:rgba(255,255,255,.72);border:1px solid var(--line);
+      color:var(--muted);font-size:clamp(.9rem,3vw,1.1rem);
+      transition:color .15s,border-color .15s;flex-shrink:0;
     }
+    .pause-btn:hover{color:var(--primary);border-color:var(--primary)}
 
-    .screen.active { display: block; }
-
-    @keyframes rise {
-      from { opacity: 0; transform: translateY(10px) scale(0.99); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+    /* question card */
+    .question-card{
+      text-align:center;padding:clamp(14px,3vw,24px);
+      border-radius:var(--radius-xl);background:rgba(255,255,255,.74);border:1px solid var(--line);
     }
+    .prompt{color:var(--muted);font-weight:800;margin:0 0 6px;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem}
+    .word{margin:0;font-size:clamp(1.9rem,8vw,4rem);line-height:1;letter-spacing:-.05em;color:#111827}
+    .part{margin-top:8px;color:var(--primary-dark);font-weight:900;font-size:.88rem}
 
-    .hero {
-      min-height: min(760px, calc(100dvh - 32px));
-      display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
-      gap: clamp(18px, 4vw, 38px);
-      align-items: center;
+    /* answers: A B C D labels */
+    .answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+    .answer-btn{
+      padding:13px 12px;min-height:58px;
+      background:var(--card-solid);border:1px solid var(--line);
+      color:#1f2937;text-align:left;
+      box-shadow:0 8px 20px rgba(15,23,42,.06);
+      border-radius:var(--radius-md);font-weight:700;
+      display:flex;align-items:flex-start;gap:9px;
+      transition:transform 160ms ease,box-shadow 160ms ease;
+      font-size:clamp(.8rem,2.2vw,.95rem);line-height:1.35;
     }
-
-    .instant-start {
-      min-height: min(720px, calc(100dvh - 32px));
-      display: grid;
-      place-items: center;
+    .answer-btn:hover{transform:translateY(-2px);box-shadow:0 14px 28px rgba(15,23,42,.1)}
+    .answer-btn.correct{color:#fff;background:linear-gradient(135deg,var(--success),#22c55e);border-color:transparent}
+    .answer-btn.wrong  {color:#fff;background:linear-gradient(135deg,var(--danger),#fb7185); border-color:transparent;animation:wrong-shake .32s ease}
+    @keyframes wrong-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+    .ans-key{
+      font-size:.82rem;font-weight:900;letter-spacing:.06em;
+      color:var(--muted);flex-shrink:0;padding-top:1px;min-width:1.2em;
     }
+    .answer-btn.correct .ans-key,
+    .answer-btn.correct .ans-txt,
+    .answer-btn.wrong   .ans-key,
+    .answer-btn.wrong   .ans-txt{color:#fff}
+    .ans-txt{flex:1}
 
-    .launch-card {
-      width: min(520px, 100%);
-      padding: clamp(16px, 4vw, 26px);
-      text-align: center;
+    /* ── PAUSE OVERLAY ── */
+    .pause-overlay{
+      display:none;position:fixed;inset:0;z-index:300;
+      background:rgba(248,246,255,.85);backdrop-filter:blur(8px);
+      align-items:center;justify-content:center;
     }
-
-    .hero-copy,
-    .setup-card,
-    .game-card,
-    .result-card {
-      background: var(--card);
-      border: 1px solid rgba(255, 255, 255, 0.72);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(18px);
-      border-radius: var(--radius-xl);
+    .pause-overlay.show{display:flex}
+    .pause-box{
+      text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;
+      padding:36px 32px;background:#fff;
+      border:1px solid var(--line);border-radius:var(--radius-xl);
+      box-shadow:var(--shadow);max-width:320px;width:90%;
     }
-
-    .hero-copy {
-      padding: clamp(24px, 5vw, 52px);
-      overflow: hidden;
-      position: relative;
+    .pause-box h2{font-size:2rem;font-weight:1000;letter-spacing:-.04em;color:var(--primary)}
+    .pause-box p{font-size:.9rem;color:var(--muted);font-weight:600;line-height:1.5;margin:0}
+    .pause-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+    .ghost-btn{
+      padding:12px 20px;border-radius:var(--radius-md);font-weight:900;
+      background:rgba(255,255,255,.75);color:#334155;border:1px solid var(--line);
+      transition:transform 160ms ease;
     }
+    .ghost-btn:hover{transform:translateY(-2px)}
 
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(124, 58, 237, 0.1);
-      color: var(--primary-dark);
-      font-size: 0.82rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+    /* ── RESULT ── */
+    .result-card{text-align:center;padding:clamp(18px,4vw,34px)}
+    .result-label{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:7px 12px;border-radius:999px;
+      background:rgba(124,58,237,.1);color:var(--primary-dark);
+      font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;
     }
-
-    h1 {
-      margin: 10px 0 16px;
-      font-size: clamp(1.9rem, 5vw, 3.1rem);
-      line-height: 0.98;
-      letter-spacing: -0.045em;
+    .result-title{
+      margin:4px 0 6px;font-size:clamp(2rem,9vw,4.8rem);
+      line-height:.9;letter-spacing:-.08em;
     }
-
-    .gradient-text {
-      background: linear-gradient(110deg, var(--primary), var(--secondary), var(--warning));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
+    .score-big{
+      margin:14px auto;width:min(180px,56vw);aspect-ratio:1;border-radius:50%;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--primary),var(--secondary));
+      color:#fff;font-size:clamp(2.4rem,11vw,5rem);font-weight:1000;
+      box-shadow:0 22px 50px rgba(124,58,237,.3);
     }
+    .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
+    .actions{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;padding-bottom:var(--safe-bottom)}
 
-    .subtitle {
-      max-width: 56ch;
-      color: var(--muted);
-      font-size: clamp(1rem, 2.4vw, 1.25rem);
-      line-height: 1.65;
-      margin: 0;
+    /* FX flash */
+    .fx-overlay{position:fixed;inset:0;pointer-events:none;z-index:200;opacity:0}
+    #fxCorrect{background:radial-gradient(ellipse at center,rgba(22,163,74,.12) 0,transparent 65%)}
+    #fxWrong  {background:radial-gradient(ellipse at center,rgba(239,68,68,.14) 0,transparent 60%)}
+    .fx-overlay.pop{animation:fx-flash 400ms ease forwards}
+    @keyframes fx-flash{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+
+    @media(max-width:640px){
+      .answers{grid-template-columns:1fr}
+      .answer-btn{min-height:50px;text-align:left}
+      .summary-grid{grid-template-columns:repeat(2,1fr)}
     }
-
-    .vibe-row {
-      margin-top: 26px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+    @media(max-width:380px){
+      .level-grid{grid-template-columns:repeat(2,1fr)}
+      .summary-grid,.topbar-stats{grid-template-columns:1fr}
     }
-
-    .pill {
-      padding: 10px 13px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.76);
-      border: 1px solid var(--line);
-      color: #334155;
-      font-weight: 700;
-      font-size: 0.9rem;
-    }
-
-    .setup-card {
-      padding: clamp(22px, 4vw, 36px);
-    }
-
-    .mascot {
-      width: min(96px, 22vw);
-      aspect-ratio: 1;
-      margin: 0 auto 20px;
-      border-radius: 38% 62% 55% 45% / 48% 42% 58% 52%;
-      display: grid;
-      place-items: center;
-      background:
-        radial-gradient(circle at 35% 32%, #ffffff 0 8%, transparent 9%),
-        radial-gradient(circle at 63% 33%, #ffffff 0 8%, transparent 9%),
-        linear-gradient(140deg, #a78bfa, #22d3ee 55%, #fde68a);
-      box-shadow: 0 20px 50px rgba(124, 58, 237, 0.28);
-      position: relative;
-      isolation: isolate;
-    }
-
-    .mascot::before,
-    .mascot::after {
-      content: "";
-      position: absolute;
-      top: 32%;
-      width: 18px;
-      height: 18px;
-      border-radius: 999px;
-      background: #172033;
-      z-index: 2;
-    }
-
-    .mascot::before { left: 36%; }
-    .mascot::after { right: 36%; }
-
-    .mascot span {
-      transform: translateY(20px);
-      font-size: 1.25rem;
-    }
-
-    .field-label {
-      display: block;
-      margin-bottom: 10px;
-      color: #475569;
-      font-weight: 800;
-      font-size: 0.94rem;
-    }
-
-    .level-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
-      max-width: 420px;
-      margin: 0 auto 16px;
-    }
-
-    .level-btn,
-    .answer-btn,
-    .main-btn,
-    .ghost-btn {
-      min-height: 48px;
-      border-radius: var(--radius-md);
-      font-weight: 900;
-      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
-    }
-
-    .level-btn {
-      background: rgba(255, 255, 255, 0.75);
-      color: #475569;
-      border: 1px solid var(--line);
-    }
-
-    .level-btn.active {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: #fff;
-      box-shadow: 0 12px 26px rgba(124, 58, 237, 0.24);
-    }
-
-    .main-btn {
-      width: 100%;
-      min-height: 58px;
-      color: #fff;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      box-shadow: 0 18px 36px rgba(124, 58, 237, 0.28);
-      letter-spacing: 0.04em;
-    }
-
-    .main-btn:hover,
-    .level-btn:hover,
-    .answer-btn:hover,
-    .ghost-btn:hover {
-      transform: translateY(-2px);
-    }
-
-    .helper {
-      color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.6;
-      text-align: center;
-      margin: 16px 0 0;
-    }
-
-    .launch-card .loading {
-      margin-top: 14px;
-      opacity: 0.75;
-    }
-
-    .game-card,
-    .result-card {
-      width: min(820px, 100%);
-      margin: 0 auto;
-      padding: clamp(18px, 4vw, 34px);
-    }
-
-    .topbar {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    .stat {
-      padding: 14px;
-      border: 1px solid var(--line);
-      border-radius: var(--radius-lg);
-      background: rgba(255, 255, 255, 0.72);
-      text-align: center;
-    }
-
-    .stat-label {
-      color: var(--muted);
-      font-size: 0.74rem;
-      font-weight: 900;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .stat-value {
-      display: block;
-      margin-top: 4px;
-      font-size: clamp(1.55rem, 5vw, 2.4rem);
-      font-weight: 1000;
-      letter-spacing: -0.04em;
-    }
-
-    .timer-ring {
-      width: min(210px, 48vw);
-      aspect-ratio: 1;
-      margin: 10px auto 18px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      background: conic-gradient(var(--primary) calc(var(--progress, 1) * 360deg), rgba(15, 23, 42, 0.08) 0deg);
-      box-shadow: inset 0 0 0 12px rgba(255, 255, 255, 0.72), 0 24px 56px rgba(6, 182, 212, 0.18);
-    }
-
-    .timer-core {
-      width: 72%;
-      aspect-ratio: 1;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      background: #fff;
-      box-shadow: inset 0 0 0 1px var(--line);
-    }
-
-    .timer-number {
-      font-size: clamp(3rem, 12vw, 5.6rem);
-      font-weight: 1000;
-      letter-spacing: -0.08em;
-      color: var(--primary-dark);
-    }
-
-    .question-card {
-      text-align: center;
-      padding: clamp(18px, 4vw, 30px);
-      border-radius: var(--radius-xl);
-      background: rgba(255, 255, 255, 0.74);
-      border: 1px solid var(--line);
-    }
-
-    .prompt {
-      color: var(--muted);
-      font-weight: 800;
-      margin: 0 0 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 0.78rem;
-    }
-
-    .word {
-      margin: 0;
-      font-size: clamp(2.4rem, 10vw, 5rem);
-      line-height: 1;
-      letter-spacing: -0.06em;
-      color: #111827;
-    }
-
-    .part {
-      margin-top: 10px;
-      color: var(--primary-dark);
-      font-weight: 900;
-    }
-
-    .answers {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 18px;
-    }
-
-    .answer-btn {
-      padding: 16px;
-      min-height: 68px;
-      background: var(--card-solid);
-      border: 1px solid var(--line);
-      color: #1f2937;
-      text-align: left;
-      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
-    }
-
-    .answer-btn.correct {
-      color: #fff;
-      background: linear-gradient(135deg, var(--success), #22c55e);
-    }
-
-    .answer-btn.wrong {
-      color: #fff;
-      background: linear-gradient(135deg, var(--danger), #fb7185);
-    }
-
-    .result-card {
-      text-align: center;
-    }
-
-    .result-title {
-      margin: 6px 0 8px;
-      font-size: clamp(2.2rem, 10vw, 5.4rem);
-      line-height: 0.9;
-      letter-spacing: -0.08em;
-    }
-
-    .score-big {
-      margin: 18px auto;
-      width: min(230px, 70vw);
-      aspect-ratio: 1;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: #fff;
-      font-size: clamp(3rem, 13vw, 6rem);
-      font-weight: 1000;
-      box-shadow: 0 28px 60px rgba(124, 58, 237, 0.3);
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-      margin: 20px 0;
-    }
-
-    .ghost-btn {
-      padding: 14px 18px;
-      background: rgba(255, 255, 255, 0.75);
-      color: #334155;
-      border: 1px solid var(--line);
-    }
-
-    .actions {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding-bottom: var(--safe-bottom);
-    }
-
-    .loading {
-      display: none;
-      text-align: center;
-      color: var(--muted);
-      font-weight: 800;
-      margin-top: 12px;
-    }
-
-    @media (max-width: 840px) {
-      .hero {
-        grid-template-columns: 1fr;
-        align-content: start;
-      }
-
-      .hero-copy {
-        text-align: center;
-      }
-
-      .subtitle {
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      .vibe-row {
-        justify-content: center;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .app {
-        padding: 14px;
-        place-items: start center;
-      }
-
-      .hero {
-        min-height: auto;
-      }
-
-      .launch-card {
-        width: min(440px, 100%);
-        padding: 16px;
-      }
-
-      h1 {
-        margin: 8px 0 12px;
-        font-size: clamp(1.7rem, 7vw, 2.35rem);
-        line-height: 1;
-        letter-spacing: -0.04em;
-      }
-
-      .mascot {
-        width: min(82px, 22vw);
-        margin-bottom: 6px;
-      }
-
-      .level-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        max-width: 360px;
-      }
-
-      .answers {
-        grid-template-columns: 1fr;
-      }
-
-      .answer-btn {
-        min-height: 58px;
-        text-align: center;
-      }
-    }
-
-    @media (max-width: 380px) {
-      h1 {
-        font-size: clamp(1.55rem, 8vw, 2.05rem);
-      }
-
-      .level-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .topbar,
-      .summary-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-        transition-duration: 0.01ms !important;
-      }
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
     }
   </style>
 </head>
 <body>
-  <main class="app">
-    <section id="menu" class="screen active">
-      <div class="instant-start">
-        <div class="setup-card launch-card">
-          <div class="mascot" aria-hidden="true"><span>👽</span></div>
-          <h1><span class="gradient-text">Cosmic Vocab</span><br />Challenge</h1>
-          <div id="levelGrid" class="level-grid" role="group" aria-label="Select vocabulary level"></div>
-          <button id="startBtn" class="main-btn">Start Game 🚀</button>
-          <div id="loading" class="loading" aria-live="polite"></div>
-        </div>
+
+<div class="fx-overlay" id="fxCorrect"></div>
+<div class="fx-overlay" id="fxWrong"></div>
+
+<!-- Pause overlay -->
+<div class="pause-overlay" id="pauseOverlay">
+  <div class="pause-box">
+    <h2>⏸ Paused</h2>
+    <p>Timer is stopped.<br/>Resume when you're ready.</p>
+    <div class="pause-actions">
+      <button class="main-btn" id="resumeBtn" style="min-width:130px">Resume ▶</button>
+      <button class="ghost-btn" id="pauseQuitBtn">Quit &amp; See Results</button>
+    </div>
+  </div>
+</div>
+
+<main class="app">
+
+  <!-- MENU -->
+  <section id="menu" class="screen active">
+    <div class="instant-start">
+      <div class="setup-card launch-card">
+        <div class="mascot" aria-hidden="true"><span>👽</span></div>
+        <h1><span class="gradient-text">Cosmic Vocab</span><br/>Challenge</h1>
+        <div id="levelGrid" class="level-grid" role="group" aria-label="Select vocabulary level"></div>
+        <button id="startBtn" class="main-btn">Start Game 🚀</button>
+        <p class="subtitle">Pick a level · answer before time runs out · wrong = game over</p>
+        <div id="loading" class="loading" aria-live="polite"></div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section id="game" class="screen">
-      <div class="game-card">
-        <div class="topbar">
-          <div class="stat"><span class="stat-label">Score</span><span id="score" class="stat-value">0</span></div>
-          <div class="stat"><span class="stat-label">Combo</span><span id="combo" class="stat-value">×0</span></div>
-          <div class="stat"><span class="stat-label">Seen</span><span id="seen" class="stat-value">0</span></div>
+  <!-- GAME -->
+  <section id="game" class="screen">
+    <div class="game-card">
+      <!-- compact topbar -->
+      <div class="topbar">
+        <div class="stat"><span class="stat-label">Score</span><span id="score" class="stat-value">0</span></div>
+        <div class="stat"><span class="stat-label">Combo</span><span id="combo" class="stat-value">×0</span></div>
+        <div class="stat"><span class="stat-label">Seen</span><span id="seen" class="stat-value">0</span></div>
+        <!-- inline timer -->
+        <div class="timer-wrap">
+          <div id="timerRing" class="timer-ring-sm" style="--progress:1">
+            <div class="timer-core-sm"><span id="timer" class="timer-number-sm">8</span></div>
+          </div>
         </div>
-
-        <div id="timerRing" class="timer-ring" style="--progress: 1">
-          <div class="timer-core"><span id="timer" class="timer-number">8</span></div>
-        </div>
-
-        <div class="question-card">
-          <p class="prompt">Choose the correct meaning</p>
-          <h2 id="word" class="word">vocabulary</h2>
-          <div id="part" class="part">noun</div>
-          <div id="answers" class="answers"></div>
-        </div>
+        <!-- pause -->
+        <button class="pause-btn" id="pauseBtn" aria-label="Pause">⏸</button>
       </div>
-    </section>
 
-    <section id="result" class="screen">
-      <div class="result-card">
-        <span class="eyebrow">Mission Complete</span>
-        <h2 class="result-title"><span class="gradient-text">Game Over</span></h2>
-        <div id="finalScore" class="score-big">0</div>
-        <div class="summary-grid">
-          <div class="stat"><span class="stat-label">Best Combo</span><span id="bestCombo" class="stat-value">0</span></div>
-          <div class="stat"><span class="stat-label">Correct</span><span id="correctCount" class="stat-value">0</span></div>
-          <div class="stat"><span class="stat-label">Words Seen</span><span id="wordsSeen" class="stat-value">0</span></div>
-          <div class="stat"><span class="stat-label">Time Used</span><span id="timeUsed" class="stat-value">0s</span></div>
-        </div>
-        <div class="actions">
-          <button id="retryBtn" class="main-btn" style="width:auto; min-width: 190px;">↺ Retry</button>
-          <button id="menuBtn" class="ghost-btn">← Menu</button>
-        </div>
+      <div class="question-card">
+        <p class="prompt">Choose the correct meaning</p>
+        <h2 id="word" class="word">vocabulary</h2>
+        <div id="part" class="part">noun</div>
+        <div id="answers" class="answers"></div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
 
-  <script>
-    const ROUND_SECONDS = 8;
-    const CSV_BASE = "https://ducj-creator.github.io/iVocab-Self-Practice/";
-    const CSV_LEVELS = ["1", "2", "3", "4", "5", "6"];
+  <!-- RESULT -->
+  <section id="result" class="screen">
+    <div class="result-card">
+      <span class="result-label" id="resultLabel">Mission Complete</span>
+      <h2 class="result-title"><span class="gradient-text" id="resultTitle">Game Over</span></h2>
+      <div id="finalScore" class="score-big">0</div>
+      <div class="summary-grid">
+        <div class="stat"><span class="stat-label">Best Combo</span><span id="bestCombo" class="stat-value">0</span></div>
+        <div class="stat"><span class="stat-label">Correct</span><span id="correctCount" class="stat-value">0</span></div>
+        <div class="stat"><span class="stat-label">Words Seen</span><span id="wordsSeen" class="stat-value">0</span></div>
+        <div class="stat"><span class="stat-label">Time Used</span><span id="timeUsed" class="stat-value">0s</span></div>
+      </div>
+      <div class="actions">
+        <button id="retryBtn" class="main-btn" style="width:auto;min-width:160px">↺ Play Again</button>
+        <button id="menuBtn" class="ghost-btn">← Menu</button>
+      </div>
+    </div>
+  </section>
 
-    let vocabulary = [];
-    let selectedLevel = "All";
-    let currentQuestion = null;
-    let wordQueue = [];
-    let activeQueueKey = "";
-    let score = 0;
-    let gameStartedAt = 0;
-    let timeUsed = 0;
-    let combo = 0;
-    let bestCombo = 0;
-    let correct = 0;
-    let seen = 0;
-    let timerId = null;
-    let deadline = 0;
-    let acceptingAnswers = false;
-    let vocabReady = false;
+</main>
 
-    const $ = (id) => document.getElementById(id);
-    const screens = { menu: $("menu"), game: $("game"), result: $("result") };
+<script>
+const ROUND_SECONDS = 8;
+const CSV_BASE = "https://ducj-creator.github.io/iVocab-Self-Practice/";
+const CSV_LEVELS = ["1","2","3","4","5","6"];
+const LABELS = ["A","B","C","D"];
 
-    const levels = ["L1", "L2", "L3", "L4", "L5", "L6", "All"];
-    const levelGrid = $("levelGrid");
+let vocabulary=[], selectedLevel="All", currentQuestion=null;
+let wordQueue=[], activeQueueKey="";
+let score=0, gameStartedAt=0, timeUsed=0;
+let combo=0, bestCombo=0, correct=0, seen=0;
+let timerId=null, deadline=0, acceptingAnswers=false, vocabReady=false;
+let paused=false;
 
-    levels.forEach(level => {
-      const btn = document.createElement("button");
-      btn.className = "level-btn" + (level === selectedLevel ? " active" : "");
-      btn.textContent = level === "All" ? "All" : level;
-      btn.type = "button";
-      btn.addEventListener("click", () => {
-        selectedLevel = level;
-        wordQueue = [];
-        activeQueueKey = "";
-        [...levelGrid.children].forEach(child => child.classList.remove("active"));
-        btn.classList.add("active");
-      });
-      levelGrid.appendChild(btn);
-    });
+const $=id=>document.getElementById(id);
+const screens={menu:$("menu"),game:$("game"),result:$("result")};
 
-    function showScreen(name) {
-      Object.values(screens).forEach(screen => screen.classList.remove("active"));
-      screens[name].classList.add("active");
-    }
+// ── Level buttons ──
+const levels=["L1","L2","L3","L4","L5","L6","All"];
+const levelGrid=$("levelGrid");
+levels.forEach(level=>{
+  const btn=document.createElement("button");
+  btn.className="level-btn"+(level===selectedLevel?" active":"");
+  btn.textContent=level;
+  btn.type="button";
+  btn.addEventListener("click",()=>{
+    selectedLevel=level;
+    wordQueue=[]; activeQueueKey="";
+    [...levelGrid.children].forEach(c=>c.classList.remove("active"));
+    btn.classList.add("active");
+  });
+  levelGrid.appendChild(btn);
+});
 
-    function getPool() {
-      return selectedLevel === "All"
-        ? vocabulary
-        : vocabulary.filter(item => item.level === selectedLevel);
-    }
+function showScreen(name){
+  Object.values(screens).forEach(s=>s.classList.remove("active"));
+  screens[name].classList.add("active");
+}
 
-    function getQueueKey(pool) {
-      const first = pool[0]?.word || "";
-      const last = pool[pool.length - 1]?.word || "";
-      return `${selectedLevel}:${pool.length}:${vocabulary.length}:${first}:${last}`;
-    }
+// ── Audio (Web Audio API) ──
+let audioCtx=null;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx}
 
-    function refillWordQueue(pool) {
-      wordQueue = shuffle(pool);
-      activeQueueKey = getQueueKey(pool);
-    }
+function playTone(freq,type,duration,vol=0.22,attack=0.005){
+  try{
+    const ctx=getCtx();
+    const osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type=type;osc.frequency.setValueAtTime(freq,ctx.currentTime);
+    gain.gain.setValueAtTime(0,ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(vol,ctx.currentTime+attack);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+duration);
+    osc.start(ctx.currentTime);osc.stop(ctx.currentTime+duration+0.01);
+  }catch(e){}
+}
+function playNoise(duration,vol=0.06){
+  try{
+    const ctx=getCtx();
+    const sz=Math.floor(ctx.sampleRate*duration);
+    const buf=ctx.createBuffer(1,sz,ctx.sampleRate);
+    const d=buf.getChannelData(0);for(let i=0;i<sz;i++)d[i]=(Math.random()*2-1);
+    const src=ctx.createBufferSource(),gain=ctx.createGain();
+    src.buffer=buf;src.connect(gain);gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(vol,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+duration);
+    src.start();src.stop(ctx.currentTime+duration);
+  }catch(e){}
+}
 
-    function getNextWord(pool) {
-      const queueKey = getQueueKey(pool);
-      if (!wordQueue.length || activeQueueKey !== queueKey) {
-        refillWordQueue(pool);
-      }
-      return wordQueue.pop();
-    }
+const SFX={
+  question(){ playTone(480,"sine",.07,.1) },
+  correct(){
+    playTone(660,"triangle",.06,.2);
+    setTimeout(()=>playTone(880,"triangle",.1,.16),60);
+  },
+  combo(n){
+    const base=440+n*12;
+    [1,1.25,1.5,2].forEach((m,i)=>setTimeout(()=>playTone(base*m,"square",.08+(i*.02),.13),i*70));
+  },
+  wrong(){
+    playTone(220,"sawtooth",.08,.22);
+    setTimeout(()=>playTone(160,"sawtooth",.18,.2),80);
+    playNoise(.14,.07);
+  },
+  timeout(){
+    playTone(300,"sawtooth",.12,.18);
+    setTimeout(()=>playTone(200,"sawtooth",.2,.16),100);
+    playNoise(.2,.08);
+  },
+  tick(){ playTone(1100,"square",.03,.05) },
+  pause(){ playTone(330,"sine",.15,.1) },
+  resume(){ playTone(550,"sine",.1,.1);setTimeout(()=>playTone(660,"sine",.1,.1),90) },
+  quit(){
+    [400,320,260].forEach((f,i)=>setTimeout(()=>playTone(f,"triangle",.15,.14),i*90));
+  },
+};
 
-    function shuffle(array) {
-      const copy = [...array];
-      for (let i = copy.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    }
+// ── Vocab helpers ──
+function getPool(){
+  return selectedLevel==="All" ? vocabulary : vocabulary.filter(i=>i.level===selectedLevel);
+}
+function getQueueKey(pool){
+  return `${selectedLevel}:${pool.length}:${vocabulary.length}:${pool[0]?.word||""}`;
+}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function uniqueByMeaning(words){const s=new Set();return words.filter(i=>i.meaning&&!s.has(i.meaning)&&s.add(i.meaning))}
 
-    function uniqueByMeaning(words) {
-      const seenMeanings = new Set();
-      return words.filter(item => {
-        if (!item.meaning || seenMeanings.has(item.meaning)) return false;
-        seenMeanings.add(item.meaning);
-        return true;
-      });
-    }
+function getNextWord(pool){
+  const key=getQueueKey(pool);
+  if(!wordQueue.length||activeQueueKey!==key){wordQueue=shuffle(pool);activeQueueKey=key}
+  return wordQueue.pop();
+}
+function makeQuestion(){
+  const pool=getPool();
+  if(!pool.length)throw new Error("No vocabulary in selected level.");
+  const answer=getNextWord(pool);
+  const dist=shuffle(uniqueByMeaning(vocabulary.filter(i=>i.meaning!==answer.meaning))).slice(0,3);
+  return{...answer,options:shuffle([answer.meaning,...dist.map(i=>i.meaning)])};
+}
 
-    function makeQuestion() {
-      const pool = getPool();
-      if (!pool.length) throw new Error("No vocabulary in the selected level.");
+// ── Game flow ──
+function startGame(){
+  if(!vocabReady||vocabulary.length<4){alert("Vocabulary still loading.");return}
+  if(!getPool().length){alert(`No words found for ${selectedLevel}.`);return}
+  getCtx(); // unlock audio on user gesture
+  wordQueue=[]; activeQueueKey="";
+  gameStartedAt=performance.now(); timeUsed=0;
+  score=0; combo=0; bestCombo=0; correct=0; seen=0;
+  paused=false;
+  updateStats();
+  showScreen("game");
+  nextQuestion();
+}
 
-      // Answer words come only from the selected range. The queue is depleted before it is refilled,
-      // so words do not repeat during a challenge until every word in that range has appeared once.
-      const answer = getNextWord(pool);
+function nextQuestion(){
+  clearInterval(timerId); acceptingAnswers=true;
+  currentQuestion=makeQuestion();
+  seen+=1;
+  $("word").textContent=currentQuestion.word;
+  $("part").textContent=`${currentQuestion.part} · ${currentQuestion.level}`;
+  $("answers").innerHTML="";
+  currentQuestion.options.forEach((opt,i)=>{
+    const btn=document.createElement("button");
+    btn.className="answer-btn"; btn.type="button";
+    btn.innerHTML=`<span class="ans-key">${LABELS[i]}</span><span class="ans-txt">${opt}</span>`;
+    btn.addEventListener("click",()=>chooseAnswer(btn,opt));
+    $("answers").appendChild(btn);
+  });
+  updateStats();
+  SFX.question();
+  startTimer();
+}
 
-      // Distractors can come from the full CSV bank so a small selected range still has four choices.
-      const distractorSource = uniqueByMeaning(vocabulary.filter(item => item.meaning !== answer.meaning));
-      const distractors = shuffle(distractorSource).slice(0, 3);
-      const options = shuffle([answer.meaning, ...distractors.map(item => item.meaning)]);
+let lastTickSec=null;
+function startTimer(){
+  deadline=performance.now()+ROUND_SECONDS*1000;
+  lastTickSec=null; tickTimer();
+  timerId=setInterval(tickTimer,80);
+}
+function tickTimer(){
+  if(paused)return;
+  const ms=Math.max(0,deadline-performance.now());
+  const remaining=Math.ceil(ms/1000);
+  const progress=ms/(ROUND_SECONDS*1000);
+  $("timer").textContent=remaining;
+  $("timerRing").style.setProperty("--progress",progress);
+  if(remaining<=2){
+    $("timerRing").classList.add("urgent");
+    if(remaining!==lastTickSec){SFX.tick();lastTickSec=remaining;}
+  }else{
+    $("timerRing").classList.remove("urgent");
+  }
+  if(ms<=0){clearInterval(timerId);SFX.timeout();setTimeout(()=>endGame(false),300);}
+}
 
-      return { ...answer, options };
-    }
+function chooseAnswer(button,option){
+  if(!acceptingAnswers)return;
+  acceptingAnswers=false; clearInterval(timerId);
+  $("timerRing").classList.remove("urgent");
+  const isCorrect=option===currentQuestion.meaning;
+  [...$("answers").children].forEach(btn=>{
+    if(btn.querySelector(".ans-txt").textContent===currentQuestion.meaning) btn.classList.add("correct");
+    else if(btn===button&&!isCorrect) btn.classList.add("wrong");
+    btn.disabled=true;
+  });
+  if(!isCorrect){
+    SFX.wrong(); fx("fxWrong");
+    setTimeout(()=>endGame(false),520);
+    return;
+  }
+  combo+=1; correct+=1; bestCombo=Math.max(bestCombo,combo);
+  score+=100+combo*25;
+  if(combo>0&&combo%5===0) SFX.combo(combo);
+  else SFX.correct();
+  fx("fxCorrect");
+  updateStats();
+  setTimeout(nextQuestion,560);
+}
 
-    function startGame() {
-      if (!vocabReady || vocabulary.length < 4) {
-        alert("Vocabulary CSV is still loading, or fewer than 4 words were loaded.");
-        return;
-      }
-      if (!getPool().length) {
-        alert(`No words found for ${selectedLevel}.`);
-        return;
-      }
-      wordQueue = [];
-      activeQueueKey = "";
-      gameStartedAt = performance.now();
-      timeUsed = 0;
-      score = 0;
-      combo = 0;
-      bestCombo = 0;
-      correct = 0;
-      seen = 0;
-      updateStats();
-      showScreen("game");
-      nextQuestion();
-    }
+function updateStats(){
+  $("score").textContent=score;
+  $("combo").textContent=`×${combo}`;
+  $("seen").textContent=seen;
+}
 
-    function nextQuestion() {
-      clearInterval(timerId);
-      acceptingAnswers = true;
-      currentQuestion = makeQuestion();
-      seen += 1;
+function endGame(quit=false){
+  clearInterval(timerId); acceptingAnswers=false;
+  timeUsed=Math.max(0,Math.ceil((performance.now()-gameStartedAt)/1000));
+  $("finalScore").textContent=score;
+  $("bestCombo").textContent=bestCombo;
+  $("correctCount").textContent=correct;
+  $("wordsSeen").textContent=seen;
+  $("timeUsed").textContent=`${timeUsed}s`;
+  if(quit){
+    $("resultLabel").textContent="Quit";
+    $("resultTitle").textContent="Results";
+  } else {
+    $("resultLabel").textContent="Mission Complete";
+    $("resultTitle").textContent="Game Over";
+  }
+  showScreen("result");
+}
 
-      $("word").textContent = currentQuestion.word;
-      $("part").textContent = `${currentQuestion.part} · ${currentQuestion.level}`;
-      $("answers").innerHTML = "";
+// ── Pause / Resume ──
+function doPause(){
+  if(paused||!$("game").classList.contains("active"))return;
+  paused=true; clearInterval(timerId);
+  $("timerRing").classList.remove("urgent");
+  $("pauseOverlay").classList.add("show");
+  SFX.pause();
+}
+function doResume(){
+  if(!paused)return;
+  paused=false;
+  $("pauseOverlay").classList.remove("show");
+  SFX.resume();
+  deadline=performance.now()+ROUND_SECONDS*1000; // reset clock on resume (fair)
+  lastTickSec=null;
+  timerId=setInterval(tickTimer,80);
+}
 
-      currentQuestion.options.forEach(option => {
-        const btn = document.createElement("button");
-        btn.className = "answer-btn";
-        btn.type = "button";
-        btn.textContent = option;
-        btn.addEventListener("click", () => chooseAnswer(btn, option));
-        $("answers").appendChild(btn);
-      });
+// ── FX ──
+function fx(id){const el=$(id);el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop")}
 
-      updateStats();
-      startTimer();
-    }
+// ── CSV ──
+function parseCsv(text){
+  const rows=[];let row=[],cell="",inQ=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i],nx=text[i+1];
+    if(ch==='"'){if(inQ&&nx==='"'){cell+='"';i++}else inQ=!inQ}
+    else if(ch===','&&!inQ){row.push(cell);cell=""}
+    else if((ch==='\n'||ch==='\r')&&!inQ){
+      if(ch==='\r'&&nx==='\n')i++;
+      row.push(cell);if(row.some(v=>v.trim()))rows.push(row);row=[];cell="";
+    }else cell+=ch;
+  }
+  row.push(cell);if(row.some(v=>v.trim()))rows.push(row);return rows;
+}
+function normalizeLevel(raw){const c=String(raw||"").trim().replace(/^L/i,"");return c?`L${c}`:"L1"}
+function normalizeCsvRows(rows,fallbackLevel){
+  return rows.slice(1).map(cols=>{
+    if(cols.length<6)return null;
+    return{level:normalizeLevel(cols[0]||fallbackLevel),unit:String(cols[1]||"").trim(),
+      no:String(cols[2]||"").trim(),word:String(cols[3]||"").trim(),
+      part:String(cols[4]||"").trim(),meaning:cols.slice(5).join(",").trim()};
+  }).filter(i=>i&&i.word&&i.meaning);
+}
+async function loadLevelCsv(lv){
+  const res=await fetch(`${CSV_BASE}level${lv}.csv`,{cache:"no-store"});
+  if(!res.ok)throw new Error(`Cannot load level${lv}.csv`);
+  return normalizeCsvRows(parseCsv(await res.text()),lv);
+}
+async function loadVocabulary(){
+  const btn=$("startBtn");
+  btn.disabled=true; btn.textContent="Loading CSV…";
+  try{
+    const data=await Promise.all(CSV_LEVELS.map(loadLevelCsv));
+    vocabulary=data.flat();
+    vocabReady=vocabulary.length>=4;
+    if(!vocabReady)throw new Error("Too few words loaded.");
+    btn.disabled=false; btn.textContent="Start Game 🚀";
+    $("loading").style.display="none";
+  }catch(e){
+    vocabReady=false; vocabulary=[];
+    btn.disabled=true; btn.textContent="CSV Load Failed";
+    $("loading").style.display="block";
+    $("loading").textContent=`Load failed: ${e.message}`;
+    console.error(e);
+  }
+}
 
-    function startTimer() {
-      deadline = performance.now() + ROUND_SECONDS * 1000;
-      tickTimer();
-      timerId = setInterval(tickTimer, 80);
-    }
+// ── Wiring ──
+$("startBtn").addEventListener("click", startGame);
+$("retryBtn").addEventListener("click", startGame);
+$("menuBtn").addEventListener("click",()=>showScreen("menu"));
+$("pauseBtn").addEventListener("click", doPause);
+$("resumeBtn").addEventListener("click", doResume);
+$("pauseQuitBtn").addEventListener("click",()=>{
+  paused=false; $("pauseOverlay").classList.remove("show");
+  SFX.quit();
+  setTimeout(()=>endGame(true),200);
+});
+document.addEventListener("keydown",e=>{
+  if(e.code==="Space"||e.code==="Escape"){
+    e.preventDefault();
+    if(paused)doResume(); else doPause();
+  }
+});
 
-    function tickTimer() {
-      const remainingMs = Math.max(0, deadline - performance.now());
-      const remaining = Math.ceil(remainingMs / 1000);
-      const progress = remainingMs / (ROUND_SECONDS * 1000);
-
-      $("timer").textContent = remaining;
-      $("timerRing").style.setProperty("--progress", progress);
-
-      if (remainingMs <= 0) {
-        clearInterval(timerId);
-        endGame();
-      }
-    }
-
-    function chooseAnswer(button, option) {
-      if (!acceptingAnswers) return;
-      acceptingAnswers = false;
-      clearInterval(timerId);
-
-      const isCorrect = option === currentQuestion.meaning;
-      const allButtons = [...$("answers").children];
-
-      allButtons.forEach(btn => {
-        if (btn.textContent === currentQuestion.meaning) btn.classList.add("correct");
-        else if (btn === button) btn.classList.add("wrong");
-        btn.disabled = true;
-      });
-
-      if (!isCorrect) {
-        setTimeout(endGame, 520);
-        return;
-      }
-
-      combo += 1;
-      correct += 1;
-      bestCombo = Math.max(bestCombo, combo);
-      score += 100 + combo * 25;
-      updateStats();
-      setTimeout(nextQuestion, 560);
-    }
-
-    function updateStats() {
-      $("score").textContent = score;
-      $("combo").textContent = `×${combo}`;
-      $("seen").textContent = seen;
-    }
-
-    function endGame() {
-      clearInterval(timerId);
-      acceptingAnswers = false;
-      $("finalScore").textContent = score;
-      $("bestCombo").textContent = bestCombo;
-      $("correctCount").textContent = correct;
-      timeUsed = Math.max(0, Math.ceil((performance.now() - gameStartedAt) / 1000));
-      $("wordsSeen").textContent = seen;
-      $("timeUsed").textContent = `${timeUsed}s`;
-      showScreen("result");
-    }
-
-    function parseCsv(text) {
-      const rows = [];
-      let row = [];
-      let cell = "";
-      let inQuotes = false;
-
-      for (let i = 0; i < text.length; i += 1) {
-        const ch = text[i];
-        const next = text[i + 1];
-
-        if (ch === '"') {
-          if (inQuotes && next === '"') {
-            cell += '"';
-            i += 1;
-          } else {
-            inQuotes = !inQuotes;
-          }
-        } else if (ch === ',' && !inQuotes) {
-          row.push(cell);
-          cell = "";
-        } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
-          if (ch === '\r' && next === '\n') i += 1;
-          row.push(cell);
-          if (row.some(value => value.trim() !== "")) rows.push(row);
-          row = [];
-          cell = "";
-        } else {
-          cell += ch;
-        }
-      }
-
-      row.push(cell);
-      if (row.some(value => value.trim() !== "")) rows.push(row);
-      return rows;
-    }
-
-    function normalizeLevel(raw) {
-      const cleaned = String(raw || "").trim().replace(/^L/i, "");
-      return cleaned ? `L${cleaned}` : "L1";
-    }
-
-    function normalizeCsvRows(rows, fallbackLevel) {
-      const body = rows.slice(1);
-      return body.map(cols => {
-        if (cols.length < 6) return null;
-        return {
-          level: normalizeLevel(cols[0] || fallbackLevel),
-          unit: String(cols[1] || "").trim(),
-          no: String(cols[2] || "").trim(),
-          word: String(cols[3] || "").trim(),
-          part: String(cols[4] || "").trim(),
-          meaning: cols.slice(5).join(",").trim()
-        };
-      }).filter(item => item && item.word && item.meaning);
-    }
-
-    async function loadLevelCsv(levelNumber) {
-      const response = await fetch(`${CSV_BASE}level${levelNumber}.csv`, { cache: "no-store" });
-      if (!response.ok) throw new Error(`Cannot load level${levelNumber}.csv`);
-      const text = await response.text();
-      return normalizeCsvRows(parseCsv(text), levelNumber);
-    }
-
-    async function loadVocabulary() {
-      const startBtn = $("startBtn");
-      startBtn.disabled = true;
-      startBtn.textContent = "Loading CSV...";
-      $("loading").style.display = "none";
-      $("loading").textContent = "";
-
-      try {
-        const levelData = await Promise.all(CSV_LEVELS.map(loadLevelCsv));
-        vocabulary = levelData.flat();
-        vocabReady = vocabulary.length >= 4;
-
-        if (!vocabReady) throw new Error("CSV vocabulary count is fewer than 4.");
-
-        const levelCounts = CSV_LEVELS.map(lv => {
-          const count = vocabulary.filter(item => item.level === `L${lv}`).length;
-          return `L${lv}: ${count}`;
-        }).join(" · ");
-
-        // CSV loaded successfully; keep the status hidden for students.
-        $("loading").style.display = "none";
-        $("loading").textContent = "";
-        startBtn.disabled = false;
-        startBtn.textContent = "Start Game 🚀";
-      } catch (error) {
-        vocabReady = false;
-        vocabulary = [];
-        startBtn.disabled = true;
-        startBtn.textContent = "CSV Load Failed";
-        $("loading").style.display = "block";
-        $("loading").textContent = `CSV loading failed: ${error.message}`;
-        console.error(error);
-      }
-    }
-
-    $("startBtn").addEventListener("click", startGame);
-    $("retryBtn").addEventListener("click", startGame);
-    $("menuBtn").addEventListener("click", () => showScreen("menu"));
-
-    loadVocabulary();
-  </script>
+loadVocabulary();
+</script>
 </body>
 </html>
