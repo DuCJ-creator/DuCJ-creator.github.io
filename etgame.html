@@ -602,26 +602,46 @@ function normalizeCsvRows(rows,fallbackLevel){
   }).filter(i=>i&&i.word&&i.meaning);
 }
 async function loadLevelCsv(lv){
-  const res=await fetch(`${CSV_BASE}level${lv}.csv`,{cache:"no-store"});
-  if(!res.ok)throw new Error(`Cannot load level${lv}.csv`);
-  return normalizeCsvRows(parseCsv(await res.text()),lv);
+  const url=`${CSV_BASE}level${lv}.csv?v=${Date.now()}`;
+  let res;
+  try{ res=await fetch(url); }
+  catch(netErr){ throw new Error(`level${lv}.csv – network error (${netErr.message})`); }
+  if(!res.ok) throw new Error(`level${lv}.csv – HTTP ${res.status} ${res.statusText}`);
+  const text=await res.text();
+  if(!text.trim()) throw new Error(`level${lv}.csv – file is empty`);
+  const words=normalizeCsvRows(parseCsv(text),lv);
+  if(!words.length) throw new Error(`level${lv}.csv – no valid rows parsed (check column count >= 6)`);
+  return words;
 }
+
 async function loadVocabulary(){
   const btn=$("startBtn");
-  btn.disabled=true; btn.textContent="Loading CSV…";
-  try{
-    const data=await Promise.all(CSV_LEVELS.map(loadLevelCsv));
-    vocabulary=data.flat();
-    vocabReady=vocabulary.length>=4;
-    if(!vocabReady)throw new Error("Too few words loaded.");
+  const info=$("loading");
+  btn.disabled=true; btn.textContent="Loading CSV...";
+  info.style.display="none"; info.innerHTML="";
+
+  const results=await Promise.allSettled(CSV_LEVELS.map(loadLevelCsv));
+  const failed=[], loaded=[];
+  results.forEach((r,i)=>{
+    if(r.status==="fulfilled"){ loaded.push(...r.value); }
+    else{ failed.push(r.reason.message); console.error(r.reason); }
+  });
+
+  vocabulary=loaded;
+  vocabReady=vocabulary.length>=4;
+
+  if(failed.length){
+    info.style.display="block";
+    if(vocabReady){
+      info.innerHTML='<span style="color:#b45309">&#9888; '+failed.length+' file(s) failed: <small>'+failed.join(" | ")+'</small> — playing with loaded levels.</span>';
+      btn.disabled=false; btn.textContent="Start Game 🚀";
+    } else {
+      info.innerHTML='<span style="color:#dc2626">&#10060; Load failed:<br><small>'+failed.join("<br>")+'</small></span><br><br><button onclick="loadVocabulary()" style="padding:8px 18px;border-radius:8px;border:none;background:#7c3aed;color:#fff;font-weight:800;cursor:pointer;font-size:.9rem">&#8635; Retry</button>';
+      btn.disabled=true; btn.textContent="CSV Load Failed";
+    }
+  } else {
+    info.style.display="none";
     btn.disabled=false; btn.textContent="Start Game 🚀";
-    $("loading").style.display="none";
-  }catch(e){
-    vocabReady=false; vocabulary=[];
-    btn.disabled=true; btn.textContent="CSV Load Failed";
-    $("loading").style.display="block";
-    $("loading").textContent=`Load failed: ${e.message}`;
-    console.error(e);
   }
 }
 
