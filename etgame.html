@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Vocab Challenge · Beat the ET</title>
+  <title>Vocab Challenge - Beat the ET</title>
   <style>
     :root {
       --bg-1:#fff7ed; --bg-2:#ecfeff; --bg-3:#eef2ff;
@@ -46,7 +46,7 @@
     .screen.active{display:block}
     @keyframes rise{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
 
-    /* ── MENU ── */
+    /* -- MENU -- */
     .instant-start{min-height:min(720px,calc(100dvh - 32px));display:grid;place-items:center}
     .launch-card{width:min(520px,100%);padding:clamp(16px,4vw,26px);text-align:center}
     .setup-card{
@@ -100,7 +100,7 @@
     .main-btn:hover{transform:translateY(-2px)}
     .loading{display:none;text-align:center;color:var(--muted);font-weight:800;margin-top:10px}
 
-    /* ── GAME ── */
+    /* -- GAME -- */
     .game-card,.result-card{
       width:min(820px,100%);margin:0 auto;
       background:var(--card);border:1px solid rgba(255,255,255,.72);
@@ -187,7 +187,7 @@
     .answer-btn.wrong   .ans-txt{color:#fff}
     .ans-txt{flex:1}
 
-    /* ── PAUSE OVERLAY ── */
+    /* -- PAUSE OVERLAY -- */
     .pause-overlay{
       display:none;position:fixed;inset:0;z-index:300;
       background:rgba(248,246,255,.85);backdrop-filter:blur(8px);
@@ -210,7 +210,7 @@
     }
     .ghost-btn:hover{transform:translateY(-2px)}
 
-    /* ── RESULT ── */
+    /* -- RESULT -- */
     .result-card{text-align:center;padding:clamp(18px,4vw,34px)}
     .result-label{
       display:inline-flex;align-items:center;gap:8px;
@@ -262,10 +262,10 @@
 <!-- Pause overlay -->
 <div class="pause-overlay" id="pauseOverlay">
   <div class="pause-box">
-    <h2>⏸ Paused</h2>
-    <p>Timer is stopped.<br/>Resume when you're ready.</p>
+    <h2>Paused</h2>
+    <p>Timer is stopped.<br/>Resumewhen you're ready.</p>
     <div class="pause-actions">
-      <button class="main-btn" id="resumeBtn" style="min-width:130px">Resume ▶</button>
+      <button class="main-btn" id="resumeBtn" style="min-width:130px">Resume</button>
       <button class="ghost-btn" id="pauseQuitBtn">Quit &amp; See Results</button>
     </div>
   </div>
@@ -277,11 +277,11 @@
   <section id="menu" class="screen active">
     <div class="instant-start">
       <div class="setup-card launch-card">
-        <div class="mascot" aria-hidden="true"><span>👽</span></div>
+        <div class="mascot" aria-hidden="true"><span>ET</span></div>
         <h1><span class="gradient-text">Cosmic Vocab</span><br/>Challenge</h1>
         <div id="levelGrid" class="level-grid" role="group" aria-label="Select vocabulary level"></div>
-        <button id="startBtn" class="main-btn">Start Game 🚀</button>
-        <p class="subtitle">Pick a level · answer before time runs out · wrong = game over</p>
+        <button id="startBtn" class="main-btn">Start Game</button>
+        <p class="subtitle">Pick a level - answer before time runs out - wrong = game over</p>
         <div id="loading" class="loading" aria-live="polite"></div>
       </div>
     </div>
@@ -293,7 +293,7 @@
       <!-- compact topbar -->
       <div class="topbar">
         <div class="stat"><span class="stat-label">Score</span><span id="score" class="stat-value">0</span></div>
-        <div class="stat"><span class="stat-label">Combo</span><span id="combo" class="stat-value">×0</span></div>
+        <div class="stat"><span class="stat-label">Combo</span><span id="combo" class="stat-value">x0</span></div>
         <div class="stat"><span class="stat-label">Seen</span><span id="seen" class="stat-value">0</span></div>
         <!-- inline timer -->
         <div class="timer-wrap">
@@ -302,7 +302,7 @@
           </div>
         </div>
         <!-- pause -->
-        <button class="pause-btn" id="pauseBtn" aria-label="Pause">⏸</button>
+        <button class="pause-btn" id="pauseBtn" aria-label="Pause">Pause</button>
       </div>
 
       <div class="question-card">
@@ -327,8 +327,8 @@
         <div class="stat"><span class="stat-label">Time Used</span><span id="timeUsed" class="stat-value">0s</span></div>
       </div>
       <div class="actions">
-        <button id="retryBtn" class="main-btn" style="width:auto;min-width:160px">↺ Play Again</button>
-        <button id="menuBtn" class="ghost-btn">← Menu</button>
+        <button id="retryBtn" class="main-btn" style="width:auto;min-width:160px">Play Again</button>
+        <button id="menuBtn" class="ghost-btn">Menu</button>
       </div>
     </div>
   </section>
@@ -351,7 +351,7 @@ let paused=false;
 const $=id=>document.getElementById(id);
 const screens={menu:$("menu"),game:$("game"),result:$("result")};
 
-// ── Level buttons ──
+// -- Level buttons --
 const levels=["L1","L2","L3","L4","L5","L6","All"];
 const levelGrid=$("levelGrid");
 levels.forEach(level=>{
@@ -373,7 +373,7 @@ function showScreen(name){
   screens[name].classList.add("active");
 }
 
-// ── Audio (Web Audio API) ──
+// -- Audio (Web Audio API) --
 let audioCtx=null;
 function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx}
 
@@ -431,7 +431,7 @@ const SFX={
   },
 };
 
-// ── Vocab helpers ──
+// -- Vocab helpers --
 function getPool(){
   return selectedLevel==="All" ? vocabulary : vocabulary.filter(i=>i.level===selectedLevel);
 }
@@ -454,7 +454,7 @@ function makeQuestion(){
   return{...answer,options:shuffle([answer.meaning,...dist.map(i=>i.meaning)])};
 }
 
-// ── Game flow ──
+// -- Game flow --
 function startGame(){
   if(!vocabReady||vocabulary.length<4){alert("Vocabulary still loading.");return}
   if(!getPool().length){alert(`No words found for ${selectedLevel}.`);return}
@@ -473,12 +473,22 @@ function nextQuestion(){
   currentQuestion=makeQuestion();
   seen+=1;
   $("word").textContent=currentQuestion.word;
-  $("part").textContent=`${currentQuestion.part} · ${currentQuestion.level}`;
+  $("part").textContent=`${currentQuestion.part} - ${currentQuestion.level}`;
   $("answers").innerHTML="";
   currentQuestion.options.forEach((opt,i)=>{
     const btn=document.createElement("button");
     btn.className="answer-btn"; btn.type="button";
-    btn.innerHTML=`<span class="ans-key">${LABELS[i]}</span><span class="ans-txt">${opt}</span>`;
+
+    const key=document.createElement("span");
+    key.className="ans-key";
+    key.textContent=LABELS[i];
+
+    const txt=document.createElement("span");
+    txt.className="ans-txt";
+    txt.textContent=opt;
+
+    btn.appendChild(key);
+    btn.appendChild(txt);
     btn.addEventListener("click",()=>chooseAnswer(btn,opt));
     $("answers").appendChild(btn);
   });
@@ -535,7 +545,7 @@ function chooseAnswer(button,option){
 
 function updateStats(){
   $("score").textContent=score;
-  $("combo").textContent=`×${combo}`;
+  $("combo").textContent=`x${combo}`;
   $("seen").textContent=seen;
 }
 
@@ -557,7 +567,7 @@ function endGame(quit=false){
   showScreen("result");
 }
 
-// ── Pause / Resume ──
+// -- Pause / Resume--
 function doPause(){
   if(paused||!$("game").classList.contains("active"))return;
   paused=true; clearInterval(timerId);
@@ -575,10 +585,20 @@ function doResume(){
   timerId=setInterval(tickTimer,80);
 }
 
-// ── FX ──
+// -- FX --
 function fx(id){const el=$(id);el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop")}
 
-// ── CSV ──
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g, ch => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    "\"":"&quot;",
+    "'":"&#39;"
+  }[ch]));
+}
+
+// -- CSV --
 function parseCsv(text){
   const rows=[];let row=[],cell="",inQ=false;
   for(let i=0;i<text.length;i++){
@@ -605,12 +625,12 @@ async function loadLevelCsv(lv){
   const url=`${CSV_BASE}level${lv}.csv?v=${Date.now()}`;
   let res;
   try{ res=await fetch(url); }
-  catch(netErr){ throw new Error(`level${lv}.csv – network error (${netErr.message})`); }
-  if(!res.ok) throw new Error(`level${lv}.csv – HTTP ${res.status} ${res.statusText}`);
+  catch(netErr){ throw new Error(`level${lv}.csv - network error (${netErr.message})`); }
+  if(!res.ok) throw new Error(`level${lv}.csv - HTTP ${res.status} ${res.statusText}`);
   const text=await res.text();
-  if(!text.trim()) throw new Error(`level${lv}.csv – file is empty`);
+  if(!text.trim()) throw new Error(`level${lv}.csv - file is empty`);
   const words=normalizeCsvRows(parseCsv(text),lv);
-  if(!words.length) throw new Error(`level${lv}.csv – no valid rows parsed (check column count >= 6)`);
+  if(!words.length) throw new Error(`level${lv}.csv - no valid rows parsed (check column count >= 6)`);
   return words;
 }
 
@@ -633,19 +653,19 @@ async function loadVocabulary(){
   if(failed.length){
     info.style.display="block";
     if(vocabReady){
-      info.innerHTML='<span style="color:#b45309">&#9888; '+failed.length+' file(s) failed: <small>'+failed.join(" | ")+'</small> — playing with loaded levels.</span>';
-      btn.disabled=false; btn.textContent="Start Game 🚀";
+      info.innerHTML='<span style="color:#b45309">&#9888; '+failed.length+' file(s) failed: <small>'+failed.map(escapeHtml).join(" | ")+'</small> - playing with loaded levels.</span>';
+      btn.disabled=false; btn.textContent="Start Game";
     } else {
-      info.innerHTML='<span style="color:#dc2626">&#10060; Load failed:<br><small>'+failed.join("<br>")+'</small></span><br><br><button onclick="loadVocabulary()" style="padding:8px 18px;border-radius:8px;border:none;background:#7c3aed;color:#fff;font-weight:800;cursor:pointer;font-size:.9rem">&#8635; Retry</button>';
+      info.innerHTML='<span style="color:#dc2626">&#10060; Load failed:<br><small>'+failed.map(escapeHtml).join("<br>")+'</small></span><br><br><button onclick="loadVocabulary()" style="padding:8px 18px;border-radius:8px;border:none;background:#7c3aed;color:#fff;font-weight:800;cursor:pointer;font-size:.9rem">&#8635; Retry</button>';
       btn.disabled=true; btn.textContent="CSV Load Failed";
     }
   } else {
     info.style.display="none";
-    btn.disabled=false; btn.textContent="Start Game 🚀";
+    btn.disabled=false; btn.textContent="Start Game";
   }
 }
 
-// ── Wiring ──
+// -- Wiring --
 $("startBtn").addEventListener("click", startGame);
 $("retryBtn").addEventListener("click", startGame);
 $("menuBtn").addEventListener("click",()=>showScreen("menu"));
