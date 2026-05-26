@@ -211,6 +211,36 @@
     .res-box .rl{font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
     .res-box .rv{display:block;font-family:'Bebas Neue',sans-serif;font-size:clamp(1.2rem,4vw,1.6rem);color:var(--text);line-height:1.2}
 
+
+    /* student info panel for screenshot on result page */
+    #screen-gameover{position:relative}
+    .student-info-panel{
+      position:absolute;top:0;right:0;z-index:5;
+      width:min(210px,44vw);
+      display:grid;gap:6px;
+      padding:10px;border-radius:var(--r);
+      background:rgba(18,18,30,.88);
+      border:1px solid var(--border);
+      box-shadow:0 0 22px rgba(0,0,0,.32);
+      text-align:left;
+    }
+    .student-info-title{
+      font-size:.58rem;font-weight:800;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--gold);
+    }
+    .student-info-field{display:grid;grid-template-columns:58px 1fr;align-items:center;gap:6px}
+    .student-info-field label{
+      font-size:.58rem;font-weight:800;letter-spacing:.08em;
+      text-transform:uppercase;color:var(--muted);
+    }
+    .student-info-field input{
+      min-width:0;height:26px;padding:4px 7px;border-radius:8px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(10,10,18,.82);color:var(--text);
+      font:700 .78rem 'DM Sans',sans-serif;outline:none;
+    }
+    .student-info-field input:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(245,200,66,.16)}
+
     /* shared buttons */
     .btn-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
     .cta-btn{
@@ -246,7 +276,14 @@
       100%{opacity:0;transform:translate(-50%,-60%) scale(.94)}
     }
 
-    @media(max-width:400px){.answers-grid{grid-template-columns:1fr}}
+
+    @media(max-width:500px){
+      .student-info-panel{
+        position:relative;align-self:flex-end;width:min(230px,100%);
+        margin-bottom:2px;
+      }
+    }
+        @media(max-width:400px){.answers-grid{grid-template-columns:1fr}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
   </style>
 </head>
@@ -317,6 +354,22 @@
 
   <!-- GAME OVER -->
   <section id="screen-gameover" class="screen">
+
+    <div class="student-info-panel" aria-label="Student information for screenshot">
+      <div class="student-info-title">Student Info</div>
+      <div class="student-info-field">
+        <label for="studentClass">Class</label>
+        <input id="studentClass" type="text" autocomplete="off" />
+      </div>
+      <div class="student-info-field">
+        <label for="studentName">Name</label>
+        <input id="studentName" type="text" autocomplete="off" />
+      </div>
+      <div class="student-info-field">
+        <label for="studentSeat">Seat No.</label>
+        <input id="studentSeat" type="text" inputmode="numeric" autocomplete="off" />
+      </div>
+    </div>
     <div class="go-title" id="goTitle">Game Over</div>
     <div class="score-circle">
       <div><span class="sc-label">Final Score</span><span class="sc-val" id="goScore">0</span></div>
