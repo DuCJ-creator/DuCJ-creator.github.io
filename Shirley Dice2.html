@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Shirley's Dice — Two D6</title>
+  <title>Shirley's Dice — Multi D6</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #12100e; --text: #f5ede0; --text-muted: rgba(245,237,224,0.45);
       --accent: #e8a870; --accent2: #c9643a;
-      --surface: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.08);
+      --teal: #3ab8b8; --teal2: #2a9090;
     }
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     body {
@@ -21,26 +21,60 @@
     body::before {
       content: ''; position: fixed; inset: 0;
       background: radial-gradient(ellipse 70% 50% at 20% 80%, rgba(200,80,30,0.12) 0%, transparent 60%),
-                  radial-gradient(ellipse 50% 60% at 80% 20%, rgba(232,168,112,0.08) 0%, transparent 60%);
+                  radial-gradient(ellipse 50% 60% at 80% 20%, rgba(58,184,184,0.06) 0%, transparent 60%);
       pointer-events: none;
     }
-    #canvas-container { position: relative; width: 360px; height: 300px; }
+    #canvas-container { position: relative; width: 400px; height: 300px; }
     canvas { display: block; border-radius: 20px; cursor: pointer; }
-    .ui { width: 360px; text-align: center; margin-top: 1rem; }
+    .ui { width: 400px; text-align: center; margin-top: 1rem; }
     h3 {
       font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 900;
       letter-spacing: -0.5px; margin-bottom: 0.2rem;
       background: linear-gradient(135deg, #f5ede0 30%, rgba(245,237,224,0.5));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .subtitle { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 1.2rem; }
+    .subtitle { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 1rem; }
+    .count-selector {
+      display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 0.9rem;
+    }
+    .count-label { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; }
+    .count-btns { display: flex; gap: 6px; }
+    .count-btn {
+      width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05); color: var(--text-muted);
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer;
+      transition: all 0.18s;
+    }
+    .count-btn:hover { border-color: var(--teal); color: var(--teal); }
+    .count-btn.active {
+      background: linear-gradient(135deg, var(--teal), var(--teal2));
+      border-color: transparent; color: #fff; font-weight: 700;
+    }
+    .dice-badges {
+      display: flex; justify-content: center; gap: 10px; margin-bottom: 0.7rem; min-height: 38px;
+    }
+    .badge {
+      display: flex; flex-direction: column; align-items: center; gap: 1px;
+      opacity: 0; transform: translateY(6px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .badge.visible { opacity: 1; transform: translateY(0); }
+    .badge-letter {
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--teal);
+    }
+    .badge-val {
+      font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
     .result-area {
-      min-height: 64px; display: flex; flex-direction: column;
+      min-height: 58px; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 4px; margin-bottom: 1rem;
     }
     .result-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 3px; color: var(--text-muted); }
     .result-value {
-      font-family: 'Playfair Display', serif; font-size: 2.7rem; font-weight: 900; line-height: 1;
+      font-family: 'Playfair Display', serif; font-size: 2.4rem; font-weight: 900; line-height: 1;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
       opacity: 0; transform: translateY(8px) scale(0.9);
@@ -53,12 +87,12 @@
     }
     .result-detail.show { opacity: 1; transform: translateY(0); }
     .roll-btn {
-      background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white;
-      border: none; padding: 13px 40px; border-radius: 100px;
-      font-family: 'DM Sans', sans-serif; font-size: 0.92rem; font-weight: 500; cursor: pointer;
-      box-shadow: 0 6px 20px rgba(232,168,112,0.3); transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      background: linear-gradient(135deg, var(--teal), var(--teal2)); color: white;
+      border: none; padding: 13px 44px; border-radius: 100px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(58,184,184,0.28); transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
     }
-    .roll-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(232,168,112,0.4); }
+    .roll-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(58,184,184,0.4); }
     .roll-btn:active { transform: translateY(0); }
     .roll-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
     .hint { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.6rem; }
@@ -68,23 +102,31 @@
 <div id="canvas-container"><canvas id="c"></canvas></div>
 <div class="ui">
   <h3>Shirley's Dice</h3>
-  <p class="subtitle">Two D6 Roller</p>
+  <p class="subtitle" id="subtitleTxt">One D6 Roller</p>
+  <div class="count-selector">
+    <span class="count-label">Dice</span>
+    <div class="count-btns" id="countBtns">
+      <button class="count-btn active" data-n="1">1</button>
+      <button class="count-btn" data-n="2">2</button>
+      <button class="count-btn" data-n="3">3</button>
+      <button class="count-btn" data-n="4">4</button>
+      <button class="count-btn" data-n="5">5</button>
+    </div>
+  </div>
+  <div class="dice-badges" id="diceBadges"></div>
   <div class="result-area">
     <div class="result-label" id="resultLabel">Click to roll</div>
     <div class="result-value" id="resultValue"></div>
     <div class="result-detail" id="resultDetail"></div>
   </div>
-  <button class="roll-btn" id="rollBtn">Roll Two Dice</button>
+  <button class="roll-btn" id="rollBtn">擲骰子 ↺</button>
   <p class="hint">or click the dice directly</p>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// ════════════════════════════════════════════════════════════
-// RENDERER
-// ════════════════════════════════════════════════════════════
 const canvas = document.getElementById('c');
-const W = 360, H = 300;
+const W = 400, H = 300;
 canvas.width = W * devicePixelRatio; canvas.height = H * devicePixelRatio;
 canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
 
@@ -101,14 +143,12 @@ camera.position.set(0, 4, 6); camera.lookAt(0, 0, 0);
 let camTargetY = 4, camTargetZ = 6, camLookY = 0;
 let camCurrentY = 4, camCurrentZ = 6, camCurrentLookY = 0;
 
-// ════════════════════════════════════════════════════════════
-// LIGHTING
-// ════════════════════════════════════════════════════════════
+// Lighting
 const keyLight = new THREE.DirectionalLight(0xfff4e0, 3.0);
 keyLight.position.set(4, 9, 5); keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(1024,1024);
 keyLight.shadow.camera.near=0.5; keyLight.shadow.camera.far=30;
-keyLight.shadow.camera.left=-4; keyLight.shadow.camera.right=4;
+keyLight.shadow.camera.left=-6; keyLight.shadow.camera.right=6;
 keyLight.shadow.camera.top=4; keyLight.shadow.camera.bottom=-4;
 keyLight.shadow.radius=5; keyLight.shadow.bias=-0.001;
 scene.add(keyLight);
@@ -120,9 +160,7 @@ scene.add(new THREE.AmbientLight(0x2a1a08, 1.4));
 const ptL = new THREE.PointLight(0xff8c42, 0.4, 12);
 ptL.position.set(0,-1.5,2); scene.add(ptL);
 
-// ════════════════════════════════════════════════════════════
-// TABLE
-// ════════════════════════════════════════════════════════════
+// Table
 const TABLE_Y = -1.1;
 const table = new THREE.Mesh(
   new THREE.PlaneGeometry(20,20),
@@ -131,34 +169,27 @@ const table = new THREE.Mesh(
 table.rotation.x = -Math.PI/2; table.position.y = TABLE_Y; table.receiveShadow = true;
 scene.add(table);
 
-// ════════════════════════════════════════════════════════════
-// D6 CONFIG + TEXTURES
-// ════════════════════════════════════════════════════════════
 const D6_CONFIG = { hex:'#f0e8d8', emissiveHex:'#0a0500', roughness:0.14, metalness:0.04, dark:true };
 
 function makeDotTexture(cfg, value) {
   const S = 256;
   const c = document.createElement('canvas'); c.width=S; c.height=S;
   const ctx = c.getContext('2d');
-
   ctx.fillStyle = cfg.hex; ctx.fillRect(0,0,S,S);
   const vg = ctx.createRadialGradient(S*.38,S*.32,0,S/2,S/2,S*.68);
   vg.addColorStop(0,'rgba(255,255,255,0.14)'); vg.addColorStop(1,'rgba(0,0,0,0.22)');
   ctx.fillStyle=vg; ctx.fillRect(0,0,S,S);
-
   const layouts = {
-    1:[[.5,.5]],
-    2:[[.30,.30],[.70,.70]],
-    3:[[.28,.28],[.50,.50],[.72,.72]],
+    1:[[.5,.5]], 2:[[.30,.30],[.70,.70]], 3:[[.28,.28],[.50,.50],[.72,.72]],
     4:[[.28,.28],[.72,.28],[.28,.72],[.72,.72]],
     5:[[.28,.28],[.72,.28],[.50,.50],[.28,.72],[.72,.72]],
     6:[[.28,.22],[.72,.22],[.28,.50],[.72,.50],[.28,.78],[.72,.78]],
   };
-
   const r = S*0.083;
   const dc = cfg.dark ? '#2a1200' : 'rgba(255,255,255,0.88)';
-  layouts[value].forEach(([fx,fy])=>{
-    const x=fx*S, y=fy*S;
+  layouts[value].forEach(function(pos) {
+    var fx=pos[0], fy=pos[1];
+    var x=fx*S, y=fy*S;
     ctx.beginPath(); ctx.arc(x,y+r*.18,r,0,Math.PI*2);
     ctx.fillStyle='rgba(0,0,0,0.28)'; ctx.fill();
     ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
@@ -170,89 +201,125 @@ function makeDotTexture(cfg, value) {
   const t = new THREE.CanvasTexture(c); t.needsUpdate=true; return t;
 }
 
-// Face material index order: 0=+X, 1=-X, 2=+Y, 3=-Y, 4=+Z, 5=-Z
-// Standard die opposite faces sum to 7: +X=2, -X=5, +Y=4, -Y=3, +Z=1, -Z=6
 const D6_MAT_VALUES = [2,5,4,3,1,6];
 const D6_NORMALS = [
-  new THREE.Vector3( 1, 0, 0), new THREE.Vector3(-1, 0, 0),
-  new THREE.Vector3( 0, 1, 0), new THREE.Vector3( 0,-1, 0),
-  new THREE.Vector3( 0, 0, 1), new THREE.Vector3( 0, 0,-1),
+  new THREE.Vector3(1,0,0), new THREE.Vector3(-1,0,0),
+  new THREE.Vector3(0,1,0), new THREE.Vector3(0,-1,0),
+  new THREE.Vector3(0,0,1), new THREE.Vector3(0,0,-1),
 ];
 
 function d6UpQuat(value) {
-  const idx = D6_MAT_VALUES.indexOf(value);
-  const faceNorm = D6_NORMALS[idx];
-  const q = new THREE.Quaternion();
-  q.setFromUnitVectors(faceNorm, new THREE.Vector3(0,1,0));
+  var idx = D6_MAT_VALUES.indexOf(value);
+  var q = new THREE.Quaternion();
+  q.setFromUnitVectors(D6_NORMALS[idx], new THREE.Vector3(0,1,0));
   return q;
 }
 
 function buildD6() {
-  const group = new THREE.Group();
-  const mats = D6_MAT_VALUES.map(v => new THREE.MeshStandardMaterial({
-    map: makeDotTexture(D6_CONFIG, v),
-    roughness: D6_CONFIG.roughness, metalness: D6_CONFIG.metalness,
-    emissive: new THREE.Color(D6_CONFIG.emissiveHex), emissiveIntensity: 0.4,
-  }));
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), mats);
+  var group = new THREE.Group();
+  var mats = D6_MAT_VALUES.map(function(v) {
+    return new THREE.MeshStandardMaterial({
+      map: makeDotTexture(D6_CONFIG, v),
+      roughness: D6_CONFIG.roughness, metalness: D6_CONFIG.metalness,
+      emissive: new THREE.Color(D6_CONFIG.emissiveHex), emissiveIntensity: 0.4,
+    });
+  });
+  var mesh = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), mats);
   mesh.castShadow = true; mesh.receiveShadow = true;
   group.add(mesh);
-
-  const edgeMesh = new THREE.Mesh(
+  group.add(new THREE.Mesh(
     new THREE.BoxGeometry(1.003,1.003,1.003),
     new THREE.MeshBasicMaterial({ color:0x000000, transparent:true, opacity:0.06, side:THREE.BackSide })
-  );
-  group.add(edgeMesh);
+  ));
   return group;
 }
 
-// ════════════════════════════════════════════════════════════
-// STATE + PHYSICS
-// ════════════════════════════════════════════════════════════
-const FLOOR_Y = TABLE_Y + 0.54;
-let dice = [];
-let isRolling=false, hasResult=false;
-let finalValues=[1,1];
+// Dice config
+var LETTERS = ['A','B','C','D','E'];
+var SUBTITLES = ['One D6 Roller','Two D6 Roller','Three D6 Roller','Four D6 Roller','Five D6 Roller'];
+var POSITIONS = {
+  1: [0],
+  2: [-0.9, 0.9],
+  3: [-1.55, 0, 1.55],
+  4: [-2.1, -0.7, 0.7, 2.1],
+  5: [-2.55, -1.27, 0, 1.27, 2.55]
+};
+var DICE_SCALES = { 1:1.0, 2:1.0, 3:0.88, 4:0.78, 5:0.68 };
 
-function createDiceState(x) {
-  const group = buildD6();
+var FLOOR_Y = TABLE_Y + 0.54;
+var numDice = 1;
+var dice = [];
+var isRolling = false, hasResult = false;
+var finalValues = [1];
+
+function createDiceState(x, scale) {
+  var group = buildD6();
+  group.scale.setScalar(scale);
   group.position.set(x, FLOOR_Y, 0);
   scene.add(group);
   return {
-    group,
-    startX:x,
-    physY:FLOOR_Y,
-    velX:0, velY:0, velZ:0,
-    angX:0, angY:0, angZ:0,
+    group: group, startX: x, physY: FLOOR_Y,
+    velX:0, velY:0, velZ:0, angX:0, angY:0, angZ:0,
     phase:'idle', bounceCount:0, settleStart:0,
-    targetQuat:new THREE.Quaternion(),
-    accumEuler:new THREE.Euler(0,0,0,'XYZ'),
-    finalValue:1,
-    highlight:null,
+    targetQuat: new THREE.Quaternion(),
+    accumEuler: new THREE.Euler(0,0,0,'XYZ'),
+    finalValue:1, highlight:null
   };
 }
 
-function spawnDicePair(){
-  dice.forEach(d => scene.remove(d.group));
-  dice = [createDiceState(-0.72), createDiceState(0.72)];
+function spawnDice(n) {
+  dice.forEach(function(d){ scene.remove(d.group); });
+  var positions = POSITIONS[n];
+  var scale = DICE_SCALES[n];
+  dice = positions.map(function(x){ return createDiceState(x, scale); });
+  finalValues = new Array(n).fill(1);
+  renderBadges(null);
 }
 
-// ════════════════════════════════════════════════════════════
-// AUDIO
-// ════════════════════════════════════════════════════════════
-let audioCtx=null;
+function renderBadges(values) {
+  var container = document.getElementById('diceBadges');
+  container.innerHTML = '';
+  for(var i=0; i<numDice; i++){
+    var b = document.createElement('div');
+    b.className = 'badge';
+    b.innerHTML = '<span class="badge-letter">'+LETTERS[i]+'</span><span class="badge-val">'+(values ? values[i] : '—')+'</span>';
+    container.appendChild(b);
+    (function(el){ setTimeout(function(){ el.classList.add('visible'); }, 30 + i*40); })(b);
+  }
+}
+
+document.getElementById('countBtns').addEventListener('click', function(e){
+  var btn = e.target.closest('.count-btn');
+  if(!btn || isRolling) return;
+  var n = parseInt(btn.dataset.n);
+  if(n === numDice) return;
+  numDice = n;
+  document.querySelectorAll('.count-btn').forEach(function(b){
+    b.classList.toggle('active', parseInt(b.dataset.n)===n);
+  });
+  document.getElementById('subtitleTxt').textContent = SUBTITLES[n-1];
+  document.getElementById('resultLabel').textContent = 'Click to roll';
+  document.getElementById('resultValue').classList.remove('show');
+  document.getElementById('resultDetail').classList.remove('show');
+  hasResult = false;
+  clearHighlights();
+  spawnDice(n);
+});
+
+// Audio
+var audioCtx=null;
 function getAudio(){
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   if(audioCtx.state==='suspended') audioCtx.resume();
   return audioCtx;
 }
 function playRollSound(){
-  const ctx=getAudio(),now=ctx.currentTime;
-  for(let i=0;i<5;i++){
-    const o=ctx.createOscillator(),g=ctx.createGain();
+  var ctx=getAudio(),now=ctx.currentTime;
+  for(var i=0;i<5;i++){
+    var o=ctx.createOscillator(),g=ctx.createGain();
     o.connect(g);g.connect(ctx.destination);
     o.type=i%2===0?'sawtooth':'triangle';
-    const t=now+i*0.055;
+    var t=now+i*0.055;
     o.frequency.setValueAtTime(90+Math.random()*70,t);
     o.frequency.exponentialRampToValueAtTime(30,t+0.09);
     g.gain.setValueAtTime(0.06,t);g.gain.linearRampToValueAtTime(0,t+0.09);
@@ -260,8 +327,8 @@ function playRollSound(){
   }
 }
 function playBounceSound(intensity){
-  const ctx=getAudio(),now=ctx.currentTime;
-  const o=ctx.createOscillator(),g=ctx.createGain();
+  var ctx=getAudio(),now=ctx.currentTime;
+  var o=ctx.createOscillator(),g=ctx.createGain();
   o.connect(g);g.connect(ctx.destination);o.type='sine';
   o.frequency.setValueAtTime(160+intensity*100,now);
   o.frequency.exponentialRampToValueAtTime(50,now+0.13);
@@ -270,9 +337,9 @@ function playBounceSound(intensity){
   o.start(now);o.stop(now+0.15);
 }
 function playLandSound(total){
-  const ctx=getAudio(),now=ctx.currentTime;
-  const freq=180+(total/12)*380;
-  const o=ctx.createOscillator(),g=ctx.createGain();
+  var ctx=getAudio(),now=ctx.currentTime;
+  var freq=180+(total/(numDice*6))*380;
+  var o=ctx.createOscillator(),g=ctx.createGain();
   o.connect(g);g.connect(ctx.destination);o.type='sine';
   o.frequency.setValueAtTime(freq,now);
   o.frequency.exponentialRampToValueAtTime(freq*1.15,now+0.06);
@@ -281,80 +348,67 @@ function playLandSound(total){
   o.start(now);o.stop(now+0.38);
 }
 
-// ════════════════════════════════════════════════════════════
-// RESULT HIGHLIGHT
-// ════════════════════════════════════════════════════════════
 function makeHighlightTexture() {
-  const S = 256;
-  const c = document.createElement('canvas'); c.width=S; c.height=S;
-  const ctx = c.getContext('2d');
-  const g = ctx.createRadialGradient(S/2,S/2,0,S/2,S/2,S/2);
-  g.addColorStop(0,   'rgba(255,200,80,0.55)');
-  g.addColorStop(0.45,'rgba(255,160,40,0.30)');
-  g.addColorStop(0.75,'rgba(255,120,20,0.10)');
-  g.addColorStop(1,   'rgba(255,100,0,0)');
+  var S=256, c=document.createElement('canvas');
+  c.width=S; c.height=S;
+  var ctx=c.getContext('2d');
+  var g=ctx.createRadialGradient(S/2,S/2,0,S/2,S/2,S/2);
+  g.addColorStop(0,'rgba(58,184,184,0.55)');
+  g.addColorStop(0.45,'rgba(42,144,144,0.30)');
+  g.addColorStop(0.75,'rgba(20,100,100,0.10)');
+  g.addColorStop(1,'rgba(0,80,80,0)');
   ctx.fillStyle=g; ctx.fillRect(0,0,S,S);
-  const t = new THREE.CanvasTexture(c); t.needsUpdate=true; return t;
+  var t=new THREE.CanvasTexture(c); t.needsUpdate=true; return t;
 }
 function clearHighlights(){
-  dice.forEach(d=>{
-    if(d.highlight){ d.group.remove(d.highlight); d.highlight=null; }
-  });
+  dice.forEach(function(d){ if(d.highlight){ d.group.remove(d.highlight); d.highlight=null; } });
 }
 function highlightDie(d) {
-  const geo = new THREE.PlaneGeometry(1.0, 1.0);
-  const mat = new THREE.MeshBasicMaterial({
-    map: makeHighlightTexture(), transparent: true, opacity: 0,
-    depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+  var mat = new THREE.MeshBasicMaterial({
+    map: makeHighlightTexture(), transparent:true, opacity:0,
+    depthWrite:false, side:THREE.DoubleSide, blending:THREE.AdditiveBlending
   });
-  d.highlight = new THREE.Mesh(geo, mat);
-  d.highlight.position.set(0, 0.502, 0);
-  d.highlight.rotation.x = -Math.PI / 2;
+  d.highlight = new THREE.Mesh(new THREE.PlaneGeometry(1.0,1.0), mat);
+  d.highlight.position.set(0,0.502,0);
+  d.highlight.rotation.x = -Math.PI/2;
   d.group.add(d.highlight);
-
-  const start = performance.now();
+  var start=performance.now();
   function fadeIn() {
-    if (!d.highlight) return;
-    const t = Math.min((performance.now()-start)/400, 1);
-    d.highlight.material.opacity = t;
-    if (t < 1) requestAnimationFrame(fadeIn);
+    if(!d.highlight) return;
+    var t=Math.min((performance.now()-start)/400,1);
+    d.highlight.material.opacity=t;
+    if(t<1) requestAnimationFrame(fadeIn);
   }
   fadeIn();
 }
 
-// ════════════════════════════════════════════════════════════
-// ROLL
-// ════════════════════════════════════════════════════════════
 function startRoll(){
   if(isRolling) return;
-  isRolling=true;
-  hasResult=false;
+  isRolling=true; hasResult=false;
   document.getElementById('rollBtn').disabled=true;
   document.getElementById('resultLabel').textContent='Rolling…';
   document.getElementById('resultValue').classList.remove('show');
   document.getElementById('resultDetail').classList.remove('show');
-
+  renderBadges(null);
   clearHighlights();
-  finalValues = dice.map(()=>Math.floor(Math.random()*6)+1);
+  finalValues = dice.map(function(){ return Math.floor(Math.random()*6)+1; });
   playRollSound();
+  camTargetY=4; camTargetZ=6; camLookY=0;
 
-  camTargetY = 4; camTargetZ = 6; camLookY = 0;
-
-  dice.forEach((d,i)=>{
-    d.finalValue = finalValues[i];
-    d.physY = 3.6 + i*0.22;
-    d.velY = -0.055 - Math.random()*0.012;
-    d.velX = (Math.random()-.5)*.035;
-    d.velZ = (Math.random()-.5)*.035;
-    d.angX = (Math.random()-.5)*.36;
-    d.angY = (Math.random()-.5)*.36;
-    d.angZ = (Math.random()-.5)*.24;
-    d.bounceCount = 0;
-    d.phase = 'falling';
-    d.accumEuler.set(Math.random()*Math.PI*2, Math.random()*Math.PI*2, Math.random()*Math.PI*2);
+  dice.forEach(function(d,i){
+    d.finalValue=finalValues[i];
+    d.physY=3.6+i*0.22;
+    d.velY=-0.055-Math.random()*0.012;
+    d.velX=(Math.random()-.5)*.035;
+    d.velZ=(Math.random()-.5)*.035;
+    d.angX=(Math.random()-.5)*.36;
+    d.angY=(Math.random()-.5)*.36;
+    d.angZ=(Math.random()-.5)*.24;
+    d.bounceCount=0; d.phase='falling';
+    d.accumEuler.set(Math.random()*Math.PI*2,Math.random()*Math.PI*2,Math.random()*Math.PI*2);
     d.group.rotation.copy(d.accumEuler);
-    d.group.position.set(d.startX, d.physY, 0);
-    d.targetQuat = d6UpQuat(d.finalValue);
+    d.group.position.set(d.startX,d.physY,0);
+    d.targetQuat=d6UpQuat(d.finalValue);
   });
 }
 
@@ -363,87 +417,83 @@ function updateDie(d){
     d.velY-=0.009; d.physY+=d.velY;
     d.accumEuler.x+=d.angX; d.accumEuler.y+=d.angY; d.accumEuler.z+=d.angZ;
     d.group.rotation.copy(d.accumEuler);
-    d.group.position.x = Math.max(d.startX-.35,Math.min(d.startX+.35, d.group.position.x+d.velX));
-    d.group.position.z = Math.max(-.45,Math.min(.45, d.group.position.z+d.velZ));
-    d.group.position.y = d.physY;
-
+    d.group.position.x=Math.max(d.startX-.35,Math.min(d.startX+.35,d.group.position.x+d.velX));
+    d.group.position.z=Math.max(-.45,Math.min(.45,d.group.position.z+d.velZ));
+    d.group.position.y=d.physY;
     if(d.physY<=FLOOR_Y){
       d.physY=FLOOR_Y; d.group.position.y=FLOOR_Y;
-      const impact=Math.abs(d.velY);
-      playBounceSound(Math.min(impact*5.5,1));
+      playBounceSound(Math.min(Math.abs(d.velY)*5.5,1));
       d.bounceCount++;
       if(d.bounceCount>=3){
         d.phase='settling'; d.settleStart=performance.now();
       } else {
-        const rest=0.40-d.bounceCount*0.12;
+        var rest=0.40-d.bounceCount*0.12;
         d.velY=Math.abs(d.velY)*rest;
         d.velX*=0.5; d.velZ*=0.5;
         d.angX*=0.45; d.angY*=0.45; d.angZ*=0.45;
       }
     }
   } else if(d.phase==='settling'){
-    const elapsed=(performance.now()-d.settleStart)/1000;
-    d.group.quaternion.slerp(d.targetQuat, 0.09);
-    const wobble=Math.sin(elapsed*22)*0.016*Math.max(0,1-elapsed*1.5);
+    var elapsed=(performance.now()-d.settleStart)/1000;
+    d.group.quaternion.slerp(d.targetQuat,0.09);
+    var wobble=Math.sin(elapsed*22)*0.016*Math.max(0,1-elapsed*1.5);
     d.group.position.y=FLOOR_Y+Math.abs(wobble);
-    d.group.position.x += (d.startX - d.group.position.x) * 0.12;
+    d.group.position.x+=(d.startX-d.group.position.x)*0.12;
     d.group.position.z*=0.88;
-
     if(elapsed>1.1){
       d.phase='idle';
       d.group.quaternion.copy(d.targetQuat);
       d.group.position.set(d.startX,FLOOR_Y,0);
     }
   } else if(d.phase==='idle'){
-    const t=performance.now()*0.0005;
-    d.group.position.y=FLOOR_Y+Math.sin(t + d.startX)*0.01;
+    var t=performance.now()*0.0005;
+    d.group.position.y=FLOOR_Y+Math.sin(t+d.startX)*0.01;
     if(!hasResult){
-      const idleQ=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),0.003);
+      var idleQ=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),0.003);
       d.group.quaternion.multiply(idleQ);
     }
   }
 }
 
 function onLanded(){
-  const total = finalValues[0] + finalValues[1];
+  var total=finalValues.reduce(function(s,v){return s+v;},0);
   playLandSound(total);
   hasResult=true;
-  camTargetY = 6.5; camTargetZ = 3.8; camLookY = 0.3;
+  camTargetY=6.5; camTargetZ=3.8; camLookY=0.3;
   dice.forEach(highlightDie);
+  renderBadges(finalValues);
 
-  document.getElementById('resultLabel').textContent='Result';
-  const rv=document.getElementById('resultValue');
+  document.getElementById('resultLabel').textContent = numDice===1 ? 'Result' : 'Total';
+  var rv=document.getElementById('resultValue');
   rv.textContent=total; rv.classList.add('show');
-  const detail=document.getElementById('resultDetail');
-  detail.textContent=`${finalValues[0]} + ${finalValues[1]} = ${total}`;
+  var detail=document.getElementById('resultDetail');
+  if(numDice===1){
+    detail.textContent='Die A = '+finalValues[0];
+  } else {
+    var parts=finalValues.map(function(v,i){ return LETTERS[i]+':'+v; }).join('  ');
+    detail.textContent=parts+'  =  '+total;
+  }
   detail.classList.add('show');
   document.getElementById('rollBtn').disabled=false;
   isRolling=false;
 }
 
-// ════════════════════════════════════════════════════════════
-// ANIMATION LOOP
-// ════════════════════════════════════════════════════════════
 function animate(){
   requestAnimationFrame(animate);
-
-  camCurrentY += (camTargetY - camCurrentY) * 0.06;
-  camCurrentZ += (camTargetZ - camCurrentZ) * 0.06;
-  camCurrentLookY += (camLookY - camCurrentLookY) * 0.06;
-  camera.position.set(0, camCurrentY, camCurrentZ);
-  camera.lookAt(0, camCurrentLookY, 0);
-
+  camCurrentY+=(camTargetY-camCurrentY)*0.06;
+  camCurrentZ+=(camTargetZ-camCurrentZ)*0.06;
+  camCurrentLookY+=(camLookY-camCurrentLookY)*0.06;
+  camera.position.set(0,camCurrentY,camCurrentZ);
+  camera.lookAt(0,camCurrentLookY,0);
   dice.forEach(updateDie);
-
-  if(isRolling && dice.every(d=>d.phase==='idle')) onLanded();
-
+  if(isRolling && dice.every(function(d){return d.phase==='idle';})) onLanded();
   renderer.render(scene,camera);
 }
 
-canvas.addEventListener('click',()=>{if(!isRolling)startRoll();});
-document.getElementById('rollBtn').addEventListener('click',()=>{if(!isRolling)startRoll();});
+canvas.addEventListener('click',function(){ if(!isRolling) startRoll(); });
+document.getElementById('rollBtn').addEventListener('click',function(){ if(!isRolling) startRoll(); });
 
-spawnDicePair();
+spawnDice(1);
 animate();
 </script>
 </body>
