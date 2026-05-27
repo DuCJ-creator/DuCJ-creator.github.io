@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Moon Blocks</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+    :root {
+      --cream: #fff6d7;
+      --muted: rgba(255, 246, 215, 0.66);
+      --gold: #eabf6a;
+      --gold-2: #ffd98a;
+      --ink: #070707;
+      --good: #78f2bd;
+      --wait: #ffd36b;
+      --no: #ff8f8f;
+      --wood-a: #d59152;
+      --wood-b: #a55328;
+      --wood-c: #55200d;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--cream);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 18% 10%, rgba(255, 216, 138, 0.18), transparent 26%),
+        radial-gradient(circle at 78% 14%, rgba(119, 92, 255, 0.14), transparent 30%),
+        radial-gradient(circle at 52% 92%, rgba(201, 105, 43, 0.22), transparent 34%),
+        linear-gradient(145deg, #120b08 0%, #080808 48%, #030303 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at center, black, transparent 78%);
+    }
+
+    button, textarea { font: inherit; }
+
+    .page {
+      min-height: 100vh;
+      padding: 28px 16px;
+      display: grid;
+      place-items: center;
+    }
+
+    .app {
+      width: min(1180px, 100%);
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+      gap: 22px;
+    }
+
+    .glass {
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      border-radius: 34px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.026)),
+        rgba(13, 13, 14, 0.76);
+      box-shadow:
+        0 34px 90px rgba(0, 0, 0, 0.52),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(18px);
+      overflow: hidden;
+    }
+
+    .glass::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(120deg, rgba(255,255,255,0.085), transparent 30%, transparent 70%, rgba(234,191,106,0.065)),
+        radial-gradient(circle at 26% 10%, rgba(255,217,138,0.12), transparent 28%);
+    }
+
+    .main { padding: clamp(22px, 3vw, 36px); }
+    .side { padding: 26px; }
+
+    .topbar {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 14px; }
+
+    .mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 17px;
+      display: grid;
+      place-items: center;
+      color: #2e1606;
+      font-family: Cinzel, serif;
+      font-weight: 900;
+      font-size: 1.35rem;
+      background: linear-gradient(145deg, #fff2bd, #eabf6a 56%, #9a571d);
+      box-shadow: 0 16px 36px rgba(234, 191, 106, 0.23), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: Cinzel, serif;
+      font-size: clamp(2.1rem, 5vw, 4.7rem);
+      line-height: 0.94;
+      letter-spacing: -0.07em;
+      background: linear-gradient(180deg, #fff5ca, #eabf6a 52%, #a36324);
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .subtitle { margin-top: 6px; color: var(--muted); font-size: 0.95rem; letter-spacing: 0.03em; }
+
+    .pill {
+      border: 1px solid rgba(234, 191, 106, 0.24);
+      background: rgba(234, 191, 106, 0.08);
+      color: rgba(255, 246, 215, 0.82);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .casting-table {
+      position: relative;
+      z-index: 1;
+      height: clamp(350px, 48vw, 480px);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background:
+        radial-gradient(circle at 50% 34%, rgba(255, 232, 164, 0.12), transparent 30%),
+        radial-gradient(circle at 50% 78%, rgba(0, 0, 0, 0.55), transparent 40%),
+        linear-gradient(135deg, rgba(45, 34, 30, 0.84), rgba(11, 11, 12, 0.92));
+      overflow: hidden;
+      box-shadow:
+        inset 0 0 88px rgba(0, 0, 0, 0.42),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      contain: layout paint;
+    }
+
+    .casting-table::before {
+      content: '';
+      position: absolute;
+      inset: 22px;
+      border-radius: 26px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: radial-gradient(circle at center, black, transparent 78%);
+      opacity: 0.72;
+    }
+
+    .casting-table::after {
+      content: '';
+      position: absolute;
+      left: 14%;
+      right: 14%;
+      bottom: 38px;
+      height: 74px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.56), transparent 68%);
+      filter: blur(5px);
+    }
+
+    .block-stage {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      transform: translateZ(0);
+    }
+
+    .moon-block {
+      --x: 0px;
+      --y: 0px;
+      --r: 0deg;
+      --scale: 1;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: clamp(122px, 16vw, 168px);
+      height: clamp(88px, 11.5vw, 120px);
+      transform: translate3d(calc(-50% + var(--x)), calc(-50% + var(--y)), 0) rotate(var(--r)) scale(var(--scale));
+      transition: transform 760ms cubic-bezier(0.17, 0.84, 0.22, 1), filter 420ms ease;
+      filter: drop-shadow(0 24px 22px rgba(0, 0, 0, 0.5));
+      will-change: transform;
+      contain: layout paint style;
+    }
+
+    .moon-block.casting {
+      transition: none;
+      filter: drop-shadow(0 34px 26px rgba(0, 0, 0, 0.38));
+    }
+
+    .block-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      transform: translateZ(0);
+    }
+
+    .wood-line { opacity: 0.23; }
+    .rim-light { opacity: 0.78; }
+    .rim-dark { opacity: 0.38; }
+
+    .moon-block[data-face="flat"] .curved-form,
+    .moon-block[data-face="curved"] .flat-form { display: none; }
+
+    .face-badge {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 900;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .moon-block[data-face="flat"] .face-badge {
+      color: rgba(255, 248, 225, 0.82);
+      border: 1px solid rgba(255, 248, 225, 0.2);
+      background: rgba(255, 248, 225, 0.06);
+    }
+
+    .moon-block[data-face="curved"] .face-badge {
+      color: rgba(255, 222, 154, 0.38);
+      border: 1px solid rgba(255, 222, 154, 0.1);
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    .form {
+      position: relative;
+      z-index: 2;
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+    }
+
+    .question {
+      min-height: 58px;
+      resize: vertical;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      outline: none;
+      color: var(--cream);
+      background: rgba(0, 0, 0, 0.28);
+      padding: 15px 16px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .question:focus {
+      border-color: rgba(234, 191, 106, 0.55);
+      box-shadow: 0 0 0 4px rgba(234, 191, 106, 0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .question::placeholder { color: rgba(255, 246, 215, 0.42); }
+
+    .cast-btn, .ghost-btn {
+      border: 0;
+      cursor: pointer;
+      border-radius: 20px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      transition: transform 150ms ease, opacity 150ms ease, filter 150ms ease;
+    }
+
+    .cast-btn {
+      min-width: 140px;
+      color: #2d1607;
+      background: linear-gradient(180deg, #fff2bd, #eabf6a 54%, #a66324);
+      box-shadow: 0 22px 42px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.68);
+    }
+
+    .ghost-btn {
+      color: rgba(255,246,215,0.78);
+      background: rgba(255,255,255,0.075);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 10px 12px;
+      font-size: 0.82rem;
+    }
+
+    .cast-btn:hover, .ghost-btn:hover { transform: translateY(-1px); filter: brightness(1.04); }
+    .cast-btn:active, .ghost-btn:active { transform: translateY(1px) scale(0.99); }
+    .cast-btn:disabled { cursor: wait; opacity: 0.58; transform: none; filter: none; }
+
+    .result-card {
+      position: relative;
+      z-index: 2;
+      margin-top: 18px;
+      border-radius: 26px;
+      min-height: 154px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      overflow: hidden;
+    }
+
+    .result-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+    .result-label { margin: 0; color: rgba(255,246,215,0.56); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; }
+
+    .result-name {
+      margin: 6px 0 0;
+      font-family: Cinzel, serif;
+      font-size: clamp(2.2rem, 5.5vw, 4rem);
+      line-height: 0.95;
+      font-weight: 900;
+      letter-spacing: -0.06em;
+      background: linear-gradient(180deg, #fff5ca, #eabf6a 58%, #9e5e21);
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .result-chip {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      padding: 8px 11px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,246,215,0.68);
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .faces { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; color: rgba(255,246,215,0.7); }
+    .face-token { border-radius: 999px; padding: 8px 10px; background: rgba(255,255,255,0.065); border: 1px solid rgba(255,255,255,0.08); font-size: 0.88rem; }
+    .meaning { margin-top: 12px; color: rgba(255,246,215,0.72); line-height: 1.68; }
+
+    .section-title {
+      position: relative;
+      z-index: 1;
+      margin: 0 0 14px;
+      font-family: Cinzel, serif;
+      color: #ffe5a3;
+      font-size: 1.25rem;
+      letter-spacing: -0.03em;
+    }
+
+    .rules, .history { position: relative; z-index: 1; display: grid; gap: 11px; }
+    .rule, .history-item { border-radius: 20px; padding: 14px; background: rgba(0,0,0,0.24); border: 1px solid rgba(255,255,255,0.08); }
+    .rule strong, .history-item strong { display: block; color: #fff0bc; font-size: 1rem; margin-bottom: 5px; }
+    .rule span, .history-item span, .history-item p { color: rgba(255,246,215,0.62); line-height: 1.58; font-size: 0.92rem; }
+
+    .history-head { position: relative; z-index: 1; margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .history-head .section-title { margin: 0; }
+    .history { max-height: 250px; overflow: auto; padding-right: 4px; }
+    .history-item p { margin: 6px 0 0; word-break: break-word; }
+
+    .note { position: relative; z-index: 1; margin-top: 18px; color: rgba(255,246,215,0.48); line-height: 1.62; font-size: 0.86rem; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .moon-block, .cast-btn, .ghost-btn { transition: none !important; }
+    }
+
+    @media (max-width: 920px) {
+      .app { grid-template-columns: 1fr; }
+      .topbar { align-items: flex-start; }
+    }
+
+    @media (max-width: 560px) {
+      .page { padding: 14px; }
+      .main, .side { padding: 20px; border-radius: 26px; }
+      .topbar { flex-direction: column; }
+      .form { grid-template-columns: 1fr; }
+      .cast-btn { min-height: 56px; }
+      .casting-table { height: 370px; }
+      .moon-block { width: 116px; height: 84px; }
+      .result-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="app">
+      <section class="glass main">
+        <div class="topbar">
+          <div class="brand">
+            <div class="mark">M</div>
+            <div>
+              <h1>Moon Blocks</h1>
+              <div class="subtitle">A modern online cast for poe divination</div>
+            </div>
+          </div>
+          <div class="pill">Smooth cast · visual-first result</div>
+        </div>
+
+        <div class="casting-table" aria-label="Moon block casting area">
+          <div class="block-stage">
+            <div id="blockA" class="moon-block" data-face="flat" aria-label="First moon block: flat side">
+              <svg class="block-svg" viewBox="0 0 180 120" aria-hidden="true">
+                <defs>
+                  <linearGradient id="flatWoodA" x1="18" y1="12" x2="150" y2="106" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stop-color="#e3a36a"/>
+                    <stop offset="0.42" stop-color="#b85f2f"/>
+                    <stop offset="1" stop-color="#5a230e"/>
+                  </linearGradient>
+                  <radialGradient id="curvedWoodA" cx="44%" cy="38%" r="78%">
+                    <stop offset="0" stop-color="#d99152"/>
+                    <stop offset="0.5" stop-color="#913a18"/>
+                    <stop offset="1" stop-color="#3d1306"/>
+                  </radialGradient>
+                </defs>
+                <g class="flat-form">
+                  <path d="M18 74 C30 36 69 12 111 16 C150 20 171 48 160 79 C148 112 104 119 61 107 C29 98 10 91 18 74Z" fill="url(#flatWoodA)"/>
+                  <path class="rim-light" d="M24 74 C36 42 70 22 109 25 C142 28 159 51 151 76 C142 103 104 109 64 98 C36 90 18 86 24 74Z" fill="none" stroke="#ffd895" stroke-width="2"/>
+                  <path class="rim-dark" d="M18 74 C30 36 69 12 111 16 C150 20 171 48 160 79 C148 112 104 119 61 107 C29 98 10 91 18 74Z" fill="none" stroke="#2d0d03" stroke-width="3"/>
+                  <path d="M40 40 C75 26 119 26 147 51" fill="none" stroke="rgba(255,230,177,.16)" stroke-width="10" stroke-linecap="round"/>
+                  <path class="wood-line" d="M39 37 L129 101M52 28 L147 90M68 22 L158 74M28 55 L101 111M88 18 L166 57" stroke="#461706" stroke-width="2"/>
+                  <path class="wood-line" d="M34 86 C68 68 111 58 154 66M30 75 C67 56 113 48 159 56M41 96 C76 79 111 73 146 81" fill="none" stroke="#fff1c8" stroke-width="1"/>
+                </g>
+                <g class="curved-form">
+                  <path d="M18 74 C30 36 69 12 111 16 C150 20 171 48 160 79 C148 112 104 119 61 107 C29 98 10 91 18 74Z" fill="url(#curvedWoodA)"/>
+                  <path d="M24 75 C34 47 70 29 112 31 C143 33 157 54 149 76 C139 100 101 105 65 95 C39 88 19 84 24 75Z" fill="rgba(255,218,148,.10)"/>
+                  <path d="M19 73 C34 48 70 34 112 37 C145 40 162 57 160 78 C151 50 126 37 89 38 C54 39 31 53 19 73Z" fill="rgba(16,5,2,.28)"/>
+                  <path class="rim-light" d="M22 74 C34 39 70 17 110 20 C146 23 165 49 156 78 C146 107 105 113 63 102 C33 94 15 88 22 74Z" fill="none" stroke="#e8a65b" stroke-width="2"/>
+                  <path class="rim-dark" d="M18 74 C30 36 69 12 111 16 C150 20 171 48 160 79 C148 112 104 119 61 107 C29 98 10 91 18 74Z" fill="none" stroke="#270b03" stroke-width="4"/>
+                  <path class="wood-line" d="M42 38 L131 101M58 29 L148 87M76 23 L160 68M31 58 L105 109" stroke="#371005" stroke-width="2"/>
+                </g>
+              </svg>
+              <div class="face-badge">Flat</div>
+            </div>
+
+            <div id="blockB" class="moon-block" data-face="curved" aria-label="Second moon block: curved side">
+              <svg class="block-svg" viewBox="0 0 180 120" aria-hidden="true">
+                <defs>
+                  <linearGradient id="flatWoodB" x1="18" y1="12" x2="150" y2="106" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stop-color="#e3a36a"/>
+                    <stop offset="0.42" stop-color="#b85f2f"/>
+                    <stop offset="1" stop-color="#5a230e"/>
+                  </linearGradient>
+                  <radialGradient id="curvedWoodB" cx="44%" cy="38%" r="78%">
+                    <stop offset="0" stop-color="#d99152"/>
+                    <stop offset="0.5" stop-color="#913a18"/>
+                    <stop offset="1" stop-color="#3d1306"/>
+                  </radialGradient>
+                </defs>
+                <g class="flat-form">
+                  <path d="M18 74 C30 36 69 12 111 16 C150 20 171 48 160 79 C148 112 104 119 61 107 C29 98 10 91 18 74Z" fill="url(#flatWoodB)"/>
+                  <path class="rim-light" d="M24 74 C36 42 70 22 109 25 C142 28 159 51 151 76 C142 103 104 109 64 98 C36 90 18 86 24 74Z" fill="none" stroke="#ffd895" stroke-width="2"/>
+                  <path class="rim-dark" d="M18 74 C30 36 69 12 111 16 C150 20 171 48 160 79 C148 112 104 119 61 107 C29 98 10 91 18 74Z" fill="none" stroke="#2d0d03" stroke-width="3"/>
+                  <path d="M40 40 C75 26 119 26 147 51" fill="none" stroke="rgba(255,230,177,.16)" stroke-width="10" stroke-linecap="round"/>
+                  <path class="wood-line" d="M39 37 L129 101M52 28 L147 90M68 22 L158 74M28 55 L101 111M88 18 L166 57" stroke="#461706" stroke-width="2"/>
+                  <path class="wood-line" d="M34 86 C68 68 111 58 154 66M30 75 C67 56 113 48 159 56M41 96 C76 79 111 73 146 81" fill="none" stroke="#fff1c8" stroke-width="1"/>
+                </g>
+                <g class="curved-form">
+                  <path d="M18 74 C30 36 69 12 111 16 C150 20 171 48 160 79 C148 112 104 119 61 107 C29 98 10 91 18 74Z" fill="url(#curvedWoodB)"/>
+                  <path d="M24 75 C34 47 70 29 112 31 C143 33 157 54 149 76 C139 100 101 105 65 95 C39 88 19 84 24 75Z" fill="rgba(255,218,148,.10)"/>
+                  <path d="M19 73 C34 48 70 34 112 37 C145 40 162 57 160 78 C151 50 126 37 89 38 C54 39 31 53 19 73Z" fill="rgba(16,5,2,.28)"/>
+                  <path class="rim-light" d="M22 74 C34 39 70 17 110 20 C146 23 165 49 156 78 C146 107 105 113 63 102 C33 94 15 88 22 74Z" fill="none" stroke="#e8a65b" stroke-width="2"/>
+                  <path class="rim-dark" d="M18 74 C30 36 69 12 111 16 C150 20 171 48 160 79 C148 112 104 119 61 107 C29 98 10 91 18 74Z" fill="none" stroke="#270b03" stroke-width="4"/>
+                  <path class="wood-line" d="M42 38 L131 101M58 29 L148 87M76 23 L160 68M31 58 L105 109" stroke="#371005" stroke-width="2"/>
+                </g>
+              </svg>
+              <div class="face-badge">Curved</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form">
+          <textarea id="question" class="question" rows="2" placeholder="Type your question, e.g. Is this the right time to move forward?"></textarea>
+          <button id="castBtn" class="cast-btn" type="button">CAST</button>
+        </div>
+
+        <div class="result-card" aria-live="polite">
+          <div class="result-row">
+            <div>
+              <p class="result-label">Result</p>
+              <p id="resultName" class="result-name">Ready</p>
+            </div>
+            <div id="resultChip" class="result-chip">Waiting</div>
+          </div>
+          <div id="faces" class="faces">
+            <span class="face-token">Block 1: Flat</span>
+            <span class="face-token">Block 2: Curved</span>
+          </div>
+          <div id="resultMeaning" class="meaning">Enter a question and cast the moon blocks. The blocks land visually first; the result is then calculated from the visible faces.</div>
+        </div>
+      </section>
+
+      <aside class="glass side">
+        <h2 class="section-title">How to read it</h2>
+        <div class="rules">
+          <div class="rule">
+            <strong>Holy Answer · One flat + one curved</strong>
+            <span>A positive answer. Traditionally read as yes, permitted, blessed, or suitable to proceed.</span>
+          </div>
+          <div class="rule">
+            <strong>Laughing Answer · Two flat sides</strong>
+            <span>The question may be unclear, premature, or not ready to be answered. Rephrase and ask again later.</span>
+          </div>
+          <div class="rule">
+            <strong>Negative Answer · Two curved sides</strong>
+            <span>A negative answer. Traditionally read as no, not approved, or not the right direction for now.</span>
+          </div>
+        </div>
+
+        <div class="history-head">
+          <h2 class="section-title">History</h2>
+          <button id="clearBtn" class="ghost-btn" type="button">Clear</button>
+        </div>
+        <div id="history" class="history"></div>
+
+        <p class="note">
+          Smoothness principle: the animation uses a single requestAnimationFrame loop and GPU-friendly translate3d transforms. Accuracy principle: the app lands the visible blocks first, reads their <code>data-face</code> values, and only then prints the result.
+        </p>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const blockA = document.getElementById('blockA');
+    const blockB = document.getElementById('blockB');
+    const castBtn = document.getElementById('castBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const questionEl = document.getElementById('question');
+    const resultName = document.getElementById('resultName');
+    const resultChip = document.getElementById('resultChip');
+    const resultMeaning = document.getElementById('resultMeaning');
+    const facesEl = document.getElementById('faces');
+    const historyEl = document.getElementById('history');
+
+    const FACE = Object.freeze({ FLAT: 'flat', CURVED: 'curved' });
+    const labels = Object.freeze({ flat: 'Flat', curved: 'Curved' });
+
+    const meanings = Object.freeze({
+      holy: {
+        name: 'Holy Answer', chip: 'Yes / Approved', tone: 'good',
+        meaning: 'One flat side and one curved side. Traditionally this means yes, approved, blessed, or suitable to proceed.'
+      },
+      laughing: {
+        name: 'Laughing Answer', chip: 'Unclear / Ask Again', tone: 'wait',
+        meaning: 'Two flat sides. Traditionally this means the question is unclear, premature, or not ready to be answered.'
+      },
+      negative: {
+        name: 'Negative Answer', chip: 'No / Not Now', tone: 'no',
+        meaning: 'Two curved sides. Traditionally this means no, not approved, or not the right direction for now.'
+      }
+    });
+
+    let isCasting = false;
+    let audioContext = null;
+    let history = [];
+    let activeAnimation = null;
+
+    function cryptoRandomInt(max) {
+      const values = new Uint32Array(1);
+      window.crypto.getRandomValues(values);
+      return values[0] % max;
+    }
+
+    function randomBetween(min, max) {
+      return min + cryptoRandomInt(max - min + 1);
+    }
+
+    function chooseFaces() {
+      const states = [
+        [FACE.FLAT, FACE.CURVED],
+        [FACE.CURVED, FACE.FLAT],
+        [FACE.FLAT, FACE.FLAT],
+        [FACE.CURVED, FACE.CURVED]
+      ];
+      return states[cryptoRandomInt(states.length)];
+    }
+
+    function judgeFromVisibleBlocks() {
+      const faceA = blockA.dataset.face;
+      const faceB = blockB.dataset.face;
+      if (faceA !== faceB) return 'holy';
+      if (faceA === FACE.FLAT && faceB === FACE.FLAT) return 'laughing';
+      return 'negative';
+    }
+
+    function getAudioContext() {
+      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      return audioContext;
+    }
+
+    function playTone({ frequency, duration, type = 'sine', volume = 0.12, delay = 0 }) {
+      const ctx = getAudioContext();
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const start = ctx.currentTime + delay;
+      const end = start + duration;
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(frequency, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(volume, start + 0.014);
+      gain.gain.exponentialRampToValueAtTime(0.0001, end);
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+      oscillator.start(start);
+      oscillator.stop(end + 0.03);
+    }
+
+    function playCastSound() {
+      [190, 250, 215, 295, 238, 320, 260].forEach((frequency, index) => {
+        playTone({ frequency, duration: 0.045, type: 'square', volume: 0.038, delay: index * 0.055 });
+      });
+    }
+
+    function playResultSound(tone) {
+      if (tone === 'good') {
+        playTone({ frequency: 523.25, duration: 0.12, type: 'triangle', volume: 0.13, delay: 0 });
+        playTone({ frequency: 659.25, duration: 0.17, type: 'triangle', volume: 0.12, delay: 0.1 });
+        playTone({ frequency: 783.99, duration: 0.24, type: 'sine', volume: 0.09, delay: 0.24 });
+      } else if (tone === 'wait') {
+        playTone({ frequency: 392, duration: 0.1, type: 'triangle', volume: 0.1, delay: 0 });
+        playTone({ frequency: 392, duration: 0.1, type: 'triangle', volume: 0.1, delay: 0.17 });
+      } else {
+        playTone({ frequency: 392, duration: 0.13, type: 'triangle', volume: 0.12, delay: 0 });
+        playTone({ frequency: 293.66, duration: 0.18, type: 'triangle', volume: 0.11, delay: 0.12 });
+        playTone({ frequency: 220, duration: 0.24, type: 'sine', volume: 0.085, delay: 0.28 });
+      }
+    }
+
+    function setBlockPosition(block, options) {
+      block.style.setProperty('--x', `${options.x}px`);
+      block.style.setProperty('--y', `${options.y}px`);
+      block.style.setProperty('--r', `${options.r}deg`);
+      block.style.setProperty('--scale', `${options.scale ?? 1}`);
+    }
+
+    function updateFaceBadges() {
+      [blockA, blockB].forEach(block => {
+        const badge = block.querySelector('.face-badge');
+        badge.textContent = labels[block.dataset.face];
+        block.setAttribute('aria-label', `${block === blockA ? 'First' : 'Second'} moon block: ${labels[block.dataset.face]} side`);
+      });
+    }
+
+    function landingPose(side) {
+      const left = side === 'left';
+      return {
+        x: left ? randomBetween(-132, -74) : randomBetween(74, 132),
+        y: randomBetween(-26, 30),
+        r: left ? randomBetween(-33, -10) : randomBetween(10, 33),
+        scale: 1 + randomBetween(-3, 4) / 100
+      };
+    }
+
+    function resetIntroPose() {
+      blockA.dataset.face = FACE.FLAT;
+      blockB.dataset.face = FACE.CURVED;
+      setBlockPosition(blockA, { x: -112, y: 0, r: -18, scale: 1 });
+      setBlockPosition(blockB, { x: 112, y: 0, r: 18, scale: 1 });
+      updateFaceBadges();
+    }
+
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function runSmoothCast(finalFaceA, finalFaceB, onLanded) {
+      if (activeAnimation) cancelAnimationFrame(activeAnimation);
+
+      blockA.classList.add('casting');
+      blockB.classList.add('casting');
+
+      const duration = 1320;
+      const start = performance.now();
+      const finalA = landingPose('left');
+      const finalB = landingPose('right');
+      let facesLocked = false;
+
+      function frame(now) {
+        const elapsed = now - start;
+        const t = Math.min(elapsed / duration, 1);
+        const settle = easeOutCubic(t);
+        const shake = 1 - settle;
+
+        if (!facesLocked && t > 0.72) {
+          blockA.dataset.face = finalFaceA;
+          blockB.dataset.face = finalFaceB;
+          updateFaceBadges();
+          facesLocked = true;
+        }
+
+        const spinA = Math.sin(t * Math.PI * 12) * 34 * shake;
+        const spinB = Math.cos(t * Math.PI * 11) * 34 * shake;
+        const hop = Math.sin(t * Math.PI * 5) * 54 * shake;
+
+        setBlockPosition(blockA, {
+          x: finalA.x + Math.sin(t * Math.PI * 9) * 58 * shake,
+          y: finalA.y - Math.abs(hop) + Math.cos(t * Math.PI * 7) * 16 * shake,
+          r: finalA.r + spinA + 720 * shake,
+          scale: finalA.scale + 0.12 * shake
+        });
+
+        setBlockPosition(blockB, {
+          x: finalB.x + Math.cos(t * Math.PI * 9) * 58 * shake,
+          y: finalB.y - Math.abs(hop * 0.92) + Math.sin(t * Math.PI * 7) * 16 * shake,
+          r: finalB.r + spinB - 720 * shake,
+          scale: finalB.scale + 0.12 * shake
+        });
+
+        if (t < 1) {
+          activeAnimation = requestAnimationFrame(frame);
+        } else {
+          blockA.dataset.face = finalFaceA;
+          blockB.dataset.face = finalFaceB;
+          updateFaceBadges();
+          setBlockPosition(blockA, finalA);
+          setBlockPosition(blockB, finalB);
+          blockA.classList.remove('casting');
+          blockB.classList.remove('casting');
+          activeAnimation = null;
+          requestAnimationFrame(() => onLanded());
+        }
+      }
+
+      activeAnimation = requestAnimationFrame(frame);
+    }
+
+    function renderPending() {
+      resultName.textContent = 'Casting';
+      resultChip.textContent = 'Landing...';
+      resultChip.style.color = 'rgba(255,246,215,0.68)';
+      facesEl.innerHTML = '<span class="face-token">Waiting for the blocks to land</span>';
+      resultMeaning.textContent = 'The blocks are moving smoothly. The app will read the visible faces after they land.';
+    }
+
+    function renderResult(resultKey) {
+      const result = meanings[resultKey];
+      const faceA = blockA.dataset.face;
+      const faceB = blockB.dataset.face;
+      resultName.textContent = result.name;
+      resultChip.textContent = result.chip;
+      resultChip.style.color = result.tone === 'good' ? 'var(--good)' : result.tone === 'wait' ? 'var(--wait)' : 'var(--no)';
+      facesEl.innerHTML = `
+        <span class="face-token">Block 1: ${labels[faceA]}</span>
+        <span class="face-token">Block 2: ${labels[faceB]}</span>
+      `;
+      resultMeaning.textContent = result.meaning;
+      playResultSound(result.tone);
+    }
+
+    function escapeHtml(value) {
+      return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+    }
+
+    function addHistory(resultKey) {
+      const result = meanings[resultKey];
+      const faceA = blockA.dataset.face;
+      const faceB = blockB.dataset.face;
+      const question = questionEl.value.trim() || 'No question entered';
+      const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      history.unshift({ name: result.name, chip: result.chip, faces: `${labels[faceA]} / ${labels[faceB]}`, question, time });
+      history = history.slice(0, 12);
+      renderHistory();
+    }
+
+    function renderHistory() {
+      if (history.length === 0) {
+        historyEl.innerHTML = `
+          <div class="history-item">
+            <strong>No casts yet</strong>
+            <span>Your latest 12 casts will appear here.</span>
+          </div>
+        `;
+        return;
+      }
+      historyEl.innerHTML = history.map(item => `
+        <div class="history-item">
+          <strong>${item.name}</strong>
+          <span>${item.chip} · ${item.faces} · ${item.time}</span>
+          <p>${escapeHtml(item.question)}</p>
+        </div>
+      `).join('');
+    }
+
+    function cast() {
+      if (isCasting) return;
+      isCasting = true;
+      castBtn.disabled = true;
+      renderPending();
+      playCastSound();
+
+      const [faceA, faceB] = chooseFaces();
+
+      runSmoothCast(faceA, faceB, () => {
+        const resultKey = judgeFromVisibleBlocks();
+        renderResult(resultKey);
+        addHistory(resultKey);
+        isCasting = false;
+        castBtn.disabled = false;
+      });
+    }
+
+    castBtn.addEventListener('click', cast);
+    clearBtn.addEventListener('click', () => { history = []; renderHistory(); });
+
+    document.addEventListener('keydown', event => {
+      const isTyping = document.activeElement === questionEl;
+      if (!isTyping && (event.key === ' ' || event.key === 'Enter')) {
+        event.preventDefault();
+        cast();
+      }
+    });
+
+    resetIntroPose();
+    renderHistory();
+  </script>
+</body>
+</html>
