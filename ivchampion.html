@@ -299,7 +299,7 @@
   <div class="pause-box">
     <h2>⏸ Paused</h2>
     <p>Take a breath.<br/>The clock is stopped.</p>
-    <p class="pause-note">⚠ Answering after resume gives no points &amp; resets your streak.</p>
+    <p class="pause-note">⚠ Answering after resume gives no streak bonus &amp; resets your streak.</p>
     <div class="btn-row">
       <button class="cta-btn primary" id="resumeBtn">Resume ▶</button>
       <button class="cta-btn secondary" id="pauseQuitBtn">Quit</button>
@@ -400,9 +400,9 @@ const CSV_BASE     = "https://ducj-creator.github.io/iVocab-Self-Practice/";
 const CSV_LEVELS   = [1,2,3,4,5,6];
 const LABELS       = ['A','B','C','D'];
 
-// Streak scoring: every 5th correct answer in a row → +bonus
-// bonus = streakCount/5 * 10  (so 5→+10, 10→+20, 15→+30, etc.)
-function streakBonus(streak){ return (streak/5)*10; }
+// Streak scoring: every consecutive correct answer adds an increasing bonus
+// 1st→+10, 2nd→+20, 3rd→+30, … (streak * 10). Resets on wrong/timeout/pause.
+function streakBonus(streak){ return streak * 10; }
 
 function getLevelWeights(curLv){
   const w={};
@@ -658,10 +658,11 @@ function handleAnswer(btn,opt){
   // Normal correct
   gameStreak++;
   gameWords++; gameCorrect++; lvWords++;
-  let pts=10;
+  // Base 10 pts + streak bonus that grows by 10 each consecutive answer
+  // streak 1→+10, 2→+20, 3→+30, … (bonus = gameStreak*10)
+  let pts=10+streakBonus(gameStreak);
   if(gameStreak%5===0){
-    pts+=streakBonus(gameStreak);
-    SFX.streak(gameStreak);
+    SFX.streak(gameStreak); // bigger fanfare on milestones
   } else {
     SFX.correct();
     fx('fxCorrect');
