@@ -1,0 +1,263 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  #clock-wrap {
+    position: relative;
+    width: 100%;
+    min-height: 420px;
+    overflow: hidden;
+    background: linear-gradient(160deg, #0f1b3d 0%, #1a1060 40%, #0d2a4a 100%);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    font-family: var(--font-sans, sans-serif);
+  }
+
+  #time-display {
+    font-size: clamp(60px, 14vw, 110px);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    color: #ffffff;
+    text-shadow: 0 0 40px rgba(120,180,255,0.4);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    position: relative;
+    z-index: 2;
+  }
+
+  .time-sep {
+    color: rgba(160, 200, 255, 0.7);
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+
+  #date-display {
+    margin-top: 14px;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #f5c842;
+    text-shadow: 0 0 12px rgba(245, 180, 30, 0.7), 0 0 28px rgba(245, 160, 10, 0.4);
+    position: relative;
+    z-index: 2;
+  }
+
+  #tz-display {
+    margin-top: 8px;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    color: #d4a017;
+    text-shadow: 0 0 10px rgba(220, 160, 20, 0.6), 0 0 22px rgba(200, 130, 0, 0.3);
+    position: relative;
+    z-index: 2;
+  }
+
+  .controls {
+    margin-top: 28px;
+    display: flex;
+    gap: 10px;
+    position: relative;
+    z-index: 2;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .ctrl-btn {
+    background: rgba(245, 185, 30, 0.08);
+    border: 0.5px solid rgba(245, 185, 30, 0.45);
+    color: #f5c842;
+    text-shadow: 0 0 8px rgba(245, 180, 30, 0.8), 0 0 18px rgba(245, 160, 10, 0.4);
+    font-size: 13px;
+    padding: 7px 18px;
+    border-radius: 100px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: background 0.2s, box-shadow 0.2s;
+    font-family: var(--font-sans, sans-serif);
+    box-shadow: 0 0 8px rgba(245, 180, 30, 0.15);
+  }
+
+  .ctrl-btn:hover {
+    background: rgba(245, 185, 30, 0.18);
+    box-shadow: 0 0 16px rgba(245, 180, 30, 0.35);
+  }
+
+  .ctrl-btn.active {
+    background: rgba(245, 185, 30, 0.15);
+    border-color: rgba(245, 185, 30, 0.7);
+    box-shadow: 0 0 14px rgba(245, 180, 30, 0.4);
+  }
+</style>
+
+<div id="clock-wrap">
+  <h2 class="sr-only">Live clock showing current local time</h2>
+  <canvas id="bubble-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;"></canvas>
+
+  <div id="time-display">
+    <span id="hh">--</span><span class="time-sep">:</span><span id="mm">--</span><span class="time-sep">:</span><span id="ss">--</span>
+  </div>
+  <div id="date-display">—</div>
+  <div id="tz-display">—</div>
+
+  <div class="controls">
+    <button class="ctrl-btn" id="btn-fmt" onclick="toggleFmt()">12H / 24H</button>
+    <button class="ctrl-btn active" id="btn-date" onclick="toggleDate()">Date on</button>
+    <button class="ctrl-btn active" id="btn-bubbles" onclick="toggleBubbles()">Bubbles on</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  let use24 = true;
+  let showDate = true;
+  let bubblesOn = true;
+
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function tick() {
+    const now = new Date();
+    let h = now.getHours();
+    const m = now.getMinutes();
+    const s = now.getSeconds();
+    let suffix = '';
+    if (!use24) {
+      suffix = h >= 12 ? ' PM' : ' AM';
+      h = h % 12 || 12;
+    }
+    document.getElementById('hh').textContent = pad(h);
+    document.getElementById('mm').textContent = pad(m);
+    document.getElementById('ss').textContent = pad(s);
+
+    if (showDate) {
+      const d = days[now.getDay()];
+      const mo = months[now.getMonth()];
+      document.getElementById('date-display').textContent = d + ', ' + mo + ' ' + now.getDate() + ', ' + now.getFullYear() + (use24 ? '' : suffix);
+    } else {
+      document.getElementById('date-display').textContent = use24 ? '' : suffix;
+    }
+
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      document.getElementById('tz-display').textContent = tz.replace(/_/g,' ');
+    } catch(e) {}
+  }
+
+  setInterval(tick, 1000);
+  tick();
+
+  window.toggleFmt = function() {
+    use24 = !use24;
+    document.getElementById('btn-fmt').textContent = use24 ? '24H / 12H' : '12H / 24H';
+    tick();
+  };
+  window.toggleDate = function() {
+    showDate = !showDate;
+    const b = document.getElementById('btn-date');
+    b.textContent = showDate ? 'Date on' : 'Date off';
+    b.classList.toggle('active', showDate);
+    tick();
+  };
+  window.toggleBubbles = function() {
+    bubblesOn = !bubblesOn;
+    const b = document.getElementById('btn-bubbles');
+    b.textContent = bubblesOn ? 'Bubbles on' : 'Bubbles off';
+    b.classList.toggle('active', bubblesOn);
+  };
+
+  const canvas = document.getElementById('bubble-canvas');
+  const ctx = canvas.getContext('2d');
+  const bubbles = [];
+
+  const COLORS = [
+    [100, 180, 255],
+    [160, 120, 255],
+    [80,  220, 200],
+    [200, 140, 255],
+    [100, 200, 240],
+  ];
+
+  function resize() {
+    const wrap = document.getElementById('clock-wrap');
+    canvas.width  = wrap.offsetWidth;
+    canvas.height = wrap.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function spawnBubble() {
+    const wrap = document.getElementById('clock-wrap');
+    const w = wrap.offsetWidth;
+    const h = wrap.offsetHeight;
+    const r = 4 + Math.random() * 22;
+    const col = COLORS[Math.floor(Math.random() * COLORS.length)];
+    bubbles.push({
+      x: Math.random() * w,
+      y: h + r,
+      r,
+      speed: 0.4 + Math.random() * 0.9,
+      drift: (Math.random() - 0.5) * 0.3,
+      op: 0.08 + Math.random() * 0.18,
+      col,
+      phase: Math.random() * Math.PI * 2,
+      wobble: 0.3 + Math.random() * 0.7,
+    });
+  }
+
+  let frameCount = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    if (!bubblesOn) { ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
+
+    frameCount++;
+    if (frameCount % 18 === 0) spawnBubble();
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const h = canvas.height;
+
+    for (let i = bubbles.length - 1; i >= 0; i--) {
+      const b = bubbles[i];
+      b.y -= b.speed;
+      b.x += b.drift + Math.sin(b.phase + b.y * 0.02) * b.wobble;
+      b.phase += 0.01;
+
+      if (b.y + b.r < 0) { bubbles.splice(i, 1); continue; }
+
+      const progress = 1 - (b.y / h);
+      let alpha = b.op;
+      if (progress < 0.1) alpha *= progress / 0.1;
+      if (progress > 0.85) alpha *= (1 - progress) / 0.15;
+
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+
+      const [r, g, bv] = b.col;
+      const grad = ctx.createRadialGradient(b.x - b.r*0.3, b.y - b.r*0.3, b.r*0.1, b.x, b.y, b.r);
+      grad.addColorStop(0, `rgba(${r},${g},${bv},${alpha * 0.9})`);
+      grad.addColorStop(0.5, `rgba(${r},${g},${bv},${alpha * 0.4})`);
+      grad.addColorStop(1, `rgba(${r},${g},${bv},${alpha * 0.05})`);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      ctx.strokeStyle = `rgba(${r},${g},${bv},${alpha * 0.6})`;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+  }
+
+  for (let i = 0; i < 12; i++) spawnBubble();
+  bubbles.forEach(b => { b.y = Math.random() * canvas.height; });
+  animate();
+})();
+</script>
