@@ -1,96 +1,213 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Name / Seat Picker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:ital@0;1&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Space+Mono&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --ink:#080612;--mist:#f0ebff;--mist2:#d6ccf7;--mist3:#a89dd4;
-  --gold:#d4a843;--gold2:#e8c96a;
-  --violet:#7c5cbf;--violet2:#a07de0;--violet3:#c4a8f5;
-  --border:rgba(160,125,224,0.22);--border2:rgba(160,125,224,0.42);
-  --panel:rgba(20,14,40,0.72);
+  --bg:#f5f0ff;
+  --bg2:#ede7ff;
+  --surface:#ffffff;
+  --surface2:#f8f5ff;
+  --border:rgba(120,80,200,0.18);
+  --border2:rgba(120,80,200,0.38);
+  --text:#1a0e3a;
+  --text2:#4a3775;
+  --text3:#7a62a8;
+  --gold:#b07a10;
+  --gold2:#c9920c;
+  --goldbg:#fff8e8;
+  --violet:#6b3fc7;
+  --violet2:#8b5ee0;
+  --violet3:#b090ef;
+  --violet-soft:rgba(107,63,199,0.10);
+  --violet-soft2:rgba(107,63,199,0.18);
+  --green:#1a8c5a;
+  --greenbg:#e8fef3;
+  --red:#c0392b;
+  --redbg:#fef0ee;
+  --shadow:0 2px 12px rgba(100,60,180,0.10);
+  --shadow2:0 6px 28px rgba(100,60,180,0.16);
 }
-body{background:var(--ink);color:var(--mist);font-family:'Cormorant Garamond',serif;min-height:100vh;overflow-x:hidden}
-canvas#stars{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
-.page{position:relative;z-index:1;padding:2rem 1.5rem 3rem;max-width:680px;margin:0 auto}
-.site-title{text-align:center;font-size:1.65rem;font-weight:300;letter-spacing:.18em;color:var(--gold2);text-transform:uppercase;margin-bottom:.2rem}
-.site-sub{text-align:center;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.3em;color:var(--violet3);text-transform:uppercase;margin-bottom:1.8rem}
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.3rem;margin-bottom:1.1rem;backdrop-filter:blur(6px)}
-.plabel{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.2em;color:var(--violet3);text-transform:uppercase;margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem}
-.plabel::after{content:'';flex:1;height:1px;background:var(--border)}
-textarea{width:100%;background:rgba(5,3,14,0.7);border:1px solid var(--border);border-radius:10px;color:var(--mist);font-family:'Space Mono',monospace;font-size:.75rem;line-height:1.75;padding:.85rem 1rem;resize:vertical;min-height:120px;outline:none;transition:border .2s}
-textarea:focus{border-color:var(--border2)}
-textarea::placeholder{color:rgba(180,165,220,0.3)}
-.modes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.55rem}
-.mcard{background:rgba(8,5,18,0.6);border:1px solid var(--border);border-radius:11px;padding:.8rem .6rem .7rem;cursor:pointer;text-align:center;transition:all .22s}
-.mcard:hover{border-color:var(--border2);background:rgba(124,92,191,0.15)}
-.mcard.active{border-color:var(--violet2);background:rgba(124,92,191,0.28)}
-.mcard.active .mcard-icon,.mcard.active .mcard-name{color:var(--gold2)}
-.mcard-icon{font-size:1.3rem;color:var(--violet3);margin-bottom:.35rem;display:block}
-.mcard-name{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mist3);line-height:1.4}
-.sub-row{display:flex;align-items:center;gap:.8rem;margin-top:.9rem;padding-top:.8rem;border-top:1px solid var(--border)}
-.sub-row label{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.1em;color:var(--violet3);white-space:nowrap}
-.sub-row input[type=range]{flex:1;accent-color:var(--violet2)}
-.sub-row .val{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--gold2);min-width:20px;text-align:center}
-.result-zone{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:1.4rem 1.3rem;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.result-zone.has-content{justify-content:flex-start;align-items:stretch;text-align:left}
-.placeholder-txt{font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.15em;color:rgba(160,130,210,0.35);text-transform:uppercase}
-.big-name{font-size:3.2rem;font-weight:300;letter-spacing:.06em;color:var(--gold2);text-align:center;padding:.8rem 0 .4rem;animation:cpulse 2.6s ease-in-out infinite;line-height:1.15}
-@keyframes cpulse{0%,100%{opacity:1}50%{opacity:.82}}
-.progress-txt{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--violet3);text-align:center;letter-spacing:.08em;margin-bottom:.7rem}
-.next-btn{align-self:center;margin-top:.6rem;padding:.55rem 1.5rem;background:rgba(124,92,191,0.2);border:1px solid var(--border2);border-radius:9px;color:var(--gold2);font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s}
-.next-btn:hover{background:rgba(124,92,191,0.42);border-color:var(--gold2)}
-.result-title{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.2em;color:var(--violet3);text-transform:uppercase;margin-bottom:.9rem;padding-bottom:.7rem;border-bottom:1px solid var(--border);width:100%}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
 
-/* shuffle draggable list */
-.shuffle-list{width:100%;list-style:none}
-.shuffle-item{display:flex;align-items:center;gap:.6rem;padding:.45rem .75rem;margin-bottom:.38rem;background:rgba(124,92,191,0.1);border:1px solid var(--border);border-radius:8px;cursor:grab;user-select:none;transition:background .15s,opacity .15s}
-.shuffle-item:hover{background:rgba(124,92,191,0.2);border-color:var(--border2)}
-.shuffle-item.dragging{opacity:.35;cursor:grabbing}
-.shuffle-item.drag-over{border-color:var(--gold2);background:rgba(212,168,67,0.12)}
-.shuffle-num{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--violet3);min-width:18px}
-.shuffle-name{font-family:'Space Mono',monospace;font-size:.75rem;color:var(--mist);flex:1}
-.shuffle-handle{font-size:.8rem;color:rgba(160,130,210,0.4)}
-.highlight-btn{padding:.15rem .5rem;background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.35);border-radius:5px;color:var(--gold);font-family:'Space Mono',monospace;font-size:.58rem;cursor:pointer;transition:all .15s;white-space:nowrap}
-.highlight-btn:hover{background:rgba(212,168,67,0.3);border-color:var(--gold2)}
+/* subtle grid bg */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:40px 40px;opacity:.4}
+
+.page{position:relative;z-index:1;padding:2rem 1.5rem 3rem;max-width:700px;margin:0 auto}
+
+.site-title{text-align:center;font-size:2rem;font-weight:700;letter-spacing:-.02em;color:var(--violet);margin-bottom:.2rem}
+.site-sub{text-align:center;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.3em;color:var(--text3);text-transform:uppercase;margin-bottom:2rem}
+
+/* tabs for name vs seat mode */
+.input-tabs{display:flex;gap:.4rem;margin-bottom:.7rem}
+.itab{flex:1;padding:.55rem 1rem;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text3);font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;text-align:center;transition:all .2s;font-weight:500}
+.itab.active{background:var(--violet);color:#fff;border-color:var(--violet);box-shadow:0 2px 10px rgba(107,63,199,0.28)}
+
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.2rem 1.3rem;margin-bottom:1rem;box-shadow:var(--shadow)}
+.plabel{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem}
+.plabel::after{content:'';flex:1;height:1px;background:var(--border)}
+
+textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Space Mono',monospace;font-size:.75rem;line-height:1.8;padding:.85rem 1rem;resize:vertical;min-height:110px;outline:none;transition:border .2s}
+textarea:focus{border-color:var(--violet2);box-shadow:0 0 0 3px rgba(107,63,199,0.08)}
+textarea::placeholder{color:rgba(120,90,180,0.35)}
+
+/* seat range input */
+.seat-panel{display:none}
+.seat-panel.on{display:block}
+.name-panel{display:none}
+.name-panel.on{display:block}
+
+.seat-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-bottom:.8rem}
+.seat-row label{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.1em;color:var(--text3);white-space:nowrap}
+.seat-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.5rem .75rem;font-family:'Space Mono',monospace;font-size:.8rem;color:var(--text);width:90px;outline:none;transition:border .2s;text-align:center}
+.seat-input:focus{border-color:var(--violet2);box-shadow:0 0 0 3px rgba(107,63,199,0.08)}
+.seat-dash{color:var(--text3);font-weight:600}
+.seat-apply{padding:.5rem 1rem;background:var(--violet);color:#fff;border:none;border-radius:8px;font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.seat-apply:hover{background:var(--violet2);transform:translateY(-1px);box-shadow:0 3px 10px rgba(107,63,199,0.28)}
+
+/* seat tag grid for delete */
+.seat-tag-grid{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.6rem}
+.seat-tag{display:inline-flex;align-items:center;gap:.3rem;background:var(--violet-soft);border:1px solid var(--border);border-radius:6px;padding:.22rem .55rem .22rem .65rem;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--text2);cursor:pointer;transition:all .15s;user-select:none}
+.seat-tag:hover{background:var(--redbg);border-color:rgba(192,57,43,0.4);color:var(--red)}
+.seat-tag .xtag{font-size:.7rem;opacity:.6}
+.seat-hint{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--text3);margin-top:.45rem;letter-spacing:.05em}
+
+/* mode cards */
+.modes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
+.mcard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.85rem .6rem .75rem;cursor:pointer;text-align:center;transition:all .22s;box-shadow:var(--shadow)}
+.mcard:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:var(--shadow2)}
+.mcard.active{border-color:var(--violet);background:linear-gradient(135deg,rgba(107,63,199,0.06),rgba(139,94,224,0.12));box-shadow:0 0 0 2px rgba(107,63,199,0.18),var(--shadow)}
+.mcard.active .mcard-icon,.mcard.active .mcard-name{color:var(--violet)}
+.mcard-icon{font-size:1.25rem;color:var(--text3);margin-bottom:.38rem;display:block}
+.mcard-name{font-family:'Space Mono',monospace;font-size:.56rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);line-height:1.5}
+.sub-row{display:flex;align-items:center;gap:.8rem;margin-top:.9rem;padding-top:.8rem;border-top:1px solid var(--border)}
+.sub-row label{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.1em;color:var(--text3);white-space:nowrap}
+.sub-row input[type=range]{flex:1;accent-color:var(--violet2)}
+.sub-row .val{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--violet);font-weight:600;min-width:20px;text-align:center}
+
+/* ── NAMETAG CHART ── */
+.chart-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.2rem 1.3rem;margin-bottom:1rem;box-shadow:var(--shadow)}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem}
+.chart-title{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;display:flex;align-items:center;gap:.5rem}
+.chart-title::after{content:'';width:60px;height:1px;background:var(--border)}
+.chart-count{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:.18rem .55rem}
+.nametag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:.45rem}
+.ntag{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:.45rem .6rem;text-align:center;font-family:'Space Mono',monospace;font-size:.7rem;color:var(--text2);transition:all .25s;position:relative;overflow:hidden}
+.ntag.drawn{background:var(--redbg);border-color:rgba(192,57,43,0.3);color:rgba(192,57,43,0.5)}
+.ntag.drawn::after{content:'';position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.ntag-strike{display:none}
+.ntag.drawn .ntag-strike{display:block;position:absolute;inset:0;pointer-events:none}
+.ntag-label{position:relative;z-index:1}
+.ntag.drawn .ntag-label{text-decoration:line-through;opacity:.45}
+/* seat number special style */
+.ntag.seat-style{min-width:58px}
+.ntag-num{font-size:.58rem;color:var(--text3);margin-bottom:.1rem;display:block}
+.ntag-remaining{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--green);background:var(--greenbg);border-radius:5px;padding:.12rem .45rem;margin-top:.5rem;display:inline-block}
+
+/* result zone */
+.result-zone{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.4rem 1.3rem;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:var(--shadow)}
+.result-zone.has-content{justify-content:flex-start;align-items:stretch;text-align:left}
+.placeholder-txt{font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.15em;color:rgba(120,90,170,0.4);text-transform:uppercase}
+.big-name{font-size:3.2rem;font-weight:700;letter-spacing:-.02em;color:var(--violet);text-align:center;padding:.8rem 0 .4rem;animation:cpulse 2.6s ease-in-out infinite;line-height:1.1}
+@keyframes cpulse{0%,100%{opacity:1}50%{opacity:.82}}
+.progress-txt{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text3);text-align:center;letter-spacing:.08em;margin-bottom:.7rem}
+.next-btn{align-self:center;margin-top:.6rem;padding:.58rem 1.7rem;background:var(--violet);color:#fff;border:none;border-radius:10px;font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s;box-shadow:0 3px 10px rgba(107,63,199,0.25)}
+.next-btn:hover{background:var(--violet2);transform:translateY(-1px);box-shadow:0 5px 16px rgba(107,63,199,0.32)}
+.result-title{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.2em;color:var(--text3);text-transform:uppercase;margin-bottom:.9rem;padding-bottom:.7rem;border-bottom:1px solid var(--border);width:100%}
 
 /* spotlight overlay */
-.spotlight{display:none;position:absolute;inset:0;background:rgba(5,3,14,0.93);border-radius:14px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.5rem}
+.spotlight{display:none;position:absolute;inset:0;background:rgba(250,247,255,0.96);border-radius:16px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.5rem;box-shadow:inset 0 0 0 2px var(--border2)}
 .spotlight.on{display:flex}
-.spotlight-name{font-size:3.4rem;font-weight:300;color:var(--gold2);letter-spacing:.06em;animation:cpulse 2.6s ease-in-out infinite}
-.spotlight-close{margin-top:1.2rem;padding:.5rem 1.4rem;background:rgba(124,92,191,0.2);border:1px solid var(--border2);border-radius:9px;color:var(--mist3);font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.1em;cursor:pointer;transition:all .2s}
-.spotlight-close:hover{background:rgba(124,92,191,0.4);color:var(--gold2)}
+.spotlight-name{font-size:3.4rem;font-weight:700;color:var(--violet);letter-spacing:-.02em;animation:cpulse 2.6s ease-in-out infinite}
+.spotlight-close{margin-top:1.2rem;padding:.5rem 1.4rem;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;color:var(--text2);font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.1em;cursor:pointer;transition:all .2s}
+.spotlight-close:hover{background:var(--violet-soft2);color:var(--violet)}
+
+/* shuffle list */
+.shuffle-list{width:100%;list-style:none}
+.shuffle-item{display:flex;align-items:center;gap:.6rem;padding:.45rem .75rem;margin-bottom:.38rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:grab;user-select:none;transition:background .15s,opacity .15s}
+.shuffle-item:hover{background:var(--violet-soft);border-color:var(--border2)}
+.shuffle-item.dragging{opacity:.35;cursor:grabbing}
+.shuffle-item.drag-over{border-color:var(--violet);background:rgba(107,63,199,0.08)}
+.shuffle-num{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--text3);min-width:18px}
+.shuffle-name{font-family:'Space Mono',monospace;font-size:.75rem;color:var(--text);flex:1}
+.shuffle-handle{font-size:.8rem;color:rgba(120,90,170,0.4)}
+.highlight-btn{padding:.15rem .5rem;background:var(--violet-soft);border:1px solid var(--border2);border-radius:5px;color:var(--violet);font-family:'Space Mono',monospace;font-size:.58rem;cursor:pointer;transition:all .15s;white-space:nowrap}
+.highlight-btn:hover{background:var(--violet-soft2);border-color:var(--violet)}
 
 /* group/pair cards */
-.gcard{margin-bottom:.8rem;background:rgba(8,5,18,0.55);border:1px solid var(--border);border-radius:11px;padding:.85rem 1rem}
+.gcard{margin-bottom:.8rem;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:.85rem 1rem}
 .gcard-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem}
-.gcard-title{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.gcard-title{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.18em;color:var(--gold2);text-transform:uppercase}
 .points-ctrl{display:flex;align-items:center;gap:.4rem}
-.pt-btn{width:22px;height:22px;border-radius:50%;border:1px solid var(--border2);background:rgba(124,92,191,0.2);color:var(--gold2);font-size:.9rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:'Space Mono',monospace}
-.pt-btn:hover{background:rgba(124,92,191,0.45)}
-.pt-score{font-family:'Space Mono',monospace;font-size:.78rem;color:var(--gold2);min-width:28px;text-align:center}
-.pt-score.pos{color:#6ee89a}
-.pt-score.neg{color:#f08080}
+.pt-btn{width:22px;height:22px;border-radius:50%;border:1px solid var(--border2);background:var(--violet-soft);color:var(--violet);font-size:.9rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:'Space Mono',monospace}
+.pt-btn:hover{background:var(--violet-soft2)}
+.pt-score{font-family:'Space Mono',monospace;font-size:.78rem;color:var(--text2);min-width:28px;text-align:center}
+.pt-score.pos{color:var(--green)}
+.pt-score.neg{color:var(--red)}
 .gcard-members{display:flex;flex-wrap:wrap;gap:.3rem}
-.chip{display:inline-block;background:rgba(124,92,191,0.18);border:1px solid var(--border);border-radius:6px;padding:.18rem .55rem;font-size:.75rem;color:var(--mist2);font-family:'Space Mono',monospace;cursor:grab;user-select:none;transition:all .15s}
-.chip:hover{background:rgba(124,92,191,0.32);border-color:var(--border2)}
+.chip{display:inline-block;background:var(--violet-soft);border:1px solid var(--border);border-radius:6px;padding:.18rem .55rem;font-size:.75rem;color:var(--text2);font-family:'Space Mono',monospace;cursor:grab;user-select:none;transition:all .15s}
+.chip:hover{background:var(--violet-soft2);border-color:var(--border2)}
 .chip.dragging{opacity:.35;cursor:grabbing}
-.gcard-members.drag-over{outline:1px dashed var(--gold);border-radius:6px;background:rgba(212,168,67,0.07)}
-.pts-summary{margin-top:.6rem;padding:.7rem .9rem;background:rgba(5,3,14,0.5);border:1px solid var(--border);border-radius:9px}
-.pts-summary-title{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.15em;color:var(--violet3);text-transform:uppercase;margin-bottom:.45rem}
-.pts-row{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--mist2);display:flex;justify-content:space-between;padding:.15rem 0}
-.pts-lead{color:var(--gold2)}
+.gcard-members.drag-over{outline:1px dashed var(--violet);border-radius:6px;background:rgba(107,63,199,0.05)}
+.pts-summary{margin-top:.6rem;padding:.7rem .9rem;background:var(--surface);border:1px solid var(--border);border-radius:9px}
+.pts-summary-title{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.15em;color:var(--text3);text-transform:uppercase;margin-bottom:.45rem}
+.pts-row{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text2);display:flex;justify-content:space-between;padding:.15rem 0}
+.pts-lead{color:var(--gold2);font-weight:600}
+
+/* confetti color override */
 </style>
-
-<canvas id="stars"></canvas>
+</head>
+<body>
 <div class="page">
-  <div class="site-title">Shirley's Name / Group Picker</div>
-  <div class="site-sub">姓名／分組抽選器</div>
+  <div class="site-title">✦ Name/Seat No./Group Picker</div>
+  <div class="site-sub">姓名/座號/分組抽選器</div>
 
+  <!-- INPUT SECTION -->
   <div class="panel">
-    <div class="plabel">Names — one per line 每行一個姓名</div>
-    <textarea id="names" placeholder="Alice&#10;Bob&#10;Carol&#10;Diana&#10;Ethan&#10;Fiona&#10;George&#10;Hannah&#10;..."></textarea>
+    <div class="input-tabs">
+      <div class="itab active" id="tab-name" onclick="switchInputMode('name')">✎ Names 姓名</div>
+      <div class="itab" id="tab-seat" onclick="switchInputMode('seat')">⊞ Seat Numbers 座號</div>
+    </div>
+
+    <!-- Name mode -->
+    <div class="name-panel on" id="name-panel">
+      <div class="plabel">One name per line 每行一個姓名</div>
+      <textarea id="names" placeholder="Alice&#10;Bob&#10;Carol&#10;Diana&#10;Ethan&#10;Fiona&#10;..."></textarea>
+    </div>
+
+    <!-- Seat mode -->
+    <div class="seat-panel" id="seat-panel">
+      <div class="plabel">Set seat range 設定座號範圍</div>
+      <div class="seat-row">
+        <label>From</label>
+        <input class="seat-input" id="seat-from" type="number" min="1" value="1" placeholder="1">
+        <span class="seat-dash">—</span>
+        <label>To</label>
+        <input class="seat-input" id="seat-to" type="number" min="1" value="30" placeholder="30">
+        <button class="seat-apply" onclick="applySeatRange()">Generate ✦</button>
+      </div>
+      <div class="seat-hint">Click any seat tag to remove (absent/missing) 點擊座號標籤可刪除</div>
+      <div class="seat-tag-grid" id="seat-tag-grid"></div>
+    </div>
   </div>
 
+  <!-- NAMETAG OVERVIEW CHART -->
+  <div class="chart-section" id="chart-section" style="display:none">
+    <div class="chart-header">
+      <div class="chart-title">Overview 總覽</div>
+      <div class="chart-count" id="chart-count">0 / 0 remaining</div>
+    </div>
+    <div class="nametag-grid" id="nametag-grid"></div>
+  </div>
+
+  <!-- MODE SELECTOR -->
   <div class="panel">
     <div class="plabel">Mode 模式</div>
     <div class="modes">
@@ -113,6 +230,7 @@ textarea::placeholder{color:rgba(180,165,220,0.3)}
     </div>
   </div>
 
+  <!-- RESULT -->
   <div style="position:relative">
     <div class="panel result-zone" id="result-zone">
       <div class="placeholder-txt">Select a mode &amp; enter names to begin</div>
@@ -126,170 +244,281 @@ textarea::placeholder{color:rgba(180,165,220,0.3)}
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 <script>
-const cvs=document.getElementById('stars'),ctx=cvs.getContext('2d');
-let stars=[];
-function initS(){cvs.width=window.innerWidth;cvs.height=window.innerHeight;stars=[];const n=Math.floor(cvs.width*cvs.height/5000);for(let i=0;i<n;i++)stars.push({x:Math.random()*cvs.width,y:Math.random()*cvs.height,r:Math.random()*1.1+.2,o:Math.random(),d:Math.random()*.006+.002,ph:Math.random()*Math.PI*2});}
-function draw(t){ctx.clearRect(0,0,cvs.width,cvs.height);stars.forEach(s=>{const op=s.o*(.45+.55*Math.sin(s.ph+t*s.d*60));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,248,240,${op.toFixed(2)})`;ctx.fill();});requestAnimationFrame(draw);}
-window.addEventListener('resize',initS);initS();draw(0);
+// ── State ──
+let inputMode = 'name'; // 'name' | 'seat'
+let seatNumbers = []; // current seat numbers (as strings)
 
-const namesEl=document.getElementById('names');
-const resultZone=document.getElementById('result-zone');
-const spotlightEl=document.getElementById('spotlight');
-const spotlightName=document.getElementById('spotlight-name');
-const spotlightClose=document.getElementById('spotlight-close');
-const groupRow=document.getElementById('group-row');
-const teamsRow=document.getElementById('teams-row');
-const groupSizeEl=document.getElementById('group-size');
-const groupSizeVal=document.getElementById('group-size-val');
-const teamsCountEl=document.getElementById('teams-count');
-const teamsCountVal=document.getElementById('teams-count-val');
+const namesEl = document.getElementById('names');
+const resultZone = document.getElementById('result-zone');
+const spotlightEl = document.getElementById('spotlight');
+const spotlightName = document.getElementById('spotlight-name');
+const spotlightClose = document.getElementById('spotlight-close');
+const groupRow = document.getElementById('group-row');
+const teamsRow = document.getElementById('teams-row');
+const groupSizeEl = document.getElementById('group-size');
+const groupSizeVal = document.getElementById('group-size-val');
+const teamsCountEl = document.getElementById('teams-count');
+const teamsCountVal = document.getElementById('teams-count-val');
+const chartSection = document.getElementById('chart-section');
+const nametagGrid = document.getElementById('nametag-grid');
+const chartCount = document.getElementById('chart-count');
 
-let mode='lucky',remaining=[],allNames=[],seqIdx=0,seqList=[];
-let shuffleOrder=[];
-let groupsData=[];   // [{members:[], pts:0}]
-let groupsMode='';   // 'group'|'teams'|'pair'
+let mode = 'lucky', remaining = [], allNames = [], seqIdx = 0, seqList = [];
+let drawnSet = new Set(); // track drawn names/seats for chart crossing
+let shuffleOrder = [];
+let groupsData = [];
+let groupsMode = '';
 
-spotlightClose.addEventListener('click',()=>spotlightEl.classList.remove('on'));
+spotlightClose.addEventListener('click', () => spotlightEl.classList.remove('on'));
 
-groupSizeEl.addEventListener('input',()=>{groupSizeVal.textContent=groupSizeEl.value;if(mode==='group')run();});
-teamsCountEl.addEventListener('input',()=>{teamsCountVal.textContent=teamsCountEl.value;if(mode==='teams')run();});
+groupSizeEl.addEventListener('input', () => { groupSizeVal.textContent = groupSizeEl.value; if (mode === 'group') run(); });
+teamsCountEl.addEventListener('input', () => { teamsCountVal.textContent = teamsCountEl.value; if (mode === 'teams') run(); });
 
-document.querySelectorAll('.mcard').forEach(card=>{
-  card.addEventListener('click',()=>{
-    document.querySelectorAll('.mcard').forEach(c=>c.classList.remove('active'));
+document.querySelectorAll('.mcard').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.mcard').forEach(c => c.classList.remove('active'));
     card.classList.add('active');
-    mode=card.dataset.mode;
-    groupRow.style.display=(mode==='group')?'flex':'none';
-    teamsRow.style.display=(mode==='teams')?'flex':'none';
-    if(mode==='lucky'||mode==='all'){remaining=[];allNames=[];seqList=[];seqIdx=0;}
+    mode = card.dataset.mode;
+    groupRow.style.display = (mode === 'group') ? 'flex' : 'none';
+    teamsRow.style.display = (mode === 'teams') ? 'flex' : 'none';
+    if (mode === 'lucky' || mode === 'all') { remaining = []; allNames = []; seqList = []; seqIdx = 0; drawnSet = new Set(); updateChart(); }
     run();
   });
 });
 
-namesEl.addEventListener('input',()=>{remaining=[];allNames=[];seqList=[];seqIdx=0;shuffleOrder=[];run();});
+namesEl.addEventListener('input', () => { remaining = []; allNames = []; seqList = []; seqIdx = 0; drawnSet = new Set(); shuffleOrder = []; updateChart(); run(); });
 
-function getNames(){return namesEl.value.split('\n').map(n=>n.trim()).filter(n=>n.length>0);}
-function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
-
-function celebrate(){
-  if(typeof confetti==='undefined')return;
-  confetti({particleCount:70,spread:55,origin:{y:.7},colors:['#d4a843','#e8c96a','#a07de0','#7c5cbf','#f5f0ff']});
-  setTimeout(()=>confetti({particleCount:50,angle:60,spread:45,origin:{x:0,y:.7},colors:['#d4a843','#e8c96a','#a07de0']}),300);
-  setTimeout(()=>confetti({particleCount:50,angle:120,spread:45,origin:{x:1,y:.7},colors:['#d4a843','#e8c96a','#a07de0']}),550);
+// ── Input mode switcher ──
+function switchInputMode(m) {
+  inputMode = m;
+  document.getElementById('tab-name').classList.toggle('active', m === 'name');
+  document.getElementById('tab-seat').classList.toggle('active', m === 'seat');
+  document.getElementById('name-panel').classList.toggle('on', m === 'name');
+  document.getElementById('seat-panel').classList.toggle('on', m === 'seat');
+  remaining = []; allNames = []; seqList = []; seqIdx = 0; drawnSet = new Set(); shuffleOrder = [];
+  updateChart();
+  run();
 }
 
-function setResult(html){resultZone.innerHTML=html;resultZone.classList.add('has-content');}
-function empty(msg='Select a mode &amp; enter names to begin'){resultZone.innerHTML=`<div class="placeholder-txt">${msg}</div>`;resultZone.classList.remove('has-content');}
+// ── Seat range ──
+function applySeatRange() {
+  const from = parseInt(document.getElementById('seat-from').value);
+  const to = parseInt(document.getElementById('seat-to').value);
+  if (isNaN(from) || isNaN(to) || from > to) return;
+  seatNumbers = [];
+  for (let i = from; i <= to; i++) seatNumbers.push(String(i));
+  renderSeatTags();
+  remaining = []; allNames = []; seqList = []; seqIdx = 0; drawnSet = new Set(); shuffleOrder = [];
+  updateChart();
+  run();
+}
 
-function run(){
-  const names=getNames();
-  if(!names.length){empty();return;}
-  if(mode==='lucky'){
-    if(!allNames.length||JSON.stringify(allNames)!==JSON.stringify(names)){allNames=names;remaining=shuffle([...names]);}
+function renderSeatTags() {
+  const grid = document.getElementById('seat-tag-grid');
+  grid.innerHTML = seatNumbers.map(n =>
+    `<div class="seat-tag" onclick="removeSeat('${n}')"><span>${n}</span><span class="xtag">×</span></div>`
+  ).join('');
+}
+
+function removeSeat(n) {
+  seatNumbers = seatNumbers.filter(s => s !== n);
+  renderSeatTags();
+  remaining = []; allNames = []; seqList = []; seqIdx = 0; drawnSet = new Set(); shuffleOrder = [];
+  updateChart();
+  run();
+}
+
+// ── Get active names ──
+function getNames() {
+  if (inputMode === 'seat') return [...seatNumbers];
+  return namesEl.value.split('\n').map(n => n.trim()).filter(n => n.length > 0);
+}
+
+function isSeatMode() { return inputMode === 'seat'; }
+
+// ── Chart ──
+function updateChart() {
+  const names = getNames();
+  if (!names.length) { chartSection.style.display = 'none'; return; }
+  chartSection.style.display = 'block';
+  const remaining = names.length - drawnSet.size;
+  chartCount.textContent = `${remaining} / ${names.length} remaining`;
+
+  nametagGrid.innerHTML = names.map(n => {
+    const drawn = drawnSet.has(n);
+    if (isSeatMode()) {
+      return `<div class="ntag seat-style${drawn ? ' drawn' : ''}">
+        <span class="ntag-num">No.</span>
+        <span class="ntag-label">${n}</span>
+        ${drawn ? '<svg class="ntag-strike" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="5" y1="50" x2="95" y2="50" stroke="rgba(192,57,43,0.55)" stroke-width="2.5" stroke-linecap="round"/></svg>' : ''}
+      </div>`;
+    }
+    return `<div class="ntag${drawn ? ' drawn' : ''}">
+      <span class="ntag-label">${n}</span>
+      ${drawn ? '<svg class="ntag-strike" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="5" y1="50" x2="95" y2="50" stroke="rgba(192,57,43,0.55)" stroke-width="2.5" stroke-linecap="round"/></svg>' : ''}
+    </div>`;
+  }).join('');
+}
+
+function markDrawn(name) {
+  drawnSet.add(name);
+  updateChart();
+}
+
+function resetDrawn() {
+  drawnSet = new Set();
+  updateChart();
+}
+
+// ── Helpers ──
+function shuffle(a) { const r = [...a]; for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; }
+
+function celebrate() {
+  if (typeof confetti === 'undefined') return;
+  confetti({ particleCount: 70, spread: 55, origin: { y: .7 }, colors: ['#6b3fc7', '#b090ef', '#c9920c', '#f0d070', '#fff'] });
+  setTimeout(() => confetti({ particleCount: 50, angle: 60, spread: 45, origin: { x: 0, y: .7 }, colors: ['#6b3fc7', '#b090ef', '#c9920c'] }), 300);
+  setTimeout(() => confetti({ particleCount: 50, angle: 120, spread: 45, origin: { x: 1, y: .7 }, colors: ['#6b3fc7', '#b090ef', '#c9920c'] }), 550);
+}
+
+function setResult(html) { resultZone.innerHTML = html; resultZone.classList.add('has-content'); }
+function empty(msg = 'Select a mode &amp; enter names to begin') { resultZone.innerHTML = `<div class="placeholder-txt">${msg}</div>`; resultZone.classList.remove('has-content'); }
+
+// ── Run ──
+function run() {
+  const names = getNames();
+  if (!names.length) { empty(); updateChart(); return; }
+  updateChart();
+  if (mode === 'lucky') {
+    if (!allNames.length || JSON.stringify(allNames) !== JSON.stringify(names)) { allNames = names; remaining = names.filter(n => !drawnSet.has(n)); if (!remaining.length) remaining = shuffle([...names]); else remaining = shuffle(remaining); }
     showLucky();
-  } else if(mode==='all'){
-    if(!seqList.length||JSON.stringify(allNames)!==JSON.stringify(names)){allNames=names;seqList=shuffle([...names]);seqIdx=0;}
+  } else if (mode === 'all') {
+    if (!seqList.length || JSON.stringify(allNames) !== JSON.stringify(names)) { allNames = names; seqList = shuffle([...names]); seqIdx = 0; }
     showSeq();
-  } else if(mode==='shuffle'){
-    if(!shuffleOrder.length||shuffleOrder.length!==names.length){shuffleOrder=shuffle(names);}
+  } else if (mode === 'shuffle') {
+    if (!shuffleOrder.length || shuffleOrder.length !== names.length) { shuffleOrder = shuffle(names); }
     doShuffle();
-  } else if(mode==='group'){doGroupInit(names,parseInt(groupSizeEl.value));
-  } else if(mode==='teams'){doTeamsInit(names,parseInt(teamsCountEl.value));
-  } else if(mode==='pair'){doPairInit(names);}
+  } else if (mode === 'group') { doGroupInit(names, parseInt(groupSizeEl.value));
+  } else if (mode === 'teams') { doTeamsInit(names, parseInt(teamsCountEl.value));
+  } else if (mode === 'pair') { doPairInit(names); }
 }
 
-function showLucky(){
-  if(!remaining.length)remaining=shuffle([...allNames]);
-  const picked=remaining.shift();celebrate();
-  const left=remaining.length,total=allNames.length;
-  let html=`<div class="result-title">✦ Lucky Draw 幸運抽獎</div>`;
-  html+=`<div class="big-name">${picked}</div>`;
-  html+=`<div class="progress-txt">${total-left} drawn · ${left} remaining</div>`;
-  html+=`<button class="next-btn" id="lucky-next">${left>0?'✦ Draw Next 再抽一位':'✦ Restart 重新開始'}</button>`;
+// ── Lucky Draw ──
+function showLucky() {
+  const names = getNames();
+  // rebuild remaining from undrawn
+  const undrawn = names.filter(n => !drawnSet.has(n));
+  if (!undrawn.length) {
+    // all drawn — offer restart
+    let html = `<div class="result-title">✦ Lucky Draw 幸運抽獎 — All drawn! 全部抽完！</div>`;
+    html += `<div class="progress-txt" style="text-align:center;margin:1rem 0">🎉 Everyone has been drawn!</div>`;
+    html += `<button class="next-btn" id="lucky-next">✦ Restart 重新開始</button>`;
+    setResult(html);
+    document.getElementById('lucky-next').addEventListener('click', () => { drawnSet = new Set(); allNames = []; remaining = []; run(); });
+    return;
+  }
+  if (!remaining.length || !remaining.some(n => undrawn.includes(n))) {
+    remaining = shuffle([...undrawn]);
+  }
+  // pick from remaining undrawn
+  remaining = remaining.filter(n => !drawnSet.has(n));
+  if (!remaining.length) remaining = shuffle([...undrawn]);
+  const picked = remaining.shift();
+  markDrawn(picked);
+  celebrate();
+  const left = names.filter(n => !drawnSet.has(n)).length;
+  let html = `<div class="result-title">✦ Lucky Draw 幸運抽獎</div>`;
+  html += `<div class="big-name">${picked}</div>`;
+  html += `<div class="progress-txt">${drawnSet.size} drawn · ${left} remaining</div>`;
+  html += `<button class="next-btn" id="lucky-next">${left > 0 ? '✦ Draw Next 再抽一位' : '✦ Restart 重新開始'}</button>`;
   setResult(html);
-  document.getElementById('lucky-next').addEventListener('click',()=>{if(!remaining.length)remaining=shuffle([...allNames]);showLucky();});
+  document.getElementById('lucky-next').addEventListener('click', () => {
+    if (left === 0) { drawnSet = new Set(); allNames = []; remaining = []; run(); } else showLucky();
+  });
 }
 
-function showSeq(){
-  if(seqIdx>=seqList.length)seqIdx=0;
-  const name=seqList[seqIdx];celebrate();
-  const isLast=seqIdx===seqList.length-1;
-  let html=`<div class="result-title">◈ Draw All 逐一抽取</div>`;
-  html+=`<div class="big-name">${name}</div>`;
-  html+=`<div class="progress-txt">${seqIdx+1} / ${seqList.length}</div>`;
-  html+=`<button class="next-btn" id="seq-next">${isLast?'✦ Restart 重新開始':'✦ Next 下一位'}</button>`;
+// ── Draw All (sequential) ──
+function showSeq() {
+  const names = getNames();
+  if (!seqList.length || JSON.stringify(allNames) !== JSON.stringify(names)) { allNames = names; seqList = shuffle([...names]); seqIdx = 0; drawnSet = new Set(); updateChart(); }
+  if (seqIdx >= seqList.length) { seqIdx = 0; drawnSet = new Set(); seqList = shuffle([...names]); updateChart(); }
+  const name = seqList[seqIdx];
+  markDrawn(name);
+  celebrate();
+  const isLast = seqIdx === seqList.length - 1;
+  let html = `<div class="result-title">◈ Draw All 逐一抽取</div>`;
+  html += `<div class="big-name">${name}</div>`;
+  html += `<div class="progress-txt">${seqIdx + 1} / ${seqList.length}</div>`;
+  html += `<button class="next-btn" id="seq-next">${isLast ? '✦ Restart 重新開始' : '✦ Next 下一位'}</button>`;
   setResult(html);
-  document.getElementById('seq-next').addEventListener('click',()=>{seqIdx=isLast?0:seqIdx+1;if(isLast){seqList=shuffle([...allNames]);seqIdx=0;}showSeq();});
+  document.getElementById('seq-next').addEventListener('click', () => {
+    seqIdx = isLast ? 0 : seqIdx + 1;
+    if (isLast) { seqList = shuffle([...names]); seqIdx = 0; drawnSet = new Set(); updateChart(); }
+    showSeq();
+  });
 }
 
-// ── Shuffle with drag-to-reorder + click-to-spotlight ──
-function doShuffle(){
-  let html=`<div class="result-title">⟳ Shuffle List 隨機排序 <span style="color:var(--mist3);font-size:.55rem;letter-spacing:.05em">drag to reorder · click name to spotlight</span></div>`;
-  html+=`<ul class="shuffle-list" id="shuffle-list">`;
-  shuffleOrder.forEach((n,i)=>{
-    html+=`<li class="shuffle-item" draggable="true" data-idx="${i}">
+// ── Shuffle with drag-to-reorder ──
+function doShuffle() {
+  let html = `<div class="result-title">⟳ Shuffle List 隨機排序 <span style="color:var(--text3);font-size:.55rem;letter-spacing:.05em">drag to reorder · click name to spotlight</span></div>`;
+  html += `<ul class="shuffle-list" id="shuffle-list">`;
+  shuffleOrder.forEach((n, i) => {
+    html += `<li class="shuffle-item" draggable="true" data-idx="${i}">
       <span class="shuffle-handle">⠿</span>
-      <span class="shuffle-num">${i+1}.</span>
+      <span class="shuffle-num">${i + 1}.</span>
       <span class="shuffle-name">${n}</span>
       <button class="highlight-btn" data-name="${n}">spotlight ✦</button>
     </li>`;
   });
-  html+=`</ul>`;
-  html+=`<button class="next-btn" style="align-self:center;margin-top:.8rem" id="reshuf-btn">⟳ Reshuffle 再次隨機</button>`;
+  html += `</ul>`;
+  html += `<button class="next-btn" style="align-self:center;margin-top:.8rem" id="reshuf-btn">⟳ Reshuffle 再次隨機</button>`;
   setResult(html);
 
-  document.getElementById('reshuf-btn').addEventListener('click',()=>{shuffleOrder=shuffle(getNames());doShuffle();});
+  document.getElementById('reshuf-btn').addEventListener('click', () => { shuffleOrder = shuffle(getNames()); doShuffle(); });
 
-  document.querySelectorAll('.highlight-btn').forEach(btn=>{
-    btn.addEventListener('click',e=>{
-      e.stopPropagation();
-      showSpotlight(btn.dataset.name);
-    });
+  document.querySelectorAll('.highlight-btn').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); showSpotlight(btn.dataset.name); });
   });
 
-  // drag-to-reorder
-  let dragIdx=null;
-  const list=document.getElementById('shuffle-list');
-  list.querySelectorAll('.shuffle-item').forEach(item=>{
-    item.addEventListener('dragstart',e=>{dragIdx=parseInt(e.currentTarget.dataset.idx);e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
-    item.addEventListener('dragend',e=>{e.currentTarget.classList.remove('dragging');list.querySelectorAll('.shuffle-item').forEach(i=>i.classList.remove('drag-over'));});
-    item.addEventListener('dragover',e=>{e.preventDefault();item.classList.add('drag-over');});
-    item.addEventListener('dragleave',()=>item.classList.remove('drag-over'));
-    item.addEventListener('drop',e=>{
-      e.preventDefault();item.classList.remove('drag-over');
-      const toIdx=parseInt(item.dataset.idx);
-      if(dragIdx===null||dragIdx===toIdx)return;
-      const moved=shuffleOrder.splice(dragIdx,1)[0];
-      shuffleOrder.splice(toIdx,0,moved);
-      dragIdx=null;
+  let dragIdx = null;
+  const list = document.getElementById('shuffle-list');
+  list.querySelectorAll('.shuffle-item').forEach(item => {
+    item.addEventListener('dragstart', e => { dragIdx = parseInt(e.currentTarget.dataset.idx); e.currentTarget.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+    item.addEventListener('dragend', e => { e.currentTarget.classList.remove('dragging'); list.querySelectorAll('.shuffle-item').forEach(i => i.classList.remove('drag-over')); });
+    item.addEventListener('dragover', e => { e.preventDefault(); item.classList.add('drag-over'); });
+    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+    item.addEventListener('drop', e => {
+      e.preventDefault(); item.classList.remove('drag-over');
+      const toIdx = parseInt(item.dataset.idx);
+      if (dragIdx === null || dragIdx === toIdx) return;
+      const moved = shuffleOrder.splice(dragIdx, 1)[0];
+      shuffleOrder.splice(toIdx, 0, moved);
+      dragIdx = null;
       doShuffle();
     });
   });
 }
 
-function showSpotlight(name){
-  spotlightName.textContent=name;
+function showSpotlight(name) {
+  spotlightName.textContent = name;
   spotlightEl.classList.add('on');
   celebrate();
 }
 
-// ── Generic group renderer with drag-between-groups + points ──
-function buildGroupsData(groups){
-  groupsData=groups.map(g=>({members:[...g],pts:0}));
+// ── Groups ──
+function buildGroupsData(groups) {
+  groupsData = groups.map(g => ({ members: [...g], pts: 0 }));
 }
 
-function renderGroups(label,rerollFn){
-  const unitLabel=groupsMode==='pair'?'Pair':'Group';
-  const unitLabelZh=groupsMode==='pair'?'對':'組';
-
-  let html=`<div class="result-title">${label} <span style="color:var(--mist3);font-size:.55rem">drag names between groups to rearrange</span></div>`;
-
-  groupsData.forEach((g,i)=>{
-    const sc=g.pts;
-    const scClass=sc>0?'pos':sc<0?'neg':'';
-    html+=`<div class="gcard" data-gi="${i}">
+function renderGroups(label, rerollFn) {
+  const unitLabel = groupsMode === 'pair' ? 'Pair' : 'Group';
+  const unitLabelZh = groupsMode === 'pair' ? '對' : '組';
+  let html = `<div class="result-title">${label} <span style="color:var(--text3);font-size:.55rem">drag names between groups to rearrange</span></div>`;
+  groupsData.forEach((g, i) => {
+    const sc = g.pts;
+    const scClass = sc > 0 ? 'pos' : sc < 0 ? 'neg' : '';
+    html += `<div class="gcard" data-gi="${i}">
       <div class="gcard-hd">
-        <span class="gcard-title">${unitLabel} ${i+1} · 第${i+1}${unitLabelZh}</span>
+        <span class="gcard-title">${unitLabel} ${i + 1} · 第${i + 1}${unitLabelZh}</span>
         <div class="points-ctrl">
           <button class="pt-btn" data-gi="${i}" data-d="-1">−</button>
           <span class="pt-score ${scClass}" id="pts-${i}">${sc}</span>
@@ -297,97 +526,87 @@ function renderGroups(label,rerollFn){
         </div>
       </div>
       <div class="gcard-members" id="members-${i}">
-        ${g.members.map(n=>`<span class="chip" draggable="true" data-name="${n}" data-gi="${i}">${n}</span>`).join('')}
+        ${g.members.map(n => `<span class="chip" draggable="true" data-name="${n}" data-gi="${i}">${n}</span>`).join('')}
       </div>
     </div>`;
   });
-
-  // points summary
-  html+=`<div class="pts-summary"><div class="pts-summary-title">✦ Score Summary 積分總結</div><div id="pts-summary-rows"></div></div>`;
-  html+=`<button class="next-btn" style="align-self:center;margin-top:.8rem" id="reroll-btn">⟳ Re-randomise 重新隨機</button>`;
-
+  html += `<div class="pts-summary"><div class="pts-summary-title">✦ Score Summary 積分總結</div><div id="pts-summary-rows"></div></div>`;
+  html += `<button class="next-btn" style="align-self:center;margin-top:.8rem" id="reroll-btn">⟳ Re-randomise 重新隨機</button>`;
   setResult(html);
   updatePtsSummary();
 
-  // point buttons
-  document.querySelectorAll('.pt-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const gi=parseInt(btn.dataset.gi),d=parseInt(btn.dataset.d);
-      groupsData[gi].pts+=d;
-      const el=document.getElementById(`pts-${gi}`);
-      el.textContent=groupsData[gi].pts;
-      el.className='pt-score'+(groupsData[gi].pts>0?' pos':groupsData[gi].pts<0?' neg':'');
+  document.querySelectorAll('.pt-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const gi = parseInt(btn.dataset.gi), d = parseInt(btn.dataset.d);
+      groupsData[gi].pts += d;
+      const el = document.getElementById(`pts-${gi}`);
+      el.textContent = groupsData[gi].pts;
+      el.className = 'pt-score' + (groupsData[gi].pts > 0 ? ' pos' : groupsData[gi].pts < 0 ? ' neg' : '');
       updatePtsSummary();
     });
   });
 
-  document.getElementById('reroll-btn').addEventListener('click',rerollFn);
+  document.getElementById('reroll-btn').addEventListener('click', rerollFn);
 
-  // drag-between-groups
-  let dragName=null,dragFromGi=null;
-
-  document.querySelectorAll('.chip').forEach(chip=>{
-    chip.addEventListener('dragstart',e=>{
-      dragName=e.currentTarget.dataset.name;
-      dragFromGi=parseInt(e.currentTarget.dataset.gi);
-      e.currentTarget.classList.add('dragging');
-      e.dataTransfer.effectAllowed='move';
-    });
-    chip.addEventListener('dragend',e=>e.currentTarget.classList.remove('dragging'));
+  let dragName = null, dragFromGi = null;
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('dragstart', e => { dragName = e.currentTarget.dataset.name; dragFromGi = parseInt(e.currentTarget.dataset.gi); e.currentTarget.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+    chip.addEventListener('dragend', e => e.currentTarget.classList.remove('dragging'));
   });
-
-  document.querySelectorAll('.gcard-members').forEach(zone=>{
-    zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag-over');});
-    zone.addEventListener('dragleave',()=>zone.classList.remove('drag-over'));
-    zone.addEventListener('drop',e=>{
-      e.preventDefault();zone.classList.remove('drag-over');
-      const toGi=parseInt(zone.id.replace('members-',''));
-      if(dragName===null||dragFromGi===toGi)return;
-      groupsData[dragFromGi].members=groupsData[dragFromGi].members.filter(n=>n!==dragName);
+  document.querySelectorAll('.gcard-members').forEach(zone => {
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('drag-over');
+      const toGi = parseInt(zone.id.replace('members-', ''));
+      if (dragName === null || dragFromGi === toGi) return;
+      groupsData[dragFromGi].members = groupsData[dragFromGi].members.filter(n => n !== dragName);
       groupsData[toGi].members.push(dragName);
-      dragName=null;dragFromGi=null;
-      renderGroups(label,rerollFn);
+      dragName = null; dragFromGi = null;
+      renderGroups(label, rerollFn);
     });
   });
 }
 
-function updatePtsSummary(){
-  const el=document.getElementById('pts-summary-rows');
-  if(!el)return;
-  const sorted=[...groupsData].map((g,i)=>({i,pts:g.pts})).sort((a,b)=>b.pts-a.pts);
-  const maxPts=sorted[0].pts;
-  const unitLabel=groupsMode==='pair'?'Pair':'Group';
-  el.innerHTML=sorted.map(g=>{
-    const lead=g.pts===maxPts&&maxPts!==0;
-    return `<div class="pts-row${lead?' pts-lead':''}"><span>${unitLabel} ${g.i+1}</span><span>${g.pts} pts${lead?' ✦':''}</span></div>`;
+function updatePtsSummary() {
+  const el = document.getElementById('pts-summary-rows');
+  if (!el) return;
+  const sorted = [...groupsData].map((g, i) => ({ i, pts: g.pts })).sort((a, b) => b.pts - a.pts);
+  const maxPts = sorted[0].pts;
+  const unitLabel = groupsMode === 'pair' ? 'Pair' : 'Group';
+  el.innerHTML = sorted.map(g => {
+    const lead = g.pts === maxPts && maxPts !== 0;
+    return `<div class="pts-row${lead ? ' pts-lead' : ''}"><span>${unitLabel} ${g.i + 1}</span><span>${g.pts} pts${lead ? ' ✦' : ''}</span></div>`;
   }).join('');
 }
 
-function doGroupInit(names,size){
-  groupsMode='group';
-  const s=shuffle(names);const grps=[];
-  for(let i=0;i<s.length;i+=size)grps.push(s.slice(i,i+size));
+function doGroupInit(names, size) {
+  groupsMode = 'group';
+  const s = shuffle(names); const grps = [];
+  for (let i = 0; i < s.length; i += size) grps.push(s.slice(i, i + size));
   buildGroupsData(grps);
-  renderGroups(`⬡ Groups of ${size} 每組${size}人`,()=>doGroupInit(getNames(),size));
+  renderGroups(`⬡ Groups of ${size} 每組${size}人`, () => doGroupInit(getNames(), size));
   celebrate();
 }
 
-function doTeamsInit(names,tc){
-  groupsMode='teams';
-  const teams=Array.from({length:tc},()=>[]);
-  shuffle(names).forEach((n,i)=>teams[i%tc].push(n));
+function doTeamsInit(names, tc) {
+  groupsMode = 'teams';
+  const teams = Array.from({ length: tc }, () => []);
+  shuffle(names).forEach((n, i) => teams[i % tc].push(n));
   buildGroupsData(teams);
-  renderGroups(`◉ ${tc} Teams ${tc}隊`,()=>doTeamsInit(getNames(),tc));
+  renderGroups(`◉ ${tc} Teams ${tc}隊`, () => doTeamsInit(getNames(), tc));
   celebrate();
 }
 
-function doPairInit(names){
-  groupsMode='pair';
-  const s=shuffle(names);const pairs=[];
-  for(let i=0;i<s.length-1;i+=2)pairs.push([s[i],s[i+1]]);
-  if(s.length%2===1)pairs.push([s[s.length-1],'(no partner)']);
+function doPairInit(names) {
+  groupsMode = 'pair';
+  const s = shuffle(names); const pairs = [];
+  for (let i = 0; i < s.length - 1; i += 2) pairs.push([s[i], s[i + 1]]);
+  if (s.length % 2 === 1) pairs.push([s[s.length - 1], '(no partner)']);
   buildGroupsData(pairs);
-  renderGroups(`⟡ Pairs 配對`,()=>doPairInit(getNames()));
+  renderGroups(`⟡ Pairs 配對`, () => doPairInit(getNames()));
   celebrate();
 }
 </script>
+</body>
+</html>
