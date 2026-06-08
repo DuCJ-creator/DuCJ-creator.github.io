@@ -207,6 +207,9 @@
     .press-header { padding: 1rem 1.4rem; }
   }
 </style>
+
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
 
@@ -506,22 +509,230 @@ function updatePreview() {
 
 function generateDoc() {
   if(!val('fTitle')){ setStatus(t('needTitle'),true); return; }
-  let btn=document.getElementById('genBtn'); btn.disabled=true; btn.textContent=t('btnGenerating');
-  let htmlContent=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${esc(val('fTitle'))}</title><style>body{font-family:'Times New Roman',serif;margin:2.54cm;font-size:12pt;}h1{font-size:20pt;text-align:center;}.meta{text-align:center;}.section-h1{font-size:16pt;font-weight:bold;}.section-h2{font-size:14pt;}.paragraph{text-align:justify;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #888;padding:4px;}</style></head><body><h1>${esc(val('fTitle'))}</h1>${val('fSubtitle')?`<h2>${esc(val('fSubtitle'))}</h2>`:''}<div class="meta">${[val('fAuthor'),val('fClass'),val('fSeat'),val('fTeacher'),formatDate(val('fDate'))].filter(Boolean).join(' · ')}</div><hr/>`;
-  blocks.forEach(b=>{
-    let v=['h1','h2','h3','body'].includes(b.type)?val('input-'+b.id):null;
-    if(b.type==='h1'&&v) htmlContent+=`<div class="section-h1">${esc(v)}</div>`;
-    else if(b.type==='h2'&&v) htmlContent+=`<div class="section-h2">${esc(v)}</div>`;
-    else if(b.type==='h3'&&v) htmlContent+=`<div class="section-h3"><i>${esc(v)}</i></div>`;
-    else if(b.type==='body'&&v) v.split('\n\n').forEach(p=>{ if(p.trim()) htmlContent+=`<div class="paragraph">${esc(p).replace(/\n/g,'<br/>')}</div>`; });
-    else if(b.type==='image'&&imageStore[b.id]) htmlContent+=`<div style="text-align:center;"><img src="${imageStore[b.id].dataUrl}" style="max-width:100%;"/><div><i>${esc(val('imgCaption-'+b.id))}</i></div></div>`;
-    else if(b.type==='table'&&tableStore[b.id]){ htmlContent+='<table>'; tableStore[b.id].rows.forEach(row=>{ htmlContent+='<tr>'+row.map(c=>`<td>${esc(c)}</td>`).join('')+'</tr>'; }); htmlContent+=`</table><div><i>${esc(val('tblCaption-'+b.id))}</i></div>`; }
-  });
-  htmlContent+=`</body></html>`;
-  const blob=new Blob([htmlContent],{type:'application/msword'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download=(val('fTitle').replace(/[^a-z0-9]/gi,'_').slice(0,40)||'report')+'.doc'; a.click(); URL.revokeObjectURL(url);
-  setStatus(t('statusOk'),false); btn.disabled=false; btn.textContent=t('btnGenerate');
+  let btn=document.getElementById('genBtn');
+  btn.disabled=true;
+  btn.textContent=t('btnGenerating');
+
+  try {
+    if (typeof docx === 'undefined') {
+      throw new Error('DOCX library not loaded. Please check your internet connection, then reload this page.');
+    }
+
+    const {
+      Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType,
+      Table, TableRow, TableCell, WidthType, BorderStyle, ImageRun,
+      PageBreak, ShadingType
+    } = docx;
+
+    const children = [];
+    const safeText = (s) => String(s || '').replace(/<[^>]*>/g, '').trim();
+    const title = safeText(val('fTitle'));
+    const subtitle = safeText(val('fSubtitle'));
+
+    // --- Title area ---
+    children.push(new Paragraph({
+      text: title,
+      heading: HeadingLevel.TITLE,
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 180 }
+    }));
+
+    if (subtitle) {
+      children.push(new Paragraph({
+        children: [new TextRun({ text: subtitle, italics: true, size: 28 })],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 200 }
+      }));
+    }
+
+    const meta = [];
+    if (val('fAuthor')) meta.push(`${t('docAuthor')} ${safeText(val('fAuthor'))}`);
+    if (val('fClass')) meta.push(`${t('docClass')} ${safeText(val('fClass'))}`);
+    if (val('fSeat')) meta.push(`${t('docSeat')} ${safeText(val('fSeat'))}`);
+    if (val('fTeacher')) meta.push(`${t('docInstructor')} ${safeText(val('fTeacher'))}`);
+    if (val('fDate')) meta.push(`${t('docDate')} ${safeText(formatDate(val('fDate')))}`);
+
+    if (meta.length) {
+      children.push(new Paragraph({
+        children: [new TextRun({ text: meta.join('   |   '), size: 22 })],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 220 }
+      }));
+    }
+
+    children.push(new Paragraph({
+      children: [new TextRun({ text: '────────────────────────────────────────', color: '999999' })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 260 }
+    }));
+
+    function addTextParagraph(text, options = {}) {
+      const clean = String(text || '').replace(/\r/g, '').trim();
+      if (!clean) return;
+
+      // Keep line breaks inside a paragraph.
+      const lines = clean.split('\n');
+      const runs = [];
+      lines.forEach((line, idx) => {
+        if (idx > 0) runs.push(new TextRun({ text: '', break: 1 }));
+        runs.push(new TextRun({
+          text: line,
+          bold: !!options.bold,
+          italics: !!options.italics,
+          size: options.size || 24
+        }));
+      });
+
+      children.push(new Paragraph({
+        children: runs,
+        alignment: options.align || AlignmentType.LEFT,
+        spacing: { before: options.before || 80, after: options.after || 120 },
+        indent: options.indent ? { left: options.indent } : undefined
+      }));
+    }
+
+    function stripMarkdownHeading(text) {
+      return String(text || '').replace(/^#{1,6}\s+/, '').trim();
+    }
+
+    function addImageBlock(id) {
+      const img = imageStore[id];
+      if (!img || !img.dataUrl) return;
+
+      const base64 = img.dataUrl.split(',')[1];
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+      const wCm = Number(val('imgW-'+id)) || 10;
+      const hCm = Number(val('imgH-'+id)) || 7;
+      const pxW = Math.round(wCm * 37.8);
+      const pxH = Math.round(hCm * 37.8);
+
+      children.push(new Paragraph({
+        children: [new ImageRun({ data: bytes, transformation: { width: pxW, height: pxH } })],
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 160, after: 80 }
+      }));
+
+      const cap = safeText(val('imgCaption-'+id));
+      if (cap) {
+        children.push(new Paragraph({
+          children: [new TextRun({ text: cap, italics: true, size: 20 })],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 160 }
+        }));
+      }
+    }
+
+    function addTableBlock(id) {
+      const tb = tableStore[id];
+      if (!tb || !tb.rows || !tb.rows.length) return;
+
+      const rows = tb.rows.map((row, ri) => new TableRow({
+        children: row.map(cell => new TableCell({
+          children: [new Paragraph({
+            children: [new TextRun({ text: safeText(cell), bold: ri === 0, size: 21 })]
+          })],
+          shading: ri === 0 ? { fill: 'F2EEE7', type: ShadingType.CLEAR } : undefined,
+          margins: { top: 80, bottom: 80, left: 100, right: 100 }
+        }))
+      }));
+
+      children.push(new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows,
+        borders: {
+          top: { style: BorderStyle.SINGLE, size: 1, color: '888888' },
+          bottom: { style: BorderStyle.SINGLE, size: 1, color: '888888' },
+          left: { style: BorderStyle.SINGLE, size: 1, color: '888888' },
+          right: { style: BorderStyle.SINGLE, size: 1, color: '888888' },
+          insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
+          insideVertical: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' }
+        }
+      }));
+
+      const cap = safeText(val('tblCaption-'+id));
+      if (cap) {
+        children.push(new Paragraph({
+          children: [new TextRun({ text: cap, italics: true, size: 20 })],
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 80, after: 160 }
+        }));
+      } else {
+        children.push(new Paragraph({ text: '', spacing: { after: 120 } }));
+      }
+    }
+
+    // --- Body blocks ---
+    blocks.forEach(b => {
+      let v = ['h1','h2','h3','body'].includes(b.type) ? val('input-'+b.id) : null;
+      if (b.type === 'h1' && v) {
+        children.push(new Paragraph({
+          text: stripMarkdownHeading(v),
+          heading: HeadingLevel.HEADING_1,
+          spacing: { before: 240, after: 100 }
+        }));
+      } else if (b.type === 'h2' && v) {
+        children.push(new Paragraph({
+          text: stripMarkdownHeading(v),
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 200, after: 80 }
+        }));
+      } else if (b.type === 'h3' && v) {
+        children.push(new Paragraph({
+          children: [new TextRun({ text: stripMarkdownHeading(v), bold: true, italics: true, size: 25 })],
+          spacing: { before: 180, after: 80 }
+        }));
+      } else if (b.type === 'body' && v) {
+        String(v).split(/\n\s*\n/).forEach(p => addTextParagraph(p));
+      } else if (b.type === 'image') {
+        addImageBlock(b.id);
+      } else if (b.type === 'table') {
+        addTableBlock(b.id);
+      }
+    });
+
+    const doc = new Document({
+      creator: safeText(val('fAuthor')) || 'Shirley Report Formatter',
+      title,
+      description: 'Generated by Report Formatter',
+      sections: [{
+        properties: {
+          page: {
+            margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 }
+          }
+        },
+        children
+      }]
+    });
+
+    Packer.toBlob(doc).then(blob => {
+      const filename = (title.replace(/[^a-z0-9\u4e00-\u9fa5]/gi,'_').slice(0,60) || 'report') + '.docx';
+      if (typeof saveAs !== 'undefined') saveAs(blob, filename);
+      else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+      setStatus(t('statusOk'), false);
+      btn.disabled=false;
+      btn.textContent=t('btnGenerate');
+    }).catch(err => {
+      console.error(err);
+      setStatus(t('statusErr') + err.message, true);
+      btn.disabled=false;
+      btn.textContent=t('btnGenerate');
+    });
+  } catch(err) {
+    console.error(err);
+    setStatus(t('statusErr') + err.message, true);
+    btn.disabled=false;
+    btn.textContent=t('btnGenerate');
+  }
 }
 
 // ===== SMART PASTE =====
