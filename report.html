@@ -83,13 +83,13 @@
   .preview-shell { background: white; border-radius: 24px; box-shadow: var(--shadow-subtle); padding: 2rem 2rem; min-height: 560px; position: relative; font-family: 'Instrument Serif', Georgia, serif; border: 1px solid #e9e2d6; }
   .preview-shell::after { content: '⚘  preview'; position: absolute; bottom: 1rem; right: 1.5rem; font-family: 'Manrope', sans-serif; font-size: 0.55rem; letter-spacing: 0.2em; color: #cfc7bb; text-transform: uppercase; }
   .prev-title { font-size: 26pt; font-weight: 500; text-align: center; font-family: 'Instrument Serif', serif; letter-spacing: -0.3px; margin-bottom: 0.2rem; color: #1e1914; }
-  .prev-subtitle { font-size: 18pt; font-weight: 400; text-align: center; font-family: 'Instrument Serif', serif; color: #4d443a; margin-bottom: 0.5rem; }
+  .prev-subtitle { font-size: 15pt; font-weight: 400; text-align: center; font-family: 'Instrument Serif', serif; color: #4d443a; margin-bottom: 0.5rem; }
   .prev-meta { font-size: 10pt; text-align: center; font-family: 'Manrope', sans-serif; color: #5c554b; line-height: 1.6; margin: 1rem 0 0.5rem; }
   .prev-rule { border: none; height: 1px; background: #d8cfc0; margin: 0.8rem 0 1rem; }
-  .prev-h1 { font-size: 18pt; font-weight: 500; font-family: 'Instrument Serif', serif; margin: 1.2rem 0 0.3rem; letter-spacing: -0.2px; }
-  .prev-h2 { font-size: 15pt; font-weight: 500; font-family: 'Instrument Serif', serif; margin: 1rem 0 0.2rem; color: #2d2a24; }
-  .prev-h3 { font-size: 13pt; font-weight: 500; font-style: italic; font-family: 'Instrument Serif', serif; margin: 0.8rem 0 0.2rem; }
-  .prev-body { font-size: 11.5pt; line-height: 1.55; text-align: justify; font-family: 'Instrument Serif', serif; margin-bottom: 1rem; color: #2a241e; }
+  .prev-h1 { font-size: 20pt; font-weight: 500; font-family: 'Instrument Serif', serif; margin: 1.2rem 0 0.3rem; letter-spacing: -0.2px; }
+  .prev-h2 { font-size: 16pt; font-weight: 500; font-family: 'Instrument Serif', serif; margin: 1rem 0 0.2rem; color: #2d2a24; }
+  .prev-h3 { font-size: 14pt; font-weight: 500; font-style: italic; font-family: 'Instrument Serif', serif; margin: 0.8rem 0 0.2rem; }
+  .prev-body { font-size: 11pt; line-height: 1.55; text-align: justify; font-family: 'Instrument Serif', serif; margin-bottom: 1rem; color: #2a241e; }
   .prev-img-block { text-align: center; margin: 1rem 0; background: #fcf9f2; border-radius: 12px; padding: 0.8rem; }
   .prev-caption { font-size: 9pt; font-style: italic; font-family: 'Manrope', sans-serif; color: #6b6256; margin-top: 0.3rem; }
   .status-bar { margin: 0.5rem 0; font-size: 0.75rem; border-radius: 40px; padding: 0.5rem 1rem; background: var(--accent-mist); color: var(--accent-slate); display: none; }
@@ -225,6 +225,32 @@
   }
   .mini-add-btn:hover { border-color: var(--gold-mark); background: var(--gold-glow); color: var(--ink-rich); }
 
+
+  .google-docs-note { font-size: 0.68rem; color: var(--ink-faint); margin-top: 0.25rem; }
+  .text-block-input, .title-textarea, .subtitle-textarea {
+    min-height: 52px;
+    resize: vertical;
+    line-height: 1.55;
+    user-select: text;
+    -webkit-user-select: text;
+  }
+  .text-block-input.block-heading { min-height: 46px; font-weight: 600; }
+  .body-block input, .body-block textarea, .body-block select, .body-block table, .body-block .tbl-editor {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+  .drag-handle[draggable="true"] { cursor: grab; }
+  .drag-handle[draggable="true"]:active { cursor: grabbing; }
+  .block-insert-row {
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--border-stroke);
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
   @media (max-width: 800px) {
     .editorial-layout { grid-template-columns: 1fr; }
     .editor-panel { border-right: none; border-bottom: 1px solid var(--border-stroke); }
@@ -313,11 +339,11 @@
     <div class="section-caption" data-i18n="panelTitle">REPORT CONTENT</div>
     <div class="field-group" style="margin-bottom: 1rem;">
       <div class="section-caption" data-i18n="lblTitle">Title <span class="required">✦</span></div>
-      <input type="text" id="fTitle" data-i18n-ph="phTitle" oninput="updatePreview()"/>
+      <textarea id="fTitle" class="title-textarea" rows="2" data-i18n-ph="phTitle" oninput="updatePreview()"></textarea>
     </div>
     <div class="field-group" style="margin-bottom: 1rem;">
       <div class="section-caption" data-i18n="lblSubtitle">Subtitle <span class="optional">(optional)</span></div>
-      <input type="text" id="fSubtitle" data-i18n-ph="phSubtitle" oninput="updatePreview()"/>
+      <textarea id="fSubtitle" class="subtitle-textarea" rows="2" data-i18n-ph="phSubtitle" oninput="updatePreview()"></textarea>
     </div>
     <hr class="divider"/>
     <div class="row-split" style="margin-bottom: 0.8rem;">
@@ -503,13 +529,9 @@ function changeBlockType(id, newType) {
   const currentValue = current ? current.value : '';
   let replacement;
 
-  if (newType === 'body') {
-    replacement = document.createElement('textarea');
-    replacement.rows = 3;
-  } else {
-    replacement = document.createElement('input');
-    replacement.type = 'text';
-  }
+  replacement = document.createElement('textarea');
+  replacement.rows = newType === 'body' ? 5 : 2;
+  replacement.className = 'text-block-input' + (newType === 'body' ? '' : ' block-heading');
 
   replacement.id = 'input-' + id;
   replacement.value = currentValue;
@@ -529,12 +551,57 @@ function setStatus(msg,isErr) { let b=document.getElementById('statusBar'); b.te
 // DRAG
 let dragSrcId = null;
 function attachDragEvents(el, id) {
-  el.setAttribute('draggable','true');
-  el.addEventListener('dragstart', e => { dragSrcId=id; el.classList.add('is-dragging'); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',String(id)); });
-  el.addEventListener('dragend', () => { el.classList.remove('is-dragging'); document.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(x=>x.classList.remove('drag-over-top','drag-over-bottom')); dragSrcId=null; });
-  el.addEventListener('dragover', e => { if(dragSrcId===null||dragSrcId===id) return; e.preventDefault(); e.dataTransfer.dropEffect='move'; let rect=el.getBoundingClientRect(); let mid=rect.top+rect.height/2; el.classList.toggle('drag-over-top',e.clientY<mid); el.classList.toggle('drag-over-bottom',e.clientY>=mid); });
-  el.addEventListener('dragleave', () => { el.classList.remove('drag-over-top','drag-over-bottom'); });
-  el.addEventListener('drop', e => { if(dragSrcId===null||dragSrcId===id) return; e.preventDefault(); el.classList.remove('drag-over-top','drag-over-bottom'); let rect=el.getBoundingClientRect(); let before=e.clientY<rect.top+rect.height/2; let srcIdx=blocks.findIndex(b=>b.id===dragSrcId); let destIdx=blocks.findIndex(b=>b.id===id); if(srcIdx===-1||destIdx===-1) return; let [moved]=blocks.splice(srcIdx,1); let newDest=blocks.findIndex(b=>b.id===id); blocks.splice(before?newDest:newDest+1,0,moved); let container=document.getElementById('blocksContainer'); blocks.forEach(b=>{ let dom=document.getElementById('block-'+b.id); if(dom) container.appendChild(dom); }); updatePreview(); });
+  const handle = el.querySelector('.drag-handle');
+  if (!handle) return;
+  handle.setAttribute('draggable', 'true');
+
+  handle.addEventListener('dragstart', e => {
+    dragSrcId = id;
+    el.classList.add('is-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(id));
+  });
+
+  handle.addEventListener('dragend', () => {
+    el.classList.remove('is-dragging');
+    document.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(x => x.classList.remove('drag-over-top','drag-over-bottom'));
+    dragSrcId = null;
+  });
+
+  // The whole card can receive drag-over/drop, but drag can only start from the handle.
+  el.addEventListener('dragover', e => {
+    if (dragSrcId === null || dragSrcId === id) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const rect = el.getBoundingClientRect();
+    const mid = rect.top + rect.height / 2;
+    el.classList.toggle('drag-over-top', e.clientY < mid);
+    el.classList.toggle('drag-over-bottom', e.clientY >= mid);
+  });
+
+  el.addEventListener('dragleave', () => {
+    el.classList.remove('drag-over-top','drag-over-bottom');
+  });
+
+  el.addEventListener('drop', e => {
+    if (dragSrcId === null || dragSrcId === id) return;
+    e.preventDefault();
+    el.classList.remove('drag-over-top','drag-over-bottom');
+    const rect = el.getBoundingClientRect();
+    const before = e.clientY < rect.top + rect.height / 2;
+    const srcIdx = blocks.findIndex(b => b.id === dragSrcId);
+    const destIdx = blocks.findIndex(b => b.id === id);
+    if (srcIdx === -1 || destIdx === -1) return;
+    const [moved] = blocks.splice(srcIdx, 1);
+    const newDest = blocks.findIndex(b => b.id === id);
+    blocks.splice(before ? newDest : newDest + 1, 0, moved);
+    const container = document.getElementById('blocksContainer');
+    blocks.forEach(b => {
+      const dom = document.getElementById('block-' + b.id);
+      if (dom) container.appendChild(dom);
+    });
+    updatePreview();
+  });
 }
 
 function addBlock(type, prefillValue, afterId = null) {
@@ -548,8 +615,8 @@ function addBlock(type, prefillValue, afterId = null) {
     ? renderBlockTypeSelector(id, type)
     : `<span class="type-badge" id="badge-${id}">${t('badge'+type[0].toUpperCase()+type.slice(1))}</span>`;
   let inner = `<div class="block-header"><div class="block-header-left"><span class="drag-handle"><svg width="12" height="14" viewBox="0 0 12 14" fill="none"><circle cx="3" cy="3" r="1.2" fill="currentColor"/><circle cx="8" cy="3" r="1.2" fill="currentColor"/><circle cx="3" cy="7" r="1.2" fill="currentColor"/><circle cx="8" cy="7" r="1.2" fill="currentColor"/><circle cx="3" cy="11" r="1.2" fill="currentColor"/><circle cx="8" cy="11" r="1.2" fill="currentColor"/></svg></span>${typeControl}</div><div class="block-header-actions"><button type="button" class="block-icon-btn" title="Copy block" onclick="duplicateBlock(${id})">⧉</button><button class="remove-btn" onclick="removeBlock(${id})">✕</button></div></div>`;
-  if(type==='body') inner+=`<textarea id="input-${id}" rows="3" placeholder="${t(textPlaceholderKey(type))}" oninput="updatePreview()"></textarea>`;
-  else if(['h1','h2','h3'].includes(type)) inner+=`<input type="text" id="input-${id}" placeholder="${t(textPlaceholderKey(type))}" oninput="updatePreview()"/>`;
+  if(type==='body') inner+=`<textarea id="input-${id}" class="text-block-input" rows="5" placeholder="${t(textPlaceholderKey(type))}" oninput="updatePreview()"></textarea>`;
+  else if(['h1','h2','h3'].includes(type)) inner+=`<textarea id="input-${id}" class="text-block-input block-heading" rows="2" placeholder="${t(textPlaceholderKey(type))}" oninput="updatePreview()"></textarea>`;
   else if(type==='image') {
     inner+=`<div class="img-upload-area" id="uploadArea-${id}"><input type="file" accept="image/*" onchange="handleImageUpload(${id},this)"/><div id="uploadLabel-${id}">${t('phImgUpload')}</div><img id="imgThumb-${id}" class="img-preview-thumb" style="display:none;"/></div>
     <div style="display:grid;gap:0.5rem;grid-template-columns:1fr 1fr;margin-top:0.5rem;" id="imgSizeRow-${id}"><label><span id="imgWLabel-${id}">${t('lblImgW')}</span><input type="number" id="imgW-${id}" min="1" max="16" step="0.5" value="10" oninput="updatePreview()"/></label><label><span id="imgHLabel-${id}">${t('lblImgH')}</span><input type="number" id="imgH-${id}" min="1" max="22" step="0.5" value="7" oninput="updatePreview()"/></label></div>
@@ -631,16 +698,16 @@ function updatePreview() {
   if(!title&&!author&&blocks.length===0){ emptyEl.style.display='flex'; contentEl.style.display='none'; return; }
   emptyEl.style.display='none'; contentEl.style.display='block';
   let html='';
-  if(title) html+=`<div class="prev-title">${esc(title)}</div>`;
-  if(subtitle) html+=`<div class="prev-subtitle">${esc(subtitle)}</div>`;
+  if(title) html+=`<div class="prev-title">${esc(title).replace(/\n/g,'<br/>')}</div>`;
+  if(subtitle) html+=`<div class="prev-subtitle">${esc(subtitle).replace(/\n/g,'<br/>')}</div>`;
   let meta=[]; if(author) meta.push(`<b>${t('docAuthor')}</b> ${esc(author)}`); if(cls) meta.push(`<b>${t('docClass')}</b> ${esc(cls)}`); if(seat) meta.push(`<b>${t('docSeat')}</b> ${esc(seat)}`); if(teacher) meta.push(`<b>${t('docInstructor')}</b> ${esc(teacher)}`); if(date) meta.push(`<b>${t('docDate')}</b> ${esc(formatDate(date))}`);
   if(meta.length) html+=`<div class="prev-meta">${meta.join(' · ')}</div>`;
   if(title||meta.length) html+=`<hr class="prev-rule"/>`;
   blocks.forEach(b=>{
     let v=['h1','h2','h3','body'].includes(b.type)?val('input-'+b.id):null;
-    if(b.type==='h1'&&v) html+=`<div class="prev-h1">${esc(v)}</div>`;
-    else if(b.type==='h2'&&v) html+=`<div class="prev-h2">${esc(v)}</div>`;
-    else if(b.type==='h3'&&v) html+=`<div class="prev-h3">${esc(v)}</div>`;
+    if(b.type==='h1'&&v) html+=`<div class="prev-h1">${esc(v).replace(/\n/g,'<br/>')}</div>`;
+    else if(b.type==='h2'&&v) html+=`<div class="prev-h2">${esc(v).replace(/\n/g,'<br/>')}</div>`;
+    else if(b.type==='h3'&&v) html+=`<div class="prev-h3">${esc(v).replace(/\n/g,'<br/>')}</div>`;
     else if(b.type==='body'&&v) v.split('\n\n').forEach(p=>{ if(p.trim()) html+=`<div class="prev-body">${esc(p).replace(/\n/g,'<br/>')}</div>`; });
     else if(b.type==='image'){ let img=imageStore[b.id],cap=val('imgCaption-'+b.id); html+=`<div class="prev-img-block">${img?`<img src="${img.dataUrl}" style="max-width:100%;"/>`:`<div style="border:1px dashed #ccc;padding:0.6rem;">${t('phImgUpload')}</div>`}${cap?`<div class="prev-caption">${esc(cap)}</div>`:''}</div>`; }
     else if(b.type==='table'){ let tb=tableStore[b.id]; if(tb){ let cap=val('tblCaption-'+b.id); let tbl='<table style="border-collapse:collapse;width:100%;border:1px solid #d8cfc0;">'; tb.rows.forEach((row,ri)=>{ tbl+='<tr>'+row.map(c=>`<td style="border:1px solid #d8cfc0;padding:0.25rem 0.5rem;${ri===0?'background:#f5efe8;font-weight:600;':''}">${esc(c)}</td>`).join('')+'</tr>'; }); tbl+='</table>'; if(cap) tbl+=`<div class="prev-caption">${esc(cap)}</div>`; html+=tbl; } }
@@ -667,20 +734,29 @@ function generateDoc() {
 
     const children = [];
     const safeText = (s) => String(s || '').replace(/<[^>]*>/g, '').trim();
+    function textRunsWithBreaks(text, options = {}) {
+      const clean = String(text || '').replace(/\r/g, '').trim();
+      const lines = clean.split('\n');
+      const runs = [];
+      lines.forEach((line, idx) => {
+        if (idx > 0) runs.push(new TextRun({ text: '', break: 1 }));
+        runs.push(new TextRun({ text: line, ...options }));
+      });
+      return runs;
+    }
     const title = safeText(val('fTitle'));
     const subtitle = safeText(val('fSubtitle'));
 
     // --- Title area ---
     children.push(new Paragraph({
-      text: title,
-      heading: HeadingLevel.TITLE,
+      children: textRunsWithBreaks(title, { bold: true, size: 52 }),
       alignment: AlignmentType.CENTER,
       spacing: { after: 180 }
     }));
 
     if (subtitle) {
       children.push(new Paragraph({
-        children: [new TextRun({ text: subtitle, italics: true, size: 28 })],
+        children: textRunsWithBreaks(subtitle, { italics: true, size: 30 }),
         alignment: AlignmentType.CENTER,
         spacing: { after: 200 }
       }));
@@ -720,7 +796,7 @@ function generateDoc() {
           text: line,
           bold: !!options.bold,
           italics: !!options.italics,
-          size: options.size || 24
+          size: options.size || 22
         }));
       });
 
@@ -810,19 +886,17 @@ function generateDoc() {
       let v = ['h1','h2','h3','body'].includes(b.type) ? val('input-'+b.id) : null;
       if (b.type === 'h1' && v) {
         children.push(new Paragraph({
-          text: stripMarkdownHeading(v),
-          heading: HeadingLevel.HEADING_1,
+          children: textRunsWithBreaks(stripMarkdownHeading(v), { bold: true, size: 40 }),
           spacing: { before: 240, after: 100 }
         }));
       } else if (b.type === 'h2' && v) {
         children.push(new Paragraph({
-          text: stripMarkdownHeading(v),
-          heading: HeadingLevel.HEADING_2,
+          children: textRunsWithBreaks(stripMarkdownHeading(v), { bold: true, size: 32 }),
           spacing: { before: 200, after: 80 }
         }));
       } else if (b.type === 'h3' && v) {
         children.push(new Paragraph({
-          children: [new TextRun({ text: stripMarkdownHeading(v), bold: true, italics: true, size: 25 })],
+          children: textRunsWithBreaks(stripMarkdownHeading(v), { bold: true, size: 28 }),
           spacing: { before: 180, after: 80 }
         }));
       } else if (b.type === 'body' && v) {
@@ -841,6 +915,7 @@ function generateDoc() {
       sections: [{
         properties: {
           page: {
+            size: { width: 11906, height: 16838 },
             margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 }
           }
         },
