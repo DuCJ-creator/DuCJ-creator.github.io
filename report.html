@@ -62,6 +62,9 @@
   .block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
   .block-header-left { display: flex; align-items: center; gap: 0.4rem; }
   .type-badge { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.2rem 0.6rem; border-radius: 30px; background: #f1ede6; color: var(--ink-soft); }
+  .block-type-selector { border: 1px solid var(--border-stroke); border-radius: 999px; padding: 0.22rem 1.8rem 0.22rem 0.75rem; font-family: 'Manrope', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; background-color: #f1ede6; color: var(--ink-soft); cursor: pointer; outline: none; appearance: auto; transition: all 0.18s ease; }
+  .block-type-selector:hover { border-color: var(--gold-mark); background-color: #f8f3e8; color: var(--ink-rich); }
+  .block-type-selector:focus { border-color: var(--gold-mark); box-shadow: 0 0 0 3px rgba(194,161,91,0.15); }
   .remove-btn { background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--ink-faint); transition: color 0.15s; line-height: 1; }
   .remove-btn:hover { color: var(--danger-rose); }
   .add-btn { font-family: 'Manrope', sans-serif; font-size: 0.7rem; font-weight: 500; background: transparent; border: 1px dashed var(--border-stroke); padding: 0.4rem 1rem; border-radius: 30px; color: var(--ink-soft); cursor: pointer; transition: all 0.2s; }
@@ -418,9 +421,25 @@ function setLang(l) {
   updatePreview();
 }
 
+function textPlaceholderKey(type) {
+  if (type === 'body') return 'phPara';
+  if (type === 'h1') return 'phH1';
+  if (type === 'h2') return 'phH2';
+  if (type === 'h3') return 'phH3';
+  return 'phPara';
+}
+
+function renderBlockTypeSelector(id, type) {
+  const labelMap = { h1: 'H1', h2: 'H2', h3: 'H3', body: 'P' };
+  return `<select class="block-type-selector" id="blockType-${id}" aria-label="Block type" onchange="changeBlockType(${id}, this.value)">
+    ${Object.entries(labelMap).map(([value, label]) => `<option value="${value}" ${value === type ? 'selected' : ''}>${label}</option>`).join('')}
+  </select>`;
+}
+
 function refreshBlockLabels(id, type) {
   const badge = document.getElementById('badge-'+id); if(badge) badge.textContent = t('badge'+type[0].toUpperCase()+type.slice(1));
-  const inp = document.getElementById('input-'+id); if(inp && ['h1','h2','h3','body'].includes(type)) inp.placeholder = t('ph'+type.toUpperCase());
+  const selector = document.getElementById('blockType-'+id); if(selector && ['h1','h2','h3','body'].includes(type)) selector.value = type;
+  const inp = document.getElementById('input-'+id); if(inp && ['h1','h2','h3','body'].includes(type)) inp.placeholder = t(textPlaceholderKey(type));
   const upl = document.getElementById('uploadLabel-'+id); if(upl && !imageStore[id]) upl.textContent = t('phImgUpload');
   const wl = document.getElementById('imgWLabel-'+id); if(wl) wl.textContent = t('lblImgW');
   const hl = document.getElementById('imgHLabel-'+id); if(hl) hl.textContent = t('lblImgH');
@@ -429,6 +448,42 @@ function refreshBlockLabels(id, type) {
   const tcp = document.getElementById('tblCaption-'+id); if(tcp) tcp.placeholder = t('phTblCaption');
   ['addRow','addCol','delRow','delCol'].forEach(op => { let btn = document.getElementById(`tblBtn-${op}-${id}`); if(btn) btn.textContent = t('tblBtn'+op[0].toUpperCase()+op.slice(1)); });
   if(type==='table'){ let ed = document.getElementById('tblEditor-'+id); if(ed) ed.innerHTML = renderTableEditor(id); }
+}
+
+function changeBlockType(id, newType) {
+  if (!['h1','h2','h3','body'].includes(newType)) return;
+  const block = blocks.find(b => b.id === id);
+  if (!block) return;
+
+  if (!['h1','h2','h3','body'].includes(block.type)) {
+    const selector = document.getElementById('blockType-'+id);
+    if (selector) selector.value = block.type;
+    return;
+  }
+
+  if (block.type === newType) return;
+  block.type = newType;
+
+  const current = document.getElementById('input-'+id);
+  const currentValue = current ? current.value : '';
+  let replacement;
+
+  if (newType === 'body') {
+    replacement = document.createElement('textarea');
+    replacement.rows = 3;
+  } else {
+    replacement = document.createElement('input');
+    replacement.type = 'text';
+  }
+
+  replacement.id = 'input-' + id;
+  replacement.value = currentValue;
+  replacement.placeholder = t(textPlaceholderKey(newType));
+  replacement.oninput = updatePreview;
+
+  if (current) current.replaceWith(replacement);
+  refreshBlockLabels(id, newType);
+  updatePreview();
 }
 
 function val(id) { let e = document.getElementById(id); return e ? e.value : ''; }
@@ -451,9 +506,12 @@ function addBlock(type, prefillValue) {
   let id = blockId++;
   blocks.push({ id, type });
   let div = document.createElement('div'); div.className='body-block'; div.id='block-'+id;
-  let inner = `<div class="block-header"><div class="block-header-left"><span class="drag-handle"><svg width="12" height="14" viewBox="0 0 12 14" fill="none"><circle cx="3" cy="3" r="1.2" fill="currentColor"/><circle cx="8" cy="3" r="1.2" fill="currentColor"/><circle cx="3" cy="7" r="1.2" fill="currentColor"/><circle cx="8" cy="7" r="1.2" fill="currentColor"/><circle cx="3" cy="11" r="1.2" fill="currentColor"/><circle cx="8" cy="11" r="1.2" fill="currentColor"/></svg></span><span class="type-badge" id="badge-${id}">${t('badge'+type[0].toUpperCase()+type.slice(1))}</span></div><button class="remove-btn" onclick="removeBlock(${id})">✕</button></div>`;
-  if(type==='body') inner+=`<textarea id="input-${id}" rows="3" placeholder="${t('phPara')}" oninput="updatePreview()"></textarea>`;
-  else if(['h1','h2','h3'].includes(type)) inner+=`<input type="text" id="input-${id}" placeholder="${t('ph'+type.toUpperCase())}" oninput="updatePreview()"/>`;
+  const typeControl = ['h1','h2','h3','body'].includes(type)
+    ? renderBlockTypeSelector(id, type)
+    : `<span class="type-badge" id="badge-${id}">${t('badge'+type[0].toUpperCase()+type.slice(1))}</span>`;
+  let inner = `<div class="block-header"><div class="block-header-left"><span class="drag-handle"><svg width="12" height="14" viewBox="0 0 12 14" fill="none"><circle cx="3" cy="3" r="1.2" fill="currentColor"/><circle cx="8" cy="3" r="1.2" fill="currentColor"/><circle cx="3" cy="7" r="1.2" fill="currentColor"/><circle cx="8" cy="7" r="1.2" fill="currentColor"/><circle cx="3" cy="11" r="1.2" fill="currentColor"/><circle cx="8" cy="11" r="1.2" fill="currentColor"/></svg></span>${typeControl}</div><button class="remove-btn" onclick="removeBlock(${id})">✕</button></div>`;
+  if(type==='body') inner+=`<textarea id="input-${id}" rows="3" placeholder="${t(textPlaceholderKey(type))}" oninput="updatePreview()"></textarea>`;
+  else if(['h1','h2','h3'].includes(type)) inner+=`<input type="text" id="input-${id}" placeholder="${t(textPlaceholderKey(type))}" oninput="updatePreview()"/>`;
   else if(type==='image') {
     inner+=`<div class="img-upload-area" id="uploadArea-${id}"><input type="file" accept="image/*" onchange="handleImageUpload(${id},this)"/><div id="uploadLabel-${id}">${t('phImgUpload')}</div><img id="imgThumb-${id}" class="img-preview-thumb" style="display:none;"/></div>
     <div style="display:grid;gap:0.5rem;grid-template-columns:1fr 1fr;margin-top:0.5rem;" id="imgSizeRow-${id}"><label><span id="imgWLabel-${id}">${t('lblImgW')}</span><input type="number" id="imgW-${id}" min="1" max="16" step="0.5" value="10" oninput="updatePreview()"/></label><label><span id="imgHLabel-${id}">${t('lblImgH')}</span><input type="number" id="imgH-${id}" min="1" max="22" step="0.5" value="7" oninput="updatePreview()"/></label></div>
