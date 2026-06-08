@@ -204,6 +204,27 @@
   }
   .sp-retry-btn:hover { background: #f5efe4; }
 
+
+  .block-header-actions { display: flex; align-items: center; gap: 0.35rem; }
+  .block-icon-btn {
+    background: none; border: 1px solid var(--border-stroke); border-radius: 999px;
+    min-width: 28px; height: 28px; padding: 0 0.45rem; cursor: pointer;
+    color: var(--ink-faint); font-size: 0.8rem; line-height: 1; transition: all 0.15s;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .block-icon-btn:hover { background: #f5efe4; color: var(--ink-rich); border-color: var(--gold-mark); }
+  .block-insert-row {
+    margin-top: 0.75rem; padding-top: 0.65rem; border-top: 1px dashed var(--border-stroke);
+    display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;
+  }
+  .block-insert-label { font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); margin-right: 0.25rem; }
+  .mini-add-btn {
+    font-family: 'Manrope', sans-serif; font-size: 0.65rem; font-weight: 600;
+    background: #fffdf8; border: 1px solid var(--border-stroke); padding: 0.28rem 0.7rem;
+    border-radius: 999px; color: var(--ink-soft); cursor: pointer; transition: all 0.18s;
+  }
+  .mini-add-btn:hover { border-color: var(--gold-mark); background: var(--gold-glow); color: var(--ink-rich); }
+
   @media (max-width: 800px) {
     .editorial-layout { grid-template-columns: 1fr; }
     .editor-panel { border-right: none; border-bottom: 1px solid var(--border-stroke); }
@@ -436,6 +457,20 @@ function renderBlockTypeSelector(id, type) {
   </select>`;
 }
 
+
+
+function renderInlineInsertControls(id) {
+  return `<div class="block-insert-row">
+    <span class="block-insert-label">Add after</span>
+    <button type="button" class="mini-add-btn" onclick="addBlockAfter(${id}, 'h1')">+ H1</button>
+    <button type="button" class="mini-add-btn" onclick="addBlockAfter(${id}, 'h2')">+ H2</button>
+    <button type="button" class="mini-add-btn" onclick="addBlockAfter(${id}, 'h3')">+ H3</button>
+    <button type="button" class="mini-add-btn" onclick="addBlockAfter(${id}, 'body')">+ P</button>
+    <button type="button" class="mini-add-btn" onclick="addBlockAfter(${id}, 'image')">+ Image</button>
+    <button type="button" class="mini-add-btn" onclick="addBlockAfter(${id}, 'table')">+ Table</button>
+  </div>`;
+}
+
 function refreshBlockLabels(id, type) {
   const badge = document.getElementById('badge-'+id); if(badge) badge.textContent = t('badge'+type[0].toUpperCase()+type.slice(1));
   const selector = document.getElementById('blockType-'+id); if(selector && ['h1','h2','h3','body'].includes(type)) selector.value = type;
@@ -502,14 +537,17 @@ function attachDragEvents(el, id) {
   el.addEventListener('drop', e => { if(dragSrcId===null||dragSrcId===id) return; e.preventDefault(); el.classList.remove('drag-over-top','drag-over-bottom'); let rect=el.getBoundingClientRect(); let before=e.clientY<rect.top+rect.height/2; let srcIdx=blocks.findIndex(b=>b.id===dragSrcId); let destIdx=blocks.findIndex(b=>b.id===id); if(srcIdx===-1||destIdx===-1) return; let [moved]=blocks.splice(srcIdx,1); let newDest=blocks.findIndex(b=>b.id===id); blocks.splice(before?newDest:newDest+1,0,moved); let container=document.getElementById('blocksContainer'); blocks.forEach(b=>{ let dom=document.getElementById('block-'+b.id); if(dom) container.appendChild(dom); }); updatePreview(); });
 }
 
-function addBlock(type, prefillValue) {
+function addBlock(type, prefillValue, afterId = null) {
   let id = blockId++;
-  blocks.push({ id, type });
+  const newBlock = { id, type };
+  const afterIdx = afterId === null ? -1 : blocks.findIndex(b => b.id === afterId);
+  if (afterIdx >= 0) blocks.splice(afterIdx + 1, 0, newBlock);
+  else blocks.push(newBlock);
   let div = document.createElement('div'); div.className='body-block'; div.id='block-'+id;
   const typeControl = ['h1','h2','h3','body'].includes(type)
     ? renderBlockTypeSelector(id, type)
     : `<span class="type-badge" id="badge-${id}">${t('badge'+type[0].toUpperCase()+type.slice(1))}</span>`;
-  let inner = `<div class="block-header"><div class="block-header-left"><span class="drag-handle"><svg width="12" height="14" viewBox="0 0 12 14" fill="none"><circle cx="3" cy="3" r="1.2" fill="currentColor"/><circle cx="8" cy="3" r="1.2" fill="currentColor"/><circle cx="3" cy="7" r="1.2" fill="currentColor"/><circle cx="8" cy="7" r="1.2" fill="currentColor"/><circle cx="3" cy="11" r="1.2" fill="currentColor"/><circle cx="8" cy="11" r="1.2" fill="currentColor"/></svg></span>${typeControl}</div><button class="remove-btn" onclick="removeBlock(${id})">✕</button></div>`;
+  let inner = `<div class="block-header"><div class="block-header-left"><span class="drag-handle"><svg width="12" height="14" viewBox="0 0 12 14" fill="none"><circle cx="3" cy="3" r="1.2" fill="currentColor"/><circle cx="8" cy="3" r="1.2" fill="currentColor"/><circle cx="3" cy="7" r="1.2" fill="currentColor"/><circle cx="8" cy="7" r="1.2" fill="currentColor"/><circle cx="3" cy="11" r="1.2" fill="currentColor"/><circle cx="8" cy="11" r="1.2" fill="currentColor"/></svg></span>${typeControl}</div><div class="block-header-actions"><button type="button" class="block-icon-btn" title="Copy block" onclick="duplicateBlock(${id})">⧉</button><button class="remove-btn" onclick="removeBlock(${id})">✕</button></div></div>`;
   if(type==='body') inner+=`<textarea id="input-${id}" rows="3" placeholder="${t(textPlaceholderKey(type))}" oninput="updatePreview()"></textarea>`;
   else if(['h1','h2','h3'].includes(type)) inner+=`<input type="text" id="input-${id}" placeholder="${t(textPlaceholderKey(type))}" oninput="updatePreview()"/>`;
   else if(type==='image') {
@@ -523,8 +561,16 @@ function addBlock(type, prefillValue) {
     <div class="tbl-controls" style="margin:0.5rem 0 0;"><button class="tbl-btn" id="tblBtn-addRow-${id}" onclick="tblOp(${id},'addRow')">${t('tblBtnAddRow')}</button><button class="tbl-btn" id="tblBtn-addCol-${id}" onclick="tblOp(${id},'addCol')">${t('tblBtnAddCol')}</button><button class="tbl-btn" id="tblBtn-delRow-${id}" onclick="tblOp(${id},'delRow')">${t('tblBtnDelRow')}</button><button class="tbl-btn" id="tblBtn-delCol-${id}" onclick="tblOp(${id},'delCol')">${t('tblBtnDelCol')}</button></div>
     <div style="margin-top:.5rem;"><div class="section-caption" id="tblCapLabel-${id}">${t('lblTblCaption')}</div><input type="text" id="tblCaption-${id}" placeholder="${t('phTblCaption')}" oninput="updatePreview()"/></div>`;
   }
+  inner += renderInlineInsertControls(id);
   div.innerHTML = inner;
-  document.getElementById('blocksContainer').appendChild(div);
+  const container = document.getElementById('blocksContainer');
+  if (afterIdx >= 0) {
+    const afterEl = document.getElementById('block-' + afterId);
+    if (afterEl && afterEl.nextSibling) container.insertBefore(div, afterEl.nextSibling);
+    else container.appendChild(div);
+  } else {
+    container.appendChild(div);
+  }
   attachDragEvents(div, id);
   // Prefill value after DOM insert
   if(prefillValue && typeof prefillValue === 'string') {
@@ -534,6 +580,43 @@ function addBlock(type, prefillValue) {
   if(blocks.length >= 2) document.getElementById('dragHint').style.display = 'block';
   updatePreview();
   return id;
+}
+
+
+function addBlockAfter(afterId, type) {
+  const newId = addBlock(type, undefined, afterId);
+  const input = document.getElementById('input-' + newId);
+  if (input) input.focus();
+}
+
+function duplicateBlock(id) {
+  const block = blocks.find(b => b.id === id);
+  if (!block) return;
+
+  if (['h1','h2','h3','body'].includes(block.type)) {
+    addBlock(block.type, val('input-' + id), id);
+  } else if (block.type === 'table') {
+    const sourceRows = tableStore[id]?.rows || [['Header'], ['Cell']];
+    const newId = addBlock('table', { rows: sourceRows.map(row => row.slice()) }, id);
+    const oldCap = document.getElementById('tblCaption-' + id);
+    const newCap = document.getElementById('tblCaption-' + newId);
+    if (oldCap && newCap) newCap.value = oldCap.value;
+  } else if (block.type === 'image') {
+    const newId = addBlock('image', undefined, id);
+    if (imageStore[id]) {
+      imageStore[newId] = { ...imageStore[id] };
+      const thumb = document.getElementById('imgThumb-' + newId);
+      if (thumb) { thumb.src = imageStore[newId].dataUrl; thumb.style.display = 'block'; }
+    }
+    ['imgW','imgH','imgCaption'].forEach(prefix => {
+      const oldEl = document.getElementById(prefix + '-' + id);
+      const newEl = document.getElementById(prefix + '-' + newId);
+      if (oldEl && newEl) newEl.value = oldEl.value;
+    });
+  }
+
+  updatePreview();
+  setStatus('✓ Block copied', false);
 }
 
 function removeBlock(id) { let idx=blocks.findIndex(b=>b.id===id); if(idx!==-1) blocks.splice(idx,1); delete imageStore[id]; delete tableStore[id]; let el=document.getElementById('block-'+id); if(el) el.remove(); if(blocks.length<2) document.getElementById('dragHint').style.display='none'; updatePreview(); }
