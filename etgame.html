@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,7 +47,6 @@
     .screen.active{display:block}
     @keyframes rise{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
 
-    /* -- MENU -- */
     .instant-start{min-height:min(720px,calc(100dvh - 32px));display:grid;place-items:center}
     .launch-card{width:min(520px,100%);padding:clamp(16px,4vw,26px);text-align:center}
     .setup-card{
@@ -100,7 +100,6 @@
     .main-btn:hover{transform:translateY(-2px)}
     .loading{display:none;text-align:center;color:var(--muted);font-weight:800;margin-top:10px}
 
-    /* -- GAME -- */
     .game-card,.result-card{
       width:min(820px,100%);margin:0 auto;
       background:var(--card);border:1px solid rgba(255,255,255,.72);
@@ -108,7 +107,6 @@
       padding:clamp(14px,3.5vw,28px);
     }
 
-    /* compact topbar: stats + inline timer + pause */
     .topbar{
       display:flex;align-items:stretch;gap:8px;margin-bottom:12px;
     }
@@ -119,7 +117,6 @@
     .stat-label{color:var(--muted);font-size:.65rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;display:block}
     .stat-value{display:block;margin-top:2px;font-size:clamp(1rem,4vw,1.5rem);font-weight:1000;letter-spacing:-.03em}
 
-    /* compact inline timer */
     .timer-wrap{
       display:flex;align-items:center;justify-content:center;
       padding:6px 10px;border:1px solid var(--line);border-radius:var(--radius-md);
@@ -143,7 +140,6 @@
     }
     .timer-number-sm{font-size:clamp(.9rem,3.5vw,1.3rem);font-weight:1000;letter-spacing:-.04em;color:var(--primary-dark)}
 
-    /* pause button */
     .pause-btn{
       min-height:0;padding:6px 12px;border-radius:var(--radius-md);
       background:rgba(255,255,255,.72);border:1px solid var(--line);
@@ -152,7 +148,6 @@
     }
     .pause-btn:hover{color:var(--primary);border-color:var(--primary)}
 
-    /* question card */
     .question-card{
       text-align:center;padding:clamp(14px,3vw,24px);
       border-radius:var(--radius-xl);background:rgba(255,255,255,.74);border:1px solid var(--line);
@@ -161,7 +156,6 @@
     .word{margin:0;font-size:clamp(1.9rem,8vw,4rem);line-height:1;letter-spacing:-.05em;color:#111827}
     .part{margin-top:8px;color:var(--primary-dark);font-weight:900;font-size:.88rem}
 
-    /* answers: A B C D labels */
     .answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
     .answer-btn{
       padding:13px 12px;min-height:58px;
@@ -187,7 +181,6 @@
     .answer-btn.wrong   .ans-txt{color:#fff}
     .ans-txt{flex:1}
 
-    /* -- PAUSE OVERLAY -- */
     .pause-overlay{
       display:none;position:fixed;inset:0;z-index:300;
       background:rgba(248,246,255,.85);backdrop-filter:blur(8px);
@@ -210,7 +203,7 @@
     }
     .ghost-btn:hover{transform:translateY(-2px)}
 
-    /* -- RESULT -- */
+    /* RESULT */
     .result-card{
       position:relative;
       text-align:center;
@@ -283,7 +276,73 @@
     .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
     .actions{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;padding-bottom:var(--safe-bottom)}
 
-    /* FX flash */
+    /* VOCAB REVIEW TABLE */
+    .vocab-review{
+      margin-top:22px;
+      text-align:left;
+      background:rgba(255,255,255,.85);
+      border:1px solid var(--line);
+      border-radius:var(--radius-lg);
+      overflow:hidden;
+    }
+    .vocab-review-header{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:12px 16px 10px;
+      border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.6);
+    }
+    .vocab-review-title{
+      font-size:.8rem;font-weight:900;letter-spacing:.08em;
+      text-transform:uppercase;color:var(--primary-dark);margin:0;
+    }
+    .vocab-filter-tabs{display:flex;gap:6px}
+    .vtab{
+      padding:4px 12px;border-radius:999px;font-size:.75rem;font-weight:800;
+      border:1px solid var(--line);background:transparent;color:var(--muted);
+      cursor:pointer;transition:all .15s;
+    }
+    .vtab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .vocab-table{width:100%;border-collapse:collapse;font-size:.82rem}
+    .vocab-table th{
+      padding:8px 12px;font-size:.68rem;font-weight:900;letter-spacing:.07em;
+      text-transform:uppercase;color:var(--muted);
+      border-bottom:1px solid var(--line);background:rgba(248,248,252,.7);
+      text-align:left;
+    }
+    .vocab-table td{
+      padding:9px 12px;border-bottom:1px solid rgba(15,23,42,.05);
+      vertical-align:middle;
+    }
+    .vocab-table tr:last-child td{border-bottom:none}
+    .vocab-table tr.wrong-row{background:rgba(239,68,68,.05)}
+    .vocab-table tr.wrong-row td:first-child{border-left:3px solid var(--danger)}
+    .vocab-table tr.correct-row td:first-child{border-left:3px solid var(--success)}
+    .word-cell{font-weight:900;color:#111827;font-size:.92rem}
+    .wrong-word{color:var(--danger)}
+    .correct-word{color:var(--success)}
+    .part-badge{
+      display:inline-block;padding:2px 8px;border-radius:999px;
+      font-size:.68rem;font-weight:800;letter-spacing:.05em;
+      background:rgba(124,58,237,.1);color:var(--primary-dark);
+    }
+    .meaning-cell{color:#374151;font-weight:700;font-size:.85rem}
+    .level-unit-cell{color:var(--muted);font-size:.75rem;font-weight:700;white-space:nowrap}
+    .wrong-badge{
+      display:inline-flex;align-items:center;gap:4px;
+      padding:2px 8px;border-radius:999px;
+      font-size:.68rem;font-weight:900;
+      background:rgba(239,68,68,.12);color:#b91c1c;
+    }
+    .no-words-msg{
+      text-align:center;padding:24px;color:var(--muted);font-weight:700;font-size:.88rem;
+    }
+    .timeout-badge{
+      display:inline-flex;align-items:center;gap:4px;
+      padding:2px 8px;border-radius:999px;
+      font-size:.68rem;font-weight:900;
+      background:rgba(245,158,11,.12);color:#b45309;
+    }
+
     .fx-overlay{position:fixed;inset:0;pointer-events:none;z-index:200;opacity:0}
     #fxCorrect{background:radial-gradient(ellipse at center,rgba(22,163,74,.12) 0,transparent 65%)}
     #fxWrong  {background:radial-gradient(ellipse at center,rgba(239,68,68,.14) 0,transparent 60%)}
@@ -297,6 +356,7 @@
       .result-card{padding-top:clamp(148px,34vw,176px)}
       .student-info-box{left:14px;right:14px;width:auto}
       .student-info-grid{grid-template-columns:1fr}
+      .vocab-table th:nth-child(4),.vocab-table td:nth-child(4){display:none}
     }
     @media(max-width:380px){
       .level-grid{grid-template-columns:repeat(2,1fr)}
@@ -312,11 +372,10 @@
 <div class="fx-overlay" id="fxCorrect"></div>
 <div class="fx-overlay" id="fxWrong"></div>
 
-<!-- Pause overlay -->
 <div class="pause-overlay" id="pauseOverlay">
   <div class="pause-box">
     <h2>Paused</h2>
-    <p>Timer is stopped.<br/>Resumewhen you're ready.</p>
+    <p>Timer is stopped.<br/>Resume when you're ready.</p>
     <div class="pause-actions">
       <button class="main-btn" id="resumeBtn" style="min-width:130px">Resume</button>
       <button class="ghost-btn" id="pauseQuitBtn">Quit &amp; See Results</button>
@@ -343,18 +402,15 @@
   <!-- GAME -->
   <section id="game" class="screen">
     <div class="game-card">
-      <!-- compact topbar -->
       <div class="topbar">
         <div class="stat"><span class="stat-label">Score</span><span id="score" class="stat-value">0</span></div>
         <div class="stat"><span class="stat-label">Combo</span><span id="combo" class="stat-value">x0</span></div>
         <div class="stat"><span class="stat-label">Seen</span><span id="seen" class="stat-value">0</span></div>
-        <!-- inline timer -->
         <div class="timer-wrap">
           <div id="timerRing" class="timer-ring-sm" style="--progress:1">
             <div class="timer-core-sm"><span id="timer" class="timer-number-sm">8</span></div>
           </div>
         </div>
-        <!-- pause -->
         <button class="pause-btn" id="pauseBtn" aria-label="Pause">Pause</button>
       </div>
 
@@ -396,7 +452,21 @@
         <div class="stat"><span class="stat-label">Words Seen</span><span id="wordsSeen" class="stat-value">0</span></div>
         <div class="stat"><span class="stat-label">Time Used</span><span id="timeUsed" class="stat-value">0s</span></div>
       </div>
-      <div class="actions">
+
+      <!-- VOCAB REVIEW -->
+      <div class="vocab-review" id="vocabReview">
+        <div class="vocab-review-header">
+          <p class="vocab-review-title">Words This Round</p>
+          <div class="vocab-filter-tabs">
+            <button class="vtab active" data-filter="all">All</button>
+            <button class="vtab" data-filter="wrong">❌ Wrong</button>
+            <button class="vtab" data-filter="correct">✓ Correct</button>
+          </div>
+        </div>
+        <div id="vocabTableWrap"></div>
+      </div>
+
+      <div class="actions" style="margin-top:18px">
         <button id="retryBtn" class="main-btn" style="width:auto;min-width:160px">Play Again</button>
         <button id="menuBtn" class="ghost-btn">Menu</button>
       </div>
@@ -418,10 +488,14 @@ let combo=0, bestCombo=0, correct=0, seen=0;
 let timerId=null, deadline=0, acceptingAnswers=false, vocabReady=false;
 let paused=false;
 
+// Track words this round: { word, part, meaning, level, unit, result: 'correct'|'wrong'|'timeout' }
+let wordLog = [];
+let activeVocabFilter = "all";
+
 const $=id=>document.getElementById(id);
 const screens={menu:$("menu"),game:$("game"),result:$("result")};
 
-// -- Level buttons --
+// Level buttons
 const levels=["L1","L2","L3","L4","L5","L6","All"];
 const levelGrid=$("levelGrid");
 levels.forEach(level=>{
@@ -443,10 +517,9 @@ function showScreen(name){
   screens[name].classList.add("active");
 }
 
-// -- Audio (Web Audio API) --
+// Audio
 let audioCtx=null;
 function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx}
-
 function playTone(freq,type,duration,vol=0.22,attack=0.005){
   try{
     const ctx=getCtx();
@@ -472,45 +545,23 @@ function playNoise(duration,vol=0.06){
     src.start();src.stop(ctx.currentTime+duration);
   }catch(e){}
 }
-
 const SFX={
   question(){ playTone(480,"sine",.07,.1) },
-  correct(){
-    playTone(660,"triangle",.06,.2);
-    setTimeout(()=>playTone(880,"triangle",.1,.16),60);
-  },
-  combo(n){
-    const base=440+n*12;
-    [1,1.25,1.5,2].forEach((m,i)=>setTimeout(()=>playTone(base*m,"square",.08+(i*.02),.13),i*70));
-  },
-  wrong(){
-    playTone(220,"sawtooth",.08,.22);
-    setTimeout(()=>playTone(160,"sawtooth",.18,.2),80);
-    playNoise(.14,.07);
-  },
-  timeout(){
-    playTone(300,"sawtooth",.12,.18);
-    setTimeout(()=>playTone(200,"sawtooth",.2,.16),100);
-    playNoise(.2,.08);
-  },
+  correct(){ playTone(660,"triangle",.06,.2); setTimeout(()=>playTone(880,"triangle",.1,.16),60); },
+  combo(n){ const base=440+n*12; [1,1.25,1.5,2].forEach((m,i)=>setTimeout(()=>playTone(base*m,"square",.08+(i*.02),.13),i*70)); },
+  wrong(){ playTone(220,"sawtooth",.08,.22); setTimeout(()=>playTone(160,"sawtooth",.18,.2),80); playNoise(.14,.07); },
+  timeout(){ playTone(300,"sawtooth",.12,.18); setTimeout(()=>playTone(200,"sawtooth",.2,.16),100); playNoise(.2,.08); },
   tick(){ playTone(1100,"square",.03,.05) },
   pause(){ playTone(330,"sine",.15,.1) },
   resume(){ playTone(550,"sine",.1,.1);setTimeout(()=>playTone(660,"sine",.1,.1),90) },
-  quit(){
-    [400,320,260].forEach((f,i)=>setTimeout(()=>playTone(f,"triangle",.15,.14),i*90));
-  },
+  quit(){ [400,320,260].forEach((f,i)=>setTimeout(()=>playTone(f,"triangle",.15,.14),i*90)); },
 };
 
-// -- Vocab helpers --
-function getPool(){
-  return selectedLevel==="All" ? vocabulary : vocabulary.filter(i=>i.level===selectedLevel);
-}
-function getQueueKey(pool){
-  return `${selectedLevel}:${pool.length}:${vocabulary.length}:${pool[0]?.word||""}`;
-}
+// Vocab helpers
+function getPool(){ return selectedLevel==="All" ? vocabulary : vocabulary.filter(i=>i.level===selectedLevel); }
+function getQueueKey(pool){ return `${selectedLevel}:${pool.length}:${vocabulary.length}:${pool[0]?.word||""}`; }
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function uniqueByMeaning(words){const s=new Set();return words.filter(i=>i.meaning&&!s.has(i.meaning)&&s.add(i.meaning))}
-
 function getNextWord(pool){
   const key=getQueueKey(pool);
   if(!wordQueue.length||activeQueueKey!==key){wordQueue=shuffle(pool);activeQueueKey=key}
@@ -524,14 +575,15 @@ function makeQuestion(){
   return{...answer,options:shuffle([answer.meaning,...dist.map(i=>i.meaning)])};
 }
 
-// -- Game flow --
+// Game flow
 function startGame(){
   if(!vocabReady||vocabulary.length<4){alert("Vocabulary still loading.");return}
   if(!getPool().length){alert(`No words found for ${selectedLevel}.`);return}
-  getCtx(); // unlock audio on user gesture
+  getCtx();
   wordQueue=[]; activeQueueKey="";
   gameStartedAt=performance.now(); timeUsed=0;
   score=0; combo=0; bestCombo=0; correct=0; seen=0;
+  wordLog=[];
   paused=false;
   updateStats();
   showScreen("game");
@@ -548,17 +600,11 @@ function nextQuestion(){
   currentQuestion.options.forEach((opt,i)=>{
     const btn=document.createElement("button");
     btn.className="answer-btn"; btn.type="button";
-
     const key=document.createElement("span");
-    key.className="ans-key";
-    key.textContent=LABELS[i];
-
+    key.className="ans-key"; key.textContent=LABELS[i];
     const txt=document.createElement("span");
-    txt.className="ans-txt";
-    txt.textContent=opt;
-
-    btn.appendChild(key);
-    btn.appendChild(txt);
+    txt.className="ans-txt"; txt.textContent=opt;
+    btn.appendChild(key); btn.appendChild(txt);
     btn.addEventListener("click",()=>chooseAnswer(btn,opt));
     $("answers").appendChild(btn);
   });
@@ -586,7 +632,20 @@ function tickTimer(){
   }else{
     $("timerRing").classList.remove("urgent");
   }
-  if(ms<=0){clearInterval(timerId);SFX.timeout();setTimeout(()=>endGame(false),300);}
+  if(ms<=0){
+    clearInterval(timerId);
+    // log timeout
+    wordLog.push({
+      word: currentQuestion.word,
+      part: currentQuestion.part,
+      meaning: currentQuestion.meaning,
+      level: currentQuestion.level,
+      unit: currentQuestion.unit||"",
+      result: "timeout"
+    });
+    SFX.timeout();
+    setTimeout(()=>endGame(false),300);
+  }
 }
 
 function chooseAnswer(button,option){
@@ -599,6 +658,17 @@ function chooseAnswer(button,option){
     else if(btn===button&&!isCorrect) btn.classList.add("wrong");
     btn.disabled=true;
   });
+
+  // Log this word
+  wordLog.push({
+    word: currentQuestion.word,
+    part: currentQuestion.part,
+    meaning: currentQuestion.meaning,
+    level: currentQuestion.level,
+    unit: currentQuestion.unit||"",
+    result: isCorrect ? "correct" : "wrong"
+  });
+
   if(!isCorrect){
     SFX.wrong(); fx("fxWrong");
     setTimeout(()=>endGame(false),520);
@@ -634,10 +704,74 @@ function endGame(quit=false){
     $("resultLabel").textContent="Mission Complete";
     $("resultTitle").textContent="Game Over";
   }
+  activeVocabFilter="all";
+  renderVocabTable();
   showScreen("result");
 }
 
-// -- Pause / Resume--
+// ---- VOCAB REVIEW TABLE ----
+function renderVocabTable(){
+  const wrap=$("vocabTableWrap");
+  const filtered = activeVocabFilter==="all" ? wordLog
+    : wordLog.filter(w=>w.result===activeVocabFilter);
+
+  // update tab active state
+  document.querySelectorAll(".vtab").forEach(t=>{
+    t.classList.toggle("active", t.dataset.filter===activeVocabFilter);
+  });
+
+  if(!filtered.length){
+    wrap.innerHTML=`<div class="no-words-msg">${
+      activeVocabFilter==="wrong" ? "No wrong answers — great job! 🎉"
+      : activeVocabFilter==="correct" ? "No correct answers yet."
+      : "No words played yet."
+    }</div>`;
+    return;
+  }
+
+  const rows = filtered.map(w=>{
+    const isWrong = w.result==="wrong";
+    const isTimeout = w.result==="timeout";
+    const rowClass = isWrong||isTimeout ? "wrong-row" : "correct-row";
+    const wordClass = isWrong||isTimeout ? "wrong-word" : "correct-word";
+    const badge = isWrong
+      ? `<span class="wrong-badge">✗ wrong</span>`
+      : isTimeout
+        ? `<span class="timeout-badge">⏱ timeout</span>`
+        : ``;
+    const lvUnit = [w.level, w.unit].filter(Boolean).join(" · ");
+    return `<tr class="${rowClass}">
+      <td class="word-cell ${wordClass}">${escHtml(w.word)}${badge?` ${badge}`:""}</td>
+      <td><span class="part-badge">${escHtml(w.part)}</span></td>
+      <td class="meaning-cell">${escHtml(w.meaning)}</td>
+      <td class="level-unit-cell">${escHtml(lvUnit)}</td>
+    </tr>`;
+  }).join("");
+
+  wrap.innerHTML=`<table class="vocab-table">
+    <thead><tr>
+      <th>Word</th>
+      <th>Part</th>
+      <th>Meaning</th>
+      <th>Level · Unit</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function escHtml(v){
+  return String(v||"").replace(/[&<>"']/g,ch=>({'&':"&amp;",'<':"&lt;",'>':"&gt;",'"':"&quot;","'":'&#39;'}[ch]));
+}
+
+// Filter tabs
+document.querySelectorAll(".vtab").forEach(tab=>{
+  tab.addEventListener("click",()=>{
+    activeVocabFilter=tab.dataset.filter;
+    renderVocabTable();
+  });
+});
+
+// Pause / Resume
 function doPause(){
   if(paused||!$("game").classList.contains("active"))return;
   paused=true; clearInterval(timerId);
@@ -650,25 +784,14 @@ function doResume(){
   paused=false;
   $("pauseOverlay").classList.remove("show");
   SFX.resume();
-  deadline=performance.now()+ROUND_SECONDS*1000; // reset clock on resume (fair)
+  deadline=performance.now()+ROUND_SECONDS*1000;
   lastTickSec=null;
   timerId=setInterval(tickTimer,80);
 }
 
-// -- FX --
 function fx(id){const el=$(id);el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop")}
 
-function escapeHtml(value){
-  return String(value).replace(/[&<>"']/g, ch => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    "\"":"&quot;",
-    "'":"&#39;"
-  }[ch]));
-}
-
-// -- CSV --
+// CSV loading
 function parseCsv(text){
   const rows=[];let row=[],cell="",inQ=false;
   for(let i=0;i<text.length;i++){
@@ -709,24 +832,21 @@ async function loadVocabulary(){
   const info=$("loading");
   btn.disabled=true; btn.textContent="Loading CSV...";
   info.style.display="none"; info.innerHTML="";
-
   const results=await Promise.allSettled(CSV_LEVELS.map(loadLevelCsv));
   const failed=[], loaded=[];
   results.forEach((r,i)=>{
     if(r.status==="fulfilled"){ loaded.push(...r.value); }
     else{ failed.push(r.reason.message); console.error(r.reason); }
   });
-
   vocabulary=loaded;
   vocabReady=vocabulary.length>=4;
-
   if(failed.length){
     info.style.display="block";
     if(vocabReady){
-      info.innerHTML='<span style="color:#b45309">&#9888; '+failed.length+' file(s) failed: <small>'+failed.map(escapeHtml).join(" | ")+'</small> - playing with loaded levels.</span>';
+      info.innerHTML='<span style="color:#b45309">&#9888; '+failed.length+' file(s) failed: <small>'+failed.map(escHtml).join(" | ")+'</small> - playing with loaded levels.</span>';
       btn.disabled=false; btn.textContent="Start Game";
     } else {
-      info.innerHTML='<span style="color:#dc2626">&#10060; Load failed:<br><small>'+failed.map(escapeHtml).join("<br>")+'</small></span><br><br><button onclick="loadVocabulary()" style="padding:8px 18px;border-radius:8px;border:none;background:#7c3aed;color:#fff;font-weight:800;cursor:pointer;font-size:.9rem">&#8635; Retry</button>';
+      info.innerHTML='<span style="color:#dc2626">&#10060; Load failed:<br><small>'+failed.map(escHtml).join("<br>")+'</small></span><br><br><button onclick="loadVocabulary()" style="padding:8px 18px;border-radius:8px;border:none;background:#7c3aed;color:#fff;font-weight:800;cursor:pointer;font-size:.9rem">&#8635; Retry</button>';
       btn.disabled=true; btn.textContent="CSV Load Failed";
     }
   } else {
@@ -735,7 +855,6 @@ async function loadVocabulary(){
   }
 }
 
-// -- Wiring --
 $("startBtn").addEventListener("click", startGame);
 $("retryBtn").addEventListener("click", startGame);
 $("menuBtn").addEventListener("click",()=>showScreen("menu"));
