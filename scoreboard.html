@@ -11,7 +11,7 @@
         }
         
         .score-display {
-            font-size: 7.5rem;
+            font-size: clamp(4rem, 15vw, 7.5rem); /* 使用 clamp 讓字體隨螢幕大小流暢縮放 */
             line-height: 1;
             font-weight: 700;
             color: #ffffff;
@@ -21,8 +21,14 @@
         
         .score-container {
             background: linear-gradient(145deg, #1f2937, #111827);
-            border: 8px solid #e5e7eb;
+            border: 6px solid #e5e7eb;
             box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+        }
+        
+        @media (min-width: 1024px) {
+            .score-container {
+                border-width: 8px;
+            }
         }
         
         .round-box {
@@ -39,7 +45,7 @@
         }
         
         .team-input {
-            font-size: 1.6rem;
+            font-size: clamp(1.2rem, 4vw, 1.6rem); /* 讓隊伍名稱也能自適應縮放 */
             font-weight: 600;
             text-align: center;
             background: transparent;
@@ -51,111 +57,97 @@
         .team-input:focus {
             border-bottom: 3px solid #60a5fa;
         }
-
-        @media (max-width: 1024px) {
-            .score-display {
-                font-size: 5.5rem;
-            }
-            .team-input {
-                font-size: 1.4rem;
-            }
-        }
     </style>
 </head>
 <body class="bg-gray-950 text-white min-h-screen flex flex-col items-center justify-center p-4">
-    <div class="max-w-[1280px] w-full">
-        <!-- Title -->
-        <div class="text-center mb-8">
-            <h1 class="text-5xl font-bold tracking-wider text-white">SCORE BOARD</h1>
-            <h2 class="text-3xl font-medium text-gray-400 mt-1">計分牌</h2>
+    <div class="max-w-[1280px] w-full flex flex-col items-center">
+        <div class="text-center mb-6 md:mb-8">
+            <h1 class="text-3xl md:text-5xl font-bold tracking-wider text-white">SCORE BOARD</h1>
+            <h2 class="text-xl md:text-3xl font-medium text-gray-400 mt-1">計分牌</h2>
         </div>
 
-        <div class="flex items-start justify-center gap-6 lg:gap-8">
+        <div class="flex flex-col md:flex-row items-center md:items-start justify-center gap-6 lg:gap-8 w-full px-2">
             
-            <!-- LEFT: Host Team -->
-            <div class="score-container rounded-3xl p-8 lg:p-10 w-full max-w-[380px] text-center flex-shrink-0">
+            <div class="score-container rounded-3xl p-6 lg:p-10 w-full max-w-[340px] lg:max-w-[380px] text-center order-1">
                 <input id="left-team" 
                        value="HOST TEAM"
-                       class="team-input text-blue-400 mb-6">
+                       class="team-input text-blue-400 mb-4 md:mb-6">
                 
                 <div id="left-score" class="score-display">00</div>
                 
-                <div class="flex justify-center gap-5 mt-10">
+                <div class="flex justify-center gap-4 lg:gap-5 mt-6 md:mt-10">
                     <button onclick="changeScore('left', 1)" 
-                            class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-3xl w-20 h-20 rounded-2xl shadow-lg flex items-center justify-center">
+                            class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-2xl lg:text-3xl w-16 h-16 lg:w-20 lg:h-20 rounded-2xl shadow-lg flex items-center justify-center">
                         +1
                     </button>
                     <button onclick="changeScore('left', -1)" 
-                            class="bg-red-600 hover:bg-red-500 text-white font-bold text-3xl w-20 h-20 rounded-2xl shadow-lg flex items-center justify-center">
+                            class="bg-red-600 hover:bg-red-500 text-white font-bold text-2xl lg:text-3xl w-16 h-16 lg:w-20 lg:h-20 rounded-2xl shadow-lg flex items-center justify-center">
                         -1
                     </button>
                 </div>
             </div>
 
-            <!-- MIDDLE: Round -->
-            <div class="flex flex-col items-center pt-6 lg:pt-12 flex-shrink-0">
-                <div class="round-box rounded-2xl px-8 py-7 text-center mb-8">
-                    <div class="text-amber-400 text-sm font-medium tracking-widest mb-1">ROUND</div>
-                    <div id="round-number" class="text-6xl lg:text-7xl font-bold text-white">1</div>
+            <div class="flex flex-col items-center pt-2 md:pt-6 lg:pt-12 order-3 md:order-2">
+                <div class="round-box rounded-2xl px-6 py-4 md:px-8 md:py-7 text-center mb-4 md:mb-8">
+                    <div class="text-amber-400 text-xs md:text-sm font-medium tracking-widest mb-1">ROUND</div>
+                    <div id="round-number" class="text-4xl md:text-6xl lg:text-7xl font-bold text-white">1</div>
                 </div>
                 
-                <div class="flex flex-col gap-3">
+                <div class="flex flex-row md:flex-col gap-3">
                     <button onclick="changeRound(1)" 
-                            class="bg-amber-500 hover:bg-amber-400 text-black font-bold px-8 py-4 rounded-2xl text-lg shadow">
+                            class="bg-amber-500 hover:bg-amber-400 text-black font-bold px-6 py-3 md:px-8 md:py-4 rounded-2xl text-base md:text-lg shadow">
                         + ROUND
                     </button>
                     <button onclick="changeRound(-1)" 
-                            class="bg-amber-500 hover:bg-amber-400 text-black font-bold px-8 py-4 rounded-2xl text-lg shadow">
+                            class="bg-amber-500 hover:bg-amber-400 text-black font-bold px-6 py-3 md:px-8 md:py-4 rounded-2xl text-base md:text-lg shadow">
                         - ROUND
                     </button>
                 </div>
             </div>
 
-            <!-- RIGHT: Guest Team -->
-            <div class="score-container rounded-3xl p-8 lg:p-10 w-full max-w-[380px] text-center flex-shrink-0">
+            <div class="score-container rounded-3xl p-6 lg:p-10 w-full max-w-[340px] lg:max-w-[380px] text-center order-2 md:order-3">
                 <input id="right-team" 
                        value="GUEST TEAM"
-                       class="team-input text-violet-400 mb-6">
+                       class="team-input text-violet-400 mb-4 md:mb-6">
                 
                 <div id="right-score" class="score-display">00</div>
                 
-                <div class="flex justify-center gap-5 mt-10">
+                <div class="flex justify-center gap-4 lg:gap-5 mt-6 md:mt-10">
                     <button onclick="changeScore('right', 1)" 
-                            class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-3xl w-20 h-20 rounded-2xl shadow-lg flex items-center justify-center">
+                            class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-2xl lg:text-3xl w-16 h-16 lg:w-20 lg:h-20 rounded-2xl shadow-lg flex items-center justify-center">
                         +1
                     </button>
                     <button onclick="changeScore('right', -1)" 
-                            class="bg-red-600 hover:bg-red-500 text-white font-bold text-3xl w-20 h-20 rounded-2xl shadow-lg flex items-center justify-center">
+                            class="bg-red-600 hover:bg-red-500 text-white font-bold text-2xl lg:text-3xl w-16 h-16 lg:w-20 lg:h-20 rounded-2xl shadow-lg flex items-center justify-center">
                         -1
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Bottom Controls -->
-        <div class="mt-12 flex flex-wrap justify-center gap-4">
+        <div class="mt-8 md:mt-12 flex flex-wrap justify-center gap-3 md:gap-4 max-w-[600px] md:max-w-none px-4">
             <button onclick="resetScores()" 
-                    class="bg-gray-800 hover:bg-gray-700 border border-gray-500 text-white px-8 py-4 rounded-2xl text-lg font-semibold">
+                    class="bg-gray-800 hover:bg-gray-700 border border-gray-500 text-white px-5 py-3 md:px-8 md:py-4 rounded-2xl text-sm md:text-lg font-semibold flex-1 sm:flex-none min-w-[120px]">
                 Reset Scores
             </button>
             
             <button onclick="resetAll()" 
-                    class="bg-gray-800 hover:bg-red-900 border border-red-500 text-white px-8 py-4 rounded-2xl text-lg font-semibold">
+                    class="bg-gray-800 hover:bg-red-900 border border-red-500 text-white px-5 py-3 md:px-8 md:py-4 rounded-2xl text-sm md:text-lg font-semibold flex-1 sm:flex-none min-w-[120px]">
                 Reset All
             </button>
             
             <button onclick="saveToLocal()" 
-                    class="bg-gray-800 hover:bg-emerald-900 border border-emerald-500 text-white px-8 py-4 rounded-2xl text-lg font-semibold">
+                    class="bg-gray-800 hover:bg-emerald-900 border border-emerald-500 text-white px-5 py-3 md:px-8 md:py-4 rounded-2xl text-sm md:text-lg font-semibold flex-1 sm:flex-none min-w-[120px]">
                 💾 Save
             </button>
             
             <button onclick="loadFromLocal()" 
-                    class="bg-gray-800 hover:bg-emerald-900 border border-emerald-500 text-white px-8 py-4 rounded-2xl text-lg font-semibold">
+                    class="bg-gray-800 hover:bg-emerald-900 border border-emerald-500 text-white px-5 py-3 md:px-8 md:py-4 rounded-2xl text-sm md:text-lg font-semibold flex-1 sm:flex-none min-w-[120px]">
                 📂 Load
             </button>
         </div>
 
-        <div class="text-center text-gray-500 text-sm mt-8">
+        <div class="text-center text-gray-500 text-xs md:text-sm mt-6 md:mt-8">
             Click team names to edit • Responsive on all devices
         </div>
     </div>
