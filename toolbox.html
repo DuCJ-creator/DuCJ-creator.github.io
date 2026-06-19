@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shirley's Toolbox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background: #f5f0ff;
+  color: #1a1630;
+  font-family: 'DM Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+.bg-canvas {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(180,150,255,0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 10%, rgba(120,190,255,0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 60% at 50% 100%, rgba(255,160,200,0.15) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 80% 60%, rgba(100,220,180,0.12) 0%, transparent 50%),
+    #f5f0ff;
+}
+
+.hero {
+  position: relative; z-index: 1;
+  text-align: center;
+  padding: 4rem 2rem 1.5rem;
+}
+
+.hero-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.35em;
+  color: #9b87c6;
+  text-transform: uppercase;
+  margin-bottom: 0.9rem;
+}
+
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(3rem, 7vw, 5.2rem);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  line-height: 1.05;
+  color: #1a1030;
+  position: relative;
+  display: inline-block;
+}
+
+.hero-title span {
+  background: linear-gradient(135deg, #6b3fa0 0%, #a855f7 40%, #3b82f6 75%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  color: #7c6fa8;
+  margin-top: 0.6rem;
+}
+
+.divider {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px;
+  margin: 1.6rem auto 3rem;
+}
+.divider-line {
+  width: 80px; height: 1px;
+  background: linear-gradient(90deg, transparent, #b09de0);
+}
+.divider-line.r { background: linear-gradient(90deg, #b09de0, transparent); }
+.divider-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #a855f7;
+  box-shadow: 0 0 8px rgba(168,85,247,0.5);
+}
+
+.container {
+  position: relative; z-index: 1;
+  max-width: 1020px;
+  margin: 0 auto;
+  padding: 0 1.8rem 5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3.5rem;
+}
+
+.category { position: relative; }
+
+.cat-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.1rem;
+  margin-bottom: 1.4rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  position: relative;
+}
+
+.cat-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0;
+  width: 60px; height: 2px;
+  border-radius: 2px;
+}
+
+.cat-icon-wrap {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.cat-text { flex: 1; }
+
+.cat-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.9rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+}
+
+.cat-subtitle {
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+.cat-count {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.85rem;
+  font-weight: 300;
+  font-style: italic;
+  color: #9a93b8;
+  align-self: flex-end;
+  padding-bottom: 6px;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 10px;
+}
+
+.tool-card {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  display: block;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  min-height: 84px;
+}
+
+.tool-inner {
+  position: relative;
+  padding: 14px 15px 12px;
+  height: 100%;
+  min-height: 84px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.7);
+  transition: border-color 0.2s;
+}
+
+.tool-card:hover { transform: translateY(-4px); }
+
+.tool-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+}
+
+.tool-name-cn {
+  font-size: 0.7rem;
+  font-weight: 300;
+  margin-top: 3px;
+  letter-spacing: 0.06em;
+  opacity: 0.65;
+}
+
+.tool-arrow {
+  font-size: 11px;
+  align-self: flex-end;
+  opacity: 0.4;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.tool-card:hover .tool-arrow { opacity: 1; transform: translate(2px, -2px); }
+
+/* Category themes */
+.cat-time .cat-header::after { background: linear-gradient(90deg, #10b981, transparent); }
+.cat-time .cat-icon-wrap { background: rgba(16,185,129,0.12); box-shadow: 0 0 0 1px rgba(16,185,129,0.2); }
+.cat-time .cat-title { color: #065f46; }
+.cat-time .cat-subtitle { color: #10b981; }
+.cat-time .tool-inner { background: linear-gradient(135deg, rgba(236,253,245,0.9) 0%, rgba(209,250,229,0.7) 100%); }
+.cat-time .tool-name { color: #064e3b; }
+.cat-time .tool-name-cn { color: #047857; }
+.cat-time .tool-arrow { color: #10b981; }
+.cat-time .tool-card:hover { box-shadow: 0 8px 30px rgba(16,185,129,0.22); }
+.cat-time .tool-card:hover .tool-inner { border-color: rgba(16,185,129,0.4); }
+
+.cat-class .cat-header::after { background: linear-gradient(90deg, #3b82f6, transparent); }
+.cat-class .cat-icon-wrap { background: rgba(59,130,246,0.1); box-shadow: 0 0 0 1px rgba(59,130,246,0.2); }
+.cat-class .cat-title { color: #1e3a8a; }
+.cat-class .cat-subtitle { color: #3b82f6; }
+.cat-class .tool-inner { background: linear-gradient(135deg, rgba(239,246,255,0.92) 0%, rgba(219,234,254,0.72) 100%); }
+.cat-class .tool-name { color: #1e3a8a; }
+.cat-class .tool-name-cn { color: #2563eb; }
+.cat-class .tool-arrow { color: #3b82f6; }
+.cat-class .tool-card:hover { box-shadow: 0 8px 30px rgba(59,130,246,0.22); }
+.cat-class .tool-card:hover .tool-inner { border-color: rgba(59,130,246,0.4); }
+
+.cat-teach .cat-header::after { background: linear-gradient(90deg, #8b5cf6, transparent); }
+.cat-teach .cat-icon-wrap { background: rgba(139,92,246,0.1); box-shadow: 0 0 0 1px rgba(139,92,246,0.2); }
+.cat-teach .cat-title { color: #4c1d95; }
+.cat-teach .cat-subtitle { color: #8b5cf6; }
+.cat-teach .tool-inner { background: linear-gradient(135deg, rgba(245,243,255,0.92) 0%, rgba(237,233,254,0.72) 100%); }
+.cat-teach .tool-name { color: #4c1d95; }
+.cat-teach .tool-name-cn { color: #7c3aed; }
+.cat-teach .tool-arrow { color: #8b5cf6; }
+.cat-teach .tool-card:hover { box-shadow: 0 8px 30px rgba(139,92,246,0.22); }
+.cat-teach .tool-card:hover .tool-inner { border-color: rgba(139,92,246,0.4); }
+
+.cat-subject .cat-header::after { background: linear-gradient(90deg, #f59e0b, transparent); }
+.cat-subject .cat-icon-wrap { background: rgba(245,158,11,0.1); box-shadow: 0 0 0 1px rgba(245,158,11,0.2); }
+.cat-subject .cat-title { color: #78350f; }
+.cat-subject .cat-subtitle { color: #f59e0b; }
+.cat-subject .tool-inner { background: linear-gradient(135deg, rgba(255,251,235,0.92) 0%, rgba(254,243,199,0.72) 100%); }
+.cat-subject .tool-name { color: #78350f; }
+.cat-subject .tool-name-cn { color: #d97706; }
+.cat-subject .tool-arrow { color: #f59e0b; }
+.cat-subject .tool-card:hover { box-shadow: 0 8px 30px rgba(245,158,11,0.22); }
+.cat-subject .tool-card:hover .tool-inner { border-color: rgba(245,158,11,0.4); }
+
+.cat-fun .cat-header::after { background: linear-gradient(90deg, #ec4899, transparent); }
+.cat-fun .cat-icon-wrap { background: rgba(236,72,153,0.1); box-shadow: 0 0 0 1px rgba(236,72,153,0.2); }
+.cat-fun .cat-title { color: #831843; }
+.cat-fun .cat-subtitle { color: #ec4899; }
+.cat-fun .tool-inner { background: linear-gradient(135deg, rgba(253,242,248,0.92) 0%, rgba(252,231,243,0.72) 100%); }
+.cat-fun .tool-name { color: #831843; }
+.cat-fun .tool-name-cn { color: #db2777; }
+.cat-fun .tool-arrow { color: #ec4899; }
+.cat-fun .tool-card:hover { box-shadow: 0 8px 30px rgba(236,72,153,0.22); }
+.cat-fun .tool-card:hover .tool-inner { border-color: rgba(236,72,153,0.4); }
+
+.footer {
+  position: relative; z-index: 1;
+  text-align: center;
+  padding: 1rem 0 2.5rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem;
+  font-style: italic;
+  font-weight: 300;
+  color: #b0a8d0;
+  letter-spacing: 0.1em;
+}
+
+@media (max-width: 520px) {
+  .tools-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-canvas"></div>
+
+<div class="hero">
+  <div class="hero-eyebrow">✦ &nbsp; Digital Teaching Companion &nbsp; ✦</div>
+  <div class="hero-title"><span>Shirley's Toolbox</span></div>
+  <div class="hero-sub">教學工具箱 &nbsp;—&nbsp; Every tool, one place</div>
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-dot"></div>
+    <div class="divider-line r"></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="category cat-time">
+    <div class="cat-header">
+      <div class="cat-icon-wrap">⏱</div>
+      <div class="cat-text">
+        <div class="cat-title">Time Management</div>
+        <div class="cat-subtitle">時間管理類</div>
+      </div>
+      <div class="cat-count">4 tools</div>
+    </div>
+    <div class="tools-grid">
+      <a class="tool-card" href="https://ducj-creator.github.io/clock.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Clock</div><div class="tool-name-cn">時鐘</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Timer" target="_blank"><div class="tool-inner"><div><div class="tool-name">Timer</div><div class="tool-name-cn">計時器</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Stop%20Watch.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Stopwatch</div><div class="tool-name-cn">碼表</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/countdown.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Countdown</div><div class="tool-name-cn">倒計時</div></div><div class="tool-arrow">↗</div></div></a>
+    </div>
+  </div>
+
+  <div class="category cat-class">
+    <div class="cat-header">
+      <div class="cat-icon-wrap">🎲</div>
+      <div class="cat-text">
+        <div class="cat-title">Class Management</div>
+        <div class="cat-subtitle">班務管理類</div>
+      </div>
+      <div class="cat-count">7 tools</div>
+    </div>
+    <div class="tools-grid">
+      <a class="tool-card" href="https://ducj-creator.github.io/scoreboard.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Scoreboard</div><div class="tool-name-cn">計分牌</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/sign.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Signpost</div><div class="tool-name-cn">指示牌</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Dice2.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Lucky Dice</div><div class="tool-name-cn">幸運骰</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/coin.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Coin Flip</div><div class="tool-name-cn">擲硬幣</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/moonblock.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Moonblock</div><div class="tool-name-cn">擲筊</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Lucky%20Wheel.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Lucky Wheel</div><div class="tool-name-cn">幸運轉盤</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/grade%20analysis.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Grade Analysis</div><div class="tool-name-cn">成績分析</div></div><div class="tool-arrow">↗</div></div></a>
+    </div>
+  </div>
+
+  <div class="category cat-teach">
+    <div class="cat-header">
+      <div class="cat-icon-wrap">✏️</div>
+      <div class="cat-text">
+        <div class="cat-title">Teaching Tools</div>
+        <div class="cat-subtitle">教學工具類</div>
+      </div>
+      <div class="cat-count">3 tools</div>
+    </div>
+    <div class="tools-grid">
+      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Pop%20Quiz%20Maker.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Quiz Maker</div><div class="tool-name-cn">測驗製作</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Flip%20Card.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Flip Card Maker</div><div class="tool-name-cn">翻轉卡製作</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/report.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Report Formatter</div><div class="tool-name-cn">報告格式器</div></div><div class="tool-arrow">↗</div></div></a>
+    </div>
+  </div>
+
+  <div class="category cat-subject">
+    <div class="cat-header">
+      <div class="cat-icon-wrap">📚</div>
+      <div class="cat-text">
+        <div class="cat-title">Subject Teaching</div>
+        <div class="cat-subtitle">學科教學類</div>
+      </div>
+      <div class="cat-count">11 tools</div>
+    </div>
+    <div class="tools-grid">
+      <a class="tool-card" href="https://ducj-creator.github.io/etgame.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Vocab ET</div><div class="tool-name-cn">單字外星人</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/iVocab-Self-Practice/levels1-6.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Vocab Escape Room</div><div class="tool-name-cn">單字密室逃脫</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/ivchampion.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Vocab Champion</div><div class="tool-name-cn">字彙終極戰</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/iVocab-Self-Practice/entry.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">My Own Words</div><div class="tool-name-cn">自主單字練習</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Word%20Search%20Maker.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Word Search Maker</div><div class="tool-name-cn">尋字工坊</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Crossword%20Maker.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Crossword Maker</div><div class="tool-name-cn">字謎生成</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/Shirley-AI-Writing/version2.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Writing Coach</div><div class="tool-name-cn">寫作教練</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/Teacher-Shirley/study-tools/kk.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">KK Phonetics</div><div class="tool-name-cn">KK 音標</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/Shirley-AI-Sentence-Practice/bank.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Sentence Reading</div><div class="tool-name-cn">例句朗讀</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/Shirley-AI-Sentence-Practice/entry.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">My Own Sentences</div><div class="tool-name-cn">自主句子練習</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/events/chhsmonthly/" target="_blank"><div class="tool-inner"><div><div class="tool-name">CHHS Monthly</div><div class="tool-name-cn">月刊</div></div><div class="tool-arrow">↗</div></div></a>
+    </div>
+  </div>
+
+  <div class="category cat-fun">
+    <div class="cat-header">
+      <div class="cat-icon-wrap">🎮</div>
+      <div class="cat-text">
+        <div class="cat-title">Fun Games</div>
+        <div class="cat-subtitle">遊戲類</div>
+      </div>
+      <div class="cat-count">4 tools</div>
+    </div>
+    <div class="tools-grid">
+      <a class="tool-card" href="https://ducj-creator.github.io/shirley%20sudoku.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Sudoku</div><div class="tool-name-cn">數獨</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/gomoku.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Gomoku</div><div class="tool-name-cn">五子棋</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/go.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Go</div><div class="tool-name-cn">圍棋</div></div><div class="tool-arrow">↗</div></div></a>
+      <a class="tool-card" href="https://ducj-creator.github.io/gem.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Gem</div><div class="tool-name-cn">連連看</div></div><div class="tool-arrow">↗</div></div></a>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">✦ &nbsp; Shirley's Digital Classroom &nbsp;·&nbsp; 數位教室 &nbsp; ✦</div>
+
+</body>
+</html>
