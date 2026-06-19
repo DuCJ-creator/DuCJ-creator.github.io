@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Intergalactic Escape Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void: #050810;
+  --deep: #090f1e;
+  --mid: #0d1628;
+  --panel: #111e38;
+  --gold: #d4a843;
+  --gold2: #f2c96a;
+  --gold-dim: rgba(212,168,67,0.15);
+  --rift: #6b3fa0;
+  --rift2: #9b6dd1;
+  --rift-dim: rgba(107,63,160,0.2);
+  --cyan: #3ecfdf;
+  --cyan-dim: rgba(62,207,223,0.15);
+  --nova: #e04a7a;
+  --nova-dim: rgba(224,74,122,0.18);
+  --green: #3dd68c;
+  --green-dim: rgba(61,214,140,0.15);
+  --text: #cfc4e4;
+  --muted: #7a7096;
+  --border: rgba(255,255,255,0.07);
+  --border-gold: rgba(212,168,67,0.3);
+  --r: 16px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--void);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ── Star canvas ── */
+#starCanvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Nebula blobs ── */
+.nebula-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60vw 40vh at 10% 20%, rgba(107,63,160,0.22) 0%, transparent 65%),
+    radial-gradient(ellipse 50vw 35vh at 85% 65%, rgba(62,207,223,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 45vw 30vh at 50% 95%, rgba(224,74,122,0.1) 0%, transparent 55%),
+    radial-gradient(ellipse 70vw 50vh at 60% 10%, rgba(107,63,160,0.1) 0%, transparent 70%);
+}
+
+/* ── Main layout ── */
+.wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 28px 16px 64px;
+}
+
+/* ── Header ── */
+.site-header {
+  text-align: center;
+  padding: 12px 0 36px;
+}
+.header-eyebrow {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 4px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  opacity: 0.85;
+}
+.site-header h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  color: #fff;
+}
+.site-header h1 em {
+  font-style: normal;
+  color: var(--gold2);
+  position: relative;
+}
+.site-header h1 em::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -3px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold2), transparent);
+  opacity: 0.5;
+}
+.header-sub {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+/* ── Cards / panels ── */
+.card {
+  background: linear-gradient(155deg, rgba(13,22,40,0.95), rgba(9,15,30,0.98));
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 40px 80px rgba(0,0,0,0.6);
+}
+
+/* ── Scan-line micro-texture overlay on card ── */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r);
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(255,255,255,0.012) 3px,
+    rgba(255,255,255,0.012) 4px
+  );
+  pointer-events: none;
+}
+.card { position: relative; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 20px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 0.88rem;
+  letter-spacing: 0.5px;
+  transition: all 0.18s;
+}
+.btn-gold {
+  background: linear-gradient(135deg, #c9932a, #e8b840);
+  color: #1a0e00;
+  box-shadow: 0 0 24px rgba(212,168,67,0.25);
+}
+.btn-gold:hover { box-shadow: 0 0 36px rgba(212,168,67,0.45); transform: translateY(-1px); }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-gold);
+  color: var(--muted);
+}
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn-rift {
+  background: linear-gradient(135deg, var(--rift), var(--rift2));
+  color: #fff;
+  box-shadow: 0 0 20px rgba(107,63,160,0.3);
+}
+.btn-rift:hover { box-shadow: 0 0 32px rgba(107,63,160,0.5); transform: translateY(-1px); }
+.btn-nova {
+  background: linear-gradient(135deg, #b02555, var(--nova));
+  color: #fff;
+}
+.btn-row { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 18px; }
+
+/* ── Selector screen ── */
+.selector-screen {
+  padding: 48px 28px 52px;
+  text-align: center;
+}
+.selector-screen h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(18px, 3vw, 28px);
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.selector-desc {
+  color: var(--muted);
+  font-size: 0.9rem;
+  max-width: 580px;
+  margin: 0 auto 32px;
+  line-height: 1.7;
+}
+
+/* Sector selector grid */
+.sector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.sector-tile {
+  background: var(--mid);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 12px 18px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.18s;
+  position: relative;
+  overflow: hidden;
+}
+.sector-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(107,63,160,0.18), transparent 65%);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.sector-tile:hover::before, .sector-tile.active::before { opacity: 1; }
+.sector-tile:hover { border-color: var(--rift2); transform: translateY(-2px); }
+.sector-tile.active {
+  border-color: var(--gold);
+  box-shadow: 0 0 24px rgba(212,168,67,0.2);
+}
+.sector-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+.sector-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--text);
+  text-transform: uppercase;
+}
+.sector-tile.active .sector-label { color: var(--gold2); }
+
+/* ── Map screen ── */
+.map-header { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); text-align: center; }
+.map-header h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(20px, 3vw, 30px);
+  font-weight: 700;
+  color: var(--gold2);
+  letter-spacing: 1px;
+}
+.map-header p { color: var(--muted); font-size: 0.84rem; margin-top: 6px; }
+.map-stats {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+}
+.map-stat {
+  flex: 1;
+  padding: 16px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+}
+.map-stat:last-child { border-right: none; }
+.map-stat strong {
+  display: block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold2);
+}
+.map-stat span { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.5px; }
+.map-body { padding: 24px 20px 28px; }
+
+/* Constellation pass map */
+.constellation-map {
+  position: relative;
+  margin: 0 0 20px;
+}
+.constellation-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+.pass-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 14px;
+  position: relative;
+  z-index: 1;
+}
+.pass-node {
+  border-radius: 16px;
+  padding: 18px 10px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.22s;
+  position: relative;
+  overflow: hidden;
+  min-height: 128px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid var(--border);
+  background: var(--mid);
+}
+.pass-node::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04), transparent 60%);
+}
+.pass-node:hover:not(.locked) { transform: translateY(-3px); border-color: var(--rift2); box-shadow: 0 0 28px rgba(107,63,160,0.25); }
+.pass-node.locked { opacity: 0.38; cursor: not-allowed; filter: grayscale(0.5); }
+.pass-node.unlocked { border-color: rgba(107,63,160,0.5); }
+.pass-node.completed {
+  border-color: rgba(61,214,140,0.5);
+  background: linear-gradient(145deg, rgba(61,214,140,0.1), var(--mid));
+}
+.pass-node.completed:hover { box-shadow: 0 0 28px rgba(61,214,140,0.2); }
+.pass-node .pass-icon { font-size: 1.7rem; position: relative; z-index: 1; }
+.pass-node .pass-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}
+.pass-node.unlocked .pass-num { color: var(--rift2); }
+.pass-node.completed .pass-num { color: var(--green); }
+.pass-node .pass-count {
+  font-size: 0.72rem;
+  color: var(--muted);
+  position: relative;
+  z-index: 1;
+}
+.pass-node .replay-tag {
+  position: absolute;
+  top: 7px; left: 7px;
+  background: var(--gold-dim);
+  border: 1px solid var(--border-gold);
+  border-radius: 20px;
+  padding: 2px 7px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  z-index: 2;
+}
+.map-rule {
+  background: var(--rift-dim);
+  border: 1px solid rgba(107,63,160,0.2);
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ── Quiz arena ── */
+.quiz-wrap { padding: 24px 20px 28px; }
+.quiz-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.quiz-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.quiz-score-pill {
+  background: var(--rift-dim);
+  border: 1px solid rgba(107,63,160,0.3);
+  border-radius: 50px;
+  padding: 5px 14px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--rift2);
+}
+.timer-ring {
+  background: var(--nova-dim);
+  border: 1px solid rgba(224,74,122,0.3);
+  border-radius: 50px;
+  padding: 5px 14px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--nova);
+}
+.timer-ring.warn { animation: timerPulse 0.7s infinite; }
+@keyframes timerPulse { 0%, 100% { background: var(--nova-dim); } 50% { background: rgba(224,74,122,0.35); } }
+
+/* Target reticle arena */
+.word-arena {
+  position: relative;
+  text-align: center;
+  padding: 36px 20px 28px;
+  margin-bottom: 20px;
+  border-radius: 20px;
+  background: radial-gradient(ellipse 80% 100% at 50% 50%, rgba(107,63,160,0.12), transparent 70%), var(--mid);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.reticle {
+  position: absolute;
+  inset: 10px;
+  border-radius: 18px;
+  pointer-events: none;
+  z-index: 0;
+}
+.reticle::before, .reticle::after {
+  content: '';
+  position: absolute;
+  border: 1px solid rgba(62,207,223,0.12);
+  border-radius: inherit;
+  animation: reticlePulse 4s ease-in-out infinite;
+}
+.reticle::before { inset: 0; }
+.reticle::after { inset: 8px; animation-delay: 0.8s; }
+@keyframes reticlePulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+/* corner accents */
+.corner { position: absolute; width: 18px; height: 18px; z-index: 0; pointer-events: none; }
+.corner.tl { top: 12px; left: 12px; border-top: 2px solid var(--cyan); border-left: 2px solid var(--cyan); border-radius: 4px 0 0 0; }
+.corner.tr { top: 12px; right: 12px; border-top: 2px solid var(--cyan); border-right: 2px solid var(--cyan); border-radius: 0 4px 0 0; }
+.corner.bl { bottom: 12px; left: 12px; border-bottom: 2px solid var(--cyan); border-left: 2px solid var(--cyan); border-radius: 0 0 0 4px; }
+.corner.br { bottom: 12px; right: 12px; border-bottom: 2px solid var(--cyan); border-right: 2px solid var(--cyan); border-radius: 0 0 4px 0; }
+.word-main {
+  position: relative;
+  z-index: 1;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(26px, 6vw, 48px);
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+  text-shadow: 0 0 40px rgba(242,201,106,0.2);
+}
+.word-pos {
+  position: relative;
+  z-index: 1;
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-top: 6px;
+}
+.word-ref {
+  position: relative;
+  z-index: 1;
+  font-size: 0.7rem;
+  color: rgba(107,63,160,0.7);
+  margin-top: 3px;
+}
+.hear-btn {
+  position: relative;
+  z-index: 1;
+  margin-top: 14px;
+  background: var(--cyan-dim);
+  border: 1px solid rgba(62,207,223,0.25);
+  border-radius: 50px;
+  padding: 6px 16px;
+  color: var(--cyan);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.hear-btn:hover { background: rgba(62,207,223,0.22); }
+
+/* Options */
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.opt-btn {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text);
+  transition: all 0.15s;
+  text-align: left;
+}
+.opt-btn:hover { border-color: var(--rift2); color: #fff; background: rgba(107,63,160,0.15); }
+.opt-prefix {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--rift-dim);
+  border: 1px solid rgba(107,63,160,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--rift2);
+  flex-shrink: 0;
+}
+.opt-btn.correct-hl { background: var(--green-dim); border-color: rgba(61,214,140,0.5); color: var(--green); }
+.opt-btn.correct-hl .opt-prefix { background: rgba(61,214,140,0.2); border-color: rgba(61,214,140,0.5); color: var(--green); }
+.opt-btn.wrong-hl { background: var(--nova-dim); border-color: rgba(224,74,122,0.5); color: var(--nova); }
+.opt-btn.wrong-hl .opt-prefix { background: rgba(224,74,122,0.2); border-color: rgba(224,74,122,0.5); color: var(--nova); }
+
+/* Progress bar */
+.progress-track {
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--rift), var(--cyan));
+  border-radius: 999px;
+  transition: width 0.35s;
+}
+
+/* ── Result screens ── */
+.result-wrap {
+  padding: 36px 24px 40px;
+  text-align: center;
+}
+.result-emoji { font-size: 5rem; margin-bottom: 16px; }
+.result-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(22px, 4vw, 34px);
+  font-weight: 700;
+}
+.result-title.success { color: var(--green); }
+.result-title.fail { color: var(--nova); }
+.result-sub { color: var(--muted); margin: 8px auto 24px; max-width: 500px; font-size: 0.9rem; line-height: 1.7; }
+.result-ctas { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* Word review table */
+.word-review { margin-top: 28px; text-align: left; }
+.word-review-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.word-table-wrap {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rift) transparent;
+}
+.word-table { width: 100%; border-collapse: collapse; }
+.word-table thead tr { background: rgba(5,8,16,0.8); border-bottom: 1px solid var(--border); }
+.word-table thead th {
+  padding: 8px 10px;
+  text-align: left;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.word-table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.1s; }
+.word-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+.word-table td { padding: 8px 10px; font-size: 0.84rem; vertical-align: middle; }
+.mark-cell { width: 32px; text-align: center; }
+.word-cell { font-family: 'Space Grotesk', sans-serif; font-weight: 600; color: #fff; }
+.word-cell.fail { color: var(--nova); }
+.word-cell.unseen { color: var(--muted); }
+.word-cell.pass { color: var(--green); }
+.pos-cell, .ref-cell { color: var(--muted); font-size: 0.75rem; white-space: nowrap; }
+.meaning-cell { color: var(--text); }
+
+/* ── Scroll thumb colors ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--rift); border-radius: 99px; }
+
+/* ── Back button ── */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  padding: 7px 14px;
+  border-radius: 50px;
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+.back-link:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── Screen visibility ── */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .options-grid { grid-template-columns: 1fr; }
+  .sector-grid { grid-template-columns: repeat(3, 1fr); }
+  .map-stats { flex-wrap: wrap; }
+  .map-stat { min-width: 33%; }
+  .pass-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<canvas id="starCanvas"></canvas>
+<div class="nebula-bg"></div>
+
+<div class="wrapper">
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-eyebrow">Vocabulary Training</div>
+    <h1>Intergalactic<br><em>Escape Room</em></h1>
+    <p class="header-sub">One mistake · Mission failed · Clear every pass to break free</p>
+  </header>
+
+  <!-- ── SCREEN: Sector selector ── -->
+  <div class="screen active card" id="selectorScreen">
+    <div class="selector-screen">
+      <h2>Choose your sector</h2>
+      <p class="selector-desc">Level sectors contain 15 words per pass. The Labyrinth draws from all six levels and runs 10 words per pass. Progress is saved automatically.</p>
+      <div class="sector-grid" id="sectorGrid"></div>
+      <button class="btn btn-gold" id="beginBtn" style="font-size:1rem; padding:13px 36px;">Begin Transmission ›</button>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: Escape map ── -->
+  <div class="screen" id="mapScreen">
+    <button class="back-link" id="mapBackBtn">← Return to orbit</button>
+    <div class="card">
+      <div class="map-header">
+        <h2 id="mapTitle">NEBULA SECTOR</h2>
+        <p id="mapDesc">Generated topography · Passes must be cleared in sequence</p>
+      </div>
+      <div class="map-stats">
+        <div class="map-stat"><strong id="statWords">—</strong><span>Total words</span></div>
+        <div class="map-stat"><strong id="statPasses">—</strong><span>Total passes</span></div>
+        <div class="map-stat"><strong id="statCleared">—</strong><span>Cleared</span></div>
+      </div>
+      <div class="map-body">
+        <div class="constellation-map" id="constellationMap">
+          <div class="pass-grid" id="passGrid"></div>
+        </div>
+        <div class="map-rule" id="mapRule"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: Quiz ── -->
+  <div class="screen" id="quizScreen">
+    <button class="back-link" id="quizBackBtn">← Abandon mission</button>
+    <div class="card">
+      <div class="quiz-wrap">
+        <div class="quiz-topbar">
+          <span class="quiz-label" id="quizPassLabel">Pass 1</span>
+          <span class="quiz-score-pill" id="quizScorePill">0 / 0</span>
+          <span class="timer-ring" id="quizTimer">⏱ 5s</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="quizProgress" style="width:0%"></div></div>
+        <div class="word-arena">
+          <div class="reticle"></div>
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+          <div class="word-main" id="quizWord">—</div>
+          <div class="word-pos" id="quizPOS"></div>
+          <div class="word-ref" id="quizRef"></div>
+          <button class="hear-btn" id="quizHearBtn">🔊 Hear again</button>
+        </div>
+        <div class="options-grid" id="quizOptions"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: Pass cleared ── -->
+  <div class="screen" id="clearedScreen">
+    <div class="card">
+      <div class="result-wrap">
+        <div class="result-emoji">🛸</div>
+        <div class="result-title success">Pass cleared!</div>
+        <p class="result-sub" id="clearedSub">You've mastered all words in this pass.</p>
+        <div class="result-ctas">
+          <button class="btn btn-gold" id="nextPassBtn">Continue journey →</button>
+          <button class="btn btn-ghost" id="clearedMapBtn">Return to map</button>
+        </div>
+        <div class="word-review" id="clearedReview"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: Mission failed ── -->
+  <div class="screen" id="failedScreen">
+    <div class="card">
+      <div class="result-wrap">
+        <div class="result-emoji">💥</div>
+        <div class="result-title fail">Mission failed</div>
+        <p class="result-sub">The nebula consumed your ship. This pass must be restarted from the beginning.</p>
+        <div class="result-ctas">
+          <button class="btn btn-nova" id="retryBtn">Retry pass</button>
+          <button class="btn btn-ghost" id="failedMapBtn">Return to map</button>
+        </div>
+        <div class="word-review" id="failedReview"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Star field ──
+(function(){
+  const cv = document.getElementById('starCanvas');
+  const ctx = cv.getContext('2d');
+  let stars = [];
+  function resize(){
+    cv.width = innerWidth;
+    cv.height = innerHeight;
+    stars = Array.from({length: 220}, () => ({
+      x: Math.random() * cv.width,
+      y: Math.random() * cv.height,
+      r: Math.random() * 1.4 + 0.2,
+      a: Math.random(),
+      da: (Math.random() - 0.5) * 0.003,
+      dx: (Math.random() - 0.5) * 0.06,
+      dy: (Math.random() - 0.5) * 0.06,
+    }));
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  function draw(){
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    for(const s of stars){
+      s.x += s.dx; s.y += s.dy; s.a += s.da;
+      if(s.x < 0) s.x = cv.width; if(s.x > cv.width) s.x = 0;
+      if(s.y < 0) s.y = cv.height; if(s.y > cv.height) s.y = 0;
+      if(s.a < 0.1) s.da = Math.abs(s.da); if(s.a > 1) s.da = -Math.abs(s.da);
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,255,${s.a * 0.85})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── Core logic ──
+const BASE = 'https://ducj-creator.github.io/iVocab-Self-Practice/';
+const loadedVocab = {};
+let currentRoom = 'all', currentPass = 0, currentPasses = [];
+let passWords = [], passCorrect = 0, passWrongIndices = [], currentIndex = 0;
+let timerInterval = null;
+let escapeProgress = {}, escapePlans = {};
+
+function $(id){ return document.getElementById(id); }
+function speak(w){ if(!w || !('speechSynthesis' in window)) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(w); u.lang='en-US'; u.rate=0.85; speechSynthesis.speak(u); }
+function escKey(w){ return [w.Level, w.Unit, w.No, w.Word].join('|'); }
+function esc(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function refTag(w){ return `[L${w.Level}-U${w.Unit}]`; }
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function chunk(arr, n){ const c=[]; for(let i=0;i<arr.length;i+=n) c.push(arr.slice(i,i+n)); return c; }
+
+function loadState(){
+  try{ escapeProgress = JSON.parse(localStorage.getItem('escProg') || '{}') || {}; }catch(e){ escapeProgress = {}; }
+  try{ escapePlans = JSON.parse(localStorage.getItem('escPlans') || '{}') || {}; }catch(e){ escapePlans = {}; }
+}
+function saveState(){
+  localStorage.setItem('escProg', JSON.stringify(escapeProgress));
+  localStorage.setItem('escPlans', JSON.stringify(escapePlans));
+}
+
+async function loadLevel(lv){
+  if(loadedVocab[lv]) return loadedVocab[lv];
+  const res = await fetch(BASE + 'level' + lv + '.csv');
+  if(!res.ok) return [];
+  const text = await res.text();
+  const data = text.trim().split(/\r?\n/).slice(1).map(line => {
+    const p = line.split(',');
+    if(p.length < 6) return null;
+    return { Level: p[0].trim(), Unit: p[1].trim(), No: p[2].trim(), Word: p[3].trim(), POS: p[4].trim(), Meaning: p.slice(5).join(',').trim() };
+  }).filter(Boolean);
+  loadedVocab[lv] = data;
+  return data;
+}
+
+async function buildBank(room){
+  let all = [];
+  if(room && room !== 'all') all = await loadLevel(String(room));
+  else for(let i=1;i<=6;i++) all.push(...(await loadLevel(String(i))));
+  return all;
+}
+
+async function getPasses(room){
+  loadState();
+  const bank = await buildBank(room);
+  const perPass = room === 'all' ? 10 : 15;
+  const wordMap = new Map(bank.map(w => [escKey(w), w]));
+  const sig = bank.map(escKey).sort().join('~');
+  const saved = escapePlans[room];
+  let orderedKeys;
+  if(saved && saved.signature === sig && saved.perPass === perPass){
+    orderedKeys = saved.wordKeys.filter(k => wordMap.has(k));
+    const missing = bank.map(escKey).filter(k => !orderedKeys.includes(k));
+    if(missing.length) orderedKeys.push(...shuffle(missing));
+  } else {
+    orderedKeys = shuffle(bank.map(escKey));
+  }
+  escapePlans[room] = { signature: sig, perPass, wordKeys: orderedKeys };
+  const passes = chunk(orderedKeys.map(k => wordMap.get(k)).filter(Boolean), perPass);
+  if(!Array.isArray(escapeProgress[room])) escapeProgress[room] = [];
+  if(escapeProgress[room].length !== passes.length){
+    escapeProgress[room] = passes.map((_,i) => Boolean(escapeProgress[room][i]));
+  }
+  saveState();
+  return passes;
+}
+
+// ── Screens ──
+const SCREENS = ['selectorScreen','mapScreen','quizScreen','clearedScreen','failedScreen'];
+function showScreen(id){
+  SCREENS.forEach(s => $(s)?.classList.remove('active'));
+  $(id)?.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Sector selector ──
+function buildSectorSelector(){
+  const grid = $('sectorGrid');
+  const sectors = [
+    { room:'1', icon:'🌑', label:'Sector 1' },
+    { room:'2', icon:'🌒', label:'Sector 2' },
+    { room:'3', icon:'🪐', label:'Sector 3' },
+    { room:'4', icon:'⭐', label:'Sector 4' },
+    { room:'5', icon:'🌠', label:'Sector 5' },
+    { room:'6', icon:'💫', label:'Sector 6' },
+    { room:'all', icon:'🌌', label:'The Labyrinth' },
+  ];
+  grid.innerHTML = '';
+  sectors.forEach(s => {
+    const tile = document.createElement('div');
+    tile.className = 'sector-tile' + (s.room === 'all' ? ' active' : '');
+    tile.innerHTML = `<span class="sector-icon">${s.icon}</span><div class="sector-label">${s.label}</div>`;
+    tile.dataset.room = s.room;
+    tile.onclick = () => {
+      document.querySelectorAll('.sector-tile').forEach(t => t.classList.remove('active'));
+      tile.classList.add('active');
+      currentRoom = s.room;
+    };
+    grid.appendChild(tile);
+  });
+  currentRoom = 'all';
+}
+
+$('beginBtn').onclick = () => showMapScreen(currentRoom);
+$('mapBackBtn').onclick = () => showScreen('selectorScreen');
+$('quizBackBtn').onclick = () => { clearTimer(); showMapScreen(currentRoom); };
+$('clearedMapBtn').onclick = () => showMapScreen(currentRoom);
+$('failedMapBtn').onclick = () => showMapScreen(currentRoom);
+$('quizHearBtn').onclick = () => speak(passWords[currentIndex]?.Word);
+$('nextPassBtn').onclick = () => {
+  if(currentPass + 1 < currentPasses.length) startPass(currentRoom, currentPass + 1);
+  else { alert('🎉 You have escaped this sector!'); showMapScreen(currentRoom); }
+};
+$('retryBtn').onclick = () => startPass(currentRoom, currentPass);
+
+// ── Map screen ──
+async function showMapScreen(room){
+  currentRoom = room;
+  showScreen('mapScreen');
+  const area = $('passGrid');
+  area.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);">Generating topography…</div>`;
+  const passes = await getPasses(room);
+  currentPasses = passes;
+  const progress = escapeProgress[room] || [];
+  const perPass = room === 'all' ? 10 : 15;
+  const totalWords = passes.reduce((s,p) => s+p.length, 0);
+  const cleared = progress.filter(Boolean).length;
+
+  $('mapTitle').textContent = room === 'all' ? 'THE LABYRINTH' : `NEBULA SECTOR ${room}`;
+  $('mapDesc').textContent = room === 'all'
+    ? 'All Level 1-6 words · 10 words per pass · full universe mapped'
+    : `Level ${room} full coverage · 15 words per pass`;
+  $('statWords').textContent = totalWords;
+  $('statPasses').textContent = passes.length;
+  $('statCleared').textContent = `${cleared}/${passes.length}`;
+  $('mapRule').textContent = '🗺 Passes must be cleared in order · Cleared passes can be replayed · One mistake = retry the whole pass';
+
+  area.innerHTML = '';
+  passes.forEach((words, idx) => {
+    const completed = Boolean(progress[idx]);
+    const unlocked = idx === 0 || Boolean(progress[idx-1]);
+    const locked = !unlocked;
+    let icon, cls;
+    if(completed)    { icon='🌟'; cls='completed'; }
+    else if(unlocked){ icon='🔓'; cls='unlocked'; }
+    else             { icon='🔒'; cls='locked'; }
+
+    const node = document.createElement('div');
+    node.className = `pass-node ${cls}`;
+    node.innerHTML = `
+      ${completed ? `<div class="replay-tag">replay</div>` : ''}
+      <div class="pass-icon">${icon}</div>
+      <div class="pass-num">Pass ${idx+1}</div>
+      <div class="pass-count">${words.length} words</div>
+    `;
+    if(!locked){
+      node.onclick = () => startPass(room, idx);
+    } else {
+      node.onclick = () => alert('🔒 Clear the previous pass first!');
+    }
+    area.appendChild(node);
+  });
+}
+
+// ── Quiz ──
+async function startPass(room, idx){
+  clearTimer();
+  currentRoom = room;
+  currentPass = idx;
+  const passes = await getPasses(room);
+  currentPasses = passes;
+  passWords = passes[idx] || [];
+  if(!passWords.length){ alert('No words for this pass.'); showMapScreen(room); return; }
+  passCorrect = 0;
+  passWrongIndices = [];
+  currentIndex = 0;
+  showScreen('quizScreen');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  if(currentIndex >= passWords.length){ clearTimer(); completePass(); return; }
+  const w = passWords[currentIndex];
+  $('quizPassLabel').textContent = `Pass ${currentPass + 1} · Q${currentIndex + 1}`;
+  $('quizScorePill').textContent = `${passCorrect} / ${passWords.length}`;
+  $('quizProgress').style.width = Math.round(currentIndex / passWords.length * 100) + '%';
+  $('quizWord').textContent = w.Word;
+  $('quizPOS').textContent = w.POS;
+  $('quizRef').textContent = refTag(w);
+  speak(w.Word);
+
+  let opts = [w.Meaning];
+  const pool = (currentRoom === 'all')
+    ? Object.values(loadedVocab).flat()
+    : (loadedVocab[currentRoom] || passWords);
+  const others = shuffle(pool.filter(x => escKey(x) !== escKey(w)).map(x => x.Meaning));
+  for(const o of others){ if(!opts.includes(o) && opts.length < 4) opts.push(o); }
+  while(opts.length < 4) opts.push('Decoy signal');
+  opts = shuffle(opts);
+
+  const grid = $('quizOptions');
+  grid.innerHTML = '';
+  opts.forEach((opt, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-prefix">${String.fromCharCode(65+i)}</span><span>${esc(opt)}</span>`;
+    btn.dataset.v = opt;
+    btn.onclick = () => handleAnswer(opt, w.Meaning);
+    grid.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+function startTimer(){
+  let t = 5;
+  const el = $('quizTimer');
+  clearTimer();
+  el.textContent = `⏱ ${t}s`;
+  el.classList.remove('warn');
+  timerInterval = setInterval(() => {
+    t--;
+    el.textContent = `⏱ ${t}s`;
+    if(t <= 2) el.classList.add('warn');
+    if(t <= 0){
+      clearTimer();
+      passWrongIndices.push(currentIndex);
+      document.querySelectorAll('.opt-btn').forEach(b => b.style.pointerEvents = 'none');
+      setTimeout(endJourney, 300);
+    }
+  }, 1000);
+}
+
+function clearTimer(){ if(timerInterval){ clearInterval(timerInterval); timerInterval = null; } }
+
+function handleAnswer(selected, correct){
+  clearTimer();
+  const isOk = selected === correct;
+  document.querySelectorAll('.opt-btn').forEach(btn => {
+    btn.style.pointerEvents = 'none';
+    const v = btn.dataset.v;
+    if(v === correct) btn.classList.add('correct-hl');
+    if(v === selected && !isOk) btn.classList.add('wrong-hl');
+  });
+  if(isOk){
+    passCorrect++;
+    currentIndex++;
+    if(currentIndex < passWords.length) setTimeout(renderQuestion, 700);
+    else setTimeout(completePass, 700);
+  } else {
+    passWrongIndices.push(currentIndex);
+    setTimeout(endJourney, 500);
+  }
+}
+
+function buildWordTable(words, wrongIndices, failedAt){
+  const wrongSet = new Set(wrongIndices);
+  const rows = words.map((w, i) => {
+    const isWrong = wrongSet.has(i);
+    const unseen = failedAt !== undefined && i > failedAt;
+    let mark, wClass;
+    if(unseen)      { mark = '—';  wClass = 'unseen'; }
+    else if(isWrong){ mark = '✗';  wClass = 'fail'; }
+    else            { mark = '✓';  wClass = 'pass'; }
+    return `<tr>
+      <td class="mark-cell" style="color:${unseen?'#7a7096':isWrong?'#e04a7a':'#3dd68c'}">${mark}</td>
+      <td class="word-cell ${wClass}">${esc(w.Word)}</td>
+      <td class="pos-cell">${esc(w.POS)}</td>
+      <td class="meaning-cell">${esc(w.Meaning)}</td>
+      <td class="ref-cell">${esc(refTag(w))}</td>
+    </tr>`;
+  }).join('');
+  return `<div class="word-review-title">Words in this pass</div>
+    <div class="word-table-wrap">
+      <table class="word-table">
+        <thead><tr><th></th><th>Word</th><th>POS</th><th>Meaning</th><th>Ref</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function completePass(){
+  loadState();
+  if(!Array.isArray(escapeProgress[currentRoom])) escapeProgress[currentRoom] = [];
+  escapeProgress[currentRoom][currentPass] = true;
+  saveState();
+  $('clearedSub').textContent = `${passWords.length} words mastered · Pass ${currentPass + 1} complete.`;
+  $('clearedReview').innerHTML = buildWordTable(passWords, []);
+  showScreen('clearedScreen');
+}
+
+function endJourney(){
+  clearTimer();
+  $('failedReview').innerHTML = buildWordTable(passWords, passWrongIndices, currentIndex);
+  showScreen('failedScreen');
+}
+
+// ── Init ──
+buildSectorSelector();
+</script>
+</body>
+</html>
