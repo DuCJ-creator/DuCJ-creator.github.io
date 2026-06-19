@@ -5,390 +5,456 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shirley's Toolbox</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+:root {
+  --denim: #1B3A6B;
+  --denim-deep: #0f2444;
+  --denim-mid: #244d8a;
+  --denim-light: #2d5fa3;
+  --burgundy: #7B1C35;
+  --burgundy-deep: #540f22;
+  --burgundy-mid: #9c2440;
+  --burgundy-bright: #b82d4d;
+  --cream: #f5efe6;
+  --gold: #c9a84c;
+  --gold-light: #e2c47a;
+  --white: #ffffff;
+}
+
 body {
   min-height: 100vh;
-  background: #f5f0ff;
-  color: #1a1630;
+  background: var(--denim-deep);
+  color: var(--white);
   font-family: 'DM Sans', sans-serif;
   overflow-x: hidden;
 }
 
-.bg-canvas {
+body::before {
+  content: '';
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background:
-    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(180,150,255,0.22) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 90% 10%, rgba(120,190,255,0.18) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 60% at 50% 100%, rgba(255,160,200,0.15) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 80% 60%, rgba(100,220,180,0.12) 0%, transparent 50%),
-    #f5f0ff;
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 4px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.008) 0px, rgba(255,255,255,0.008) 1px, transparent 1px, transparent 6px);
 }
 
 .hero {
   position: relative; z-index: 1;
   text-align: center;
-  padding: 4rem 2rem 1.5rem;
+  padding: 3.5rem 2rem 2rem;
+  background: linear-gradient(180deg, var(--burgundy-deep) 0%, var(--denim-deep) 100%);
+  border-bottom: 3px solid var(--gold);
 }
 
-.hero-eyebrow {
-  font-size: 0.72rem;
-  font-weight: 400;
-  letter-spacing: 0.35em;
-  color: #9b87c6;
+.hero-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.4em;
   text-transform: uppercase;
-  margin-bottom: 0.9rem;
+  color: var(--gold-light);
+  border: 1px solid var(--gold);
+  padding: 5px 18px;
+  border-radius: 2px;
+  margin-bottom: 1.4rem;
 }
 
 .hero-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(3rem, 7vw, 5.2rem);
-  font-weight: 300;
-  letter-spacing: 0.06em;
-  line-height: 1.05;
-  color: #1a1030;
-  position: relative;
-  display: inline-block;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.8rem, 7vw, 5rem);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: var(--white);
+  text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+  margin-bottom: 0.5rem;
 }
 
-.hero-title span {
-  background: linear-gradient(135deg, #6b3fa0 0%, #a855f7 40%, #3b82f6 75%, #06b6d4 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.hero-title em {
+  font-style: italic;
+  color: var(--gold-light);
 }
 
 .hero-sub {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.15rem;
-  font-weight: 300;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
   font-style: italic;
-  letter-spacing: 0.08em;
-  color: #7c6fa8;
-  margin-top: 0.6rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 0.06em;
 }
 
-.divider {
-  display: flex; align-items: center; justify-content: center;
-  gap: 12px;
-  margin: 1.6rem auto 3rem;
+.hero-rule {
+  display: flex; align-items: center; gap: 14px;
+  margin: 1.6rem auto 0;
+  max-width: 360px;
 }
-.divider-line {
-  width: 80px; height: 1px;
-  background: linear-gradient(90deg, transparent, #b09de0);
-}
-.divider-line.r { background: linear-gradient(90deg, #b09de0, transparent); }
-.divider-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: #a855f7;
-  box-shadow: 0 0 8px rgba(168,85,247,0.5);
-}
+.hero-rule-line { flex: 1; height: 1px; background: var(--gold); opacity: 0.5; }
+.hero-rule-diamond { width: 8px; height: 8px; background: var(--gold); transform: rotate(45deg); }
 
 .container {
   position: relative; z-index: 1;
-  max-width: 1020px;
+  max-width: 1060px;
   margin: 0 auto;
-  padding: 0 1.8rem 5rem;
+  padding: 2.8rem 1.6rem 5rem;
   display: flex;
   flex-direction: column;
-  gap: 3.5rem;
+  gap: 3rem;
 }
-
-.category { position: relative; }
 
 .cat-header {
   display: flex;
-  align-items: flex-start;
-  gap: 1.1rem;
-  margin-bottom: 1.4rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 1.2rem;
+  padding: 14px 18px;
+  border-radius: 6px 6px 0 0;
   position: relative;
 }
 
-.cat-header::after {
-  content: '';
-  position: absolute;
-  bottom: -1px; left: 0;
-  width: 60px; height: 2px;
-  border-radius: 2px;
-}
-
-.cat-icon-wrap {
-  width: 48px; height: 48px;
-  border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px;
+.cat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 900;
+  font-style: italic;
+  opacity: 0.25;
+  line-height: 1;
   flex-shrink: 0;
-  margin-top: 2px;
+  color: var(--white);
 }
 
 .cat-text { flex: 1; }
 
 .cat-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.9rem;
-  font-weight: 400;
-  letter-spacing: 0.03em;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--white);
   line-height: 1.1;
 }
 
-.cat-subtitle {
-  font-size: 0.8rem;
+.cat-sub {
+  font-size: 0.72rem;
   font-weight: 400;
-  letter-spacing: 0.18em;
-  margin-top: 4px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+  margin-top: 3px;
 }
 
-.cat-count {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.85rem;
-  font-weight: 300;
-  font-style: italic;
-  color: #9a93b8;
-  align-self: flex-end;
-  padding-bottom: 6px;
-}
+.cat-icon { font-size: 24px; flex-shrink: 0; opacity: 0.85; }
+
+.cat-time .cat-header    { background: linear-gradient(135deg, var(--denim) 0%, var(--denim-mid) 100%); border-left: 4px solid var(--gold); }
+.cat-class .cat-header   { background: linear-gradient(135deg, var(--burgundy) 0%, var(--burgundy-mid) 100%); border-left: 4px solid var(--gold); }
+.cat-teach .cat-header   { background: linear-gradient(135deg, var(--denim-mid) 0%, #1d4e8f 100%); border-left: 4px solid var(--burgundy-bright); }
+.cat-subject .cat-header { background: linear-gradient(135deg, var(--burgundy-deep) 0%, var(--burgundy) 100%); border-left: 4px solid var(--gold); }
+.cat-fun .cat-header     { background: linear-gradient(135deg, #1a2f55 0%, var(--denim) 100%); border-left: 4px solid var(--burgundy-bright); }
 
 .tools-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 8px;
+  background: rgba(15,36,68,0.5);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  padding: 14px;
 }
 
-.tool-card {
-  position: relative;
-  border-radius: 14px;
-  overflow: hidden;
-  cursor: pointer;
-  text-decoration: none;
-  display: block;
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
-  min-height: 84px;
-}
-
-.tool-inner {
-  position: relative;
-  padding: 14px 15px 12px;
-  height: 100%;
-  min-height: 84px;
+.tool-btn {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: space-between;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.7);
-  transition: border-color 0.2s;
+  padding: 11px 13px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, transform 0.18s;
+  text-align: left;
+  gap: 6px;
 }
 
-.tool-card:hover { transform: translateY(-4px); }
+.tool-btn:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.tool-btn.active {
+  background: rgba(201,168,76,0.15);
+  border-color: var(--gold);
+}
+
+.tool-names { flex: 1; min-width: 0; }
 
 .tool-name {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 500;
+  color: var(--white);
   line-height: 1.3;
-  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.tool-name-cn {
-  font-size: 0.7rem;
-  font-weight: 300;
-  margin-top: 3px;
-  letter-spacing: 0.06em;
-  opacity: 0.65;
+.tool-cn {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.5);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.tool-arrow {
-  font-size: 11px;
-  align-self: flex-end;
-  opacity: 0.4;
+.tool-arr {
+  font-size: 10px;
+  color: var(--gold);
+  opacity: 0.6;
+  flex-shrink: 0;
   transition: opacity 0.2s, transform 0.2s;
 }
-.tool-card:hover .tool-arrow { opacity: 1; transform: translate(2px, -2px); }
+.tool-btn:hover .tool-arr { opacity: 1; transform: translate(2px,-2px); }
 
-/* Category themes */
-.cat-time .cat-header::after { background: linear-gradient(90deg, #10b981, transparent); }
-.cat-time .cat-icon-wrap { background: rgba(16,185,129,0.12); box-shadow: 0 0 0 1px rgba(16,185,129,0.2); }
-.cat-time .cat-title { color: #065f46; }
-.cat-time .cat-subtitle { color: #10b981; }
-.cat-time .tool-inner { background: linear-gradient(135deg, rgba(236,253,245,0.9) 0%, rgba(209,250,229,0.7) 100%); }
-.cat-time .tool-name { color: #064e3b; }
-.cat-time .tool-name-cn { color: #047857; }
-.cat-time .tool-arrow { color: #10b981; }
-.cat-time .tool-card:hover { box-shadow: 0 8px 30px rgba(16,185,129,0.22); }
-.cat-time .tool-card:hover .tool-inner { border-color: rgba(16,185,129,0.4); }
+/* iFrame Panel */
+.frame-panel {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(10,20,40,0.92);
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
 
-.cat-class .cat-header::after { background: linear-gradient(90deg, #3b82f6, transparent); }
-.cat-class .cat-icon-wrap { background: rgba(59,130,246,0.1); box-shadow: 0 0 0 1px rgba(59,130,246,0.2); }
-.cat-class .cat-title { color: #1e3a8a; }
-.cat-class .cat-subtitle { color: #3b82f6; }
-.cat-class .tool-inner { background: linear-gradient(135deg, rgba(239,246,255,0.92) 0%, rgba(219,234,254,0.72) 100%); }
-.cat-class .tool-name { color: #1e3a8a; }
-.cat-class .tool-name-cn { color: #2563eb; }
-.cat-class .tool-arrow { color: #3b82f6; }
-.cat-class .tool-card:hover { box-shadow: 0 8px 30px rgba(59,130,246,0.22); }
-.cat-class .tool-card:hover .tool-inner { border-color: rgba(59,130,246,0.4); }
+.frame-panel.open { display: flex; }
 
-.cat-teach .cat-header::after { background: linear-gradient(90deg, #8b5cf6, transparent); }
-.cat-teach .cat-icon-wrap { background: rgba(139,92,246,0.1); box-shadow: 0 0 0 1px rgba(139,92,246,0.2); }
-.cat-teach .cat-title { color: #4c1d95; }
-.cat-teach .cat-subtitle { color: #8b5cf6; }
-.cat-teach .tool-inner { background: linear-gradient(135deg, rgba(245,243,255,0.92) 0%, rgba(237,233,254,0.72) 100%); }
-.cat-teach .tool-name { color: #4c1d95; }
-.cat-teach .tool-name-cn { color: #7c3aed; }
-.cat-teach .tool-arrow { color: #8b5cf6; }
-.cat-teach .tool-card:hover { box-shadow: 0 8px 30px rgba(139,92,246,0.22); }
-.cat-teach .tool-card:hover .tool-inner { border-color: rgba(139,92,246,0.4); }
+.frame-topbar {
+  width: 100%;
+  background: linear-gradient(90deg, var(--burgundy-deep), var(--denim-deep));
+  border-bottom: 2px solid var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  height: 52px;
+  flex-shrink: 0;
+}
 
-.cat-subject .cat-header::after { background: linear-gradient(90deg, #f59e0b, transparent); }
-.cat-subject .cat-icon-wrap { background: rgba(245,158,11,0.1); box-shadow: 0 0 0 1px rgba(245,158,11,0.2); }
-.cat-subject .cat-title { color: #78350f; }
-.cat-subject .cat-subtitle { color: #f59e0b; }
-.cat-subject .tool-inner { background: linear-gradient(135deg, rgba(255,251,235,0.92) 0%, rgba(254,243,199,0.72) 100%); }
-.cat-subject .tool-name { color: #78350f; }
-.cat-subject .tool-name-cn { color: #d97706; }
-.cat-subject .tool-arrow { color: #f59e0b; }
-.cat-subject .tool-card:hover { box-shadow: 0 8px 30px rgba(245,158,11,0.22); }
-.cat-subject .tool-card:hover .tool-inner { border-color: rgba(245,158,11,0.4); }
+.frame-title-text {
+  flex: 1;
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-.cat-fun .cat-header::after { background: linear-gradient(90deg, #ec4899, transparent); }
-.cat-fun .cat-icon-wrap { background: rgba(236,72,153,0.1); box-shadow: 0 0 0 1px rgba(236,72,153,0.2); }
-.cat-fun .cat-title { color: #831843; }
-.cat-fun .cat-subtitle { color: #ec4899; }
-.cat-fun .tool-inner { background: linear-gradient(135deg, rgba(253,242,248,0.92) 0%, rgba(252,231,243,0.72) 100%); }
-.cat-fun .tool-name { color: #831843; }
-.cat-fun .tool-name-cn { color: #db2777; }
-.cat-fun .tool-arrow { color: #ec4899; }
-.cat-fun .tool-card:hover { box-shadow: 0 8px 30px rgba(236,72,153,0.22); }
-.cat-fun .tool-card:hover .tool-inner { border-color: rgba(236,72,153,0.4); }
+.frame-title-cn {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.55);
+  font-weight: 300;
+  flex-shrink: 0;
+}
+
+.frame-close {
+  width: 34px; height: 34px;
+  border-radius: 4px;
+  background: rgba(123,28,53,0.5);
+  border: 1px solid var(--burgundy-bright);
+  color: var(--white);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  font-family: monospace;
+}
+.frame-close:hover { background: var(--burgundy); }
+
+.frame-open-btn {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 4px;
+  background: rgba(201,168,76,0.12);
+  border: 1px solid var(--gold);
+  color: var(--gold-light);
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.frame-open-btn:hover { background: rgba(201,168,76,0.25); }
+
+.frame-wrapper {
+  flex: 1;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.frame-wrapper iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  background: #fff;
+}
+
+.frame-loading {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--denim-deep);
+  color: rgba(255,255,255,0.5);
+  font-size: 0.85rem;
+  gap: 12px;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.frame-loading.hidden { opacity: 0; }
+
+.spinner {
+  width: 32px; height: 32px;
+  border: 2px solid rgba(201,168,76,0.2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .footer {
   position: relative; z-index: 1;
   text-align: center;
   padding: 1rem 0 2.5rem;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.95rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85rem;
   font-style: italic;
-  font-weight: 300;
-  color: #b0a8d0;
+  color: rgba(255,255,255,0.25);
   letter-spacing: 0.1em;
+  border-top: 1px solid rgba(201,168,76,0.15);
 }
 
-@media (max-width: 520px) {
+@media (max-width: 500px) {
   .tools-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-title { font-size: 2.4rem; }
+  .frame-title-cn { display: none; }
+  .frame-open-btn span { display: none; }
 }
 </style>
 </head>
 <body>
 
-<div class="bg-canvas"></div>
+<div class="frame-panel" id="framePanel">
+  <div class="frame-topbar">
+    <button class="frame-close" id="frameClose" aria-label="Close">✕</button>
+    <div class="frame-title-text" id="frameTitleText">Tool</div>
+    <div class="frame-title-cn" id="frameTitleCn"></div>
+    <button class="frame-open-btn" id="frameOpenBtn">↗ <span>Open in new tab</span></button>
+  </div>
+  <div class="frame-wrapper">
+    <div class="frame-loading" id="frameLoading">
+      <div class="spinner"></div>
+      <span>Loading tool…</span>
+    </div>
+    <iframe id="mainFrame" title="Tool viewer" allowfullscreen></iframe>
+  </div>
+</div>
 
 <div class="hero">
-  <div class="hero-eyebrow">✦ &nbsp; Digital Teaching Companion &nbsp; ✦</div>
-  <div class="hero-title"><span>Shirley's Toolbox</span></div>
-  <div class="hero-sub">教學工具箱 &nbsp;—&nbsp; Every tool, one place</div>
-  <div class="divider">
-    <div class="divider-line"></div>
-    <div class="divider-dot"></div>
-    <div class="divider-line r"></div>
-  </div>
+  <div class="hero-badge">✦ Digital Teaching Companion ✦</div>
+  <div class="hero-title"><em>Shirley's</em> Toolbox</div>
+  <div class="hero-sub">教學工具箱 — Every tool, one place</div>
+  <div class="hero-rule"><div class="hero-rule-line"></div><div class="hero-rule-diamond"></div><div class="hero-rule-line"></div></div>
 </div>
 
 <div class="container">
 
   <div class="category cat-time">
     <div class="cat-header">
-      <div class="cat-icon-wrap">⏱</div>
-      <div class="cat-text">
-        <div class="cat-title">Time Management</div>
-        <div class="cat-subtitle">時間管理類</div>
-      </div>
-      <div class="cat-count">4 tools</div>
+      <div class="cat-num">01</div>
+      <div class="cat-text"><div class="cat-title">Time Management</div><div class="cat-sub">時間管理類</div></div>
+      <div class="cat-icon">⏱</div>
     </div>
     <div class="tools-grid">
-      <a class="tool-card" href="https://ducj-creator.github.io/clock.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Clock</div><div class="tool-name-cn">時鐘</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Timer" target="_blank"><div class="tool-inner"><div><div class="tool-name">Timer</div><div class="tool-name-cn">計時器</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Stop%20Watch.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Stopwatch</div><div class="tool-name-cn">碼表</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/countdown.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Countdown</div><div class="tool-name-cn">倒計時</div></div><div class="tool-arrow">↗</div></div></a>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/clock.html" data-en="Clock" data-cn="時鐘"><div class="tool-names"><div class="tool-name">Clock</div><div class="tool-cn">時鐘</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Timer" data-en="Timer" data-cn="計時器"><div class="tool-names"><div class="tool-name">Timer</div><div class="tool-cn">計時器</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Stop%20Watch.html" data-en="Stopwatch" data-cn="碼表"><div class="tool-names"><div class="tool-name">Stopwatch</div><div class="tool-cn">碼表</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/countdown.html" data-en="Countdown" data-cn="倒計時"><div class="tool-names"><div class="tool-name">Countdown</div><div class="tool-cn">倒計時</div></div><span class="tool-arr">▶</span></button>
     </div>
   </div>
 
   <div class="category cat-class">
     <div class="cat-header">
-      <div class="cat-icon-wrap">🎲</div>
-      <div class="cat-text">
-        <div class="cat-title">Class Management</div>
-        <div class="cat-subtitle">班務管理類</div>
-      </div>
-      <div class="cat-count">7 tools</div>
+      <div class="cat-num">02</div>
+      <div class="cat-text"><div class="cat-title">Class Management</div><div class="cat-sub">班務管理類</div></div>
+      <div class="cat-icon">🎲</div>
     </div>
     <div class="tools-grid">
-      <a class="tool-card" href="https://ducj-creator.github.io/scoreboard.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Scoreboard</div><div class="tool-name-cn">計分牌</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/sign.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Signpost</div><div class="tool-name-cn">指示牌</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Dice2.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Lucky Dice</div><div class="tool-name-cn">幸運骰</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/coin.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Coin Flip</div><div class="tool-name-cn">擲硬幣</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/moonblock.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Moonblock</div><div class="tool-name-cn">擲筊</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Lucky%20Wheel.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Lucky Wheel</div><div class="tool-name-cn">幸運轉盤</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/grade%20analysis.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Grade Analysis</div><div class="tool-name-cn">成績分析</div></div><div class="tool-arrow">↗</div></div></a>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/scoreboard.html" data-en="Scoreboard" data-cn="計分牌"><div class="tool-names"><div class="tool-name">Scoreboard</div><div class="tool-cn">計分牌</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/sign.html" data-en="Signpost" data-cn="指示牌"><div class="tool-names"><div class="tool-name">Signpost</div><div class="tool-cn">指示牌</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Dice2.html" data-en="Lucky Dice" data-cn="幸運骰"><div class="tool-names"><div class="tool-name">Lucky Dice</div><div class="tool-cn">幸運骰</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/coin.html" data-en="Coin Flip" data-cn="擲硬幣"><div class="tool-names"><div class="tool-name">Coin Flip</div><div class="tool-cn">擲硬幣</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/moonblock.html" data-en="Moonblock" data-cn="擲筊"><div class="tool-names"><div class="tool-name">Moonblock</div><div class="tool-cn">擲筊</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Lucky%20Wheel.html" data-en="Lucky Wheel" data-cn="幸運轉盤"><div class="tool-names"><div class="tool-name">Lucky Wheel</div><div class="tool-cn">幸運轉盤</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/grade%20analysis.html" data-en="Grade Analysis" data-cn="成績分析"><div class="tool-names"><div class="tool-name">Grade Analysis</div><div class="tool-cn">成績分析</div></div><span class="tool-arr">▶</span></button>
     </div>
   </div>
 
   <div class="category cat-teach">
     <div class="cat-header">
-      <div class="cat-icon-wrap">✏️</div>
-      <div class="cat-text">
-        <div class="cat-title">Teaching Tools</div>
-        <div class="cat-subtitle">教學工具類</div>
-      </div>
-      <div class="cat-count">3 tools</div>
+      <div class="cat-num">03</div>
+      <div class="cat-text"><div class="cat-title">Teaching Tools</div><div class="cat-sub">教學工具類</div></div>
+      <div class="cat-icon">✏️</div>
     </div>
     <div class="tools-grid">
-      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Pop%20Quiz%20Maker.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Quiz Maker</div><div class="tool-name-cn">測驗製作</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Flip%20Card.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Flip Card Maker</div><div class="tool-name-cn">翻轉卡製作</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/report.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Report Formatter</div><div class="tool-name-cn">報告格式器</div></div><div class="tool-arrow">↗</div></div></a>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Pop%20Quiz%20Maker.html" data-en="Quiz Maker" data-cn="測驗製作"><div class="tool-names"><div class="tool-name">Quiz Maker</div><div class="tool-cn">測驗製作</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Flip%20Card.html" data-en="Flip Card Maker" data-cn="翻轉卡製作"><div class="tool-names"><div class="tool-name">Flip Card Maker</div><div class="tool-cn">翻轉卡製作</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/report.html" data-en="Report Formatter" data-cn="報告格式器"><div class="tool-names"><div class="tool-name">Report Formatter</div><div class="tool-cn">報告格式器</div></div><span class="tool-arr">▶</span></button>
     </div>
   </div>
 
   <div class="category cat-subject">
     <div class="cat-header">
-      <div class="cat-icon-wrap">📚</div>
-      <div class="cat-text">
-        <div class="cat-title">Subject Teaching</div>
-        <div class="cat-subtitle">學科教學類</div>
-      </div>
-      <div class="cat-count">11 tools</div>
+      <div class="cat-num">04</div>
+      <div class="cat-text"><div class="cat-title">Subject Teaching</div><div class="cat-sub">學科教學類</div></div>
+      <div class="cat-icon">📚</div>
     </div>
     <div class="tools-grid">
-      <a class="tool-card" href="https://ducj-creator.github.io/etgame.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Vocab ET</div><div class="tool-name-cn">單字外星人</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/iVocab-Self-Practice/levels1-6.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Vocab Escape Room</div><div class="tool-name-cn">單字密室逃脫</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/ivchampion.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Vocab Champion</div><div class="tool-name-cn">字彙終極戰</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/iVocab-Self-Practice/entry.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">My Own Words</div><div class="tool-name-cn">自主單字練習</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Word%20Search%20Maker.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Word Search Maker</div><div class="tool-name-cn">尋字工坊</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/Shirley%20Crossword%20Maker.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Crossword Maker</div><div class="tool-name-cn">字謎生成</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/Shirley-AI-Writing/version2.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Writing Coach</div><div class="tool-name-cn">寫作教練</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/Teacher-Shirley/study-tools/kk.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">KK Phonetics</div><div class="tool-name-cn">KK 音標</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/Shirley-AI-Sentence-Practice/bank.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Sentence Reading</div><div class="tool-name-cn">例句朗讀</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/Shirley-AI-Sentence-Practice/entry.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">My Own Sentences</div><div class="tool-name-cn">自主句子練習</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/events/chhsmonthly/" target="_blank"><div class="tool-inner"><div><div class="tool-name">CHHS Monthly</div><div class="tool-name-cn">月刊</div></div><div class="tool-arrow">↗</div></div></a>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/etgame.html" data-en="Vocab ET" data-cn="單字外星人"><div class="tool-names"><div class="tool-name">Vocab ET</div><div class="tool-cn">單字外星人</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/iVocab-Self-Practice/levels1-6.html" data-en="Vocab Escape Room" data-cn="單字密室逃脫"><div class="tool-names"><div class="tool-name">Vocab Escape Room</div><div class="tool-cn">單字密室逃脫</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/ivchampion.html" data-en="Vocab Champion" data-cn="字彙終極戰"><div class="tool-names"><div class="tool-name">Vocab Champion</div><div class="tool-cn">字彙終極戰</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/iVocab-Self-Practice/entry.html" data-en="My Own Words" data-cn="自主單字練習"><div class="tool-names"><div class="tool-name">My Own Words</div><div class="tool-cn">自主單字練習</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Word%20Search%20Maker.html" data-en="Word Search Maker" data-cn="尋字工坊"><div class="tool-names"><div class="tool-name">Word Search Maker</div><div class="tool-cn">尋字工坊</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Crossword%20Maker.html" data-en="Crossword Maker" data-cn="字謎生成"><div class="tool-names"><div class="tool-name">Crossword Maker</div><div class="tool-cn">字謎生成</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley-AI-Writing/version2.html" data-en="Writing Coach" data-cn="寫作教練"><div class="tool-names"><div class="tool-name">Writing Coach</div><div class="tool-cn">寫作教練</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/Teacher-Shirley/study-tools/kk.html" data-en="KK Phonetics" data-cn="KK 音標"><div class="tool-names"><div class="tool-name">KK Phonetics</div><div class="tool-cn">KK 音標</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley-AI-Sentence-Practice/bank.html" data-en="Sentence Reading" data-cn="例句朗讀"><div class="tool-names"><div class="tool-name">Sentence Reading</div><div class="tool-cn">例句朗讀</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley-AI-Sentence-Practice/entry.html" data-en="My Own Sentences" data-cn="自主句子練習"><div class="tool-names"><div class="tool-name">My Own Sentences</div><div class="tool-cn">自主句子練習</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/events/chhsmonthly/" data-en="CHHS Monthly" data-cn="月刊"><div class="tool-names"><div class="tool-name">CHHS Monthly</div><div class="tool-cn">月刊</div></div><span class="tool-arr">▶</span></button>
     </div>
   </div>
 
   <div class="category cat-fun">
     <div class="cat-header">
-      <div class="cat-icon-wrap">🎮</div>
-      <div class="cat-text">
-        <div class="cat-title">Fun Games</div>
-        <div class="cat-subtitle">遊戲類</div>
-      </div>
-      <div class="cat-count">4 tools</div>
+      <div class="cat-num">05</div>
+      <div class="cat-text"><div class="cat-title">Fun Games</div><div class="cat-sub">遊戲類</div></div>
+      <div class="cat-icon">🎮</div>
     </div>
     <div class="tools-grid">
-      <a class="tool-card" href="https://ducj-creator.github.io/shirley%20sudoku.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Sudoku</div><div class="tool-name-cn">數獨</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/gomoku.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Gomoku</div><div class="tool-name-cn">五子棋</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/go.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Go</div><div class="tool-name-cn">圍棋</div></div><div class="tool-arrow">↗</div></div></a>
-      <a class="tool-card" href="https://ducj-creator.github.io/gem.html" target="_blank"><div class="tool-inner"><div><div class="tool-name">Gem</div><div class="tool-name-cn">連連看</div></div><div class="tool-arrow">↗</div></div></a>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/shirley%20sudoku.html" data-en="Sudoku" data-cn="數獨"><div class="tool-names"><div class="tool-name">Sudoku</div><div class="tool-cn">數獨</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/gomoku.html" data-en="Gomoku" data-cn="五子棋"><div class="tool-names"><div class="tool-name">Gomoku</div><div class="tool-cn">五子棋</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/go.html" data-en="Go" data-cn="圍棋"><div class="tool-names"><div class="tool-name">Go</div><div class="tool-cn">圍棋</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/gem.html" data-en="Gem" data-cn="連連看"><div class="tool-names"><div class="tool-name">Gem</div><div class="tool-cn">連連看</div></div><span class="tool-arr">▶</span></button>
     </div>
   </div>
 
@@ -396,5 +462,54 @@ body {
 
 <div class="footer">✦ &nbsp; Shirley's Digital Classroom &nbsp;·&nbsp; 數位教室 &nbsp; ✦</div>
 
+<script>
+const panel = document.getElementById('framePanel');
+const frame = document.getElementById('mainFrame');
+const loading = document.getElementById('frameLoading');
+const titleText = document.getElementById('frameTitleText');
+const titleCn = document.getElementById('frameTitleCn');
+const openBtn = document.getElementById('frameOpenBtn');
+let currentUrl = '';
+let activeBtn = null;
+
+document.querySelectorAll('.tool-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const url = btn.dataset.url;
+    const en = btn.dataset.en;
+    const cn = btn.dataset.cn;
+    if (activeBtn) activeBtn.classList.remove('active');
+    btn.classList.add('active');
+    activeBtn = btn;
+    currentUrl = url;
+    titleText.textContent = en;
+    titleCn.textContent = cn;
+    loading.classList.remove('hidden');
+    frame.src = '';
+    panel.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => { frame.src = url; });
+  });
+});
+
+frame.addEventListener('load', () => { loading.classList.add('hidden'); });
+
+document.getElementById('frameClose').addEventListener('click', () => {
+  panel.classList.remove('open');
+  document.body.style.overflow = '';
+  frame.src = '';
+  if (activeBtn) { activeBtn.classList.remove('active'); activeBtn = null; }
+});
+
+openBtn.addEventListener('click', () => { if (currentUrl) window.open(currentUrl, '_blank'); });
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    document.body.style.overflow = '';
+    frame.src = '';
+    if (activeBtn) { activeBtn.classList.remove('active'); activeBtn = null; }
+  }
+});
+</script>
 </body>
 </html>
