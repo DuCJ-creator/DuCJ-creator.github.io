@@ -321,7 +321,7 @@ body::before {
   pointer-events: none;
   transition: opacity 0.3s;
 }
-.frame-loading.hidden { opacity: 0; }
+.frame-loading.hidden { opacity: 0; pointer-events: none; }
 
 .spinner {
   width: 32px; height: 32px;
@@ -420,7 +420,7 @@ body::before {
       <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Pop%20Quiz%20Maker.html" data-en="Quiz Maker" data-cn="測驗製作"><div class="tool-names"><div class="tool-name">Quiz Maker</div><div class="tool-cn">測驗製作</div></div><span class="tool-arr">▶</span></button>
       <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Flip%20Card.html" data-en="Flip Card Maker" data-cn="翻轉卡製作"><div class="tool-names"><div class="tool-name">Flip Card Maker</div><div class="tool-cn">翻轉卡製作</div></div><span class="tool-arr">▶</span></button>
       <button class="tool-btn" data-url="https://ducj-creator.github.io/report.html" data-en="Report Formatter" data-cn="報告格式器"><div class="tool-names"><div class="tool-name">Report Formatter</div><div class="tool-cn">報告格式器</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/urlsqrcg.html" data-en="URL Shortner & QR Code Generator" data-cn="短網址及QR生成器"><div class="tool-names"><div class="tool-name">URL Shortner & QR Code Generator</div><div class="tool-cn">短網址及QR生成器</div></div><span class="tool-arr">▶</span></button>
+      <button class="tool-btn" data-url="https://ducj-creator.github.io/urlsqrcg.html" data-en="URL Shortner & QR Code Generator" data-cn="短網址及QR生成器"><div name="tool-names"><div class="tool-name">URL Shortner & QR Code Generator</div><div class="tool-cn">短網址及QR生成器</div></div><span class="tool-arr">▶</span></button>
     </div>
   </div>
 
@@ -472,44 +472,73 @@ const titleCn = document.getElementById('frameTitleCn');
 const openBtn = document.getElementById('frameOpenBtn');
 let currentUrl = '';
 let activeBtn = null;
+let loadTimer = null;
 
 document.querySelectorAll('.tool-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const url = btn.dataset.url;
     const en = btn.dataset.en;
     const cn = btn.dataset.cn;
+
+    // If clicking the same tool that's already open, do nothing
+    if (activeBtn === btn && panel.classList.contains('open')) return;
+
     if (activeBtn) activeBtn.classList.remove('active');
     btn.classList.add('active');
     activeBtn = btn;
     currentUrl = url;
+
     titleText.textContent = en;
     titleCn.textContent = cn;
+
+    // Show panel and spinner
     loading.classList.remove('hidden');
-    frame.src = '';
+    loading.style.opacity = '1';
     panel.classList.add('open');
     document.body.style.overflow = 'hidden';
-    requestAnimationFrame(() => { frame.src = url; });
+
+    // Clear any pending load timer
+    if (loadTimer) clearTimeout(loadTimer);
+
+    // Reset iframe cleanly
+    frame.src = 'about:blank';
+
+    // Wait for panel to be fully painted + sized before loading the real URL
+    loadTimer = setTimeout(() => {
+      frame.src = url;
+    }, 80);
   });
 });
 
-frame.addEventListener('load', () => { loading.classList.add('hidden'); });
-
-document.getElementById('frameClose').addEventListener('click', () => {
-  panel.classList.remove('open');
-  document.body.style.overflow = '';
-  frame.src = '';
-  if (activeBtn) { activeBtn.classList.remove('active'); activeBtn = null; }
+frame.addEventListener('load', () => {
+  // Ignore the about:blank load event — only hide spinner for real URLs
+  try {
+    if (frame.contentWindow && frame.contentWindow.location.href === 'about:blank') return;
+  } catch(e) {
+    // Cross-origin frames throw on .href access — that means a real page loaded, hide spinner
+  }
+  loading.style.opacity = '0';
+  setTimeout(() => { loading.classList.add('hidden'); }, 300);
 });
 
-openBtn.addEventListener('click', () => { if (currentUrl) window.open(currentUrl, '_blank'); });
+function closePanel() {
+  panel.classList.remove('open');
+  document.body.style.overflow = '';
+  if (loadTimer) clearTimeout(loadTimer);
+  frame.src = 'about:blank';
+  loading.classList.remove('hidden');
+  loading.style.opacity = '1';
+  if (activeBtn) { activeBtn.classList.remove('active'); activeBtn = null; }
+}
+
+document.getElementById('frameClose').addEventListener('click', closePanel);
+
+openBtn.addEventListener('click', () => {
+  if (currentUrl) window.open(currentUrl, '_blank');
+});
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && panel.classList.contains('open')) {
-    panel.classList.remove('open');
-    document.body.style.overflow = '';
-    frame.src = '';
-    if (activeBtn) { activeBtn.classList.remove('active'); activeBtn = null; }
-  }
+  if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
 });
 </script>
 </body>
