@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shirley's Sudoku</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
@@ -13,7 +14,6 @@
       -webkit-touch-callout: none;
       user-select: none;
     }
-
     :root {
       --blue-dark:   #01579b;
       --blue-mid:    #0288d1;
@@ -29,9 +29,7 @@
       --box-border:  #01579b;
       --cell-border: #b3d9f0;
     }
-
-    html { font-size: clamp(13px, 2.2vw, 17px); }
-
+    html { font-size: clamp(12px, 2vw, 16px); }
     body {
       background: var(--blue-pale);
       color: var(--blue-dark);
@@ -39,84 +37,76 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 10px 12px 24px;
+      padding: 10px 8px 32px;
       min-height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
-
     h1 {
-      font-size: clamp(1.3rem, 5vw, 2rem);
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
       font-weight: 900;
       color: var(--blue-mid);
-      margin: 8px 0 4px;
+      margin: 6px 0 4px;
       letter-spacing: -0.5px;
     }
-
-    /* ── Controls ── */
     .controls {
       display: flex;
-      gap: 5px;
-      margin: 8px 0;
+      gap: 4px;
+      margin: 6px 0;
       flex-wrap: wrap;
       justify-content: center;
-      max-width: 520px;
       width: 100%;
+      max-width: 480px;
       align-items: center;
     }
-
     button {
-      padding: 7px 11px;
+      padding: 6px 10px;
       border: none;
       border-radius: 8px;
       font-family: 'Nunito', sans-serif;
       font-weight: 700;
       cursor: pointer;
-      font-size: clamp(0.75rem, 2vw, 0.88rem);
+      font-size: clamp(0.7rem, 1.8vw, 0.85rem);
       white-space: nowrap;
       -webkit-appearance: none;
       touch-action: manipulation;
       transition: filter 0.15s, transform 0.1s;
     }
     button:active { transform: scale(0.95); filter: brightness(0.9); }
-
     .difficulty-btn { background: #b3e5fc; color: var(--blue-dark); }
     .difficulty-btn.active { background: var(--blue-mid); color: white; }
-
     #reset-btn  { background: #4fc3f7; color: white; }
     #undo-btn   { background: var(--gray); color: #263238; }
     #erase-btn  { background: var(--erase); color: white; }
     #note-btn   { background: var(--yellow); color: #5d4037; }
     #note-btn.active { background: #ffa000; color: white; }
     #check-btn  { background: var(--green); color: white; }
-
     .timer {
-      padding: 7px 14px;
+      padding: 6px 12px;
       background: var(--blue-light);
       color: var(--blue-dark);
       border-radius: 999px;
       font-weight: 700;
-      font-size: clamp(0.75rem, 2vw, 0.88rem);
-      min-width: 82px;
+      font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+      min-width: 75px;
       text-align: center;
     }
-
-    /* ── Board ── */
     .sudoku-container {
-      margin: 10px 0 6px;
+      margin: 8px 0 6px;
       background: white;
       border-radius: 12px;
       box-shadow: 0 3px 12px rgba(0,0,0,0.12);
       display: inline-flex;
       justify-content: center;
       overflow: hidden;
+      flex-shrink: 0;
     }
-
     .grid {
       display: grid;
       background: var(--box-border);
       padding: 2px;
       gap: 0;
     }
-
     .cell {
       display: flex;
       align-items: center;
@@ -129,15 +119,12 @@
       position: relative;
       transition: background 0.1s;
     }
-
     .cell.given   { color: var(--blue-dark); background: var(--blue-light) !important; }
     .cell.user    { color: var(--blue-mid); }
     .cell.error   { background: var(--red-light) !important; color: var(--red); }
     .cell.selected { background: var(--blue-select) !important; outline: 2.5px solid var(--blue-mid); outline-offset: -1px; }
-    .cell.highlight { background: #e8f4fd; }  /* same row/col/box as selected */
-    .cell.same-num  { background: #c5e5f7; }   /* same number as selected */
-
-    /* Note grid inside cell */
+    .cell.highlight { background: #e8f4fd; }
+    .cell.same-num  { background: #c5e5f7; }
     .note-grid {
       display: grid;
       width: 100%;
@@ -153,24 +140,22 @@
       line-height: 1;
     }
     .note-num.active { color: var(--blue-mid); }
-
-    /* ── Number pad ── */
     .pad-row {
       display: flex;
-      gap: 6px;
-      margin-top: 10px;
+      gap: 5px;
+      margin-top: 8px;
       justify-content: center;
       width: 100%;
-      max-width: 520px;
+      max-width: 480px;
+      flex-shrink: 0;
     }
-
     .num-btn {
       flex: 1;
-      padding: clamp(8px, 2.5vw, 12px) 0;
+      padding: clamp(7px, 2vw, 11px) 0;
       background: var(--blue-light);
       color: var(--blue-dark);
       font-family: 'Nunito', sans-serif;
-      font-size: clamp(1rem, 3.5vw, 1.3rem);
+      font-size: clamp(0.95rem, 3vw, 1.2rem);
       font-weight: 800;
       border-radius: 8px;
       border: none;
@@ -179,8 +164,6 @@
       transition: background 0.15s, transform 0.1s;
     }
     .num-btn:active { transform: scale(0.93); background: var(--blue-select); }
-
-    /* ── Victory overlay ── */
     .victory-overlay {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.65);
@@ -191,7 +174,6 @@
       transition: opacity 0.35s;
     }
     .victory-overlay.show { opacity: 1; pointer-events: all; }
-
     .victory-content {
       background: white;
       border-radius: 20px;
@@ -203,48 +185,22 @@
       transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
     }
     .victory-overlay.show .victory-content { transform: scale(1); }
-
     .victory-emoji { font-size: clamp(2.5rem, 10vw, 4rem); margin-bottom: 8px; }
-    .victory-title {
-      font-size: clamp(1.6rem, 7vw, 2.4rem);
-      font-weight: 900;
-      color: var(--blue-mid);
-      margin-bottom: 6px;
-    }
-    .victory-time {
-      font-size: clamp(1rem, 4vw, 1.3rem);
-      color: #78909c;
-      margin-bottom: 20px;
-    }
-    #close-victory {
-      background: var(--blue-mid); color: white;
-      padding: 10px 24px; border-radius: 10px;
-      font-size: clamp(0.95rem, 3vw, 1.1rem);
-    }
-
-    /* Confetti */
-    .confetti {
-      position: fixed;
-      top: -20px;
-      border-radius: 2px;
-      opacity: 0.85;
-      animation: fall linear forwards;
-    }
-    @keyframes fall {
-      to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-    }
-
-    /* ── Toast message ── */
+    .victory-title { font-size: clamp(1.4rem, 6vw, 2.2rem); font-weight: 900; color: var(--blue-mid); margin-bottom: 6px; }
+    .victory-time { font-size: clamp(0.9rem, 3.5vw, 1.2rem); color: #78909c; margin-bottom: 20px; }
+    #close-victory { background: var(--blue-mid); color: white; padding: 10px 24px; border-radius: 10px; font-size: clamp(0.9rem, 2.8vw, 1rem); }
+    .confetti { position: fixed; top: -20px; border-radius: 2px; opacity: 0.85; animation: fall linear forwards; }
+    @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
     .message {
       position: fixed;
-      bottom: 30px; left: 50%;
+      bottom: 20px; left: 50%;
       transform: translateX(-50%) translateY(20px);
       background: rgba(1,87,155,0.92);
       color: white;
-      padding: 11px 26px;
+      padding: 10px 22px;
       border-radius: 12px;
       font-family: 'Nunito', sans-serif;
-      font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+      font-size: clamp(0.85rem, 3vw, 1rem);
       font-weight: 700;
       z-index: 1001;
       opacity: 0;
@@ -253,19 +209,11 @@
       white-space: nowrap;
     }
     .message.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    /* ── Keyboard hint ── */
-    .hint {
-      font-size: 0.72rem;
-      color: #90a4ae;
-      margin-top: 6px;
-      text-align: center;
-    }
+    .hint { font-size: 0.68rem; color: #90a4ae; margin-top: 5px; text-align: center; }
   </style>
 </head>
 <body>
   <h1>✏️ Shirley's Sudoku</h1>
-
   <div class="controls">
     <button class="difficulty-btn" data-size="4">初學 4×4</button>
     <button class="difficulty-btn active" data-size="6">輕鬆 6×6</button>
@@ -277,16 +225,11 @@
     <button id="check-btn">✅ 完成確認</button>
     <span id="timer" class="timer">⌛ 00:00</span>
   </div>
-
   <div class="sudoku-container">
     <div class="grid" id="sudoku-grid"></div>
   </div>
-
   <div class="pad-row" id="number-pad"></div>
-
   <p class="hint">方向鍵移動格子 · Delete/Space 清除 · 點同數字清除</p>
-
-  <!-- Victory overlay -->
   <div class="victory-overlay" id="victory-overlay">
     <div class="victory-content">
       <div class="victory-emoji">🎉</div>
@@ -295,38 +238,22 @@
       <button id="close-victory">再玩一局</button>
     </div>
   </div>
-
   <div class="message" id="message"></div>
 
   <script>
-    // ── Prevent scroll / zoom interference ──
-    document.documentElement.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
-    document.documentElement.addEventListener('touchstart', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', e => {
-      const now = Date.now();
-      if (now - lastTouchEnd <= 300) e.preventDefault();
-      lastTouchEnd = now;
-    }, false);
-
-    // ── Global state ──
     let currentSize = 6;
     let board = [], solution = [], given = [], notes = [];
     let history = [];
     let noteMode = false;
-    let selectedPos = null;      // { row, col }
-
-    // Timer
+    let selectedPos = null;
     let timerInterval = null, elapsedSeconds = 0;
 
-    // Box dimensions
     const difficulties = {
       4: { boxH: 2, boxW: 2 },
       6: { boxH: 2, boxW: 3 },
       9: { boxH: 3, boxW: 3 }
     };
 
-    // ── Fisher-Yates shuffle (FIXED – old version was biased) ──
     function shuffle(arr) {
       const a = [...arr];
       for (let i = a.length - 1; i > 0; i--) {
@@ -336,7 +263,6 @@
       return a;
     }
 
-    // ── Timer ──
     function updateTimerDisplay() {
       const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
       const s = String(elapsedSeconds % 60).padStart(2, '0');
@@ -350,7 +276,6 @@
     }
     function stopTimer() { clearInterval(timerInterval); timerInterval = null; }
 
-    // ── Validation (excludes current cell) ──
     function isValid(grid, row, col, num, size) {
       if (num === 0) return true;
       for (let x = 0; x < size; x++) {
@@ -367,7 +292,6 @@
       return true;
     }
 
-    // ── Solver ──
     function solve(grid, size) {
       for (let row = 0; row < size; row++)
         for (let col = 0; col < size; col++)
@@ -384,20 +308,17 @@
       return true;
     }
 
-    // ── Puzzle generation ──
     function generatePuzzle(size) {
       solution = Array.from({ length: size }, () => Array(size).fill(0));
       solve(solution, size);
       board = solution.map(r => [...r]);
       given = Array.from({ length: size }, () => Array(size).fill(true));
       notes = Array.from({ length: size }, () => Array.from({ length: size }, () => new Set()));
-
       const removeCount = size === 4 ? 8 : size === 6 ? 14 : 42;
       const shuffled = shuffle(Array.from({ length: size * size }, (_, k) => [Math.floor(k / size), k % size]));
       const rowCount = Array(size).fill(size);
       const colCount = Array(size).fill(size);
       let removed = 0;
-
       for (const [i, j] of shuffled) {
         if (removed >= removeCount) break;
         if (rowCount[i] <= 1 || colCount[j] <= 1) continue;
@@ -409,10 +330,11 @@
       }
     }
 
-    // ── Cell sizing ──
     function getCellSize() {
-      const containerWidth = Math.min(500, window.innerWidth - 24);
-      return Math.floor(containerWidth / currentSize);
+      // Cap to viewport width with a comfortable margin; never stretch past that
+      const vw = window.innerWidth;
+      const maxGrid = Math.min(vw - 24, 420);
+      return Math.floor(maxGrid / currentSize);
     }
     function getFontSizes(cellSize) {
       return {
@@ -421,19 +343,15 @@
       };
     }
 
-    // ── Note rendering inside a cell ──
     function renderNoteContent(cell, cellNotes, cellSize) {
       const size = currentSize;
       const { note: noteFontSize } = getFontSizes(cellSize);
-      // For size 4: 2×2 grid, size 6: 2×3 grid, size 9: 3×3 grid
       const cols = size <= 4 ? 2 : size <= 6 ? 3 : 3;
       const rows = Math.ceil(size / cols);
-
       const grid = document.createElement('div');
       grid.className = 'note-grid';
       grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
       grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-
       for (let n = 1; n <= size; n++) {
         const span = document.createElement('span');
         span.className = 'note-num' + (cellNotes.has(n) ? ' active' : '');
@@ -445,17 +363,14 @@
       cell.appendChild(grid);
     }
 
-    // ── Render full grid ──
     function renderGrid() {
       const gridEl = document.getElementById('sudoku-grid');
       const size = currentSize;
       gridEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
       gridEl.innerHTML = '';
-
       const cellSize = getCellSize();
       const { base: baseFontSize } = getFontSizes(cellSize);
       const { boxH, boxW } = difficulties[size];
-
       for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
           const cell = document.createElement('div');
@@ -464,50 +379,35 @@
           cell.dataset.col = j;
           cell.style.width  = cellSize + 'px';
           cell.style.height = cellSize + 'px';
-
-          // Borders: thin default, thick at box boundaries
           cell.style.border = `1px solid var(--cell-border)`;
           if (i % boxH === 0)    cell.style.borderTop    = '3px solid var(--box-border)';
           if (j % boxW === 0)    cell.style.borderLeft   = '3px solid var(--box-border)';
           if (i === size - 1)    cell.style.borderBottom = '3px solid var(--box-border)';
           if (j === size - 1)    cell.style.borderRight  = '3px solid var(--box-border)';
-
           fillCell(cell, i, j, cellSize, baseFontSize);
-
-          // Use only click (touchstart → click is handled natively on mobile too)
-          // BUG FIX: was binding BOTH touchstart and click, causing double-fire on mobile
           cell.addEventListener('pointerdown', e => {
             e.preventDefault();
             selectCell(i, j);
           });
-
           gridEl.appendChild(cell);
         }
       }
-
-      // Restore selection highlight
       if (selectedPos) applyHighlights();
     }
 
-    // ── Fill a single cell's content and classes ──
     function fillCell(cell, row, col, cellSize, baseFontSize) {
       cellSize  = cellSize  || getCellSize();
       baseFontSize = baseFontSize || getFontSizes(cellSize).base;
-
-      // Remove state classes (keep structural/selection ones separate)
       cell.classList.remove('given', 'user', 'error', 'note-cell');
       cell.innerHTML = '';
       cell.style.fontSize = baseFontSize + 'px';
-
       if (given[row][col]) {
         cell.textContent = board[row][col];
         cell.classList.add('given');
         return;
       }
-
       const value = board[row][col];
       const cellNotes = notes[row][col];
-
       if (value !== 0) {
         cell.textContent = value;
         cell.classList.add('user');
@@ -516,16 +416,13 @@
         cell.classList.add('note-cell');
         renderNoteContent(cell, cellNotes, cellSize);
       }
-      // else: empty, nothing to render
     }
 
-    // ── Update a single cell's display ──
     function updateCellDisplay(row, col) {
       const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
       if (cell) fillCell(cell, row, col);
     }
 
-    // ── Re-validate all user cells (for undo / erase ripple effect) ──
     function refreshAllErrors() {
       for (let i = 0; i < currentSize; i++)
         for (let j = 0; j < currentSize; j++)
@@ -533,16 +430,13 @@
             updateCellDisplay(i, j);
     }
 
-    // ── Highlight related cells ──
     function applyHighlights() {
       document.querySelectorAll('.cell').forEach(c => c.classList.remove('highlight', 'same-num', 'selected'));
       if (!selectedPos) return;
-
       const { row, col } = selectedPos;
       const { boxH, boxW } = difficulties[currentSize];
       const r0 = row - (row % boxH), c0 = col - (col % boxW);
       const selVal = board[row][col];
-
       document.querySelectorAll('.cell').forEach(c => {
         const r = +c.dataset.row, cl = +c.dataset.col;
         if (r === row && cl === col) {
@@ -550,31 +444,21 @@
         } else if (r === row || cl === col || (r >= r0 && r < r0 + boxH && cl >= c0 && cl < c0 + boxW)) {
           c.classList.add('highlight');
         }
-        // Highlight same number
         if (selVal !== 0 && board[r][cl] === selVal && !(r === row && cl === col)) {
           c.classList.add('same-num');
         }
       });
     }
 
-    // ── Selection ──
     function selectCell(row, col) {
-      // FIX: even given cells can be selected (to see highlights); just can't be edited
       selectedPos = { row, col };
       applyHighlights();
     }
 
-    function clearSelection() {
-      selectedPos = null;
-      document.querySelectorAll('.cell').forEach(c => c.classList.remove('highlight', 'same-num', 'selected'));
-    }
-
-    // ── Note pad ──
     function renderNumberPad() {
       const pad = document.getElementById('number-pad');
       pad.innerHTML = '';
-      const size = currentSize;
-      for (let n = 1; n <= size; n++) {
+      for (let n = 1; n <= currentSize; n++) {
         const btn = document.createElement('button');
         btn.className = 'num-btn';
         btn.textContent = n;
@@ -583,13 +467,11 @@
       }
     }
 
-    // ── History ──
     function recordHistory(row, col, prevValue, newValue, prevNotes, newNotes) {
       history.push({ row, col, prevValue, newValue,
         prevNotes: new Set(prevNotes), newNotes: new Set(newNotes) });
     }
 
-    // ── Input ──
     function eraseCell() {
       if (!selectedPos) return;
       const { row, col } = selectedPos;
@@ -622,14 +504,10 @@
       if (!selectedPos) return;
       const { row, col } = selectedPos;
       if (given[row][col]) return;
-
       if (noteMode) { toggleNote(num); return; }
-
       const prevValue = board[row][col];
       const prevNotes = new Set(notes[row][col] || []);
-
       if (prevValue === num) {
-        // Tap same number → erase  (FIX: keep as toggle)
         board[row][col] = 0;
         notes[row][col] = new Set();
         recordHistory(row, col, prevValue, 0, prevNotes, new Set());
@@ -639,17 +517,13 @@
         recordHistory(row, col, prevValue, num, prevNotes, new Set());
       }
       updateCellDisplay(row, col);
-      // FIX: refresh related cells so their error state updates too
       refreshAllErrors();
       applyHighlights();
-
-      // Auto-check if board is fully filled
       if (isBoardFull()) {
         if (checkSolution()) setTimeout(showVictory, 200);
       }
     }
 
-    // ── Solution check ──
     function isBoardFull() {
       for (let i = 0; i < currentSize; i++)
         for (let j = 0; j < currentSize; j++)
@@ -657,7 +531,6 @@
       return true;
     }
 
-    // FIX: was passing even with zeros if solution had zeros (impossible but safe anyway)
     function checkSolution() {
       for (let i = 0; i < currentSize; i++)
         for (let j = 0; j < currentSize; j++)
@@ -665,7 +538,6 @@
       return true;
     }
 
-    // ── Undo ──
     function undoLast() {
       const action = history.pop();
       if (!action) return;
@@ -673,15 +545,12 @@
       board[row][col] = prevValue;
       notes[row][col] = new Set(prevNotes);
       updateCellDisplay(row, col);
-      // FIX: refresh all so error states update for cells affected by this undo
       refreshAllErrors();
       applyHighlights();
     }
 
-    // ── Keyboard navigation ──
     window.addEventListener('keydown', e => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
       if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
         e.preventDefault();
         if (!selectedPos) { selectCell(0, 0); return; }
@@ -693,13 +562,11 @@
         selectCell(row, col);
         return;
       }
-
       if (['Delete', 'Backspace', ' '].includes(e.key)) {
         e.preventDefault();
         eraseCell();
         return;
       }
-
       const num = parseInt(e.key);
       if (!isNaN(num) && num >= 1 && num <= currentSize) {
         e.preventDefault();
@@ -707,14 +574,12 @@
       }
     });
 
-    // ── Note mode toggle ──
     function updateNoteButtonUI() {
       const btn = document.getElementById('note-btn');
       btn.classList.toggle('active', noteMode);
       btn.textContent = noteMode ? '✏️ 筆記中' : '✏️ 筆記';
     }
 
-    // ── Init ──
     function initGame(size) {
       currentSize = size;
       document.querySelectorAll('.difficulty-btn').forEach(b =>
@@ -729,29 +594,24 @@
       startTimer();
     }
 
-    // ── Victory ──
     function showVictory() {
       stopTimer();
       const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
       const s = String(elapsedSeconds % 60).padStart(2, '0');
-
       const titles = { 4: '數獨新手 🌱', 6: '數獨高手 🌟', 9: '數獨王者 👑' };
       document.getElementById('victory-title').textContent = titles[currentSize];
       document.getElementById('victory-time').textContent = `完成時間：${m}:${s}`;
-
-      // FIX: clear old confetti before adding new
       document.querySelectorAll('.confetti').forEach(c => c.remove());
       createConfetti();
-
       document.getElementById('victory-overlay').classList.add('show');
     }
 
     function createConfetti() {
       const colors = ['#f44336','#e91e63','#9c27b0','#3f51b5','#2196f3','#00bcd4','#4CAF50','#ff9800','#ffeb3b','#00e676'];
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 80; i++) {
         const c = document.createElement('div');
         c.className = 'confetti';
-        c.style.left   = Math.random() * 100 + 'vw';
+        c.style.left = Math.random() * 100 + 'vw';
         c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
         c.style.width  = (Math.random() * 8 + 6) + 'px';
         c.style.height = (Math.random() * 8 + 6) + 'px';
@@ -765,7 +625,6 @@
       }
     }
 
-    // ── Toast ──
     let msgTimeout;
     function showMessage(text) {
       const msg = document.getElementById('message');
@@ -775,8 +634,6 @@
       msgTimeout = setTimeout(() => msg.classList.remove('show'), 1800);
     }
 
-    // ── Button bindings ──
-    // FIX: Use a single pointerdown handler to avoid click+touchstart double-fire
     function bind(id, fn) {
       document.getElementById(id).addEventListener('pointerdown', e => { e.preventDefault(); fn(); });
     }
@@ -799,7 +656,8 @@
       initGame(currentSize);
     });
 
-    // ── Start ──
+    window.addEventListener('resize', () => renderGrid());
+
     initGame(6);
   </script>
 </body>
