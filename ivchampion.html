@@ -192,7 +192,12 @@
     .pause-note{font-size:.78rem!important;color:var(--danger)!important;opacity:.8}
 
     /* ── GAME OVER ── */
-    #screen-gameover{align-items:center;text-align:center;gap:clamp(8px,2vh,18px)}
+    #screen-gameover{
+      align-items:center;text-align:center;gap:clamp(8px,2vh,16px);
+      overflow-y:auto;max-height:100dvh;
+      padding-top:clamp(10px,2vh,20px);
+      padding-bottom:max(clamp(10px,2vh,20px),env(safe-area-inset-bottom,10px));
+    }
     .go-title{
       font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,11vw,5.5rem);
       letter-spacing:.06em;line-height:1;color:var(--danger);text-shadow:0 0 36px var(--danger-glow);
@@ -203,6 +208,7 @@
       width:min(130px,36vw);aspect-ratio:1;border-radius:50%;
       background:linear-gradient(135deg,var(--purple),var(--cyan));
       display:grid;place-items:center;box-shadow:0 0 38px rgba(124,58,237,.38);
+      flex-shrink:0;
     }
     .sc-label{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.75}
     .sc-val{display:block;font-family:'Bebas Neue',sans-serif;font-size:clamp(1.9rem,7.5vw,3.2rem);letter-spacing:.04em;line-height:1}
@@ -211,11 +217,55 @@
     .res-box .rl{font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
     .res-box .rv{display:block;font-family:'Bebas Neue',sans-serif;font-size:clamp(1.2rem,4vw,1.6rem);color:var(--text);line-height:1.2}
 
+    /* ── WORDS LEARNED TABLE ── */
+    .words-learned{
+      width:100%;background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--r-lg);overflow:hidden;flex-shrink:0;
+    }
+    .words-learned-header{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:10px 14px 8px;
+      border-bottom:1px solid var(--border);
+    }
+    .words-learned-title{
+      font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.08em;
+      color:var(--gold);
+    }
+    .words-learned-count{
+      font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+      color:var(--muted);
+    }
+    .words-table{width:100%;border-collapse:collapse;font-size:clamp(.68rem,1.9vw,.82rem)}
+    .words-table thead tr{background:var(--surface2)}
+    .words-table th{
+      padding:6px 8px;text-align:left;font-size:.58rem;font-weight:800;
+      letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+      border-bottom:1px solid var(--border);
+    }
+    .words-table th:last-child{text-align:center}
+    .words-table td{
+      padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.04);
+      vertical-align:middle;line-height:1.3;
+    }
+    .words-table tr:last-child td{border-bottom:none}
+    .words-table tr.row-wrong td{background:rgba(255,71,87,.06)}
+    .words-table tr.row-correct td{background:rgba(46,213,115,.04)}
+    .word-cell{font-weight:700;color:#fff}
+    .pos-cell{color:var(--muted);font-style:italic;font-size:.7em}
+    .meaning-cell{color:var(--text)}
+    .unit-cell{color:var(--muted);font-size:.7em;white-space:nowrap}
+    .status-cell{text-align:center}
+    .status-dot{
+      display:inline-block;width:8px;height:8px;border-radius:50%;
+    }
+    .status-dot.correct{background:var(--success);box-shadow:0 0 5px var(--success-glow)}
+    .status-dot.wrong  {background:var(--danger); box-shadow:0 0 5px var(--danger-glow)}
+    .status-dot.timeout{background:var(--muted)}
 
     /* student info panel for screenshot on result page */
     #screen-gameover{position:relative}
     .student-info-panel{
-      position:absolute;top:0;right:0;z-index:5;
+      align-self:flex-end;
       width:min(210px,44vw);
       display:grid;gap:6px;
       padding:10px;border-radius:var(--r);
@@ -276,14 +326,10 @@
       100%{opacity:0;transform:translate(-50%,-60%) scale(.94)}
     }
 
-
     @media(max-width:500px){
-      .student-info-panel{
-        position:relative;align-self:flex-end;width:min(230px,100%);
-        margin-bottom:2px;
-      }
+      .student-info-panel{align-self:flex-end;width:min(230px,100%);margin-bottom:2px;}
     }
-        @media(max-width:400px){.answers-grid{grid-template-columns:1fr}}
+    @media(max-width:400px){.answers-grid{grid-template-columns:1fr}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
   </style>
 </head>
@@ -313,7 +359,7 @@
   <section id="screen-home" class="screen active">
     <span class="trophy-icon">🏆</span>
     <div class="game-title">iVocab<br/>Champion</div>
-    <p class="tagline">10 words per level · 6 seconds each · one wrong move ends it all</p>
+    <p class="tagline">10 words per level · 8 seconds each · one wrong move ends it all</p>
     <button class="start-btn" id="startBtn" disabled><span>Loading words…</span></button>
     <div class="loading-note" id="loadingNote">Preparing your challenge…</div>
     <div class="best-display" id="bestDisplay" style="display:none">
@@ -332,13 +378,13 @@
       <!-- timer -->
       <div class="timer-pill">
         <div class="timer-arc" id="timerArc" style="--p:1">
-          <div class="timer-inner"><span class="timer-num" id="timerNum">6</span></div>
+          <div class="timer-inner"><span class="timer-num" id="timerNum">8</span></div>
         </div>
       </div>
     </div>
 
     <div class="prog-row">
-      <span class="prog-count" id="progCount">0 / 15</span>
+      <span class="prog-count" id="progCount">0 / 10</span>
       <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
       <span class="lv-badge" id="lvBadge">Lv 1</span>
     </div>
@@ -370,6 +416,7 @@
         <input id="studentSeat" type="text" inputmode="numeric" autocomplete="off" />
       </div>
     </div>
+
     <div class="go-title" id="goTitle">Game Over</div>
     <div class="score-circle">
       <div><span class="sc-label">Final Score</span><span class="sc-val" id="goScore">0</span></div>
@@ -382,6 +429,29 @@
       <div class="res-box"><span class="rl">Best lv</span><span class="rv" id="goBestLv">1</span></div>
       <div class="res-box"><span class="rl">Best streak</span><span class="rv" id="goBestStreak">0</span></div>
     </div>
+
+    <!-- Words Learned Table -->
+    <div class="words-learned" id="wordsLearnedPanel">
+      <div class="words-learned-header">
+        <span class="words-learned-title">📖 Words This Round</span>
+        <span class="words-learned-count" id="wordsLearnedCount">0 words</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="words-table">
+          <thead>
+            <tr>
+              <th>Word</th>
+              <th>POS</th>
+              <th>Chinese Meaning</th>
+              <th>Lv-Unit</th>
+              <th>✓✗</th>
+            </tr>
+          </thead>
+          <tbody id="wordsLearnedBody"></tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="btn-row">
       <button class="cta-btn primary"   id="retryBtn">Try Again 🔥</button>
       <button class="cta-btn secondary" id="homeBtn">Home</button>
@@ -394,14 +464,12 @@
 // ─────────────────────────────
 // Config
 // ─────────────────────────────
-const ROUND_SEC    = 6;
+const ROUND_SEC    = 8;   // ← changed from 6 to 8
 const WORDS_PER_LV = 10;
 const CSV_BASE     = "https://ducj-creator.github.io/iVocab-Self-Practice/";
 const CSV_LEVELS   = [1,2,3,4,5,6];
 const LABELS       = ['A','B','C','D'];
 
-// Streak scoring: every consecutive correct answer adds an increasing bonus
-// 1st→+10, 2nd→+20, 3rd→+30, … (streak * 10). Resets on wrong/timeout/pause.
 function streakBonus(streak){ return streak * 10; }
 
 function getLevelWeights(curLv){
@@ -423,6 +491,10 @@ let gameScore=0, gameStreak=0, gameWords=0, gameCorrect=0, gameLv=1, lvWords=0;
 let timerId=null, deadline=0, accepting=false, curQuestion=null;
 let paused=false, pausedWasAccepting=false, pausedQuestion=false;
 
+// Words log for the results table
+// Each entry: { word, part, meaning, level, unit, status: 'correct'|'wrong'|'timeout' }
+let wordsLog=[];
+
 const $=id=>document.getElementById(id);
 
 function showScreen(name){
@@ -431,7 +503,7 @@ function showScreen(name){
 }
 
 // ─────────────────────────────
-// Audio engine (Web Audio API — no network needed)
+// Audio engine
 // ─────────────────────────────
 let audioCtx=null;
 function getCtx(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
@@ -468,14 +540,11 @@ function playNoise(duration, vol=0.06){
 }
 
 const SFX={
-  // question appears — soft rising blip
   question(){ playTone(440,'sine',.08,.12) },
-  // correct answer
   correct(){
     playTone(660,'triangle',.06,.18);
     setTimeout(()=>playTone(880,'triangle',.1,.14),60);
   },
-  // streak milestone — bright fanfare
   streak(n){
     const base=440+n*8;
     playTone(base,'square',.07,.12);
@@ -483,25 +552,17 @@ const SFX={
     setTimeout(()=>playTone(base*1.5,'square',.12,.14),140);
     setTimeout(()=>playTone(base*2,'triangle',.18,.16),210);
   },
-  // wrong answer / timeout
   wrong(){
     playTone(200,'sawtooth',.08,.2);
     setTimeout(()=>playTone(150,'sawtooth',.18,.18),80);
     playNoise(.15,.08);
   },
-  // level up — ascending arpeggio
   levelUp(){
     [523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,'triangle',.13,.15),i*80));
   },
-  // tick urgency (last 2s) — called each tick cycle
-  tick(){
-    playTone(1200,'square',.03,.05);
-  },
-  // pause
+  tick(){ playTone(1200,'square',.03,.05); },
   pause(){ playTone(330,'sine',.15,.1) },
-  // resume
   resume(){ playTone(550,'sine',.12,.1);setTimeout(()=>playTone(660,'sine',.12,.1),100) },
-  // game over
   gameOver(){
     [300,250,200,160].forEach((f,i)=>setTimeout(()=>{ playTone(f,'sawtooth',.15,.2); playNoise(.05,.04); },i*120));
   },
@@ -540,13 +601,22 @@ function parseCsv(text){
   }
   row.push(cell);if(row.some(v=>v.trim()))rows.push(row);return rows;
 }
+
 async function loadAllVocab(){
   const results=await Promise.all(CSV_LEVELS.map(async lv=>{
     const res=await fetch(`${CSV_BASE}level${lv}.csv`,{cache:'no-store'});
     if(!res.ok) throw new Error(`level${lv}.csv failed`);
     return parseCsv(await res.text()).slice(1)
       .filter(r=>r.length>=6)
-      .map(r=>({level:lv,word:String(r[3]||'').trim(),part:String(r[4]||'').trim(),meaning:r.slice(5).join(',').trim()}))
+      .map(r=>({
+        level: lv,
+        // Try to extract a unit identifier from columns 0-2
+        // Common CSV layout: col0=id/no, col1=unit, col2=?, col3=word, col4=pos, col5+=meaning
+        unit:  String(r[1]||'').trim() || String(r[0]||'').trim() || '',
+        word:  String(r[3]||'').trim(),
+        part:  String(r[4]||'').trim(),
+        meaning: r.slice(5).join(',').trim()
+      }))
       .filter(r=>r.word&&r.meaning);
   }));
   results.forEach((words,i)=>{ vocabulary[CSV_LEVELS[i]]=words; });
@@ -576,11 +646,73 @@ function makeQuestion(curLv){
 }
 
 // ─────────────────────────────
+// Words Log
+// ─────────────────────────────
+function logWord(q, status){
+  // status: 'correct' | 'wrong' | 'timeout'
+  wordsLog.push({
+    word:    q.word,
+    part:    q.part,
+    meaning: q.meaning,
+    level:   q.level,
+    unit:    q.unit || '',
+    status:  status
+  });
+}
+
+function renderWordsTable(){
+  const tbody=$('wordsLearnedBody');
+  tbody.innerHTML='';
+  if(!wordsLog.length){
+    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--muted);font-size:.8rem">No words seen this round.</td></tr>';
+    $('wordsLearnedCount').textContent='0 words';
+    return;
+  }
+  $('wordsLearnedCount').textContent=`${wordsLog.length} word${wordsLog.length!==1?'s':''}`;
+  wordsLog.forEach(entry=>{
+    const tr=document.createElement('tr');
+    tr.className = entry.status==='correct' ? 'row-correct' : 'row-wrong';
+
+    // Build Lv-Unit string: e.g. "L3-U2" or just "L3" if no unit
+    const lvUnit = entry.unit
+      ? `L${entry.level}-${entry.unit}`
+      : `L${entry.level}`;
+
+    // Status icon
+    const dotClass = entry.status==='correct' ? 'correct'
+                   : entry.status==='timeout'  ? 'timeout'
+                   : 'wrong';
+    const dotTitle = entry.status==='correct' ? '✓ Correct'
+                   : entry.status==='timeout'  ? '⏱ Timeout'
+                   : '✗ Wrong';
+
+    tr.innerHTML=`
+      <td class="word-cell">${esc(entry.word)}<br><span class="pos-cell">${esc(entry.part)}</span></td>
+      <td class="pos-cell">${esc(entry.part)}</td>
+      <td class="meaning-cell">${esc(entry.meaning)}</td>
+      <td class="unit-cell">${esc(lvUnit)}</td>
+      <td class="status-cell"><span class="status-dot ${dotClass}" title="${dotTitle}"></span></td>
+    `;
+    // Collapse the separate POS column on narrow screens (it's also in word cell)
+    tbody.appendChild(tr);
+  });
+}
+
+function esc(s){
+  return String(s||'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ─────────────────────────────
 // Game flow
 // ─────────────────────────────
 function startGame(){
   gameScore=0;gameStreak=0;gameWords=0;gameCorrect=0;gameLv=1;lvWords=0;
   paused=false; pausedQuestion=false;
+  wordsLog=[];
   CSV_LEVELS.forEach(lv=>{queues[lv]=[];});
   showScreen('game'); renderStats(); nextQuestion();
 }
@@ -618,7 +750,13 @@ function tick(){
   $('timerArc').style.setProperty('--p',p);
   if(sec<=2){ $('timerArc').classList.add('danger'); if(sec!==lastTickSec){SFX.tick();lastTickSec=sec;} }
   else{ $('timerArc').classList.remove('danger'); }
-  if(ms<=0){clearInterval(timerId);SFX.wrong();setTimeout(triggerGameOver,300);}
+  if(ms<=0){
+    clearInterval(timerId);
+    // Log as timeout
+    if(curQuestion) logWord(curQuestion,'timeout');
+    SFX.wrong();
+    setTimeout(triggerGameOver,300);
+  }
 }
 
 function handleAnswer(btn,opt){
@@ -627,7 +765,6 @@ function handleAnswer(btn,opt){
   $('timerArc').classList.remove('danger');
 
   const ok=opt===curQuestion.meaning;
-  // find correct answer text to highlight
   const allBtns=[...$('answersGrid').children];
   allBtns.forEach(b=>{
     const txt=b.querySelector('.ans-txt').textContent;
@@ -637,6 +774,7 @@ function handleAnswer(btn,opt){
   });
 
   if(!ok){
+    logWord(curQuestion,'wrong');
     SFX.wrong(); fx('fxDanger');
     setTimeout(triggerGameOver,560);
     return;
@@ -644,8 +782,8 @@ function handleAnswer(btn,opt){
 
   // Was this a post-pause answer? → no points, streak reset
   if(pausedQuestion){
+    logWord(curQuestion,'correct');
     gameWords++; gameCorrect++;
-    // streak broken — no bonus, reset
     gameStreak=0;
     lvWords++;
     pausedQuestion=false;
@@ -656,13 +794,12 @@ function handleAnswer(btn,opt){
   }
 
   // Normal correct
+  logWord(curQuestion,'correct');
   gameStreak++;
   gameWords++; gameCorrect++; lvWords++;
-  // Base 10 pts + streak bonus that grows by 10 each consecutive answer
-  // streak 1→+10, 2→+20, 3→+30, … (bonus = gameStreak*10)
   let pts=10+streakBonus(gameStreak);
   if(gameStreak%5===0){
-    SFX.streak(gameStreak); // bigger fanfare on milestones
+    SFX.streak(gameStreak);
   } else {
     SFX.correct();
     fx('fxCorrect');
@@ -706,6 +843,7 @@ function triggerGameOver(quit=false){
   $('goBest').textContent       = r.bestScore;
   $('goBestLv').textContent     = r.bestLv;
   $('goBestStreak').textContent = r.bestStreak;
+  renderWordsTable();
   showScreen('gameover');
 }
 
@@ -726,9 +864,7 @@ function doResume(){
   paused=false;
   $('pauseOverlay').classList.remove('show');
   SFX.resume();
-  // Mark current question as post-pause (no points, streak broken on answer)
   pausedQuestion=true;
-  // Restart timer from fresh 6s so it's fair (timer was stopped)
   deadline=performance.now()+ROUND_SEC*1000;
   lastTickSec=null;
   timerId=setInterval(tick,80);
@@ -753,12 +889,11 @@ $('resumeBtn').addEventListener('click', doResume);
 $('pauseQuitBtn').addEventListener('click',()=>{
   paused=false;
   $('pauseOverlay').classList.remove('show');
-  triggerGameOver(true); // true = quit, not death
+  triggerGameOver(true);
 });
 $('retryBtn').addEventListener('click', startGame);
 $('homeBtn').addEventListener('click',()=>{ updateBestDisplay(); showScreen('home'); });
 
-// Keyboard: Space/Escape for pause/resume
 document.addEventListener('keydown',e=>{
   if(e.code==='Space'||e.code==='Escape'){
     e.preventDefault();
