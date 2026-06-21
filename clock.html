@@ -1,7 +1,5 @@
-
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   #clock-wrap {
     position: relative;
     width: 100%;
@@ -16,7 +14,6 @@
     padding: 40px 20px;
     font-family: var(--font-sans, sans-serif);
   }
-
   #time-display {
     font-size: clamp(60px, 14vw, 110px);
     font-weight: 300;
@@ -28,17 +25,14 @@
     position: relative;
     z-index: 2;
   }
-
   .time-sep {
     color: rgba(160, 200, 255, 0.7);
     animation: blink 1s step-end infinite;
   }
-
   @keyframes blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.25; }
   }
-
   #date-display {
     margin-top: 14px;
     font-size: 16px;
@@ -50,7 +44,6 @@
     position: relative;
     z-index: 2;
   }
-
   #tz-display {
     margin-top: 8px;
     font-size: 13px;
@@ -60,7 +53,6 @@
     position: relative;
     z-index: 2;
   }
-
   .controls {
     margin-top: 28px;
     display: flex;
@@ -70,7 +62,6 @@
     flex-wrap: wrap;
     justify-content: center;
   }
-
   .ctrl-btn {
     background: rgba(245, 185, 30, 0.08);
     border: 0.5px solid rgba(245, 185, 30, 0.45);
@@ -85,12 +76,10 @@
     font-family: var(--font-sans, sans-serif);
     box-shadow: 0 0 8px rgba(245, 180, 30, 0.15);
   }
-
   .ctrl-btn:hover {
     background: rgba(245, 185, 30, 0.18);
     box-shadow: 0 0 16px rgba(245, 180, 30, 0.35);
   }
-
   .ctrl-btn.active {
     background: rgba(245, 185, 30, 0.15);
     border-color: rgba(245, 185, 30, 0.7);
@@ -99,6 +88,7 @@
 </style>
 
 <div id="clock-wrap">
+  <canvas id="flower-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.6;"></canvas>
   <canvas id="bubble-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;"></canvas>
 
   <div id="time-display">
@@ -110,7 +100,7 @@
   <div class="controls">
     <button class="ctrl-btn" id="btn-fmt" onclick="toggleFmt()">12H / 24H</button>
     <button class="ctrl-btn active" id="btn-date" onclick="toggleDate()">Date on</button>
-    <button class="ctrl-btn active" id="btn-bubbles" onclick="toggleBubbles()">Bubbles on</button>
+    <button class="ctrl-btn active" id="btn-fx" onclick="toggleFx()">Effects on</button>
   </div>
 </div>
 
@@ -118,7 +108,7 @@
 (function() {
   let use24 = true;
   let showDate = true;
-  let bubblesOn = true;
+  let fxOn = true; // 控制泡泡和花朵
 
   const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -168,39 +158,46 @@
     b.classList.toggle('active', showDate);
     tick();
   };
-  window.toggleBubbles = function() {
-    bubblesOn = !bubblesOn;
-    const b = document.getElementById('btn-bubbles');
-    b.textContent = bubblesOn ? 'Bubbles on' : 'Bubbles off';
-    b.classList.toggle('active', bubblesOn);
+  window.toggleFx = function() {
+    fxOn = !fxOn;
+    const b = document.getElementById('btn-fx');
+    b.textContent = fxOn ? 'Effects on' : 'Effects off';
+    b.classList.toggle('active', fxOn);
   };
 
-  const canvas = document.getElementById('bubble-canvas');
-  const ctx = canvas.getContext('2d');
+  // --- 泡泡 (Bubble) 效果 ---
+  const bubbleCanvas = document.getElementById('bubble-canvas');
+  const bCtx = bubbleCanvas.getContext('2d');
   const bubbles = [];
+  const B_COLORS = [[100, 180, 255],[160, 120, 255],[80,  220, 200],[200, 140, 255],[100, 200, 240]];
 
-  const COLORS = [
-    [100, 180, 255],
-    [160, 120, 255],
-    [80,  220, 200],
-    [200, 140, 255],
-    [100, 200, 240],
+  // --- 花朵綻放 (Flower) 效果 ---
+  const flowerCanvas = document.getElementById('flower-canvas');
+  const fCtx = flowerCanvas.getContext('2d');
+  const flowers = [];
+  // 暖色調花朵顏色，與金屬質感文字呼應
+  const F_COLORS = [
+    [245, 200, 66, 0.4],  // 金黃
+    [255, 150, 100, 0.3], // 暖橙
+    [255, 100, 150, 0.25], // 柔粉
+    [180, 120, 255, 0.2], // 淺紫 (與泡泡呼應)
   ];
 
   function resize() {
     const wrap = document.getElementById('clock-wrap');
-    canvas.width  = wrap.offsetWidth;
-    canvas.height = wrap.offsetHeight;
+    const w = wrap.offsetWidth;
+    const h = wrap.offsetHeight;
+    bubbleCanvas.width = flowerCanvas.width = w;
+    bubbleCanvas.height = flowerCanvas.height = h;
   }
   resize();
   window.addEventListener('resize', resize);
 
   function spawnBubble() {
-    const wrap = document.getElementById('clock-wrap');
-    const w = wrap.offsetWidth;
-    const h = wrap.offsetHeight;
+    const w = bubbleCanvas.width;
+    const h = bubbleCanvas.height;
     const r = 4 + Math.random() * 22;
-    const col = COLORS[Math.floor(Math.random() * COLORS.length)];
+    const col = B_COLORS[Math.floor(Math.random() * B_COLORS.length)];
     bubbles.push({
       x: Math.random() * w,
       y: h + r,
@@ -214,49 +211,135 @@
     });
   }
 
+  function spawnFlower() {
+    const w = flowerCanvas.width;
+    const h = flowerCanvas.height;
+    const colIdx = Math.floor(Math.random() * F_COLORS.length);
+    flowers.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      size: 5 + Math.random() * 20, // 初始大小 (花蕾)
+      maxSize: 50 + Math.random() * 100, // 盛開大小
+      color: F_COLORS[colIdx],
+      life: 0, // 當前生命週期 (0 to 1)
+      ageSpeed: 0.002 + Math.random() * 0.005, // 花朵生長/凋謝速度
+      petals: 5 + Math.floor(Math.random() * 4), // 花瓣數量
+      angle: Math.random() * Math.PI * 2, // 旋轉角度
+    });
+  }
+
   let frameCount = 0;
   function animate() {
     requestAnimationFrame(animate);
-    if (!bubblesOn) { ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
+
+    if (!fxOn) {
+      bCtx.clearRect(0, 0, bubbleCanvas.width, bubbleCanvas.height);
+      fCtx.clearRect(0, 0, flowerCanvas.width, flowerCanvas.height);
+      return;
+    }
 
     frameCount++;
-    if (frameCount % 18 === 0) spawnBubble();
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const h = canvas.height;
+    // --- 泡泡動畫與繪製 ---
+    if (frameCount % 18 === 0) spawnBubble();
+    bCtx.clearRect(0, 0, bubbleCanvas.width, bubbleCanvas.height);
+    const bh = bubbleCanvas.height;
 
     for (let i = bubbles.length - 1; i >= 0; i--) {
       const b = bubbles[i];
       b.y -= b.speed;
       b.x += b.drift + Math.sin(b.phase + b.y * 0.02) * b.wobble;
       b.phase += 0.01;
-
       if (b.y + b.r < 0) { bubbles.splice(i, 1); continue; }
-
-      const progress = 1 - (b.y / h);
+      const progress = 1 - (b.y / bh);
       let alpha = b.op;
       if (progress < 0.1) alpha *= progress / 0.1;
       if (progress > 0.85) alpha *= (1 - progress) / 0.15;
-
-      ctx.beginPath();
-      ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-
+      bCtx.beginPath();
+      bCtx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
       const [r, g, bv] = b.col;
-      const grad = ctx.createRadialGradient(b.x - b.r*0.3, b.y - b.r*0.3, b.r*0.1, b.x, b.y, b.r);
+      const grad = bCtx.createRadialGradient(b.x - b.r*0.3, b.y - b.r*0.3, b.r*0.1, b.x, b.y, b.r);
       grad.addColorStop(0, `rgba(${r},${g},${bv},${alpha * 0.9})`);
       grad.addColorStop(0.5, `rgba(${r},${g},${bv},${alpha * 0.4})`);
       grad.addColorStop(1, `rgba(${r},${g},${bv},${alpha * 0.05})`);
-      ctx.fillStyle = grad;
-      ctx.fill();
+      bCtx.fillStyle = grad;
+      bCtx.fill();
+      bCtx.strokeStyle = `rgba(${r},${g},${bv},${alpha * 0.6})`;
+      bCtx.lineWidth = 0.5;
+      bCtx.stroke();
+    }
 
-      ctx.strokeStyle = `rgba(${r},${g},${bv},${alpha * 0.6})`;
-      ctx.lineWidth = 0.5;
-      ctx.stroke();
+    // --- 花朵動畫與繪製 (縮時綻放效果) ---
+    if (frameCount % 100 === 0) spawnFlower(); // 花朵生成頻率
+    fCtx.clearRect(0, 0, flowerCanvas.width, flowerCanvas.height);
+
+    for (let i = flowers.length - 1; i >= 0; i--) {
+      const f = flowers[i];
+      f.life += f.ageSpeed;
+
+      // 花朵凋謝後移除
+      if (f.life >= 1) {
+        flowers.splice(i, 1);
+        continue;
+      }
+
+      // 計算當前大小和透明度
+      let currentSize, alpha;
+      if (f.life < 0.3) {
+        // 綻放階段：從花蕾生長到盛開
+        currentSize = f.size + (f.maxSize - f.size) * (f.life / 0.3);
+        alpha = f.color[3] * (f.life / 0.3); // 漸顯
+      } else if (f.life > 0.7) {
+        // 凋謝階段：盛開後漸隱
+        currentSize = f.maxSize;
+        alpha = f.color[3] * (1 - (f.life - 0.7) / 0.3); // 漸隱
+      } else {
+        // 盛開階段
+        currentSize = f.maxSize;
+        alpha = f.color[3];
+      }
+
+      const [r, g, b, baselineAlpha] = f.color;
+      fCtx.save();
+      fCtx.translate(f.x, f.y);
+      fCtx.rotate(f.angle + f.life * 0.1); // 緩慢旋轉
+
+      // 繪製花瓣 (簡單的抽象圖形)
+      fCtx.beginPath();
+      for (let j = 0; j < f.petals; j++) {
+        const angle = (j / f.petals) * Math.PI * 2;
+        const petalLen = currentSize;
+        const petalWid = currentSize * 0.6;
+        fCtx.rotate(Math.PI * 2 / f.petals);
+        // 使用三次貝塞爾曲線繪製花瓣
+        fCtx.moveTo(0, 0);
+        fCtx.bezierCurveTo(petalWid / 2, -petalLen / 2, petalWid / 2, -petalLen, 0, -petalLen);
+        fCtx.bezierCurveTo(-petalWid / 2, -petalLen, -petalWid / 2, -petalLen / 2, 0, 0);
+      }
+      fCtx.closePath();
+
+      // 填充花朵
+      const grad = fCtx.createRadialGradient(0, 0, currentSize * 0.1, 0, 0, currentSize);
+      grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 1.5})`); // 花心較亮
+      grad.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${alpha})`);
+      grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`); // 邊緣淡出
+      fCtx.fillStyle = grad;
+      fCtx.fill();
+
+      fCtx.restore();
     }
   }
 
+  // 初始泡泡
   for (let i = 0; i < 12; i++) spawnBubble();
-  bubbles.forEach(b => { b.y = Math.random() * canvas.height; });
+  bubbles.forEach(b => { b.y = Math.random() * bubbleCanvas.height; });
+
+  // 初始花朵
+  for (let i = 0; i < 5; i++) {
+    spawnFlower();
+    flowers[i].life = Math.random() * 0.6; // 隨機初始生命週期
+  }
+
   animate();
 })();
 </script>
