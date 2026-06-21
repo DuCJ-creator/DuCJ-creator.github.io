@@ -35,35 +35,93 @@
 
         .countdown-card {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(165, 243, 252, 0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
         }
         
         .countdown-card:hover {
             transform: translateY(-12px);
-            box-shadow: 0 30px 60px -15px rgba(165, 243, 252, 0.3);
+            box-shadow: 0 30px 60px -10px rgba(0,0,0,0.7), 0 0 0 2px rgba(255,255,255,0.25);
         }
 
         .days-left {
             font-size: 5rem;
             line-height: 1;
             font-weight: 700;
-            text-shadow: 0 0 30px rgba(165, 243, 252, 0.6);
         }
 
-        /* Cosmic Special Themes */
-        .special-100 { background: linear-gradient(135deg, #312e81, #4f46e5); }
-        .special-50 { background: linear-gradient(135deg, #581c87, #7c3aed); }
-        .special-30 { background: linear-gradient(135deg, #1e3a8a, #3b82f6); }
-        .special-10 { background: linear-gradient(135deg, #164e63, #22d3ee); }
-        .special-5 { background: linear-gradient(135deg, #78350f, #f59e0b); }
+        /* 8 rotating distinct card palettes */
+        .theme-0 { background: #312e81; }  /* deep indigo */
+        .theme-0 .days-left { color: #a5f3fc; text-shadow: 0 0 20px rgba(165,243,252,0.6); }
+        .theme-0 .card-label { color: #a5f3fc; }
+        .theme-0 .card-msg { color: #c7d2fe; }
+
+        .theme-1 { background: #064e3b; }  /* deep emerald */
+        .theme-1 .days-left { color: #6ee7b7; text-shadow: 0 0 20px rgba(110,231,183,0.6); }
+        .theme-1 .card-label { color: #6ee7b7; }
+        .theme-1 .card-msg { color: #a7f3d0; }
+
+        .theme-2 { background: #881337; }  /* deep rose */
+        .theme-2 .days-left { color: #fda4af; text-shadow: 0 0 20px rgba(253,164,175,0.6); }
+        .theme-2 .card-label { color: #fda4af; }
+        .theme-2 .card-msg { color: #fecdd3; }
+
+        .theme-3 { background: #78350f; }  /* deep amber */
+        .theme-3 .days-left { color: #fcd34d; text-shadow: 0 0 20px rgba(252,211,77,0.6); }
+        .theme-3 .card-label { color: #fcd34d; }
+        .theme-3 .card-msg { color: #fde68a; }
+
+        .theme-4 { background: #1e3a5f; }  /* slate blue */
+        .theme-4 .days-left { color: #93c5fd; text-shadow: 0 0 20px rgba(147,197,253,0.6); }
+        .theme-4 .card-label { color: #93c5fd; }
+        .theme-4 .card-msg { color: #bfdbfe; }
+
+        .theme-5 { background: #7c2d12; }  /* deep coral/burnt orange */
+        .theme-5 .days-left { color: #fdba74; text-shadow: 0 0 20px rgba(253,186,116,0.6); }
+        .theme-5 .card-label { color: #fdba74; }
+        .theme-5 .card-msg { color: #fed7aa; }
+
+        .theme-6 { background: #1a3a2a; }  /* deep forest */
+        .theme-6 .days-left { color: #86efac; text-shadow: 0 0 20px rgba(134,239,172,0.6); }
+        .theme-6 .card-label { color: #86efac; }
+        .theme-6 .card-msg { color: #bbf7d0; }
+
+        .theme-7 { background: #0c4a6e; }  /* deep sky */
+        .theme-7 .days-left { color: #7dd3fc; text-shadow: 0 0 20px rgba(125,211,252,0.6); }
+        .theme-7 .card-label { color: #7dd3fc; }
+        .theme-7 .card-msg { color: #bae6fd; }
+
+        /* Milestone urgency overrides — still opaque, very vivid */
+        .special-100 { background: #3730a3 !important; }
+        .special-100 .days-left { color: #c7d2fe !important; text-shadow: 0 0 20px rgba(199,210,254,0.7) !important; }
+        .special-100 .card-label { color: #a5b4fc !important; }
+
+        .special-50 { background: #6b21a8 !important; }
+        .special-50 .days-left { color: #e9d5ff !important; text-shadow: 0 0 20px rgba(233,213,255,0.7) !important; }
+        .special-50 .card-label { color: #d8b4fe !important; }
+
+        .special-30 { background: #1e40af !important; }
+        .special-30 .days-left { color: #bfdbfe !important; text-shadow: 0 0 20px rgba(191,219,254,0.7) !important; }
+        .special-30 .card-label { color: #93c5fd !important; }
+
+        .special-10 { background: #0e7490 !important; }
+        .special-10 .days-left { color: #a5f3fc !important; text-shadow: 0 0 20px rgba(165,243,252,0.9) !important; }
+        .special-10 .card-label { color: #67e8f9 !important; }
+
+        .special-5 { background: #b45309 !important; }
+        .special-5 .days-left { color: #fde68a !important; text-shadow: 0 0 24px rgba(253,230,138,0.9) !important; }
+        .special-5 .card-label { color: #fcd34d !important; }
+
         .special-1 { 
-            background: linear-gradient(135deg, #831843, #ec4899);
-            animation: cosmic-pulse 2.5s infinite;
+            background: #9d174d !important;
+            animation: pulse-urgent 2s infinite;
         }
+        .special-1 .days-left { color: #fce7f3 !important; text-shadow: 0 0 30px rgba(252,231,243,1) !important; }
+        .special-1 .card-label { color: #fbcfe8 !important; }
 
-        @keyframes cosmic-pulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 40px #f472b6; }
-            50% { transform: scale(1.04); box-shadow: 0 0 60px #c084fc; }
+        @keyframes pulse-urgent {
+            0%, 100% { box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 2px rgba(255,255,255,0.2), 0 0 40px rgba(244,114,182,0.4); }
+            50% { box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 3px rgba(255,255,255,0.4), 0 0 70px rgba(192,132,252,0.6); }
         }
 
         .glass {
@@ -100,15 +158,11 @@
         <!-- Quick Select -->
         <div class="mb-12">
             <p class="text-cyan-200 text-sm mb-4 font-medium tracking-widest">快速選擇常見事件 Common Event Quick Pick</p>
-            <div class="flex flex-wrap gap-3" id="quick-select">
-                <!-- Populated by JS -->
-            </div>
+            <div class="flex flex-wrap gap-3" id="quick-select"></div>
         </div>
 
         <!-- Countdown List -->
-        <div id="countdown-list" class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Cards populated by JS -->
-        </div>
+        <div id="countdown-list" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
 
         <!-- Empty State -->
         <div id="empty-state" class="hidden text-center py-24">
@@ -116,7 +170,7 @@
                 <i class="fa-solid fa-star text-5xl text-cyan-300"></i>
             </div>
             <p class="text-3xl text-white">還沒有倒數事件 No Counting Down Event Yet</p>
-            <p class="text-cyan-300 mt-3">點擊上方快速按鈕或新增自己的事件Pick or Add</p>
+            <p class="text-cyan-300 mt-3">點擊上方快速按鈕或新增自己的事件 Pick or Add</p>
         </div>
     </div>
 
@@ -124,27 +178,23 @@
     <div id="modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
         <div class="glass w-full max-w-lg mx-4 rounded-3xl p-9 shadow-2xl">
             <h2 id="modal-title" class="text-3xl font-medium text-white mb-8">新增倒數事件 / New Event</h2>
-            
             <div class="space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-cyan-300 mb-2">事件名稱 / Event Name</label>
                     <input id="event-name" 
                            class="w-full px-6 py-4 bg-slate-900/70 border border-cyan-400/30 focus:border-cyan-400 rounded-2xl outline-none text-lg text-white placeholder:text-slate-400">
                 </div>
-                
                 <div>
                     <label class="block text-sm font-medium text-cyan-300 mb-2">目標日期與時間 / Target Date & Time</label>
                     <input id="event-datetime" type="datetime-local"
                            class="w-full px-6 py-4 bg-slate-900/70 border border-cyan-400/30 focus:border-cyan-400 rounded-2xl outline-none text-lg text-white">
                 </div>
-                
                 <div>
                     <label class="block text-sm font-medium text-cyan-300 mb-2">備註（選填） / Note (Optional)</label>
                     <textarea id="event-note" rows="3"
                               class="w-full px-6 py-4 bg-slate-900/70 border border-cyan-400/30 focus:border-cyan-400 rounded-2xl outline-none resize-none text-white"></textarea>
                 </div>
             </div>
-            
             <div class="flex gap-4 mt-10">
                 <button onclick="hideModal()" 
                         class="flex-1 py-4 text-slate-300 font-medium rounded-2xl border border-slate-600 hover:bg-slate-800">
@@ -162,18 +212,14 @@
     <div id="detail-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
         <div class="glass w-full max-w-xl mx-4 rounded-3xl overflow-hidden">
             <div id="detail-header" class="h-3"></div>
-            
             <div class="p-9">
                 <div class="flex justify-between">
                     <h2 id="detail-name" class="text-4xl font-medium text-white"></h2>
                     <button onclick="hideDetailModal()" class="text-4xl text-cyan-300 hover:text-white">✕</button>
                 </div>
                 <p id="detail-date" class="text-cyan-300 mt-2"></p>
-                
                 <div id="detail-countdown" class="my-14 text-center"></div>
-                
                 <div id="detail-note" class="bg-slate-900/60 rounded-2xl p-7 text-slate-200"></div>
-                
                 <div class="flex gap-4 mt-10">
                     <button onclick="editCurrentEvent()" 
                             class="flex-1 py-4 border border-cyan-400 text-cyan-300 rounded-2xl font-medium hover:bg-cyan-950">
@@ -207,9 +253,7 @@
 
         function loadEvents() {
             const saved = localStorage.getItem('cosmicCountdowns');
-            if (saved) {
-                events = JSON.parse(saved);
-            }
+            if (saved) events = JSON.parse(saved);
             renderQuickSelect();
             renderCountdowns();
         }
@@ -222,25 +266,24 @@
             const now = new Date().getTime();
             const target = new Date(targetDate).getTime();
             const diff = target - now;
-
             if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, passed: true };
-
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-            return { days, hours, minutes, seconds, passed: false };
+            return {
+                days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+                hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+                seconds: Math.floor((diff % (1000 * 60)) / 1000),
+                passed: false
+            };
         }
 
-        function getSpecialClass(days) {
+        function getMilestoneClass(days) {
             if (days <= 1) return 'special-1';
             if (days <= 5) return 'special-5';
             if (days <= 10) return 'special-10';
             if (days <= 30) return 'special-30';
             if (days <= 50) return 'special-50';
             if (days <= 100) return 'special-100';
-            return '';
+            return null;
         }
 
         function getBilingualMessage(days) {
@@ -256,7 +299,6 @@
         function renderQuickSelect() {
             const container = document.getElementById('quick-select');
             container.innerHTML = '';
-            
             quickEvents.forEach(item => {
                 const btn = document.createElement('button');
                 btn.className = "quick-btn px-6 py-3.5 bg-white/10 hover:bg-white/20 border border-cyan-400/40 rounded-2xl text-sm text-white flex items-center gap-2.5 shadow-inner";
@@ -269,19 +311,9 @@
         function quickAddEvent(name) {
             const futureDate = new Date();
             futureDate.setDate(futureDate.getDate() + 45);
-            
-            const eventData = {
-                id: Date.now().toString(),
-                name: name,
-                targetDate: futureDate.toISOString().slice(0, 16),
-                note: "已從快速選擇新增"
-            };
-            
-            events.unshift(eventData); // Add to the top
+            events.unshift({ id: Date.now().toString(), name, targetDate: futureDate.toISOString().slice(0, 16), note: "已從快速選擇新增" });
             saveEvents();
             renderCountdowns();
-            
-            // Visual feedback
             const notif = document.createElement('div');
             notif.className = "fixed bottom-6 right-6 bg-emerald-600 text-white px-6 py-3 rounded-2xl shadow-xl z-50";
             notif.textContent = `已新增：${name}`;
@@ -292,43 +324,36 @@
         function renderCountdowns() {
             const container = document.getElementById('countdown-list');
             const empty = document.getElementById('empty-state');
-            
             container.innerHTML = '';
-
-            if (events.length === 0) {
-                empty.classList.remove('hidden');
-                return;
-            }
-            
+            if (events.length === 0) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
 
             events.forEach((event, index) => {
                 const timeLeft = calculateTimeLeft(event.targetDate);
-                const specialClass = getSpecialClass(timeLeft.days);
+                const milestoneClass = getMilestoneClass(timeLeft.days);
+                // Rotate through 8 distinct themes by index
+                const themeClass = milestoneClass ? milestoneClass : `theme-${index % 8}`;
 
-                const cardHTML = `
-                    <div onclick="showDetail(${index})" class="countdown-card cursor-pointer ${specialClass} rounded-3xl p-8 shadow-2xl">
+                container.innerHTML += `
+                    <div onclick="showDetail(${index})" class="countdown-card cursor-pointer ${themeClass} rounded-3xl p-8 shadow-2xl">
                         <div class="flex justify-between items-start mb-6">
-                            <div class="text-2xl font-medium">${event.name}</div>
-                            ${timeLeft.passed ? `<span class="px-4 py-1 text-xs bg-red-500/80 rounded-full">已過期</span>` : ''}
+                            <div class="text-2xl font-medium text-white">${event.name}</div>
+                            ${timeLeft.passed ? `<span class="px-4 py-1 text-xs bg-red-500/80 rounded-full text-white">已過期</span>` : ''}
                         </div>
-                        
                         <div class="text-center my-8">
                             ${timeLeft.passed ? `
                                 <div class="text-7xl mb-4">🌌</div>
-                                <div class="text-3xl">美好時刻已到來</div>
+                                <div class="text-3xl text-white">美好時刻已到來</div>
                             ` : `
-                                <div class="days-left text-cyan-100">${timeLeft.days}</div>
-                                <div class="text-cyan-300 -mt-4 text-2xl">天 / DAYS</div>
+                                <div class="days-left">${timeLeft.days}</div>
+                                <div class="card-label -mt-4 text-2xl">天 / DAYS</div>
                             `}
                         </div>
-                        
-                        <div class="text-center text-cyan-200 text-[15px] leading-tight">
+                        <div class="card-msg text-center text-[15px] leading-tight">
                             ${getBilingualMessage(timeLeft.days)}
                         </div>
                     </div>
                 `;
-                container.innerHTML += cardHTML;
             });
         }
 
@@ -341,29 +366,20 @@
             document.getElementById('modal').classList.remove('hidden');
         }
 
-        function hideModal() {
-            document.getElementById('modal').classList.add('hidden');
-        }
+        function hideModal() { document.getElementById('modal').classList.add('hidden'); }
 
         function saveEvent() {
             const name = document.getElementById('event-name').value.trim();
             const datetime = document.getElementById('event-datetime').value;
             const note = document.getElementById('event-note').value.trim();
-
-            if (!name || !datetime) {
-                alert('請填寫事件名稱與日期時間 / Please fill name and date');
-                return;
-            }
-
+            if (!name || !datetime) { alert('請填寫事件名稱與日期時間 / Please fill name and date'); return; }
             const eventData = { id: Date.now().toString(), name, targetDate: datetime, note };
-
             if (currentEditId) {
                 const idx = events.findIndex(e => e.id === currentEditId);
-                if (idx > -1) events[idx] = {...events[idx], ...eventData};
+                if (idx > -1) events[idx] = { ...events[idx], ...eventData };
             } else {
                 events.push(eventData);
             }
-
             saveEvents();
             hideModal();
             renderCountdowns();
@@ -373,7 +389,8 @@
             currentDetailId = index;
             const event = events[index];
             const timeLeft = calculateTimeLeft(event.targetDate);
-            const specialClass = getSpecialClass(timeLeft.days);
+            const milestoneClass = getMilestoneClass(timeLeft.days);
+            const themeClass = milestoneClass ? milestoneClass : `theme-${index % 8}`;
 
             document.getElementById('detail-name').textContent = event.name;
             document.getElementById('detail-date').textContent = new Date(event.targetDate).toLocaleString('zh-TW');
@@ -390,13 +407,11 @@
             }
 
             document.getElementById('detail-note').innerHTML = event.note ? `<p>${event.note}</p>` : '<span class="opacity-60">無備註 / No note</span>';
-            document.getElementById('detail-header').className = `h-3 ${specialClass || 'bg-gradient-to-r from-cyan-400 to-purple-500'}`;
+            document.getElementById('detail-header').className = `h-3 ${themeClass}`;
             document.getElementById('detail-modal').classList.remove('hidden');
         }
 
-        function hideDetailModal() {
-            document.getElementById('detail-modal').classList.add('hidden');
-        }
+        function hideDetailModal() { document.getElementById('detail-modal').classList.add('hidden'); }
 
         function editCurrentEvent() {
             hideDetailModal();
@@ -418,7 +433,6 @@
             }
         }
 
-        // Initialize
         window.onload = function() {
             loadEvents();
             setInterval(() => renderCountdowns(), 10000);
