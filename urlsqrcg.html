@@ -1,0 +1,316 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shirley's SURL & QRCG</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        /* Define the color scheme */
+        :root {
+            --navy-blue: #0A192F;
+            --emerald-green: #10B981; /* Tailwind emerald-500 */
+            --emerald-light: #6EE7B7; /* Tailwind emerald-300 */
+            --pearl-white: #F3F4F6; /* Tailwind gray-100 */
+            --pearl-dim: #D1D5DB; /* Tailwind gray-300 */
+        }
+
+        body {
+            background-color: var(--navy-blue);
+            color: var(--pearl-white);
+            position: relative;
+            overflow-x: hidden;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        /* Flower and Particle Layer */
+        #flower-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none; /* Let clicks pass through */
+        }
+
+        .flower {
+            position: absolute;
+            background-color: var(--emerald-green);
+            border-radius: 50%;
+            opacity: 0; /* Start invisible for the blooming effect */
+            filter: blur(8px);
+            animation: bloom 4s ease-out forwards;
+        }
+
+        /* Flower placement and delays */
+        .flower:nth-child(1) { width: 120px; height: 120px; top: 10%; left: 5%; animation-delay: 0.5s; }
+        .flower:nth-child(2) { width: 80px; height: 80px; top: 70%; left: 15%; animation-delay: 1.5s; }
+        .flower:nth-child(3) { width: 150px; height: 150px; top: 20%; left: 80%; animation-delay: 1s; }
+        .flower:nth-child(4) { width: 90px; height: 90px; top: 80%; left: 70%; animation-delay: 2.5s; }
+        .flower:nth-child(5) { width: 60px; height: 60px; top: 50%; left: 40%; animation-delay: 2s; }
+        .flower:nth-child(6) { width: 110px; height: 110px; top: 40%; left: 90%; animation-delay: 3s; }
+
+        @keyframes bloom {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1); opacity: 0.2; } /* Subdued glowing effect */
+            100% { transform: scale(1); opacity: 0.15; }
+        }
+
+        /* Interactive Particle */
+        .particle {
+            position: absolute;
+            background-color: var(--emerald-light);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.7;
+            transform: scale(0);
+            animation: particle-puff 0.6s ease-out forwards;
+        }
+
+        @keyframes particle-puff {
+            to { transform: scale(1); opacity: 0; }
+        }
+
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.05); /* Very light pearl white */
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* Custom glow focus for inputs */
+        .emerald-glow:focus {
+            border-color: var(--emerald-green);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); /* Emerald-500 opacity */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 antialiased">
+
+    <div id="flower-background">
+        <div class="flower"></div>
+        <div class="flower"></div>
+        <div class="flower"></div>
+        <div class="flower"></div>
+        <div class="flower"></div>
+        <div class="flower"></div>
+    </div>
+
+    <div class="w-full max-w-2xl glass-card rounded-3xl p-6 md:p-10 z-10 my-8">
+        <div class="text-center mb-10 relative">
+            <h1 class="text-3xl md:text-4xl font-black tracking-wide text-pearl-white drop-shadow-sm">
+                Shirley's SURL & QRCG
+            </h1>
+            <p class="text-xs font-medium tracking-widest text-emerald-light uppercase mt-2">Short URL & QR Code Generator</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 split-container">
+            
+            <div class="flex flex-col justify-between space-y-4 pr-0 md:pr-4 md:border-r border-pearl-dim/20">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="p-1.5 rounded-lg bg-emerald-light/10 text-emerald-light">🔗</span>
+                        <h2 class="text-lg font-bold text-pearl-white">URL Shortener</h2>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <label for="longUrl" class="block text-xs font-semibold text-pearl-dim uppercase tracking-wider">Destination URL</label>
+                        <input type="url" id="longUrl" placeholder="https://example.com/very-long-link..." 
+                            class="w-full bg-navy-blue/50 border border-pearl-dim/20 rounded-xl px-4 py-3 text-sm text-pearl-white placeholder-pearl-dim/50 focus:outline-none emerald-glow transition-all">
+                    </div>
+                </div>
+
+                <div class="space-y-4 pt-2">
+                    <button onclick="shortenLink()" id="shortenBtn" class="w-full bg-emerald-green hover:bg-emerald-light text-navy-blue text-sm font-semibold py-3 rounded-xl transition-all shadow-lg active:scale-[0.98] cursor-pointer">
+                        Shorten URL
+                    </button>
+
+                    <div id="shortenOutput" class="hidden animate-fade-in space-y-2">
+                        <label class="block text-xs font-semibold text-emerald-light uppercase tracking-wider">Your Short Link</label>
+                        <div class="flex items-center gap-2 bg-navy-blue/80 border border-emerald-green/40 rounded-xl p-2 pl-3">
+                            <span id="shortenedUrl" class="text-sm text-emerald-light font-medium truncate select-all"></span>
+                            <button onclick="copyText('shortenedUrl', this)" class="ml-auto bg-pearl-dim/20 hover:bg-pearl-dim/40 text-pearl-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-95 cursor-pointer whitespace-nowrap">
+                                Copy
+                            </button>
+                        </div>
+                    </div>
+                    <div id="shortenError" class="hidden p-3 bg-red-950/30 border border-red-900/40 text-red-400 text-xs rounded-xl text-center"></div>
+                </div>
+            </div>
+
+            <div class="flex flex-col justify-between space-y-4 pl-0 md:pl-4 mt-6 md:mt-0">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="p-1.5 rounded-lg bg-emerald-light/10 text-emerald-light">📷</span>
+                        <h2 class="text-lg font-bold text-pearl-white">QR Code Generator</h2>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <label for="qrInput" class="block text-xs font-semibold text-pearl-dim uppercase tracking-wider">Text or URL for QR</label>
+                        <input type="text" id="qrInput" placeholder="Enter link or text to convert..." 
+                            class="w-full bg-navy-blue/50 border border-pearl-dim/20 rounded-xl px-4 py-3 text-sm text-pearl-white placeholder-pearl-dim/50 focus:outline-none emerald-glow transition-all">
+                    </div>
+                </div>
+
+                <div class="space-y-4 pt-2">
+                    <button onclick="generateQR()" class="w-full bg-emerald-green hover:bg-emerald-light text-navy-blue text-sm font-semibold py-3 rounded-xl transition-all shadow-lg active:scale-[0.98] cursor-pointer">
+                        Generate QR Code
+                    </button>
+
+                    <div id="qrOutput" class="hidden flex flex-col items-center justify-center bg-white/5 border border-pearl-dim/20 rounded-xl p-4">
+                        <div id="qrcode" class="bg-white p-3 rounded-xl shadow-md"></div>
+                    </div>
+                    <div id="qrError" class="hidden p-3 bg-red-950/30 border border-red-900/40 text-red-400 text-xs rounded-xl text-center"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 1. URL Shortener Logic
+        async function shortenLink() {
+            const longUrl = document.getElementById('longUrl').value.trim();
+            const outputBox = document.getElementById('shortenOutput');
+            const errorBox = document.getElementById('shortenError');
+            const btn = document.getElementById('shortenBtn');
+
+            outputBox.classList.add('hidden');
+            errorBox.classList.add('hidden');
+
+            if (!longUrl) {
+                errorBox.innerText = "Please input a URL first.";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            btn.innerText = "Shortening...";
+            btn.disabled = true;
+
+            try {
+                // Spoo.me API call
+                const response = await fetch('https://spoo.me/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    body: new URLSearchParams({ url: longUrl })
+                });
+
+                if (!response.ok) throw new Error();
+                const data = await response.json();
+
+                if(data.short_url) {
+                    document.getElementById('shortenedUrl').innerText = data.short_url;
+                    outputBox.classList.remove('hidden');
+                } else {
+                    throw new Error();
+                }
+            } catch (err) {
+                errorBox.innerText = "Error shortening link. Please check format.";
+                errorBox.classList.remove('hidden');
+            } finally {
+                btn.innerText = "Shorten URL";
+                btn.disabled = false;
+            }
+        }
+
+        // 2. QR Code Generator Logic
+        function generateQR() {
+            const qrInput = document.getElementById('qrInput').value.trim();
+            const qrOutput = document.getElementById('qrOutput');
+            const qrError = document.getElementById('qrError');
+            const qrContainer = document.getElementById('qrcode');
+
+            qrOutput.classList.add('hidden');
+            qrError.classList.add('hidden');
+            qrContainer.innerHTML = "";
+
+            if (!qrInput) {
+                qrError.innerText = "Please provide data or a URL.";
+                qrError.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                // Generate QR Code using the library
+                new QRCode(qrContainer, {
+                    text: qrInput,
+                    width: 140,
+                    height: 140,
+                    colorDark : "#0A192F", // Navy Blue
+                    colorLight : "#FFFFFF",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+                qrOutput.classList.remove('hidden');
+            } catch(e) {
+                qrError.innerText = "Failed to render QR Code.";
+                qrError.classList.remove('hidden');
+            }
+        }
+
+        // Helper: Copy Utility
+        function copyText(elementId, btnElement) {
+            const text = document.getElementById(elementId).innerText;
+            if (!text) return;
+            navigator.clipboard.writeText(text);
+            
+            const nativeText = btnElement.innerText;
+            btnElement.innerText = "Copied!";
+            btnElement.classList.remove('bg-pearl-dim/20');
+            btnElement.classList.add('bg-emerald-green', 'text-navy-blue');
+            
+            setTimeout(() => {
+                btnElement.innerText = nativeText;
+                btnElement.classList.remove('bg-emerald-green', 'text-navy-blue');
+                btnElement.classList.add('bg-pearl-dim/20');
+            }, 2000);
+        }
+
+        // 3. Particle Effect Logic (clicks/touches)
+        document.addEventListener('click', (e) => {
+            // Only trigger if we click on the background, not on buttons or inputs
+            if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SPAN') {
+                createParticlePuff(e.clientX, e.clientY);
+            }
+        });
+
+        function createParticlePuff(x, y) {
+            const particleCount = 8;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                document.body.appendChild(particle);
+
+                // Define size and movement
+                const size = Math.random() * 8 + 4 + 'px';
+                particle.style.width = size;
+                particle.style.height = size;
+
+                // Random direction/distance
+                const destinationX = x + (Math.random() - 0.5) * 60;
+                const destinationY = y + (Math.random() - 0.5) * 60;
+
+                // Position the particle at the click location
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+
+                // Animate to the destination
+                requestAnimationFrame(() => {
+                    particle.style.transform = `translate(${destinationX - x}px, ${destinationY - y}px) scale(0)`;
+                });
+
+                // Remove after animation completes
+                setTimeout(() => {
+                    particle.remove();
+                }, 600);
+            }
+        }
+    </script>
+</body>
+</html>
