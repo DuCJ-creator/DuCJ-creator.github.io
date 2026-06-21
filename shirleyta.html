@@ -144,22 +144,25 @@
       flex: 1;
       min-width: 0;
       min-height: 0;
-      position: relative;
-      overflow: hidden;   /* clip children; each child scrolls independently */
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
     /* ── HOME PANEL ──
-       Key fix: use height:100% + overflow-y:auto so it fills the content
-       area exactly and scrolls its own content — no clipping from parent. */
+       Safari fix: avoid position:absolute for the scrolling container.
+       Instead make #home a flex child that fills #content via flex:1,
+       then scroll inside it. Safari handles this reliably. */
     #home {
-      position: absolute;
-      inset: 0;
+      flex: 1;
+      min-height: 0;           /* allow shrink inside flex parent */
       overflow-y: auto;
       overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;  /* smooth momentum scroll on Safari/iOS */
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 52px 28px 80px;   /* generous bottom padding */
+      padding: 52px 28px 80px;
       transition: opacity .3s;
     }
     #home.off { opacity: 0; pointer-events: none; }
@@ -225,14 +228,19 @@
     .hfooter { margin-top: 44px; font-size: 11px; color: var(--txt-m); letter-spacing: .06em; text-align: center; align-self: center; }
     .hfooter span { color: var(--gold); opacity: .7; }
 
-    /* ── IFRAME PANEL ── */
+    /* ── IFRAME PANEL ──
+       Same Safari fix: flex child of #content, not position:absolute.
+       Hidden state uses opacity+pointer-events so it doesn't collapse layout. */
     #fp {
-      position: absolute; inset: 0;
-      opacity: 0; pointer-events: none;
+      flex: 1;
+      min-height: 0;
+      opacity: 0;
+      pointer-events: none;
       transition: opacity .3s;
-      display: flex; flex-direction: column;  /* stack loader / iframe cleanly */
+      position: relative;   /* only relative, so children can use absolute inside */
+      display: none;        /* fully removed from flow when not active */
     }
-    #fp.on { opacity: 1; pointer-events: all; }
+    #fp.on { display: flex; flex-direction: column; opacity: 1; pointer-events: all; }
 
     /* iframe fills fp completely */
     #mf { position: absolute; inset: 0; width: 100%; height: 100%; border: none; display: block; background: #fff; }
@@ -369,7 +377,8 @@ document.getElementById('btn-home').addEventListener('click', showHome);
 
 function showHome() {
   home.classList.remove('off');
-  fp.classList.remove('on');
+  home.style.display = '';      /* restore flex:1 flow */
+  fp.classList.remove('on');    /* triggers display:none via CSS */
   barTool.textContent = '選擇一個工具開始';
   btnOut.classList.add('hide');
   clearTimeout(timer);
@@ -379,7 +388,8 @@ function showHome() {
 
 function openTool(t) {
   home.classList.add('off');
-  fp.classList.add('on');
+  home.style.display = 'none';  /* remove from flex flow so #fp gets full height */
+  fp.classList.add('on');       /* triggers display:flex via CSS */
   barTool.textContent = t.title;
   btnOut.href = t.url;
   btnOut.classList.remove('hide');
