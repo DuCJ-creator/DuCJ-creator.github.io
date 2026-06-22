@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TOEFL Junior Visualized Charts</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans TC',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+:root{
+  --bg:#f4f6f9;--card:#fff;--text:#2c3e50;--muted:#7f8c8d;--border:#dce6f1;
+  --primary:#2c3e50;--primary2:#4a6fa5;--plight:#edf2f7;
+  --c1:rgba(93,137,174,.95);--c2:rgba(99,162,136,.95);--c3:rgba(196,135,75,.95);--c4:rgba(158,169,178,.95);--c5:rgba(221,190,80,.95);
+  --c1s:#3d6080;--c2s:#4a8a72;--c3s:#8b5e35;--c4s:#7a868f;--c5s:#b09040;
+}
+html,body{width:100%;max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--text);font-size:14px}
+body{padding:12px}
+header{background:linear-gradient(135deg,#2c3e50,#4a6fa5);padding:16px 22px;border-radius:14px;color:#fff;text-align:center;margin:0 auto 14px;max-width:1440px}
+header h1{font-size:20px;font-weight:900;margin-bottom:3px;letter-spacing:.3px}
+header p{font-size:12px;opacity:.9}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 auto 14px;max-width:1440px;flex-wrap:wrap}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}.tab{padding:9px 16px;background:#e2e8f0;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;color:var(--text)}
+.tab.active{background:var(--primary2);color:#fff;box-shadow:0 3px 10px rgba(74,111,165,.3)}
+.expbtn{padding:9px 18px;background:#27ae60;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer}.expbtn:hover{background:#1e9655}
+.mode{display:none}.mode.active{display:grid;grid-template-columns:260px minmax(0,1fr);gap:16px;max-width:1440px;margin:0 auto;width:100%}
+.panel{background:var(--card);padding:16px;border-radius:14px;border:1px solid var(--border);height:fit-content;min-width:0}.panel h2{font-size:15px;font-weight:800;border-left:4px solid var(--primary2);padding-left:8px;margin-bottom:14px}
+.ig{margin-bottom:10px}.ig label{display:block;font-size:11px;font-weight:700;margin-bottom:4px;color:#4a5568}.ig input,.ig select{width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:7px;font-size:13px;background:#fff;color:var(--text)}
+.abtn,.abtn2{width:100%;padding:9px;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}.abtn{background:var(--primary2);margin-top:4px}.abtn2{background:#2c3e50;margin-bottom:10px}.cpanel{max-height:calc(100vh - 160px);overflow:auto}
+.report-host{min-width:0;width:100%}.rptwrap{background:#fff;padding:20px;border-radius:14px;border:1px solid var(--border);width:100%;max-width:100%;overflow:hidden}.rpthdr{display:flex;justify-content:space-between;align-items:baseline;border-bottom:3px solid #2c3e50;padding-bottom:10px;margin-bottom:18px;gap:12px}.rpttitle{font-size:22px;font-weight:900;letter-spacing:.2px;white-space:normal}.rptdate{font-size:12px;color:#6b7280;white-space:nowrap}.cgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;width:100%}
+.ccard{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;min-width:0;overflow:hidden}.ctitle{font-size:15px;font-weight:900;text-align:center;background:var(--plight);padding:7px 14px;border-radius:22px;margin-bottom:10px}.cbody{display:flex;gap:14px;align-items:center;min-width:0}.legbox{flex:0 0 180px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:10px;display:flex;flex-direction:column;gap:5px;min-height:300px;justify-content:center}.litem{font-size:13px;font-weight:800;display:flex;align-items:center;gap:5px;color:#334155;white-space:nowrap}.dot{width:10px;height:10px;border-radius:2px;flex:0 0 auto}.sumbox{margin-top:7px;padding-top:8px;border-top:1px dashed #cbd5e1;font-size:13px;font-weight:900;color:#1e3a8a;line-height:1.45}.svgwrap{flex:1;min-width:0;display:flex;align-items:center;justify-content:center}.svgwrap svg{width:320px;height:320px;max-width:100%;display:block;flex:0 0 auto}.tbadge{text-align:center;font-size:14px;font-weight:900;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:20px;padding:5px 12px;margin-top:8px}.single-card{max-width:900px;margin:0 auto}.single-card .svgwrap svg{width:380px;height:380px}.single-card .legbox{flex-basis:220px;min-height:360px}.single-card .litem,.single-card .sumbox,.single-card .tbadge{font-size:15px}.cgblock{border:1px solid var(--border);padding:9px;border-radius:8px;margin-bottom:9px;background:#fafafa}.cgheader{font-size:12px;font-weight:800;color:var(--primary2);display:flex;justify-content:space-between;margin-bottom:7px}.rmbtn{background:none;border:none;color:#e74c3c;cursor:pointer;font-size:11px;font-weight:800}.cginputs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.cginputs input{padding:4px;font-size:11px;text-align:center;border:1px solid var(--border);border-radius:5px;width:100%}
+.exporting{position:absolute;left:-99999px;top:0;width:1122px;background:#fff;padding:0;border:0;border-radius:0;overflow:hidden}.exporting.rptwrap{width:1122px;height:794px;padding:28px 30px}.exporting .rpthdr{margin-bottom:20px}.exporting .rpttitle{font-size:25px}.exporting .rptdate{font-size:13px}.exporting .cgrid{grid-template-columns:repeat(2,1fr);gap:22px 24px}.exporting .ccard{padding:18px;border-radius:14px}.exporting .ctitle{font-size:18px;padding:8px 14px;margin-bottom:12px}.exporting .cbody{gap:18px}.exporting .legbox{flex:0 0 172px;min-height:292px}.exporting .litem{font-size:13px}.exporting .sumbox{font-size:13px}.exporting .svgwrap svg{width:316px;height:316px}.exporting .tbadge{font-size:14px}.exporting .single-card{max-width:980px}.exporting .single-card .svgwrap svg{width:420px;height:420px}.exporting .single-card .legbox{flex-basis:230px;min-height:410px}
+@media (max-width:1100px){.mode.active{grid-template-columns:1fr}.panel{order:1}.report-host{order:2}.cpanel{max-height:none}.cgrid{grid-template-columns:1fr}.cbody{flex-direction:column}.legbox{width:100%;min-height:0;flex-basis:auto}.svgwrap svg{width:280px;height:280px}.single-card .svgwrap svg{width:320px;height:320px}}
+@media print{body{padding:0;background:#fff}header,.topbar,.panel{display:none!important}.mode.active{display:block;max-width:none}.report-host{width:100%}.rptwrap{border:0;border-radius:0;padding:16px;page-break-inside:avoid}.cgrid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Shirley's TOEFL Junior Visualized Charts</h1>
+  <p>中學托福成績可視化圖表 — 純 SVG 穩定版 · 莫蘭迪色系 · PDF 一頁匯出</p>
+</header>
+<div class="topbar">
+  <div class="tabs">
+    <button class="tab active" onclick="switchMode('single')">📊 單組數據分析</button>
+    <button class="tab" onclick="switchMode('compare')">🔄 多組橫向對比</button>
+  </div>
+  <button class="expbtn" onclick="exportPDF()">🖨️ 導出 PDF 報告</button>
+</div>
+<div id="mSingle" class="mode active">
+  <aside class="panel">
+    <h2>數據配置面板</h2>
+    <div class="ig"><label>圖表類型</label><select id="stype" onchange="renderSingle()"><option value="donut">圓環圖 (Doughnut)</option><option value="bar">柱狀圖 (Bar)</option></select></div>
+    <hr style="border:0;border-top:1px solid var(--border);margin:10px 0">
+    <div class="ig"><label>1級 (藍色證書) 人數</label><input type="number" id="v1" value="5" min="0" oninput="renderSingle()"></div>
+    <div class="ig"><label>2級 (綠色證書) 人數</label><input type="number" id="v2" value="11" min="0" oninput="renderSingle()"></div>
+    <div class="ig"><label>3級 (銅色證書) 人數</label><input type="number" id="v3" value="7" min="0" oninput="renderSingle()"></div>
+    <div class="ig"><label>4級 (銀色證書) 人數</label><input type="number" id="v4" value="13" min="0" oninput="renderSingle()"></div>
+    <div class="ig"><label>5級 (金色證書) 人數</label><input type="number" id="v5" value="7" min="0" oninput="renderSingle()"></div>
+    <div class="ig"><label>自動計算總數</label><input type="number" id="vtotal" disabled></div>
+    <button class="abtn" onclick="renderSingle()">刷新圖表</button>
+  </aside>
+  <main class="report-host"><div class="rptwrap" id="pdfSingle">
+    <div class="rpthdr"><span class="rpttitle">TOEFL Junior 班級成績分佈報告</span><span class="rptdate" id="dSingle">報告生成日期: --</span></div>
+    <div class="ccard single-card" id="singleCard"><div class="ctitle">數據分佈詳情</div><div class="cbody"><div class="legbox" id="sLeg"></div><div class="svgwrap" id="sChart"></div></div><div class="tbadge" id="sBadge">總計人數：43 人</div></div>
+  </div></main>
+</div>
+<div id="mCompare" class="mode">
+  <aside class="panel cpanel">
+    <h2>對比配置面板</h2>
+    <div class="ig"><label>圖表類型</label><select id="ctype" onchange="renderCompare()"><option value="donut">圓環圖 (Doughnut)</option><option value="bar">柱狀圖 (Bar)</option></select></div>
+    <button class="abtn2" onclick="addGroup()">＋ 新增對比數據組 (最多6組)</button>
+    <div id="cgCont"></div><button class="abtn" onclick="renderCompare()">生成並對比圖表</button>
+  </aside>
+  <main class="report-host"><div class="rptwrap" id="pdfCompare">
+    <div class="rpthdr"><span class="rpttitle">TOEFL Junior 多組數據橫向對比分析報告</span><span class="rptdate" id="dCompare">報告生成日期: --</span></div>
+    <div class="cgrid" id="cGrid"></div>
+  </div></main>
+</div>
+<script>
+const BG=['rgba(93,137,174,.95)','rgba(99,162,136,.95)','rgba(196,135,75,.95)','rgba(158,169,178,.95)','rgba(221,190,80,.95)'];
+const BD=['#3d6080','#4a8a72','#8b5e35','#7a868f','#b09040'];
+const LBL=['1級(藍)','2級(綠)','3級(銅)','4級(銀)','5級(金)'];
+const LNAME=['1級 (藍)','2級 (綠)','3級 (銅)','4級 (銀)','5級 (金)'];
+const DEF=[{t:'2026MS',v:[5,11,7,13,7]},{t:'2027MS',v:[1,13,17,17,3]},{t:'2028MS',v:[1,20,12,10,1]},{t:'2029MS 班級D',v:[4,29,15,5,0]}];
+let cgN=0,activeMode='single';
+function switchMode(m){activeMode=m;document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',i===(m==='single'?0:1)));document.getElementById('mSingle').classList.toggle('active',m==='single');document.getElementById('mCompare').classList.toggle('active',m==='compare');m==='single'?renderSingle():renderCompare();}
+function getVals(){return [1,2,3,4,5].map(i=>Math.max(0,parseInt(document.getElementById('v'+i).value)||0));}
+function legHTML(vals,total){let s=vals[2]+vals[3]+vals[4];let sp=total>0?((s/total)*100).toFixed(1):'0.0';let h=vals.map((v,i)=>{let p=total>0?((v/total)*100).toFixed(1):'0.0';return `<div class="litem"><span class="dot" style="background:${BG[i]};border:1px solid ${BD[i]}"></span><span>${LNAME[i]}: <b>${v}人</b> (${p}%)</span></div>`;}).join('');return h+`<div class="sumbox">📈 3級至5級加總：<br><b>${s} 人 (${sp}%)</b></div>`;}
+function donutSVG(vals,total,size=260){if(total===0)return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg"><circle cx="${size/2}" cy="${size/2}" r="${size*.35}" fill="none" stroke="#eee" stroke-width="${size*.15}"/></svg>`;const cx=size/2,cy=size/2,R=size*.42,r=size*.24,tau=2*Math.PI;let paths='',labels='',start=-Math.PI/2;vals.forEach((v,i)=>{if(v===0)return;const ang=v/total*tau,end=start+ang,mid=start+ang/2;const x1=cx+R*Math.cos(start),y1=cy+R*Math.sin(start),x2=cx+R*Math.cos(end),y2=cy+R*Math.sin(end),x3=cx+r*Math.cos(end),y3=cy+r*Math.sin(end),x4=cx+r*Math.cos(start),y4=cy+r*Math.sin(start);const large=ang>Math.PI?1:0;paths+=`<path d="M${x1},${y1} A${R},${R},0,${large},1,${x2},${y2} L${x3},${y3} A${r},${r},0,${large},0,${x4},${y4} Z" fill="${BG[i]}" stroke="#fff" stroke-width="1.7"/>`;const pct=(v/total*100).toFixed(1),lr=(R+r)/2,lx=cx+lr*Math.cos(mid),ly=cy+lr*Math.sin(mid);if(ang>.11){labels+=`<text x="${lx}" y="${ly-5}" text-anchor="middle" font-size="${size*.045}" font-weight="900" fill="#fff">${v}人</text><text x="${lx}" y="${ly+size*.045}" text-anchor="middle" font-size="${size*.04}" font-weight="800" fill="rgba(255,255,255,.94)">(${pct}%)</text>`;}start=end;});return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">${paths}${labels}</svg>`;}
+function barSVG(vals,total,w=320,h=260){const mx=Math.max(...vals,1),pad={t:28,r:12,b:38,l:35},cw=w-pad.l-pad.r,ch=h-pad.t-pad.b,bw=cw/5*.58,gap=cw/5;let grid='',bars='',texts='',xlabels='';for(let k=0;k<=4;k++){const y=pad.t+ch*(1-k/4),val=Math.round(mx*k/4);grid+=`<line x1="${pad.l}" y1="${y}" x2="${pad.l+cw}" y2="${y}" stroke="#e5e7eb" stroke-width=".7"/><text x="${pad.l-4}" y="${y+3}" text-anchor="end" font-size="9" fill="#888">${val}</text>`;}vals.forEach((v,i)=>{const x=pad.l+i*gap+gap*.21,bh=v>0?v/mx*ch:0,y=pad.t+ch-bh,p=total>0?(v/total*100).toFixed(1):'0.0';bars+=`<rect x="${x}" y="${y}" width="${bw}" height="${bh}" fill="${BG[i]}" rx="4"/>`;if(v>0)texts+=`<text x="${x+bw/2}" y="${y-5}" text-anchor="middle" font-size="10" font-weight="800" fill="${BD[i]}">${v}人</text><text x="${x+bw/2}" y="${y+9}" text-anchor="middle" font-size="9" font-weight="700" fill="${BD[i]}">(${p}%)</text>`;xlabels+=`<text x="${x+bw/2}" y="${pad.t+ch+18}" text-anchor="middle" font-size="10" fill="#555">${LBL[i]}</text>`;});return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${grid}${bars}${texts}${xlabels}</svg>`;}
+function renderSingle(){const vals=getVals(),total=vals.reduce((a,b)=>a+b,0);document.getElementById('vtotal').value=total;document.getElementById('sBadge').textContent='總計人數：'+total+' 人';document.getElementById('sLeg').innerHTML=legHTML(vals,total);const type=document.getElementById('stype').value;document.getElementById('sChart').innerHTML=type==='donut'?donutSVG(vals,total,320):barSVG(vals,total,380,300);}
+function addGroup(title='',vals=[0,0,0,0,0]){const cont=document.getElementById('cgCont');if(cont.querySelectorAll('.cgblock').length>=6){alert('最多6組');return;}cgN++;const id=cgN,d=document.createElement('div');d.className='cgblock';d.id='cgb'+id;d.innerHTML=`<div class="cgheader"><span>數據組 #${id}</span><button class="rmbtn" onclick="rmGroup(${id})">✕ 刪除</button></div><div class="ig" style="margin-bottom:6px"><input type="text" id="cgt${id}" value="${title||'班級'+id}" style="font-size:12px;padding:5px 8px"></div><div class="cginputs">${[1,2,3,4,5].map(i=>`<div><label style="font-size:10px;text-align:center;display:block">${i}級</label><input type="number" id="cg${id}_${i}" min="0" value="${vals[i-1]}" oninput="renderCompare()"></div>`).join('')}</div>`;cont.appendChild(d);renderCompare();}
+function rmGroup(id){const el=document.getElementById('cgb'+id);if(el)el.remove();renderCompare();}
+function initCompare(){document.getElementById('cgCont').innerHTML='';cgN=0;DEF.forEach(g=>addGroup(g.t,g.v));}
+function renderCompare(){const grid=document.getElementById('cGrid');grid.innerHTML='';const type=document.getElementById('ctype').value;document.querySelectorAll('.cgblock').forEach(block=>{const id=block.id.replace('cgb',''),title=document.getElementById('cgt'+id).value||'數據組'+id,vals=[1,2,3,4,5].map(i=>Math.max(0,parseInt(document.getElementById(`cg${id}_${i}`).value)||0)),total=vals.reduce((a,b)=>a+b,0),card=document.createElement('div');card.className='ccard';card.innerHTML=`<div class="ctitle">${title}</div><div class="cbody"><div class="legbox">${legHTML(vals,total)}</div><div class="svgwrap">${type==='donut'?donutSVG(vals,total,320):barSVG(vals,total,340,270)}</div></div><div class="tbadge">總計人數 (分母)：${total} 人</div>`;grid.appendChild(card);});}
+function setDate(){const t=new Date(),ds=`報告生成日期: ${t.getFullYear()}/${String(t.getMonth()+1).padStart(2,'0')}/${String(t.getDate()).padStart(2,'0')}`;document.getElementById('dSingle').textContent=ds;document.getElementById('dCompare').textContent=ds;}
+function exportPDF(){setDate();const isSingle=activeMode==='single',src=document.getElementById(isSingle?'pdfSingle':'pdfCompare'),fname=isSingle?'TOEFL_Junior_Single.pdf':'TOEFL_Junior_Compare.pdf';const clone=src.cloneNode(true);clone.id='pdfExportClone';clone.classList.add('exporting');document.body.appendChild(clone);const opt={margin:0,filename:fname,image:{type:'jpeg',quality:1},html2canvas:{scale:2,useCORS:true,logging:false,backgroundColor:'#ffffff',windowWidth:1122,windowHeight:794,scrollX:0,scrollY:0},jsPDF:{unit:'px',format:[1122,794],orientation:'landscape'},pagebreak:{mode:['avoid-all']}};html2pdf().set(opt).from(clone).save().finally(()=>clone.remove());}
+window.addEventListener('load',()=>{renderSingle();initCompare();renderCompare();setDate();});
+</script>
+</body>
+</html>
