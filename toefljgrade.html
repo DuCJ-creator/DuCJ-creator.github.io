@@ -1,101 +1,146 @@
-<!doctype html>
-<html lang="zh-Hant">
+<!DOCTYPE html>
+<html lang="zh-TW">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TOEFL Junior Visualized Charts</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans TC',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-:root{
-  --bg:#f4f6f9;--card:#fff;--text:#2c3e50;--muted:#7f8c8d;--border:#dce6f1;
-  --primary:#2c3e50;--primary2:#4a6fa5;--plight:#edf2f7;
-  --c1:rgba(93,137,174,.95);--c2:rgba(99,162,136,.95);--c3:rgba(196,135,75,.95);--c4:rgba(158,169,178,.95);--c5:rgba(221,190,80,.95);
-  --c1s:#3d6080;--c2s:#4a8a72;--c3s:#8b5e35;--c4s:#7a868f;--c5s:#b09040;
-}
-html,body{width:100%;max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--text);font-size:14px}
-body{padding:12px}
-header{background:linear-gradient(135deg,#2c3e50,#4a6fa5);padding:16px 22px;border-radius:14px;color:#fff;text-align:center;margin:0 auto 14px;max-width:1440px}
-header h1{font-size:20px;font-weight:900;margin-bottom:3px;letter-spacing:.3px}
-header p{font-size:12px;opacity:.9}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 auto 14px;max-width:1440px;flex-wrap:wrap}
-.tabs{display:flex;gap:8px;flex-wrap:wrap}.tab{padding:9px 16px;background:#e2e8f0;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;color:var(--text)}
-.tab.active{background:var(--primary2);color:#fff;box-shadow:0 3px 10px rgba(74,111,165,.3)}
-.expbtn{padding:9px 18px;background:#27ae60;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer}.expbtn:hover{background:#1e9655}
-.mode{display:none}.mode.active{display:grid;grid-template-columns:260px minmax(0,1fr);gap:16px;max-width:1440px;margin:0 auto;width:100%}
-.panel{background:var(--card);padding:16px;border-radius:14px;border:1px solid var(--border);height:fit-content;min-width:0}.panel h2{font-size:15px;font-weight:800;border-left:4px solid var(--primary2);padding-left:8px;margin-bottom:14px}
-.ig{margin-bottom:10px}.ig label{display:block;font-size:11px;font-weight:700;margin-bottom:4px;color:#4a5568}.ig input,.ig select{width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:7px;font-size:13px;background:#fff;color:var(--text)}
-.abtn,.abtn2{width:100%;padding:9px;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}.abtn{background:var(--primary2);margin-top:4px}.abtn2{background:#2c3e50;margin-bottom:10px}.cpanel{max-height:calc(100vh - 160px);overflow:auto}
-.report-host{min-width:0;width:100%}.rptwrap{background:#fff;padding:20px;border-radius:14px;border:1px solid var(--border);width:100%;max-width:100%;overflow:hidden}.rpthdr{display:flex;justify-content:space-between;align-items:baseline;border-bottom:3px solid #2c3e50;padding-bottom:10px;margin-bottom:18px;gap:12px}.rpttitle{font-size:22px;font-weight:900;letter-spacing:.2px;white-space:normal}.rptdate{font-size:12px;color:#6b7280;white-space:nowrap}.cgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;width:100%}
-.ccard{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;min-width:0;overflow:hidden}.ctitle{font-size:15px;font-weight:900;text-align:center;background:var(--plight);padding:7px 14px;border-radius:22px;margin-bottom:10px}.cbody{display:flex;gap:14px;align-items:center;min-width:0}.legbox{flex:0 0 180px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:10px;display:flex;flex-direction:column;gap:5px;min-height:300px;justify-content:center}.litem{font-size:13px;font-weight:800;display:flex;align-items:center;gap:5px;color:#334155;white-space:nowrap}.dot{width:10px;height:10px;border-radius:2px;flex:0 0 auto}.sumbox{margin-top:7px;padding-top:8px;border-top:1px dashed #cbd5e1;font-size:13px;font-weight:900;color:#1e3a8a;line-height:1.45}.svgwrap{flex:1;min-width:0;display:flex;align-items:center;justify-content:center}.svgwrap svg{width:320px;height:320px;max-width:100%;display:block;flex:0 0 auto}.tbadge{text-align:center;font-size:14px;font-weight:900;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:20px;padding:5px 12px;margin-top:8px}.single-card{max-width:900px;margin:0 auto}.single-card .svgwrap svg{width:380px;height:380px}.single-card .legbox{flex-basis:220px;min-height:360px}.single-card .litem,.single-card .sumbox,.single-card .tbadge{font-size:15px}.cgblock{border:1px solid var(--border);padding:9px;border-radius:8px;margin-bottom:9px;background:#fafafa}.cgheader{font-size:12px;font-weight:800;color:var(--primary2);display:flex;justify-content:space-between;margin-bottom:7px}.rmbtn{background:none;border:none;color:#e74c3c;cursor:pointer;font-size:11px;font-weight:800}.cginputs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.cginputs input{padding:4px;font-size:11px;text-align:center;border:1px solid var(--border);border-radius:5px;width:100%}
-.exporting{position:absolute;left:-99999px;top:0;width:1122px;background:#fff;padding:0;border:0;border-radius:0;overflow:hidden}.exporting.rptwrap{width:1122px;height:794px;padding:28px 30px}.exporting .rpthdr{margin-bottom:20px}.exporting .rpttitle{font-size:25px}.exporting .rptdate{font-size:13px}.exporting .cgrid{grid-template-columns:repeat(2,1fr);gap:22px 24px}.exporting .ccard{padding:18px;border-radius:14px}.exporting .ctitle{font-size:18px;padding:8px 14px;margin-bottom:12px}.exporting .cbody{gap:18px}.exporting .legbox{flex:0 0 172px;min-height:292px}.exporting .litem{font-size:13px}.exporting .sumbox{font-size:13px}.exporting .svgwrap svg{width:316px;height:316px}.exporting .tbadge{font-size:14px}.exporting .single-card{max-width:980px}.exporting .single-card .svgwrap svg{width:420px;height:420px}.exporting .single-card .legbox{flex-basis:230px;min-height:410px}
-@media (max-width:1100px){.mode.active{grid-template-columns:1fr}.panel{order:1}.report-host{order:2}.cpanel{max-height:none}.cgrid{grid-template-columns:1fr}.cbody{flex-direction:column}.legbox{width:100%;min-height:0;flex-basis:auto}.svgwrap svg{width:280px;height:280px}.single-card .svgwrap svg{width:320px;height:320px}}
-@media print{body{padding:0;background:#fff}header,.topbar,.panel{display:none!important}.mode.active{display:block;max-width:none}.report-host{width:100%}.rptwrap{border:0;border-radius:0;padding:16px;page-break-inside:avoid}.cgrid{grid-template-columns:repeat(2,1fr)}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shirley's TOEFL Junior Visualized Charts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+  <style>
+    :root{
+      --bg:#f4f6f9;--card:#fff;--text:#2c3e50;--muted:#7f8c8d;--border:#e2e8f0;
+      --primary:#4a6fa5;--plight:#edf2f7;--accent:#e74c3c;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans TC',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+    html,body{width:100%;max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--text)}
+    body{padding:18px}
+    header{max-width:1280px;margin:0 auto 18px;text-align:center;background:linear-gradient(135deg,#2c3e50,#4a6fa5);padding:18px;border-radius:14px;color:white;box-shadow:0 8px 20px rgba(44,62,80,.14)}
+    header h1{font-size:23px;font-weight:700;margin-bottom:4px} header p{font-size:13px;opacity:.9}
+    .top-bar{max-width:1280px;margin:0 auto 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .mode-tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .tab-btn{padding:10px 18px;background:#e2e8f0;border:0;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;color:var(--text)}
+    .tab-btn.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(74,111,165,.25)}
+    .export-pdf-btn{padding:10px 18px;background:#27ae60;color:#fff;border:0;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(39,174,96,.22)}
+    .export-pdf-btn:hover{background:#219653}
+    .hint{max-width:1280px;margin:0 auto 12px;font-size:12px;color:#64748b;line-height:1.5}
+    .main-container{width:100%;max-width:1280px;margin:0 auto}
+    .mode-content{display:none;grid-template-columns:280px minmax(0,1fr);gap:16px;width:100%}
+    .mode-content.active{display:grid}
+    @media(max-width:980px){.mode-content{grid-template-columns:1fr}.panel{max-height:none!important}}
+    .panel{background:var(--card);padding:18px;border-radius:14px;border:1px solid var(--border);height:fit-content;box-shadow:0 8px 24px rgba(0,0,0,.035)}
+    h2{font-size:16px;margin-bottom:14px;font-weight:700;border-left:4px solid var(--primary);padding-left:9px}
+    .input-group{margin-bottom:10px} label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:#4a5568}
+    input[type="number"],input[type="text"],select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff;color:var(--text)}
+    button.action-btn{width:100%;padding:10px;background:var(--primary);color:#fff;border:0;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-top:5px}
+    .display-area{min-width:0;width:100%}
+    .report-pdf-wrapper{background:#fff;padding:20px;border-radius:14px;border:1px solid var(--border);width:100%;max-width:100%;overflow:hidden}
+    .report-meta-info{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #2c3e50;padding-bottom:10px;margin-bottom:16px;color:var(--muted);gap:12px}
+    .report-title-pdf{font-size:21px;color:var(--text);font-weight:700}.report-date{font-size:12px;white-space:nowrap}
+    .charts-grid-compare{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;width:100%}
+    .pdf-page-block{background:#fff;padding:14px;border-radius:12px;border:1px solid var(--border);box-shadow:0 4px 12px rgba(0,0,0,.02);width:100%;min-width:0;height:355px;break-inside:avoid;page-break-inside:avoid}
+    .single-card{max-width:740px;margin:0 auto;height:410px}
+    .chart-title-label{font-size:15px;font-weight:700;background:var(--plight);padding:6px 16px;border-radius:20px;text-align:center;margin-bottom:10px;width:100%}
+    .chart-layout-box{display:flex;width:100%;height:calc(100% - 72px);gap:12px;align-items:center;justify-content:space-between}
+    .text-data-list{flex:0 0 168px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:9px;display:flex;flex-direction:column;gap:5px;height:100%;justify-content:center;overflow:hidden}
+    .data-item{font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px;color:#334155;white-space:nowrap}.color-dot{width:9px;height:9px;border-radius:2px;display:inline-block;flex-shrink:0}
+    .sum-badge-box{margin-top:4px;padding-top:6px;border-top:1px dashed #cbd5e1;font-size:11px;font-weight:700;color:#1e3a8a;line-height:1.35}
+    .chart-container{position:relative;flex:1;height:100%;min-width:0}.chart-container canvas{display:block!important;width:100%!important;height:100%!important}
+    .info-badge{margin-top:8px;font-size:12px;color:#2c3e50;background:#f1f5f9;padding:4px 12px;border-radius:20px;font-weight:700;border:1px solid #cbd5e1;text-align:center;width:100%}
+    .compare-group-block{border:1px solid var(--border);padding:10px;border-radius:10px;margin-bottom:10px;background:#fafafa}.compare-group-header{font-size:13px;font-weight:700;margin-bottom:7px;color:var(--primary);display:flex;justify-content:space-between;align-items:center}.remove-btn{background:none;border:0;color:var(--accent);cursor:pointer;font-size:11px;font-weight:700}
+    @media(max-width:1180px){.charts-grid-compare{gap:10px}.pdf-page-block{height:345px;padding:12px}.text-data-list{flex-basis:158px}.data-item,.sum-badge-box{font-size:10px}}
+
+    @page{size:A4 landscape;margin:7mm}
+    @media print{
+      html,body{background:#fff!important;width:100%!important;height:auto!important;overflow:visible!important;padding:0!important;margin:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+      header,.top-bar,.hint,.panel{display:none!important}
+      .main-container,.mode-content,.display-area{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important}
+      .mode-content:not(.active){display:none!important}
+      .report-pdf-wrapper{border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important;margin:0!important;width:100%!important;max-width:none!important;overflow:visible!important;background:#fff!important}
+      .report-meta-info{margin-bottom:4mm!important;padding-bottom:3mm!important}.report-title-pdf{font-size:20pt!important}.report-date{font-size:10pt!important}
+      .charts-grid-compare{display:grid!important;grid-template-columns:1fr 1fr!important;gap:4mm!important;width:100%!important;page-break-inside:avoid!important;break-inside:avoid!important}
+      .pdf-page-block{height:82mm!important;padding:4mm!important;border:1px solid #dbe3ec!important;border-radius:4mm!important;box-shadow:none!important;page-break-inside:avoid!important;break-inside:avoid!important;background:#fff!important;overflow:hidden!important}
+      .single-card{height:120mm!important;max-width:190mm!important;margin:0 auto!important}.chart-title-label{font-size:13pt!important;padding:2mm 5mm!important;margin-bottom:3mm!important}.chart-layout-box{height:calc(100% - 20mm)!important;gap:4mm!important}.text-data-list{flex:0 0 44mm!important}.data-item,.sum-badge-box{font-size:8.5pt!important}.info-badge{font-size:9pt!important;margin-top:2mm!important;padding:1mm 3mm!important}.chart-container{height:100%!important}
+    }
+  </style>
 </head>
 <body>
 <header>
   <h1>Shirley's TOEFL Junior Visualized Charts</h1>
-  <p>中學托福成績可視化圖表 — 純 SVG 穩定版 · 莫蘭迪色系 · PDF 一頁匯出</p>
+  <p>中學托福成績可視化圖表分析系統｜固定寬度修正版</p>
 </header>
-<div class="topbar">
-  <div class="tabs">
-    <button class="tab active" onclick="switchMode('single')">📊 單組數據分析</button>
-    <button class="tab" onclick="switchMode('compare')">🔄 多組橫向對比</button>
+<div class="top-bar">
+  <div class="mode-tabs">
+    <button class="tab-btn active" onclick="switchMode('single')">📊 單組數據分析</button>
+    <button class="tab-btn" onclick="switchMode('compare')">🔄 多組類別橫向對比</button>
   </div>
-  <button class="expbtn" onclick="exportPDF()">🖨️ 導出 PDF 報告</button>
+  <button class="export-pdf-btn" onclick="exportToPDF()">🖨️ 導出 PDF 報告</button>
 </div>
-<div id="mSingle" class="mode active">
-  <aside class="panel">
-    <h2>數據配置面板</h2>
-    <div class="ig"><label>圖表類型</label><select id="stype" onchange="renderSingle()"><option value="donut">圓環圖 (Doughnut)</option><option value="bar">柱狀圖 (Bar)</option></select></div>
-    <hr style="border:0;border-top:1px solid var(--border);margin:10px 0">
-    <div class="ig"><label>1級 (藍色證書) 人數</label><input type="number" id="v1" value="5" min="0" oninput="renderSingle()"></div>
-    <div class="ig"><label>2級 (綠色證書) 人數</label><input type="number" id="v2" value="11" min="0" oninput="renderSingle()"></div>
-    <div class="ig"><label>3級 (銅色證書) 人數</label><input type="number" id="v3" value="7" min="0" oninput="renderSingle()"></div>
-    <div class="ig"><label>4級 (銀色證書) 人數</label><input type="number" id="v4" value="13" min="0" oninput="renderSingle()"></div>
-    <div class="ig"><label>5級 (金色證書) 人數</label><input type="number" id="v5" value="7" min="0" oninput="renderSingle()"></div>
-    <div class="ig"><label>自動計算總數</label><input type="number" id="vtotal" disabled></div>
-    <button class="abtn" onclick="renderSingle()">刷新圖表</button>
-  </aside>
-  <main class="report-host"><div class="rptwrap" id="pdfSingle">
-    <div class="rpthdr"><span class="rpttitle">TOEFL Junior 班級成績分佈報告</span><span class="rptdate" id="dSingle">報告生成日期: --</span></div>
-    <div class="ccard single-card" id="singleCard"><div class="ctitle">數據分佈詳情</div><div class="cbody"><div class="legbox" id="sLeg"></div><div class="svgwrap" id="sChart"></div></div><div class="tbadge" id="sBadge">總計人數：43 人</div></div>
-  </div></main>
-</div>
-<div id="mCompare" class="mode">
-  <aside class="panel cpanel">
-    <h2>對比配置面板</h2>
-    <div class="ig"><label>圖表類型</label><select id="ctype" onchange="renderCompare()"><option value="donut">圓環圖 (Doughnut)</option><option value="bar">柱狀圖 (Bar)</option></select></div>
-    <button class="abtn2" onclick="addGroup()">＋ 新增對比數據組 (最多6組)</button>
-    <div id="cgCont"></div><button class="abtn" onclick="renderCompare()">生成並對比圖表</button>
-  </aside>
-  <main class="report-host"><div class="rptwrap" id="pdfCompare">
-    <div class="rpthdr"><span class="rpttitle">TOEFL Junior 多組數據橫向對比分析報告</span><span class="rptdate" id="dCompare">報告生成日期: --</span></div>
-    <div class="cgrid" id="cGrid"></div>
-  </div></main>
+<div class="hint">PDF 匯出改用瀏覽器原生列印，會開啟列印視窗；Mac 請選「儲存為 PDF」。這個方式不會再產生空白頁，也不會把圖表放大爆版。</div>
+<div class="main-container">
+  <div id="modeSingle" class="mode-content active">
+    <div class="panel">
+      <h2>數據配置面板</h2>
+      <div class="input-group"><label>圖表類型選擇</label><select id="singleChartType" onchange="renderSingleChart()"><option value="doughnut">高級圓環圖 (Doughnut)</option><option value="bar">優雅柱狀圖 (Bar)</option><option value="line">趨勢折線圖 (Line)</option><option value="scatter">分佈點狀圖 (Scatter)</option></select></div>
+      <hr style="border:0;border-top:1px solid var(--border);margin:12px 0">
+      <div class="input-group"><label>1級 (藍色證書) 人數</label><input type="number" id="s_val1" value="5" min="0" oninput="renderSingleChart()"></div>
+      <div class="input-group"><label>2級 (綠色證書) 人數</label><input type="number" id="s_val2" value="11" min="0" oninput="renderSingleChart()"></div>
+      <div class="input-group"><label>3級 (銅色證書) 人數</label><input type="number" id="s_val3" value="7" min="0" oninput="renderSingleChart()"></div>
+      <div class="input-group"><label>4級 (銀色證書) 人數</label><input type="number" id="s_val4" value="13" min="0" oninput="renderSingleChart()"></div>
+      <div class="input-group"><label>5級 (金色證書) 人數</label><input type="number" id="s_val5" value="7" min="0" oninput="renderSingleChart()"></div>
+      <div class="input-group"><label>自動計算總數</label><input type="number" id="singleTotal" value="43" disabled></div>
+      <button class="action-btn" onclick="renderSingleChart()">刷新圖表</button>
+    </div>
+    <div class="display-area">
+      <div class="report-pdf-wrapper" id="pdfReportSingle">
+        <div class="report-meta-info"><span class="report-title-pdf">TOEFL Junior 班級成績分佈報告</span><span class="report-date" id="pdfDateSingle">報告生成日期: --</span></div>
+        <div class="pdf-page-block single-card">
+          <div class="chart-title-label">數據分佈詳情</div>
+          <div class="chart-layout-box"><div class="text-data-list" id="singleTextList"></div><div class="chart-container"><canvas id="singleChartCanvas"></canvas></div></div>
+          <div class="info-badge" id="singleBadge">總計人數 (分母)：43 人</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="modeCompare" class="mode-content">
+    <div class="panel" style="max-height:80vh;overflow-y:auto">
+      <h2>對比配置面板</h2>
+      <div class="input-group"><label>統一圖表類型</label><select id="compareChartType" onchange="renderCompareCharts()"><option value="doughnut">高級圓環圖 (Doughnut)</option><option value="bar">優雅柱狀圖 (Bar)</option><option value="line">趨勢折線圖 (Line)</option><option value="scatter">分佈點狀圖 (Scatter)</option></select></div>
+      <button class="action-btn" onclick="addCompareGroup()" style="background:#2c3e50;margin-bottom:12px">＋ 新增對比數據組 (最多6組)</button>
+      <div id="compareGroupsContainer"></div>
+      <button class="action-btn" onclick="renderCompareCharts()">生成並對比圖表</button>
+    </div>
+    <div class="display-area">
+      <div class="report-pdf-wrapper" id="pdfReportCompare">
+        <div class="report-meta-info"><span class="report-title-pdf">TOEFL Junior 多組數據橫向對比分析報告</span><span class="report-date" id="pdfDateCompare">報告生成日期: --</span></div>
+        <div class="charts-grid-compare" id="compareChartsGrid"></div>
+      </div>
+    </div>
+  </div>
 </div>
 <script>
-const BG=['rgba(93,137,174,.95)','rgba(99,162,136,.95)','rgba(196,135,75,.95)','rgba(158,169,178,.95)','rgba(221,190,80,.95)'];
-const BD=['#3d6080','#4a8a72','#8b5e35','#7a868f','#b09040'];
-const LBL=['1級(藍)','2級(綠)','3級(銅)','4級(銀)','5級(金)'];
-const LNAME=['1級 (藍)','2級 (綠)','3級 (銅)','4級 (銀)','5級 (金)'];
-const DEF=[{t:'2026MS',v:[5,11,7,13,7]},{t:'2027MS',v:[1,13,17,17,3]},{t:'2028MS',v:[1,20,12,10,1]},{t:'2029MS 班級D',v:[4,29,15,5,0]}];
-let cgN=0,activeMode='single';
-function switchMode(m){activeMode=m;document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',i===(m==='single'?0:1)));document.getElementById('mSingle').classList.toggle('active',m==='single');document.getElementById('mCompare').classList.toggle('active',m==='compare');m==='single'?renderSingle():renderCompare();}
-function getVals(){return [1,2,3,4,5].map(i=>Math.max(0,parseInt(document.getElementById('v'+i).value)||0));}
-function legHTML(vals,total){let s=vals[2]+vals[3]+vals[4];let sp=total>0?((s/total)*100).toFixed(1):'0.0';let h=vals.map((v,i)=>{let p=total>0?((v/total)*100).toFixed(1):'0.0';return `<div class="litem"><span class="dot" style="background:${BG[i]};border:1px solid ${BD[i]}"></span><span>${LNAME[i]}: <b>${v}人</b> (${p}%)</span></div>`;}).join('');return h+`<div class="sumbox">📈 3級至5級加總：<br><b>${s} 人 (${sp}%)</b></div>`;}
-function donutSVG(vals,total,size=260){if(total===0)return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg"><circle cx="${size/2}" cy="${size/2}" r="${size*.35}" fill="none" stroke="#eee" stroke-width="${size*.15}"/></svg>`;const cx=size/2,cy=size/2,R=size*.42,r=size*.24,tau=2*Math.PI;let paths='',labels='',start=-Math.PI/2;vals.forEach((v,i)=>{if(v===0)return;const ang=v/total*tau,end=start+ang,mid=start+ang/2;const x1=cx+R*Math.cos(start),y1=cy+R*Math.sin(start),x2=cx+R*Math.cos(end),y2=cy+R*Math.sin(end),x3=cx+r*Math.cos(end),y3=cy+r*Math.sin(end),x4=cx+r*Math.cos(start),y4=cy+r*Math.sin(start);const large=ang>Math.PI?1:0;paths+=`<path d="M${x1},${y1} A${R},${R},0,${large},1,${x2},${y2} L${x3},${y3} A${r},${r},0,${large},0,${x4},${y4} Z" fill="${BG[i]}" stroke="#fff" stroke-width="1.7"/>`;const pct=(v/total*100).toFixed(1),lr=(R+r)/2,lx=cx+lr*Math.cos(mid),ly=cy+lr*Math.sin(mid);if(ang>.11){labels+=`<text x="${lx}" y="${ly-5}" text-anchor="middle" font-size="${size*.045}" font-weight="900" fill="#fff">${v}人</text><text x="${lx}" y="${ly+size*.045}" text-anchor="middle" font-size="${size*.04}" font-weight="800" fill="rgba(255,255,255,.94)">(${pct}%)</text>`;}start=end;});return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">${paths}${labels}</svg>`;}
-function barSVG(vals,total,w=320,h=260){const mx=Math.max(...vals,1),pad={t:28,r:12,b:38,l:35},cw=w-pad.l-pad.r,ch=h-pad.t-pad.b,bw=cw/5*.58,gap=cw/5;let grid='',bars='',texts='',xlabels='';for(let k=0;k<=4;k++){const y=pad.t+ch*(1-k/4),val=Math.round(mx*k/4);grid+=`<line x1="${pad.l}" y1="${y}" x2="${pad.l+cw}" y2="${y}" stroke="#e5e7eb" stroke-width=".7"/><text x="${pad.l-4}" y="${y+3}" text-anchor="end" font-size="9" fill="#888">${val}</text>`;}vals.forEach((v,i)=>{const x=pad.l+i*gap+gap*.21,bh=v>0?v/mx*ch:0,y=pad.t+ch-bh,p=total>0?(v/total*100).toFixed(1):'0.0';bars+=`<rect x="${x}" y="${y}" width="${bw}" height="${bh}" fill="${BG[i]}" rx="4"/>`;if(v>0)texts+=`<text x="${x+bw/2}" y="${y-5}" text-anchor="middle" font-size="10" font-weight="800" fill="${BD[i]}">${v}人</text><text x="${x+bw/2}" y="${y+9}" text-anchor="middle" font-size="9" font-weight="700" fill="${BD[i]}">(${p}%)</text>`;xlabels+=`<text x="${x+bw/2}" y="${pad.t+ch+18}" text-anchor="middle" font-size="10" fill="#555">${LBL[i]}</text>`;});return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${grid}${bars}${texts}${xlabels}</svg>`;}
-function renderSingle(){const vals=getVals(),total=vals.reduce((a,b)=>a+b,0);document.getElementById('vtotal').value=total;document.getElementById('sBadge').textContent='總計人數：'+total+' 人';document.getElementById('sLeg').innerHTML=legHTML(vals,total);const type=document.getElementById('stype').value;document.getElementById('sChart').innerHTML=type==='donut'?donutSVG(vals,total,320):barSVG(vals,total,380,300);}
-function addGroup(title='',vals=[0,0,0,0,0]){const cont=document.getElementById('cgCont');if(cont.querySelectorAll('.cgblock').length>=6){alert('最多6組');return;}cgN++;const id=cgN,d=document.createElement('div');d.className='cgblock';d.id='cgb'+id;d.innerHTML=`<div class="cgheader"><span>數據組 #${id}</span><button class="rmbtn" onclick="rmGroup(${id})">✕ 刪除</button></div><div class="ig" style="margin-bottom:6px"><input type="text" id="cgt${id}" value="${title||'班級'+id}" style="font-size:12px;padding:5px 8px"></div><div class="cginputs">${[1,2,3,4,5].map(i=>`<div><label style="font-size:10px;text-align:center;display:block">${i}級</label><input type="number" id="cg${id}_${i}" min="0" value="${vals[i-1]}" oninput="renderCompare()"></div>`).join('')}</div>`;cont.appendChild(d);renderCompare();}
-function rmGroup(id){const el=document.getElementById('cgb'+id);if(el)el.remove();renderCompare();}
-function initCompare(){document.getElementById('cgCont').innerHTML='';cgN=0;DEF.forEach(g=>addGroup(g.t,g.v));}
-function renderCompare(){const grid=document.getElementById('cGrid');grid.innerHTML='';const type=document.getElementById('ctype').value;document.querySelectorAll('.cgblock').forEach(block=>{const id=block.id.replace('cgb',''),title=document.getElementById('cgt'+id).value||'數據組'+id,vals=[1,2,3,4,5].map(i=>Math.max(0,parseInt(document.getElementById(`cg${id}_${i}`).value)||0)),total=vals.reduce((a,b)=>a+b,0),card=document.createElement('div');card.className='ccard';card.innerHTML=`<div class="ctitle">${title}</div><div class="cbody"><div class="legbox">${legHTML(vals,total)}</div><div class="svgwrap">${type==='donut'?donutSVG(vals,total,320):barSVG(vals,total,340,270)}</div></div><div class="tbadge">總計人數 (分母)：${total} 人</div>`;grid.appendChild(card);});}
-function setDate(){const t=new Date(),ds=`報告生成日期: ${t.getFullYear()}/${String(t.getMonth()+1).padStart(2,'0')}/${String(t.getDate()).padStart(2,'0')}`;document.getElementById('dSingle').textContent=ds;document.getElementById('dCompare').textContent=ds;}
-function exportPDF(){setDate();const isSingle=activeMode==='single',src=document.getElementById(isSingle?'pdfSingle':'pdfCompare'),fname=isSingle?'TOEFL_Junior_Single.pdf':'TOEFL_Junior_Compare.pdf';const clone=src.cloneNode(true);clone.id='pdfExportClone';clone.classList.add('exporting');document.body.appendChild(clone);const opt={margin:0,filename:fname,image:{type:'jpeg',quality:1},html2canvas:{scale:2,useCORS:true,logging:false,backgroundColor:'#ffffff',windowWidth:1122,windowHeight:794,scrollX:0,scrollY:0},jsPDF:{unit:'px',format:[1122,794],orientation:'landscape'},pagebreak:{mode:['avoid-all']}};html2pdf().set(opt).from(clone).save().finally(()=>clone.remove());}
-window.addEventListener('load',()=>{renderSingle();initCompare();renderCompare();setDate();});
+  Chart.register(ChartDataLabels);
+  const colors={background:['rgba(64,115,158,.85)','rgba(70,142,115,.85)','rgba(184,115,51,.85)','rgba(142,152,163,.85)','rgba(212,175,55,.85)'],border:['#2f5a80','#2d6a53','#8a5225','#6c7782','#9c7e23']};
+  const labels=['1級 (藍)','2級 (綠)','3級 (銅)','4級 (銀)','5級 (金)'];
+  let singleChartInstance=null,compareChartInstances=[],compareGroupCount=0,currentActiveMode='single';
+  const defaultCompareData=[{title:'2026MS',vals:[5,11,7,13,7]},{title:'2027MS',vals:[1,13,17,17,3]},{title:'2028MS',vals:[1,20,12,10,1]},{title:'2029MS 班級D',vals:[4,29,15,5,0]}];
+  function switchMode(mode){currentActiveMode=mode;document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.mode-content').forEach(c=>c.classList.remove('active'));if(mode==='single'){document.querySelectorAll('.tab-btn')[0].classList.add('active');document.getElementById('modeSingle').classList.add('active');renderSingleChart()}else{document.querySelectorAll('.tab-btn')[1].classList.add('active');document.getElementById('modeCompare').classList.add('active');renderCompareCharts()}}
+  function setDates(){const d=new Date();const s=`報告生成日期: ${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;document.getElementById('pdfDateSingle').innerText=s;document.getElementById('pdfDateCompare').innerText=s}
+  function calcSingleTotal(){let sum=0;for(let i=1;i<=5;i++)sum+=Number(document.getElementById(`s_val${i}`).value)||0;document.getElementById('singleTotal').value=sum;document.getElementById('singleBadge').innerText=`總計人數 (分母)：${sum} 人`;return sum}
+  function generateTextListHTML(vals,total){let html='',sum345=0;vals.forEach((val,idx)=>{const pct=total>0?((val/total)*100).toFixed(1):'0.0';if(idx>=2)sum345+=val;html+=`<div class="data-item"><span class="color-dot" style="background-color:${colors.background[idx]};border:1px solid ${colors.border[idx]}"></span><span>${labels[idx]}: <b>${val}人</b> (${pct}%)</span></div>`});const total345Pct=total>0?((sum345/total)*100).toFixed(1):'0.0';html+=`<div class="sum-badge-box">📈 3級至5級加總：<br><span><b>${sum345} 人</b> (${total345Pct}%)</span></div>`;return html}
+  function renderSingleChart(){setDates();const ctx=document.getElementById('singleChartCanvas').getContext('2d'),type=document.getElementById('singleChartType').value;const vals=[];for(let i=1;i<=5;i++)vals.push(Number(document.getElementById(`s_val${i}`).value)||0);const total=calcSingleTotal();document.getElementById('singleTextList').innerHTML=generateTextListHTML(vals,total);if(singleChartInstance)singleChartInstance.destroy();singleChartInstance=new Chart(ctx,buildChartConfig(type,vals,total,'人數分佈'))}
+  function initCompareConfig(){const c=document.getElementById('compareGroupsContainer');c.innerHTML='';compareGroupCount=0;defaultCompareData.forEach(g=>addCompareGroup(g.title,g.vals));renderCompareCharts()}
+  function addCompareGroup(title='',vals=[0,0,0,0,0]){const c=document.getElementById('compareGroupsContainer');if(c.querySelectorAll('.compare-group-block').length>=6){alert('最多只能建立 6 組對比數據！');return}compareGroupCount++;const id=compareGroupCount;const b=document.createElement('div');b.className='compare-group-block';b.id=`cg_block_${id}`;b.innerHTML=`<div class="compare-group-header"><span>數據組 #${id}</span><button class="remove-btn" onclick="removeCompareGroup(${id})">✕ 刪除</button></div><div class="input-group" style="margin-bottom:8px"><input type="text" id="cg_title_${id}" value="${title||'未命名班級 '+id}"></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px">${[1,2,3,4,5].map(i=>`<div><label style="font-size:10px;text-align:center">${i}級</label><input type="number" id="cg_${id}_${i}" value="${vals[i-1]}" min="0" style="padding:4px;font-size:12px;text-align:center" oninput="renderCompareCharts()"></div>`).join('')}</div>`;c.appendChild(b)}
+  function removeCompareGroup(id){const c=document.getElementById('compareGroupsContainer');if(c.querySelectorAll('.compare-group-block').length<=2){alert('最少需要保留 2 組數據進行對比！');return}document.getElementById(`cg_block_${id}`).remove();renderCompareCharts()}
+  function renderCompareCharts(){setDates();const grid=document.getElementById('compareChartsGrid');compareChartInstances.forEach(ins=>ins.destroy());compareChartInstances=[];grid.innerHTML='';const type=document.getElementById('compareChartType').value;document.getElementById('compareGroupsContainer').querySelectorAll('.compare-group-block').forEach(block=>{const id=block.id.replace('cg_block_','');const title=document.getElementById(`cg_title_${id}`).value||`數據組 ${id}`;const vals=[];let total=0;for(let i=1;i<=5;i++){const v=Number(document.getElementById(`cg_${id}_${i}`).value)||0;vals.push(v);total+=v}const card=document.createElement('div');card.className='pdf-page-block';card.innerHTML=`<div class="chart-title-label">${title}</div><div class="chart-layout-box"><div class="text-data-list">${generateTextListHTML(vals,total)}</div><div class="chart-container"><canvas id="canvas_compare_${id}"></canvas></div></div><div class="info-badge">總計人數 (分母)：${total} 人</div>`;grid.appendChild(card);const ctx=document.getElementById(`canvas_compare_${id}`).getContext('2d');compareChartInstances.push(new Chart(ctx,buildChartConfig(type,vals,total,'人數')))})}
+  function buildChartConfig(type,vals,total,datasetLabel){let chartData={},chartOptions={responsive:true,maintainAspectRatio:false,animation:false,layout:{padding:(type==='doughnut'||type==='scatter')?4:{top:18,bottom:4,left:4,right:4}},plugins:{legend:{display:false},tooltip:{enabled:true},datalabels:{display:function(context){const val=type==='scatter'?context.dataset.data[context.dataIndex].y:context.dataset.data[context.dataIndex];return val>0},color:type==='doughnut'?'#fff':'#2c3e50',anchor:type==='doughnut'?'center':'end',align:type==='doughnut'?'center':'top',offset:2,font:{size:10,weight:'bold'},formatter:function(value){let val=type==='scatter'?value.y:value;const pct=total>0?((val/total)*100).toFixed(1):'0.0';return type==='doughnut'?`${val}人\n(${pct}%)`:`${val}人 (${pct}%)`},textAlign:'center'}}};
+    if(type==='scatter'){chartData={datasets:labels.map((label,idx)=>({label,data:[{x:idx+1,y:vals[idx]}],backgroundColor:colors.background[idx],borderColor:colors.border[idx],pointRadius:7}))};chartOptions.scales={x:{min:.5,max:5.5,ticks:{stepSize:1,callback:v=>labels[v-1]||'',font:{size:9}},grid:{display:false}},y:{beginAtZero:true,ticks:{precision:0}}}}
+    else if(type==='line'){chartData={labels,datasets:[{label:datasetLabel,data:vals,backgroundColor:'rgba(74,111,165,.1)',borderColor:'#4a6fa5',borderWidth:2,tension:.2,fill:true,pointRadius:3}]};chartOptions.scales={y:{beginAtZero:true,grid:{color:'#f1f5f9'},ticks:{precision:0}},x:{ticks:{font:{size:9}},grid:{display:false}}}}
+    else{chartData={labels,datasets:[{label:datasetLabel,data:vals,backgroundColor:colors.background,borderColor:type==='bar'?colors.border:'#fff',borderWidth:1}]};if(type==='doughnut'){chartOptions.cutout='50%'}else{chartOptions.scales={y:{beginAtZero:true,grid:{color:'#f1f5f9'},ticks:{precision:0}},x:{ticks:{font:{size:9}},grid:{display:false}}}}}
+    return{type,data:chartData,options:chartOptions}}
+  function exportToPDF(){setDates();if(currentActiveMode==='single')renderSingleChart();else renderCompareCharts();setTimeout(()=>{window.print()},350)}
+  window.addEventListener('beforeprint',()=>{setDates();compareChartInstances.forEach(c=>c.resize());if(singleChartInstance)singleChartInstance.resize()});
+  window.onload=function(){renderSingleChart();initCompareConfig()};
 </script>
 </body>
 </html>
