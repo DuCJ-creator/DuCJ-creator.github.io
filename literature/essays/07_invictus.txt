@@ -1,0 +1,20 @@
+<p>Out of the night that covers me,<br>
+Black as the pit from pole to pole,<br>
+I thank whatever gods may be<br>
+For my <span class="vocab-tip" data-tip="unconquerable：不可征服的、剛毅的">unconquerable</span> soul.</p>
+<p>In the fell clutch of circumstance<br>
+I have not winced nor cried aloud.<br>
+Under the bludgeonings of chance<br>
+My head is bloody, but unbowed.</p>
+<blockquote>
+    "I am the master of my fate, I am the captain of my soul."<br>
+    <span style="font-size:14px; font-style:normal; color:#8c8a88;">（我是我命運的主宰，我是我靈魂的統帥。）</span>
+</blockquote>
+<p>Beyond this place of wrath and tears<br>
+Looms but the Horror of the shade,<br>
+And yet the menace of the years<br>
+Finds and shall find me unafraid.</p>
+<p>It matters not how strait the gate,<br>
+How charged with punishments the scroll,<br>
+I am the master of my fate,<br>
+I am the captain of my soul.</p>
