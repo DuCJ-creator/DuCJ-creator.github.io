@@ -5,43 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Classic Literature Collection | Pluto</title>
     <style>
-        /* ==================== 1. 全域變數（支援深淺色切換） ==================== */
         :root {
-            --bg-color: #fbf9f4;       /* 柔和米白紙張色 */
-            --text-color: #2c2a29;     /* 柔和深碳灰 */
-            --sub-text: #8c8a88;       /* 質感灰色 */
-            --border-color: #e5dfd8;   /* 淺色分隔線 */
+            --bg-color: #fbf9f4;
+            --text-color: #2c2a29;
+            --sub-text: #8c8a88;
+            --border-color: #e5dfd8;
             --hover-bg: rgba(125, 107, 167, 0.03);
             --quote-text: #4c4a48;
         }
-
         [data-theme="dark"] {
-            --bg-color: #121212;       /* 深夜極黑 */
-            --text-color: #e0e0e0;     /* 柔和白文字 */
-            --sub-text: #a0a0a0;       /* 暗灰副標 */
-            --border-color: #2c2c2c;   /* 深色分隔線 */
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --sub-text: #a0a0a0;
+            --border-color: #2c2c2c;
             --hover-bg: rgba(177, 159, 251, 0.05);
             --quote-text: #b0b0b0;
         }
-
-        /* ==================== 2. 基礎排版 ==================== */
         body { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-color); font-family: -apple-system, BlinkMacSystemFont, sans-serif; display: flex; justify-content: center; min-height: 100vh; transition: background-color 0.3s, color 0.3s; }
         .container { max-width: 680px; width: 90%; padding: 80px 0; display: block; }
-        
         .view-mode { display: none; }
         .active-view { display: block; }
-
-        /* ==================== 3. 列表首頁與分類樣式 ==================== */
         .header { margin-bottom: 40px; }
         .header h1 { font-family: "Georgia", serif; font-size: 52px; font-weight: 400; margin: 0; line-height: 1.1; }
         .header h1 span { color: #7d6ba7; display: block; margin-top: 5px; }
         .header .subtitle { font-size: 14px; color: var(--sub-text); letter-spacing: 2px; margin-top: 25px; font-weight: 300; }
-        
         .filter-nav { display: flex; gap: 15px; margin-bottom: 40px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
         .filter-btn { font-size: 14px; color: var(--sub-text); background: none; border: none; cursor: pointer; padding: 5px 10px; letter-spacing: 1px; font-weight: 500; transition: all 0.2s; border-radius: 4px; }
         .filter-btn:hover { color: var(--text-color); background: var(--hover-bg); }
         .filter-btn.active-filter { color: #fff; background-color: #7d6ba7; }
-
         .essay-list { border-top: 1px solid var(--border-color); }
         .essay-item { display: flex; align-items: flex-start; padding: 35px 0; border-bottom: 1px solid var(--border-color); text-decoration: none; color: inherit; cursor: pointer; transition: background-color 0.2s; }
         .essay-item:hover { background-color: var(--hover-bg); }
@@ -51,8 +42,6 @@
         .item-title-en { font-size: 20px; font-weight: 600; letter-spacing: 0.5px; }
         .item-title-zh { font-size: 14px; color: var(--sub-text); font-weight: 400; }
         .item-author { font-family: "Georgia", serif; font-style: italic; font-size: 15px; color: #9c8fb7; }
-
-        /* ==================== 4. 沉浸閱讀頁樣式 ==================== */
         .back-home { font-size: 14px; color: var(--sub-text); text-decoration: none; display: inline-block; margin-bottom: 40px; cursor: pointer; }
         .reader-title-container { margin-bottom: 50px; }
         .reader-title { font-family: "Georgia", serif; font-size: 36px; font-weight: 400; line-height: 1.3; margin: 0 0 6px 0; }
@@ -60,191 +49,182 @@
         .reader-author { font-family: "Georgia", serif; font-style: italic; color: var(--sub-text); font-size: 18px; }
         main p { font-family: "Georgia", serif; font-size: 19px; margin-bottom: 28px; text-align: justify; line-height: 1.8; }
         main blockquote { margin: 40px 0; padding-left: 20px; border-left: 3px solid #7d6ba7; font-family: "Georgia", serif; font-style: italic; font-size: 22px; color: var(--quote-text); line-height: 1.6; }
-        
-        /* 雙語懸停註解 */
         .vocab-tip { border-bottom: 1px dashed #7d6ba7; cursor: help; position: relative; font-weight: 500; }
         .vocab-tip::after { content: attr(data-tip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background-color: #2c2a29; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 14px; font-family: -apple-system, sans-serif; white-space: nowrap; opacity: 0; visibility: hidden; transition: opacity 0.2s; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
         .vocab-tip:hover::after { opacity: 1; visibility: visible; }
-
-        /* 🤖 浮動控制按鈕群樣式 */
         .control-btn { position: fixed; right: 20px; padding: 10px; background: #7d6ba7; color: #fff; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-size: 20px; z-index: 100; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
         .control-btn:hover { transform: scale(1.05); }
-        #audio-btn { bottom: 85px; display: none; } /* 僅在閱讀模式顯示 */
-        #theme-btn { bottom: 20px; } /* 全時顯示 */
+        #audio-btn { bottom: 85px; display: none; }
+        #theme-btn { bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- 頂部閱讀進度條 -->
-    <div id="reading-bar" style="position:fixed; top:0; left:0; height:4px; background:#7d6ba7; width:0%; z-index:999; transition:width 0.1s;"></div>
-    
-    <!-- 🔊 浮動語音按鈕 -->
-    <button id="audio-btn" class="control-btn" onclick="speakText()">🔊</button>
+<div id="reading-bar" style="position:fixed; top:0; left:0; height:4px; background:#7d6ba7; width:0%; z-index:999; transition:width 0.1s;"></div>
 
-    <!-- 🌙 浮動深色模式切換鈕 -->
-    <button id="theme-btn" class="control-btn" onclick="toggleTheme()">🌙</button>
+<button id="audio-btn" class="control-btn" onclick="speakText()">&#128266;</button>
+<button id="theme-btn" class="control-btn" onclick="toggleTheme()">&#127769;</button>
 
-    <div class="container">
-        
-        <!-- ==================== 視圖 A：16 篇目列表首頁 ==================== -->
-        <div id="home-view" class="view-mode active-view">
-            <header class="header">
-                <h1>Classic <span>Literature</span></h1>
-                <div class="subtitle">沉浸式文學賞析 🪐 點擊任一篇目即可進入深度閱讀</div>
-            </header>
+<div class="container">
 
-            <div class="filter-nav">
-<button class="filter-btn active-filter" onclick="filterCategory('all', this)">ALL 全部</button>
-<button class="filter-btn" onclick="filterCategory('essay', this)">ESSAYS 散文隨筆</button>
-<button class="filter-btn" onclick="filterCategory('poetry', this)">POETRY 經典詩歌</button>
-<button class="filter-btn" onclick="filterCategory('story', this)">STORIES 故事小說</button>
-            </div>
-
-            <nav class="essay-list" id="main-menu"></nav>
+    <div id="home-view" class="view-mode active-view">
+        <header class="header">
+            <h1>Classic <span>Literature</span></h1>
+            <div class="subtitle">&#x1FA90; Click any title to start reading</div>
+        </header>
+        <div class="filter-nav">
+            <button class="filter-btn active-filter" onclick="filterCategory('all', this)">ALL</button>
+            <button class="filter-btn" onclick="filterCategory('essay', this)">ESSAYS</button>
+            <button class="filter-btn" onclick="filterCategory('poetry', this)">POETRY</button>
+            <button class="filter-btn" onclick="filterCategory('story', this)">STORIES</button>
         </div>
-
-        <!-- ==================== 視圖 B：動態沉浸閱讀器 ==================== -->
-        <div id="reader-view" class="view-mode">
-            <span class="back-home" onclick="goBackHome()">← Back to Collection</span>
-            <header class="reader-title-container">
-                <h1 class="reader-title" id="art-title">Title</h1>
-                <div class="reader-title-zh" id="art-title-zh">繁體中文標題</div>
-                <div class="reader-author" id="art-author">Author</div>
-            </header>
-            <main id="article-content"></main>
-        </div>
-
+        <nav class="essay-list" id="main-menu"></nav>
     </div>
 
-    <!-- ==================== 5. 核心邏輯 JavaScript ==================== -->
-    <script>
-    const articles = [
-        { id: "01", title: "Of Studies", titleZh: "談讀書", author: "Francis Bacon", category: "essay", file: "essays/01_of_studies.txt" },
-        { id: "02", title: "Of Beauty", titleZh: "談美", author: "Francis Bacon", category: "essay", file: "essays/02_of_beauty.txt" },
-        { id: "03", title: "The Gettysburg Address", titleZh: "蓋茲堡宣言", author: "Abraham Lincoln", category: "essay", file: "essays/03_gettysburg.txt" },
-        { id: "14", title: "Dream-Children: A Reverie", titleZh: "夢中的孩子：幻之隨筆", author: "Charles Lamb", category: "essay", file: "essays/14_dream_children.txt" },
-        { id: "15", title: "The Lowest Animal", titleZh: "最低等的動物", author: "Mark Twain", category: "essay", file: "essays/15_lowest_animal.txt" },
-        { id: "04", title: "The Road Not Taken", titleZh: "未走之路", author: "Robert Frost", category: "poetry", file: "essays/04_the_road.txt" },
-        { id: "05", title: "Stopping by Woods on a Snowy Evening", titleZh: "雪晚林邊歇馬", author: "Robert Frost", category: "poetry", file: "essays/05_stopping_woods.txt" },
-        { id: "06", title: "Sonnet 18", titleZh: "十四行詩第 18 首", author: "William Shakespeare", category: "poetry", file: "essays/06_sonnet18.txt" },
-        { id: "07", title: "Invictus", titleZh: "不敗 / 我命由我", author: "William Ernest Henley", category: "poetry", file: "essays/07_invictus.txt" },
-        { id: "08", title: "The Happy Prince", titleZh: "快樂王子", author: "Oscar Wilde", category: "story", file: "essays/08_happy_prince.txt" },
-        { id: "09", title: "The Fox and the Grapes", titleZh: "狐狸與葡萄", author: "Aesop", category: "story", file: "essays/09_fox_grapes.txt" },
-        { id: "10", title: "The North Wind and the Sun", titleZh: "北風與太陽", author: "Aesop", category: "story", file: "essays/10_north_wind.txt" },
-        { id: "11", title: "The Ambitious Guest", titleZh: "有野心的青年", author: "Nathaniel Hawthorne", category: "story", file: "essays/11_ambitious_guest.txt" },
-        { id: "12", title: "The Gift of the Magi", titleZh: "麥琪的禮物", author: "O. Henry", category: "story", file: "essays/12_gift_magi.txt" },
-        { id: "13", title: "The Last Leaf", titleZh: "最後一片藤葉", author: "O. Henry", category: "story", file: "essays/13_last_leaf.txt" },
-        { id: "16", title: "The Sphinx Without a Secret", titleZh: "沒有秘密的斯芬克斯", author: "Oscar Wilde", category: "story", file: "essays/16_sphinx.txt" }
-    ];
+    <div id="reader-view" class="view-mode">
+        <span class="back-home" onclick="goBackHome()">&#8592; Back to Collection</span>
+        <header class="reader-title-container">
+            <h1 class="reader-title" id="art-title"></h1>
+            <div class="reader-title-zh" id="art-title-zh"></div>
+            <div class="reader-author" id="art-author"></div>
+        </header>
+        <main id="article-content"></main>
+    </div>
 
-    let currentFileKey = "";
-    let isSpeaking = false;
-    let lastSelectedText = "";
+</div>
 
-    function renderMenu(items) {
-        const menu = document.getElementById("main-menu");
-        menu.innerHTML = "";
-        items.forEach(article => {
-            const el = document.createElement("div");
-            el.className = "essay-item";
-            el.innerHTML = `
-                <div class="item-number">${article.id}</div>
-                <div class="item-content">
-                    <div class="item-title-row">
-                        <span class="item-title-en">${article.title}</span>
-                        <span class="item-title-zh">${article.titleZh}</span>
-                    </div>
-                    <div class="item-author">${article.author}</div>
-                </div>
-            `;
-            el.onclick = () => openArticle(article.id);
-            menu.appendChild(el);
+<script>
+var articles = [
+    { id: "01", title: "Of Studies", titleZh: "談讀書", author: "Francis Bacon", category: "essay", file: "essays/01_of_studies.txt" },
+    { id: "02", title: "Of Beauty", titleZh: "談美", author: "Francis Bacon", category: "essay", file: "essays/02_of_beauty.txt" },
+    { id: "03", title: "The Gettysburg Address", titleZh: "蓋茲堡宣言", author: "Abraham Lincoln", category: "essay", file: "essays/03_gettysburg.txt" },
+    { id: "14", title: "Dream-Children: A Reverie", titleZh: "夢中的孩子", author: "Charles Lamb", category: "essay", file: "essays/14_dream_children.txt" },
+    { id: "15", title: "The Lowest Animal", titleZh: "最低等的動物", author: "Mark Twain", category: "essay", file: "essays/15_lowest_animal.txt" },
+    { id: "04", title: "The Road Not Taken", titleZh: "未走之路", author: "Robert Frost", category: "poetry", file: "essays/04_the_road.txt" },
+    { id: "05", title: "Stopping by Woods on a Snowy Evening", titleZh: "雪晚林邊歇馬", author: "Robert Frost", category: "poetry", file: "essays/05_stopping_woods.txt" },
+    { id: "06", title: "Sonnet 18", titleZh: "十四行詩第18首", author: "William Shakespeare", category: "poetry", file: "essays/06_sonnet18.txt" },
+    { id: "07", title: "Invictus", titleZh: "不敗", author: "William Ernest Henley", category: "poetry", file: "essays/07_invictus.txt" },
+    { id: "08", title: "The Happy Prince", titleZh: "快樂王子", author: "Oscar Wilde", category: "story", file: "essays/08_happy_prince.txt" },
+    { id: "09", title: "The Fox and the Grapes", titleZh: "狐狸與葡萄", author: "Aesop", category: "story", file: "essays/09_fox_grapes.txt" },
+    { id: "10", title: "The North Wind and the Sun", titleZh: "北風與太陽", author: "Aesop", category: "story", file: "essays/10_north_wind.txt" },
+    { id: "11", title: "The Ambitious Guest", titleZh: "有野心的青年", author: "Nathaniel Hawthorne", category: "story", file: "essays/11_ambitious_guest.txt" },
+    { id: "12", title: "The Gift of the Magi", titleZh: "麥琪的禮物", author: "O. Henry", category: "story", file: "essays/12_gift_magi.txt" },
+    { id: "13", title: "The Last Leaf", titleZh: "最後一片藤葉", author: "O. Henry", category: "story", file: "essays/13_last_leaf.txt" },
+    { id: "16", title: "The Sphinx Without a Secret", titleZh: "沒有秘密的斯芬克斯", author: "Oscar Wilde", category: "story", file: "essays/16_sphinx.txt" }
+];
+
+var isSpeaking = false;
+
+function renderMenu(items) {
+    var menu = document.getElementById("main-menu");
+    menu.innerHTML = "";
+    for (var i = 0; i < items.length; i++) {
+        var article = items[i];
+        var el = document.createElement("div");
+        el.className = "essay-item";
+        el.innerHTML = "<div class=\"item-number\">" + article.id + "</div><div class=\"item-content\"><div class=\"item-title-row\"><span class=\"item-title-en\">" + article.title + "</span><span class=\"item-title-zh\">" + article.titleZh + "</span></div><div class=\"item-author\">" + article.author + "</div></div>";
+        (function(id) {
+            el.onclick = function() { openArticle(id); };
+        })(article.id);
+        menu.appendChild(el);
+    }
+}
+
+function filterCategory(cat, btn) {
+    var buttons = document.querySelectorAll(".filter-btn");
+    for (var i = 0; i < buttons.length; i++) {
+        buttons[i].classList.remove("active-filter");
+    }
+    btn.classList.add("active-filter");
+    var filtered = [];
+    for (var j = 0; j < articles.length; j++) {
+        if (cat === "all" || articles[j].category === cat) {
+            filtered.push(articles[j]);
+        }
+    }
+    renderMenu(filtered);
+}
+
+function openArticle(id) {
+    var article = null;
+    for (var i = 0; i < articles.length; i++) {
+        if (articles[i].id === id) { article = articles[i]; break; }
+    }
+    if (!article) return;
+
+    document.getElementById("home-view").classList.remove("active-view");
+    document.getElementById("reader-view").classList.add("active-view");
+    document.getElementById("audio-btn").style.display = "flex";
+    document.getElementById("art-title").textContent = article.title;
+    document.getElementById("art-title-zh").textContent = article.titleZh;
+    document.getElementById("art-author").textContent = article.author;
+
+    var content = document.getElementById("article-content");
+    content.innerHTML = "<p>Loading...</p>";
+
+    fetch(article.file)
+        .then(function(res) {
+            if (!res.ok) throw new Error("File not found: " + article.file);
+            return res.text();
+        })
+        .then(function(text) {
+            var paragraphs = text.split(/\n\s*\n/);
+            var html = "";
+            for (var i = 0; i < paragraphs.length; i++) {
+                var p = paragraphs[i].trim();
+                if (p) html += "<p>" + p.replace(/\n/g, "<br>") + "</p>";
+            }
+            content.innerHTML = html;
+        })
+        .catch(function(err) {
+            content.innerHTML = "<p style=\"color:#c0392b;\">Error: " + err.message + "</p>";
         });
-    }
 
-    function filterCategory(cat, btn) {
-        document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active-filter"));
-        btn.classList.add("active-filter");
-        const filtered = cat === "all" ? articles : articles.filter(a => a.category === cat);
-        renderMenu(filtered);
-    }  
+    window.scrollTo(0, 0);
+}
 
-    function openArticle(id) {
-        const article = articles.find(a => a.id === id);
-        if (!article) return;
+function goBackHome() {
+    document.getElementById("reader-view").classList.remove("active-view");
+    document.getElementById("home-view").classList.add("active-view");
+    document.getElementById("audio-btn").style.display = "none";
+    window.speechSynthesis.cancel();
+    isSpeaking = false;
+    document.getElementById("audio-btn").textContent = "\uD83D\uDD0A";
+    window.scrollTo(0, 0);
+}
 
-        currentFileKey = id;
-        document.getElementById("home-view").classList.remove("active-view");
-        document.getElementById("reader-view").classList.add("active-view");
-        document.getElementById("audio-btn").style.display = "flex";
-        document.getElementById("art-title").textContent = article.title;
-        document.getElementById("art-title-zh").textContent = article.titleZh;
-        document.getElementById("art-author").textContent = article.author;
-
-        const content = document.getElementById("article-content");
-        content.innerHTML = "<p style='color:var(--sub-text)'>載入中…</p>";
-
-        fetch(article.file)
-            .then(res => {
-                if (!res.ok) throw new Error("找不到檔案：" + article.file);
-                return res.text();
-            })
-            .then(text => {
-                content.innerHTML = text
-                    .split(/\n\s*\n/)
-                    .map(p => `<p>${p.trim().replace(/\n/g, "<br>")}</p>`)
-                    .filter(p => p !== "<p></p>")
-                    .join("");
-            })
-            .catch(err => {
-                content.innerHTML = `<p style="color:#c0392b;">⚠️ ${err.message}</p>`;
-            });
-
-        window.scrollTo(0, 0);
-    }
-
-    function goBackHome() {
-        document.getElementById("reader-view").classList.remove("active-view");
-        document.getElementById("home-view").classList.add("active-view");
-        document.getElementById("audio-btn").style.display = "none";
+function speakText() {
+    var btn = document.getElementById("audio-btn");
+    if (isSpeaking) {
         window.speechSynthesis.cancel();
         isSpeaking = false;
-        document.getElementById("audio-btn").textContent = "🔊";
-        window.scrollTo(0, 0);
+        btn.textContent = "\uD83D\uDD0A";
+        return;
     }
+    var text = document.getElementById("article-content").innerText;
+    if (!text) return;
+    var utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US";
+    utterance.rate = 0.9;
+    utterance.onend = function() { isSpeaking = false; btn.textContent = "\uD83D\uDD0A"; };
+    window.speechSynthesis.speak(utterance);
+    isSpeaking = true;
+    btn.textContent = "\u23F9";
+}
 
-    function speakText() {
-        const btn = document.getElementById("audio-btn");
-        if (isSpeaking) {
-            window.speechSynthesis.cancel();
-            isSpeaking = false;
-            btn.textContent = "🔊";
-            return;
-        }
-        const text = document.getElementById("article-content").innerText;
-        if (!text) return;
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = "en-US";
-        utterance.rate = 0.9;
-        utterance.onend = () => { isSpeaking = false; btn.textContent = "🔊"; };
-        window.speechSynthesis.speak(utterance);
-        isSpeaking = true;
-        btn.textContent = "⏹";
-    }
+function toggleTheme() {
+    var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    document.documentElement.setAttribute("data-theme", isDark ? "" : "dark");
+    document.getElementById("theme-btn").textContent = isDark ? "\uD83C\uDF19" : "\u2600\uFE0F";
+}
 
-    function toggleTheme() {
-        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-        document.documentElement.setAttribute("data-theme", isDark ? "" : "dark");
-        document.getElementById("theme-btn").textContent = isDark ? "🌙" : "☀️";
-    }
+window.addEventListener("scroll", function() {
+    var doc = document.documentElement;
+    var scrolled = doc.scrollTop / (doc.scrollHeight - doc.clientHeight) * 100;
+    document.getElementById("reading-bar").style.width = scrolled + "%";
+});
 
-    window.addEventListener("scroll", () => {
-        const doc = document.documentElement;
-        const scrolled = doc.scrollTop / (doc.scrollHeight - doc.clientHeight) * 100;
-        document.getElementById("reading-bar").style.width = scrolled + "%";
-    });
-
-    renderMenu(articles);
+renderMenu(articles);
 </script>
 </body>
 </html>
