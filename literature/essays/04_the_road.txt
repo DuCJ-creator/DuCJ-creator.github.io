@@ -1,0 +1,24 @@
+<p>Two roads <span class="vocab-tip" data-tip="diverged：分叉、分道揚鑣">diverged</span> in a yellow wood,<br>
+And sorry I could not travel both<br>
+And be one traveler, long I stood<br>
+And look down one as far as I could<br>
+To where it bent in the <span class="vocab-tip" data-tip="undergrowth：灌木叢、林下葉層">undergrowth</span>;</p>
+<p>Then took the other, as just as fair,<br>
+And having perhaps the better claim,<br>
+Because it was grassy and wanted wear;<br>
+Though as for that the passing there<br>
+Had worn them really about the same,</p>
+<blockquote>
+    "Two roads diverged in a wood, and I—I took the one less traveled by, and that has made all the difference."<br>
+    <span style="font-size:14px; font-style:normal; color:#8c8a88;">（黃樹林裡分叉出兩條路，而我——選擇了人跡罕至的那一條，這便決定了我一生的道路。）</span>
+</blockquote>
+<p>And both that morning equally lay<br>
+In leaves no step had trodden black.<br>
+Oh, I kept the first for another day!<br>
+Yet knowing how way leads on to way,<br>
+I doubted if I should ever come back.</p>
+<p>I shall be telling this with a sigh<br>
+Somewhere ages and ages hence:<br>
+Two roads diverged in a wood, and I—<br>
+I took the one less traveled by,<br>
+And that has made all the <span class="vocab-tip" data-tip="difference：巨大的改變、差別">difference</span>.</p>
