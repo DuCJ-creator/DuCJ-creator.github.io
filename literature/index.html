@@ -94,10 +94,10 @@
             </header>
 
             <div class="filter-nav">
-                <button class="filter-btn active-filter" onclick="filterCategory('all')">ALL 全部</button>
-                <button class="filter-btn" onclick="filterCategory('essay')">ESSAYS 散文隨筆</button>
-                <button class="filter-btn" onclick="filterCategory('poetry')">POETRY 經典詩歌</button>
-                <button class="filter-btn" onclick="filterCategory('story')">STORIES 故事小說</button>
+<button class="filter-btn active-filter" onclick="filterCategory('all', this)">ALL 全部</button>
+<button class="filter-btn" onclick="filterCategory('essay', this)">ESSAYS 散文隨筆</button>
+<button class="filter-btn" onclick="filterCategory('poetry', this)">POETRY 經典詩歌</button>
+<button class="filter-btn" onclick="filterCategory('story', this)">STORIES 故事小說</button>
             </div>
 
             <nav class="essay-list" id="main-menu"></nav>
@@ -169,14 +169,10 @@
     }
 
     // ==================== 分類篩選 ====================
-    function filterCategory(cat) {
-        // 更新按鈕樣式
-        document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active-filter"));
-        event.target.classList.add("active-filter");
-
-        const filtered = cat === "all" ? articles : articles.filter(a => a.category === cat);
-        renderMenu(filtered);
-    }
+function filterCategory(cat, btn) {
+    // 更新按鈕樣式
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active-filter"));
+    btn.classList.add("active-filter");
 
     // ==================== 開啟文章（讀取 .txt 檔） ====================
     function openArticle(id) {
