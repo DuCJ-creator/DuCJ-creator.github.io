@@ -116,6 +116,7 @@ var articles = [
 ];
 
 var isSpeaking = false;
+var selectedTextForSpeech = "";
 
 function renderMenu(items) {
     var menu = document.getElementById("main-menu");
@@ -191,7 +192,8 @@ function goBackHome() {
     document.getElementById("audio-btn").style.display = "none";
     window.speechSynthesis.cancel();
     isSpeaking = false;
-    document.getElementById("audio-btn").textContent = "&#128266;";
+    selectedTextForSpeech = "";
+    document.getElementById("audio-btn").innerHTML = "&#128266;";
     window.scrollTo(0, 0);
 }
 
@@ -203,8 +205,7 @@ function speakText() {
         btn.innerHTML = "&#128266;";
         return;
     }
-    var selected = window.getSelection().toString().trim();
-    var text = selected ? selected : document.getElementById("article-content").innerText;
+    var text = selectedTextForSpeech ? selectedTextForSpeech : document.getElementById("article-content").innerText;
     if (!text) return;
     var utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
@@ -223,6 +224,7 @@ function toggleTheme() {
 
 document.addEventListener("mouseup", function() {
     var selection = window.getSelection();
+    selectedTextForSpeech = selection ? selection.toString().trim() : "";
     if (!selection || selection.toString().trim() === "") return;
     var range = selection.getRangeAt(0);
     var content = document.getElementById("article-content");
