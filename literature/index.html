@@ -221,7 +221,7 @@ function toggleTheme() {
     document.getElementById("theme-btn").textContent = isDark ? "\uD83C\uDF19" : "\u2600\uFE0F";
 }
 
-document.getElementById("article-content").addEventListener("mouseup", function() {
+document.addEventListener("mouseup", function() {
     var selection = window.getSelection();
     if (!selection || selection.toString().trim() === "") return;
     var range = selection.getRangeAt(0);
