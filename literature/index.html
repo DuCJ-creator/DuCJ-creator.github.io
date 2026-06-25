@@ -119,31 +119,30 @@
     <!-- ==================== 5. 核心邏輯 JavaScript ==================== -->
     <script>
     // 🗂️ 16 篇完整資料庫清單（已校對編號 01 - 16）
+       // 🗂️ 16 篇完整資料庫清單（已校對 id:15、絕對路徑與檔名）
     const articles = [
         // 散文隨筆 (essay)
-        { id: "01", title: "Of Studies", titleZh: "談讀書", author: "Francis Bacon", category: "essay", file: "essays/01_of_studies.txt" },
-        { id: "02", title: "Of Beauty", titleZh: "談美", author: "Francis Bacon", category: "essay", file: "essays/02_of_beauty.txt" },
-        { id: "03", title: "The Gettysburg Address", titleZh: "蓋茲堡宣言", author: "Abraham Lincoln", category: "essay", file: "essays/03_gettysburg.txt" },
-        { id: "14", title: "Dream-Children: A Reverie", titleZh: "夢中的孩子：幻之隨筆", author: "Charles Lamb", category: "essay", file: "essays/14_dream_children.txt" },
-        { id: "15", title: "The Lowest Animal", titleZh: "最低等的動物", author: "Mark Twain", category: "essay", file: "essays/15_lowest_animal.txt" },
+        { id: "01", title: "Of Studies", titleZh: "談讀書", author: "Francis Bacon", category: "essay", file: "/literature/essays/01_of_studies.txt" },
+        { id: "02", title: "Of Beauty", titleZh: "談美", author: "Francis Bacon", category: "essay", file: "/literature/essays/02_of_beauty.txt" },
+        { id: "03", title: "The Gettysburg Address", titleZh: "蓋茲堡宣言", author: "Abraham Lincoln", category: "essay", file: "/literature/essays/03_gettysburg.txt" },
+        { id: "14", title: "Dream-Children: A Reverie", titleZh: "夢中的孩子：幻之隨筆", author: "Charles Lamb", category: "essay", file: "/literature/essays/14_dream_children.txt" },
+        { id: "15", title: "The Lowest Animal", titleZh: "最低等的動物", author: "Mark Twain", category: "essay", file: "/literature/essays/15_lowest_animal.txt" },
         
         // 經典詩歌 (poetry)
-        { id: "04", title: "The Road Not Taken", titleZh: "未走之路", author: "Robert Frost", category: "poetry", file: "essays/04_the_road.txt" },
-        { id: "05", title: "Stopping by Woods on a Snowy Evening", titleZh: "雪晚林邊歇馬", author: "Robert Frost", category: "poetry", file: "essays/05_stopping_woods.txt" },
-        { id: "06", title: "Sonnet 18", titleZh: "十四行詩第 18 首", author: "William Shakespeare", category: "poetry", file: "essays/06_sonnet18.txt" },
-        { id: "07", title: "Invictus", titleZh: "不敗 / 我命由我", author: "William Ernest Henley", category: "poetry", file: "essays/07_invictus.txt" },
+        { id: "04", title: "The Road Not Taken", titleZh: "未走之路", author: "Robert Frost", category: "poetry", file: "/literature/essays/04_the_road.txt" },
+        { id: "05", title: "Stopping by Woods on a Snowy Evening", titleZh: "雪晚林邊歇馬", author: "Robert Frost", category: "poetry", file: "/literature/essays/05_stopping_woods.txt" },
+        { id: "06", title: "Sonnet 18", titleZh: "十四行詩第 18 首", author: "William Shakespeare", category: "poetry", file: "/literature/essays/06_sonnet18.txt" },
+        { id: "07", title: "Invictus", titleZh: "不敗 / 我命由我", author: "William Ernest Henley", category: "poetry", file: "/literature/essays/07_invictus.txt" },
         
         // 故事小說 (story)
-        { id: "08", title: "The Happy Prince", titleZh: "快樂王子", author: "Oscar Wilde", category: "story", file: "essays/08_happy_prince.txt" },
-        { id: "09", title: "The Fox and the Grapes", titleZh: "狐狸與葡萄", author: "Aesop", category: "story", file: "essays/09_fox_grapes.txt" },
-        { id: "10", title: "The North Wind and the Sun", titleZh: "北風與太陽", author: "Aesop", category: "story", file: "essays/10_north_wind.txt" },
-        { id: "11", title: "The Ambitious Guest", titleZh: "有野心的青年", author: "Nathaniel Hawthorne", category: "story", file: "essays/11_ambitious_guest.txt" },
-        { id: "12", title: "The Gift of the Magi", titleZh: "麥琪的禮物", author: "O. Henry", category: "story", file: "essays/12_gift_magi.txt" },
-        { id: "13", title: "The Last Leaf", titleZh: "最後一片藤葉", author: "O. Henry", category: "story", file: "essays/13_last_leaf.txt" },
-        { id: "16", title: "The Sphinx Without a Secret", titleZh: "沒有秘密的斯芬克斯", author: "Oscar Wilde", category: "story", file: "essays/16_sphinx.txt" }
+        { id: "08", title: "The Happy Prince", titleZh: "快樂王子", author: "Oscar Wilde", category: "story", file: "/literature/essays/08_happy_prince.txt" },
+        { id: "09", title: "The Fox and the Grapes", titleZh: "狐狸與葡萄", author: "Aesop", category: "story", file: "/literature/essays/09_fox_grapes.txt" },
+        { id: "10", title: "The North Wind and the Sun", titleZh: "北風與太陽", author: "Aesop", category: "story", file: "/literature/essays/10_north_wind.txt" },
+        { id: "11", title: "The Ambitious Guest", titleZh: "有野心的青年", author: "Nathaniel Hawthorne", category: "story", file: "/literature/essays/11_ambitious_guest.txt" },
+        { id: "12", title: "The Gift of the Magi", titleZh: "麥琪的禮物", author: "O. Henry", category: "story", file: "/literature/essays/12_gift_magi.txt" },
+        { id: "13", title: "The Last Leaf", titleZh: "最後一片藤葉", author: "O. Henry", category: "story", file: "/literature/essays/13_last_leaf.txt" },
+        { id: "16", title: "The Sphinx Without a Secret", titleZh: "沒有秘密的斯芬克斯", author: "Oscar Wilde", category: "story", file: "/literature/essays/16_sphinx.txt" }
     ];
-
     let currentFileKey = ""; 
     let isSpeaking = false; 
     let lastSelectedText = ""; 
-
