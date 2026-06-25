@@ -1,0 +1,20 @@
+<p>Whose woods these are I think I know.<br>
+His house is in the village though;<br>
+He will not see me stopping here<br>
+To watch his woods fill up with snow.</p>
+<p>My little horse must think it <span class="vocab-tip" data-tip="queer：古怪的、奇特的">queer</span><br>
+To stop without a farmhouse near<br>
+Between the woods and frozen lake<br>
+The darkest evening of the year.</p>
+<blockquote>
+    "The woods are lovely, dark and deep, but I have promises to keep."<br>
+    <span style="font-size:14px; font-style:normal; color:#8c8a88;">（森林幽美、幽暗而深邃，但我還有承諾必須去履行。）</span>
+</blockquote>
+<p>He gives his harness bells a shake<br>
+To ask if there is some mistake.<br>
+The only other sound’s the sweep<br>
+Of easy wind and downy flake.</p>
+<p>The woods are lovely, dark and deep,<br>
+But I have promises to keep,<br>
+And miles to go before I sleep,<br>
+And miles to go before I sleep.</p>
