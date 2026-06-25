@@ -1,0 +1,7 @@
+<p>The North Wind and the Sun were <span class="vocab-tip" data-tip="disputing：爭論、爭執">disputing</span> which was the stronger, when a traveler came along wrapped in a warm cloak. They agreed that the one who first succeeded in making the traveler take his cloak off should be considered stronger than the other.</p>
+<p>Then the North Wind blew with all his might, but the more he blew the more closely did the traveler fold his cloak around him; and at last the North Wind gave up the attempt.</p>
+<blockquote>
+    "Persuasion is often more effective than force."<br>
+    <span style="font-size:14px; font-style:normal; color:#8c8a88;">（說服往往比強迫更有效。溫柔的力量勝過強權。）</span>
+</blockquote>
+<p>Then the Sun shined out warmly, and immediately the traveler took off his cloak. And so the North Wind was obliged to confess that the Sun was the stronger of the two. Persuasion is often more effective than force.</p>
