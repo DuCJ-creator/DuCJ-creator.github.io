@@ -97,22 +97,22 @@
 
 <script>
 var articles = [
-{ id: "01", title: "Of Studies", titleZh: "談讀書", ...
-{ id: "02", title: "Of Beauty", titleZh: "談美", ...
-{ id: "03", title: "The Gettysburg Address", titleZh: "蓋茲堡宣言", ...
-{ id: "14", title: "Dream-Children: A Reverie", titleZh: "夢中的孩子", ...
-{ id: "15", title: "The Lowest Animal", titleZh: "最低等的動物", ...
-{ id: "04", title: "The Road Not Taken", titleZh: "未走之路", ...
-{ id: "05", title: "Stopping by Woods on a Snowy Evening", titleZh: "雪晚林邊歇馬", ...
-{ id: "06", title: "Sonnet 18", titleZh: "十四行詩第18首", ...
-{ id: "07", title: "Invictus", titleZh: "不敗", ...
-{ id: "08", title: "The Happy Prince", titleZh: "快樂王子", ...
-{ id: "09", title: "The Fox and the Grapes", titleZh: "狐狸與葡萄", ...
-{ id: "10", title: "The North Wind and the Sun", titleZh: "北風與太陽", ...
-{ id: "11", title: "The Ambitious Guest", titleZh: "有野心的青年", ...
-{ id: "12", title: "The Gift of the Magi", titleZh: "麥琪的禮物", ...
-{ id: "13", title: "The Last Leaf", titleZh: "最後一片藤葉", ...
-{ id: "16", title: "The Sphinx Without a Secret", titleZh: "沒有秘密的斯芬克斯", ...
+    { id: "01", title: "Of Studies", titleZh: "談讀書", author: "Francis Bacon", category: "essay", file: "essays/01_of_studies.txt" },
+    { id: "02", title: "Of Beauty", titleZh: "談美", author: "Francis Bacon", category: "essay", file: "essays/02_of_beauty.txt" },
+    { id: "03", title: "The Gettysburg Address", titleZh: "蓋茲堡宣言", author: "Abraham Lincoln", category: "essay", file: "essays/03_gettysburg.txt" },
+    { id: "14", title: "Dream-Children: A Reverie", titleZh: "夢中的孩子", author: "Charles Lamb", category: "essay", file: "essays/14_dream_children.txt" },
+    { id: "15", title: "The Lowest Animal", titleZh: "最低等的動物", author: "Mark Twain", category: "essay", file: "essays/15_lowest_animal.txt" },
+    { id: "04", title: "The Road Not Taken", titleZh: "未走之路", author: "Robert Frost", category: "poetry", file: "essays/04_the_road.txt" },
+    { id: "05", title: "Stopping by Woods on a Snowy Evening", titleZh: "雪晚林邊歇馬", author: "Robert Frost", category: "poetry", file: "essays/05_stopping_woods.txt" },
+    { id: "06", title: "Sonnet 18", titleZh: "十四行詩第18首", author: "William Shakespeare", category: "poetry", file: "essays/06_sonnet18.txt" },
+    { id: "07", title: "Invictus", titleZh: "不敗", author: "William Ernest Henley", category: "poetry", file: "essays/07_invictus.txt" },
+    { id: "08", title: "The Happy Prince", titleZh: "快樂王子", author: "Oscar Wilde", category: "story", file: "essays/08_happy_prince.txt" },
+    { id: "09", title: "The Fox and the Grapes", titleZh: "狐狸與葡萄", author: "Aesop", category: "story", file: "essays/09_fox_grapes.txt" },
+    { id: "10", title: "The North Wind and the Sun", titleZh: "北風與太陽", author: "Aesop", category: "story", file: "essays/10_north_wind.txt" },
+    { id: "11", title: "The Ambitious Guest", titleZh: "有野心的青年", author: "Nathaniel Hawthorne", category: "story", file: "essays/11_ambitious_guest.txt" },
+    { id: "12", title: "The Gift of the Magi", titleZh: "麥琪的禮物", author: "O. Henry", category: "story", file: "essays/12_gift_magi.txt" },
+    { id: "13", title: "The Last Leaf", titleZh: "最後一片藤葉", author: "O. Henry", category: "story", file: "essays/13_last_leaf.txt" },
+    { id: "16", title: "The Sphinx Without a Secret", titleZh: "沒有秘密的斯芬克斯", author: "Oscar Wilde", category: "story", file: "essays/16_sphinx.txt" }
 ];
 
 var isSpeaking = false;
@@ -191,7 +191,7 @@ function goBackHome() {
     document.getElementById("audio-btn").style.display = "none";
     window.speechSynthesis.cancel();
     isSpeaking = false;
-    document.getElementById("audio-btn").textContent = "\uD83D\uDD0A";
+    document.getElementById("audio-btn").textContent = "&#128266;";
     window.scrollTo(0, 0);
 }
 
@@ -200,7 +200,7 @@ function speakText() {
     if (isSpeaking) {
         window.speechSynthesis.cancel();
         isSpeaking = false;
-        btn.textContent = "\uD83D\uDD0A";
+        btn.innerHTML = "&#128266;";
         return;
     }
     var selected = window.getSelection().toString().trim();
@@ -209,16 +209,16 @@ function speakText() {
     var utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
     utterance.rate = 0.9;
-    utterance.onend = function() { isSpeaking = false; btn.textContent = "\uD83D\uDD0A"; };
+    utterance.onend = function() { isSpeaking = false; btn.innerHTML = "&#128266;"; };
     window.speechSynthesis.speak(utterance);
     isSpeaking = true;
-    btn.textContent = "\u23F9";
+    btn.innerHTML = "&#9209;";
 }
 
 function toggleTheme() {
     var isDark = document.documentElement.getAttribute("data-theme") === "dark";
     document.documentElement.setAttribute("data-theme", isDark ? "" : "dark");
-    document.getElementById("theme-btn").textContent = isDark ? "\uD83C\uDF19" : "\u2600\uFE0F";
+    document.getElementById("theme-btn").innerHTML = isDark ? "&#127769;" : "&#9728;";
 }
 
 document.addEventListener("mouseup", function() {
@@ -226,11 +226,11 @@ document.addEventListener("mouseup", function() {
     if (!selection || selection.toString().trim() === "") return;
     var range = selection.getRangeAt(0);
     var content = document.getElementById("article-content");
-    if (!content.contains(range.commonAncestorContainer)) return;
+    if (!content || !content.contains(range.commonAncestorContainer)) return;
     var parentEl = range.commonAncestorContainer.parentElement;
     if (parentEl && parentEl.classList.contains("highlight")) {
-        var text = document.createTextNode(parentEl.textContent);
-        parentEl.replaceWith(text);
+        var textNode = document.createTextNode(parentEl.textContent);
+        parentEl.replaceWith(textNode);
         selection.removeAllRanges();
         return;
     }
