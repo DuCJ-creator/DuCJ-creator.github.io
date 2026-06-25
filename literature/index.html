@@ -167,7 +167,7 @@
         btn.classList.add("active-filter");
         const filtered = cat === "all" ? articles : articles.filter(a => a.category === cat);
         renderMenu(filtered);
-    }   // ← 這個 } 之前少了 renderMenu 那行，且括號沒關閉，是原本的 bug
+    }  
 
     function openArticle(id) {
         const article = articles.find(a => a.id === id);
