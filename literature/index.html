@@ -54,17 +54,26 @@
         .vocab-tip:hover::after { opacity: 1; visibility: visible; }
         .control-btn { position: fixed; right: 20px; padding: 10px; background: #7d6ba7; color: #fff; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-size: 20px; z-index: 100; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
         .control-btn:hover { transform: scale(1.05); }
-        #audio-btn { bottom: 85px; display: none; }
+        #audio-btn { bottom: 150px; display: none; }
+        #highlight-btn { bottom: 85px; display: none; }
         #theme-btn { bottom: 20px; }
         .highlight { background-color: #f0e68c; border-radius: 3px; padding: 0 2px; }
         [data-theme="dark"] .highlight { background-color: #7d6ba7; color: #fff; }
+        .selection-toolbar { display: none; position: fixed; background: #2c2a29; border-radius: 8px; padding: 6px 10px; gap: 8px; z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .selection-toolbar button { background: none; border: none; color: #fff; cursor: pointer; font-size: 18px; padding: 2px 6px; border-radius: 4px; }
+        .selection-toolbar button:hover { background: rgba(255,255,255,0.15); }
     </style>
 </head>
 <body>
 
 <div id="reading-bar" style="position:fixed; top:0; left:0; height:4px; background:#7d6ba7; width:0%; z-index:999; transition:width 0.1s;"></div>
 
-<button id="audio-btn" class="control-btn" onclick="speakText()">&#128266;</button>
+<div id="selection-toolbar" class="selection-toolbar">
+    <button id="toolbar-speak" title="Speak">&#128266;</button>
+    <button id="toolbar-highlight" title="Highlight">&#9999;</button>
+</div>
+
+<button id="audio-btn" class="control-btn" onclick="speakAll()">&#128266;</button>
 <button id="theme-btn" class="control-btn" onclick="toggleTheme()">&#127769;</button>
 
 <div class="container">
@@ -116,7 +125,6 @@ var articles = [
 ];
 
 var isSpeaking = false;
-var selectedTextForSpeech = "";
 
 function renderMenu(items) {
     var menu = document.getElementById("main-menu");
@@ -190,14 +198,14 @@ function goBackHome() {
     document.getElementById("reader-view").classList.remove("active-view");
     document.getElementById("home-view").classList.add("active-view");
     document.getElementById("audio-btn").style.display = "none";
+    hideToolbar();
     window.speechSynthesis.cancel();
     isSpeaking = false;
-    selectedTextForSpeech = "";
     document.getElementById("audio-btn").innerHTML = "&#128266;";
     window.scrollTo(0, 0);
 }
 
-function speakText() {
+function speakText(text) {
     var btn = document.getElementById("audio-btn");
     if (isSpeaking) {
         window.speechSynthesis.cancel();
@@ -205,7 +213,6 @@ function speakText() {
         btn.innerHTML = "&#128266;";
         return;
     }
-    var text = selectedTextForSpeech ? selectedTextForSpeech : document.getElementById("article-content").innerText;
     if (!text) return;
     var utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
@@ -216,44 +223,84 @@ function speakText() {
     btn.innerHTML = "&#9209;";
 }
 
+function speakAll() {
+    var text = document.getElementById("article-content").innerText;
+    speakText(text);
+}
+
 function toggleTheme() {
     var isDark = document.documentElement.getAttribute("data-theme") === "dark";
     document.documentElement.setAttribute("data-theme", isDark ? "" : "dark");
     document.getElementById("theme-btn").innerHTML = isDark ? "&#127769;" : "&#9728;";
 }
 
-document.addEventListener("mouseup", function() {
+function hideToolbar() {
+    document.getElementById("selection-toolbar").style.display = "none";
+}
+
+document.getElementById("toolbar-speak").addEventListener("mousedown", function(e) {
+    e.preventDefault();
     var selection = window.getSelection();
-    var selected = selection ? selection.toString().trim() : "";
+    var text = selection ? selection.toString().trim() : "";
+    hideToolbar();
+    if (text) speakText(text);
+});
 
-    // 先存起來，不管後面 highlight 動作怎麼影響選取
-    if (selected) {
-        selectedTextForSpeech = selected;
-    }
-
-    if (!selected) return;
+document.getElementById("toolbar-highlight").addEventListener("mousedown", function(e) {
+    e.preventDefault();
+    var selection = window.getSelection();
+    if (!selection || selection.toString().trim() === "") { hideToolbar(); return; }
     var range = selection.getRangeAt(0);
     var content = document.getElementById("article-content");
-    if (!content || !content.contains(range.commonAncestorContainer)) return;
+    if (!content || !content.contains(range.commonAncestorContainer)) { hideToolbar(); return; }
     var parentEl = range.commonAncestorContainer.parentElement;
     if (parentEl && parentEl.classList.contains("highlight")) {
         var textNode = document.createTextNode(parentEl.textContent);
         parentEl.replaceWith(textNode);
-        selection.removeAllRanges();
-        return;
+    } else {
+        try {
+            var span = document.createElement("span");
+            span.className = "highlight";
+            range.surroundContents(span);
+        } catch(e) {}
     }
+    selection.removeAllRanges();
+    hideToolbar();
+});
+
+document.addEventListener("mouseup", function(e) {
+    var toolbar = document.getElementById("selection-toolbar");
+    if (toolbar.contains(e.target)) return;
+
+    var selection = window.getSelection();
+    var text = selection ? selection.toString().trim() : "";
+    var content = document.getElementById("article-content");
+
+    if (!text || !content) { hideToolbar(); return; }
+
     try {
-        var span = document.createElement("span");
-        span.className = "highlight";
-        range.surroundContents(span);
-        selection.removeAllRanges();
-    } catch(e) {}
+        var range = selection.getRangeAt(0);
+        if (!content.contains(range.commonAncestorContainer)) { hideToolbar(); return; }
+    } catch(e) { hideToolbar(); return; }
+
+    var rect = selection.getRangeAt(0).getBoundingClientRect();
+    toolbar.style.display = "flex";
+    toolbar.style.top = (rect.top + window.scrollY - 50) + "px";
+    toolbar.style.left = (rect.left + rect.width / 2 - 40) + "px";
+});
+
+document.addEventListener("mousedown", function(e) {
+    var toolbar = document.getElementById("selection-toolbar");
+    if (!toolbar.contains(e.target)) {
+        hideToolbar();
+    }
 });
 
 window.addEventListener("scroll", function() {
     var doc = document.documentElement;
     var scrolled = doc.scrollTop / (doc.scrollHeight - doc.clientHeight) * 100;
     document.getElementById("reading-bar").style.width = scrolled + "%";
+    hideToolbar();
 });
 
 renderMenu(articles);
