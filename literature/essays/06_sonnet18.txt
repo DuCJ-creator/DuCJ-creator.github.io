@@ -1,0 +1,18 @@
+<p>Shall I compare thee to a summer's day?<br>
+Thou art more lovely and more <span class="vocab-tip" data-tip="temperate：溫和的、有節制的">temperate</span>:<br>
+Rough winds do shake the darling buds of May,<br>
+And summer's lease hath all too short a date:</p>
+<p>Sometime too hot the eye of heaven shines,<br>
+And often is his gold complexion dimm'd;<br>
+And every fair from fair sometime declines,<br>
+By chance or nature's changing course untrimm'm;</p>
+<blockquote>
+    "So long as men can breathe or eyes can see, so long lives this and this gives life to thee."<br>
+    <span style="font-size:14px; font-style:normal; color:#8c8a88;"> breathe or eyes can see, so long lives this and this gives life to thee."<br>只要人類還能呼吸、眼睛還能看見，這首詩就會流傳下去，賦予你永恆的生命。）</span>
+</blockquote>
+<p>But thy eternal summer shall not fade<br>
+Nor lose possession of that fair thou owest;<br>
+Nor shall death brag thou wander'st in his shade,<br>
+When in eternal lines to time thou growest:</p>
+<p>So long as men can breathe or eyes can see,<br>
+So long lives this and this gives life to thee.</p>
