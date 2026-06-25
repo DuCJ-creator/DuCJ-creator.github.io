@@ -146,3 +146,123 @@
     let currentFileKey = ""; 
     let isSpeaking = false; 
     let lastSelectedText = ""; 
+        // ==================== 初始化與列表渲染 ====================
+    function renderMenu(items) {
+        const menu = document.getElementById("main-menu");
+        menu.innerHTML = "";
+        items.forEach(article => {
+            const el = document.createElement("div");
+            el.className = "essay-item";
+            el.innerHTML = `
+                <div class="item-number">${article.id}</div>
+                <div class="item-content">
+                    <div class="item-title-row">
+                        <span class="item-title-en">${article.title}</span>
+                        <span class="item-title-zh">${article.titleZh}</span>
+                    </div>
+                    <div class="item-author">${article.author}</div>
+                </div>
+            `;
+            el.onclick = () => openArticle(article.id);
+            menu.appendChild(el);
+        });
+    }
+
+    // ==================== 分類篩選 ====================
+    function filterCategory(cat) {
+        // 更新按鈕樣式
+        document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active-filter"));
+        event.target.classList.add("active-filter");
+
+        const filtered = cat === "all" ? articles : articles.filter(a => a.category === cat);
+        renderMenu(filtered);
+    }
+
+    // ==================== 開啟文章（讀取 .txt 檔） ====================
+    function openArticle(id) {
+        const article = articles.find(a => a.id === id);
+        if (!article) return;
+
+        currentFileKey = id;
+
+        // 切換視圖
+        document.getElementById("home-view").classList.remove("active-view");
+        document.getElementById("reader-view").classList.add("active-view");
+        document.getElementById("audio-btn").style.display = "flex";
+
+        // 填入標題
+        document.getElementById("art-title").textContent = article.title;
+        document.getElementById("art-title-zh").textContent = article.titleZh;
+        document.getElementById("art-author").textContent = article.author;
+
+        // 讀取文章內容
+        const content = document.getElementById("article-content");
+        content.innerHTML = "<p style='color:var(--sub-text)'>載入中…</p>";
+
+        fetch(article.file)
+            .then(res => {
+                if (!res.ok) throw new Error("找不到檔案：" + article.file);
+                return res.text();
+            })
+            .then(text => {
+                // 將空行分段落，換成 <p>
+                content.innerHTML = text
+                    .split(/\n\s*\n/)
+                    .map(p => `<p>${p.trim().replace(/\n/g, "<br>")}</p>`)
+                    .filter(p => p !== "<p></p>")
+                    .join("");
+            })
+            .catch(err => {
+                content.innerHTML = `<p style="color:#c0392b;">⚠️ ${err.message}</p>`;
+            });
+
+        window.scrollTo(0, 0);
+    }
+
+    // ==================== 返回首頁 ====================
+    function goBackHome() {
+        document.getElementById("reader-view").classList.remove("active-view");
+        document.getElementById("home-view").classList.add("active-view");
+        document.getElementById("audio-btn").style.display = "none";
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+        document.getElementById("audio-btn").textContent = "🔊";
+        window.scrollTo(0, 0);
+    }
+
+    // ==================== 語音朗讀 ====================
+    function speakText() {
+        const btn = document.getElementById("audio-btn");
+        if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            btn.textContent = "🔊";
+            return;
+        }
+        const text = document.getElementById("article-content").innerText;
+        if (!text) return;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "en-US";
+        utterance.rate = 0.9;
+        utterance.onend = () => { isSpeaking = false; btn.textContent = "🔊"; };
+        window.speechSynthesis.speak(utterance);
+        isSpeaking = true;
+        btn.textContent = "⏹";
+    }
+
+    // ==================== 深淺色切換 ====================
+    function toggleTheme() {
+        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        document.documentElement.setAttribute("data-theme", isDark ? "" : "dark");
+        document.getElementById("theme-btn").textContent = isDark ? "🌙" : "☀️";
+    }
+
+    // ==================== 閱讀進度條 ====================
+    window.addEventListener("scroll", () => {
+        const doc = document.documentElement;
+        const scrolled = doc.scrollTop / (doc.scrollHeight - doc.clientHeight) * 100;
+        document.getElementById("reading-bar").style.width = scrolled + "%";
+    });
+
+    // ==================== 頁面初始化 ====================
+    renderMenu(articles);
