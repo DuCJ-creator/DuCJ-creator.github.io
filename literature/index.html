@@ -224,8 +224,14 @@ function toggleTheme() {
 
 document.addEventListener("mouseup", function() {
     var selection = window.getSelection();
-    selectedTextForSpeech = selection ? selection.toString().trim() : "";
-    if (!selection || selection.toString().trim() === "") return;
+    var selected = selection ? selection.toString().trim() : "";
+
+    // 先存起來，不管後面 highlight 動作怎麼影響選取
+    if (selected) {
+        selectedTextForSpeech = selected;
+    }
+
+    if (!selected) return;
     var range = selection.getRangeAt(0);
     var content = document.getElementById("article-content");
     if (!content || !content.contains(range.commonAncestorContainer)) return;
