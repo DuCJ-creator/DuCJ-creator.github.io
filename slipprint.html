@@ -98,7 +98,12 @@
     .label-content ol {
       margin: 0 0 1.2mm 4.5mm;
       padding-left: 3mm;
+      list-style-position: outside;
     }
+
+    .label-content ul { list-style-type: disc; }
+    .label-content ol { list-style-type: decimal; }
+    .label-content li { display: list-item; }
 
     .label-content b,
     .label-content strong { font-weight: 700; }
@@ -220,13 +225,46 @@
       <section id="panelRepeat" class="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <h2 class="text-sm font-bold text-slate-800">重複內容編輯</h2>
 
-        <div class="flex flex-wrap gap-1 rounded-lg border border-slate-200 bg-slate-50 p-2" role="toolbar" aria-label="文字格式工具列">
-          <button type="button" class="tool-button h-8 min-w-8 rounded border border-slate-300 bg-white px-2 font-bold" onclick="formatText('bold')" title="粗體">B</button>
-          <button type="button" class="tool-button h-8 min-w-8 rounded border border-slate-300 bg-white px-2 italic" onclick="formatText('italic')" title="斜體">I</button>
-          <button type="button" class="tool-button h-8 min-w-8 rounded border border-slate-300 bg-white px-2 underline" onclick="formatText('underline')" title="底線">U</button>
-          <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onclick="formatText('insertUnorderedList')" title="項目符號">• 清單</button>
-          <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onclick="formatText('insertOrderedList')" title="編號清單">1. 清單</button>
-          <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onclick="formatText('removeFormat')" title="清除格式">清除格式</button>
+        <div class="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-2" role="toolbar" aria-label="文字格式工具列">
+          <div class="flex flex-wrap items-center gap-1">
+            <select id="fontSizeSelect" class="h-8 rounded border border-slate-300 bg-white px-2 text-xs" onchange="applyFontSize(this.value)" title="字體大小">
+              <option value="7">7 pt</option>
+              <option value="8">8 pt</option>
+              <option value="8.5" selected>8.5 pt</option>
+              <option value="9">9 pt</option>
+              <option value="10">10 pt</option>
+              <option value="11">11 pt</option>
+              <option value="12">12 pt</option>
+              <option value="14">14 pt</option>
+              <option value="16">16 pt</option>
+              <option value="18">18 pt</option>
+              <option value="20">20 pt</option>
+              <option value="24">24 pt</option>
+            </select>
+            <button type="button" class="tool-button h-8 min-w-8 rounded border border-slate-300 bg-white px-2 font-bold" onmousedown="event.preventDefault(); formatText('bold')" title="粗體">B</button>
+            <button type="button" class="tool-button h-8 min-w-8 rounded border border-slate-300 bg-white px-2 italic" onmousedown="event.preventDefault(); formatText('italic')" title="斜體">I</button>
+            <button type="button" class="tool-button h-8 min-w-8 rounded border border-slate-300 bg-white px-2 underline" onmousedown="event.preventDefault(); formatText('underline')" title="底線">U</button>
+            <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onmousedown="event.preventDefault(); applyList('ul','disc')" title="實心點清單">● 點</button>
+            <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onmousedown="event.preventDefault(); applyList('ul','circle')" title="空心圈清單">○ 圈</button>
+            <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onmousedown="event.preventDefault(); applyList('ol','decimal')" title="數字清單">1. 數字</button>
+          </div>
+          <div class="flex flex-wrap items-center gap-1">
+            <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onmousedown="event.preventDefault(); formatText('justifyLeft')" title="靠左對齊">☰ 左</button>
+            <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onmousedown="event.preventDefault(); formatText('justifyCenter')" title="置中對齊">☰ 中</button>
+            <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onmousedown="event.preventDefault(); formatText('justifyRight')" title="靠右對齊">☰ 右</button>
+            <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onmousedown="event.preventDefault(); formatText('justifyFull')" title="左右對齊">☰ 齊</button>
+            <label class="ml-1 text-xs text-slate-600" for="lineHeightSelect">行距</label>
+            <select id="lineHeightSelect" class="h-8 rounded border border-slate-300 bg-white px-2 text-xs" onchange="applyLineHeight(this.value)">
+              <option value="1">1.0</option>
+              <option value="1.15">1.15</option>
+              <option value="1.25">1.25</option>
+              <option value="1.4">1.4</option>
+              <option value="1.5" selected>1.5</option>
+              <option value="1.75">1.75</option>
+              <option value="2">2.0</option>
+            </select>
+            <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onmousedown="event.preventDefault(); clearFormatting()" title="清除格式">清除格式</button>
+          </div>
         </div>
 
         <div id="repeatEditor" class="rich-editor" contenteditable="true" spellcheck="false" oninput="updateGrid()">
@@ -285,10 +323,102 @@
       updateGrid();
     }
 
+    let savedRange = null;
+
+    function saveSelection() {
+      const editor = document.getElementById('repeatEditor');
+      const selection = window.getSelection();
+      if (!selection || !selection.rangeCount) return;
+      const range = selection.getRangeAt(0);
+      if (editor.contains(range.commonAncestorContainer)) savedRange = range.cloneRange();
+    }
+
+    function restoreSelection() {
+      if (!savedRange) return;
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(savedRange);
+    }
+
     function formatText(command) {
       const editor = document.getElementById('repeatEditor');
       editor.focus();
+      restoreSelection();
       document.execCommand(command, false, null);
+      saveSelection();
+      updateGrid();
+    }
+
+    function applyFontSize(sizePt) {
+      const editor = document.getElementById('repeatEditor');
+      editor.focus();
+      restoreSelection();
+      document.execCommand('fontSize', false, '7');
+      editor.querySelectorAll('font[size="7"]').forEach(font => {
+        const span = document.createElement('span');
+        span.style.fontSize = `${sizePt}pt`;
+        while (font.firstChild) span.appendChild(font.firstChild);
+        font.replaceWith(span);
+      });
+      saveSelection();
+      updateGrid();
+    }
+
+    function closestList(node, editor) {
+      let el = node && node.nodeType === Node.ELEMENT_NODE ? node : node?.parentElement;
+      while (el && el !== editor) {
+        if (el.tagName === 'UL' || el.tagName === 'OL') return el;
+        el = el.parentElement;
+      }
+      return null;
+    }
+
+    function applyList(kind, styleType) {
+      const editor = document.getElementById('repeatEditor');
+      editor.focus();
+      restoreSelection();
+      document.execCommand(kind === 'ol' ? 'insertOrderedList' : 'insertUnorderedList', false, null);
+      const selection = window.getSelection();
+      const list = selection && selection.rangeCount ? closestList(selection.anchorNode, editor) : null;
+      if (list) list.style.listStyleType = styleType;
+      saveSelection();
+      updateGrid();
+    }
+
+    function selectedBlocks() {
+      const editor = document.getElementById('repeatEditor');
+      restoreSelection();
+      const selection = window.getSelection();
+      if (!selection || !selection.rangeCount) return [];
+      const range = selection.getRangeAt(0);
+      const blocks = [...editor.querySelectorAll('p,div,li')].filter(el => {
+        try { return range.intersectsNode(el); } catch { return false; }
+      });
+      if (blocks.length) return blocks;
+      let el = selection.anchorNode?.nodeType === Node.ELEMENT_NODE ? selection.anchorNode : selection.anchorNode?.parentElement;
+      while (el && el !== editor && !['P','DIV','LI'].includes(el.tagName)) el = el.parentElement;
+      return el && el !== editor ? [el] : [editor];
+    }
+
+    function applyLineHeight(value) {
+      const editor = document.getElementById('repeatEditor');
+      editor.focus();
+      selectedBlocks().forEach(block => block.style.lineHeight = value);
+      saveSelection();
+      updateGrid();
+    }
+
+    function clearFormatting() {
+      const editor = document.getElementById('repeatEditor');
+      editor.focus();
+      restoreSelection();
+      document.execCommand('removeFormat', false, null);
+      selectedBlocks().forEach(block => {
+        block.style.fontSize = '';
+        block.style.textAlign = '';
+        block.style.lineHeight = '';
+      });
+      saveSelection();
       updateGrid();
     }
 
@@ -318,6 +448,10 @@
           if (style.fontWeight === 'bold' || Number(style.fontWeight) >= 600) safeStyles.push('font-weight:700');
           if (style.fontStyle === 'italic') safeStyles.push('font-style:italic');
           if (style.textDecorationLine.includes('underline')) safeStyles.push('text-decoration:underline');
+          if (/^\d+(?:\.\d+)?pt$/.test(style.fontSize)) safeStyles.push(`font-size:${style.fontSize}`);
+          if (['left','center','right','justify'].includes(style.textAlign)) safeStyles.push(`text-align:${style.textAlign}`);
+          if (/^(?:1|1\.15|1\.25|1\.4|1\.5|1\.75|2)$/.test(style.lineHeight)) safeStyles.push(`line-height:${style.lineHeight}`);
+          if (['disc','circle','decimal'].includes(style.listStyleType)) safeStyles.push(`list-style-type:${style.listStyleType}`);
           node.setAttribute('style', safeStyles.join(';'));
           if (!safeStyles.length) node.removeAttribute('style');
         }
@@ -416,8 +550,13 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      const editor = document.getElementById('repeatEditor');
+      ['keyup', 'mouseup', 'input', 'focus'].forEach(eventName => editor.addEventListener(eventName, saveSelection));
+      editor.addEventListener('paste', () => setTimeout(() => { saveSelection(); updateGrid(); }, 0));
+
       updateGrid();
       fitPreviewToViewport();
+      saveSelection();
 
       const viewport = document.getElementById('previewViewport');
       if ('ResizeObserver' in window && viewport) {
