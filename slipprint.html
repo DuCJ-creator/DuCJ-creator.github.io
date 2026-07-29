@@ -1,361 +1,374 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A4 3×8 標籤貼紙產生器 (v10 零留白滿版)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A4 3×8 滿版標籤列印平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --page-width: 210mm;
+      --page-height: 297mm;
+      --label-width: 70mm;
+      --label-height: 37.125mm;
+    }
 
-        body {
-            background-color: #f1f5f9;
-        }
+    * { box-sizing: border-box; }
 
-        /* 螢幕預覽與列印共用基礎 - 強制 A4 精確 210mm x 297mm 零邊距 */
-        .preview-container {
-            width: 210mm;
-            height: 297mm;
-            background: white;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            margin: 0 auto;
-            padding: 0 !important; /* 強制移除任何內聚留白 */
-            box-sizing: border-box;
-            overflow: hidden;
-        }
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
 
-        .label-grid {
-            width: 210mm;
-            height: 297mm;
-            table-layout: fixed;
-            border-collapse: collapse; /* 改為無間隙合併 */
-            padding: 0;
-            margin: 0;
-        }
+    body {
+      background: #f1f5f9;
+      font-family: Arial, "Noto Sans TC", sans-serif;
+    }
 
-        .slip-cell {
-            width: 70mm; /* 210mm / 3 */
-            height: 37.125mm; /* 297mm / 8 */
-            vertical-align: top;
-            padding: 0;
-            margin: 0;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
+    /* A4 紙張：固定尺寸、零內距 */
+    .a4-page {
+      width: var(--page-width);
+      height: var(--page-height);
+      margin: 0 auto;
+      padding: 0;
+      background: #fff;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, .16);
+      overflow: visible;
+    }
 
-        .slip {
-            width: 100%;
-            height: 100%;
-            border: 1px dashed #94a3b8; /* 虛線貼紙框線 */
-            padding: 6px 8px;
-            background-color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
+    /* 永遠固定 3 欄 × 8 列，格子不因內容改變 */
+    .label-grid {
+      display: grid;
+      grid-template-columns: repeat(3, var(--label-width));
+      grid-template-rows: repeat(8, var(--label-height));
+      width: var(--page-width);
+      height: var(--page-height);
+      margin: 0;
+      padding: 0;
+      gap: 0;
+      overflow: visible;
+    }
 
-        .text-content {
-            font-size: 8.5pt;
-            line-height: 1.15;
-            font-weight: 700;
-            color: #0f172a;
-            white-space: pre-wrap;
-            word-break: break-all;
-            overflow: hidden;
-        }
+    .label {
+      position: relative;
+      width: var(--label-width);
+      height: var(--label-height);
+      min-width: var(--label-width);
+      min-height: var(--label-height);
+      max-width: var(--label-width);
+      max-height: var(--label-height);
+      padding: 2.5mm 3mm;
+      margin: 0;
+      border: .25mm dashed #64748b;
+      background: #fff;
+      overflow: visible; /* 內容過多時直接溢出，不撐大標籤 */
+      break-inside: avoid;
+      contain: layout; /* 固定格子排版，內容不回推格線 */
+    }
 
-        .pass-title {
-            font-size: 9pt;
-            font-weight: 700;
-            color: #0f172a;
-            border-bottom: 1px solid #cbd5e1;
-            padding-bottom: 2px;
-            margin-bottom: 2px;
-            line-height: 1.1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+    .label-content {
+      width: 100%;
+      height: auto;
+      min-height: 0;
+      font-size: 8.5pt;
+      line-height: 1.18;
+      color: #0f172a;
+      overflow: visible;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
 
-        .pass-info {
-            font-size: 8pt;
-            color: #334155;
-            line-height: 1.15;
-            overflow: hidden;
-        }
+    .label-content p { margin: 0 0 1.2mm; }
+    .label-content ul,
+    .label-content ol {
+      margin: 0 0 1.2mm 4.5mm;
+      padding-left: 3mm;
+    }
 
-        .pass-row {
-            margin-top: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+    .label-content b,
+    .label-content strong { font-weight: 700; }
+    .label-content i,
+    .label-content em { font-style: italic; }
+    .label-content u { text-decoration: underline; }
 
-        .pass-code {
-            font-family: monospace;
-            font-weight: 700;
-            color: #0284c7;
-        }
+    .pass-title {
+      font-size: 9pt;
+      font-weight: 700;
+      border-bottom: .25mm solid #cbd5e1;
+      padding-bottom: 1mm;
+      margin-bottom: 1mm;
+      white-space: nowrap;
+      overflow: visible;
+    }
 
-        /* 🖨️ 列印/PDF 轉存 0 邊界設定 */
-        @media print {
-            @page {
-                size: 210mm 297mm;
-                margin: 0mm !important; /* 瀏覽器 / 印表機 0 Margin */
-            }
+    .pass-info {
+      font-size: 8pt;
+      line-height: 1.25;
+      overflow: visible;
+    }
 
-            html, body {
-                width: 210mm !important;
-                height: 297mm !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                background: #ffffff !important;
-                overflow: hidden !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
+    .pass-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-weight: 700;
+    }
 
-            .no-print {
-                display: none !important;
-            }
+    .rich-editor {
+      min-height: 180px;
+      max-height: 340px;
+      overflow: auto;
+      border: 1px solid #cbd5e1;
+      border-radius: .5rem;
+      padding: .75rem;
+      font-size: .82rem;
+      line-height: 1.5;
+      background: #fff;
+      outline: none;
+    }
 
-            .print-area {
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 210mm !important;
-                height: 297mm !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
+    .rich-editor:focus {
+      border-color: #0ea5e9;
+      box-shadow: 0 0 0 3px rgba(14,165,233,.18);
+    }
 
-            .preview-container {
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 210mm !important;
-                height: 297mm !important;
-                padding: 0 !important;
-                box-shadow: none !important;
-                border: none !important;
-                margin: 0 !important;
-            }
+    .rich-editor ul,
+    .rich-editor ol {
+      margin: .25rem 0 .5rem 1.35rem;
+      padding-left: .65rem;
+    }
 
-            .slip {
-                border: 1px dashed #64748b !important;
-            }
-        }
-    </style>
+    .tool-button.active,
+    .tool-button:active {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    @media print {
+      html, body {
+        width: var(--page-width) !important;
+        height: var(--page-height) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .no-print { display: none !important; }
+
+      main,
+      .print-area,
+      .a4-page {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: var(--page-width) !important;
+        height: var(--page-height) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+      }
+
+      .label-grid {
+        width: var(--page-width) !important;
+        height: var(--page-height) !important;
+      }
+    }
+  </style>
 </head>
-<body class="min-h-screen font-sans">
+<body>
+  <header class="no-print sticky top-0 z-50 h-16 border-b border-slate-200 bg-white shadow-sm">
+    <div class="mx-auto flex h-full max-w-7xl items-center justify-between px-4">
+      <h1 class="font-bold text-slate-800">🏷️ A4 滿版 3×8 標籤列印平台</h1>
+      <button onclick="window.print()" class="rounded-lg bg-sky-600 px-5 py-2 font-medium text-white hover:bg-sky-700">
+        🖨️ 列印／另存 PDF
+      </button>
+    </div>
+  </header>
 
-    <!-- 頂部列印列 -->
-    <header class="no-print bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <span class="text-2xl">🏷️</span>
-                <h1 class="text-lg font-bold text-slate-800">A4 滿版 3×8 標籤產生器 (v10 零留白貼齊版)</h1>
-            </div>
-            <button onclick="window.print()" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-5 py-2 rounded-lg transition shadow flex items-center gap-2">
-                🖨️ 直接列印 / 另存為 PDF
-            </button>
+  <main class="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 lg:flex-row">
+    <aside class="no-print w-full flex-shrink-0 space-y-4 lg:w-96">
+      <div class="grid grid-cols-2 gap-1 rounded-xl border border-slate-200 bg-white p-2">
+        <button id="tabRepeat" onclick="switchMode('repeat')" class="rounded-lg bg-sky-600 py-2 text-xs font-bold text-white shadow">重複內容</button>
+        <button id="tabIndividual" onclick="switchMode('individual')" class="rounded-lg py-2 text-xs font-bold text-slate-600 hover:bg-slate-100">個別清單</button>
+      </div>
+
+      <section id="panelRepeat" class="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <h2 class="text-sm font-bold text-slate-800">重複內容編輯</h2>
+
+        <div class="flex flex-wrap gap-1 rounded-lg border border-slate-200 bg-slate-50 p-2" role="toolbar" aria-label="文字格式工具列">
+          <button type="button" class="tool-button h-8 min-w-8 rounded border border-slate-300 bg-white px-2 font-bold" onclick="formatText('bold')" title="粗體">B</button>
+          <button type="button" class="tool-button h-8 min-w-8 rounded border border-slate-300 bg-white px-2 italic" onclick="formatText('italic')" title="斜體">I</button>
+          <button type="button" class="tool-button h-8 min-w-8 rounded border border-slate-300 bg-white px-2 underline" onclick="formatText('underline')" title="底線">U</button>
+          <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onclick="formatText('insertUnorderedList')" title="項目符號">• 清單</button>
+          <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onclick="formatText('insertOrderedList')" title="編號清單">1. 清單</button>
+          <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onclick="formatText('removeFormat')" title="清除格式">清除格式</button>
         </div>
-    </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6">
-        
-        <!-- 左側控制面板 -->
-        <aside class="no-print lg:w-96 flex-shrink-0 space-y-4">
-            
-            <!-- 模式切換 Tabs -->
-            <div class="bg-white rounded-xl p-2 border border-slate-200 grid grid-cols-2 gap-1">
-                <button id="tabRepeat" onclick="switchMode('repeat')" class="py-2 text-xs font-bold rounded-lg transition bg-sky-600 text-white shadow">
-                    🔁 重複內容模式
-                </button>
-                <button id="tabIndividual" onclick="switchMode('individual')" class="py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:bg-slate-100">
-                    📋 個別密碼/清單模式
-                </button>
-            </div>
+        <div id="repeatEditor" class="rich-editor" contenteditable="true" spellcheck="false" oninput="updateGrid()">
+          <p><strong>This book is a 2-year-long resource.</strong> Please retain it for the duration of <u>2 academic years</u>.</p>
+          <p>本書供兩學年使用。請務必保留至兩學年結束。<em>請勿隨意丟棄或遺失。</em></p>
+        </div>
 
-            <!-- 面板 1：重複內容模式 -->
-            <div id="panelRepeat" class="bg-white rounded-xl p-4 border border-slate-200 space-y-3 shadow-sm">
-                <h2 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                    <span>✍️</span> 重複內容編輯
-                </h2>
-                <textarea id="repeatTextInput" rows="8" oninput="updateGrid()" class="w-full text-xs p-3 border border-slate-300 rounded-lg leading-normal font-bold focus:ring-2 focus:ring-sky-500 focus:outline-none">This book is a 2-year-long resource. Please retain it for the duration of 2 academic years.
-本書供兩學年使用。請務必保留至兩學年結束。請勿隨意丟棄或遺失。(Reminded by FRP)</textarea>
-            </div>
+        <p class="text-[11px] leading-relaxed text-slate-500">可直接貼上含格式的文字，也可選取文字後使用上方工具列。</p>
+      </section>
 
-            <!-- 面板 2：個別密碼/清單模式 -->
-            <div id="panelIndividual" class="bg-white rounded-xl p-4 border border-slate-200 space-y-3 shadow-sm hidden">
-                <h2 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                    <span>📊</span> Google Sheets / Excel 直接複製貼上
-                </h2>
-                <div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded-lg text-[11.5px] text-emerald-800 space-y-1">
-                    <p class="font-bold">💡 免去打逗號！直接貼上即可：</p>
-                    <p>在 Google Sheets / Excel 選取 <b>【姓名 | 帳號 | 密碼】</b> 直接貼上！</p>
-                </div>
-                <textarea id="individualTextInput" rows="12" oninput="updateGrid()" placeholder="直接從試算表貼上..." class="w-full text-xs p-3 border border-slate-300 rounded-lg font-mono leading-relaxed focus:ring-2 focus:ring-sky-500 focus:outline-none">學生 01 - 張小明	S10101	a8x29k
+      <section id="panelIndividual" class="hidden space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <h2 class="text-sm font-bold text-slate-800">Google Sheets／Excel 清單</h2>
+        <p class="rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-[11px] text-emerald-800">每列格式：姓名［Tab］帳號［Tab］密碼；最多列印前 24 筆。</p>
+        <textarea id="individualTextInput" rows="14" oninput="updateGrid()" class="w-full rounded-lg border border-slate-300 p-3 font-mono text-xs leading-relaxed focus:border-sky-500 focus:outline-none">學生 01 - 張小明	S10101	a8x29k
 學生 02 - 李小華	S10102	m4k91p
-學生 03 - 王大同	S10103	q7p32w
-學生 04 - 陳美玲	S10104	x1v84n
-學生 05 - 林志豪	S10105	r5t63z
-學生 06 - 黃雅婷	S10106	c9y25m
-學生 07 - 吳冠宇	S10107	b3w81k
-學生 08 - 蔡家豪	S10108	h6j42p
-學生 09 - 楊淑芬	S10109	v8n15q
-學生 10 - 劉建宏	S10110	k2m93x
-學生 11 - 鄭怡君	S10111	p4r76z
-學生 12 - 謝宇翔	S10112	t9x21w
-學生 13 - 郭家瑋	S10113	z1c54v
-學生 14 - 邱品妤	S10114	f3b87m
-學生 15 - 曾威傑	S10115	g6h29k
-學生 16 - 廖柏翰	S10116	j8k41p
-學生 17 - 賴心怡	S10117	l2p93q
-學生 18 - 徐睿哲	S10118	w5x74n
-學生 19 - 周子晴	S10119	d9f12z
-學生 20 - 葉宗翰	S10120	s3a85m
-學生 21 - 蘇庭妤	S10121	n7v63k
-學生 22 - 莊承恩	S10122	e1w49p
-學生 23 - 呂品萱	S10123	u4r82x
-學生 24 - 彭立偉	S10124	y8t25q</textarea>
-            </div>
+學生 03 - 王大同	S10103	q7p32w</textarea>
+      </section>
 
-            <!-- 列印說明 -->
-            <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs text-amber-900 space-y-2">
-                <p class="font-bold flex items-center gap-1">
-                    <span>⚠️</span> 存成 PDF 零白邊的設定：
-                </p>
-                <ol class="list-decimal pl-4 space-y-1">
-                    <li><b>邊界 (Margins)</b>：選 <b>「無」 (None)</b></li>
-                    <li><b>縮放 (Scale)</b>：選 <b>「預設」 或 「100%」</b></li>
-                    <li><b>頁首與頁尾</b>：<b>取消勾選</b></li>
-                </ol>
-            </div>
-        </aside>
+      <section class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-relaxed text-amber-900">
+        <strong>列印設定：</strong>紙張 A4、邊界「無」、縮放 100%、關閉頁首與頁尾。實體印表機若不支援無邊界列印，機器仍可能保留不可列印區域。
+      </section>
+    </aside>
 
-        <!-- 右側 A4 預覽區域 -->
-        <section class="flex-1 flex justify-center">
-            <div class="print-area">
-                <div class="preview-container">
-                    <table class="label-grid" id="gridTable"></table>
-                </div>
-            </div>
-        </section>
+    <section class="flex flex-1 justify-center overflow-auto">
+      <div class="print-area">
+        <div class="a4-page">
+          <div id="labelGrid" class="label-grid"></div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-    </main>
+  <script>
+    const LABEL_COUNT = 24;
+    let currentMode = 'repeat';
 
-    <script>
-        let currentMode = 'repeat';
+    function switchMode(mode) {
+      currentMode = mode;
+      const isRepeat = mode === 'repeat';
 
-        function switchMode(mode) {
-            currentMode = mode;
-            const tabRepeat = document.getElementById('tabRepeat');
-            const tabIndividual = document.getElementById('tabIndividual');
-            const panelRepeat = document.getElementById('panelRepeat');
-            const panelIndividual = document.getElementById('panelIndividual');
+      document.getElementById('panelRepeat').classList.toggle('hidden', !isRepeat);
+      document.getElementById('panelIndividual').classList.toggle('hidden', isRepeat);
 
-            if (mode === 'repeat') {
-                tabRepeat.className = 'py-2 text-xs font-bold rounded-lg transition bg-sky-600 text-white shadow';
-                tabIndividual.className = 'py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:bg-slate-100';
-                panelRepeat.classList.remove('hidden');
-                panelIndividual.classList.add('hidden');
-            } else {
-                tabIndividual.className = 'py-2 text-xs font-bold rounded-lg transition bg-sky-600 text-white shadow';
-                tabRepeat.className = 'py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:bg-slate-100';
-                panelIndividual.classList.remove('hidden');
-                panelRepeat.classList.add('hidden');
-            }
-            updateGrid();
+      document.getElementById('tabRepeat').className = isRepeat
+        ? 'rounded-lg bg-sky-600 py-2 text-xs font-bold text-white shadow'
+        : 'rounded-lg py-2 text-xs font-bold text-slate-600 hover:bg-slate-100';
+
+      document.getElementById('tabIndividual').className = !isRepeat
+        ? 'rounded-lg bg-sky-600 py-2 text-xs font-bold text-white shadow'
+        : 'rounded-lg py-2 text-xs font-bold text-slate-600 hover:bg-slate-100';
+
+      updateGrid();
+    }
+
+    function formatText(command) {
+      const editor = document.getElementById('repeatEditor');
+      editor.focus();
+      document.execCommand(command, false, null);
+      updateGrid();
+    }
+
+    function sanitizeRichHtml(html) {
+      const template = document.createElement('template');
+      template.innerHTML = html;
+
+      const allowedTags = new Set(['P', 'BR', 'DIV', 'B', 'STRONG', 'I', 'EM', 'U', 'UL', 'OL', 'LI', 'SPAN']);
+      const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT);
+      const nodes = [];
+
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+
+      nodes.forEach(node => {
+        if (!allowedTags.has(node.tagName)) {
+          node.replaceWith(...node.childNodes);
+          return;
         }
 
-        function updateGrid() {
-            const table = document.getElementById('gridTable');
-            table.innerHTML = '';
+        [...node.attributes].forEach(attr => {
+          if (attr.name !== 'style') node.removeAttribute(attr.name);
+        });
 
-            if (currentMode === 'repeat') {
-                const text = document.getElementById('repeatTextInput').value.trim();
-                for (let r = 0; r < 8; r++) {
-                    const tr = document.createElement('tr');
-                    for (let c = 0; c < 3; c++) {
-                        const td = document.createElement('td');
-                        td.className = 'slip-cell';
-                        td.innerHTML = `
-                            <div class="slip">
-                                <div class="text-content">${escapeHtml(text)}</div>
-                            </div>
-                        `;
-                        tr.appendChild(td);
-                    }
-                    table.appendChild(tr);
-                }
-            } else {
-                const rawText = document.getElementById('individualTextInput').value.trim();
-                const lines = rawText.split('\n').filter(line => line.trim() !== '');
-                
-                let lineIdx = 0;
-                for (let r = 0; r < 8; r++) {
-                    const tr = document.createElement('tr');
-                    for (let c = 0; c < 3; c++) {
-                        const td = document.createElement('td');
-                        td.className = 'slip-cell';
-                        
-                        if (lineIdx < lines.length) {
-                            const line = lines[lineIdx].trim();
-                            let parts = [];
-                            if (line.includes('\t')) {
-                                parts = line.split('\t');
-                            } else if (line.includes(',')) {
-                                parts = line.split(',');
-                            } else if (line.includes('，')) {
-                                parts = line.split('，');
-                            } else {
-                                parts = line.split(/\s+/);
-                            }
-                            
-                            parts = parts.map(p => p.trim()).filter(p => p !== '');
-                            
-                            let cellHtml = '';
-                            if (parts.length >= 3) {
-                                cellHtml = `
-                                    <div class="pass-title">${escapeHtml(parts[0])}</div>
-                                    <div class="pass-info">
-                                        <div class="pass-row">帳號: <span class="pass-code">${escapeHtml(parts[1])}</span></div>
-                                        <div class="pass-row">預設密碼: <span class="pass-code">${escapeHtml(parts[2])}</span></div>
-                                    </div>
-                                `;
-                            } else if (parts.length === 2) {
-                                cellHtml = `
-                                    <div class="pass-title">${escapeHtml(parts[0])}</div>
-                                    <div class="pass-info"><div class="pass-row">帳號/密碼: <span class="pass-code">${escapeHtml(parts[1])}</span></div></div>
-                                `;
-                            } else {
-                                cellHtml = `<div class="text-content">${escapeHtml(line)}</div>`;
-                            }
-
-                            td.innerHTML = `<div class="slip">${cellHtml}</div>`;
-                            lineIdx++;
-                        } else {
-                            td.innerHTML = `<div class="slip"></div>`;
-                        }
-                        tr.appendChild(td);
-                    }
-                    table.appendChild(tr);
-                }
-            }
+        if (node.hasAttribute('style')) {
+          const safeStyles = [];
+          const style = node.style;
+          if (style.fontWeight === 'bold' || Number(style.fontWeight) >= 600) safeStyles.push('font-weight:700');
+          if (style.fontStyle === 'italic') safeStyles.push('font-style:italic');
+          if (style.textDecorationLine.includes('underline')) safeStyles.push('text-decoration:underline');
+          node.setAttribute('style', safeStyles.join(';'));
+          if (!safeStyles.length) node.removeAttribute('style');
         }
+      });
 
-        function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      return template.innerHTML;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function parseLine(line) {
+      if (line.includes('\t')) return line.split('\t').map(v => v.trim());
+      if (line.includes(',')) return line.split(',').map(v => v.trim());
+      if (line.includes('，')) return line.split('，').map(v => v.trim());
+      return [line.trim()];
+    }
+
+    function makeIndividualHtml(line) {
+      const parts = parseLine(line).filter(Boolean);
+      if (parts.length >= 3) {
+        return `
+          <div class="pass-title">${escapeHtml(parts[0])}</div>
+          <div class="pass-info">
+            <div>帳號：<span class="pass-code">${escapeHtml(parts[1])}</span></div>
+            <div>預設密碼：<span class="pass-code">${escapeHtml(parts[2])}</span></div>
+          </div>`;
+      }
+      if (parts.length === 2) {
+        return `
+          <div class="pass-title">${escapeHtml(parts[0])}</div>
+          <div class="pass-info">帳號／密碼：<span class="pass-code">${escapeHtml(parts[1])}</span></div>`;
+      }
+      return `<div class="label-content">${escapeHtml(parts[0] || '')}</div>`;
+    }
+
+    function updateGrid() {
+      const grid = document.getElementById('labelGrid');
+      grid.innerHTML = '';
+
+      if (currentMode === 'repeat') {
+        const richHtml = sanitizeRichHtml(document.getElementById('repeatEditor').innerHTML);
+        for (let i = 0; i < LABEL_COUNT; i++) {
+          const label = document.createElement('div');
+          label.className = 'label';
+          label.innerHTML = `<div class="label-content">${richHtml}</div>`;
+          grid.appendChild(label);
         }
+        return;
+      }
 
-        window.onload = updateGrid;
-    </script>
+      const lines = document.getElementById('individualTextInput').value
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean)
+        .slice(0, LABEL_COUNT);
+
+      for (let i = 0; i < LABEL_COUNT; i++) {
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.innerHTML = lines[i] ? makeIndividualHtml(lines[i]) : '';
+        grid.appendChild(label);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', updateGrid);
+  </script>
 </body>
 </html>
