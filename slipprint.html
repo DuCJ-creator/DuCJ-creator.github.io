@@ -25,6 +25,20 @@
       font-family: Arial, "Noto Sans TC", sans-serif;
     }
 
+    /* 螢幕預覽外框：依可用寬度等比例縮放，避免左右欄被裁切 */
+    .preview-stage {
+      position: relative;
+      width: var(--page-width);
+      height: var(--page-height);
+      flex: 0 0 auto;
+    }
+
+    .preview-scale {
+      width: var(--page-width);
+      height: var(--page-height);
+      transform-origin: top left;
+    }
+
     /* A4 紙張：固定尺寸、零內距 */
     .a4-page {
       width: var(--page-width);
@@ -164,6 +178,8 @@
 
       main,
       .print-area,
+      .preview-stage,
+      .preview-scale,
       .a4-page {
         position: absolute !important;
         top: 0 !important;
@@ -174,6 +190,7 @@
         padding: 0 !important;
         box-shadow: none !important;
         overflow: visible !important;
+        transform: none !important;
       }
 
       .label-grid {
@@ -233,10 +250,14 @@
       </section>
     </aside>
 
-    <section class="flex flex-1 justify-center overflow-auto">
+    <section id="previewViewport" class="flex min-w-0 flex-1 justify-center overflow-x-auto overflow-y-visible">
       <div class="print-area">
-        <div class="a4-page">
-          <div id="labelGrid" class="label-grid"></div>
+        <div id="previewStage" class="preview-stage">
+          <div id="previewScale" class="preview-scale">
+            <div class="a4-page">
+              <div id="labelGrid" class="label-grid"></div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -339,6 +360,32 @@
       return `<div class="label-content">${escapeHtml(parts[0] || '')}</div>`;
     }
 
+
+    function fitPreviewToViewport() {
+      const viewport = document.getElementById('previewViewport');
+      const stage = document.getElementById('previewStage');
+      const scaleLayer = document.getElementById('previewScale');
+
+      if (!viewport || !stage || !scaleLayer) return;
+
+      /* 列印時必須維持原始 A4 尺寸，不套用預覽縮放 */
+      if (window.matchMedia('print').matches) {
+        scaleLayer.style.transform = 'none';
+        stage.style.width = '210mm';
+        stage.style.height = '297mm';
+        return;
+      }
+
+      const pageWidth = scaleLayer.offsetWidth;
+      const pageHeight = scaleLayer.offsetHeight;
+      const availableWidth = Math.max(0, viewport.clientWidth - 8);
+      const scale = Math.min(1, availableWidth / pageWidth);
+
+      scaleLayer.style.transform = `scale(${scale})`;
+      stage.style.width = `${pageWidth * scale}px`;
+      stage.style.height = `${pageHeight * scale}px`;
+    }
+
     function updateGrid() {
       const grid = document.getElementById('labelGrid');
       grid.innerHTML = '';
@@ -368,7 +415,27 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', updateGrid);
+    document.addEventListener('DOMContentLoaded', () => {
+      updateGrid();
+      fitPreviewToViewport();
+
+      const viewport = document.getElementById('previewViewport');
+      if ('ResizeObserver' in window && viewport) {
+        new ResizeObserver(fitPreviewToViewport).observe(viewport);
+      }
+    });
+
+    window.addEventListener('resize', fitPreviewToViewport);
+    window.addEventListener('beforeprint', () => {
+      const scaleLayer = document.getElementById('previewScale');
+      const stage = document.getElementById('previewStage');
+      if (scaleLayer) scaleLayer.style.transform = 'none';
+      if (stage) {
+        stage.style.width = '210mm';
+        stage.style.height = '297mm';
+      }
+    });
+    window.addEventListener('afterprint', fitPreviewToViewport);
   </script>
 </body>
 </html>
