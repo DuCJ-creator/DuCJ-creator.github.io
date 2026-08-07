@@ -264,6 +264,19 @@
               <option value="20">20 pt</option>
               <option value="24">24 pt</option>
             </select>
+            <select id="fontFamilySelect" class="h-8 rounded border border-slate-300 bg-white px-2 text-xs" onchange="applyFontFamily(this.value)" title="字型">
+              <option value="">字型</option>
+              <option value="Arial, 'Noto Sans TC', sans-serif">Arial</option>
+              <option value="'Times New Roman', 'Noto Serif TC', serif">Times New Roman</option>
+              <option value="'Courier New', monospace">Courier New</option>
+              <option value="Georgia, 'Noto Serif TC', serif">Georgia</option>
+              <option value="Verdana, 'Noto Sans TC', sans-serif">Verdana</option>
+              <option value="'Microsoft JhengHei', '微軟正黑體', sans-serif">微軟正黑體</option>
+              <option value="'PMingLiU', '新細明體', serif">新細明體</option>
+              <option value="'Noto Sans TC', sans-serif">Noto Sans TC</option>
+              <option value="'Noto Serif TC', serif">Noto Serif TC</option>
+              <option value="'Kaiti TC', '標楷體', cursive">標楷體</option>
+            </select>
             <button type="button" class="tool-button h-8 min-w-8 rounded border border-slate-300 bg-white px-2 font-bold" onmousedown="event.preventDefault(); formatText('bold')" title="粗體">B</button>
             <button type="button" class="tool-button h-8 min-w-8 rounded border border-slate-300 bg-white px-2 italic" onmousedown="event.preventDefault(); formatText('italic')" title="斜體">I</button>
             <button type="button" class="tool-button h-8 min-w-8 rounded border border-slate-300 bg-white px-2 underline" onmousedown="event.preventDefault(); formatText('underline')" title="底線">U</button>
@@ -394,19 +407,62 @@
       updateGrid();
     }
 
-    function applyFontSize(sizePt) {
+    // 收集 range 內、屬於 editor 底下的所有文字節點（包含跨區塊選取）
+    function getTextNodesInRange(range, editor) {
+      const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+          if (!node.nodeValue || !node.nodeValue.length) return NodeFilter.FILTER_REJECT;
+          return range.intersectsNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+        }
+      });
+      const nodes = [];
+      let current;
+      while ((current = walker.nextNode())) nodes.push(current);
+      return nodes;
+    }
+
+    // 將選取範圍內的文字節點逐一包上帶指定 style 的 span
+    function wrapSelectedTextNodesWithStyle(styleProp, styleValue) {
       const editor = document.getElementById('repeatEditor');
       editor.focus();
       restoreSelection();
-      document.execCommand('fontSize', false, '7');
-      editor.querySelectorAll('font[size="7"]').forEach(font => {
+
+      const selection = window.getSelection();
+      if (!selection || !selection.rangeCount || selection.isCollapsed) return;
+
+      const range = selection.getRangeAt(0);
+      if (!editor.contains(range.commonAncestorContainer)) return;
+
+      const textNodes = getTextNodesInRange(range, editor);
+      if (!textNodes.length) return;
+
+      textNodes.forEach(node => {
+        const nodeRange = document.createRange();
+        nodeRange.selectNodeContents(node);
+        const start = (node === range.startContainer) ? range.startOffset : 0;
+        const end = (node === range.endContainer) ? range.endOffset : node.nodeValue.length;
+        if (start >= end) return;
+        nodeRange.setStart(node, start);
+        nodeRange.setEnd(node, end);
+
         const span = document.createElement('span');
-        span.style.fontSize = `${sizePt}pt`;
-        while (font.firstChild) span.appendChild(font.firstChild);
-        font.replaceWith(span);
+        span.style[styleProp] = styleValue;
+        const fragment = nodeRange.extractContents();
+        span.appendChild(fragment);
+        nodeRange.insertNode(span);
       });
+
       saveSelection();
       updateGrid();
+    }
+
+    function applyFontSize(sizePt) {
+      wrapSelectedTextNodesWithStyle('fontSize', `${sizePt}pt`);
+    }
+
+    function applyFontFamily(fontStack) {
+      if (!fontStack) return;
+      wrapSelectedTextNodesWithStyle('fontFamily', fontStack);
     }
 
     // 用 span 包裹選取範圍，套用給定的 CSS 樣式屬性
@@ -544,6 +600,7 @@
           if (['disc','circle','decimal'].includes(style.listStyleType)) safeStyles.push(`list-style-type:${style.listStyleType}`);
           if (isSafeColor(style.color)) safeStyles.push(`color:${style.color}`);
           if (isSafeColor(style.backgroundColor)) safeStyles.push(`background-color:${style.backgroundColor}`);
+          if (isSafeFontFamily(style.fontFamily)) safeStyles.push(`font-family:${style.fontFamily}`);
           node.setAttribute('style', safeStyles.join(';'));
           if (!safeStyles.length) node.removeAttribute('style');
         }
@@ -556,6 +613,24 @@
       if (!value) return false;
       if (value === 'transparent' || value === 'rgba(0, 0, 0, 0)') return false;
       return /^(#[0-9a-fA-F]{3,8}|rgb\(|rgba\()/.test(value.trim());
+    }
+
+    const ALLOWED_FONT_FAMILIES = new Set([
+      "Arial, 'Noto Sans TC', sans-serif",
+      "'Times New Roman', 'Noto Serif TC', serif",
+      "'Courier New', monospace",
+      "Georgia, 'Noto Serif TC', serif",
+      "Verdana, 'Noto Sans TC', sans-serif",
+      "'Microsoft JhengHei', '微軟正黑體', sans-serif",
+      "'PMingLiU', '新細明體', serif",
+      "'Noto Sans TC', sans-serif",
+      "'Noto Serif TC', serif",
+      "'Kaiti TC', '標楷體', cursive"
+    ]);
+
+    function isSafeFontFamily(value) {
+      if (!value) return false;
+      return ALLOWED_FONT_FAMILIES.has(value.trim());
     }
 
     function escapeHtml(value) {
