@@ -325,7 +325,7 @@
           </div>
         </div>
 
-        <div id="repeatEditor" class="rich-editor" contenteditable="true" spellcheck="false" oninput="updateGrid()">
+        <div id="repeatEditor" class="rich-editor" contenteditable="true" spellcheck="false" oninput="scheduleUpdateGrid()">
           <p><strong>This book is a 2-year-long resource.</strong> Please retain it for the duration of <u>2 academic years</u>.</p>
           <p>本書供兩學年使用。請務必保留至兩學年結束。<em>請勿隨意丟棄或遺失。</em></p>
         </div>
@@ -336,7 +336,7 @@
       <section id="panelIndividual" class="hidden space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <h2 class="text-sm font-bold text-slate-800">Google Sheets／Excel 清單</h2>
         <p class="rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-[11px] text-emerald-800">每列格式：姓名［Tab］帳號［Tab］密碼；最多列印前 24 筆。</p>
-        <textarea id="individualTextInput" rows="14" oninput="updateGrid()" class="w-full rounded-lg border border-slate-300 p-3 font-mono text-xs leading-relaxed focus:border-sky-500 focus:outline-none">學生 01 - 張小明	S10101	a8x29k
+        <textarea id="individualTextInput" rows="14" oninput="scheduleUpdateGrid()" class="w-full rounded-lg border border-slate-300 p-3 font-mono text-xs leading-relaxed focus:border-sky-500 focus:outline-none">學生 01 - 張小明	S10101	a8x29k
 學生 02 - 李小華	S10102	m4k91p
 學生 03 - 王大同	S10103	q7p32w</textarea>
       </section>
@@ -699,12 +699,20 @@
 
       if (currentMode === 'repeat') {
         const richHtml = sanitizeRichHtml(document.getElementById('repeatEditor').innerHTML);
+
+        // 只組一次內容節點，其餘 23 份用 cloneNode 複製，避免重複解析同一段 HTML 字串
+        const template = document.createElement('div');
+        template.className = 'label-content';
+        template.innerHTML = richHtml;
+
+        const fragment = document.createDocumentFragment();
         for (let i = 0; i < LABEL_COUNT; i++) {
           const label = document.createElement('div');
           label.className = 'label';
-          label.innerHTML = `<div class="label-content">${richHtml}</div>`;
-          grid.appendChild(label);
+          label.appendChild(i === 0 ? template : template.cloneNode(true));
+          fragment.appendChild(label);
         }
+        grid.appendChild(fragment);
         return;
       }
 
@@ -714,12 +722,21 @@
         .filter(Boolean)
         .slice(0, LABEL_COUNT);
 
+      const fragment = document.createDocumentFragment();
       for (let i = 0; i < LABEL_COUNT; i++) {
         const label = document.createElement('div');
         label.className = 'label';
         label.innerHTML = lines[i] ? makeIndividualHtml(lines[i]) : '';
-        grid.appendChild(label);
+        fragment.appendChild(label);
       }
+      grid.appendChild(fragment);
+    }
+
+    // 防抖：輸入時不要每個按鍵都重繪 24 格預覽，停頓後才更新，避免打字卡頓
+    let updateGridTimer = null;
+    function scheduleUpdateGrid(delay = 150) {
+      if (updateGridTimer) clearTimeout(updateGridTimer);
+      updateGridTimer = setTimeout(updateGrid, delay);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
