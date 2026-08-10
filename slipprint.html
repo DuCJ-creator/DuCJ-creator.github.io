@@ -137,6 +137,28 @@
       font-weight: 700;
     }
 
+    .individual-content {
+      width: 100%;
+      min-height: 100%;
+      overflow: visible;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    /* 個別清單由工具列統一控制格式，避免被原本的固定字級覆蓋 */
+    .individual-content .pass-title,
+    .individual-content .pass-info,
+    .individual-content .pass-code {
+      font-size: inherit;
+      font-family: inherit;
+      font-weight: inherit;
+      font-style: inherit;
+      text-decoration: inherit;
+      line-height: inherit;
+      text-align: inherit;
+      color: inherit;
+    }
+
     .rich-editor {
       min-height: 180px;
       max-height: 340px;
@@ -341,7 +363,81 @@
       <section id="panelIndividual" class="hidden space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <h2 class="text-sm font-bold text-slate-800">Google Sheets／Excel 清單</h2>
         <p class="rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-[11px] text-emerald-800">每列格式：姓名［Tab］帳號［Tab］密碼；最多列印前 24 筆。</p>
+
+        <div class="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-2" role="toolbar" aria-label="個別清單格式工具列">
+          <div class="flex flex-wrap items-center gap-1">
+            <label class="text-xs text-slate-600" for="individualFontSizeSelect">字級</label>
+            <select id="individualFontSizeSelect" class="h-8 rounded border border-slate-300 bg-white px-2 text-xs" onchange="setIndividualFormat('fontSize', this.value)" title="字體大小">
+              <option value="7">7 pt</option>
+              <option value="8">8 pt</option>
+              <option value="8.5">8.5 pt</option>
+              <option value="9">9 pt</option>
+              <option value="10">10 pt</option>
+              <option value="11" selected>11 pt</option>
+              <option value="12">12 pt</option>
+              <option value="14">14 pt</option>
+              <option value="16">16 pt</option>
+              <option value="18">18 pt</option>
+              <option value="20">20 pt</option>
+              <option value="24">24 pt</option>
+            </select>
+            <select id="individualFontFamilySelect" class="h-8 rounded border border-slate-300 bg-white px-2 text-xs" onchange="setIndividualFormat('fontFamily', this.value)" title="字型">
+              <option value="Arial, 'Noto Sans TC', sans-serif" selected>Arial</option>
+              <option value="'Times New Roman', 'Noto Serif TC', serif">Times New Roman</option>
+              <option value="'Courier New', monospace">Courier New</option>
+              <option value="Georgia, 'Noto Serif TC', serif">Georgia</option>
+              <option value="Verdana, 'Noto Sans TC', sans-serif">Verdana</option>
+              <option value="'Microsoft JhengHei', '微軟正黑體', sans-serif">微軟正黑體</option>
+              <option value="'PMingLiU', '新細明體', serif">新細明體</option>
+              <option value="'Noto Sans TC', sans-serif">Noto Sans TC</option>
+              <option value="'Noto Serif TC', serif">Noto Serif TC</option>
+              <option value="'Kaiti TC', '標楷體', cursive">標楷體</option>
+            </select>
+            <button id="individualBoldButton" type="button" class="tool-button h-8 min-w-8 rounded border border-slate-300 bg-white px-2 font-bold" onclick="toggleIndividualFormat('bold', this)" title="粗體">B</button>
+            <button id="individualItalicButton" type="button" class="tool-button h-8 min-w-8 rounded border border-slate-300 bg-white px-2 italic" onclick="toggleIndividualFormat('italic', this)" title="斜體">I</button>
+            <button id="individualUnderlineButton" type="button" class="tool-button h-8 min-w-8 rounded border border-slate-300 bg-white px-2 underline" onclick="toggleIndividualFormat('underline', this)" title="底線">U</button>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-1">
+            <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onclick="setIndividualFormat('textAlign', 'left')" title="靠左對齊">☰ 左</button>
+            <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onclick="setIndividualFormat('textAlign', 'center')" title="置中對齊">☰ 中</button>
+            <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onclick="setIndividualFormat('textAlign', 'right')" title="靠右對齊">☰ 右</button>
+            <label class="ml-1 text-xs text-slate-600" for="individualLineHeightSelect">行距</label>
+            <select id="individualLineHeightSelect" class="h-8 rounded border border-slate-300 bg-white px-2 text-xs" onchange="setIndividualFormat('lineHeight', this.value)">
+              <option value="1">1.0</option>
+              <option value="1.15">1.15</option>
+              <option value="1.25" selected>1.25</option>
+              <option value="1.4">1.4</option>
+              <option value="1.5">1.5</option>
+              <option value="1.75">1.75</option>
+              <option value="2">2.0</option>
+            </select>
+            <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2" onclick="resetIndividualFormat()" title="清除格式">清除格式</button>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-1.5 pt-1">
+            <span class="mr-0.5 text-xs text-slate-600">文字色</span>
+            <button type="button" class="color-swatch" style="background:#000000" title="黑" onclick="setIndividualFormat('color', '#000000')"></button>
+            <button type="button" class="color-swatch" style="background:#dc2626" title="紅" onclick="setIndividualFormat('color', '#dc2626')"></button>
+            <button type="button" class="color-swatch" style="background:#2563eb" title="藍" onclick="setIndividualFormat('color', '#2563eb')"></button>
+            <button type="button" class="color-swatch checkerboard" style="border:1px solid #94a3b8" title="白" onclick="setIndividualFormat('color', '#ffffff')"></button>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-1.5 pt-1">
+            <span class="mr-0.5 text-xs text-slate-600">背景色</span>
+            <button type="button" class="color-swatch" style="background:#000000" title="黑" onclick="setIndividualFormat('backgroundColor', '#000000')"></button>
+            <button type="button" class="color-swatch" style="background:#dc2626" title="紅" onclick="setIndividualFormat('backgroundColor', '#dc2626')"></button>
+            <button type="button" class="color-swatch" style="background:#2563eb" title="藍" onclick="setIndividualFormat('backgroundColor', '#2563eb')"></button>
+            <button type="button" class="color-swatch" style="background:#ffffff; border:1px solid #94a3b8" title="白" onclick="setIndividualFormat('backgroundColor', '#ffffff')"></button>
+            <button type="button" class="color-swatch" style="background:#16a34a" title="綠" onclick="setIndividualFormat('backgroundColor', '#16a34a')"></button>
+            <button type="button" class="color-swatch" style="background:#9333ea" title="紫" onclick="setIndividualFormat('backgroundColor', '#9333ea')"></button>
+            <button type="button" class="color-swatch" style="background:#eab308" title="黃" onclick="setIndividualFormat('backgroundColor', '#eab308')"></button>
+            <button type="button" class="tool-button h-8 rounded border border-slate-300 bg-white px-2 text-xs" title="移除背景色" onclick="setIndividualFormat('backgroundColor', 'transparent')">無背景</button>
+          </div>
+        </div>
+
         <textarea id="individualTextInput" rows="14" oninput="scheduleUpdateGrid()" placeholder="請貼上或輸入清單內容" class="w-full rounded-lg border border-slate-300 p-3 font-mono text-xs leading-relaxed focus:border-sky-500 focus:outline-none"></textarea>
+        <p class="text-[11px] leading-relaxed text-slate-500">格式設定會統一套用到所有個別清單標籤。</p>
       </section>
 
       <section class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-relaxed text-amber-900">
@@ -365,6 +461,69 @@
   <script>
     const LABEL_COUNT = 24;
     let currentMode = 'repeat';
+
+    const DEFAULT_INDIVIDUAL_FORMAT = Object.freeze({
+      fontSize: '11',
+      fontFamily: "Arial, 'Noto Sans TC', sans-serif",
+      lineHeight: '1.25',
+      textAlign: 'left',
+      color: '#000000',
+      backgroundColor: 'transparent',
+      bold: false,
+      italic: false,
+      underline: false
+    });
+    let individualFormat = { ...DEFAULT_INDIVIDUAL_FORMAT };
+
+    function setIndividualFormat(property, value) {
+      const allowedValues = {
+        fontSize: new Set(['7','8','8.5','9','10','11','12','14','16','18','20','24']),
+        lineHeight: new Set(['1','1.15','1.25','1.4','1.5','1.75','2']),
+        textAlign: new Set(['left','center','right']),
+        color: new Set(['#000000','#dc2626','#2563eb','#ffffff']),
+        backgroundColor: new Set(['transparent','#000000','#dc2626','#2563eb','#ffffff','#16a34a','#9333ea','#eab308'])
+      };
+
+      if (property === 'fontFamily') {
+        if (!ALLOWED_FONT_FAMILIES.has(value)) return;
+      } else if (!allowedValues[property]?.has(value)) {
+        return;
+      }
+
+      individualFormat[property] = value;
+      updateGrid();
+    }
+
+    function toggleIndividualFormat(property, button) {
+      if (!['bold','italic','underline'].includes(property)) return;
+      individualFormat[property] = !individualFormat[property];
+      button.classList.toggle('active', individualFormat[property]);
+      updateGrid();
+    }
+
+    function resetIndividualFormat() {
+      individualFormat = { ...DEFAULT_INDIVIDUAL_FORMAT };
+      document.getElementById('individualFontSizeSelect').value = individualFormat.fontSize;
+      document.getElementById('individualFontFamilySelect').value = individualFormat.fontFamily;
+      document.getElementById('individualLineHeightSelect').value = individualFormat.lineHeight;
+      ['individualBoldButton','individualItalicButton','individualUnderlineButton'].forEach(id => {
+        document.getElementById(id).classList.remove('active');
+      });
+      updateGrid();
+    }
+
+    function applyIndividualStyles(element) {
+      if (!element) return;
+      element.style.fontSize = `${individualFormat.fontSize}pt`;
+      element.style.fontFamily = individualFormat.fontFamily;
+      element.style.lineHeight = individualFormat.lineHeight;
+      element.style.textAlign = individualFormat.textAlign;
+      element.style.color = individualFormat.color;
+      element.style.backgroundColor = individualFormat.backgroundColor;
+      element.style.fontWeight = individualFormat.bold ? '700' : '400';
+      element.style.fontStyle = individualFormat.italic ? 'italic' : 'normal';
+      element.style.textDecoration = individualFormat.underline ? 'underline' : 'none';
+    }
 
     function switchMode(mode) {
       currentMode = mode;
@@ -656,18 +815,22 @@
       const parts = parseLine(line).filter(Boolean);
       if (parts.length >= 3) {
         return `
-          <div class="pass-title">${escapeHtml(parts[0])}</div>
-          <div class="pass-info">
-            <div><span class="pass-code">${escapeHtml(parts[1])}</span></div>
-            <div><span class="pass-code">${escapeHtml(parts[2])}</span></div>
+          <div class="individual-content">
+            <div class="pass-title">${escapeHtml(parts[0])}</div>
+            <div class="pass-info">
+              <div><span class="pass-code">${escapeHtml(parts[1])}</span></div>
+              <div><span class="pass-code">${escapeHtml(parts[2])}</span></div>
+            </div>
           </div>`;
       }
       if (parts.length === 2) {
         return `
-          <div class="pass-title">${escapeHtml(parts[0])}</div>
-          <div class="pass-info"><span class="pass-code">${escapeHtml(parts[1])}</span></div>`;
+          <div class="individual-content">
+            <div class="pass-title">${escapeHtml(parts[0])}</div>
+            <div class="pass-info"><span class="pass-code">${escapeHtml(parts[1])}</span></div>
+          </div>`;
       }
-      return `<div class="label-content">${escapeHtml(parts[0] || '')}</div>`;
+      return `<div class="individual-content">${escapeHtml(parts[0] || '')}</div>`;
     }
 
 
@@ -730,6 +893,7 @@
         const label = document.createElement('div');
         label.className = 'label';
         label.innerHTML = lines[i] ? makeIndividualHtml(lines[i]) : '';
+        applyIndividualStyles(label.querySelector('.individual-content'));
         fragment.appendChild(label);
       }
       grid.appendChild(fragment);
