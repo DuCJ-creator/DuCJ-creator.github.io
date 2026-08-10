@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -14,6 +16,9 @@
     }
 
     * { box-sizing: border-box; }
+
+    /* 切換面板的基本樣式不依賴外部 CSS，確保離線開啟也能正常切換 */
+    .hidden { display: none !important; }
 
     html, body {
       margin: 0;
@@ -336,9 +341,7 @@
       <section id="panelIndividual" class="hidden space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <h2 class="text-sm font-bold text-slate-800">Google Sheets／Excel 清單</h2>
         <p class="rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-[11px] text-emerald-800">每列格式：姓名［Tab］帳號［Tab］密碼；最多列印前 24 筆。</p>
-        <textarea id="individualTextInput" rows="14" oninput="scheduleUpdateGrid()" class="w-full rounded-lg border border-slate-300 p-3 font-mono text-xs leading-relaxed focus:border-sky-500 focus:outline-none">學生 01 - 張小明	S10101	a8x29k
-學生 02 - 李小華	S10102	m4k91p
-學生 03 - 王大同	S10103	q7p32w</textarea>
+        <textarea id="individualTextInput" rows="14" oninput="scheduleUpdateGrid()" placeholder="請貼上或輸入清單內容" class="w-full rounded-lg border border-slate-300 p-3 font-mono text-xs leading-relaxed focus:border-sky-500 focus:outline-none"></textarea>
       </section>
 
       <section class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-relaxed text-amber-900">
@@ -655,14 +658,14 @@
         return `
           <div class="pass-title">${escapeHtml(parts[0])}</div>
           <div class="pass-info">
-            <div>帳號：<span class="pass-code">${escapeHtml(parts[1])}</span></div>
-            <div>預設密碼：<span class="pass-code">${escapeHtml(parts[2])}</span></div>
+            <div><span class="pass-code">${escapeHtml(parts[1])}</span></div>
+            <div><span class="pass-code">${escapeHtml(parts[2])}</span></div>
           </div>`;
       }
       if (parts.length === 2) {
         return `
           <div class="pass-title">${escapeHtml(parts[0])}</div>
-          <div class="pass-info">帳號／密碼：<span class="pass-code">${escapeHtml(parts[1])}</span></div>`;
+          <div class="pass-info"><span class="pass-code">${escapeHtml(parts[1])}</span></div>`;
       }
       return `<div class="label-content">${escapeHtml(parts[0] || '')}</div>`;
     }
