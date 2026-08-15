@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Basics | 文法基礎</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Noto+Serif+TC:wght@600;900&family=Outfit:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-deep: #030814;
+            --bg-velvet: #0a1329;
+            --lemon-glow: #a3e635;
+            --lemon-bright: #bef264;
+            --emerald-glow: #10b981;
+            --border-glass: rgba(163, 230, 53, 0.25);
+            --card-bg: rgba(15, 23, 42, 0.65);
+            --card-hover: rgba(30, 41, 59, 0.85);
+            --text-title: #f7fee7;
+            --text-sub: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 20%, #064e3b 0%, transparent 50%),
+                radial-gradient(circle at 10% 80%, #0f172a 0%, transparent 50%),
+                radial-gradient(circle at 90% 90%, #1e293b 0%, transparent 50%);
+            position: relative;
+        }
+
+        /* Ambient Stars Background */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background-color: var(--lemon-bright);
+            border-radius: 50%;
+            animation: twinkle var(--duration, 3s) infinite ease-in-out;
+            opacity: 0.5;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 0.9; transform: scale(1.2); box-shadow: 0 0 8px var(--lemon-glow); }
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(3, 8, 20, 0.8);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-glass);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-align: center;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            color: var(--lemon-glow);
+            filter: drop-shadow(0 0 10px var(--lemon-glow));
+            animation: pulseLeaf 3s infinite ease-in-out;
+        }
+
+        @keyframes pulseLeaf {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px var(--lemon-glow)); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 16px var(--lemon-bright)); }
+        }
+
+        .logo-text h1 {
+            font-family: 'Cinzel', 'Noto Serif TC', serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f7fee7 0%, #a3e635 50%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+
+        .logo-text p {
+            font-size: 0.82rem;
+            color: var(--text-title);
+            opacity: 0.8;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        /* Main Container Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 83px);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Cards Grid Section (Left / Sidebar) */
+        .sidebar {
+            width: 480px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: rgba(10, 19, 41, 0.75);
+            border-right: 1px solid var(--border-glass);
+            backdrop-filter: blur(12px);
+            z-index: 10;
+            overflow-y: auto;
+            box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .section-title {
+            font-family: 'Cinzel', 'Noto Serif TC', serif;
+            font-size: 1.1rem;
+            color: var(--lemon-glow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 14px;
+        }
+
+        /* Glassmorphism Glowing Card */
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(163, 230, 53, 0.15), transparent);
+            transition: 0.5s;
+        }
+
+        .glass-card:hover::before {
+            left: 100%;
+        }
+
+        .glass-card:hover {
+            background: var(--card-hover);
+            border-color: var(--lemon-glow);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(163, 230, 53, 0.25);
+        }
+
+        .glass-card.active {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.6) 0%, rgba(6, 78, 59, 0.7) 100%);
+            border-color: var(--lemon-bright);
+            box-shadow: 0 0 25px rgba(163, 230, 53, 0.35), inset 0 0 15px rgba(163, 230, 53, 0.15);
+            transform: scale(1.02);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(163, 230, 53, 0.12);
+            border: 1px solid var(--border-glass);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.3rem;
+            color: var(--lemon-glow);
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .glass-card:hover .card-icon, .glass-card.active .card-icon {
+            background: var(--lemon-glow);
+            color: #030814;
+            box-shadow: 0 0 15px var(--lemon-glow);
+        }
+
+        .card-content {
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-title);
+            margin-bottom: 4px;
+        }
+
+        .card-desc {
+            font-size: 0.78rem;
+            color: var(--text-sub);
+        }
+
+        .card-arrow {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .glass-card:hover .card-arrow, .glass-card.active .card-arrow {
+            color: var(--lemon-glow);
+            transform: translateX(4px);
+        }
+
+        /* Content Area (iFrame) */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(3, 8, 20, 0.6);
+            position: relative;
+        }
+
+        .content-header {
+            padding: 12px 24px;
+            background: rgba(10, 19, 41, 0.9);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-glass);
+            font-size: 0.88rem;
+        }
+
+        .current-resource-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--lemon-bright);
+            font-weight: 600;
+        }
+
+        .external-link-btn {
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+
+        .external-link-btn:hover {
+            color: var(--lemon-glow);
+        }
+
+        .iframe-container {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+        }
+
+        /* Initial Landing Welcome Screen */
+        .welcome-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 40%, rgba(10, 19, 41, 0.95) 0%, rgba(3, 8, 20, 0.98) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            z-index: 20;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+
+        .welcome-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .welcome-icon {
+            font-size: 4rem;
+            color: var(--lemon-glow);
+            margin-bottom: 24px;
+            filter: drop-shadow(0 0 20px var(--lemon-glow));
+            animation: floatIcon 4s infinite ease-in-out;
+        }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .welcome-title {
+            font-family: 'Cinzel', 'Noto Serif TC', serif;
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #f7fee7 0%, #a3e635 50%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 25px rgba(163, 230, 53, 0.3);
+        }
+
+        .welcome-desc {
+            font-size: 1rem;
+            color: var(--text-title);
+            max-width: 500px;
+            line-height: 1.7;
+            margin-bottom: 30px;
+            opacity: 0.85;
+        }
+
+        .welcome-prompt {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(163, 230, 53, 0.12);
+            border: 1px solid var(--lemon-glow);
+            padding: 10px 24px;
+            border-radius: 30px;
+            color: var(--lemon-bright);
+            font-size: 0.92rem;
+            font-weight: 600;
+            box-shadow: 0 0 20px rgba(163, 230, 53, 0.2);
+            animation: pulsePrompt 2s infinite;
+        }
+
+        @keyframes pulsePrompt {
+            0%, 100% { box-shadow: 0 0 15px rgba(163, 230, 53, 0.2); transform: scale(1); }
+            50% { box-shadow: 0 0 30px rgba(163, 230, 53, 0.4); transform: scale(1.03); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .main-container {
+                flex-direction: column;
+                height: auto;
+            }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-glass);
+            }
+            .content-area {
+                height: 75vh;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Stars Canvas -->
+    <div class="stars-container" id="stars-container"></div>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="logo">
+            <div class="logo-icon"><i class="fa-solid fa-lemon"></i></div>
+            <div class="logo-text">
+                <h1>GRAMMAR BASICS</h1>
+                <p>文法基礎 · 你就不基礎</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        
+        <!-- Sidebar Cards List -->
+        <div class="sidebar">
+            <div class="section-title">
+                <i class="fa-solid fa-cubes-stacked"></i> 選擇基礎單元
+            </div>
+            
+            <div class="cards-grid" id="cards-grid">
+                <!-- Dynamically Generated Glass Cards -->
+            </div>
+        </div>
+
+        <!-- Content Viewport (iFrame) -->
+        <div class="content-area">
+            
+            <!-- Welcome Overlay -->
+            <div class="welcome-screen" id="welcome-screen">
+                <div class="welcome-icon"><i class="fa-solid fa-seedling"></i></div>
+                <h2 class="welcome-title">札穩你的英語文法根基</h2>
+                <p class="welcome-desc">
+                    點擊左側精選的六大文法與單字專題卡片，即可直接在頁面內展開探索與互動練習！
+                </p>
+                <div class="welcome-prompt">
+                    <i class="fa-solid fa-hand-pointer"></i> 請點擊左側卡片開始學習
+                </div>
+            </div>
+
+            <div class="content-header">
+                <div class="current-resource-info" id="current-info">
+                    <i class="fa-solid fa-book-open"></i> 學習資源視窗
+                </div>
+                <a id="external-link" href="#" target="_blank" class="external-link-btn">
+                    在新分頁開啟 <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>
+            </div>
+
+            <div class="iframe-container">
+                <iframe id="main-frame" src="" title="Grammar Content"></iframe>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Resource Data
+        const resources = [
+            { 
+                title: "Grammar Lemon Tree 文法檸檬樹", 
+                desc: "系統化樹狀結構，輕鬆掌握文法概念",
+                icon: "fa-tree",
+                url: "https://ducj-creator.github.io/Shirley-Grammar/" 
+            },
+            { 
+                title: "Grammar with Songs 聽歌學文法", 
+                desc: "結合杜老師自創歌曲，讓旋律加深文法記憶",
+                icon: "fa-music",
+                url: "https://ducj-creator.github.io/Shirley-AI-Music-Studio/learning/index.html" 
+            },
+            { 
+                title: "Irregular Verbs 動詞不規則", 
+                desc: "核心動詞三態變化精準整理與特訓",
+                icon: "fa-bolt",
+                url: "https://ducj-creator.github.io/Shirley-Grammar/irregular/verbs/" 
+            },
+            { 
+                title: "Irregular Nouns 名詞不規則", 
+                desc: "複數名詞不規則變化與常見易錯點",
+                icon: "fa-shapes",
+                url: "https://ducj-creator.github.io/Shirley-Grammar/irregular/nouns/" 
+            },
+            { 
+                title: "Common Polysemes 一詞多意", 
+                desc: "破解高頻核心單字的多元字義與用法",
+                icon: "fa-layer-group",
+                url: "https://ducj-creator.github.io/Shirley-Grammar/polysemy" 
+            },
+            { 
+                title: "Roots & Affixes 詞根詞綴", 
+                desc: "掌握字首字尾拆解力，倍增單字庫",
+                icon: "fa-puzzle-piece",
+                url: "https://ducj-creator.github.io/Shirley-Grammar/root%20and%20affix/" 
+            }
+        ];
+
+        // Generate Ambient Background Stars
+        function createStars() {
+            const container = document.getElementById('stars-container');
+            const count = 45;
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                const size = Math.random() * 3 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+                container.appendChild(star);
+            }
+        }
+
+        // Render Glassmorphism Cards
+        function renderCards() {
+            const grid = document.getElementById('cards-grid');
+            grid.innerHTML = '';
+
+            resources.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'glass-card';
+                card.onclick = () => loadResource(item, card);
+
+                card.innerHTML = `
+                    <div class="card-icon">
+                        <i class="fa-solid ${item.icon}"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title">${item.title}</div>
+                        <div class="card-desc">${item.desc}</div>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Load Resource into iFrame
+        function loadResource(item, cardElement) {
+            // Hide Welcome Overlay
+            document.getElementById('welcome-screen').classList.add('hidden');
+
+            // Update Active Card Style
+            document.querySelectorAll('.glass-card').forEach(el => el.classList.remove('active'));
+            cardElement.classList.add('active');
+
+            // Update Header Info
+            document.getElementById('current-info').innerHTML = `<i class="fa-solid ${item.icon}"></i> ${item.title}`;
+            document.getElementById('external-link').href = item.url;
+
+            // Update iFrame
+            const iframe = document.getElementById('main-frame');
+            iframe.src = item.url;
+        }
+
+        // Initialize Page
+        window.onload = () => {
+            createStars();
+            renderCards();
+        };
+    </script>
+</body>
+</html>
