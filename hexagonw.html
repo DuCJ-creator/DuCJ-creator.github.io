@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shirley’s Hexagon Warrior | 杜老師的六邊形戰士</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Noto+Serif+TC:wght@600;900&family=Outfit:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --velvet-deep: #050914;
+            --velvet-blue: #0c152b;
+            --velvet-mid: #142246;
+            --gold-primary: #fbbf24;
+            --gold-light: #fef08a;
+            --gold-glow: rgba(251, 191, 36, 0.4);
+            --gold-dark: #b45309;
+            --panel-bg: rgba(12, 21, 43, 0.75);
+            --border-gold: rgba(251, 191, 36, 0.25);
+            --text-gold: #fef3c7;
+            --text-sub: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+        }
+
+        body {
+            background-color: var(--velvet-deep);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            /* Velvet Blue Night Sky Radial Gradients */
+            background-image: 
+                radial-gradient(circle at 50% 30%, #1e295d 0%, transparent 60%),
+                radial-gradient(circle at 10% 80%, #0d1733 0%, transparent 50%),
+                radial-gradient(circle at 90% 10%, #162044 0%, transparent 50%);
+            position: relative;
+        }
+
+        /* Starry Night Effect Canvas Background */
+        .stars-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background-color: var(--gold-light);
+            border-radius: 50%;
+            animation: twinkle var(--duration, 3s) infinite ease-in-out;
+            opacity: var(--opacity, 0.7);
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.3); box-shadow: 0 0 8px var(--gold-primary); }
+        }
+
+        /* Header Navigation */
+        header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px 30px;
+            background: rgba(5, 9, 20, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-gold);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            color: var(--gold-primary);
+            filter: drop-shadow(0 0 10px var(--gold-primary));
+            animation: pulseStar 4s infinite ease-in-out;
+        }
+
+        @keyframes pulseStar {
+            0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 8px var(--gold-primary)); }
+            50% { transform: scale(1.1) rotate(180deg); filter: drop-shadow(0 0 18px var(--gold-light)); }
+        }
+
+        .logo-text {
+            text-align: center;
+        }
+
+        .logo-text h1 {
+            font-family: 'Cinzel', 'Noto Serif TC', serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff3a0 0%, #fbbf24 50%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+
+        .logo-text p {
+            font-size: 0.8rem;
+            color: var(--text-gold);
+            opacity: 0.85;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        /* Main Container Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 73px);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Sidebar / Hexagon Section */
+        .sidebar {
+            width: 440px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border-gold);
+            backdrop-filter: blur(12px);
+            z-index: 10;
+            overflow-y: auto;
+            box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .radar-box {
+            position: relative;
+            width: 330px;
+            height: 330px;
+            margin: 10px 0 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Hexagram & Hexagon SVG Animation */
+        svg.radar-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .hex-bg {
+            fill: rgba(20, 34, 70, 0.3);
+            stroke: rgba(251, 191, 36, 0.25);
+            stroke-width: 1.2;
+        }
+
+        .star-line {
+            stroke: var(--gold-primary);
+            stroke-width: 1.5;
+            stroke-dasharray: 6 6;
+            animation: dash 30s linear infinite;
+            filter: drop-shadow(0 0 6px var(--gold-glow));
+        }
+
+        @keyframes dash {
+            to { stroke-dashoffset: 200; }
+        }
+
+        .hex-active-area {
+            fill: rgba(251, 191, 36, 0.18);
+            stroke: var(--gold-primary);
+            stroke-width: 2.5;
+            filter: drop-shadow(0 0 12px var(--gold-primary));
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0.4;
+        }
+
+        .hex-active-area.active {
+            opacity: 1;
+            fill: rgba(251, 191, 36, 0.28);
+        }
+
+        /* Golden Star Particles on Radar Vertices */
+        .vertex-glow {
+            fill: var(--gold-light);
+            filter: drop-shadow(0 0 8px var(--gold-primary));
+            animation: pulseGlow 2s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { r: 3; opacity: 0.6; }
+            100% { r: 5; opacity: 1; filter: drop-shadow(0 0 12px var(--gold-light)); }
+        }
+
+        /* Category Node Buttons */
+        .node-btn {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #1a284e 0%, #0c152b 100%);
+            border: 2px solid var(--border-gold);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: var(--text-gold);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(251, 191, 36, 0.1);
+        }
+
+        .node-btn i {
+            font-size: 1.25rem;
+            margin-bottom: 3px;
+            color: var(--gold-primary);
+            transition: all 0.3s;
+        }
+
+        .node-btn span {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .node-btn:hover {
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 20px var(--gold-primary), inset 0 0 15px var(--gold-glow);
+            transform: translate(-50%, -50%) scale(1.12);
+            color: #fff;
+        }
+
+        .node-btn.active {
+            border-color: var(--gold-light);
+            background: radial-gradient(circle, #322508 0%, #171205 100%);
+            box-shadow: 0 0 25px var(--gold-primary), inset 0 0 20px var(--gold-glow);
+            transform: translate(-50%, -50%) scale(1.18);
+            color: #fff;
+        }
+
+        .node-btn.active i {
+            color: var(--gold-light);
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 8px var(--gold-light));
+        }
+
+        /* Resource List Panel */
+        .resource-panel {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .category-title {
+            font-family: 'Cinzel', 'Noto Serif TC', serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--gold-primary);
+            border-bottom: 1px solid var(--border-gold);
+            padding-bottom: 10px;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.2);
+        }
+
+        .link-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            list-style: none;
+        }
+
+        .link-item {
+            background: rgba(20, 34, 70, 0.4);
+            border: 1px solid rgba(251, 191, 36, 0.15);
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .link-item:hover, .link-item.active {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--gold-primary);
+            transform: translateX(6px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .link-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-gold);
+        }
+
+        .link-item.active .link-name {
+            color: #fff;
+            text-shadow: 0 0 8px var(--gold-glow);
+        }
+
+        .external-btn {
+            color: var(--text-sub);
+            font-size: 0.85rem;
+            padding: 5px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .external-btn:hover {
+            color: var(--gold-primary);
+            transform: scale(1.1);
+        }
+
+        /* Main Content Viewport (iFrame) */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(5, 9, 20, 0.6);
+            position: relative;
+        }
+
+        .content-header {
+            padding: 12px 24px;
+            background: rgba(12, 21, 43, 0.9);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-gold);
+            font-size: 0.88rem;
+        }
+
+        .current-resource-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-gold);
+            font-weight: 600;
+        }
+
+        .iframe-container {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+        }
+
+        /* Initial Landing Welcome Screen (Before selecting dimension) */
+        .welcome-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 40%, rgba(20, 34, 70, 0.95) 0%, rgba(5, 9, 20, 0.98) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            z-index: 20;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+
+        .welcome-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .welcome-hexagram {
+            font-size: 4.5rem;
+            color: var(--gold-primary);
+            margin-bottom: 24px;
+            filter: drop-shadow(0 0 20px var(--gold-primary));
+            animation: floatStar 4s infinite ease-in-out;
+        }
+
+        @keyframes floatStar {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(180deg); }
+        }
+
+        .welcome-title {
+            font-family: 'Cinzel', 'Noto Serif TC', serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff3a0 0%, #fbbf24 50%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 25px rgba(251, 191, 36, 0.3);
+        }
+
+        .welcome-desc {
+            font-size: 1.05rem;
+            color: var(--text-gold);
+            max-width: 520px;
+            line-height: 1.7;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .welcome-prompt {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(251, 191, 36, 0.12);
+            border: 1px solid var(--gold-primary);
+            padding: 10px 24px;
+            border-radius: 30px;
+            color: var(--gold-light);
+            font-size: 0.95rem;
+            font-weight: 600;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
+            animation: pulsePrompt 2s infinite;
+        }
+
+        @keyframes pulsePrompt {
+            0%, 100% { box-shadow: 0 0 15px rgba(251, 191, 36, 0.2); transform: scale(1); }
+            50% { box-shadow: 0 0 30px rgba(251, 191, 36, 0.5); transform: scale(1.03); }
+        }
+
+        /* Fallback Overlay for frame restrictions */
+        .iframe-fallback {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 9, 20, 0.96);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 30px;
+            z-index: 5;
+        }
+
+        .iframe-fallback i {
+            font-size: 3.5rem;
+            color: var(--gold-primary);
+            margin-bottom: 18px;
+            filter: drop-shadow(0 0 15px var(--gold-primary));
+        }
+
+        .iframe-fallback h2 {
+            font-family: 'Cinzel', 'Noto Serif TC', serif;
+            font-size: 1.6rem;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .iframe-fallback p {
+            color: var(--text-sub);
+            max-width: 480px;
+            margin-bottom: 24px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .open-btn {
+            background: linear-gradient(135deg, #fef08a 0%, #fbbf24 50%, #d97706 100%);
+            color: #0b132b;
+            font-weight: 800;
+            padding: 12px 28px;
+            border-radius: 30px;
+            text-decoration: none;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+            transition: all 0.3s;
+        }
+
+        .open-btn:hover {
+            transform: scale(1.06);
+            box-shadow: 0 0 30px var(--gold-primary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .main-container {
+                flex-direction: column;
+                height: auto;
+            }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-gold);
+            }
+            .content-area {
+                height: 75vh;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Starry Background Layer -->
+    <div class="stars-container" id="stars-container"></div>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="logo">
+            <div class="logo-icon"><i class="fa-solid fa-certificate"></i></div>
+            <div class="logo-text">
+                <h1>SHIRLEY'S HEXAGON WARRIOR</h1>
+                <p>杜老師的六邊形戰士 · 英語全方位自主學習基地</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        
+        <!-- Sidebar with Radar & Resources -->
+        <div class="sidebar">
+            
+            <!-- Hexagon Radar Graphic -->
+            <div class="radar-box">
+                <svg class="radar-svg" viewBox="0 0 200 200">
+                    <!-- Glowing Hexagram Lines (金色六芒星線條) -->
+                    <polygon class="star-line" points="100,20 169.3,140 30.7,140" />
+                    <polygon class="star-line" points="100,180 30.7,60 169.3,60" />
+
+                    <!-- Outer Hexagon Grid -->
+                    <polygon class="hex-bg" points="100,20 169.3,60 169.3,140 100,180 30.7,140 30.7,60" />
+                    <polygon class="hex-bg" points="100,45 151.5,75 151.5,125 100,155 48.5,125 48.5,75" />
+                    <polygon class="hex-bg" points="100,70 133.8,89.5 133.8,110.5 100,130 66.2,110.5 66.2,89.5" />
+
+                    <!-- Active Dynamic Area (Full Hexagon on start) -->
+                    <polygon id="radar-shape" class="hex-active-area" points="100,20 169.3,60 169.3,140 100,180 30.7,140 30.7,60" />
+
+                    <!-- Vertex Golden Glow Points -->
+                    <circle class="vertex-glow" cx="100" cy="20" />
+                    <circle class="vertex-glow" cx="169.3" cy="60" />
+                    <circle class="vertex-glow" cx="169.3" cy="140" />
+                    <circle class="vertex-glow" cx="100" cy="180" />
+                    <circle class="vertex-glow" cx="30.7" cy="140" />
+                    <circle class="vertex-glow" cx="30.7" cy="60" />
+                </svg>
+
+                <!-- 6 Interactive Nodes -->
+                <!-- 聽 (Top) -->
+                <div class="node-btn" style="top: 10%; left: 50%;" onclick="selectCategory('listen')">
+                    <i class="fa-solid fa-headphones"></i>
+                    <span>聽一聽</span>
+                </div>
+                <!-- 看 (Top Right) -->
+                <div class="node-btn" style="top: 30%; left: 88%;" onclick="selectCategory('watch')">
+                    <i class="fa-solid fa-circle-play"></i>
+                    <span>看一看</span>
+                </div>
+                <!-- 讀 (Bottom Right) -->
+                <div class="node-btn" style="top: 70%; left: 88%;" onclick="selectCategory('read')">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>讀一讀</span>
+                </div>
+                <!-- 說 (Bottom) -->
+                <div class="node-btn" style="top: 90%; left: 50%;" onclick="selectCategory('speak')">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>說一說</span>
+                </div>
+                <!-- 寫 (Bottom Left) -->
+                <div class="node-btn" style="top: 70%; left: 12%;" onclick="selectCategory('write')">
+                    <i class="fa-solid fa-pen-nib"></i>
+                    <span>寫一寫</span>
+                </div>
+                <!-- 考 (Top Left) -->
+                <div class="node-btn" style="top: 30%; left: 12%;" onclick="selectCategory('test')">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>考一考</span>
+                </div>
+            </div>
+
+            <!-- Resource Links List -->
+            <div class="resource-panel">
+                <div class="category-title" id="category-title">
+                    <i class="fa-solid fa-sparkles"></i> 請選擇學習維度
+                </div>
+                <ul class="link-list" id="link-list">
+                    <li style="color: var(--text-sub); text-align: center; padding: 20px; font-size: 0.88rem;">
+                        <i class="fa-solid fa-hand-pointer" style="margin-right: 6px; color: var(--gold-primary);"></i> 點擊上方六邊形圖示即可解鎖該項資源
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Main Display / iFrame Content -->
+        <div class="content-area">
+            
+            <!-- Welcome Screen Overlay (Initial State) -->
+            <div class="welcome-screen" id="welcome-screen">
+                <div class="welcome-hexagram"><i class="fa-solid fa-star-of-david"></i></div>
+                <h2 class="welcome-title">成為頂尖的六邊形戰士</h2>
+                <p class="welcome-desc">
+                    歡迎來到杜老師的英語自主學習殿堂！這裡匯集了「聽、看、讀、說、寫、考」六大核心能力的精選資源。請點擊左側星陣中的維度，展開你的全方位特訓！
+                </p>
+                <div class="welcome-prompt">
+                    <i class="fa-solid fa-compass"></i> 點擊左側六邊形節點開始學習
+                </div>
+            </div>
+
+            <div class="content-header">
+                <div class="current-resource-info" id="current-info">
+                    <i class="fa-solid fa-globe"></i> 學習資源面板
+                </div>
+                <span style="color: var(--text-sub); font-size: 0.78rem;">若受網頁安全限制，可點選右側小圖示於新分頁開啟</span>
+            </div>
+
+            <div class="iframe-container">
+                <iframe id="main-frame" src="" title="Learning Content"></iframe>
+                
+                <!-- Fallback when X-Frame-Options blocks embed -->
+                <div class="iframe-fallback" id="iframe-fallback">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <h2>受原網站安全政策限制</h2>
+                    <p>該學習平台（如 BBC、TED、VOA 等）設有安全防護，無法直接在內嵌視窗中顯示。請點擊下方按鈕前往原網站學習！</p>
+                    <a id="fallback-link" href="#" target="_blank" class="open-btn">
+                        前往原網站學習 <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Generate Starry Night Background
+        function createStars() {
+            const container = document.getElementById('stars-container');
+            const starCount = 60;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                const size = Math.random() * 3 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+                star.style.setProperty('--opacity', Math.random() * 0.7 + 0.3);
+                container.appendChild(star);
+            }
+        }
+
+        // Learning Resource Data
+        const categories = {
+            listen: {
+                title: '聽一聽 Listen a Bit',
+                icon: 'fa-headphones',
+                points: '100,20 152,68 145,132 100,150 55,132 55,68',
+                links: [
+                    { name: 'VOA: English in a Minute', url: 'https://learningenglish.voanews.com/z/3619', blockIframe: true },
+                    { name: 'BBC: 6 Minute English', url: 'https://www.bbc.co.uk/learningenglish/english/features/6-minute-english', blockIframe: true },
+                    { name: 'Test English - Listening', url: 'https://test-english.com/listening/', blockIframe: false }
+                ]
+            },
+            watch: {
+                title: '看一看 Watch a Bit',
+                icon: 'fa-circle-play',
+                points: '100,55 169.3,60 145,132 100,150 55,132 55,68',
+                links: [
+                    { name: 'Music Videos (Nostalgia Machine)', url: 'http://thenostalgiamachine.com/', blockIframe: false },
+                    { name: 'TED-Ed: Lessons Worth Sharing', url: 'https://ed.ted.com/', blockIframe: true },
+                    { name: 'TED Talks', url: 'https://www.ted.com/talks', blockIframe: true }
+                ]
+            },
+            read: {
+                title: '讀一讀 Read a Bit',
+                icon: 'fa-book-open',
+                points: '100,55 145,68 169.3,140 100,150 55,132 55,68',
+                links: [
+                    { name: 'BBC Reading Room', url: 'https://www.bbc.co.uk/learningenglish/features/the_reading_room', blockIframe: true },
+                    { name: 'News in Levels', url: 'https://www.newsinlevels.com/', blockIframe: false },
+                    { name: 'Breaking News English', url: 'https://breakingnewsenglish.com/', blockIframe: false },
+                    { name: 'Science Reading for Kids (AMNH)', url: 'https://www.amnh.org/explore/ology/reading', blockIframe: false },
+                    { name: 'Science News', url: 'https://www.sciencenews.org/', blockIframe: false },
+                    { name: 'Test English - Reading', url: 'https://test-english.com/reading/', blockIframe: false },
+                    { name: 'CHHS Monthly 刊物', url: 'https://ducj-creator.github.io/events/chhsmonthly/', blockIframe: false }
+                ]
+            },
+            speak: {
+                title: '說一說 Speak a Bit',
+                icon: 'fa-comments',
+                points: '100,55 145,68 145,132 100,180 55,132 55,68',
+                links: [
+                    { name: 'Speak & Improve', url: 'https://speakandimprove.com/', blockIframe: false },
+                    { name: 'Gliglish AI Dialogue', url: 'https://gliglish.com/free', blockIframe: false },
+                    { name: 'Shirley’s AI Speaking Coach', url: 'https://ducj-creator.github.io/Shirley-AI-Sentence-Practice/', blockIframe: false }
+                ]
+            },
+            write: {
+                title: '寫一寫 Write a Bit',
+                icon: 'fa-pen-nib',
+                points: '100,55 145,68 145,132 100,150 30.7,140 55,68',
+                links: [
+                    { name: 'Test English - Writing', url: 'https://test-english.com/writing/', blockIframe: false },
+                    { name: 'Write & Improve', url: 'https://writeandimprove.com/', blockIframe: false },
+                    { name: 'Shirley’s Writing Coach', url: 'https://ducj-creator.github.io/Shirley-AI-Writing/version2.html', blockIframe: false }
+                ]
+            },
+            test: {
+                title: '考一考 Test a Bit',
+                icon: 'fa-graduation-cap',
+                points: '100,55 145,68 145,132 100,150 55,132 30.7,60',
+                links: [
+                    { name: 'GSAT 詞彙練習', url: 'https://ducj-creator.github.io/Teacher-Shirley/study-tools/GSAT%20Vocab.html', blockIframe: false },
+                    { name: 'GSAT 綜合測驗', url: 'https://ducj-creator.github.io/Teacher-Shirley/tests/GSAT%20Comprehensive.html', blockIframe: false },
+                    { name: 'GSAT 文意選填', url: 'https://ducj-creator.github.io/Teacher-Shirley/tests/GSAT%20cloze.html', blockIframe: false },
+                    { name: 'GSAT 閱讀理解', url: 'https://ducj-creator.github.io/Teacher-Shirley/tests/gsat%20reading.html', blockIframe: false }
+                ]
+            }
+        };
+
+        // Initialize Background Stars
+        window.onload = () => {
+            createStars();
+        };
+
+        // Select Category Function
+        function selectCategory(catKey) {
+            const data = categories[catKey];
+
+            // Hide Welcome Screen
+            document.getElementById('welcome-screen').classList.add('hidden');
+
+            // 1. Update Radar Active Polygon Shape
+            const radarShape = document.getElementById('radar-shape');
+            radarShape.setAttribute('points', data.points);
+            radarShape.classList.add('active');
+
+            // 2. Update Node Buttons Active Style
+            const nodes = document.querySelectorAll('.node-btn');
+            const catKeys = ['listen', 'watch', 'read', 'speak', 'write', 'test'];
+            nodes.forEach((node, index) => {
+                if (catKeys[index] === catKey) {
+                    node.classList.add('active');
+                } else {
+                    node.classList.remove('active');
+                }
+            });
+
+            // 3. Update Category Title
+            const titleEl = document.getElementById('category-title');
+            titleEl.innerHTML = `<i class="fa-solid ${data.icon}"></i> ${data.title}`;
+
+            // 4. Render Link List
+            const listEl = document.getElementById('link-list');
+            listEl.innerHTML = '';
+
+            data.links.forEach((item, idx) => {
+                const li = document.createElement('li');
+                li.className = `link-item ${idx === 0 ? 'active' : ''}`;
+                li.onclick = () => loadResource(item, li);
+                
+                li.innerHTML = `
+                    <span class="link-name"><i class="fa-solid fa-circle-dot" style="font-size: 0.6rem; color: var(--gold-primary);"></i> ${item.name}</span>
+                    <a href="${item.url}" target="_blank" class="external-btn" title="在新分頁開啟" onclick="event.stopPropagation();">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
+                `;
+                listEl.appendChild(li);
+            });
+
+            // 5. Auto load first link in this category
+            if (data.links.length > 0) {
+                loadResource(data.links[0], listEl.children[0]);
+            }
+        }
+
+        // Load Resource into iFrame or Trigger Fallback
+        function loadResource(item, element) {
+            document.querySelectorAll('.link-item').forEach(el => el.classList.remove('active'));
+            if(element) element.classList.add('active');
+
+            document.getElementById('current-info').innerHTML = `<i class="fa-solid fa-globe"></i> ${item.name}`;
+
+            const iframe = document.getElementById('main-frame');
+            const fallback = document.getElementById('iframe-fallback');
+            const fallbackLink = document.getElementById('fallback-link');
+
+            if (item.blockIframe) {
+                iframe.style.display = 'none';
+                fallback.style.display = 'flex';
+                fallbackLink.href = item.url;
+            } else {
+                fallback.style.display = 'none';
+                iframe.style.display = 'block';
+                iframe.src = item.url;
+            }
+        }
+    </script>
+</body>
+</html>
