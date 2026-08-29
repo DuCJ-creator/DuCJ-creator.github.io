@@ -688,9 +688,60 @@
                 min-height: 80px;
             }
         }
-    </style>
+    
+        .game-container {
+            margin-top: 46px !important;
+        }
+        .hud {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        .hud a.back-to-hub,
+        .hud button.sound-toggle {
+            background: rgba(255,255,255,0.92);
+            color: #2B2A28;
+            font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-decoration: none;
+            padding: 7px 14px;
+            border-radius: 999px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+            border: 1px solid rgba(0,0,0,0.08);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            white-space: nowrap;
+            line-height: 1.2;
+        }
+        .hud a.back-to-hub:active,
+        .hud button.sound-toggle:active {
+            transform: scale(0.96);
+        }
+        @media (hover: hover) {
+            .hud a.back-to-hub:hover,
+            .hud button.sound-toggle:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 14px rgba(0,0,0,0.3);
+            }
+        }
+        @media (max-width: 480px) {
+            .hud { top: 8px; right: 8px; }
+            .hud a.back-to-hub, .hud button.sound-toggle { font-size: 0.7rem; padding: 6px 11px; }
+        }
+</style>
 </head>
 <body>
+    <div class="hud">
+        <a href="index.html" class="back-to-hub" aria-label="回到字彙護照首頁">← 生活字彙護照</a>
+        <button type="button" class="sound-toggle" id="sound-toggle" aria-pressed="true">🔊 音效已開</button>
+    </div>
     <div class="game-container">
         <h1>CAP2000 Housing & Others 單字挑戰無極限</h1>
         
@@ -759,6 +810,125 @@
 
     <!-- 煙火動畫層 -->
     <div class="firework-animation" id="firework-animation"></div>
+
+    <script>
+    (function () {
+        "use strict";
+        var STORAGE_KEY = "cap2000_sound_enabled";
+        var enabled = localStorage.getItem(STORAGE_KEY) !== "off";
+        var ctx = null;
+
+        function ensureCtx() {
+            if (!ctx) {
+                var AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return null;
+                ctx = new AC();
+            }
+            if (ctx.state === "suspended") ctx.resume();
+            return ctx;
+        }
+
+        function tone(freq, opts) {
+            if (!enabled) return;
+            var c = ensureCtx();
+            if (!c) return;
+            opts = opts || {};
+            var duration = opts.duration || 0.16;
+            var delay = opts.delay || 0;
+            var type = opts.type || "sine";
+            var peak = opts.peak || 0.08;
+            var t0 = c.currentTime + delay;
+            var osc = c.createOscillator();
+            var gain = c.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(0, t0);
+            gain.gain.linearRampToValueAtTime(peak, t0 + 0.015);
+            gain.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+            osc.connect(gain).connect(c.destination);
+            osc.start(t0);
+            osc.stop(t0 + duration + 0.03);
+        }
+
+        function playClick() {
+            tone(520, { duration: 0.09, type: "sine", peak: 0.06 });
+        }
+
+        function playStart() {
+            tone(523.25, { duration: 0.12, type: "triangle", peak: 0.09 });
+            tone(659.25, { duration: 0.12, delay: 0.09, type: "triangle", peak: 0.09 });
+            tone(783.99, { duration: 0.22, delay: 0.18, type: "triangle", peak: 0.10 });
+        }
+
+        function playCorrect(streak) {
+            streak = streak || 1;
+            var base = 587.33;
+            var lift = Math.min(streak - 1, 3) * 40;
+            tone(base + lift, { duration: 0.1, type: "sine", peak: 0.09 });
+            tone((base + lift) * 1.335, { duration: 0.16, delay: 0.08, type: "sine", peak: 0.09 });
+        }
+
+        function playWrong() {
+            tone(220, { duration: 0.16, type: "sawtooth", peak: 0.06 });
+            tone(174.61, { duration: 0.22, delay: 0.09, type: "sawtooth", peak: 0.05 });
+        }
+
+        function playTick(urgent) {
+            tone(urgent ? 880 : 660, { duration: 0.05, type: "square", peak: urgent ? 0.05 : 0.03 });
+        }
+
+        function playGameOver(good) {
+            if (good) {
+                tone(523.25, { duration: 0.14, type: "triangle", peak: 0.09 });
+                tone(659.25, { duration: 0.14, delay: 0.13, type: "triangle", peak: 0.09 });
+                tone(783.99, { duration: 0.14, delay: 0.26, type: "triangle", peak: 0.09 });
+                tone(1046.5, { duration: 0.3, delay: 0.39, type: "triangle", peak: 0.10 });
+            } else {
+                tone(392.0, { duration: 0.16, type: "sine", peak: 0.08 });
+                tone(329.63, { duration: 0.16, delay: 0.14, type: "sine", peak: 0.07 });
+                tone(261.63, { duration: 0.28, delay: 0.28, type: "sine", peak: 0.07 });
+            }
+        }
+
+        function isEnabled() { return enabled; }
+        function setEnabled(v) {
+            enabled = v;
+            localStorage.setItem(STORAGE_KEY, enabled ? "on" : "off");
+            if (enabled) ensureCtx();
+        }
+
+        window.CAPAudio = {
+            playClick: playClick,
+            playStart: playStart,
+            playCorrect: playCorrect,
+            playWrong: playWrong,
+            playTick: playTick,
+            playGameOver: playGameOver,
+            isEnabled: isEnabled,
+            setEnabled: setEnabled
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var btn = document.getElementById('sound-toggle');
+            if (!btn) return;
+            function render() {
+                btn.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+                btn.textContent = enabled ? '🔊 音效已開' : '🔇 音效關閉';
+            }
+            render();
+            btn.addEventListener('click', function () {
+                setEnabled(!enabled);
+                render();
+                if (enabled) {
+                    tone(659.25, { duration: 0.1, type: 'sine', peak: 0.08 });
+                    tone(987.77, { duration: 0.14, delay: 0.08, type: 'sine', peak: 0.08 });
+                } else {
+                    tone(440, { duration: 0.12, type: 'sine', peak: 0.07 });
+                }
+            });
+        });
+    })();
+    </script>
 
     <script>
         // 遊戲變數
@@ -1308,6 +1478,7 @@ wrong,adj.,錯誤的`;
                 alert('單字庫載入失敗！');
                 return;
             }
+            if (window.CAPAudio) window.CAPAudio.playStart();
             
             // 重置遊戲狀態
             score = 0;
@@ -1344,6 +1515,9 @@ wrong,adj.,錯誤的`;
                 if (!gameActive) return;
                 gameTimeLeft--;
                 updateGameTimeDisplay();
+                if (window.CAPAudio && gameTimeLeft <= 10 && gameTimeLeft > 0) {
+                    window.CAPAudio.playTick(gameTimeLeft <= 5);
+                }
                 if (gameTimeLeft <= 0) {
                     gameTimeLeft = 0;
                     updateGameTimeDisplay();
@@ -1546,6 +1720,7 @@ wrong,adj.,錯誤的`;
         function applyCorrectScore() {
             correctStreak++;
             wrongStreak = 0;
+            if (window.CAPAudio) window.CAPAudio.playCorrect(correctStreak);
             const bonus = correctStreak * 5;
             score += bonus;
             updateScoreUI();
@@ -1555,6 +1730,7 @@ wrong,adj.,錯誤的`;
         function applyWrongScore() {
             wrongStreak++;
             correctStreak = 0;
+            if (window.CAPAudio) window.CAPAudio.playWrong();
             const penalty = wrongStreak * 5;
             score = Math.max(0, score - penalty);
             updateScoreUI();
@@ -1611,6 +1787,8 @@ wrong,adj.,錯誤的`;
             }
             
             finalScoreDisplay.textContent = score;
+
+            if (window.CAPAudio) window.CAPAudio.playGameOver(score >= 50);
 
             if (reason === 'time') {
                 resultMessage.textContent = '時間到，挑戰結束！';
@@ -1671,6 +1849,7 @@ wrong,adj.,錯誤的`;
             // 遊戲時間選擇事件
             timeButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
+                    if (window.CAPAudio) window.CAPAudio.playClick();
                     timeButtons.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     const minutes = parseInt(btn.dataset.minutes, 10) || 5;
