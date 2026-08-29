@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>生活字彙護照 · CAP2000 會考單字特訓</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:      #FAF6EC;
+    --paper-deep: #F1EAD9;
+    --ink:        #2B2A28;
+    --ink-soft:   #6B6559;
+    --gold:       #C79A3D;
+    --clothing:   #8B4A9C;
+    --dining:     #C23B3B;
+    --housing:    #2F8F5B;
+    --transport:  #2E5C8A;
+    --line:       rgba(43,42,40,0.12);
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;
+    background:
+      radial-gradient(circle at 8% 12%, rgba(199,154,61,0.10), transparent 40%),
+      radial-gradient(circle at 92% 88%, rgba(139,74,156,0.08), transparent 45%),
+      var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  /* faint paper grain */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 42px 42px;
+    opacity:0.35;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .wrap{ position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:0 24px 80px; }
+
+  /* ---------- HERO ---------- */
+  header.hero{
+    padding:56px 0 40px;
+    text-align:center;
+    opacity:0;
+    animation: rise 0.7s ease-out forwards;
+  }
+  @keyframes rise{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:'DM Mono',monospace;
+    font-size:0.72rem;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    background:rgba(255,255,255,0.6);
+    border:1px solid var(--line);
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:22px;
+  }
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--gold); }
+
+  h1.title{
+    font-family:'Noto Serif TC',serif;
+    font-weight:900;
+    font-size:clamp(2.4rem, 6vw, 3.6rem);
+    line-height:1.25;
+    letter-spacing:0.02em;
+  }
+  h1.title .accent{
+    background: linear-gradient(180deg, transparent 62%, rgba(199,154,61,0.35) 62%);
+  }
+
+  p.sub{
+    margin:18px auto 0;
+    max-width:560px;
+    color:var(--ink-soft);
+    font-size:1rem;
+    line-height:1.8;
+  }
+
+  .stats-strip{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px 28px;
+    margin-top:30px;
+    font-family:'DM Mono',monospace;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+  }
+  .stats-strip span b{ color:var(--ink); font-weight:500; }
+
+  /* ---------- PASSPORT INTRO STRIP ---------- */
+  .passport-band{
+    margin-top:46px;
+    border-top:1px dashed var(--line);
+    border-bottom:1px dashed var(--line);
+    padding:16px 0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    font-family:'DM Mono',monospace;
+    font-size:0.74rem;
+    color:var(--ink-soft);
+    letter-spacing:0.05em;
+    flex-wrap:wrap;
+    text-align:center;
+  }
+  .passport-band .sep{ color: var(--line); }
+
+  /* ---------- GRID ---------- */
+  .grid{
+    margin-top:46px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:26px;
+  }
+  @media (max-width:720px){
+    .grid{ grid-template-columns:1fr; }
+  }
+
+  .card{
+    --c: var(--ink);
+    position:relative;
+    background:#FFFDF8;
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:30px 28px 26px;
+    text-decoration:none;
+    color:var(--ink);
+    display:block;
+    overflow:hidden;
+    box-shadow:0 1px 0 rgba(0,0,0,0.02);
+    transition: transform 0.28s cubic-bezier(.2,.8,.3,1), box-shadow 0.28s ease, border-color 0.28s ease;
+    opacity:0;
+    transform:translateY(16px);
+    animation: rise 0.6s ease-out forwards;
+  }
+  .card:nth-of-type(1){ animation-delay: .05s; }
+  .card:nth-of-type(2){ animation-delay: .12s; }
+  .card:nth-of-type(3){ animation-delay: .19s; }
+  .card:nth-of-type(4){ animation-delay: .26s; }
+
+  .card::before{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0; width:6px;
+    background:var(--c);
+    opacity:0.85;
+  }
+
+  @media (hover:hover){
+    .card:hover{
+      transform:translateY(-6px);
+      box-shadow:0 18px 34px -18px rgba(0,0,0,0.32);
+      border-color:var(--c);
+    }
+    .card:hover .stamp{ transform:rotate(-8deg) scale(1.05); opacity:1; }
+    .card:hover .cta{ gap:12px; }
+  }
+  .card:active{ transform:translateY(-2px) scale(0.994); }
+
+  .card-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:14px;
+  }
+
+  .icon-badge{
+    width:56px; height:56px;
+    border-radius:14px;
+    background: var(--c-tint, rgba(0,0,0,0.06));
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .icon-badge svg{ width:30px; height:30px; stroke:var(--c); fill:none; stroke-width:1.6; }
+
+  .stamp{
+    font-family:'Noto Serif TC',serif;
+    font-weight:900;
+    font-size:1.1rem;
+    color:var(--c);
+    border:2px solid var(--c);
+    border-radius:50%;
+    width:46px; height:46px;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0.55;
+    transform:rotate(-4deg);
+    transition:transform 0.3s ease, opacity 0.3s ease;
+    flex-shrink:0;
+  }
+
+  h2.card-title{
+    margin-top:18px;
+    font-family:'Noto Serif TC',serif;
+    font-weight:900;
+    font-size:1.5rem;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  h2.card-title .en{
+    font-family:'DM Mono',monospace;
+    font-weight:500;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+  }
+
+  p.card-desc{
+    margin-top:8px;
+    color:var(--ink-soft);
+    font-size:0.9rem;
+    line-height:1.75;
+  }
+
+  .meta-row{
+    margin-top:18px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding-top:14px;
+    border-top:1px dashed var(--line);
+  }
+  .meta-item{
+    font-family:'DM Mono',monospace;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .meta-item b{ color:var(--ink); font-weight:600; font-size:0.85rem; }
+
+  .cta{
+    margin-left:auto;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:0.84rem;
+    font-weight:700;
+    color:var(--c);
+    transition: gap 0.2s ease;
+  }
+  .cta svg{ width:14px; height:14px; stroke:var(--c); fill:none; stroke-width:2; }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    margin-top:56px;
+    text-align:center;
+    font-family:'DM Mono',monospace;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+    letter-spacing:0.04em;
+  }
+  footer .rule{
+    width:56px; height:1px;
+    background:var(--line);
+    margin:0 auto 16px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow"><span class="dot"></span> CAP 2000 · 國中會考必備字彙</div>
+    <h1 class="title">生活字彙<span class="accent">護照</span></h1>
+    <p class="sub">從食、衣、住、行四大生活主題出發，蓋滿四本單字護照，一步步征服會考必考的兩千個常用字。</p>
+    <div class="stats-strip">
+      <span>單元 <b>4</b></span>
+      <span>總單字量 <b>約 2,000</b></span>
+      <span>模式 <b>限時挑戰</b></span>
+    </div>
+  </header>
+
+  <div class="passport-band">
+    <span>選擇一本護照</span><span class="sep">·</span>
+    <span>設定挑戰時間</span><span class="sep">·</span>
+    <span>答對連續加分</span><span class="sep">·</span>
+    <span>蓋下你的字彙印章</span>
+  </div>
+
+  <main class="grid">
+
+    <!-- 衣 CLOTHING -->
+    <a class="card" href="https://ducj-creator.github.io/CAP2000%20Clothing.html" style="--c:var(--clothing); --c-tint:rgba(139,74,156,0.12)">
+      <div class="card-top">
+        <div class="icon-badge">
+          <svg viewBox="0 0 24 24"><path d="M9 4l3 2 3-2 4 3-2 3-2-1v10H8V9L6 10 4 7z" stroke-linejoin="round" stroke-linecap="round"/></svg>
+        </div>
+        <div class="stamp">衣</div>
+      </div>
+      <h2 class="card-title">衣著生活 <span class="en">Clothing &amp; Others</span></h2>
+      <p class="card-desc">從外套、配件到顏色形容詞，掌握描述穿搭與外觀的必考字彙。</p>
+      <div class="meta-row">
+        <div class="meta-item"><b>540+</b>&nbsp;字</div>
+        <div class="meta-item">萬聖節主題</div>
+        <span class="cta">開始挑戰 <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div>
+    </a>
+
+    <!-- 食 DINING -->
+    <a class="card" href="https://ducj-creator.github.io/CAP2000%20Dining.html" style="--c:var(--dining); --c-tint:rgba(194,59,59,0.12)">
+      <div class="card-top">
+        <div class="icon-badge">
+          <svg viewBox="0 0 24 24"><path d="M7 3v7a2 2 0 002 2v9M7 3v7M9 3v7M17 3c-2 1-2 5-2 7 0 1 .8 2 2 2v9M17 3v18" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="stamp">食</div>
+      </div>
+      <h2 class="card-title">飲食生活 <span class="en">Dining &amp; Others</span></h2>
+      <p class="card-desc">食物、餐具與用餐動作的常用單字，餐桌對話再也不詞窮。</p>
+      <div class="meta-row">
+        <div class="meta-item"><b>480+</b>&nbsp;字</div>
+        <div class="meta-item">Unit 1–10</div>
+        <span class="cta">開始挑戰 <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div>
+    </a>
+
+    <!-- 住 HOUSING -->
+    <a class="card" href="https://ducj-creator.github.io/CAP2000%20Housing.html" style="--c:var(--housing); --c-tint:rgba(47,143,91,0.12)">
+      <div class="card-top">
+        <div class="icon-badge">
+          <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7M6 10v10h12V10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="stamp">住</div>
+      </div>
+      <h2 class="card-title">居家生活 <span class="en">Housing &amp; Others</span></h2>
+      <p class="card-desc">房間、家具與居家動作，描述你家與生活空間的關鍵字彙。</p>
+      <div class="meta-row">
+        <div class="meta-item"><b>450+</b>&nbsp;字</div>
+        <div class="meta-item">新年主題</div>
+        <span class="cta">開始挑戰 <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div>
+    </a>
+
+    <!-- 行 TRANSPORT -->
+    <a class="card" href="https://ducj-creator.github.io/CAP2000%20Transport.html" style="--c:var(--transport); --c-tint:rgba(46,92,138,0.12)">
+      <div class="card-top">
+        <div class="icon-badge">
+          <svg viewBox="0 0 24 24"><path d="M3 16V9a2 2 0 012-2h14a2 2 0 012 2v7M3 16h18M7 16v3M17 16v3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="16" r="1.4"/><circle cx="16.5" cy="16" r="1.4"/></svg>
+        </div>
+        <div class="stamp">行</div>
+      </div>
+      <h2 class="card-title">交通生活 <span class="en">Transport &amp; Others</span></h2>
+      <p class="card-desc">交通工具、方向與路線用語，出門在外溝通無障礙。</p>
+      <div class="meta-row">
+        <div class="meta-item"><b>590+</b>&nbsp;字</div>
+        <div class="meta-item">復活節主題</div>
+        <span class="cta">開始挑戰 <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div>
+    </a>
+
+  </main>
+
+  <footer>
+    <div class="rule"></div>
+    CAP 2000 生活字彙護照 · 點選任一主題開始限時單字挑戰
+  </footer>
+
+</div>
+</body>
+</html>
