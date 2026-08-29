@@ -1591,7 +1591,7 @@ wrong,adj.,錯誤的`;
                 if (timeLeft <= 0) {
                     clearInterval(timer);
                     timer = null;
-                    // 單題時間到視為答錯，只扣分不結束遊戲
+                    // 單題時間到視為答錯；若分數歸零會立即結束遊戲
                     handleTimeout();
                 }
             }, 100);
@@ -1701,7 +1701,7 @@ wrong,adj.,錯誤的`;
                     if (gameActive) nextQuestion();
                 }, 800);
             } else {
-                // 錯誤：顯示正確選項，扣分但不結束遊戲
+                // 錯誤：顯示正確選項並扣分；若分數歸零會立即結束遊戲
                 optionElements.forEach(opt => {
                     if (opt.dataset.meaning === currentWord.meaning) {
                         opt.classList.add('correct-answer');
@@ -1726,7 +1726,7 @@ wrong,adj.,錯誤的`;
             updateScoreUI();
         }
 
-        // 錯誤計分（連續答錯遞增 -5，分數不低於 0）
+        // 錯誤計分（連續答錯遞增 -5；分數歸零時立即結束）
         function applyWrongScore() {
             wrongStreak++;
             correctStreak = 0;
@@ -1734,6 +1734,10 @@ wrong,adj.,錯誤的`;
             const penalty = wrongStreak * 5;
             score = Math.max(0, score - penalty);
             updateScoreUI();
+
+            if (score <= 0) {
+                endGame('score');
+            }
         }
         
         // 顯示正確效果
@@ -1774,8 +1778,11 @@ wrong,adj.,錯誤的`;
         
         // 結束遊戲
         function endGame(reason = 'normal') {
+            // 避免計時器或連點造成重複結束、重複送出結果
+            if (!gameActive) return;
+
             gameActive = false;
-            canAnswer = false;
+            disableOptions();
             
             if (timer) {
                 clearInterval(timer);
@@ -1792,6 +1799,8 @@ wrong,adj.,錯誤的`;
 
             if (reason === 'time') {
                 resultMessage.textContent = '時間到，挑戰結束！';
+            } else if (reason === 'score') {
+                resultMessage.textContent = '分數歸零，挑戰結束！';
             } else {
                 resultMessage.textContent = '遊戲結束！';
             }
