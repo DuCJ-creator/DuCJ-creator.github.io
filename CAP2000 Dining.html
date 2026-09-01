@@ -12,32 +12,51 @@
             -webkit-tap-highlight-color: transparent;
         }
         
+        html {
+            height: 100%;
+        }
+
         body {
             font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
             background-color: #a8e6cf;
             text-align: center;
             color: #333;
-            overflow: hidden;
-            height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             padding: 10px;
-            background-image: linear-gradient(to bottom, #a8e6cf, #88d4ba);
+            padding-top: 56px;
+            background-image:
+                radial-gradient(circle at 12% 8%, rgba(255,255,255,0.35) 0, rgba(255,255,255,0) 40%),
+                linear-gradient(to bottom, #cdeccb 0%, #a8e6cf 35%, #8fd8b8 70%, #7fcf9e 100%);
+            background-attachment: fixed;
             touch-action: manipulation;
+        }
+
+        /* 底部草地紋理，增添田園氣息 */
+        body::after {
+            content: "";
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 26px;
+            background: repeating-linear-gradient(
+                90deg,
+                #6fbf8a 0px, #6fbf8a 10px,
+                #7fcf9e 10px, #7fcf9e 20px
+            );
+            clip-path: polygon(0% 100%, 2% 40%, 4% 100%, 6% 30%, 8% 100%, 10% 45%, 12% 100%, 14% 35%, 16% 100%, 18% 40%, 20% 100%, 22% 30%, 24% 100%, 26% 45%, 28% 100%, 30% 35%, 32% 100%, 34% 40%, 36% 100%, 38% 30%, 40% 100%, 42% 45%, 44% 100%, 46% 35%, 48% 100%, 50% 40%, 52% 100%, 54% 30%, 56% 100%, 58% 45%, 60% 100%, 62% 35%, 64% 100%, 66% 40%, 68% 100%, 70% 30%, 72% 100%, 74% 45%, 76% 100%, 78% 35%, 80% 100%, 82% 40%, 84% 100%, 86% 30%, 88% 100%, 90% 45%, 92% 100%, 94% 35%, 96% 100%, 98% 40%, 100% 100%);
+            z-index: 0;
+            pointer-events: none;
         }
         
         .device-info {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            z-index: 1000;
+            display: none;
         }
         
         .game-container {
@@ -48,12 +67,16 @@
             padding: 15px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
             position: relative;
-            overflow: hidden;
+            z-index: 2;
+            overflow-x: hidden;
+            overflow-y: auto;
             border: 8px solid #ffaaa5;
+            border-image: repeating-linear-gradient(90deg, #d9985a 0 14px, #c98548 14px 16px) 8;
             display: flex;
             flex-direction: column;
-            height: 95vh;
-            max-height: 95vh;
+            height: auto;
+            max-height: calc(100vh - 90px);
+            margin-bottom: 30px;
         }
         
         h1 {
@@ -219,13 +242,14 @@
         }
         
         .character-container {
-            height: 120px;
+            height: 130px;
             margin: 10px 0;
             position: relative;
-            background-color: #f0f8ff;
+            background: linear-gradient(to bottom, #eaf6ff 0%, #eaf6ff 70%, #d9f2c4 70%, #cdeba8 100%);
             border-radius: 15px;
-            overflow: hidden;
+            overflow: visible;
             flex-shrink: 0;
+            border: 2px dashed #b7d1a0;
         }
         
         .pig {
@@ -434,15 +458,17 @@
             position: absolute;
             font-size: 25px;
             z-index: 1;
+            filter: drop-shadow(1px 2px 1px rgba(0,0,0,0.12));
         }
         
         .sun {
-            position: absolute;
+            position: fixed;
             top: 10px;
             right: 10px;
             font-size: 40px;
             color: #ffd700;
             animation: rotate 20s linear infinite;
+            z-index: 0;
         }
         
         @keyframes rotate {
@@ -451,10 +477,11 @@
         }
         
         .cloud {
-            position: absolute;
+            position: fixed;
             font-size: 30px;
             color: white;
             animation: float 15s linear infinite;
+            z-index: 0;
         }
         
         @keyframes float {
@@ -462,6 +489,89 @@
             10% { opacity: 1; }
             90% { opacity: 1; }
             100% { transform: translateX(calc(100vw + 100px)); opacity: 0; }
+        }
+
+        /* 額外的田園背景裝飾：蝴蝶、瓢蟲、穀倉、拖拉機、柵欄、草叢 */
+        .bg-critter {
+            position: fixed;
+            font-size: 26px;
+            z-index: 0;
+            pointer-events: none;
+            filter: drop-shadow(1px 2px 1px rgba(0,0,0,0.12));
+        }
+
+        .butterfly {
+            animation: flutter 9s ease-in-out infinite;
+        }
+
+        @keyframes flutter {
+            0%   { transform: translate(0, 0) rotate(0deg); }
+            25%  { transform: translate(18px, -22px) rotate(8deg); }
+            50%  { transform: translate(-10px, -10px) rotate(-6deg); }
+            75%  { transform: translate(14px, 10px) rotate(4deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        .ladybug {
+            animation: crawl 6s ease-in-out infinite;
+        }
+
+        @keyframes crawl {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(24px); }
+        }
+
+        .barn-deco {
+            position: fixed;
+            bottom: 22px;
+            left: 4%;
+            font-size: 46px;
+            z-index: 0;
+            opacity: 0.9;
+            filter: drop-shadow(2px 3px 2px rgba(0,0,0,0.15));
+        }
+
+        .tractor-deco {
+            position: fixed;
+            bottom: 22px;
+            right: 4%;
+            font-size: 42px;
+            z-index: 0;
+            opacity: 0.9;
+            animation: driveWiggle 4s ease-in-out infinite;
+            filter: drop-shadow(2px 3px 2px rgba(0,0,0,0.15));
+        }
+
+        @keyframes driveWiggle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        /* 木柵欄分隔線，用在標題下方 */
+        .fence-divider {
+            width: 100%;
+            height: 14px;
+            margin: 6px 0 12px;
+            background-image: repeating-linear-gradient(
+                90deg,
+                #e0a86a 0px, #e0a86a 8px,
+                #c98548 8px, #c98548 10px,
+                transparent 10px, transparent 22px
+            );
+            border-radius: 4px;
+            flex-shrink: 0;
+            opacity: 0.85;
+        }
+
+        @media (min-width: 1025px) {
+            .barn-deco { font-size: 64px; }
+            .tractor-deco { font-size: 58px; }
+            .bg-critter { font-size: 34px; }
+        }
+
+        @media (max-width: 480px) {
+            .barn-deco, .tractor-deco { display: none; }
+            .bg-critter { font-size: 20px; }
         }
 
         /* 设备检测和自适应样式 */
@@ -518,8 +628,8 @@
         /* 响应式设计优化 */
         @media (max-width: 768px) {
             .game-container {
-                height: 98vh;
-                max-height: 98vh;
+                height: auto;
+                max-height: calc(100vh - 70px);
                 padding: 10px;
             }
             
@@ -623,8 +733,8 @@
         @media (max-width: 480px) {
             .game-container {
                 padding: 10px;
-                height: 96vh;
-                max-height: 96vh;
+                height: auto;
+                max-height: calc(100vh - 65px);
             }
             
             h1 {
@@ -732,8 +842,8 @@
         @media (min-width: 769px) and (max-width: 1024px) {
             .game-container {
                 max-width: 700px;
-                height: 90vh;
-                max-height: 90vh;
+                height: auto;
+                max-height: calc(100vh - 80px);
             }
             
             h1 {
@@ -763,14 +873,14 @@
         @media (min-width: 1025px) {
             .game-container {
                 max-width: 900px;
-                height: 85vh;
-                max-height: 85vh;
+                height: auto;
+                max-height: calc(100vh - 90px);
                 padding: 25px;
             }
             
             h1 {
-                font-size: 2.8rem !important;
-                margin: 15px 0;
+                font-size: 2.2rem !important;
+                margin: 10px 0;
             }
             
             .options-container {
@@ -780,40 +890,40 @@
             }
             
             .option {
-                min-height: 100px !important;
-                font-size: 1.4rem !important;
-                padding: 20px !important;
+                min-height: 80px !important;
+                font-size: 1.3rem !important;
+                padding: 16px !important;
                 border-radius: 20px !important;
             }
             
             .character-container {
-                height: 160px;
-                margin: 20px 0;
+                height: 130px;
+                margin: 15px 0;
             }
             
             .pig {
-                font-size: 100px !important;
+                font-size: 80px !important;
             }
             
             .bomb {
-                font-size: 50px !important;
-                bottom: 110px;
+                font-size: 40px !important;
+                bottom: 88px;
             }
             
             .fuse {
-                bottom: 160px;
-                width: 100px;
+                bottom: 128px;
+                width: 80px;
                 height: 8px;
             }
             
             .flame {
-                bottom: 150px;
-                font-size: 30px !important;
+                bottom: 120px;
+                font-size: 24px !important;
             }
             
             .word-display {
-                font-size: 2.5rem !important;
-                margin: 20px 0;
+                font-size: 2rem !important;
+                margin: 12px 0;
             }
             
             .pos-display {
@@ -884,24 +994,24 @@
             }
             
             h1 {
-                font-size: 3.2rem !important;
+                font-size: 2.4rem !important;
             }
             
             .option {
-                min-height: 120px !important;
-                font-size: 1.6rem !important;
+                min-height: 90px !important;
+                font-size: 1.4rem !important;
             }
             
             .word-display {
-                font-size: 3rem !important;
+                font-size: 2.2rem !important;
             }
         }
         
         /* 横屏專用樣式 */
         @media (orientation: landscape) {
             .game-container {
-                height: 98vh;
-                max-height: 98vh;
+                height: auto;
+                max-height: calc(100vh - 60px);
                 padding: 10px;
             }
             
@@ -1043,9 +1153,6 @@
             }
         }
     
-        .game-container {
-            margin-top: 46px !important;
-        }
         .hud {
             position: fixed;
             top: 12px;
@@ -1101,9 +1208,15 @@
     <div class="cloud" style="top: 20px; animation-delay: 0s;">☁️</div>
     <div class="cloud" style="top: 60px; animation-delay: 5s;">☁️</div>
     <div class="cloud" style="top: 40px; animation-delay: 10s;">☁️</div>
-    
+    <div class="bg-critter butterfly" style="top: 22%; left: 6%; animation-delay: 0s;">🦋</div>
+    <div class="bg-critter butterfly" style="top: 65%; right: 8%; animation-delay: 2s;">🦋</div>
+    <div class="bg-critter ladybug" style="bottom: 30%; left: 10%; animation-delay: 1s;">🐞</div>
+    <div class="barn-deco">🏡</div>
+    <div class="tractor-deco">🚜</div>
+
     <div class="game-container">
         <h1>CAP 2000 Dining & Others 單字挑戰無極限</h1>
+        <div class="fence-divider" aria-hidden="true"></div>
         
         <div class="game-content">
             <div class="start-screen">
@@ -1115,6 +1228,8 @@
                         <div class="flame">🔥</div>
                         <div class="farm-decoration" style="bottom: 15px; left: 15px;">🌻</div>
                         <div class="farm-decoration" style="bottom: 15px; right: 15px;">🌽</div>
+                        <div class="farm-decoration" style="top: 8px; left: 8px; font-size: 18px;">🐓</div>
+                        <div class="farm-decoration" style="top: 8px; right: 8px; font-size: 18px;">🌾</div>
                     </div>
 
                     <div class="time-selector">
@@ -1153,6 +1268,8 @@
                         <div class="confetti" id="confetti"></div>
                         <div class="farm-decoration" style="bottom: 15px; left: 15px;">🐔</div>
                         <div class="farm-decoration" style="bottom: 15px; right: 15px;">🐄</div>
+                        <div class="farm-decoration" style="top: 8px; left: 8px; font-size: 18px;">🌼</div>
+                        <div class="farm-decoration" style="top: 8px; right: 8px; font-size: 18px;">🐝</div>
                     </div>
                 </div>
             </div>
@@ -1164,6 +1281,9 @@
                 <button id="restart-btn">再玩一次</button>
                 <div class="farm-decoration" style="bottom: 40px; left: 40px; font-size: 35px;">🐑</div>
                 <div class="farm-decoration" style="bottom: 20px; right: 40px; font-size: 40px;">🚜</div>
+                <div class="farm-decoration" style="top: 15px; left: 30px; font-size: 26px;">🌻</div>
+                <div class="farm-decoration" style="top: 15px; right: 30px; font-size: 26px;">🐓</div>
+                <div class="farm-decoration" style="bottom: 15px; left: 50%; transform: translateX(-50%); font-size: 22px;">🧺🥕</div>
             </div>
         </div>
         
