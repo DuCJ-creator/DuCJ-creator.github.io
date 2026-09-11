@@ -207,9 +207,10 @@ input[type=color].custom-swatch{
 #boardSvg{position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none;}
 
 .el-text, .sticky-text, .table-cell{
-  outline:none; width:100%; height:100%; cursor:default;
+  outline:none; width:100%; cursor:default;
   overflow:hidden; word-wrap:break-word;
 }
+.table-cell{height:auto;}
 .el-text, .sticky-text, .table-cell{
   -webkit-user-select:text; user-select:text; pointer-events:auto;
 }
@@ -234,7 +235,7 @@ input[type=color].custom-swatch{
 }
 .wb-table td{
   border:1.4px solid currentColor; padding:6px 8px; font-size:13px;
-  vertical-align:top; overflow:hidden;
+  height:auto; vertical-align:top; overflow:hidden;
 }
 .el-locked{pointer-events:none;}
 
@@ -1454,6 +1455,36 @@ document.getElementById('zoomFit').addEventListener('click', ()=>{
 });
 
 /* ===================== EDITING TEXT/STICKY/TABLE ===================== */
+let editingCell = null;
+
+function tableCellFromTarget(target){
+  const cell = target && target.closest ? target.closest('.table-cell') : null;
+  return cell && cell.closest('[data-type="table"]') ? cell : null;
+}
+
+function editTableCell(cell){
+  if(!cell) return;
+  const node = cell.closest('[data-id]');
+  if(!node) return;
+  const id = node.getAttribute('data-id');
+  const el = state.elements.find(x=>x.id===id);
+  if(!el || el.type!=='table') return;
+
+  // Finish a previous cell before switching, but do not let its delayed blur
+  // callback finish the newly-focused cell below.
+  if(state.editingId && (editingCell!==cell || state.editingId!==id)) finishEditing();
+  setSelection([id]);
+  cell.contentEditable='true';
+  state.editingId=id;
+  editingCell=cell;
+  requestAnimationFrame(()=>{
+    if(cell.isConnected && state.editingId===id){
+      cell.focus({preventScroll:true});
+      placeCaretEnd(cell);
+    }
+  });
+}
+
 svg.addEventListener('dblclick', (e)=>{
   const id = elIdFromEvent(e);
   if(!id) return;
@@ -1462,12 +1493,7 @@ svg.addEventListener('dblclick', (e)=>{
   if(el.type==='text' || el.type==='sticky'){ setSelection([id]); enterEdit(id); }
   else if(el.type==='table'){
     setSelection([id]);
-    let t=e.target;
-    while(t && !t.classList.contains('table-cell')) t = t.parentNode;
-    if(t && t.classList){
-      t.contentEditable='true'; t.focus(); state.editingId=id;
-      placeCaretEnd(t);
-    }
+    editTableCell(tableCellFromTarget(e.target));
   }
 });
 function enterEdit(id){
@@ -1484,12 +1510,34 @@ function enterEdit(id){
   });
 }
 elementsLayer.addEventListener('pointerdown', e=>{
+  const cell = tableCellFromTarget(e.target);
+  if(cell){
+    // A cell is an editing surface, not a drag handle. Stop this event before
+    // it reaches the SVG-level selection/drag state machine.
+    e.stopPropagation();
+    editTableCell(cell);
+    return;
+  }
   const editable = e.target.closest && e.target.closest('[contenteditable="true"]');
-  if(editable){ e.stopPropagation(); editable.focus(); }
+  if(editable){ e.stopPropagation(); editable.focus({preventScroll:true}); }
 });
 elementsLayer.addEventListener('click', e=>{
+  const cell = tableCellFromTarget(e.target);
   const editable = e.target.closest && e.target.closest('[contenteditable="true"]');
-  if(editable) e.stopPropagation();
+  if(cell || editable) e.stopPropagation();
+});
+elementsLayer.addEventListener('input', e=>{
+  const cell = tableCellFromTarget(e.target);
+  if(!cell) return;
+  const node = cell.closest('[data-id]');
+  const el = node && state.elements.find(x=>x.id===node.getAttribute('data-id'));
+  const r=+cell.dataset.r, c=+cell.dataset.c;
+  if(el && el.cells[r]){
+    // Keep the model current while typing, so a realtime update never relies
+    // solely on blur and the next broadcast contains the latest cell text.
+    el.cells[r][c] = cell.innerHTML;
+    broadcastBoard();
+  }
 });
 function placeCaretEnd(div){
   const range = document.createRange();
@@ -1497,6 +1545,7 @@ function placeCaretEnd(div){
   const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
 }
 function finishEditing(){
+  const hadEditing = !!state.editingId;
   document.querySelectorAll('[contenteditable="true"]').forEach(d=>{
     d.contentEditable='false';
     const node = d.closest('[data-id]');
@@ -1512,16 +1561,27 @@ function finishEditing(){
       }
     }
   });
-  if(state.editingId) commit();
+  if(hadEditing) commit();
   state.editingId=null;
+  editingCell=null;
 }
 elementsLayer.addEventListener('blur', (e)=>{
-  if(e.target.isContentEditable){ setTimeout(finishEditing, 60); }
+  if(e.target.isContentEditable){
+    setTimeout(()=>{
+      // Switching between cells fires blur on the old cell first. Keep the
+      // new editing surface alive when focus has already moved inside a cell.
+      const active = document.activeElement;
+      if(active && active.closest && active.closest('.table-cell[contenteditable="true"]')) return;
+      finishEditing();
+    }, 60);
+  }
 }, true);
 
 /* table toolbar actions */
 tableToolbar.addEventListener('click', (e)=>{
+  e.stopPropagation();
   const btn = e.target.closest('button'); if(!btn) return;
+  if(state.editingId) finishEditing();
   const id = tableToolbar.dataset.for;
   const el = state.elements.find(x=>x.id===id); if(!el) return;
   const act = btn.dataset.act;
@@ -1735,7 +1795,7 @@ const EXPORT_CSS = `
 .sticky-box{width:100%;height:100%;display:flex;flex-direction:column;border-radius:3px 14px 3px 14px;box-shadow:2px 6px 14px rgba(0,0,0,.16);padding:12px 12px 10px;}
 .sticky-text{flex:1;line-height:1.4;color:#2b2410;}
 .wb-table{border-collapse:collapse;width:100%;height:100%;table-layout:fixed;}
-.wb-table td{border:1.4px solid currentColor;padding:6px 8px;font-size:13px;vertical-align:top;}
+.wb-table td{border:1.4px solid currentColor;padding:6px 8px;font-size:13px;height:auto;vertical-align:top;}
 `;
 function buildExportSvgString(){
   const b = contentBBox();
