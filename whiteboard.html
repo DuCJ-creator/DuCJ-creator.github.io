@@ -186,6 +186,16 @@ input[type=color].custom-swatch{
 }
 .hint{color:var(--frame-text-dim); font-size:11.5px; opacity:.8;}
 
+.realtime-status{
+  display:flex; align-items:center; gap:7px; padding:0 8px 0 10px;
+  color:var(--frame-text-dim); font-size:11px; white-space:nowrap;
+}
+.realtime-status::before{content:''; width:7px; height:7px; border-radius:50%; background:#9BA0AC; box-shadow:0 0 0 3px rgba(155,160,172,.12);}
+.realtime-status.connected{color:#A9D9BF;}
+.realtime-status.connected::before{background:#65C98D; box-shadow:0 0 0 3px rgba(101,201,141,.14);}
+.realtime-status.error{color:#E5A28F;}
+.realtime-status.error::before{background:var(--danger); box-shadow:0 0 0 3px var(--danger-soft);}
+
 /* ===== BOARD ===== */
 .board-wrap{
   flex:1; position:relative; overflow:hidden;
@@ -351,6 +361,8 @@ input[type=color].custom-swatch{
 
     <div class="spacer"></div>
 
+    <div class="realtime-status" id="realtimeStatus" title="Realtime connection status">尚未連線</div>
+
     <div class="tool-group" style="border-right:none;">
       <div class="dropdown">
         <button class="tbtn wide tt" id="fileBtn" data-tt="Import / open"><svg viewBox="0 0 24 24" fill="none"><path d="M4 8.5V6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v1" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M3.2 9.5h17.6l-2 9.3a2 2 0 01-2 1.6H7.2a2 2 0 01-2-1.6l-2-9.3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>File</span></button>
@@ -447,6 +459,7 @@ input[type=color].custom-swatch{
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
 "use strict";
@@ -473,6 +486,77 @@ const state = {
   clipboard: null,
   editingId: null
 };
+
+/* ===================== REALTIME (EPHEMERAL) ===================== */
+// Replace these two values, or pass ?room=room-name in the URL.
+const REALTIME_CONFIG = {
+  supabaseUrl: 'https://YOUR-PROJECT.supabase.co',
+  anonKey: 'YOUR_SUPABASE_ANON_KEY',
+  room: new URLSearchParams(location.search).get('room') || 'slate-classroom'
+};
+const realtimeStatus = document.getElementById('realtimeStatus');
+let realtimeChannel = null;
+let realtimeClientId = 'client-' + Math.random().toString(36).slice(2, 10);
+let realtimeReady = false;
+let applyingRemote = false;
+
+function setRealtimeStatus(kind, message){
+  realtimeStatus.className = 'realtime-status' + (kind ? ' '+kind : '');
+  realtimeStatus.textContent = message;
+}
+function currentBoardPayload(){
+  return { elements: clone(state.elements), theme: state.theme, bgStyle: state.bgStyle, sender: realtimeClientId };
+}
+function broadcastBoard(){
+  if(!realtimeChannel || !realtimeReady || applyingRemote) return;
+  realtimeChannel.send({type:'broadcast', event:'board', payload:currentBoardPayload()}).catch(()=>{});
+}
+function applyRemoteBoard(payload){
+  if(!payload || payload.sender===realtimeClientId || !Array.isArray(payload.elements)) return;
+  applyingRemote = true;
+  state.elements = payload.elements;
+  if(payload.theme) state.theme = payload.theme;
+  if(payload.bgStyle) state.bgStyle = payload.bgStyle;
+  fullRender();
+  history = [clone(state.elements)]; hIdx = 0; updateHistBtns();
+  applyingRemote = false;
+}
+async function connectRealtime(){
+  const configured = window.supabase && REALTIME_CONFIG.supabaseUrl.startsWith('http') &&
+    !REALTIME_CONFIG.supabaseUrl.includes('YOUR-PROJECT') && !REALTIME_CONFIG.anonKey.includes('YOUR_');
+  if(!configured){
+    setRealtimeStatus('error', '請設定 Realtime');
+    toast('請在 HTML 內填入 Supabase URL 與 anon key，或先以單機模式使用。', 4200);
+    return;
+  }
+  try{
+    const client = window.supabase.createClient(REALTIME_CONFIG.supabaseUrl, REALTIME_CONFIG.anonKey, {
+      auth:{persistSession:false, autoRefreshToken:false, detectSessionInUrl:false}
+    });
+    realtimeChannel = client.channel('slate-room-' + REALTIME_CONFIG.room, {
+      config:{broadcast:{self:false}, presence:{key:realtimeClientId}}
+    });
+    realtimeChannel
+      .on('broadcast', {event:'board'}, ({payload})=>applyRemoteBoard(payload))
+      .on('broadcast', {event:'request-state'}, ({payload})=>{
+        if(payload && payload.sender!==realtimeClientId) broadcastBoard();
+      })
+      .on('presence', {event:'sync'}, ()=>{})
+      .subscribe(async status=>{
+        if(status==='SUBSCRIBED'){
+          realtimeReady = true;
+          setRealtimeStatus('connected', '已連線 · ' + REALTIME_CONFIG.room);
+          await realtimeChannel.track({joinedAt:Date.now()});
+          realtimeChannel.send({type:'broadcast', event:'request-state', payload:{sender:realtimeClientId}}).catch(()=>{});
+        } else if(status==='CHANNEL_ERROR' || status==='TIMED_OUT'){
+          realtimeReady = false; setRealtimeStatus('error', '連線失敗');
+        }
+      });
+  }catch(err){
+    realtimeReady = false; setRealtimeStatus('error', '連線失敗');
+    toast('Realtime 連線設定有誤，請檢查 Supabase URL 與 anon key。', 4200);
+  }
+}
 let uid = 1;
 const newId = () => 'el' + (uid++) + '_' + Math.random().toString(36).slice(2,7);
 
@@ -810,17 +894,17 @@ function commit(){
   hIdx++;
   if(history.length>120){ history.shift(); hIdx--; }
   updateHistBtns();
-  scheduleAutosave();
+  broadcastBoard();
 }
 function undo(){
   if(hIdx<=0) return;
   hIdx--; state.elements = clone(history[hIdx]);
-  fullRender(); updateHistBtns(); scheduleAutosave();
+  fullRender(); updateHistBtns(); broadcastBoard();
 }
 function redo(){
   if(hIdx>=history.length-1) return;
   hIdx++; state.elements = clone(history[hIdx]);
-  fullRender(); updateHistBtns(); scheduleAutosave();
+  fullRender(); updateHistBtns(); broadcastBoard();
 }
 function updateHistBtns(){
   document.getElementById('undoBtn').disabled = hIdx<=0;
@@ -1729,66 +1813,17 @@ function fitSvg(){
 }
 window.addEventListener('resize', fitSvg);
 
-/* ===================== AUTOSAVE (window.storage) ===================== */
-let autosaveTimer=null;
-function scheduleAutosave(){
-  clearTimeout(autosaveTimer);
-  autosaveTimer = setTimeout(async ()=>{
-    try{
-      if(window.storage){
-        await window.storage.set('slate-board', JSON.stringify({elements:state.elements, theme:state.theme, bgStyle:state.bgStyle}));
-      }
-    }catch(err){ /* storage unavailable — JSON export/import still works */ }
-  }, 900);
-}
-async function tryLoadAutosave(){
-  try{
-    if(window.storage){
-      const res = await window.storage.get('slate-board');
-      if(res && res.value){
-        const parsed = JSON.parse(res.value);
-        if(parsed.elements && parsed.elements.length){
-          state.elements = parsed.elements;
-          uid = 1 + Math.max(0,...state.elements.map(el=>{ const m=/el(\d+)_/.exec(el.id); return m?+m[1]:0; }));
-          if(parsed.theme) setTheme(parsed.theme);
-          if(parsed.bgStyle) setBgStyle(parsed.bgStyle);
-          fullRender();
-          history=[clone(state.elements)]; hIdx=0; updateHistBtns();
-          return true;
-        }
-      }
-    }
-  }catch(err){}
-  return false;
-}
-
-/* ===================== STARTER CONTENT ===================== */
-function seedStarterBoard(){
-  const title = makeEl({type:'text', x:-360, y:-230, w:520, h:60, html:'Welcome to your whiteboard', stroke: state.defaults.stroke, fontFamily:"'Space Grotesk', ui-sans-serif, system-ui, sans-serif", fontSize:30});
-  const sub = makeEl({type:'text', x:-360, y:-178, w:520, h:40, html:'Draw, type, drop in a table or image — everything saves as you go.', stroke: state.defaults.stroke, fontFamily:"'Space Grotesk', ui-sans-serif, system-ui, sans-serif", fontSize:15});
-  const note = makeEl({type:'sticky', x:-360, y:-90, w:190, h:170, html:'Double-click me to edit. Drag my corner to resize.', fill:'#F3C55D', rot:-3, fontFamily:"'Kalam', cursive", fontSize:16});
-  const rectA = makeEl({type:'shape', shapeKind:'rect', x:-100, y:-40, w:150, h:70, stroke:'#3E7C64', fill:'none', strokeWidth:3});
-  const rectALabel = makeEl({type:'text', x:-100, y:-15, w:150, h:24, html:'Idea', stroke:'#3E7C64', fontFamily:"'Space Grotesk', ui-sans-serif, system-ui, sans-serif", fontSize:16, align:'center'});
-  const diamondB = makeEl({type:'shape', shapeKind:'diamond', x:120, y:-55, w:140, h:100, stroke:'#3D6FB4', fill:'none', strokeWidth:3});
-  const diamondLabel = makeEl({type:'text', x:120, y:-15, w:140, h:24, html:'Decision?', stroke:'#3D6FB4', fontFamily:"'Space Grotesk', ui-sans-serif, system-ui, sans-serif", fontSize:15, align:'center'});
-  const arrow = makeEl({type:'shape', shapeKind:'arrow', x1:50, y1:-5, x2:118, y2:-5, stroke:'#8A5CB0', strokeWidth:3,
-    bindStart:{id:rectA.id, fx:1, fy:0.5}, bindEnd:{id:diamondB.id, fx:0, fy:0.5}});
-  const table = makeEl({type:'table', x:-360, y:110, w:330, h:120, rows:3, cols:3, cells:[['Week','Topic','Homework'],['1','Fractions',''],['2','Decimals','']], stroke: state.defaults.stroke, fontFamily:"'Space Grotesk', ui-sans-serif, system-ui, sans-serif"});
-  [title,sub,note,rectA,rectALabel,diamondB,diamondLabel,arrow,table].forEach((el,i)=>{ el.z=i; state.elements.push(el); });
-  fullRender();
-  history=[clone(state.elements)]; hIdx=0; updateHistBtns();
-  setTimeout(()=>document.getElementById('zoomFit').click(), 30);
-}
-
 /* ===================== INIT ===================== */
 async function init(){
   fitSvg();
   applyView();
   setBgStyle('dot');
-  const loaded = await tryLoadAutosave();
-  if(!loaded){ seedStarterBoard(); }
+  state.elements = [];
+  fullRender();
+  history=[clone(state.elements)]; hIdx=0;
   updateHistBtns();
-  toast('Welcome — this board autosaves as you work. Use File → Save to keep a copy offline.', 3200);
+  setTimeout(()=>document.getElementById('zoomFit').click(), 30);
+  connectRealtime();
 }
 init();
 
