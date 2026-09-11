@@ -210,6 +210,9 @@ input[type=color].custom-swatch{
   outline:none; width:100%; height:100%; cursor:default;
   overflow:hidden; word-wrap:break-word;
 }
+.el-text, .sticky-text, .table-cell{
+  -webkit-user-select:text; user-select:text; pointer-events:auto;
+}
 .el-text{
   padding:4px 6px; line-height:1.35; background:transparent;
 }
@@ -1472,9 +1475,21 @@ function enterEdit(id){
   if(!div) return;
   div.contentEditable='true';
   state.editingId = id;
-  div.focus();
-  placeCaretEnd(div);
+  // foreignObject editing becomes reliable after the newly-created SVG node
+  // has been painted once, especially in Safari and mobile browsers.
+  requestAnimationFrame(()=>{
+    div.focus({preventScroll:true});
+    placeCaretEnd(div);
+  });
 }
+elementsLayer.addEventListener('pointerdown', e=>{
+  const editable = e.target.closest && e.target.closest('[contenteditable="true"]');
+  if(editable){ e.stopPropagation(); editable.focus(); }
+});
+elementsLayer.addEventListener('click', e=>{
+  const editable = e.target.closest && e.target.closest('[contenteditable="true"]');
+  if(editable) e.stopPropagation();
+});
 function placeCaretEnd(div){
   const range = document.createRange();
   range.selectNodeContents(div); range.collapse(false);
