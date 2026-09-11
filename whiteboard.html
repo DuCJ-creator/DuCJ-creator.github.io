@@ -879,11 +879,12 @@ function renderEndpointHandles(el){
 }
 function positionTableToolbar(el){
   if(!el){ tableToolbar.style.display='none'; return; }
-  const r = svg.getBoundingClientRect();
-  const sx = r.left + state.view.x + el.x*state.view.scale;
-  const sy = r.top + state.view.y + el.y*state.view.scale - 40;
-  tableToolbar.style.left = sx+'px';
-  tableToolbar.style.top = Math.max(sy,4)+'px';
+  // tableToolbar is positioned inside boardWrap, so use coordinates relative
+  // to boardWrap rather than viewport coordinates from getBoundingClientRect().
+  const sx = state.view.x + el.x*state.view.scale;
+  const sy = state.view.y + el.y*state.view.scale - 52;
+  tableToolbar.style.left = Math.max(4, sx)+'px';
+  tableToolbar.style.top = Math.max(4, sy)+'px';
   tableToolbar.style.display='flex';
   tableToolbar.dataset.for = el.id;
 }
