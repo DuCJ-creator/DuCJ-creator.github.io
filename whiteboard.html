@@ -503,11 +503,13 @@ const REALTIME_CONFIG = {
 };
 const ROOM_PARAMS = new URLSearchParams(location.search);
 const realtimeRole = ROOM_PARAMS.get('role') === 'participant' ? 'participant' : 'owner';
-const realtimeClientId = sessionStorage.getItem('slate-participant-id') || ('p-' + Math.random().toString(36).slice(2,10));
-sessionStorage.setItem('slate-participant-id', realtimeClientId);
+let storedParticipantId = null;
+try{ storedParticipantId = sessionStorage.getItem('slate-participant-id'); }catch(err){}
+const realtimeClientId = storedParticipantId || ('p-' + Math.random().toString(36).slice(2,10));
+try{ sessionStorage.setItem('slate-participant-id', realtimeClientId); }catch(err){}
 if(!ROOM_PARAMS.get('room')){
   ROOM_PARAMS.set('room', REALTIME_CONFIG.room);
-  history.replaceState(null, '', location.pathname + '?' + ROOM_PARAMS.toString() + location.hash);
+  try{ history.replaceState(null, '', location.pathname + '?' + ROOM_PARAMS.toString() + location.hash); }catch(err){}
 }
 const realtimeStatus = document.getElementById('realtimeStatus');
 let realtimeChannel = null;
@@ -575,11 +577,12 @@ function applyRemoteBoard(payload){
   applyingRemote = false;
 }
 async function connectRealtime(){
+  setRealtimeStatus('', '連線中…');
   const configured = window.supabase && REALTIME_CONFIG.supabaseUrl.startsWith('http') &&
     !REALTIME_CONFIG.supabaseUrl.includes('YOUR-PROJECT') && !REALTIME_CONFIG.anonKey.includes('YOUR_');
   if(!configured){
-    setRealtimeStatus('error', '請設定 Realtime');
-    toast('請在 HTML 內填入 Supabase URL 與 anon key，或先以單機模式使用。', 4200);
+    setRealtimeStatus('error', window.supabase ? 'Realtime 設定無效' : 'Supabase SDK 載入失敗');
+    toast(window.supabase ? '請檢查 Supabase URL 與 anon key。' : '無法載入 Supabase SDK，請用網頁網址開啟此白板。', 4200);
     return;
   }
   try{
@@ -2048,7 +2051,10 @@ async function init(){
   setTimeout(()=>document.getElementById('zoomFit').click(), 30);
   connectRealtime();
 }
-init();
+init().catch(err=>{
+  console.error(err);
+  setRealtimeStatus('error', '白板初始化失敗');
+});
 
 })();
 </script>
