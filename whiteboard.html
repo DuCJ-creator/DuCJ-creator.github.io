@@ -195,6 +195,8 @@ input[type=color].custom-swatch{
 .realtime-status.connected::before{background:#65C98D; box-shadow:0 0 0 3px rgba(101,201,141,.14);}
 .realtime-status.error{color:#E5A28F;}
 .realtime-status.error::before{background:var(--danger); box-shadow:0 0 0 3px var(--danger-soft);}
+.share-btn{border:1px solid var(--frame-line);background:var(--frame);color:var(--frame-text);border-radius:7px;padding:6px 10px;font-size:11px;cursor:pointer;white-space:nowrap;}
+.share-btn:hover{background:var(--accent-soft);color:var(--accent);}
 
 /* ===== BOARD ===== */
 .board-wrap{
@@ -366,6 +368,7 @@ input[type=color].custom-swatch{
     <div class="spacer"></div>
 
     <div class="realtime-status" id="realtimeStatus" title="Realtime connection status">尚未連線</div>
+    <button class="share-btn" id="shareBtn" type="button">Share participants</button>
 
     <div class="tool-group" style="border-right:none;">
       <div class="dropdown">
@@ -496,27 +499,73 @@ const state = {
 const REALTIME_CONFIG = {
   supabaseUrl: 'https://wpklmzmerhwokfvtklnx.supabase.co',
   anonKey: 'sb_publishable_RROBN-EPYL26R3SpwaUBag_f9RLHfWu',
-  room: new URLSearchParams(location.search).get('room') || 'slate-classroom'
+  room: new URLSearchParams(location.search).get('room') || ('slate-' + Math.random().toString(36).slice(2,10))
 };
+const ROOM_PARAMS = new URLSearchParams(location.search);
+const realtimeRole = ROOM_PARAMS.get('role') === 'participant' ? 'participant' : 'owner';
+const realtimeClientId = sessionStorage.getItem('slate-participant-id') || ('p-' + Math.random().toString(36).slice(2,10));
+sessionStorage.setItem('slate-participant-id', realtimeClientId);
+if(!ROOM_PARAMS.get('room')){
+  ROOM_PARAMS.set('room', REALTIME_CONFIG.room);
+  history.replaceState(null, '', location.pathname + '?' + ROOM_PARAMS.toString() + location.hash);
+}
 const realtimeStatus = document.getElementById('realtimeStatus');
 let realtimeChannel = null;
-let realtimeClientId = 'client-' + Math.random().toString(36).slice(2, 10);
 let realtimeReady = false;
 let applyingRemote = false;
+const isOwner = realtimeRole === 'owner';
+let participantPendingOps = [];
+
+function canEditElement(el){
+  return isOwner || (!!el && el.type==='path' && el.ownerId===realtimeClientId);
+}
 
 function setRealtimeStatus(kind, message){
   realtimeStatus.className = 'realtime-status' + (kind ? ' '+kind : '');
   realtimeStatus.textContent = message;
 }
 function currentBoardPayload(){
-  return { elements: clone(state.elements), theme: state.theme, bgStyle: state.bgStyle, sender: realtimeClientId };
+  return { elements: clone(state.elements), theme: state.theme, bgStyle: state.bgStyle, sender: realtimeClientId, senderRole: realtimeRole };
 }
 function broadcastBoard(){
-  if(!realtimeChannel || !realtimeReady || applyingRemote) return;
-  realtimeChannel.send({type:'broadcast', event:'board', payload:currentBoardPayload()}).catch(()=>{});
+  if(!isOwner || !realtimeChannel || !realtimeReady || applyingRemote) return;
+  realtimeChannel.send({type:'broadcast', event:'board', payload:currentBoardPayload()})
+    .then(result=>{
+      if(result && result !== 'ok' && result.status && result.status!=='ok'){
+        toast('同步失敗：圖片或白板內容太大', 3200);
+      }
+    })
+    .catch(()=>toast('同步失敗：圖片或白板內容太大', 3200));
+}
+function broadcastParticipantOp(op){
+  if(isOwner || !realtimeChannel || !realtimeReady || applyingRemote) return;
+  realtimeChannel.send({type:'broadcast', event:'participant-op', payload:{...op, sender:realtimeClientId}}).catch(()=>toast('同步失敗，請稍後再試', 2600));
+}
+function applyParticipantOp(payload){
+  if(!payload || payload.sender===realtimeClientId) return;
+  if(payload.kind==='upsert' && payload.element && payload.element.type==='path'){
+    const el = clone(payload.element);
+    el.ownerId = payload.sender;
+    const index = state.elements.findIndex(x=>x.id===el.id);
+    if(index<0) state.elements.push(el); else state.elements[index]=el;
+    applyingRemote = true;
+    fullRender();
+    history = [clone(state.elements)]; hIdx = 0; updateHistBtns();
+    applyingRemote = false;
+  } else if(payload.kind==='remove' && payload.id){
+    const el = state.elements.find(x=>x.id===payload.id);
+    if(el && el.type==='path' && el.ownerId===payload.sender){
+      removeFromDOM(el.id);
+      state.elements = state.elements.filter(x=>x.id!==el.id);
+      applyingRemote = true;
+      clearSelection();
+      history = [clone(state.elements)]; hIdx = 0; updateHistBtns();
+      applyingRemote = false;
+    }
+  }
 }
 function applyRemoteBoard(payload){
-  if(!payload || payload.sender===realtimeClientId || !Array.isArray(payload.elements)) return;
+  if(!payload || payload.sender===realtimeClientId || payload.senderRole!=='owner' || !Array.isArray(payload.elements)) return;
   applyingRemote = true;
   state.elements = payload.elements;
   if(payload.theme) state.theme = payload.theme;
@@ -543,13 +592,14 @@ async function connectRealtime(){
     realtimeChannel
       .on('broadcast', {event:'board'}, ({payload})=>applyRemoteBoard(payload))
       .on('broadcast', {event:'request-state'}, ({payload})=>{
-        if(payload && payload.sender!==realtimeClientId) broadcastBoard();
+        if(isOwner && payload && payload.sender!==realtimeClientId) broadcastBoard();
       })
+      .on('broadcast', {event:'participant-op'}, ({payload})=>applyParticipantOp(payload))
       .on('presence', {event:'sync'}, ()=>{})
       .subscribe(async status=>{
         if(status==='SUBSCRIBED'){
           realtimeReady = true;
-          setRealtimeStatus('connected', '已連線 · ' + REALTIME_CONFIG.room);
+          setRealtimeStatus('connected', (isOwner?'Owner':'Participant') + ' · ' + REALTIME_CONFIG.room);
           await realtimeChannel.track({joinedAt:Date.now()});
           realtimeChannel.send({type:'broadcast', event:'request-state', payload:{sender:realtimeClientId}}).catch(()=>{});
         } else if(status==='CHANNEL_ERROR' || status==='TIMED_OUT'){
@@ -899,7 +949,21 @@ function commit(){
   hIdx++;
   if(history.length>120){ history.shift(); hIdx--; }
   updateHistBtns();
-  broadcastBoard();
+  if(isOwner) broadcastBoard();
+  else {
+    // Selection moves, resizes and style changes also arrive here. Publish
+    // only participant-owned paths; never send a participant board snapshot.
+    if(!participantPendingOps.length){
+      for(const id of state.selectedIds){
+        const el=state.elements.find(x=>x.id===id);
+        if(el && el.type==='path' && el.ownerId===realtimeClientId){
+          participantPendingOps.push({kind:'upsert', element:clone(el)});
+        }
+      }
+    }
+    const ops = participantPendingOps.splice(0);
+    ops.forEach(broadcastParticipantOp);
+  }
 }
 function undo(){
   if(hIdx<=0) return;
@@ -944,6 +1008,10 @@ function updateBoundConnectors(movedId){
 /* ===================== TOOL / DEFAULTS UI ===================== */
 const toolButtons = [...document.querySelectorAll('[data-tool]')];
 function setTool(t){
+  if(!isOwner && !['select','pan','pen','highlighter','eraser'].includes(t)){
+    toast('Participants can draw and erase their own drawing only', 2600);
+    return;
+  }
   state.tool = t;
   toolButtons.forEach(b=>b.classList.toggle('active', b.dataset.tool===t));
   document.getElementById('shapeBtn').classList.toggle('active', ['rect','ellipse','diamond'].includes(t));
@@ -953,6 +1021,21 @@ function setTool(t){
   syncPropsPanel();
 }
 toolButtons.forEach(b=>b.addEventListener('click', ()=>setTool(b.dataset.tool)));
+
+document.getElementById('shareBtn').addEventListener('click', async ()=>{
+  const params = new URLSearchParams(location.search);
+  params.set('room', REALTIME_CONFIG.room);
+  params.set('role', 'participant');
+  const inviteUrl = location.origin && location.origin!=='null'
+    ? location.origin + location.pathname + '?' + params.toString()
+    : location.href.split('?')[0] + '?' + params.toString();
+  try{
+    await navigator.clipboard.writeText(inviteUrl);
+    toast('Participant link copied — no login required', 3200);
+  }catch(err){
+    prompt('Copy this participant link:', inviteUrl);
+  }
+});
 
 document.getElementById('shapeBtn').addEventListener('click', (e)=>{
   e.stopPropagation();
@@ -987,6 +1070,7 @@ lockBtn.addEventListener('click', ()=>{
 
 /* clear board */
 document.getElementById('clearBtn').addEventListener('click', ()=>{
+  if(!isOwner){ toast('Only the owner can clear the whiteboard', 2600); return; }
   if(!state.elements.length) return;
   if(confirm('Clear the whole board? This cannot be undone once you leave this page.')){
     state.elements = []; clearSelection(); fullRender(); commit();
@@ -1148,6 +1232,11 @@ svg.addEventListener('pointerdown', (e)=>{
     }
     const id = elIdFromEvent(e);
     if(id){
+      const clickedEl = state.elements.find(x=>x.id===id);
+      if(!isOwner && !canEditElement(clickedEl)){
+        clearSelection();
+        return;
+      }
       if(e.shiftKey){
         const s = new Set(state.selectedIds);
         s.has(id)? s.delete(id) : s.add(id);
@@ -1179,13 +1268,15 @@ svg.addEventListener('pointerdown', (e)=>{
       type:'path', points:[[wp.x,wp.y]],
       stroke: isHi ? (state.defaults.stroke==='#FFFFFF'? '#F3C55D': state.defaults.stroke) : state.defaults.stroke,
       strokeWidth: isHi ? Math.max(state.defaults.strokeWidth*3, 14) : state.defaults.strokeWidth,
-      opacity: isHi ? 0.35 : 1
+      opacity: isHi ? 0.35 : 1,
+      ownerId: realtimeClientId
     });
     addToDOM(state.current);
     return;
   }
 
   if(state.tool==='eraser'){
+    if(!isOwner && state.tool!=='eraser') return;
     state.mode='erasing'; eraseAt(wp); return;
   }
 
@@ -1216,6 +1307,7 @@ svg.addEventListener('pointerdown', (e)=>{
   }
 
   if(state.tool==='text'){
+    if(!isOwner) return;
     const el = makeEl({type:'text', x:wp.x, y:wp.y, w:220, h:50, html:'', stroke:state.defaults.stroke, fontFamily:state.defaults.fontFamily, fontSize:state.defaults.fontSize});
     state.elements.push(el); addToDOM(el); commit();
     setSelection([el.id]);
@@ -1225,6 +1317,7 @@ svg.addEventListener('pointerdown', (e)=>{
   }
 
   if(state.tool==='sticky'){
+    if(!isOwner) return;
     const el = makeEl({type:'sticky', x:wp.x, y:wp.y, w:190, h:170, html:'', fill: state.defaults.stickyColor, rot:(Math.random()*4-2), fontFamily:"'Kalam', cursive", fontSize:16});
     state.elements.push(el); addToDOM(el); commit();
     setSelection([el.id]);
@@ -1234,6 +1327,7 @@ svg.addEventListener('pointerdown', (e)=>{
   }
 
   if(state.tool==='table'){
+    if(!isOwner) return;
     const rows=3, cols=3;
     const el = makeEl({type:'table', x:wp.x, y:wp.y, w:330, h:130, rows, cols, cells:Array.from({length:rows},()=>Array(cols).fill('')), stroke:state.defaults.stroke, fontFamily:state.defaults.fontFamily});
     state.elements.push(el); addToDOM(el); commit();
@@ -1350,6 +1444,7 @@ svg.addEventListener('pointerup', (e)=>{
       state.elements.push(state.current);
     }
     const id = state.current.id;
+    if(!isOwner) participantPendingOps.push({kind:'upsert', element:clone(state.current)});
     state.current=null;
     commit();
     if(!state.toolLocked && state.tool!=='pen' && state.tool!=='highlighter') setTool('select');
@@ -1373,6 +1468,14 @@ svg.addEventListener('pointerup', (e)=>{
   else if(state.mode==='dragging'){
     let moved=false;
     for(const o of dragOrigins){ const el=state.elements.find(x=>x.id===o.id); if(el) moved = moved || true; }
+    if(!isOwner){
+      for(const o of dragOrigins){
+        const movedEl=state.elements.find(x=>x.id===o.id);
+        if(movedEl && movedEl.type==='path' && movedEl.ownerId===realtimeClientId){
+          participantPendingOps.push({kind:'upsert', element:clone(movedEl)});
+        }
+      }
+    }
     if(moved) commit();
     renderSelection();
   }
@@ -1406,9 +1509,13 @@ function eraseAt(wp){
   let removed=false;
   for(let i=state.elements.length-1;i>=0;i--){
     const el = state.elements[i];
-    if(el.type!=='path') continue;
+    if(el.type!=='path' || (!isOwner && el.ownerId!==realtimeClientId)) continue;
     const hit = el.points.some(p=>Math.hypot(p[0]-wp.x,p[1]-wp.y)<r);
-    if(hit){ removeFromDOM(el.id); state.elements.splice(i,1); removed=true; }
+    if(hit){
+      const removedId=el.id;
+      removeFromDOM(removedId); state.elements.splice(i,1); removed=true;
+      if(!isOwner) participantPendingOps.push({kind:'remove', id:removedId});
+    }
   }
   if(removed) renderSelection();
 }
@@ -1599,12 +1706,18 @@ tableToolbar.addEventListener('click', (e)=>{
 /* ===================== DELETE / DUPLICATE / ORDER ===================== */
 function deleteSelected(){
   if(!state.selectedIds.size) return;
-  for(const id of state.selectedIds){ removeFromDOM(id); }
-  state.elements = state.elements.filter(el=>!state.selectedIds.has(el.id));
+  const ids=[...state.selectedIds].filter(id=>canEditElement(state.elements.find(x=>x.id===id)));
+  if(!ids.length) return;
+  for(const id of ids){
+    removeFromDOM(id);
+    if(!isOwner) participantPendingOps.push({kind:'remove', id});
+  }
+  state.elements = state.elements.filter(el=>!ids.includes(el.id));
   clearSelection();
   commit();
 }
 function duplicateSelected(){
+  if(!isOwner){ toast('Participants cannot duplicate or edit other objects', 2600); return; }
   if(!state.selectedIds.size) return;
   const newIds=[];
   for(const id of state.selectedIds){
@@ -1620,6 +1733,7 @@ function duplicateSelected(){
   commit();
 }
 function bringToFront(){
+  if(!isOwner){ toast('Only the owner can arrange objects', 2600); return; }
   if(!state.selectedIds.size) return;
   let maxZ = Math.max(0,...state.elements.map(e=>e.z||0));
   for(const id of state.selectedIds){
@@ -1689,6 +1803,7 @@ document.addEventListener('copy', (e)=>{
 document.addEventListener('paste', (e)=>{
   const activeIsEditable = document.activeElement && document.activeElement.isContentEditable;
   if(activeIsEditable) return;
+  if(!isOwner){ toast('Participants can draw and erase their own drawing only', 2600); return; }
   const items = e.clipboardData && e.clipboardData.items;
   if(items){
     for(const it of items){
@@ -1721,17 +1836,25 @@ document.addEventListener('paste', (e)=>{
 });
 
 /* ===================== IMAGE IMPORT ===================== */
-document.getElementById('imageBtn').addEventListener('click', ()=>document.getElementById('imageInput').click());
+document.getElementById('imageBtn').addEventListener('click', (e)=>{
+  if(!isOwner){ e.preventDefault(); toast('Only the owner can add images', 2600); return; }
+  document.getElementById('imageInput').click();
+});
 document.getElementById('imageInput').addEventListener('change', (e)=>{
   const f = e.target.files[0]; if(f) loadImageFile(f);
   e.target.value='';
 });
 function loadImageFile(file){
+  if(!isOwner){ toast('Only the owner can add images', 2600); return; }
   const reader = new FileReader();
   reader.onload = (ev)=>{
-    const src = ev.target.result;
+    const originalSrc = ev.target.result;
     const img = new Image();
     img.onload = ()=>{
+      // Blob/local URLs are not usable by another browser, and a full-size
+      // camera image can exceed Realtime's broadcast payload limit. Store a
+      // compact data URL so every connected client can render the same image.
+      const src = compactImageDataUrl(img);
       const r = svg.getBoundingClientRect();
       const c = toWorld(r.left+r.width/2, r.top+r.height/2);
       const maxW = 360;
@@ -1741,9 +1864,33 @@ function loadImageFile(file){
       state.elements.push(el); addToDOM(el); commit();
       setTool('select'); setSelection([el.id]);
     };
-    img.src = src;
+    img.src = originalSrc;
   };
   reader.readAsDataURL(file);
+}
+
+function compactImageDataUrl(img){
+  const maxDataUrlLength = 120000;
+  const maxDimension = 1400;
+  let scale = Math.min(1, maxDimension/Math.max(img.naturalWidth||img.width, img.naturalHeight||img.height));
+  let canvas = document.createElement('canvas');
+  let quality = .82;
+  let dataUrl='';
+
+  // Rebuild at a smaller size if quality reduction alone is not enough.
+  for(let pass=0; pass<5; pass++){
+    canvas.width=Math.max(1, Math.round(img.width*scale));
+    canvas.height=Math.max(1, Math.round(img.height*scale));
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#fff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    dataUrl=canvas.toDataURL('image/jpeg', quality);
+    if(dataUrl.length<=maxDataUrlLength) break;
+    if(quality>.5) quality-=.12;
+    else scale*=.72;
+  }
+  return dataUrl;
 }
 boardWrap.addEventListener('dragover', e=>e.preventDefault());
 boardWrap.addEventListener('drop', e=>{
