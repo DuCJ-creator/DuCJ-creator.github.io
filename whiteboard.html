@@ -551,7 +551,7 @@ let isOwner = realtimeRole === 'owner';
 let participantPendingOps = [];
 
 function canEditElement(el){
-  return isOwner || (!!el && el.type==='path' && el.ownerId===realtimeClientId);
+  return isOwner || (!!el && ['path','text'].includes(el.type) && el.ownerId===realtimeClientId);
 }
 
 function activeOwnerIds(){
@@ -593,7 +593,7 @@ function broadcastParticipantOp(op){
 }
 function applyParticipantOp(payload){
   if(!payload || payload.sender===realtimeClientId) return;
-  if(payload.kind==='upsert' && payload.element && payload.element.type==='path'){
+  if(payload.kind==='upsert' && payload.element && ['path','text'].includes(payload.element.type)){
     const el = clone(payload.element);
     el.ownerId = payload.sender;
     const index = state.elements.findIndex(x=>x.id===el.id);
@@ -604,7 +604,7 @@ function applyParticipantOp(payload){
     applyingRemote = false;
   } else if(payload.kind==='remove' && payload.id){
     const el = state.elements.find(x=>x.id===payload.id);
-    if(el && el.type==='path' && el.ownerId===payload.sender){
+    if(el && ['path','text'].includes(el.type) && el.ownerId===payload.sender){
       removeFromDOM(el.id);
       state.elements = state.elements.filter(x=>x.id!==el.id);
       applyingRemote = true;
@@ -1008,7 +1008,7 @@ function commit(){
     if(!participantPendingOps.length){
       for(const id of state.selectedIds){
         const el=state.elements.find(x=>x.id===id);
-        if(el && el.type==='path' && el.ownerId===realtimeClientId){
+        if(el && ['path','text'].includes(el.type) && el.ownerId===realtimeClientId){
           participantPendingOps.push({kind:'upsert', element:clone(el)});
         }
       }
@@ -1060,7 +1060,7 @@ function updateBoundConnectors(movedId){
 /* ===================== TOOL / DEFAULTS UI ===================== */
 const toolButtons = [...document.querySelectorAll('[data-tool]')];
 function setTool(t){
-  if(!isOwner && !['select','pan','pen','highlighter','eraser'].includes(t)){
+  if(!isOwner && !['select','pan','pen','highlighter','eraser','text'].includes(t)){
     toast('Participants can draw and erase their own drawing only', 2600);
     return;
   }
@@ -1410,10 +1410,10 @@ svg.addEventListener('pointerdown', (e)=>{
   }
 
   if(state.tool==='text'){
-    if(!isOwner) return;
-    const el = makeEl({type:'text', x:wp.x, y:wp.y, w:220, h:50, html:'', stroke:state.defaults.stroke, fontFamily:state.defaults.fontFamily, fontSize:state.defaults.fontSize});
-    state.elements.push(el); addToDOM(el); commit();
+    const el = makeEl({type:'text', x:wp.x, y:wp.y, w:220, h:50, html:'', stroke:state.defaults.stroke, fontFamily:state.defaults.fontFamily, fontSize:state.defaults.fontSize, ownerId:realtimeClientId});
+    state.elements.push(el); addToDOM(el);
     setSelection([el.id]);
+    commit();
     enterEdit(el.id);
     if(!state.toolLocked) setTool('select');
     return;
@@ -1574,7 +1574,7 @@ svg.addEventListener('pointerup', (e)=>{
     if(!isOwner){
       for(const o of dragOrigins){
         const movedEl=state.elements.find(x=>x.id===o.id);
-        if(movedEl && movedEl.type==='path' && movedEl.ownerId===realtimeClientId){
+        if(movedEl && ['path','text'].includes(movedEl.type) && movedEl.ownerId===realtimeClientId){
           participantPendingOps.push({kind:'upsert', element:clone(movedEl)});
         }
       }
@@ -1606,14 +1606,17 @@ svg.addEventListener('pointerup', (e)=>{
 });
 
 function eraseAt(wp){
-  // the eraser lifts ink (pen / highlighter strokes) only — use Select + Delete
-  // for shapes, text, sticky notes, tables and images.
+  // Participants can erase only their own paths and text boxes. The owner
+  // keeps the original ink-only eraser behavior for the shared board.
   const r = 14/state.view.scale;
   let removed=false;
   for(let i=state.elements.length-1;i>=0;i--){
     const el = state.elements[i];
-    if(el.type!=='path' || (!isOwner && el.ownerId!==realtimeClientId)) continue;
-    const hit = el.points.some(p=>Math.hypot(p[0]-wp.x,p[1]-wp.y)<r);
+    if(!isOwner && el.ownerId!==realtimeClientId) continue;
+    if(el.type!=='path' && !( !isOwner && el.type==='text')) continue;
+    const hit = el.type==='path'
+      ? el.points.some(p=>Math.hypot(p[0]-wp.x,p[1]-wp.y)<r)
+      : wp.x>=el.x-r && wp.x<=el.x+el.w+r && wp.y>=el.y-r && wp.y<=el.y+el.h+r;
     if(hit){
       const removedId=el.id;
       removeFromDOM(removedId); state.elements.splice(i,1); removed=true;
@@ -1700,7 +1703,10 @@ svg.addEventListener('dblclick', (e)=>{
   if(!id) return;
   const el = state.elements.find(x=>x.id===id);
   if(!el) return;
-  if(el.type==='text' || el.type==='sticky'){ setSelection([id]); enterEdit(id); }
+  if(el.type==='text' || el.type==='sticky'){
+    if(!canEditElement(el)) return;
+    setSelection([id]); enterEdit(id);
+  }
   else if(el.type==='table'){
     setSelection([id]);
     editTableCell(tableCellFromTarget(e.target));
