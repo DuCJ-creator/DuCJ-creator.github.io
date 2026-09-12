@@ -54,34 +54,17 @@
 
   /* ---------- HERO ---------- */
   header.hero{
-    padding:56px 0 40px;
+    padding:28px 0 18px;
     text-align:center;
     opacity:0;
     animation: rise 0.7s ease-out forwards;
   }
   @keyframes rise{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
 
-  .eyebrow{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    font-family:'DM Mono',monospace;
-    font-size:0.72rem;
-    letter-spacing:0.22em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    background:rgba(255,255,255,0.82);
-    border:1px solid var(--line);
-    padding:6px 14px;
-    border-radius:999px;
-    margin-bottom:22px;
-  }
-  .eyebrow .dot{ width:7px; height:7px; border-radius:50%; background:#FF8A3D; }
-
   h1.title{
     font-family:'Noto Serif TC',serif;
     font-weight:900;
-    font-size:clamp(2.4rem, 6vw, 3.6rem);
+    font-size:clamp(1.9rem, 5vw, 2.7rem);
     line-height:1.25;
     letter-spacing:0.02em;
   }
@@ -90,47 +73,16 @@
   }
 
   p.sub{
-    margin:18px auto 0;
+    margin:10px auto 0;
     max-width:560px;
     color:var(--ink-soft);
-    font-size:1rem;
-    line-height:1.8;
+    font-size:0.94rem;
+    line-height:1.7;
   }
-
-  .stats-strip{
-    display:flex;
-    justify-content:center;
-    flex-wrap:wrap;
-    gap:10px 28px;
-    margin-top:30px;
-    font-family:'DM Mono',monospace;
-    font-size:0.78rem;
-    color:var(--ink-soft);
-  }
-  .stats-strip span b{ color:var(--ink); font-weight:500; }
-
-  /* ---------- PASSPORT INTRO STRIP ---------- */
-  .passport-band{
-    margin-top:46px;
-    border-top:1px dashed var(--line);
-    border-bottom:1px dashed var(--line);
-    padding:16px 0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:14px;
-    font-family:'DM Mono',monospace;
-    font-size:0.74rem;
-    color:var(--ink-soft);
-    letter-spacing:0.05em;
-    flex-wrap:wrap;
-    text-align:center;
-  }
-  .passport-band .sep{ color: var(--line); }
 
   /* ---------- LOCAL SCOREBOOK ---------- */
   .scorebook{
-    margin-top:38px;
+    margin-top:20px;
     padding:24px;
     border:1px solid rgba(36,50,74,0.12);
     border-radius:22px;
@@ -187,77 +139,6 @@
   }
   .scorebook-clear:hover:not(:disabled){ background:#FFF0F2; color:var(--dining); }
   .scorebook-clear:disabled{ opacity:0.38; cursor:not-allowed; }
-  .score-grid{
-    margin-top:18px;
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:12px;
-  }
-  .score-card{
-    --score-c:var(--transport);
-    --score-tint:rgba(23,105,168,0.10);
-    position:relative;
-    min-width:0;
-    padding:16px;
-    border:1px solid var(--line);
-    border-radius:16px;
-    background:rgba(255,255,255,0.82);
-    overflow:hidden;
-  }
-  .score-card::before{
-    content:"";
-    position:absolute;
-    inset:0 0 auto 0;
-    height:4px;
-    background:var(--score-c);
-  }
-  .score-card-top{ display:flex; align-items:center; gap:9px; }
-  .score-card-mark{
-    width:30px;
-    height:30px;
-    border-radius:10px;
-    display:grid;
-    place-items:center;
-    background:var(--score-tint);
-    color:var(--score-c);
-    font-family:'Noto Serif TC',serif;
-    font-weight:900;
-  }
-  .score-card-name{ font-size:0.86rem; font-weight:700; }
-  .score-best-label{
-    margin-top:13px;
-    color:var(--ink-soft);
-    font-size:0.68rem;
-    letter-spacing:0.06em;
-  }
-  .score-best{
-    margin-top:1px;
-    font-family:'DM Mono',monospace;
-    color:var(--score-c);
-    font-size:1.7rem;
-    font-weight:500;
-    line-height:1.2;
-  }
-  .score-best small{ margin-left:3px; color:var(--ink-soft); font-size:0.66rem; }
-  .score-details{
-    margin-top:11px;
-    padding-top:10px;
-    border-top:1px dashed var(--line);
-    display:flex;
-    justify-content:space-between;
-    gap:8px;
-    color:var(--ink-soft);
-    font-size:0.68rem;
-  }
-  .score-updated{
-    margin-top:7px;
-    min-height:1.4em;
-    color:var(--ink-soft);
-    font-size:0.65rem;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
   .score-toast{
     position:fixed;
     left:50%;
@@ -276,19 +157,10 @@
   }
   .score-toast.show{ opacity:1; transform:translate(-50%,0); }
 
-  @media (max-width:860px){
-    .score-grid{ grid-template-columns:1fr 1fr; }
-  }
   @media (max-width:560px){
     .scorebook{ padding:19px 16px; }
     .scorebook-head{ align-items:flex-start; flex-direction:column; }
     .scorebook-summary{ justify-content:flex-start; }
-    .score-grid{ grid-template-columns:1fr; }
-    .score-card{ display:grid; grid-template-columns:1fr auto; column-gap:16px; }
-    .score-card-top, .score-details, .score-updated{ grid-column:1; }
-    .score-best-label, .score-best{ grid-column:2; text-align:right; }
-    .score-best-label{ grid-row:1; align-self:start; margin-top:2px; }
-    .score-best{ grid-row:1 / span 2; align-self:center; margin-top:14px; }
   }
 
   /* ---------- GRID ---------- */
@@ -416,6 +288,46 @@
   }
   .meta-item b{ color:var(--ink); font-weight:600; font-size:0.85rem; }
 
+  .score-row{
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px dashed var(--line);
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px 22px;
+  }
+  .score-item{ display:flex; flex-direction:column; gap:3px; }
+  .score-item-label{
+    font-family:'DM Mono',monospace;
+    font-size:0.64rem;
+    letter-spacing:0.05em;
+    color:var(--ink-soft);
+  }
+  .score-item-value{
+    font-family:'DM Mono',monospace;
+    font-size:1rem;
+    font-weight:600;
+    color:var(--c);
+  }
+  .score-item-value small{ margin-left:2px; color:var(--ink-soft); font-size:0.62rem; font-weight:400; }
+
+  .card-footer{
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px dashed var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .score-updated{
+    color:var(--ink-soft);
+    font-size:0.68rem;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
   .cta{
     margin-left:auto;
     display:inline-flex;
@@ -425,6 +337,7 @@
     font-weight:700;
     color:var(--c);
     transition: gap 0.2s ease;
+    flex-shrink:0;
   }
   .cta svg{ width:14px; height:14px; stroke:var(--c); fill:none; stroke-width:2; }
 
@@ -500,22 +413,9 @@
 <div class="wrap">
 
   <header class="hero">
-    <div class="eyebrow"><span class="dot"></span> CAP 2000 · 國中會考必備字彙</div>
     <h1 class="title">生活字彙<span class="accent">護照</span></h1>
-    <p class="sub">從食、衣、住、行四大生活主題出發，蓋滿四本單字護照，一步步征服會考必考的兩千個常用字。</p>
-    <div class="stats-strip">
-      <span>單元 <b>4</b></span>
-      <span>總單字量 <b>約 2,000</b></span>
-      <span>模式 <b>限時挑戰</b></span>
-    </div>
+    <p class="sub">選一本護照，開始限時單字挑戰。</p>
   </header>
-
-  <div class="passport-band">
-    <span>選擇一本護照</span><span class="sep">·</span>
-    <span>設定挑戰時間</span><span class="sep">·</span>
-    <span>答對連續加分</span><span class="sep">·</span>
-    <span>蓋下你的字彙印章</span>
-  </div>
 
   <section class="scorebook" aria-labelledby="scorebook-title">
     <div class="scorebook-head">
@@ -528,36 +428,6 @@
         <span class="summary-pill">累計 <b id="total-attempts">0</b> 次</span>
         <button type="button" class="scorebook-clear" id="clear-scores" disabled>清除紀錄</button>
       </div>
-    </div>
-    <div class="score-grid">
-      <article class="score-card" data-score-card="clothing" style="--score-c:var(--clothing); --score-tint:rgba(117,64,184,0.11)">
-        <div class="score-card-top"><span class="score-card-mark">衣</span><span class="score-card-name">衣著生活</span></div>
-        <div class="score-best-label">最佳分數</div>
-        <div class="score-best"><span data-best>—</span><small>分</small></div>
-        <div class="score-details"><span>最近 <b data-latest>—</b></span><span><b data-attempts>0</b> 次挑戰</span></div>
-        <div class="score-updated" data-updated>完成挑戰後自動記錄</div>
-      </article>
-      <article class="score-card" data-score-card="dining" style="--score-c:var(--dining); --score-tint:rgba(194,62,90,0.11)">
-        <div class="score-card-top"><span class="score-card-mark">食</span><span class="score-card-name">飲食生活</span></div>
-        <div class="score-best-label">最佳分數</div>
-        <div class="score-best"><span data-best>—</span><small>分</small></div>
-        <div class="score-details"><span>最近 <b data-latest>—</b></span><span><b data-attempts>0</b> 次挑戰</span></div>
-        <div class="score-updated" data-updated>完成挑戰後自動記錄</div>
-      </article>
-      <article class="score-card" data-score-card="housing" style="--score-c:var(--housing); --score-tint:rgba(8,122,88,0.11)">
-        <div class="score-card-top"><span class="score-card-mark">住</span><span class="score-card-name">居家生活</span></div>
-        <div class="score-best-label">最佳分數</div>
-        <div class="score-best"><span data-best>—</span><small>分</small></div>
-        <div class="score-details"><span>最近 <b data-latest>—</b></span><span><b data-attempts>0</b> 次挑戰</span></div>
-        <div class="score-updated" data-updated>完成挑戰後自動記錄</div>
-      </article>
-      <article class="score-card" data-score-card="transport" style="--score-c:var(--transport); --score-tint:rgba(23,105,168,0.11)">
-        <div class="score-card-top"><span class="score-card-mark">行</span><span class="score-card-name">交通生活</span></div>
-        <div class="score-best-label">最佳分數</div>
-        <div class="score-best"><span data-best>—</span><small>分</small></div>
-        <div class="score-details"><span>最近 <b data-latest>—</b></span><span><b data-attempts>0</b> 次挑戰</span></div>
-        <div class="score-updated" data-updated>完成挑戰後自動記錄</div>
-      </article>
     </div>
   </section>
 
@@ -576,6 +446,14 @@
       <div class="meta-row">
         <div class="meta-item"><b>540+</b>&nbsp;字</div>
         <div class="meta-item">萬聖節主題</div>
+      </div>
+      <div class="score-row">
+        <div class="score-item"><span class="score-item-label">最佳分數</span><span class="score-item-value"><b data-best>—</b><small>分</small></span></div>
+        <div class="score-item"><span class="score-item-label">最近一次</span><span class="score-item-value" data-latest>—</span></div>
+        <div class="score-item"><span class="score-item-label">挑戰次數</span><span class="score-item-value" data-attempts>0</span></div>
+      </div>
+      <div class="card-footer">
+        <span class="score-updated" data-updated>完成挑戰後自動記錄</span>
         <span class="cta">開始挑戰 <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </div>
     </a>
@@ -593,6 +471,14 @@
       <div class="meta-row">
         <div class="meta-item"><b>480+</b>&nbsp;字</div>
         <div class="meta-item">Unit 1–10</div>
+      </div>
+      <div class="score-row">
+        <div class="score-item"><span class="score-item-label">最佳分數</span><span class="score-item-value"><b data-best>—</b><small>分</small></span></div>
+        <div class="score-item"><span class="score-item-label">最近一次</span><span class="score-item-value" data-latest>—</span></div>
+        <div class="score-item"><span class="score-item-label">挑戰次數</span><span class="score-item-value" data-attempts>0</span></div>
+      </div>
+      <div class="card-footer">
+        <span class="score-updated" data-updated>完成挑戰後自動記錄</span>
         <span class="cta">開始挑戰 <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </div>
     </a>
@@ -610,6 +496,14 @@
       <div class="meta-row">
         <div class="meta-item"><b>450+</b>&nbsp;字</div>
         <div class="meta-item">新年主題</div>
+      </div>
+      <div class="score-row">
+        <div class="score-item"><span class="score-item-label">最佳分數</span><span class="score-item-value"><b data-best>—</b><small>分</small></span></div>
+        <div class="score-item"><span class="score-item-label">最近一次</span><span class="score-item-value" data-latest>—</span></div>
+        <div class="score-item"><span class="score-item-label">挑戰次數</span><span class="score-item-value" data-attempts>0</span></div>
+      </div>
+      <div class="card-footer">
+        <span class="score-updated" data-updated>完成挑戰後自動記錄</span>
         <span class="cta">開始挑戰 <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </div>
     </a>
@@ -627,6 +521,14 @@
       <div class="meta-row">
         <div class="meta-item"><b>590+</b>&nbsp;字</div>
         <div class="meta-item">復活節主題</div>
+      </div>
+      <div class="score-row">
+        <div class="score-item"><span class="score-item-label">最佳分數</span><span class="score-item-value"><b data-best>—</b><small>分</small></span></div>
+        <div class="score-item"><span class="score-item-label">最近一次</span><span class="score-item-value" data-latest>—</span></div>
+        <div class="score-item"><span class="score-item-label">挑戰次數</span><span class="score-item-value" data-attempts>0</span></div>
+      </div>
+      <div class="card-footer">
+        <span class="score-updated" data-updated>完成挑戰後自動記錄</span>
         <span class="cta">開始挑戰 <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </div>
     </a>
@@ -762,7 +664,7 @@
     var attempts = 0;
 
     Object.keys(passportNames).forEach(function (id) {
-      var card = document.querySelector('[data-score-card="' + id + '"]');
+      var card = document.querySelector('[data-passport="' + id + '"]');
       var record = scores[id];
       var hasRecord = record && Number.isFinite(Number(record.best));
 
