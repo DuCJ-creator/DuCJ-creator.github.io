@@ -207,6 +207,9 @@ input[type=color].custom-swatch{
 #qrCode img,#qrCode canvas{display:block;}
 .qr-link{width:100%;box-sizing:border-box;margin-bottom:10px;padding:8px;border:1px solid var(--frame-line);border-radius:7px;background:var(--frame-2);color:var(--frame-text);font-size:11px;}
 .qr-copy{border:0;border-radius:7px;padding:8px 13px;background:var(--accent);color:#0e1512;font-size:12px;cursor:pointer;}
+.format-tools{display:flex;align-items:center;gap:3px;margin-left:8px;padding-left:8px;border-left:1px solid var(--frame-line);}
+.format-btn{min-width:28px;height:27px;padding:0 7px;border:1px solid var(--frame-line);border-radius:6px;background:var(--frame-2);color:var(--frame-text);font-size:13px;cursor:pointer;}
+.format-btn:hover{background:var(--accent-soft);color:var(--accent);}
 
 /* ===== BOARD ===== */
 .board-wrap{
@@ -426,6 +429,13 @@ input[type=color].custom-swatch{
       <div class="seg" id="fontSizeSeg">
         <button data-fs="14">S</button><button data-fs="18" class="active">M</button><button data-fs="24">L</button><button data-fs="34">XL</button>
       </div>
+      <div class="format-tools" id="formatTools" aria-label="Text formatting">
+        <button class="format-btn" type="button" data-format="bold" title="Bold"><b>B</b></button>
+        <button class="format-btn" type="button" data-format="underline" title="Underline"><u>U</u></button>
+        <button class="format-btn" type="button" data-format="insertUnorderedList" title="Bullet list">•</button>
+        <button class="format-btn" type="button" data-format="insertOrderedList" title="Numbered list">1.</button>
+        <button class="format-btn" type="button" data-format="hiliteColor" data-value="#F3C55D" title="Highlight">▰</button>
+      </div>
     </div>
     <div class="props-group" id="stickyColorGroup" style="display:none;">
       <span class="props-label">Note color</span>
@@ -537,11 +547,27 @@ const realtimeStatus = document.getElementById('realtimeStatus');
 let realtimeChannel = null;
 let realtimeReady = false;
 let applyingRemote = false;
-const isOwner = realtimeRole === 'owner';
+let isOwner = realtimeRole === 'owner';
 let participantPendingOps = [];
 
 function canEditElement(el){
   return isOwner || (!!el && el.type==='path' && el.ownerId===realtimeClientId);
+}
+
+function activeOwnerIds(){
+  if(!realtimeChannel) return [];
+  const entries=Object.values(realtimeChannel.presenceState() || {}).flat();
+  return [...new Set(entries.filter(x=>x && x.role==='owner').map(x=>x.clientId).filter(Boolean))].sort();
+}
+function enforceSingleOwner(){
+  if(realtimeRole!=='owner') return;
+  const owners=activeOwnerIds();
+  const winner=owners[0] || realtimeClientId;
+  const nextIsOwner=winner===realtimeClientId;
+  if(nextIsOwner===isOwner) return;
+  isOwner=nextIsOwner;
+  setRealtimeStatus('connected', (isOwner?'Owner':'Participant') + ' · ' + REALTIME_CONFIG.room);
+  toast(isOwner ? 'You are the active owner' : 'This room already has an owner; you joined as a participant', 3600);
 }
 
 function setRealtimeStatus(kind, message){
@@ -549,7 +575,7 @@ function setRealtimeStatus(kind, message){
   realtimeStatus.textContent = message;
 }
 function currentBoardPayload(){
-  return { elements: clone(state.elements), theme: state.theme, bgStyle: state.bgStyle, sender: realtimeClientId, senderRole: realtimeRole };
+  return { elements: clone(state.elements), theme: state.theme, bgStyle: state.bgStyle, sender: realtimeClientId, senderRole: isOwner?'owner':'participant' };
 }
 function broadcastBoard(){
   if(!isOwner || !realtimeChannel || !realtimeReady || applyingRemote) return;
@@ -620,12 +646,13 @@ async function connectRealtime(){
         if(isOwner && payload && payload.sender!==realtimeClientId) broadcastBoard();
       })
       .on('broadcast', {event:'participant-op'}, ({payload})=>applyParticipantOp(payload))
-      .on('presence', {event:'sync'}, ()=>{})
+      .on('presence', {event:'sync'}, ()=>enforceSingleOwner())
       .subscribe(async status=>{
         if(status==='SUBSCRIBED'){
           realtimeReady = true;
+          await realtimeChannel.track({joinedAt:Date.now(), role:isOwner?'owner':'participant', clientId:realtimeClientId});
+          enforceSingleOwner();
           setRealtimeStatus('connected', (isOwner?'Owner':'Participant') + ' · ' + REALTIME_CONFIG.room);
-          await realtimeChannel.track({joinedAt:Date.now()});
           realtimeChannel.send({type:'broadcast', event:'request-state', payload:{sender:realtimeClientId}}).catch(()=>{});
         } else if(status==='CHANNEL_ERROR' || status==='TIMED_OUT'){
           realtimeReady = false; setRealtimeStatus('error', '連線失敗');
@@ -1046,6 +1073,34 @@ function setTool(t){
   syncPropsPanel();
 }
 toolButtons.forEach(b=>b.addEventListener('click', ()=>setTool(b.dataset.tool)));
+
+function syncEditableToModel(d){
+  if(!d) return;
+  const node=d.closest('[data-id]');
+  if(!node) return;
+  const el=state.elements.find(x=>x.id===node.getAttribute('data-id'));
+  if(!el) return;
+  if(d.classList.contains('el-text') || d.classList.contains('sticky-text')) el.html=d.innerHTML;
+  else if(d.classList.contains('table-cell')){
+    const r=+d.dataset.r, c=+d.dataset.c;
+    if(el.cells[r]) el.cells[r][c]=d.innerHTML;
+  }
+}
+
+document.querySelectorAll('[data-format]').forEach(btn=>{
+  btn.addEventListener('mousedown', e=>e.preventDefault());
+  btn.addEventListener('click', ()=>{
+    const editor=document.activeElement && document.activeElement.isContentEditable
+      ? document.activeElement : document.querySelector('[contenteditable="true"]');
+    if(!editor){ toast('Click into text first, then choose a format', 2200); return; }
+    editor.focus({preventScroll:true});
+    const command=btn.dataset.format;
+    try{ document.execCommand(command, false, btn.dataset.value || null); }
+    catch(err){ if(command==='hiliteColor') document.execCommand('backColor', false, btn.dataset.value); }
+    syncEditableToModel(editor);
+    if(isOwner) commit();
+  });
+});
 
 document.getElementById('shareBtn').addEventListener('click', async ()=>{
   const params = new URLSearchParams(location.search);
