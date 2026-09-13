@@ -153,6 +153,13 @@ input,select,textarea{font-family:inherit;}
 .slate-tab.active{background:var(--accent-soft);border-color:var(--accent);color:#b9e1cf}
 .slate-tab[disabled]{cursor:default;opacity:.8}
 .room-role{margin-left:auto;font-size:11px;color:var(--frame-text-dim);white-space:nowrap}
+.share-btn{height:30px;border:1px solid var(--accent);background:var(--accent-soft);color:#b9e1cf;border-radius:8px;padding:0 11px;font:600 12px var(--font-ui)}
+.share-btn:hover{background:rgba(79,146,119,.3)}
+.share-modal{position:fixed;inset:0;background:rgba(8,10,13,.7);display:none;align-items:center;justify-content:center;z-index:100}
+.share-modal.open{display:flex}
+.share-card{width:min(440px,calc(100vw - 28px));background:var(--frame-2);border:1px solid var(--frame-line);border-radius:16px;padding:20px;color:var(--frame-text);box-shadow:0 20px 70px rgba(0,0,0,.45)}
+.share-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.share-head h3{margin:0;font-size:17px}.share-close{border:0;background:none;color:var(--frame-text-dim);font-size:24px;cursor:pointer}
+.share-label{display:block;margin:12px 0 5px;color:var(--frame-text-dim);font-size:11px}.share-row{display:flex;gap:7px}.share-input{flex:1;min-width:0;background:var(--frame);border:1px solid var(--frame-line);border-radius:7px;color:var(--frame-text);padding:8px;font-size:12px}.share-copy{border:1px solid var(--frame-line);background:var(--frame);color:var(--frame-text);border-radius:7px;padding:0 10px}.share-copy:hover{border-color:var(--accent);color:#b9e1cf}.qr-wrap{display:flex;justify-content:center;margin:16px 0 4px}.qr-wrap canvas,.qr-wrap img{background:#fff;border-radius:8px;padding:10px;max-width:220px}.share-note{font-size:11px;line-height:1.45;color:var(--frame-text-dim);margin-top:12px}
 
 /* ===== PROPERTIES BAR (row 2) ===== */
 .props-bar{
@@ -372,6 +379,7 @@ input[type=color].custom-swatch{
     <div class="spacer"></div>
 
     <div class="realtime-status" id="realtimeStatus" title="Realtime connection status">尚未連線</div>
+    <button class="share-btn" id="shareBtn">Share / QR</button>
 
     <div class="tool-group" style="border-right:none;">
       <div class="dropdown">
@@ -438,6 +446,18 @@ input[type=color].custom-swatch{
     <span class="room-role" id="roomRole">Owner · starting…</span>
   </div>
 
+  <div class="share-modal" id="shareModal" role="dialog" aria-modal="true" aria-label="Share room">
+    <div class="share-card">
+      <div class="share-head"><h3>Share this room</h3><button class="share-close" id="shareClose" aria-label="Close">×</button></div>
+      <label class="share-label">Participant link</label>
+      <div class="share-row"><input class="share-input" id="participantLink" readonly><button class="share-copy" data-copy="participantLink">Copy</button></div>
+      <div class="qr-wrap" id="qrCode"></div>
+      <label class="share-label">Owner link</label>
+      <div class="share-row"><input class="share-input" id="ownerLink" readonly><button class="share-copy" data-copy="ownerLink">Copy</button></div>
+      <div class="share-note">Participant link 會自動加入此房間的 Participant slate。QR Code 也是 Participant link。請把這個頁面部署到可被其他裝置開啟的網址後再分享。</div>
+    </div>
+  </div>
+
   <!-- ===== BOARD ===== -->
   <div class="board-wrap" id="boardWrap">
     <div id="bgLayer"></div>
@@ -475,6 +495,7 @@ input[type=color].custom-swatch{
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
 <script>
 (function(){
 "use strict";
@@ -679,6 +700,33 @@ const bgLayer = document.getElementById('bgLayer');
 const appEl = document.getElementById('app');
 const statusNote = document.getElementById('statusNote');
 const tableToolbar = document.getElementById('tableToolbar');
+
+function buildRoomLink(role){
+  const url=new URL(location.href);
+  url.searchParams.set('room',REALTIME_CONFIG.room);
+  url.searchParams.set('role',role);
+  url.searchParams.delete('name');
+  return url.href;
+}
+function openShareDialog(){
+  const participantLink=buildRoomLink('participant');
+  document.getElementById('participantLink').value=participantLink;
+  document.getElementById('ownerLink').value=buildRoomLink('owner');
+  const qr=document.getElementById('qrCode'); qr.innerHTML='';
+  if(window.QRCode && QRCode.toCanvas){
+    const canvas=document.createElement('canvas'); qr.appendChild(canvas);
+    QRCode.toCanvas(canvas,participantLink,{width:190,margin:1,color:{dark:'#20242B',light:'#FFFFFF'}},err=>{ if(err) qr.textContent='QR Code unavailable'; });
+  } else qr.textContent='QR Code library is still loading — try again in a moment.';
+  document.getElementById('shareModal').classList.add('open');
+}
+document.getElementById('shareBtn').addEventListener('click',openShareDialog);
+document.getElementById('shareClose').addEventListener('click',()=>document.getElementById('shareModal').classList.remove('open'));
+document.getElementById('shareModal').addEventListener('click',e=>{ if(e.target.id==='shareModal') e.currentTarget.classList.remove('open'); });
+document.querySelectorAll('[data-copy]').forEach(btn=>btn.addEventListener('click',async()=>{
+  const input=document.getElementById(btn.dataset.copy); input.select();
+  try{ await navigator.clipboard.writeText(input.value); }catch(err){ document.execCommand('copy'); }
+  toast('Link copied');
+}));
 
 const domById = new Map(); // element id -> its svg group node
 
