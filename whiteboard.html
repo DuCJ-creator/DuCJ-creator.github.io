@@ -147,6 +147,13 @@ input,select,textarea{font-family:inherit;}
 .dd-item svg{width:16px;height:16px;flex-shrink:0;color:var(--frame-text-dim);}
 .dd-sep{height:1px;background:var(--frame-line); margin:4px 2px;}
 
+.slate-tabs{display:flex;align-items:center;gap:6px;min-height:42px;padding:5px 12px;background:var(--frame);border-bottom:1px solid var(--frame-line);overflow-x:auto;flex-shrink:0}
+.slate-tab{border:1px solid var(--frame-line);background:transparent;color:var(--frame-text-dim);border-radius:8px;padding:7px 12px;font:500 12px var(--font-ui);white-space:nowrap}
+.slate-tab:hover{background:var(--frame-2);color:var(--frame-text)}
+.slate-tab.active{background:var(--accent-soft);border-color:var(--accent);color:#b9e1cf}
+.slate-tab[disabled]{cursor:default;opacity:.8}
+.room-role{margin-left:auto;font-size:11px;color:var(--frame-text-dim);white-space:nowrap}
+
 /* ===== PROPERTIES BAR (row 2) ===== */
 .props-bar{
   display:flex; align-items:center; gap:14px;
@@ -195,21 +202,6 @@ input[type=color].custom-swatch{
 .realtime-status.connected::before{background:#65C98D; box-shadow:0 0 0 3px rgba(101,201,141,.14);}
 .realtime-status.error{color:#E5A28F;}
 .realtime-status.error::before{background:var(--danger); box-shadow:0 0 0 3px var(--danger-soft);}
-.share-btn{border:1px solid var(--frame-line);background:var(--frame);color:var(--frame-text);border-radius:7px;padding:6px 10px;font-size:11px;cursor:pointer;white-space:nowrap;}
-.share-btn:hover{background:var(--accent-soft);color:var(--accent);}
-.qr-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(8,12,18,.62);z-index:100;}
-.qr-modal.open{display:flex;}
-.qr-card{position:relative;width:min(360px,calc(100vw - 32px));padding:24px 22px 20px;border:1px solid var(--frame-line);border-radius:16px;background:var(--frame);color:var(--frame-text);box-shadow:0 18px 50px rgba(0,0,0,.35);text-align:center;}
-.qr-card h3{margin:0 0 6px;font-size:20px;font-weight:500;}
-.qr-card p{margin:0 0 18px;color:var(--frame-text-dim);font-size:12px;}
-.qr-close{position:absolute;right:10px;top:8px;border:0;background:none;color:var(--frame-text-dim);font-size:25px;cursor:pointer;}
-#qrCode{display:flex;justify-content:center;align-items:center;min-height:220px;margin:0 auto 16px;padding:10px;background:#fff;border-radius:8px;width:220px;}
-#qrCode img,#qrCode canvas{display:block;}
-.qr-link{width:100%;box-sizing:border-box;margin-bottom:10px;padding:8px;border:1px solid var(--frame-line);border-radius:7px;background:var(--frame-2);color:var(--frame-text);font-size:11px;}
-.qr-copy{border:0;border-radius:7px;padding:8px 13px;background:var(--accent);color:#0e1512;font-size:12px;cursor:pointer;}
-.format-tools{display:flex;align-items:center;gap:3px;margin-left:8px;padding-left:8px;border-left:1px solid var(--frame-line);}
-.format-btn{min-width:28px;height:27px;padding:0 7px;border:1px solid var(--frame-line);border-radius:6px;background:var(--frame-2);color:var(--frame-text);font-size:13px;cursor:pointer;}
-.format-btn:hover{background:var(--accent-soft);color:var(--accent);}
 
 /* ===== BOARD ===== */
 .board-wrap{
@@ -222,10 +214,9 @@ input[type=color].custom-swatch{
 #boardSvg{position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none;}
 
 .el-text, .sticky-text, .table-cell{
-  outline:none; width:100%; cursor:default;
+  outline:none; width:100%; height:100%; cursor:default;
   overflow:hidden; word-wrap:break-word;
 }
-.table-cell{height:auto;}
 .el-text, .sticky-text, .table-cell{
   -webkit-user-select:text; user-select:text; pointer-events:auto;
 }
@@ -250,7 +241,7 @@ input[type=color].custom-swatch{
 }
 .wb-table td{
   border:1.4px solid currentColor; padding:6px 8px; font-size:13px;
-  height:auto; vertical-align:top; overflow:hidden;
+  vertical-align:top; overflow:hidden;
 }
 .el-locked{pointer-events:none;}
 
@@ -381,7 +372,6 @@ input[type=color].custom-swatch{
     <div class="spacer"></div>
 
     <div class="realtime-status" id="realtimeStatus" title="Realtime connection status">尚未連線</div>
-    <button class="share-btn" id="shareBtn" type="button">Share participants</button>
 
     <div class="tool-group" style="border-right:none;">
       <div class="dropdown">
@@ -429,13 +419,6 @@ input[type=color].custom-swatch{
       <div class="seg" id="fontSizeSeg">
         <button data-fs="14">S</button><button data-fs="18" class="active">M</button><button data-fs="24">L</button><button data-fs="34">XL</button>
       </div>
-      <div class="format-tools" id="formatTools" aria-label="Text formatting">
-        <button class="format-btn" type="button" data-format="bold" title="Bold"><b>B</b></button>
-        <button class="format-btn" type="button" data-format="underline" title="Underline"><u>U</u></button>
-        <button class="format-btn" type="button" data-format="insertUnorderedList" title="Bullet list">•</button>
-        <button class="format-btn" type="button" data-format="insertOrderedList" title="Numbered list">1.</button>
-        <button class="format-btn" type="button" data-format="hiliteColor" data-value="#F3C55D" title="Highlight">▰</button>
-      </div>
     </div>
     <div class="props-group" id="stickyColorGroup" style="display:none;">
       <span class="props-label">Note color</span>
@@ -448,6 +431,11 @@ input[type=color].custom-swatch{
       <button class="tbtn tt" id="deleteBtn" data-tt="Delete (Del)" style="color:var(--danger)"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V4.8a1 1 0 011-1h4a1 1 0 011 1V7m-9 0l1 12.2A2 2 0 008 21h8a2 2 0 002-1.8L19 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
     <span class="hint" id="hintText">Tip: hold Space to pan · Ctrl + wheel to zoom</span>
+  </div>
+
+  <div class="slate-tabs" id="slateTabs">
+    <button class="slate-tab active" data-slate="main">Main</button>
+    <span class="room-role" id="roomRole">Owner · starting…</span>
   </div>
 
   <!-- ===== BOARD ===== -->
@@ -486,19 +474,7 @@ input[type=color].custom-swatch{
   </div>
 </div>
 
-<div class="qr-modal" id="qrModal" aria-hidden="true">
-  <div class="qr-card" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
-    <button class="qr-close" id="qrClose" type="button" aria-label="Close">×</button>
-    <h3 id="qrTitle">Join this whiteboard</h3>
-    <p>Scan with your phone — no login or registration required.</p>
-    <div id="qrCode"></div>
-    <input class="qr-link" id="participantLink" readonly aria-label="Participant link">
-    <button class="qr-copy" id="qrCopyBtn" type="button">Copy participant link</button>
-  </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
 (function(){
 "use strict";
@@ -526,111 +502,98 @@ const state = {
   editingId: null
 };
 
+// The active canvas remains exposed as state.elements for the existing tools,
+// while the room keeps one independent array per slate.
+const roomState = { main: [], participants: {}, participantMeta: {}, activeSlateId:'main' };
+const params = new URLSearchParams(location.search);
+const isOwner = (params.get('role') || 'owner').toLowerCase() !== 'participant';
+let participantId = null;
+let joinOrder = null;
+let displayName = params.get('name') || '';
+
 /* ===================== REALTIME (EPHEMERAL) ===================== */
 // Replace these two values, or pass ?room=room-name in the URL.
 const REALTIME_CONFIG = {
   supabaseUrl: 'https://wpklmzmerhwokfvtklnx.supabase.co',
   anonKey: 'sb_publishable_RROBN-EPYL26R3SpwaUBag_f9RLHfWu',
-  room: new URLSearchParams(location.search).get('room') || ('slate-' + Math.random().toString(36).slice(2,10))
+  room: new URLSearchParams(location.search).get('room') || 'slate-classroom'
 };
-const ROOM_PARAMS = new URLSearchParams(location.search);
-const realtimeRole = ROOM_PARAMS.get('role') === 'participant' ? 'participant' : 'owner';
-let storedParticipantId = null;
-try{ storedParticipantId = sessionStorage.getItem('slate-participant-id'); }catch(err){}
-const realtimeClientId = storedParticipantId || ('p-' + Math.random().toString(36).slice(2,10));
-try{ sessionStorage.setItem('slate-participant-id', realtimeClientId); }catch(err){}
-if(!ROOM_PARAMS.get('room')){
-  ROOM_PARAMS.set('room', REALTIME_CONFIG.room);
-  try{ history.replaceState(null, '', location.pathname + '?' + ROOM_PARAMS.toString() + location.hash); }catch(err){}
-}
 const realtimeStatus = document.getElementById('realtimeStatus');
 let realtimeChannel = null;
+let realtimeClientId = 'client-' + Math.random().toString(36).slice(2, 10);
 let realtimeReady = false;
 let applyingRemote = false;
-let isOwner = realtimeRole === 'owner';
-let participantPendingOps = [];
-
-function canEditElement(el){
-  return isOwner || (!!el && ['path','text'].includes(el.type) && el.ownerId===realtimeClientId);
-}
-
-function activeOwnerIds(){
-  if(!realtimeChannel) return [];
-  const entries=Object.values(realtimeChannel.presenceState() || {}).flat();
-  return [...new Set(entries.filter(x=>x && x.role==='owner').map(x=>x.clientId).filter(Boolean))].sort();
-}
-function enforceSingleOwner(){
-  if(realtimeRole!=='owner') return;
-  const owners=activeOwnerIds();
-  const winner=owners[0] || realtimeClientId;
-  const nextIsOwner=winner===realtimeClientId;
-  if(nextIsOwner===isOwner) return;
-  isOwner=nextIsOwner;
-  setRealtimeStatus('connected', (isOwner?'Owner':'Participant') + ' · ' + REALTIME_CONFIG.room);
-  toast(isOwner ? 'You are the active owner' : 'This room already has an owner; you joined as a participant', 3600);
-}
 
 function setRealtimeStatus(kind, message){
   realtimeStatus.className = 'realtime-status' + (kind ? ' '+kind : '');
   realtimeStatus.textContent = message;
 }
-function currentBoardPayload(){
-  return { elements: clone(state.elements), theme: state.theme, bgStyle: state.bgStyle, sender: realtimeClientId, senderRole: isOwner?'owner':'participant' };
+function sendRealtime(event, payload){
+  if(!realtimeChannel || !realtimeReady || applyingRemote) return;
+  realtimeChannel.send({type:'broadcast', event, payload:Object.assign({sender:realtimeClientId},payload)}).catch(()=>{});
 }
-function broadcastBoard(){
-  if(!isOwner || !realtimeChannel || !realtimeReady || applyingRemote) return;
-  realtimeChannel.send({type:'broadcast', event:'board', payload:currentBoardPayload()})
-    .then(result=>{
-      if(result && result !== 'ok' && result.status && result.status!=='ok'){
-        toast('同步失敗：圖片或白板內容太大', 3200);
+function ownerCopy(el){ const c=clone(el); c.ownerSourceId = el.ownerSourceId || el.id; c.id=newId(); return c; }
+function snapshotForParticipant(){ return roomState.main.map(ownerCopy); }
+function saveActiveSlate(){
+  if(roomState.activeSlateId==='main') roomState.main = state.elements;
+  else roomState.participants[roomState.activeSlateId] = state.elements;
+}
+function syncOwnerToParticipants(){
+  roomState.main = state.elements;
+  for(const pid of Object.keys(roomState.participants)){
+    const current = roomState.participants[pid] || [];
+    const bySource = new Map(current.filter(e=>e.ownerSourceId).map(e=>[e.ownerSourceId,e]));
+    const mainIds = new Set();
+    for(const source of roomState.main){
+      const sourceId = source.ownerSourceId || source.id; mainIds.add(sourceId);
+      const existing = bySource.get(sourceId);
+      if(existing){
+        const localGeometry={x:existing.x,y:existing.y,w:existing.w,h:existing.h,x1:existing.x1,y1:existing.y1,x2:existing.x2,y2:existing.y2};
+        Object.assign(existing, clone(source), {id:existing.id, ownerSourceId:sourceId});
+        for(const k of ['x','y','w','h','x1','y1','x2','y2']) if(localGeometry[k]!==undefined) existing[k]=localGeometry[k];
       }
-    })
-    .catch(()=>toast('同步失敗：圖片或白板內容太大', 3200));
-}
-function broadcastParticipantOp(op){
-  if(isOwner || !realtimeChannel || !realtimeReady || applyingRemote) return;
-  realtimeChannel.send({type:'broadcast', event:'participant-op', payload:{...op, sender:realtimeClientId}}).catch(()=>toast('同步失敗，請稍後再試', 2600));
-}
-function applyParticipantOp(payload){
-  if(!payload || payload.sender===realtimeClientId) return;
-  if(payload.kind==='upsert' && payload.element && ['path','text'].includes(payload.element.type)){
-    const el = clone(payload.element);
-    el.ownerId = payload.sender;
-    const index = state.elements.findIndex(x=>x.id===el.id);
-    if(index<0) state.elements.push(el); else state.elements[index]=el;
-    applyingRemote = true;
-    fullRender();
-    history = [clone(state.elements)]; hIdx = 0; updateHistBtns();
-    applyingRemote = false;
-  } else if(payload.kind==='remove' && payload.id){
-    const el = state.elements.find(x=>x.id===payload.id);
-    if(el && ['path','text'].includes(el.type) && el.ownerId===payload.sender){
-      removeFromDOM(el.id);
-      state.elements = state.elements.filter(x=>x.id!==el.id);
-      applyingRemote = true;
-      clearSelection();
-      history = [clone(state.elements)]; hIdx = 0; updateHistBtns();
-      applyingRemote = false;
+      else current.push(ownerCopy(source));
     }
+    roomState.participants[pid] = current.filter(e=>!e.ownerSourceId || mainIds.has(e.ownerSourceId));
+    sendRealtime('main-delta',{targetParticipantId:pid, elements:clone(roomState.participants[pid]), mainRevision:Date.now()});
   }
 }
-function applyRemoteBoard(payload){
-  if(!payload || payload.sender===realtimeClientId || payload.senderRole!=='owner' || !Array.isArray(payload.elements)) return;
-  applyingRemote = true;
-  state.elements = payload.elements;
-  if(payload.theme) state.theme = payload.theme;
-  if(payload.bgStyle) state.bgStyle = payload.bgStyle;
-  fullRender();
-  history = [clone(state.elements)]; hIdx = 0; updateHistBtns();
-  applyingRemote = false;
+function applySlateSnapshot(payload){
+  if(!payload || payload.sender===realtimeClientId || !Array.isArray(payload.elements)) return;
+  const target = payload.slateId || payload.targetParticipantId;
+  if(target==='main' && isOwner) roomState.main = payload.elements;
+  else if(target && target !== 'main') roomState.participants[target] = payload.elements;
+  const active = roomState.activeSlateId;
+  if(target===active || (target===participantId && active===participantId)){
+    applyingRemote=true; state.elements = target==='main' ? roomState.main : roomState.participants[target];
+    fullRender(); history=[clone(state.elements)]; hIdx=0; updateHistBtns(); applyingRemote=false;
+  }
+  if(isOwner) renderSlateTabs();
+}
+function assignParticipant(payload){
+  if(isOwner || !payload || payload.targetClientId!==realtimeClientId) return;
+  participantId=payload.participantId; joinOrder=payload.joinOrder; displayName=displayName||payload.displayName||('Participant '+joinOrder);
+  roomState.participants[participantId]=payload.elements||[]; activateSlate(participantId);
+  realtimeChannel && realtimeChannel.track({joinedAt:Date.now(),role:'participant',clientId:realtimeClientId,participantId,displayName});
+  document.getElementById('roomRole').textContent='Participant '+joinOrder+' · Connected';
+  sendRealtime('request-main-snapshot',{targetParticipantId:participantId});
+}
+function handleJoin(payload){
+  if(!isOwner || !payload || payload.sender===realtimeClientId) return;
+  const existing = Object.keys(roomState.participantMeta).find(p=>roomState.participantMeta[p].clientId===payload.sender);
+  const pid = existing || ('p'+(Object.keys(roomState.participantMeta).length+1));
+  const order = existing ? roomState.participantMeta[pid].joinOrder : Object.keys(roomState.participantMeta).length+1;
+  if(!existing){ roomState.participantMeta[pid]={clientId:payload.sender,joinOrder:order,displayName:payload.displayName||('Participant '+order)}; roomState.participants[pid]=snapshotForParticipant(); }
+  sendRealtime('assign-participant',{targetClientId:payload.sender,participantId:pid,joinOrder:order,displayName:roomState.participantMeta[pid].displayName,elements:clone(roomState.participants[pid])});
+  sendRealtime('participant-snapshot',{targetParticipantId:pid,elements:clone(roomState.participants[pid])});
+  renderSlateTabs();
 }
 async function connectRealtime(){
-  setRealtimeStatus('', '連線中…');
   const configured = window.supabase && REALTIME_CONFIG.supabaseUrl.startsWith('http') &&
     !REALTIME_CONFIG.supabaseUrl.includes('YOUR-PROJECT') && !REALTIME_CONFIG.anonKey.includes('YOUR_');
   if(!configured){
-    setRealtimeStatus('error', window.supabase ? 'Realtime 設定無效' : 'Supabase SDK 載入失敗');
-    toast(window.supabase ? '請檢查 Supabase URL 與 anon key。' : '無法載入 Supabase SDK，請用網頁網址開啟此白板。', 4200);
+    setRealtimeStatus('error', '請設定 Realtime');
+    toast('請在 HTML 內填入 Supabase URL 與 anon key，或先以單機模式使用。', 4200);
     return;
   }
   try{
@@ -641,19 +604,52 @@ async function connectRealtime(){
       config:{broadcast:{self:false}, presence:{key:realtimeClientId}}
     });
     realtimeChannel
-      .on('broadcast', {event:'board'}, ({payload})=>applyRemoteBoard(payload))
-      .on('broadcast', {event:'request-state'}, ({payload})=>{
-        if(isOwner && payload && payload.sender!==realtimeClientId) broadcastBoard();
+      .on('broadcast', {event:'join'}, ({payload})=>handleJoin(payload))
+      .on('broadcast', {event:'assign-participant'}, ({payload})=>assignParticipant(payload))
+      .on('broadcast', {event:'request-main-snapshot'}, ({payload})=>{
+        if(isOwner && payload && payload.targetParticipantId) sendRealtime('participant-snapshot',{targetParticipantId:payload.targetParticipantId,elements:clone(roomState.participants[payload.targetParticipantId]||snapshotForParticipant())});
       })
-      .on('broadcast', {event:'participant-op'}, ({payload})=>applyParticipantOp(payload))
-      .on('presence', {event:'sync'}, ()=>enforceSingleOwner())
+      .on('broadcast', {event:'participant-snapshot'}, ({payload})=>{
+        if(payload && (!payload.targetParticipantId || payload.targetParticipantId===participantId)) applySlateSnapshot(Object.assign({},payload,{slateId:participantId}));
+      })
+      .on('broadcast', {event:'request-participant-snapshot'}, ({payload})=>{
+        if(!isOwner && payload && payload.targetParticipantId===participantId) sendRealtime('participant-delta',{targetParticipantId:participantId,slateId:participantId,elements:clone(state.elements)});
+      })
+      .on('broadcast', {event:'main-delta'}, ({payload})=>{
+        if(payload && payload.targetParticipantId===participantId) applySlateSnapshot(Object.assign({},payload,{slateId:participantId}));
+        else if(isOwner && payload && payload.targetParticipantId) { roomState.participants[payload.targetParticipantId]=payload.elements||[]; renderSlateTabs(); }
+      })
+      .on('broadcast', {event:'participant-delta'}, ({payload})=>{
+        if(isOwner && payload && payload.targetParticipantId){ roomState.participants[payload.targetParticipantId]=payload.elements||[]; if(roomState.activeSlateId===payload.targetParticipantId) applySlateSnapshot(Object.assign({},payload,{slateId:payload.targetParticipantId})); renderSlateTabs(); }
+      })
+      .on('presence', {event:'sync'}, ()=>{
+        if(isOwner){
+          const presence=realtimeChannel.presenceState();
+          Object.values(presence).flat().forEach(meta=>{
+            if(meta.participantId && !roomState.participantMeta[meta.participantId]){
+              roomState.participantMeta[meta.participantId]={clientId:meta.clientId,joinOrder:meta.joinOrder||Object.keys(roomState.participantMeta).length+1,displayName:meta.displayName||('Participant '+meta.participantId.slice(1))};
+              roomState.participants[meta.participantId] ||= [];
+              sendRealtime('request-participant-snapshot',{targetParticipantId:meta.participantId});
+            }
+          });
+          renderSlateTabs();
+        }
+      })
+      .on('presence', {event:'leave'}, ({leftPresences})=>{
+        if(!isOwner) return;
+        (leftPresences||[]).forEach(meta=>{
+          const pid=Object.keys(roomState.participantMeta).find(p=>roomState.participantMeta[p].clientId===meta.clientId);
+          if(pid){ delete roomState.participantMeta[pid]; delete roomState.participants[pid]; if(roomState.activeSlateId===pid) activateSlate('main'); }
+        });
+        renderSlateTabs();
+      })
       .subscribe(async status=>{
         if(status==='SUBSCRIBED'){
           realtimeReady = true;
-          await realtimeChannel.track({joinedAt:Date.now(), role:isOwner?'owner':'participant', clientId:realtimeClientId});
-          enforceSingleOwner();
-          setRealtimeStatus('connected', (isOwner?'Owner':'Participant') + ' · ' + REALTIME_CONFIG.room);
-          realtimeChannel.send({type:'broadcast', event:'request-state', payload:{sender:realtimeClientId}}).catch(()=>{});
+          setRealtimeStatus('connected', (isOwner?'Owner':'Participant')+' · '+REALTIME_CONFIG.room);
+          document.getElementById('roomRole').textContent=isOwner?'Owner · Connected':'Participant · waiting for assignment';
+          await realtimeChannel.track({joinedAt:Date.now(),role:isOwner?'owner':'participant',clientId:realtimeClientId,participantId});
+          if(!isOwner) sendRealtime('join',{displayName:displayName||null});
         } else if(status==='CHANNEL_ERROR' || status==='TIMED_OUT'){
           realtimeReady = false; setRealtimeStatus('error', '連線失敗');
         }
@@ -782,13 +778,36 @@ function arrowHeadPoints(x1,y1,x2,y2,size){
 
 /* ===================== ELEMENT FACTORY ===================== */
 function makeEl(partial){
-  return Object.assign({
+  const el = Object.assign({
     id: newId(), type:'shape', x:0,y:0,w:100,h:60,
     stroke: state.defaults.stroke, fill:'none', strokeWidth: state.defaults.strokeWidth,
     opacity:1, fontFamily: state.defaults.fontFamily, fontSize: state.defaults.fontSize,
     z: state.elements.length
   }, partial);
+  if(isOwner && roomState.activeSlateId==='main' && !el.ownerSourceId) el.ownerSourceId=el.id;
+  return el;
 }
+
+function renderSlateTabs(){
+  const tabs=document.getElementById('slateTabs');
+  tabs.querySelectorAll('.slate-tab').forEach(b=>b.remove());
+  const ids=isOwner ? ['main',...Object.keys(roomState.participantMeta).sort((a,b)=>roomState.participantMeta[a].joinOrder-roomState.participantMeta[b].joinOrder)] : [participantId||'main'];
+  ids.forEach(id=>{
+    const b=document.createElement('button'); b.className='slate-tab'+(roomState.activeSlateId===id?' active':''); b.dataset.slate=id;
+    b.textContent=id==='main'?'Main':(roomState.participantMeta[id]?.displayName||('Participant '+roomState.participantMeta[id]?.joinOrder));
+    if(!isOwner) b.disabled=true;
+    b.addEventListener('click',()=>activateSlate(id)); tabs.insertBefore(b,tabs.querySelector('.room-role'));
+  });
+}
+function activateSlate(id){
+  if(!isOwner && id!==participantId) return;
+  saveActiveSlate();
+  roomState.activeSlateId=id;
+  state.elements = id==='main' ? roomState.main : (roomState.participants[id] ||= []);
+  clearSelection(); fullRender(); history=[clone(state.elements)]; hIdx=0; updateHistBtns();
+  renderSlateTabs();
+}
+function isReadOnlySlate(){ return isOwner && roomState.activeSlateId!=='main'; }
 
 /* ===================== RENDERING ===================== */
 function buildNode(el){
@@ -996,36 +1015,34 @@ function positionTableToolbar(el){
 let history = [clone(state.elements)];
 let hIdx = 0;
 function commit(){
+  saveActiveSlate();
   history = history.slice(0, hIdx+1);
   history.push(clone(state.elements));
   hIdx++;
   if(history.length>120){ history.shift(); hIdx--; }
   updateHistBtns();
-  if(isOwner) broadcastBoard();
-  else {
-    // Selection moves, resizes and style changes also arrive here. Publish
-    // only participant-owned paths; never send a participant board snapshot.
-    if(!participantPendingOps.length){
-      for(const id of state.selectedIds){
-        const el=state.elements.find(x=>x.id===id);
-        if(el && ['path','text'].includes(el.type) && el.ownerId===realtimeClientId){
-          participantPendingOps.push({kind:'upsert', element:clone(el)});
-        }
-      }
-    }
-    const ops = participantPendingOps.splice(0);
-    ops.forEach(broadcastParticipantOp);
+  if(isOwner && roomState.activeSlateId==='main'){
+    syncOwnerToParticipants();
+    sendRealtime('main-delta',{slateId:'main',elements:clone(roomState.main)});
+  } else {
+    sendRealtime('participant-delta',{targetParticipantId:participantId||roomState.activeSlateId,slateId:roomState.activeSlateId,elements:clone(state.elements)});
   }
+}
+function broadcastActiveSlate(){
+  saveActiveSlate();
+  if(isOwner && roomState.activeSlateId==='main'){
+    syncOwnerToParticipants(); sendRealtime('main-delta',{slateId:'main',elements:clone(roomState.main)});
+  } else sendRealtime('participant-delta',{targetParticipantId:participantId||roomState.activeSlateId,slateId:roomState.activeSlateId,elements:clone(state.elements)});
 }
 function undo(){
   if(hIdx<=0) return;
   hIdx--; state.elements = clone(history[hIdx]);
-  fullRender(); updateHistBtns(); broadcastBoard();
+  fullRender(); updateHistBtns(); broadcastActiveSlate();
 }
 function redo(){
   if(hIdx>=history.length-1) return;
   hIdx++; state.elements = clone(history[hIdx]);
-  fullRender(); updateHistBtns(); broadcastBoard();
+  fullRender(); updateHistBtns(); broadcastActiveSlate();
 }
 function updateHistBtns(){
   document.getElementById('undoBtn').disabled = hIdx<=0;
@@ -1060,10 +1077,6 @@ function updateBoundConnectors(movedId){
 /* ===================== TOOL / DEFAULTS UI ===================== */
 const toolButtons = [...document.querySelectorAll('[data-tool]')];
 function setTool(t){
-  if(!isOwner && !['select','pan','pen','highlighter','eraser','text'].includes(t)){
-    toast('Participants can draw and erase their own drawing only', 2600);
-    return;
-  }
   state.tool = t;
   toolButtons.forEach(b=>b.classList.toggle('active', b.dataset.tool===t));
   document.getElementById('shapeBtn').classList.toggle('active', ['rect','ellipse','diamond'].includes(t));
@@ -1073,72 +1086,6 @@ function setTool(t){
   syncPropsPanel();
 }
 toolButtons.forEach(b=>b.addEventListener('click', ()=>setTool(b.dataset.tool)));
-
-function syncEditableToModel(d){
-  if(!d) return;
-  const node=d.closest('[data-id]');
-  if(!node) return;
-  const el=state.elements.find(x=>x.id===node.getAttribute('data-id'));
-  if(!el) return;
-  if(d.classList.contains('el-text') || d.classList.contains('sticky-text')) el.html=d.innerHTML;
-  else if(d.classList.contains('table-cell')){
-    const r=+d.dataset.r, c=+d.dataset.c;
-    if(el.cells[r]) el.cells[r][c]=d.innerHTML;
-  }
-}
-
-document.querySelectorAll('[data-format]').forEach(btn=>{
-  btn.addEventListener('mousedown', e=>e.preventDefault());
-  btn.addEventListener('click', ()=>{
-    const editor=document.activeElement && document.activeElement.isContentEditable
-      ? document.activeElement : document.querySelector('[contenteditable="true"]');
-    if(!editor){ toast('Click into text first, then choose a format', 2200); return; }
-    editor.focus({preventScroll:true});
-    const command=btn.dataset.format;
-    try{ document.execCommand(command, false, btn.dataset.value || null); }
-    catch(err){ if(command==='hiliteColor') document.execCommand('backColor', false, btn.dataset.value); }
-    syncEditableToModel(editor);
-    if(isOwner) commit();
-  });
-});
-
-document.getElementById('shareBtn').addEventListener('click', async ()=>{
-  const params = new URLSearchParams(location.search);
-  params.set('room', REALTIME_CONFIG.room);
-  params.set('role', 'participant');
-  const inviteUrl = location.origin && location.origin!=='null'
-    ? location.origin + location.pathname + '?' + params.toString()
-    : location.href.split('?')[0] + '?' + params.toString();
-  const qrModal=document.getElementById('qrModal');
-  const qrCode=document.getElementById('qrCode');
-  document.getElementById('participantLink').value=inviteUrl;
-  qrCode.innerHTML='';
-  if(window.QRCode){
-    new QRCode(qrCode,{text:inviteUrl,width:220,height:220,colorDark:'#10151c',colorLight:'#ffffff'});
-  } else {
-    qrCode.textContent='QR code library unavailable';
-  }
-  qrModal.classList.add('open');
-  qrModal.setAttribute('aria-hidden','false');
-  try{
-    await navigator.clipboard.writeText(inviteUrl);
-    toast('Participant link copied — no login required', 3200);
-  }catch(err){
-    prompt('Copy this participant link:', inviteUrl);
-  }
-});
-document.getElementById('qrClose').addEventListener('click', ()=>{
-  document.getElementById('qrModal').classList.remove('open');
-  document.getElementById('qrModal').setAttribute('aria-hidden','true');
-});
-document.getElementById('qrModal').addEventListener('click', e=>{
-  if(e.target.id==='qrModal') document.getElementById('qrClose').click();
-});
-document.getElementById('qrCopyBtn').addEventListener('click', async ()=>{
-  const input=document.getElementById('participantLink');
-  try{ await navigator.clipboard.writeText(input.value); toast('Participant link copied', 2200); }
-  catch(err){ input.select(); document.execCommand('copy'); toast('Participant link copied', 2200); }
-});
 
 document.getElementById('shapeBtn').addEventListener('click', (e)=>{
   e.stopPropagation();
@@ -1173,7 +1120,7 @@ lockBtn.addEventListener('click', ()=>{
 
 /* clear board */
 document.getElementById('clearBtn').addEventListener('click', ()=>{
-  if(!isOwner){ toast('Only the owner can clear the whiteboard', 2600); return; }
+  if(isReadOnlySlate()) return;
   if(!state.elements.length) return;
   if(confirm('Clear the whole board? This cannot be undone once you leave this page.')){
     state.elements = []; clearSelection(); fullRender(); commit();
@@ -1235,6 +1182,7 @@ document.getElementById('fontSelect').addEventListener('change', (e)=>{
   applyToSelection({fontFamily:e.target.value});
 });
 function applyToSelection(props){
+  if(isReadOnlySlate()) return;
   if(!state.selectedIds.size) return;
   let changed=false;
   for(const id of state.selectedIds){
@@ -1316,6 +1264,7 @@ svg.addEventListener('pointerdown', (e)=>{
   if(isEditingSomething){
     finishEditing();
   }
+  if(isReadOnlySlate() && !['select','pan'].includes(state.tool)) return;
   svg.setPointerCapture(e.pointerId);
   const wp = toWorld(e.clientX, e.clientY);
 
@@ -1327,7 +1276,7 @@ svg.addEventListener('pointerdown', (e)=>{
 
   if(state.tool==='select'){
     const handle = handleFromEvent(e);
-    if(handle){
+    if(handle && !isReadOnlySlate()){
       state.mode='resizing'; resizeHandle=handle;
       const ids=[...state.selectedIds];
       resizeOrigin = { start: wp, elements: ids.map(id=>clone(state.elements.find(x=>x.id===id))) };
@@ -1335,11 +1284,6 @@ svg.addEventListener('pointerdown', (e)=>{
     }
     const id = elIdFromEvent(e);
     if(id){
-      const clickedEl = state.elements.find(x=>x.id===id);
-      if(!isOwner && !canEditElement(clickedEl)){
-        clearSelection();
-        return;
-      }
       if(e.shiftKey){
         const s = new Set(state.selectedIds);
         s.has(id)? s.delete(id) : s.add(id);
@@ -1347,7 +1291,7 @@ svg.addEventListener('pointerdown', (e)=>{
       } else if(!state.selectedIds.has(id)){
         setSelection([id]);
       }
-      if(state.selectedIds.size){
+      if(state.selectedIds.size && !isReadOnlySlate()){
         state.mode='dragging';
         dragStartWorld = wp;
         dragOrigins = [...state.selectedIds].map(sid=>{
@@ -1371,15 +1315,13 @@ svg.addEventListener('pointerdown', (e)=>{
       type:'path', points:[[wp.x,wp.y]],
       stroke: isHi ? (state.defaults.stroke==='#FFFFFF'? '#F3C55D': state.defaults.stroke) : state.defaults.stroke,
       strokeWidth: isHi ? Math.max(state.defaults.strokeWidth*3, 14) : state.defaults.strokeWidth,
-      opacity: isHi ? 0.35 : 1,
-      ownerId: realtimeClientId
+      opacity: isHi ? 0.35 : 1
     });
     addToDOM(state.current);
     return;
   }
 
   if(state.tool==='eraser'){
-    if(!isOwner && state.tool!=='eraser') return;
     state.mode='erasing'; eraseAt(wp); return;
   }
 
@@ -1410,17 +1352,15 @@ svg.addEventListener('pointerdown', (e)=>{
   }
 
   if(state.tool==='text'){
-    const el = makeEl({type:'text', x:wp.x, y:wp.y, w:220, h:50, html:'', stroke:state.defaults.stroke, fontFamily:state.defaults.fontFamily, fontSize:state.defaults.fontSize, ownerId:realtimeClientId});
-    state.elements.push(el); addToDOM(el);
+    const el = makeEl({type:'text', x:wp.x, y:wp.y, w:220, h:50, html:'', stroke:state.defaults.stroke, fontFamily:state.defaults.fontFamily, fontSize:state.defaults.fontSize});
+    state.elements.push(el); addToDOM(el); commit();
     setSelection([el.id]);
-    commit();
     enterEdit(el.id);
     if(!state.toolLocked) setTool('select');
     return;
   }
 
   if(state.tool==='sticky'){
-    if(!isOwner) return;
     const el = makeEl({type:'sticky', x:wp.x, y:wp.y, w:190, h:170, html:'', fill: state.defaults.stickyColor, rot:(Math.random()*4-2), fontFamily:"'Kalam', cursive", fontSize:16});
     state.elements.push(el); addToDOM(el); commit();
     setSelection([el.id]);
@@ -1430,7 +1370,6 @@ svg.addEventListener('pointerdown', (e)=>{
   }
 
   if(state.tool==='table'){
-    if(!isOwner) return;
     const rows=3, cols=3;
     const el = makeEl({type:'table', x:wp.x, y:wp.y, w:330, h:130, rows, cols, cells:Array.from({length:rows},()=>Array(cols).fill('')), stroke:state.defaults.stroke, fontFamily:state.defaults.fontFamily});
     state.elements.push(el); addToDOM(el); commit();
@@ -1547,7 +1486,6 @@ svg.addEventListener('pointerup', (e)=>{
       state.elements.push(state.current);
     }
     const id = state.current.id;
-    if(!isOwner) participantPendingOps.push({kind:'upsert', element:clone(state.current)});
     state.current=null;
     commit();
     if(!state.toolLocked && state.tool!=='pen' && state.tool!=='highlighter') setTool('select');
@@ -1571,14 +1509,6 @@ svg.addEventListener('pointerup', (e)=>{
   else if(state.mode==='dragging'){
     let moved=false;
     for(const o of dragOrigins){ const el=state.elements.find(x=>x.id===o.id); if(el) moved = moved || true; }
-    if(!isOwner){
-      for(const o of dragOrigins){
-        const movedEl=state.elements.find(x=>x.id===o.id);
-        if(movedEl && ['path','text'].includes(movedEl.type) && movedEl.ownerId===realtimeClientId){
-          participantPendingOps.push({kind:'upsert', element:clone(movedEl)});
-        }
-      }
-    }
     if(moved) commit();
     renderSelection();
   }
@@ -1606,22 +1536,15 @@ svg.addEventListener('pointerup', (e)=>{
 });
 
 function eraseAt(wp){
-  // Participants can erase only their own paths and text boxes. The owner
-  // keeps the original ink-only eraser behavior for the shared board.
+  // the eraser lifts ink (pen / highlighter strokes) only — use Select + Delete
+  // for shapes, text, sticky notes, tables and images.
   const r = 14/state.view.scale;
   let removed=false;
   for(let i=state.elements.length-1;i>=0;i--){
     const el = state.elements[i];
-    if(!isOwner && el.ownerId!==realtimeClientId) continue;
-    if(el.type!=='path' && !( !isOwner && el.type==='text')) continue;
-    const hit = el.type==='path'
-      ? el.points.some(p=>Math.hypot(p[0]-wp.x,p[1]-wp.y)<r)
-      : wp.x>=el.x-r && wp.x<=el.x+el.w+r && wp.y>=el.y-r && wp.y<=el.y+el.h+r;
-    if(hit){
-      const removedId=el.id;
-      removeFromDOM(removedId); state.elements.splice(i,1); removed=true;
-      if(!isOwner) participantPendingOps.push({kind:'remove', id:removedId});
-    }
+    if(el.type!=='path') continue;
+    const hit = el.points.some(p=>Math.hypot(p[0]-wp.x,p[1]-wp.y)<r);
+    if(hit){ removeFromDOM(el.id); state.elements.splice(i,1); removed=true; }
   }
   if(removed) renderSelection();
 }
@@ -1668,48 +1591,21 @@ document.getElementById('zoomFit').addEventListener('click', ()=>{
 });
 
 /* ===================== EDITING TEXT/STICKY/TABLE ===================== */
-let editingCell = null;
-
-function tableCellFromTarget(target){
-  const cell = target && target.closest ? target.closest('.table-cell') : null;
-  return cell && cell.closest('[data-type="table"]') ? cell : null;
-}
-
-function editTableCell(cell){
-  if(!cell) return;
-  const node = cell.closest('[data-id]');
-  if(!node) return;
-  const id = node.getAttribute('data-id');
-  const el = state.elements.find(x=>x.id===id);
-  if(!el || el.type!=='table') return;
-
-  // Finish a previous cell before switching, but do not let its delayed blur
-  // callback finish the newly-focused cell below.
-  if(state.editingId && (editingCell!==cell || state.editingId!==id)) finishEditing();
-  setSelection([id]);
-  cell.contentEditable='true';
-  state.editingId=id;
-  editingCell=cell;
-  requestAnimationFrame(()=>{
-    if(cell.isConnected && state.editingId===id){
-      cell.focus({preventScroll:true});
-      placeCaretEnd(cell);
-    }
-  });
-}
-
 svg.addEventListener('dblclick', (e)=>{
+  if(isReadOnlySlate()) return;
   const id = elIdFromEvent(e);
   if(!id) return;
   const el = state.elements.find(x=>x.id===id);
   if(!el) return;
-  if(el.type==='text' || el.type==='sticky'){
-    if(!canEditElement(el)) return;
-    setSelection([id]); enterEdit(id);
-  }
+  if(el.type==='text' || el.type==='sticky'){ setSelection([id]); enterEdit(id); }
   else if(el.type==='table'){
     setSelection([id]);
-    editTableCell(tableCellFromTarget(e.target));
+    let t=e.target;
+    while(t && !t.classList.contains('table-cell')) t = t.parentNode;
+    if(t && t.classList){
+      t.contentEditable='true'; t.focus(); state.editingId=id;
+      placeCaretEnd(t);
+    }
   }
 });
 function enterEdit(id){
@@ -1726,34 +1622,12 @@ function enterEdit(id){
   });
 }
 elementsLayer.addEventListener('pointerdown', e=>{
-  const cell = tableCellFromTarget(e.target);
-  if(cell){
-    // A cell is an editing surface, not a drag handle. Stop this event before
-    // it reaches the SVG-level selection/drag state machine.
-    e.stopPropagation();
-    editTableCell(cell);
-    return;
-  }
   const editable = e.target.closest && e.target.closest('[contenteditable="true"]');
-  if(editable){ e.stopPropagation(); editable.focus({preventScroll:true}); }
+  if(editable){ e.stopPropagation(); editable.focus(); }
 });
 elementsLayer.addEventListener('click', e=>{
-  const cell = tableCellFromTarget(e.target);
   const editable = e.target.closest && e.target.closest('[contenteditable="true"]');
-  if(cell || editable) e.stopPropagation();
-});
-elementsLayer.addEventListener('input', e=>{
-  const cell = tableCellFromTarget(e.target);
-  if(!cell) return;
-  const node = cell.closest('[data-id]');
-  const el = node && state.elements.find(x=>x.id===node.getAttribute('data-id'));
-  const r=+cell.dataset.r, c=+cell.dataset.c;
-  if(el && el.cells[r]){
-    // Keep the model current while typing, so a realtime update never relies
-    // solely on blur and the next broadcast contains the latest cell text.
-    el.cells[r][c] = cell.innerHTML;
-    broadcastBoard();
-  }
+  if(editable) e.stopPropagation();
 });
 function placeCaretEnd(div){
   const range = document.createRange();
@@ -1761,7 +1635,6 @@ function placeCaretEnd(div){
   const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
 }
 function finishEditing(){
-  const hadEditing = !!state.editingId;
   document.querySelectorAll('[contenteditable="true"]').forEach(d=>{
     d.contentEditable='false';
     const node = d.closest('[data-id]');
@@ -1777,27 +1650,17 @@ function finishEditing(){
       }
     }
   });
-  if(hadEditing) commit();
+  if(state.editingId) commit();
   state.editingId=null;
-  editingCell=null;
 }
 elementsLayer.addEventListener('blur', (e)=>{
-  if(e.target.isContentEditable){
-    setTimeout(()=>{
-      // Switching between cells fires blur on the old cell first. Keep the
-      // new editing surface alive when focus has already moved inside a cell.
-      const active = document.activeElement;
-      if(active && active.closest && active.closest('.table-cell[contenteditable="true"]')) return;
-      finishEditing();
-    }, 60);
-  }
+  if(e.target.isContentEditable){ setTimeout(finishEditing, 60); }
 }, true);
 
 /* table toolbar actions */
 tableToolbar.addEventListener('click', (e)=>{
-  e.stopPropagation();
+  if(isReadOnlySlate()) return;
   const btn = e.target.closest('button'); if(!btn) return;
-  if(state.editingId) finishEditing();
   const id = tableToolbar.dataset.for;
   const el = state.elements.find(x=>x.id===id); if(!el) return;
   const act = btn.dataset.act;
@@ -1814,24 +1677,21 @@ tableToolbar.addEventListener('click', (e)=>{
 
 /* ===================== DELETE / DUPLICATE / ORDER ===================== */
 function deleteSelected(){
+  if(isReadOnlySlate()) return;
   if(!state.selectedIds.size) return;
-  const ids=[...state.selectedIds].filter(id=>canEditElement(state.elements.find(x=>x.id===id)));
-  if(!ids.length) return;
-  for(const id of ids){
-    removeFromDOM(id);
-    if(!isOwner) participantPendingOps.push({kind:'remove', id});
-  }
-  state.elements = state.elements.filter(el=>!ids.includes(el.id));
+  for(const id of state.selectedIds){ removeFromDOM(id); }
+  state.elements = state.elements.filter(el=>!state.selectedIds.has(el.id));
   clearSelection();
   commit();
 }
 function duplicateSelected(){
-  if(!isOwner){ toast('Participants cannot duplicate or edit other objects', 2600); return; }
+  if(isReadOnlySlate()) return;
   if(!state.selectedIds.size) return;
   const newIds=[];
   for(const id of state.selectedIds){
     const el = state.elements.find(x=>x.id===id); if(!el) continue;
     const copy = clone(el); copy.id = newId();
+    if(isOwner && roomState.activeSlateId==='main') copy.ownerSourceId=copy.id; else delete copy.ownerSourceId;
     if(copy.type==='path') copy.points = copy.points.map(p=>[p[0]+18,p[1]+18]);
     else if(copy.type==='shape' && (copy.shapeKind==='line'||copy.shapeKind==='arrow')){ copy.x1+=18;copy.y1+=18;copy.x2+=18;copy.y2+=18; delete copy.bindStart; delete copy.bindEnd; }
     else { copy.x+=18; copy.y+=18; }
@@ -1842,7 +1702,7 @@ function duplicateSelected(){
   commit();
 }
 function bringToFront(){
-  if(!isOwner){ toast('Only the owner can arrange objects', 2600); return; }
+  if(isReadOnlySlate()) return;
   if(!state.selectedIds.size) return;
   let maxZ = Math.max(0,...state.elements.map(e=>e.z||0));
   for(const id of state.selectedIds){
@@ -1877,6 +1737,7 @@ window.addEventListener('keydown', (e)=>{
   if(e.key==='+' || e.key==='='){ zoomBy(1.15); return; }
   if(e.key==='-'){ zoomBy(1/1.15); return; }
   if(state.selectedIds.size && ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){
+    if(isReadOnlySlate()) return;
     e.preventDefault();
     const d = e.shiftKey?10:1;
     const dx = e.key==='ArrowLeft'?-d:e.key==='ArrowRight'?d:0;
@@ -1912,7 +1773,6 @@ document.addEventListener('copy', (e)=>{
 document.addEventListener('paste', (e)=>{
   const activeIsEditable = document.activeElement && document.activeElement.isContentEditable;
   if(activeIsEditable) return;
-  if(!isOwner){ toast('Participants can draw and erase their own drawing only', 2600); return; }
   const items = e.clipboardData && e.clipboardData.items;
   if(items){
     for(const it of items){
@@ -1934,6 +1794,7 @@ document.addEventListener('paste', (e)=>{
   const newIds=[];
   for(const src of payload){
     const copy = clone(src); copy.id = newId();
+    if(isOwner && roomState.activeSlateId==='main') copy.ownerSourceId=copy.id; else delete copy.ownerSourceId;
     if(copy.type==='path') copy.points = copy.points.map(p=>[p[0]+24,p[1]+24]);
     else if(copy.type==='shape' && (copy.shapeKind==='line'||copy.shapeKind==='arrow')){ copy.x1+=24;copy.y1+=24;copy.x2+=24;copy.y2+=24; delete copy.bindStart; delete copy.bindEnd; }
     else { copy.x+=24; copy.y+=24; }
@@ -1945,25 +1806,17 @@ document.addEventListener('paste', (e)=>{
 });
 
 /* ===================== IMAGE IMPORT ===================== */
-document.getElementById('imageBtn').addEventListener('click', (e)=>{
-  if(!isOwner){ e.preventDefault(); toast('Only the owner can add images', 2600); return; }
-  document.getElementById('imageInput').click();
-});
+document.getElementById('imageBtn').addEventListener('click', ()=>document.getElementById('imageInput').click());
 document.getElementById('imageInput').addEventListener('change', (e)=>{
   const f = e.target.files[0]; if(f) loadImageFile(f);
   e.target.value='';
 });
 function loadImageFile(file){
-  if(!isOwner){ toast('Only the owner can add images', 2600); return; }
   const reader = new FileReader();
   reader.onload = (ev)=>{
-    const originalSrc = ev.target.result;
+    const src = ev.target.result;
     const img = new Image();
     img.onload = ()=>{
-      // Blob/local URLs are not usable by another browser, and a full-size
-      // camera image can exceed Realtime's broadcast payload limit. Store a
-      // compact data URL so every connected client can render the same image.
-      const src = compactImageDataUrl(img);
       const r = svg.getBoundingClientRect();
       const c = toWorld(r.left+r.width/2, r.top+r.height/2);
       const maxW = 360;
@@ -1973,33 +1826,9 @@ function loadImageFile(file){
       state.elements.push(el); addToDOM(el); commit();
       setTool('select'); setSelection([el.id]);
     };
-    img.src = originalSrc;
+    img.src = src;
   };
   reader.readAsDataURL(file);
-}
-
-function compactImageDataUrl(img){
-  const maxDataUrlLength = 120000;
-  const maxDimension = 1400;
-  let scale = Math.min(1, maxDimension/Math.max(img.naturalWidth||img.width, img.naturalHeight||img.height));
-  let canvas = document.createElement('canvas');
-  let quality = .82;
-  let dataUrl='';
-
-  // Rebuild at a smaller size if quality reduction alone is not enough.
-  for(let pass=0; pass<5; pass++){
-    canvas.width=Math.max(1, Math.round(img.width*scale));
-    canvas.height=Math.max(1, Math.round(img.height*scale));
-    const ctx=canvas.getContext('2d');
-    ctx.fillStyle='#fff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(img,0,0,canvas.width,canvas.height);
-    dataUrl=canvas.toDataURL('image/jpeg', quality);
-    if(dataUrl.length<=maxDataUrlLength) break;
-    if(quality>.5) quality-=.12;
-    else scale*=.72;
-  }
-  return dataUrl;
 }
 boardWrap.addEventListener('dragover', e=>e.preventDefault());
 boardWrap.addEventListener('drop', e=>{
@@ -2051,7 +1880,7 @@ const EXPORT_CSS = `
 .sticky-box{width:100%;height:100%;display:flex;flex-direction:column;border-radius:3px 14px 3px 14px;box-shadow:2px 6px 14px rgba(0,0,0,.16);padding:12px 12px 10px;}
 .sticky-text{flex:1;line-height:1.4;color:#2b2410;}
 .wb-table{border-collapse:collapse;width:100%;height:100%;table-layout:fixed;}
-.wb-table td{border:1.4px solid currentColor;padding:6px 8px;font-size:13px;height:auto;vertical-align:top;}
+.wb-table td{border:1.4px solid currentColor;padding:6px 8px;font-size:13px;vertical-align:top;}
 `;
 function buildExportSvgString(){
   const b = contentBBox();
@@ -2147,6 +1976,9 @@ window.addEventListener('resize', fitSvg);
 
 /* ===================== INIT ===================== */
 async function init(){
+  if(!isOwner && !displayName){
+    displayName = (window.prompt('Display name (optional)', '') || '').trim();
+  }
   fitSvg();
   applyView();
   setBgStyle('dot');
@@ -2154,13 +1986,11 @@ async function init(){
   fullRender();
   history=[clone(state.elements)]; hIdx=0;
   updateHistBtns();
+  renderSlateTabs();
   setTimeout(()=>document.getElementById('zoomFit').click(), 30);
   connectRealtime();
 }
-init().catch(err=>{
-  console.error(err);
-  setRealtimeStatus('error', '白板初始化失敗');
-});
+init();
 
 })();
 </script>
