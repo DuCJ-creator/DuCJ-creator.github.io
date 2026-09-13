@@ -243,12 +243,12 @@ input[type=color].custom-swatch{
   flex:1; font-family:var(--font-hand); font-size:16px; line-height:1.4; color:#2b2410;
 }
 .wb-table{
-  border-collapse:collapse; width:100%; height:100%; table-layout:fixed;
+  display:grid; width:100%; height:100%; min-width:0; min-height:0;
   box-shadow:0 2px 10px rgba(0,0,0,.08);
 }
-.wb-table td{
+.wb-table .table-cell{
   border:1.4px solid currentColor; padding:6px 8px; font-size:13px;
-  vertical-align:top; overflow:hidden;
+  overflow:hidden; min-width:0; min-height:0; line-height:1.25;
 }
 .el-locked{pointer-events:none;}
 
@@ -713,10 +713,15 @@ function openShareDialog(){
   document.getElementById('participantLink').value=participantLink;
   document.getElementById('ownerLink').value=buildRoomLink('owner');
   const qr=document.getElementById('qrCode'); qr.innerHTML='';
+  const useImageQr=()=>{
+    qr.innerHTML=''; const img=document.createElement('img'); img.alt='QR Code';
+    img.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data='+encodeURIComponent(participantLink);
+    img.onerror=()=>{ qr.textContent='QR Code unavailable. Copy the Participant link instead.'; }; qr.appendChild(img);
+  };
   if(window.QRCode && QRCode.toCanvas){
     const canvas=document.createElement('canvas'); qr.appendChild(canvas);
-    QRCode.toCanvas(canvas,participantLink,{width:190,margin:1,color:{dark:'#20242B',light:'#FFFFFF'}},err=>{ if(err) qr.textContent='QR Code unavailable'; });
-  } else qr.textContent='QR Code library is still loading — try again in a moment.';
+    QRCode.toCanvas(canvas,participantLink,{width:190,margin:1,color:{dark:'#20242B',light:'#FFFFFF'}},err=>{ if(err) useImageQr(); });
+  } else useImageQr();
   document.getElementById('shareModal').classList.add('open');
 }
 document.getElementById('shareBtn').addEventListener('click',openShareDialog);
@@ -928,17 +933,15 @@ function buildStickyInner(el){
   </div>`;
 }
 function buildTableInner(el){
-  let rows='';
+  let cells='';
   for(let r=0;r<el.rows;r++){
-    let cells='';
     for(let c=0;c<el.cols;c++){
       const val = (el.cells[r] && el.cells[r][c]!=null) ? el.cells[r][c] : '';
-      cells += `<td class="table-cell" data-r="${r}" data-c="${c}" contenteditable="false" style="font-family:${el.fontFamily};">${val}</td>`;
+      cells += `<div class="table-cell" data-r="${r}" data-c="${c}" contenteditable="false" style="font-family:${el.fontFamily};">${val}</div>`;
     }
-    rows += `<tr>${cells}</tr>`;
   }
   const color = el.stroke || (state.theme==='chalk'?'#F5F3E7':'#23272F');
-  return `<table class="wb-table" style="color:${color};background:${state.theme==='chalk'?'rgba(255,255,255,.03)':'rgba(255,255,255,.6)'};">${rows}</table>`;
+  return `<div class="wb-table" style="grid-template-columns:repeat(${el.cols},minmax(0,1fr));grid-template-rows:repeat(${el.rows},minmax(0,1fr));color:${color};background:${state.theme==='chalk'?'rgba(255,255,255,.03)':'rgba(255,255,255,.6)'};">${cells}</div>`;
 }
 
 function addToDOM(el){
@@ -1927,8 +1930,8 @@ const EXPORT_CSS = `
 .el-text{padding:4px 6px; line-height:1.35;}
 .sticky-box{width:100%;height:100%;display:flex;flex-direction:column;border-radius:3px 14px 3px 14px;box-shadow:2px 6px 14px rgba(0,0,0,.16);padding:12px 12px 10px;}
 .sticky-text{flex:1;line-height:1.4;color:#2b2410;}
-.wb-table{border-collapse:collapse;width:100%;height:100%;table-layout:fixed;}
-.wb-table td{border:1.4px solid currentColor;padding:6px 8px;font-size:13px;vertical-align:top;}
+.wb-table{display:grid;width:100%;height:100%;}
+.wb-table .table-cell{border:1.4px solid currentColor;padding:6px 8px;font-size:13px;overflow:hidden;}
 `;
 function buildExportSvgString(){
   const b = contentBBox();
