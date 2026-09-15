@@ -6,71 +6,103 @@
   <title>高中六級易錯字聽寫練習</title>
   <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
   <style>
-    * { box-sizing: border-box; font-family: 'Microsoft JhengHei', sans-serif; }
+    :root {
+      --navy: #1b2a4a;
+      --navy-deep: #132039;
+      --gold: #f0b429;
+      --cream: #fff8e6;
+      --ink: #2b2210;
+      --muted: #756b58;
+      --white: #fffdf7;
+      --danger: #b94a48;
+    }
+    * { box-sizing: border-box; font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif; }
     body { 
-      background: #f8f9fa; 
+      background: var(--cream);
+      color: var(--ink);
       padding: 20px; 
       max-width: 900px; 
       margin: 0 auto; 
     }
-    h1 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
+    h1 {
+      position: relative;
+      text-align: center;
+      color: var(--gold);
+      background: var(--navy);
+      margin: -20px -20px 24px;
+      padding: 28px 18px 24px;
+      border-bottom: 5px solid var(--gold);
+      letter-spacing: .04em;
+      text-shadow: 0 2px 0 var(--navy-deep);
+    }
+    h1::before { content: '🐝'; display: block; font-size: 30px; margin-bottom: 5px; }
+    h1::after { content: 'SPELL • LISTEN • WIN'; display: block; color: rgba(255,255,255,.78); font-size: 11px; letter-spacing: .2em; margin-top: 8px; }
     .category-buttons { 
       display: grid; 
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-      gap: 10px; 
+      gap: 12px; 
       margin-bottom: 20px; 
     }
     .btn { 
-      padding: 10px; 
-      background: #3498db; 
-      color: white; 
+      padding: 11px 10px;
+      background: var(--navy);
+      color: var(--gold);
       border: none; 
-      border-radius: 5px; 
+      border-radius: 10px;
+      box-shadow: 0 3px 0 var(--navy-deep);
       cursor: pointer; 
       font-weight: bold; 
       font-size: 14px;
-      transition: background 0.3s; 
+      transition: transform .2s, background .2s, box-shadow .2s;
     }
-    .btn:hover { background: #2980b9; }
+    .btn:hover { background: var(--navy-deep); transform: translateY(-2px); box-shadow: 0 5px 0 #0b1425; }
+    .btn:active { transform: translateY(1px); box-shadow: 0 2px 0 var(--navy-deep); }
+    .link-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 11px 10px; color: var(--navy); background: var(--gold);
+      border: 2px solid var(--navy); border-radius: 10px; box-shadow: 0 3px 0 var(--navy);
+      font-weight: 800; font-size: 14px; text-decoration: none;
+      transition: transform .2s, background .2s, box-shadow .2s;
+    }
+    .link-btn:hover { background: #ffd466; transform: translateY(-2px); box-shadow: 0 5px 0 var(--navy); }
+    .link-btn:active { transform: translateY(1px); box-shadow: 0 2px 0 var(--navy); }
     .mixed-section { 
-      background: #fff; 
+      background: var(--white);
       padding: 15px; 
-      border-radius: 8px; 
+      border: 1px solid #eadcae; border-radius: 12px;
       margin: 20px 0; 
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
+      box-shadow: 0 3px 12px rgba(27,42,74,.1);
       font-size: 14px;
     }
     #practiceArea { display: none; }
     .word-list { 
-      background: white; 
+      background: var(--white);
       padding: 20px; 
-      border-radius: 8px; 
+      border: 1px solid #eadcae; border-radius: 12px;
       margin: 20px 0; 
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
+      box-shadow: 0 3px 12px rgba(27,42,74,.1);
     }
     .word-item { 
       display: flex; 
       align-items: center; 
       margin: 12px 0; 
       padding: 8px; 
-      background: #f8f9fa; 
-      border-radius: 5px; 
+      background: #fffaf0; border: 1px solid #f0e4bd; border-radius: 8px;
     }
     .word-number { 
       width: 30px; 
       font-weight: bold; 
-      color: #2c3e50; 
+      color: var(--navy);
     }
     .word-input { 
       flex: 1; 
       padding: 8px 12px; 
       font-size: 16px; 
-      border: 1px solid #bdc3c7; 
-      border-radius: 4px; 
+      border: 2px solid #e2d6b2; border-radius: 7px;
       margin: 0 10px; 
     }
     .word-input:focus { 
-      border-color: #3498db; 
+      border-color: var(--gold); box-shadow: 0 0 0 3px rgba(240,180,41,.2);
       outline: none; 
     }
     .controls { 
@@ -78,7 +110,7 @@
       margin: 20px 0; 
     }
     .result { 
-      background: #fff; 
+      background: var(--white); border: 1px solid #eadcae;
       padding: 20px; 
       border-radius: 8px; 
       margin: 25px 0; 
@@ -95,15 +127,14 @@
     .column h3 { 
       text-align: center; 
       margin-bottom: 15px; 
-      color: #2c3e50; 
+      color: var(--navy);
     }
     .answer-item { 
       display: flex; 
       align-items: center; 
       margin: 10px 0; 
       padding: 8px; 
-      background: #f8f9fa; 
-      border-radius: 5px; 
+      background: #fffaf0; border: 1px solid #f0e4bd; border-radius: 8px;
     }
     .answer-number { 
       width: 30px; 
@@ -117,13 +148,11 @@
     .correct-answer { 
       flex: 1; 
       padding: 6px 10px; 
-      background: #e8f4e8; 
+      background: #eef7d8;
       border-radius: 4px; 
     }
     .error { 
-      background: #ffeaea !important; 
-      border: 1px solid #e74c3c; 
-      color: #e74c3c; 
+      background: #fff0ed !important; border: 1px solid var(--danger); color: var(--danger);
     }
     .status { 
       text-align: center; 
@@ -133,7 +162,7 @@
     }
     .timer { 
       text-align: center; 
-      color: #7f8c8d; 
+      color: var(--muted);
       margin: 10px 0; 
       font-size: 14px; 
     }
@@ -155,7 +184,7 @@
     <button class="btn" data-category="LongAcademic">長難學術型</button>
     <button class="btn" data-category="AcademicRare">學術非常用型</button>
     <button class="btn" data-category="Others">其他易錯型</button>
-    <button href="https://nce-spelling.ducj.workers.dev/" class="link-btn" target="_blank" rel="noopener noreferrer"><i class="ti ti-external-link" aria-hidden="true"></i>Past Paper Practice</button>
+    <a href="https://nce-spelling.ducj.workers.dev/" class="link-btn" target="_blank" rel="noopener noreferrer">🐝 Past Paper Practice ↗</a>
   </div>
 
   <!-- 混合練習區 -->
