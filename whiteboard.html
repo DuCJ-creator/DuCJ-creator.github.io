@@ -1725,6 +1725,16 @@ function enterEdit(id){
 elementsLayer.addEventListener('pointerdown', e=>{
   const editable = e.target.closest && e.target.closest('[contenteditable="true"]');
   if(editable){ e.stopPropagation(); editable.focus(); }
+  if(!editable && state.tool==='select' && (!isReadOnlySlate() || annotationMode)){
+    const text=e.target.closest && e.target.closest('.el-text');
+    const node=text && text.closest('[data-id]');
+    const el=node && state.elements.find(x=>x.id===node.dataset.id);
+    if(node && el && (!isReadOnlySlate() || el.ownerAnnotation)){
+      e.stopPropagation();
+      setSelection([node.dataset.id]);
+      enterEdit(node.dataset.id);
+    }
+  }
 });
 elementsLayer.addEventListener('click', e=>{
   const editable = e.target.closest && e.target.closest('[contenteditable="true"]');
