@@ -602,6 +602,27 @@ function applySlateSnapshot(payload){
   }
   if(isOwner) renderSlateTabs();
 }
+function applyOwnerDeltaToParticipant(payload){
+  if(isOwner || !payload || payload.targetParticipantId!==participantId || !Array.isArray(payload.elements)) return;
+  const current=roomState.participants[participantId] || [];
+  const incoming=payload.elements;
+  const incomingBySource=new Map(incoming.filter(e=>e.ownerSourceId).map(e=>[e.ownerSourceId,e]));
+  const currentBySource=new Map(current.filter(e=>e.ownerSourceId).map(e=>[e.ownerSourceId,e]));
+  for(const source of incoming){
+    if(!source.ownerSourceId) continue;
+    const existing=currentBySource.get(source.ownerSourceId);
+    if(existing){
+      const geometry={x:existing.x,y:existing.y,w:existing.w,h:existing.h,x1:existing.x1,y1:existing.y1,x2:existing.x2,y2:existing.y2};
+      Object.assign(existing,clone(source),{id:existing.id,ownerSourceId:source.ownerSourceId});
+      for(const k of ['x','y','w','h','x1','y1','x2','y2']) if(geometry[k]!==undefined) existing[k]=geometry[k];
+    } else current.push(clone(source));
+  }
+  roomState.participants[participantId]=current.filter(e=>!e.ownerSourceId || incomingBySource.has(e.ownerSourceId));
+  state.elements=roomState.participants[participantId];
+  if(roomState.activeSlateId===participantId){
+    applyingRemote=true; fullRender(); history=[clone(state.elements)]; hIdx=0; updateHistBtns(); applyingRemote=false;
+  }
+}
 function assignParticipant(payload){
   if(isOwner || !payload || payload.targetClientId!==realtimeClientId) return;
   participantId=payload.participantId; joinOrder=payload.joinOrder; displayName=displayName||payload.displayName||('Participant '+joinOrder);
@@ -648,7 +669,7 @@ async function connectRealtime(){
         if(!isOwner && payload && payload.targetParticipantId===participantId) sendRealtime('participant-delta',{targetParticipantId:participantId,slateId:participantId,elements:clone(state.elements)});
       })
       .on('broadcast', {event:'main-delta'}, ({payload})=>{
-        if(payload && payload.targetParticipantId===participantId) applySlateSnapshot(Object.assign({},payload,{slateId:participantId}));
+        if(payload && payload.targetParticipantId===participantId) applyOwnerDeltaToParticipant(payload);
         else if(isOwner && payload && payload.targetParticipantId) { roomState.participants[payload.targetParticipantId]=payload.elements||[]; renderSlateTabs(); }
       })
       .on('broadcast', {event:'participant-delta'}, ({payload})=>{
