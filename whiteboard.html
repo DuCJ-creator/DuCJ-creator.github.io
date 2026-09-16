@@ -652,7 +652,16 @@ async function connectRealtime(){
         else if(isOwner && payload && payload.targetParticipantId) { roomState.participants[payload.targetParticipantId]=payload.elements||[]; renderSlateTabs(); }
       })
       .on('broadcast', {event:'participant-delta'}, ({payload})=>{
-        if(isOwner && payload && payload.targetParticipantId){ roomState.participants[payload.targetParticipantId]=payload.elements||[]; if(roomState.activeSlateId===payload.targetParticipantId) applySlateSnapshot(Object.assign({},payload,{slateId:payload.targetParticipantId})); renderSlateTabs(); }
+        if(!payload || !payload.targetParticipantId) return;
+        if(!isOwner && payload.targetParticipantId===participantId){
+          applySlateSnapshot(Object.assign({},payload,{slateId:participantId}));
+          return;
+        }
+        if(isOwner){
+          roomState.participants[payload.targetParticipantId]=payload.elements||[];
+          if(roomState.activeSlateId===payload.targetParticipantId) applySlateSnapshot(Object.assign({},payload,{slateId:payload.targetParticipantId}));
+          renderSlateTabs();
+        }
       })
       .on('presence', {event:'sync'}, ()=>{
         if(isOwner){
