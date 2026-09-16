@@ -147,20 +147,6 @@ input,select,textarea{font-family:inherit;}
 .dd-item svg{width:16px;height:16px;flex-shrink:0;color:var(--frame-text-dim);}
 .dd-sep{height:1px;background:var(--frame-line); margin:4px 2px;}
 
-.slate-tabs{display:flex;align-items:center;gap:6px;min-height:42px;padding:5px 12px;background:var(--frame);border-bottom:1px solid var(--frame-line);overflow-x:auto;flex-shrink:0}
-.slate-tab{border:1px solid var(--frame-line);background:transparent;color:var(--frame-text-dim);border-radius:8px;padding:7px 12px;font:500 12px var(--font-ui);white-space:nowrap}
-.slate-tab:hover{background:var(--frame-2);color:var(--frame-text)}
-.slate-tab.active{background:var(--accent-soft);border-color:var(--accent);color:#b9e1cf}
-.slate-tab[disabled]{cursor:default;opacity:.8}
-.room-role{margin-left:auto;font-size:11px;color:var(--frame-text-dim);white-space:nowrap}
-.share-btn{height:30px;border:1px solid var(--accent);background:var(--accent-soft);color:#b9e1cf;border-radius:8px;padding:0 11px;font:600 12px var(--font-ui)}
-.share-btn:hover{background:rgba(79,146,119,.3)}
-.share-modal{position:fixed;inset:0;background:rgba(8,10,13,.7);display:none;align-items:center;justify-content:center;z-index:100}
-.share-modal.open{display:flex}
-.share-card{width:min(440px,calc(100vw - 28px));background:var(--frame-2);border:1px solid var(--frame-line);border-radius:16px;padding:20px;color:var(--frame-text);box-shadow:0 20px 70px rgba(0,0,0,.45)}
-.share-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.share-head h3{margin:0;font-size:17px}.share-close{border:0;background:none;color:var(--frame-text-dim);font-size:24px;cursor:pointer}
-.share-label{display:block;margin:12px 0 5px;color:var(--frame-text-dim);font-size:11px}.share-row{display:flex;gap:7px}.share-input{flex:1;min-width:0;background:var(--frame);border:1px solid var(--frame-line);border-radius:7px;color:var(--frame-text);padding:8px;font-size:12px}.share-copy{border:1px solid var(--frame-line);background:var(--frame);color:var(--frame-text);border-radius:7px;padding:0 10px}.share-copy:hover{border-color:var(--accent);color:#b9e1cf}.qr-wrap{display:flex;justify-content:center;margin:16px 0 4px}.qr-wrap canvas,.qr-wrap img{background:#fff;border-radius:8px;padding:10px;max-width:220px}.share-note{font-size:11px;line-height:1.45;color:var(--frame-text-dim);margin-top:12px}
-
 /* ===== PROPERTIES BAR (row 2) ===== */
 .props-bar{
   display:flex; align-items:center; gap:14px;
@@ -243,12 +229,12 @@ input[type=color].custom-swatch{
   flex:1; font-family:var(--font-hand); font-size:16px; line-height:1.4; color:#2b2410;
 }
 .wb-table{
-  display:grid; width:100%; height:100%; min-width:0; min-height:0;
+  border-collapse:collapse; width:100%; height:100%; table-layout:fixed;
   box-shadow:0 2px 10px rgba(0,0,0,.08);
 }
-.wb-table .table-cell{
+.wb-table td{
   border:1.4px solid currentColor; padding:6px 8px; font-size:13px;
-  overflow:hidden; min-width:0; min-height:0; line-height:1.25;
+  vertical-align:top; overflow:hidden;
 }
 .el-locked{pointer-events:none;}
 
@@ -379,7 +365,6 @@ input[type=color].custom-swatch{
     <div class="spacer"></div>
 
     <div class="realtime-status" id="realtimeStatus" title="Realtime connection status">尚未連線</div>
-    <button class="share-btn" id="shareBtn">Share / QR</button>
 
     <div class="tool-group" style="border-right:none;">
       <div class="dropdown">
@@ -441,23 +426,6 @@ input[type=color].custom-swatch{
     <span class="hint" id="hintText">Tip: hold Space to pan · Ctrl + wheel to zoom</span>
   </div>
 
-  <div class="slate-tabs" id="slateTabs">
-    <button class="slate-tab active" data-slate="main">Main</button>
-    <span class="room-role" id="roomRole">Owner · starting…</span>
-  </div>
-
-  <div class="share-modal" id="shareModal" role="dialog" aria-modal="true" aria-label="Share room">
-    <div class="share-card">
-      <div class="share-head"><h3>Share this room</h3><button class="share-close" id="shareClose" aria-label="Close">×</button></div>
-      <label class="share-label">Participant link</label>
-      <div class="share-row"><input class="share-input" id="participantLink" readonly><button class="share-copy" data-copy="participantLink">Copy</button></div>
-      <div class="qr-wrap" id="qrCode"></div>
-      <label class="share-label">Owner link</label>
-      <div class="share-row"><input class="share-input" id="ownerLink" readonly><button class="share-copy" data-copy="ownerLink">Copy</button></div>
-      <div class="share-note">Participant link 會自動加入此房間的 Participant slate。QR Code 也是 Participant link。請把這個頁面部署到可被其他裝置開啟的網址後再分享。</div>
-    </div>
-  </div>
-
   <!-- ===== BOARD ===== -->
   <div class="board-wrap" id="boardWrap">
     <div id="bgLayer"></div>
@@ -495,7 +463,6 @@ input[type=color].custom-swatch{
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
 <script>
 (function(){
 "use strict";
@@ -523,15 +490,6 @@ const state = {
   editingId: null
 };
 
-// The active canvas remains exposed as state.elements for the existing tools,
-// while the room keeps one independent array per slate.
-const roomState = { main: [], participants: {}, participantMeta: {}, activeSlateId:'main' };
-const params = new URLSearchParams(location.search);
-const isOwner = (params.get('role') || 'owner').toLowerCase() !== 'participant';
-let participantId = null;
-let joinOrder = null;
-let displayName = params.get('name') || '';
-
 /* ===================== REALTIME (EPHEMERAL) ===================== */
 // Replace these two values, or pass ?room=room-name in the URL.
 const REALTIME_CONFIG = {
@@ -549,65 +507,22 @@ function setRealtimeStatus(kind, message){
   realtimeStatus.className = 'realtime-status' + (kind ? ' '+kind : '');
   realtimeStatus.textContent = message;
 }
-function sendRealtime(event, payload){
+function currentBoardPayload(){
+  return { elements: clone(state.elements), theme: state.theme, bgStyle: state.bgStyle, sender: realtimeClientId };
+}
+function broadcastBoard(){
   if(!realtimeChannel || !realtimeReady || applyingRemote) return;
-  realtimeChannel.send({type:'broadcast', event, payload:Object.assign({sender:realtimeClientId},payload)}).catch(()=>{});
+  realtimeChannel.send({type:'broadcast', event:'board', payload:currentBoardPayload()}).catch(()=>{});
 }
-function ownerCopy(el){ const c=clone(el); c.ownerSourceId = el.ownerSourceId || el.id; c.id=newId(); return c; }
-function snapshotForParticipant(){ return roomState.main.map(ownerCopy); }
-function saveActiveSlate(){
-  if(roomState.activeSlateId==='main') roomState.main = state.elements;
-  else roomState.participants[roomState.activeSlateId] = state.elements;
-}
-function syncOwnerToParticipants(){
-  roomState.main = state.elements;
-  for(const pid of Object.keys(roomState.participants)){
-    const current = roomState.participants[pid] || [];
-    const bySource = new Map(current.filter(e=>e.ownerSourceId).map(e=>[e.ownerSourceId,e]));
-    const mainIds = new Set();
-    for(const source of roomState.main){
-      const sourceId = source.ownerSourceId || source.id; mainIds.add(sourceId);
-      const existing = bySource.get(sourceId);
-      if(existing){
-        const localGeometry={x:existing.x,y:existing.y,w:existing.w,h:existing.h,x1:existing.x1,y1:existing.y1,x2:existing.x2,y2:existing.y2};
-        Object.assign(existing, clone(source), {id:existing.id, ownerSourceId:sourceId});
-        for(const k of ['x','y','w','h','x1','y1','x2','y2']) if(localGeometry[k]!==undefined) existing[k]=localGeometry[k];
-      }
-      else current.push(ownerCopy(source));
-    }
-    roomState.participants[pid] = current.filter(e=>!e.ownerSourceId || mainIds.has(e.ownerSourceId));
-    sendRealtime('main-delta',{targetParticipantId:pid, elements:clone(roomState.participants[pid]), mainRevision:Date.now()});
-  }
-}
-function applySlateSnapshot(payload){
+function applyRemoteBoard(payload){
   if(!payload || payload.sender===realtimeClientId || !Array.isArray(payload.elements)) return;
-  const target = payload.slateId || payload.targetParticipantId;
-  if(target==='main' && isOwner) roomState.main = payload.elements;
-  else if(target && target !== 'main') roomState.participants[target] = payload.elements;
-  const active = roomState.activeSlateId;
-  if(target===active || (target===participantId && active===participantId)){
-    applyingRemote=true; state.elements = target==='main' ? roomState.main : roomState.participants[target];
-    fullRender(); history=[clone(state.elements)]; hIdx=0; updateHistBtns(); applyingRemote=false;
-  }
-  if(isOwner) renderSlateTabs();
-}
-function assignParticipant(payload){
-  if(isOwner || !payload || payload.targetClientId!==realtimeClientId) return;
-  participantId=payload.participantId; joinOrder=payload.joinOrder; displayName=displayName||payload.displayName||('Participant '+joinOrder);
-  roomState.participants[participantId]=payload.elements||[]; activateSlate(participantId);
-  realtimeChannel && realtimeChannel.track({joinedAt:Date.now(),role:'participant',clientId:realtimeClientId,participantId,displayName});
-  document.getElementById('roomRole').textContent='Participant '+joinOrder+' · Connected';
-  sendRealtime('request-main-snapshot',{targetParticipantId:participantId});
-}
-function handleJoin(payload){
-  if(!isOwner || !payload || payload.sender===realtimeClientId) return;
-  const existing = Object.keys(roomState.participantMeta).find(p=>roomState.participantMeta[p].clientId===payload.sender);
-  const pid = existing || ('p'+(Object.keys(roomState.participantMeta).length+1));
-  const order = existing ? roomState.participantMeta[pid].joinOrder : Object.keys(roomState.participantMeta).length+1;
-  if(!existing){ roomState.participantMeta[pid]={clientId:payload.sender,joinOrder:order,displayName:payload.displayName||('Participant '+order)}; roomState.participants[pid]=snapshotForParticipant(); }
-  sendRealtime('assign-participant',{targetClientId:payload.sender,participantId:pid,joinOrder:order,displayName:roomState.participantMeta[pid].displayName,elements:clone(roomState.participants[pid])});
-  sendRealtime('participant-snapshot',{targetParticipantId:pid,elements:clone(roomState.participants[pid])});
-  renderSlateTabs();
+  applyingRemote = true;
+  state.elements = payload.elements;
+  if(payload.theme) state.theme = payload.theme;
+  if(payload.bgStyle) state.bgStyle = payload.bgStyle;
+  fullRender();
+  history = [clone(state.elements)]; hIdx = 0; updateHistBtns();
+  applyingRemote = false;
 }
 async function connectRealtime(){
   const configured = window.supabase && REALTIME_CONFIG.supabaseUrl.startsWith('http') &&
@@ -625,52 +540,17 @@ async function connectRealtime(){
       config:{broadcast:{self:false}, presence:{key:realtimeClientId}}
     });
     realtimeChannel
-      .on('broadcast', {event:'join'}, ({payload})=>handleJoin(payload))
-      .on('broadcast', {event:'assign-participant'}, ({payload})=>assignParticipant(payload))
-      .on('broadcast', {event:'request-main-snapshot'}, ({payload})=>{
-        if(isOwner && payload && payload.targetParticipantId) sendRealtime('participant-snapshot',{targetParticipantId:payload.targetParticipantId,elements:clone(roomState.participants[payload.targetParticipantId]||snapshotForParticipant())});
+      .on('broadcast', {event:'board'}, ({payload})=>applyRemoteBoard(payload))
+      .on('broadcast', {event:'request-state'}, ({payload})=>{
+        if(payload && payload.sender!==realtimeClientId) broadcastBoard();
       })
-      .on('broadcast', {event:'participant-snapshot'}, ({payload})=>{
-        if(payload && (!payload.targetParticipantId || payload.targetParticipantId===participantId)) applySlateSnapshot(Object.assign({},payload,{slateId:participantId}));
-      })
-      .on('broadcast', {event:'request-participant-snapshot'}, ({payload})=>{
-        if(!isOwner && payload && payload.targetParticipantId===participantId) sendRealtime('participant-delta',{targetParticipantId:participantId,slateId:participantId,elements:clone(state.elements)});
-      })
-      .on('broadcast', {event:'main-delta'}, ({payload})=>{
-        if(payload && payload.targetParticipantId===participantId) applySlateSnapshot(Object.assign({},payload,{slateId:participantId}));
-        else if(isOwner && payload && payload.targetParticipantId) { roomState.participants[payload.targetParticipantId]=payload.elements||[]; renderSlateTabs(); }
-      })
-      .on('broadcast', {event:'participant-delta'}, ({payload})=>{
-        if(isOwner && payload && payload.targetParticipantId){ roomState.participants[payload.targetParticipantId]=payload.elements||[]; if(roomState.activeSlateId===payload.targetParticipantId) applySlateSnapshot(Object.assign({},payload,{slateId:payload.targetParticipantId})); renderSlateTabs(); }
-      })
-      .on('presence', {event:'sync'}, ()=>{
-        if(isOwner){
-          const presence=realtimeChannel.presenceState();
-          Object.values(presence).flat().forEach(meta=>{
-            if(meta.participantId && !roomState.participantMeta[meta.participantId]){
-              roomState.participantMeta[meta.participantId]={clientId:meta.clientId,joinOrder:meta.joinOrder||Object.keys(roomState.participantMeta).length+1,displayName:meta.displayName||('Participant '+meta.participantId.slice(1))};
-              roomState.participants[meta.participantId] ||= [];
-              sendRealtime('request-participant-snapshot',{targetParticipantId:meta.participantId});
-            }
-          });
-          renderSlateTabs();
-        }
-      })
-      .on('presence', {event:'leave'}, ({leftPresences})=>{
-        if(!isOwner) return;
-        (leftPresences||[]).forEach(meta=>{
-          const pid=Object.keys(roomState.participantMeta).find(p=>roomState.participantMeta[p].clientId===meta.clientId);
-          if(pid){ delete roomState.participantMeta[pid]; delete roomState.participants[pid]; if(roomState.activeSlateId===pid) activateSlate('main'); }
-        });
-        renderSlateTabs();
-      })
+      .on('presence', {event:'sync'}, ()=>{})
       .subscribe(async status=>{
         if(status==='SUBSCRIBED'){
           realtimeReady = true;
-          setRealtimeStatus('connected', (isOwner?'Owner':'Participant')+' · '+REALTIME_CONFIG.room);
-          document.getElementById('roomRole').textContent=isOwner?'Owner · Connected':'Participant · waiting for assignment';
-          await realtimeChannel.track({joinedAt:Date.now(),role:isOwner?'owner':'participant',clientId:realtimeClientId,participantId});
-          if(!isOwner) sendRealtime('join',{displayName:displayName||null});
+          setRealtimeStatus('connected', '已連線 · ' + REALTIME_CONFIG.room);
+          await realtimeChannel.track({joinedAt:Date.now()});
+          realtimeChannel.send({type:'broadcast', event:'request-state', payload:{sender:realtimeClientId}}).catch(()=>{});
         } else if(status==='CHANNEL_ERROR' || status==='TIMED_OUT'){
           realtimeReady = false; setRealtimeStatus('error', '連線失敗');
         }
@@ -700,38 +580,6 @@ const bgLayer = document.getElementById('bgLayer');
 const appEl = document.getElementById('app');
 const statusNote = document.getElementById('statusNote');
 const tableToolbar = document.getElementById('tableToolbar');
-
-function buildRoomLink(role){
-  const url=new URL(location.href);
-  url.searchParams.set('room',REALTIME_CONFIG.room);
-  url.searchParams.set('role',role);
-  url.searchParams.delete('name');
-  return url.href;
-}
-function openShareDialog(){
-  const participantLink=buildRoomLink('participant');
-  document.getElementById('participantLink').value=participantLink;
-  document.getElementById('ownerLink').value=buildRoomLink('owner');
-  const qr=document.getElementById('qrCode'); qr.innerHTML='';
-  const useImageQr=()=>{
-    qr.innerHTML=''; const img=document.createElement('img'); img.alt='QR Code';
-    img.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data='+encodeURIComponent(participantLink);
-    img.onerror=()=>{ qr.textContent='QR Code unavailable. Copy the Participant link instead.'; }; qr.appendChild(img);
-  };
-  if(window.QRCode && QRCode.toCanvas){
-    const canvas=document.createElement('canvas'); qr.appendChild(canvas);
-    QRCode.toCanvas(canvas,participantLink,{width:190,margin:1,color:{dark:'#20242B',light:'#FFFFFF'}},err=>{ if(err) useImageQr(); });
-  } else useImageQr();
-  document.getElementById('shareModal').classList.add('open');
-}
-document.getElementById('shareBtn').addEventListener('click',openShareDialog);
-document.getElementById('shareClose').addEventListener('click',()=>document.getElementById('shareModal').classList.remove('open'));
-document.getElementById('shareModal').addEventListener('click',e=>{ if(e.target.id==='shareModal') e.currentTarget.classList.remove('open'); });
-document.querySelectorAll('[data-copy]').forEach(btn=>btn.addEventListener('click',async()=>{
-  const input=document.getElementById(btn.dataset.copy); input.select();
-  try{ await navigator.clipboard.writeText(input.value); }catch(err){ document.execCommand('copy'); }
-  toast('Link copied');
-}));
 
 const domById = new Map(); // element id -> its svg group node
 
@@ -831,36 +679,13 @@ function arrowHeadPoints(x1,y1,x2,y2,size){
 
 /* ===================== ELEMENT FACTORY ===================== */
 function makeEl(partial){
-  const el = Object.assign({
+  return Object.assign({
     id: newId(), type:'shape', x:0,y:0,w:100,h:60,
     stroke: state.defaults.stroke, fill:'none', strokeWidth: state.defaults.strokeWidth,
     opacity:1, fontFamily: state.defaults.fontFamily, fontSize: state.defaults.fontSize,
     z: state.elements.length
   }, partial);
-  if(isOwner && roomState.activeSlateId==='main' && !el.ownerSourceId) el.ownerSourceId=el.id;
-  return el;
 }
-
-function renderSlateTabs(){
-  const tabs=document.getElementById('slateTabs');
-  tabs.querySelectorAll('.slate-tab').forEach(b=>b.remove());
-  const ids=isOwner ? ['main',...Object.keys(roomState.participantMeta).sort((a,b)=>roomState.participantMeta[a].joinOrder-roomState.participantMeta[b].joinOrder)] : [participantId||'main'];
-  ids.forEach(id=>{
-    const b=document.createElement('button'); b.className='slate-tab'+(roomState.activeSlateId===id?' active':''); b.dataset.slate=id;
-    b.textContent=id==='main'?'Main':(roomState.participantMeta[id]?.displayName||('Participant '+roomState.participantMeta[id]?.joinOrder));
-    if(!isOwner) b.disabled=true;
-    b.addEventListener('click',()=>activateSlate(id)); tabs.insertBefore(b,tabs.querySelector('.room-role'));
-  });
-}
-function activateSlate(id){
-  if(!isOwner && id!==participantId) return;
-  saveActiveSlate();
-  roomState.activeSlateId=id;
-  state.elements = id==='main' ? roomState.main : (roomState.participants[id] ||= []);
-  clearSelection(); fullRender(); history=[clone(state.elements)]; hIdx=0; updateHistBtns();
-  renderSlateTabs();
-}
-function isReadOnlySlate(){ return isOwner && roomState.activeSlateId!=='main'; }
 
 /* ===================== RENDERING ===================== */
 function buildNode(el){
@@ -933,15 +758,17 @@ function buildStickyInner(el){
   </div>`;
 }
 function buildTableInner(el){
-  let cells='';
+  let rows='';
   for(let r=0;r<el.rows;r++){
+    let cells='';
     for(let c=0;c<el.cols;c++){
       const val = (el.cells[r] && el.cells[r][c]!=null) ? el.cells[r][c] : '';
-      cells += `<div class="table-cell" data-r="${r}" data-c="${c}" contenteditable="false" style="font-family:${el.fontFamily};">${val}</div>`;
+      cells += `<td class="table-cell" data-r="${r}" data-c="${c}" contenteditable="false" style="font-family:${el.fontFamily};">${val}</td>`;
     }
+    rows += `<tr>${cells}</tr>`;
   }
   const color = el.stroke || (state.theme==='chalk'?'#F5F3E7':'#23272F');
-  return `<div class="wb-table" style="grid-template-columns:repeat(${el.cols},minmax(0,1fr));grid-template-rows:repeat(${el.rows},minmax(0,1fr));color:${color};background:${state.theme==='chalk'?'rgba(255,255,255,.03)':'rgba(255,255,255,.6)'};">${cells}</div>`;
+  return `<table class="wb-table" style="color:${color};background:${state.theme==='chalk'?'rgba(255,255,255,.03)':'rgba(255,255,255,.6)'};">${rows}</table>`;
 }
 
 function addToDOM(el){
@@ -1066,34 +893,22 @@ function positionTableToolbar(el){
 let history = [clone(state.elements)];
 let hIdx = 0;
 function commit(){
-  saveActiveSlate();
   history = history.slice(0, hIdx+1);
   history.push(clone(state.elements));
   hIdx++;
   if(history.length>120){ history.shift(); hIdx--; }
   updateHistBtns();
-  if(isOwner && roomState.activeSlateId==='main'){
-    syncOwnerToParticipants();
-    sendRealtime('main-delta',{slateId:'main',elements:clone(roomState.main)});
-  } else {
-    sendRealtime('participant-delta',{targetParticipantId:participantId||roomState.activeSlateId,slateId:roomState.activeSlateId,elements:clone(state.elements)});
-  }
-}
-function broadcastActiveSlate(){
-  saveActiveSlate();
-  if(isOwner && roomState.activeSlateId==='main'){
-    syncOwnerToParticipants(); sendRealtime('main-delta',{slateId:'main',elements:clone(roomState.main)});
-  } else sendRealtime('participant-delta',{targetParticipantId:participantId||roomState.activeSlateId,slateId:roomState.activeSlateId,elements:clone(state.elements)});
+  broadcastBoard();
 }
 function undo(){
   if(hIdx<=0) return;
   hIdx--; state.elements = clone(history[hIdx]);
-  fullRender(); updateHistBtns(); broadcastActiveSlate();
+  fullRender(); updateHistBtns(); broadcastBoard();
 }
 function redo(){
   if(hIdx>=history.length-1) return;
   hIdx++; state.elements = clone(history[hIdx]);
-  fullRender(); updateHistBtns(); broadcastActiveSlate();
+  fullRender(); updateHistBtns(); broadcastBoard();
 }
 function updateHistBtns(){
   document.getElementById('undoBtn').disabled = hIdx<=0;
@@ -1171,7 +986,6 @@ lockBtn.addEventListener('click', ()=>{
 
 /* clear board */
 document.getElementById('clearBtn').addEventListener('click', ()=>{
-  if(isReadOnlySlate()) return;
   if(!state.elements.length) return;
   if(confirm('Clear the whole board? This cannot be undone once you leave this page.')){
     state.elements = []; clearSelection(); fullRender(); commit();
@@ -1233,7 +1047,6 @@ document.getElementById('fontSelect').addEventListener('change', (e)=>{
   applyToSelection({fontFamily:e.target.value});
 });
 function applyToSelection(props){
-  if(isReadOnlySlate()) return;
   if(!state.selectedIds.size) return;
   let changed=false;
   for(const id of state.selectedIds){
@@ -1315,7 +1128,6 @@ svg.addEventListener('pointerdown', (e)=>{
   if(isEditingSomething){
     finishEditing();
   }
-  if(isReadOnlySlate() && !['select','pan'].includes(state.tool)) return;
   svg.setPointerCapture(e.pointerId);
   const wp = toWorld(e.clientX, e.clientY);
 
@@ -1327,7 +1139,7 @@ svg.addEventListener('pointerdown', (e)=>{
 
   if(state.tool==='select'){
     const handle = handleFromEvent(e);
-    if(handle && !isReadOnlySlate()){
+    if(handle){
       state.mode='resizing'; resizeHandle=handle;
       const ids=[...state.selectedIds];
       resizeOrigin = { start: wp, elements: ids.map(id=>clone(state.elements.find(x=>x.id===id))) };
@@ -1342,7 +1154,7 @@ svg.addEventListener('pointerdown', (e)=>{
       } else if(!state.selectedIds.has(id)){
         setSelection([id]);
       }
-      if(state.selectedIds.size && !isReadOnlySlate()){
+      if(state.selectedIds.size){
         state.mode='dragging';
         dragStartWorld = wp;
         dragOrigins = [...state.selectedIds].map(sid=>{
@@ -1643,7 +1455,6 @@ document.getElementById('zoomFit').addEventListener('click', ()=>{
 
 /* ===================== EDITING TEXT/STICKY/TABLE ===================== */
 svg.addEventListener('dblclick', (e)=>{
-  if(isReadOnlySlate()) return;
   const id = elIdFromEvent(e);
   if(!id) return;
   const el = state.elements.find(x=>x.id===id);
@@ -1710,7 +1521,6 @@ elementsLayer.addEventListener('blur', (e)=>{
 
 /* table toolbar actions */
 tableToolbar.addEventListener('click', (e)=>{
-  if(isReadOnlySlate()) return;
   const btn = e.target.closest('button'); if(!btn) return;
   const id = tableToolbar.dataset.for;
   const el = state.elements.find(x=>x.id===id); if(!el) return;
@@ -1728,7 +1538,6 @@ tableToolbar.addEventListener('click', (e)=>{
 
 /* ===================== DELETE / DUPLICATE / ORDER ===================== */
 function deleteSelected(){
-  if(isReadOnlySlate()) return;
   if(!state.selectedIds.size) return;
   for(const id of state.selectedIds){ removeFromDOM(id); }
   state.elements = state.elements.filter(el=>!state.selectedIds.has(el.id));
@@ -1736,13 +1545,11 @@ function deleteSelected(){
   commit();
 }
 function duplicateSelected(){
-  if(isReadOnlySlate()) return;
   if(!state.selectedIds.size) return;
   const newIds=[];
   for(const id of state.selectedIds){
     const el = state.elements.find(x=>x.id===id); if(!el) continue;
     const copy = clone(el); copy.id = newId();
-    if(isOwner && roomState.activeSlateId==='main') copy.ownerSourceId=copy.id; else delete copy.ownerSourceId;
     if(copy.type==='path') copy.points = copy.points.map(p=>[p[0]+18,p[1]+18]);
     else if(copy.type==='shape' && (copy.shapeKind==='line'||copy.shapeKind==='arrow')){ copy.x1+=18;copy.y1+=18;copy.x2+=18;copy.y2+=18; delete copy.bindStart; delete copy.bindEnd; }
     else { copy.x+=18; copy.y+=18; }
@@ -1753,7 +1560,6 @@ function duplicateSelected(){
   commit();
 }
 function bringToFront(){
-  if(isReadOnlySlate()) return;
   if(!state.selectedIds.size) return;
   let maxZ = Math.max(0,...state.elements.map(e=>e.z||0));
   for(const id of state.selectedIds){
@@ -1788,7 +1594,6 @@ window.addEventListener('keydown', (e)=>{
   if(e.key==='+' || e.key==='='){ zoomBy(1.15); return; }
   if(e.key==='-'){ zoomBy(1/1.15); return; }
   if(state.selectedIds.size && ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){
-    if(isReadOnlySlate()) return;
     e.preventDefault();
     const d = e.shiftKey?10:1;
     const dx = e.key==='ArrowLeft'?-d:e.key==='ArrowRight'?d:0;
@@ -1845,7 +1650,6 @@ document.addEventListener('paste', (e)=>{
   const newIds=[];
   for(const src of payload){
     const copy = clone(src); copy.id = newId();
-    if(isOwner && roomState.activeSlateId==='main') copy.ownerSourceId=copy.id; else delete copy.ownerSourceId;
     if(copy.type==='path') copy.points = copy.points.map(p=>[p[0]+24,p[1]+24]);
     else if(copy.type==='shape' && (copy.shapeKind==='line'||copy.shapeKind==='arrow')){ copy.x1+=24;copy.y1+=24;copy.x2+=24;copy.y2+=24; delete copy.bindStart; delete copy.bindEnd; }
     else { copy.x+=24; copy.y+=24; }
@@ -1930,8 +1734,8 @@ const EXPORT_CSS = `
 .el-text{padding:4px 6px; line-height:1.35;}
 .sticky-box{width:100%;height:100%;display:flex;flex-direction:column;border-radius:3px 14px 3px 14px;box-shadow:2px 6px 14px rgba(0,0,0,.16);padding:12px 12px 10px;}
 .sticky-text{flex:1;line-height:1.4;color:#2b2410;}
-.wb-table{display:grid;width:100%;height:100%;}
-.wb-table .table-cell{border:1.4px solid currentColor;padding:6px 8px;font-size:13px;overflow:hidden;}
+.wb-table{border-collapse:collapse;width:100%;height:100%;table-layout:fixed;}
+.wb-table td{border:1.4px solid currentColor;padding:6px 8px;font-size:13px;vertical-align:top;}
 `;
 function buildExportSvgString(){
   const b = contentBBox();
@@ -2027,9 +1831,6 @@ window.addEventListener('resize', fitSvg);
 
 /* ===================== INIT ===================== */
 async function init(){
-  if(!isOwner && !displayName){
-    displayName = (window.prompt('Display name (optional)', '') || '').trim();
-  }
   fitSvg();
   applyView();
   setBgStyle('dot');
@@ -2037,7 +1838,6 @@ async function init(){
   fullRender();
   history=[clone(state.elements)]; hIdx=0;
   updateHistBtns();
-  renderSlateTabs();
   setTimeout(()=>document.getElementById('zoomFit').click(), 30);
   connectRealtime();
 }
