@@ -687,7 +687,9 @@ function broadcastActiveSlateDelta(){
     for(const pid of Object.keys(roomState.participants)){
       applyMainDeltaToParticipant(pid, delta);
     }
-    sendRealtime('main-delta', { slateId:'main', delta });
+    for(const pid of Object.keys(roomState.participants)){
+      sendRealtime('main-delta', {targetParticipantId:pid, slateId:'main', delta});
+    }
   } else {
     sendRealtime('participant-delta', {
       targetParticipantId: participantId || roomState.activeSlateId,
@@ -718,6 +720,10 @@ function applySlateSnapshot(payload){
   if(target==='main' && isOwner) roomState.main = payload.elements || [];
   else if(target) roomState.participants[target] = payload.elements || [];
   const active = roomState.activeSlateId;
+  if(!isOwner && payload.view){
+    state.view=clone(payload.view);
+    applyView();
+  }
   if(target===active || (target===participantId && active===participantId)){
     applyingRemote = true;
     state.elements = target==='main' ? roomState.main : roomState.participants[target];
@@ -733,6 +739,7 @@ function assignParticipant(payload){
   participantId=payload.participantId; joinOrder=payload.joinOrder;
   displayName=displayName||payload.displayName||('Participant '+joinOrder);
   roomState.participants[participantId]=payload.elements||[];
+  if(payload.view){ state.view=clone(payload.view); applyView(); }
   activateSlate(participantId);
   realtimeChannel && realtimeChannel.track({joinedAt:Date.now(),role:'participant',clientId:realtimeClientId,participantId,displayName});
   document.getElementById('roomRole').textContent='Participant '+joinOrder+' · Connected';
@@ -750,7 +757,7 @@ function handleJoin(payload){
   sendRealtime('assign-participant',{
     targetClientId:payload.sender, participantId:pid, joinOrder:order,
     displayName:roomState.participantMeta[pid].displayName,
-    elements:clone(roomState.participants[pid])
+    elements:clone(roomState.participants[pid]), view:clone(state.view)
   });
   renderSlateTabs();
 }
@@ -1449,6 +1456,7 @@ function updateBoundConnectors(movedId){
 /* ===================== TOOL / DEFAULTS ===================== */
 const toolButtons = [...document.querySelectorAll('[data-tool]')];
 function setTool(t){
+  if(!isOwner && !['select','pen','highlighter','text'].includes(t)) t='select';
   state.tool = t;
   toolButtons.forEach(b=>b.classList.toggle('active', b.dataset.tool===t));
   document.getElementById('shapeBtn').classList.toggle('active', ['rect','ellipse','diamond'].includes(t));
@@ -2411,6 +2419,21 @@ function fitSvg(){
   svg.setAttribute('width', r.width); svg.setAttribute('height', r.height);
 }
 window.addEventListener('resize', fitSvg);
+
+function setupParticipantMode(){
+  document.body.classList.add('participant-mode');
+  const allowed=new Set(['select','pen','highlighter','text']);
+  document.querySelectorAll('[data-tool]').forEach(btn=>{
+    if(!allowed.has(btn.dataset.tool)) btn.style.display='none';
+  });
+  ['shapeBtn','imageBtn','undoBtn','redoBtn','lockToolBtn','clearBtn','fileBtn','shareBtn','gridBtn','themeBtn','zoomIn','zoomOut','zoomFit'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='none';
+  });
+  document.getElementById('propsBar').style.display='none';
+  document.getElementById('tableToolbar').style.display='none';
+  document.getElementById('annotateBtn').style.display='none';
+  document.getElementById('roomRole').textContent='Participant · connecting';
+}
 
 /* ===================== INIT ===================== */
 async function init(){
