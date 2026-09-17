@@ -512,13 +512,13 @@ input[type=color].custom-swatch{
 
 /* ===================== STATE ===================== */
 const state = {
-  elements: [],           // all board elements
+  elements: [],
   selectedIds: new Set(),
   tool: 'select',
   toolLocked: false,
   view: { x: 0, y: 0, scale: 1 },
-  theme: 'paper',          // 'paper' | 'chalk'
-  bgStyle: 'dot',           // 'dot' | 'grid' | 'lines' | 'blank'
+  theme: 'paper',
+  bgStyle: 'dot',
   defaults: {
     stroke: '#23272F',
     fill: 'none',
@@ -534,7 +534,6 @@ const state = {
 };
 let annotationMode = false;
 
-// 房間狀態 (slate 系統)
 const roomState = { main: [], participants: {}, participantMeta: {}, activeSlateId:'main' };
 const params = new URLSearchParams(location.search);
 const isOwner = (params.get('role') || 'owner').toLowerCase() !== 'participant';
@@ -542,7 +541,7 @@ let participantId = null;
 let joinOrder = null;
 let displayName = params.get('name') || '';
 
-/* ===================== REALTIME 設定 ===================== */
+/* ===================== REALTIME ===================== */
 const REALTIME_CONFIG = {
   supabaseUrl: 'https://wpklmzmerhwokfvtklnx.supabase.co',
   anonKey: 'sb_publishable_RROBN-EPYL26R3SpwaUBag_f9RLHfWu',
@@ -554,6 +553,9 @@ let realtimeClientId = 'client-' + Math.random().toString(36).slice(2, 10);
 let realtimeReady = false;
 let applyingRemote = false;
 
+/* 每次 commit 後記錄的「最後一次已同步的元素快照」，用來算 delta */
+let lastBroadcastElements = null;
+
 function setRealtimeStatus(kind, message){
   realtimeStatus.className = 'realtime-status' + (kind ? ' '+kind : '');
   realtimeStatus.textContent = message;
@@ -562,70 +564,176 @@ function sendRealtime(event, payload){
   if(!realtimeChannel || !realtimeReady || applyingRemote) return;
   realtimeChannel.send({type:'broadcast', event, payload:Object.assign({sender:realtimeClientId},payload)}).catch(()=>{});
 }
+
+/* ===================== 深拷貝（structuredClone 優先） ===================== */
+function clone(o){
+  try { return structuredClone(o); }
+  catch(e){ return JSON.parse(JSON.stringify(o)); }
+}
+
+/* ===================== DELTA 計算與套用 ===================== */
+/* delta = { add: [el...], update: [el...], remove: [id...] } */
+function computeDelta(prevArr, nextArr){
+  const prevMap = new Map((prevArr||[]).map(e=>[e.id,e]));
+  const nextMap = new Map((nextArr||[]).map(e=>[e.id,e]));
+  const add=[], update=[], remove=[];
+  for(const [id,el] of nextMap){
+    const p = prevMap.get(id);
+    if(!p) add.push(el);
+    else if(!shallowEqualEl(p, el)) update.push(el);
+  }
+  for(const [id] of prevMap){ if(!nextMap.has(id)) remove.push(id); }
+  return { add, update, remove };
+}
+function shallowEqualEl(a, b){
+  if(a===b) return true;
+  // 快速欄位比對，避免 JSON.stringify 成本
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  for(const k of keys){
+    if(k==='points'){
+      const pa=a.points||[], pb=b.points||[];
+      if(pa.length!==pb.length) return false;
+      for(let i=0;i<pa.length;i++){ if(pa[i][0]!==pb[i][0]||pa[i][1]!==pb[i][1]) return false; }
+      continue;
+    }
+    if(k==='cells'){
+      const ca=a.cells||[], cb=b.cells||[];
+      if(ca.length!==cb.length) return false;
+      for(let i=0;i<ca.length;i++){
+        const ra=ca[i]||[], rb=cb[i]||[];
+        if(ra.length!==rb.length) return false;
+        for(let j=0;j<ra.length;j++){ if(ra[j]!==rb[j]) return false; }
+      }
+      continue;
+    }
+    if(k==='bindStart'||k==='bindEnd'){
+      const x=a[k]||null, y=b[k]||null;
+      if(!x!==!y) return false;
+      if(x && (x.id!==y.id || x.fx!==y.fx || x.fy!==y.fy)) return false;
+      continue;
+    }
+    if(a[k]!==b[k]) return false;
+  }
+  return true;
+}
+function applyDelta(arr, delta){
+  const map = new Map((arr||[]).map(e=>[e.id,e]));
+  for(const id of delta.remove) map.delete(id);
+  for(const el of delta.add) map.set(el.id, clone(el));
+  for(const el of delta.update){
+    const exist = map.get(el.id);
+    if(exist) Object.assign(exist, clone(el));
+    else map.set(el.id, clone(el));
+  }
+  return [...map.values()];
+}
+
+/* ===================== 房間同步 ===================== */
 function ownerCopy(el){ const c=clone(el); c.ownerSourceId = el.ownerSourceId || el.id; c.id=newId(); return c; }
 function snapshotForParticipant(){ return roomState.main.map(ownerCopy); }
+
 function saveActiveSlate(){
   if(roomState.activeSlateId==='main') roomState.main = state.elements;
   else roomState.participants[roomState.activeSlateId] = state.elements;
 }
-function syncOwnerToParticipants(){
-  roomState.main = state.elements;
-  for(const pid of Object.keys(roomState.participants)){
-    const current = roomState.participants[pid] || [];
-    const bySource = new Map(current.filter(e=>e.ownerSourceId).map(e=>[e.ownerSourceId,e]));
-    const mainIds = new Set();
-    for(const source of roomState.main){
-      const sourceId = source.ownerSourceId || source.id; mainIds.add(sourceId);
-      const existing = bySource.get(sourceId);
-      if(existing){
-        // 保留參與者的本地幾何，只同步其他屬性
-        const localGeometry={x:existing.x,y:existing.y,w:existing.w,h:existing.h,x1:existing.x1,y1:existing.y1,x2:existing.x2,y2:existing.y2};
-        Object.assign(existing, clone(source), {id:existing.id, ownerSourceId:sourceId});
-        for(const k of ['x','y','w','h','x1','y1','x2','y2']) if(localGeometry[k]!==undefined) existing[k]=localGeometry[k];
-      }
-      else current.push(ownerCopy(source));
+
+/* owner 的 main 變動 → 只把 delta 套到每個 participant 的 snapshot 上 */
+function applyMainDeltaToParticipant(pid, delta){
+  const cur = roomState.participants[pid] || [];
+  const map = new Map(cur.map(e=>[e.id,e]));
+  const srcMap = new Map(cur.filter(e=>e.ownerSourceId).map(e=>[e.ownerSourceId,e]));
+
+  for(const el of delta.add){
+    const srcId = el.ownerSourceId || el.id;
+    if(srcMap.has(srcId)) continue;
+    const cp = ownerCopy(el);
+    map.set(cp.id, cp);
+  }
+  for(const el of delta.update){
+    const srcId = el.ownerSourceId || el.id;
+    const exist = srcMap.get(srcId);
+    if(exist){
+      const geo = {x:exist.x,y:exist.y,w:exist.w,h:exist.h,x1:exist.x1,y1:exist.y1,x2:exist.x2,y2:exist.y2};
+      Object.assign(exist, clone(el), {id:exist.id, ownerSourceId:srcId});
+      for(const k in geo) if(geo[k]!==undefined) exist[k]=geo[k];
+    } else {
+      const cp = ownerCopy(el);
+      map.set(cp.id, cp);
+      srcMap.set(srcId, cp);
     }
-    roomState.participants[pid] = current.filter(e=>!e.ownerSourceId || mainIds.has(e.ownerSourceId));
-    sendRealtime('main-delta',{targetParticipantId:pid, elements:clone(roomState.participants[pid]), mainRevision:Date.now()});
+  }
+  for(const id of delta.remove){
+    // id 可能是 ownerSourceId 或本地 id
+    for(const [localId, e] of [...map]){
+      if(e.id===id || e.ownerSourceId===id) map.delete(localId);
+    }
+  }
+  roomState.participants[pid] = [...map.values()];
+}
+
+function broadcastActiveSlateDelta(){
+  saveActiveSlate();
+  if(!lastBroadcastElements){
+    lastBroadcastElements = clone(state.elements);
+    return;
+  }
+  const delta = computeDelta(lastBroadcastElements, state.elements);
+  if(!delta.add.length && !delta.update.length && !delta.remove.length){
+    lastBroadcastElements = clone(state.elements);
+    return;
+  }
+  if(isOwner && roomState.activeSlateId==='main'){
+    roomState.main = state.elements;
+    for(const pid of Object.keys(roomState.participants)){
+      applyMainDeltaToParticipant(pid, delta);
+    }
+    sendRealtime('main-delta', { slateId:'main', delta });
+  } else {
+    sendRealtime('participant-delta', {
+      targetParticipantId: participantId || roomState.activeSlateId,
+      slateId: roomState.activeSlateId,
+      delta
+    });
+  }
+  lastBroadcastElements = clone(state.elements);
+}
+
+/* 接收 main delta */
+function applyOwnerDeltaToParticipant(payload){
+  if(isOwner || !payload || payload.targetParticipantId!==participantId) return;
+  const cur = roomState.participants[participantId] || [];
+  const next = payload.delta ? applyDelta(cur, payload.delta) : (payload.elements || cur);
+  roomState.participants[participantId] = next;
+  if(roomState.activeSlateId===participantId){
+    applyingRemote = true;
+    diffRender(next);
+    applyingRemote = false;
   }
 }
+
+/* 接收完整 snapshot（僅在加入時） */
 function applySlateSnapshot(payload){
-  if(!payload || payload.sender===realtimeClientId || !Array.isArray(payload.elements)) return;
+  if(!payload || payload.sender===realtimeClientId) return;
   const target = payload.slateId || payload.targetParticipantId;
-  if(target==='main' && isOwner) roomState.main = payload.elements;
-  else if(target && target !== 'main') roomState.participants[target] = payload.elements;
+  if(target==='main' && isOwner) roomState.main = payload.elements || [];
+  else if(target) roomState.participants[target] = payload.elements || [];
   const active = roomState.activeSlateId;
   if(target===active || (target===participantId && active===participantId)){
-    applyingRemote=true; state.elements = target==='main' ? roomState.main : roomState.participants[target];
-    fullRender(); history=[clone(state.elements)]; hIdx=0; updateHistBtns(); applyingRemote=false;
+    applyingRemote = true;
+    state.elements = target==='main' ? roomState.main : roomState.participants[target];
+    fullRender();
+    applyingRemote = false;
+    lastBroadcastElements = clone(state.elements);
   }
   if(isOwner) renderSlateTabs();
 }
-function applyOwnerDeltaToParticipant(payload){
-  if(isOwner || !payload || payload.targetParticipantId!==participantId || !Array.isArray(payload.elements)) return;
-  const current=roomState.participants[participantId] || [];
-  const incoming=payload.elements;
-  const incomingBySource=new Map(incoming.filter(e=>e.ownerSourceId).map(e=>[e.ownerSourceId,e]));
-  const currentBySource=new Map(current.filter(e=>e.ownerSourceId).map(e=>[e.ownerSourceId,e]));
-  for(const source of incoming){
-    if(!source.ownerSourceId) continue;
-    const existing=currentBySource.get(source.ownerSourceId);
-    if(existing){
-      const geometry={x:existing.x,y:existing.y,w:existing.w,h:existing.h,x1:existing.x1,y1:existing.y1,x2:existing.x2,y2:existing.y2};
-      Object.assign(existing,clone(source),{id:existing.id,ownerSourceId:source.ownerSourceId});
-      for(const k of ['x','y','w','h','x1','y1','x2','y2']) if(geometry[k]!==undefined) existing[k]=geometry[k];
-    } else current.push(clone(source));
-  }
-  roomState.participants[participantId]=current.filter(e=>!e.ownerSourceId || incomingBySource.has(e.ownerSourceId));
-  state.elements=roomState.participants[participantId];
-  if(roomState.activeSlateId===participantId){
-    applyingRemote=true; fullRender(); history=[clone(state.elements)]; hIdx=0; updateHistBtns(); applyingRemote=false;
-  }
-}
+
 function assignParticipant(payload){
   if(isOwner || !payload || payload.targetClientId!==realtimeClientId) return;
-  participantId=payload.participantId; joinOrder=payload.joinOrder; displayName=displayName||payload.displayName||('Participant '+joinOrder);
-  roomState.participants[participantId]=payload.elements||[]; activateSlate(participantId);
+  participantId=payload.participantId; joinOrder=payload.joinOrder;
+  displayName=displayName||payload.displayName||('Participant '+joinOrder);
+  roomState.participants[participantId]=payload.elements||[];
+  activateSlate(participantId);
   realtimeChannel && realtimeChannel.track({joinedAt:Date.now(),role:'participant',clientId:realtimeClientId,participantId,displayName});
   document.getElementById('roomRole').textContent='Participant '+joinOrder+' · Connected';
   sendRealtime('request-main-snapshot',{targetParticipantId:participantId});
@@ -635,11 +743,18 @@ function handleJoin(payload){
   const existing = Object.keys(roomState.participantMeta).find(p=>roomState.participantMeta[p].clientId===payload.sender);
   const pid = existing || ('p'+(Object.keys(roomState.participantMeta).length+1));
   const order = existing ? roomState.participantMeta[pid].joinOrder : Object.keys(roomState.participantMeta).length+1;
-  if(!existing){ roomState.participantMeta[pid]={clientId:payload.sender,joinOrder:order,displayName:payload.displayName||('Participant '+order)}; roomState.participants[pid]=snapshotForParticipant(); }
-  sendRealtime('assign-participant',{targetClientId:payload.sender,participantId:pid,joinOrder:order,displayName:roomState.participantMeta[pid].displayName,elements:clone(roomState.participants[pid])});
-  sendRealtime('participant-snapshot',{targetParticipantId:pid,elements:clone(roomState.participants[pid])});
+  if(!existing){
+    roomState.participantMeta[pid]={clientId:payload.sender,joinOrder:order,displayName:payload.displayName||('Participant '+order)};
+    roomState.participants[pid]=snapshotForParticipant();
+  }
+  sendRealtime('assign-participant',{
+    targetClientId:payload.sender, participantId:pid, joinOrder:order,
+    displayName:roomState.participantMeta[pid].displayName,
+    elements:clone(roomState.participants[pid])
+  });
   renderSlateTabs();
 }
+
 async function connectRealtime(){
   const configured = window.supabase && REALTIME_CONFIG.supabaseUrl.startsWith('http') &&
     !REALTIME_CONFIG.supabaseUrl.includes('YOUR-PROJECT') && !REALTIME_CONFIG.anonKey.includes('YOUR_');
@@ -659,27 +774,53 @@ async function connectRealtime(){
       .on('broadcast', {event:'join'}, ({payload})=>handleJoin(payload))
       .on('broadcast', {event:'assign-participant'}, ({payload})=>assignParticipant(payload))
       .on('broadcast', {event:'request-main-snapshot'}, ({payload})=>{
-        if(isOwner && payload && payload.targetParticipantId) sendRealtime('participant-snapshot',{targetParticipantId:payload.targetParticipantId,elements:clone(roomState.participants[payload.targetParticipantId]||snapshotForParticipant())});
+        if(isOwner && payload && payload.targetParticipantId)
+          sendRealtime('participant-snapshot',{
+            targetParticipantId:payload.targetParticipantId,
+            elements:clone(roomState.participants[payload.targetParticipantId]||snapshotForParticipant())
+          });
       })
       .on('broadcast', {event:'participant-snapshot'}, ({payload})=>{
-        if(payload && (!payload.targetParticipantId || payload.targetParticipantId===participantId)) applySlateSnapshot(Object.assign({},payload,{slateId:participantId}));
+        if(payload && (!payload.targetParticipantId || payload.targetParticipantId===participantId))
+          applySlateSnapshot(Object.assign({},payload,{slateId:participantId}));
       })
       .on('broadcast', {event:'request-participant-snapshot'}, ({payload})=>{
-        if(!isOwner && payload && payload.targetParticipantId===participantId) sendRealtime('participant-delta',{targetParticipantId:participantId,slateId:participantId,elements:clone(state.elements)});
+        if(!isOwner && payload && payload.targetParticipantId===participantId)
+          sendRealtime('participant-delta',{
+            targetParticipantId:participantId, slateId:participantId,
+            elements:clone(state.elements)
+          });
       })
       .on('broadcast', {event:'main-delta'}, ({payload})=>{
         if(payload && payload.targetParticipantId===participantId) applyOwnerDeltaToParticipant(payload);
-        else if(isOwner && payload && payload.targetParticipantId) { roomState.participants[payload.targetParticipantId]=payload.elements||[]; renderSlateTabs(); }
+        else if(isOwner && payload && payload.targetParticipantId){
+          roomState.participants[payload.targetParticipantId]=payload.elements||[];
+          renderSlateTabs();
+        }
       })
       .on('broadcast', {event:'participant-delta'}, ({payload})=>{
         if(!payload || !payload.targetParticipantId) return;
         if(!isOwner && payload.targetParticipantId===participantId){
-          applySlateSnapshot(Object.assign({},payload,{slateId:participantId}));
+          const cur = roomState.participants[participantId] || [];
+          const next = payload.delta ? applyDelta(cur, payload.delta) : (payload.elements||cur);
+          roomState.participants[participantId] = next;
+          if(roomState.activeSlateId===participantId){
+            applyingRemote = true; diffRender(next); applyingRemote = false;
+          }
           return;
         }
         if(isOwner){
-          roomState.participants[payload.targetParticipantId]=payload.elements||[];
-          if(roomState.activeSlateId===payload.targetParticipantId) applySlateSnapshot(Object.assign({},payload,{slateId:payload.targetParticipantId}));
+          if(payload.delta){
+            const cur = roomState.participants[payload.targetParticipantId] || [];
+            roomState.participants[payload.targetParticipantId] = applyDelta(cur, payload.delta);
+          } else {
+            roomState.participants[payload.targetParticipantId]=payload.elements||[];
+          }
+          if(roomState.activeSlateId===payload.targetParticipantId){
+            applyingRemote = true;
+            diffRender(roomState.participants[payload.targetParticipantId]);
+            applyingRemote = false;
+          }
           renderSlateTabs();
         }
       })
@@ -688,7 +829,11 @@ async function connectRealtime(){
           const presence=realtimeChannel.presenceState();
           Object.values(presence).flat().forEach(meta=>{
             if(meta.participantId && !roomState.participantMeta[meta.participantId]){
-              roomState.participantMeta[meta.participantId]={clientId:meta.clientId,joinOrder:meta.joinOrder||Object.keys(roomState.participantMeta).length+1,displayName:meta.displayName||('Participant '+meta.participantId.slice(1))};
+              roomState.participantMeta[meta.participantId]={
+                clientId:meta.clientId,
+                joinOrder:meta.joinOrder||Object.keys(roomState.participantMeta).length+1,
+                displayName:meta.displayName||('Participant '+meta.participantId.slice(1))
+              };
               roomState.participants[meta.participantId] ||= [];
               sendRealtime('request-participant-snapshot',{targetParticipantId:meta.participantId});
             }
@@ -720,6 +865,7 @@ async function connectRealtime(){
     toast('Realtime 連線設定有誤，請檢查 Supabase URL 與 anon key。', 4200);
   }
 }
+
 let uid = 1;
 const newId = () => 'el' + (uid++) + '_' + Math.random().toString(36).slice(2,7);
 
@@ -773,7 +919,8 @@ document.querySelectorAll('[data-copy]').forEach(btn=>btn.addEventListener('clic
   toast('Link copied');
 }));
 
-const domById = new Map(); // element id -> its svg group node
+const domById = new Map();
+const nodeSig = new Map();
 
 /* ===================== UTIL ===================== */
 const NS = 'http://www.w3.org/2000/svg';
@@ -784,14 +931,12 @@ function svgEl(tag, attrs){
   return e;
 }
 function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
-function clone(o){ return JSON.parse(JSON.stringify(o)); }
 function toast(msg, ms){
   statusNote.textContent = msg;
   statusNote.classList.add('show');
   clearTimeout(toast._t);
   toast._t = setTimeout(()=>statusNote.classList.remove('show'), ms||1600);
 }
-
 function toWorld(clientX, clientY){
   const r = svg.getBoundingClientRect();
   return {
@@ -822,7 +967,7 @@ function updateBg(){
   }
 }
 
-/* ===================== BBOX HELPERS ===================== */
+/* ===================== BBOX ===================== */
 function getBBox(el){
   if(el.type==='path'){
     let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
@@ -848,7 +993,7 @@ function contentBBox(){
   return {x:minX-pad, y:minY-pad, w:(maxX-minX)+pad*2, h:(maxY-minY)+pad*2};
 }
 
-/* ===================== PATH SMOOTHING ===================== */
+/* ===================== PATH / SHAPE ===================== */
 function smoothPath(pts){
   if(pts.length===0) return '';
   if(pts.length===1) return `M ${pts[0][0]} ${pts[0][1]} L ${pts[0][0]+0.1} ${pts[0][1]+0.1}`;
@@ -869,7 +1014,7 @@ function arrowHeadPoints(x1,y1,x2,y2,size){
   return `${x2},${y2} ${x2+size*Math.cos(a1)},${y2+size*Math.sin(a1)} ${x2+size*Math.cos(a2)},${y2+size*Math.sin(a2)}`;
 }
 
-/* ===================== ELEMENT FACTORY ===================== */
+/* ===================== ELEMENT ===================== */
 function makeEl(partial){
   const el = Object.assign({
     id: newId(), type:'shape', x:0,y:0,w:100,h:60,
@@ -885,12 +1030,17 @@ function makeEl(partial){
 function renderSlateTabs(){
   const tabs=document.getElementById('slateTabs');
   tabs.querySelectorAll('.slate-tab').forEach(b=>b.remove());
-  const ids=isOwner ? ['main',...Object.keys(roomState.participantMeta).sort((a,b)=>roomState.participantMeta[a].joinOrder-roomState.participantMeta[b].joinOrder)] : [participantId||'main'];
+  const ids=isOwner
+    ? ['main',...Object.keys(roomState.participantMeta).sort((a,b)=>roomState.participantMeta[a].joinOrder-roomState.participantMeta[b].joinOrder)]
+    : [participantId||'main'];
   ids.forEach(id=>{
-    const b=document.createElement('button'); b.className='slate-tab'+(roomState.activeSlateId===id?' active':''); b.dataset.slate=id;
+    const b=document.createElement('button');
+    b.className='slate-tab'+(roomState.activeSlateId===id?' active':'');
+    b.dataset.slate=id;
     b.textContent=id==='main'?'Main':(roomState.participantMeta[id]?.displayName||('Participant '+roomState.participantMeta[id]?.joinOrder));
     if(!isOwner) b.disabled=true;
-    b.addEventListener('click',()=>activateSlate(id)); tabs.insertBefore(b,tabs.querySelector('.room-role'));
+    b.addEventListener('click',()=>activateSlate(id));
+    tabs.insertBefore(b,tabs.querySelector('.room-role'));
   });
   updateAnnotationUI();
 }
@@ -900,7 +1050,10 @@ function activateSlate(id){
   roomState.activeSlateId=id;
   if(id==='main') annotationMode=false;
   state.elements = id==='main' ? roomState.main : (roomState.participants[id] ||= []);
-  clearSelection(); fullRender(); history=[clone(state.elements)]; hIdx=0; updateHistBtns();
+  clearSelection();
+  fullRender();
+  history=[state.elements]; hIdx=0; updateHistBtns();
+  lastBroadcastElements = clone(state.elements);
   renderSlateTabs();
 }
 function isReadOnlySlate(){ return isOwner && roomState.activeSlateId!=='main'; }
@@ -915,10 +1068,20 @@ document.getElementById('annotateBtn').addEventListener('click',()=>{
   annotationMode=!annotationMode;
   setTool(annotationMode?'pen':'select');
   updateAnnotationUI();
-  toast(annotationMode?'Annotate mode: draw or add text on this participant slate':'Annotate mode off');
+  toast(annotationMode?'Annotate mode on':'Annotate mode off');
 });
 
-/* ===================== RENDERING ===================== */
+/* ===================== RENDER (diff-based) ===================== */
+function sigOf(el){
+  return [
+    el.type, el.shapeKind||'', el.stroke||'', el.fill||'', el.strokeWidth||0,
+    el.opacity==null?1:el.opacity, el.fontFamily||'', el.fontSize||0, el.lineHeight||'',
+    el.html||'', el.rows||0, el.cols||0, el.rot==null?0:el.rot,
+    el.src?('img:'+el.src.length):'', el.ownerAnnotation?'A':'',
+    el.bold?'B':'', el.italic?'I':'', el.align||'', el.dashed?'D':''
+  ].join('|');
+}
+
 function buildNode(el){
   let node;
   if(el.type==='path'){
@@ -947,7 +1110,6 @@ function buildNode(el){
   wrap.style.cursor = 'pointer';
   return wrap;
 }
-function shapeInnerBBox(el){ return {x:el.x,y:el.y,w:el.w,h:el.h}; }
 function buildShapeInner(el){
   const fill = el.fill && el.fill!=='none' ? el.fill : 'none';
   if(el.shapeKind==='rect'){
@@ -1006,48 +1168,109 @@ function addToDOM(el){
   else if(el.type==='shape') shapesLayer.appendChild(node);
   else elementsLayer.appendChild(node);
   domById.set(el.id, node);
+  nodeSig.set(el.id, sigOf(el));
   return node;
 }
 function removeFromDOM(id){
   const n = domById.get(id);
   if(n) n.remove();
   domById.delete(id);
-}
-function fullRender(){
-  pathsLayer.innerHTML=''; shapesLayer.innerHTML=''; elementsLayer.innerHTML='';
-  domById.clear();
-  state.elements.sort((a,b)=>(a.z||0)-(b.z||0));
-  for(const el of state.elements) addToDOM(el);
-  clearSelection();
-  renderSelection();
+  nodeSig.delete(id);
 }
 
-/* live-update a node's geometry without full rebuild (used during drag/resize) */
+/* 只更新幾何，不重建節點 */
 function updateNodeGeometry(el){
   const node = domById.get(el.id);
   if(!node) return;
   if(el.type==='path'){
-    node.querySelector('path').setAttribute('d', smoothPath(el.points));
+    const p = node.querySelector('path');
+    if(p) p.setAttribute('d', smoothPath(el.points));
   } else if(el.type==='shape'){
-    node.innerHTML='';
-    node.appendChild(buildShapeInner(el));
+    // shape 的變動通常需要重建 inner（因為 rect/ellipse 屬性不同）
+    // 但這裡可以針對常見情形只改屬性
+    const kind = el.shapeKind;
+    if(kind==='rect'){
+      const r = node.querySelector('rect');
+      if(r){ r.setAttribute('x',el.x); r.setAttribute('y',el.y); r.setAttribute('width',Math.max(el.w,1)); r.setAttribute('height',Math.max(el.h,1)); }
+      else { node.innerHTML=''; node.appendChild(buildShapeInner(el)); }
+    } else if(kind==='ellipse'){
+      const e = node.querySelector('ellipse');
+      if(e){ e.setAttribute('cx',el.x+el.w/2); e.setAttribute('cy',el.y+el.h/2); e.setAttribute('rx',Math.max(Math.abs(el.w)/2,0.5)); e.setAttribute('ry',Math.max(Math.abs(el.h)/2,0.5)); }
+      else { node.innerHTML=''; node.appendChild(buildShapeInner(el)); }
+    } else {
+      // diamond / line / arrow 重建即可（成本低）
+      node.innerHTML='';
+      node.appendChild(buildShapeInner(el));
+    }
   } else if(el.type==='image'){
     const img = node.querySelector('image');
-    img.setAttribute('x',el.x); img.setAttribute('y',el.y);
-    img.setAttribute('width',el.w); img.setAttribute('height',el.h);
+    if(img){
+      img.setAttribute('x',el.x); img.setAttribute('y',el.y);
+      img.setAttribute('width',el.w); img.setAttribute('height',el.h);
+    }
   } else {
     const fo = node.querySelector('foreignObject');
-    fo.setAttribute('x',el.x); fo.setAttribute('y',el.y);
-    fo.setAttribute('width',Math.max(el.w,10)); fo.setAttribute('height',Math.max(el.h,10));
+    if(fo){
+      fo.setAttribute('x',el.x); fo.setAttribute('y',el.y);
+      fo.setAttribute('width',Math.max(el.w,10)); fo.setAttribute('height',Math.max(el.h,10));
+    }
     if(el.type==='sticky'){
-      const box = fo.querySelector('.sticky-box');
+      const box = node.querySelector('.sticky-box');
       if(box) box.style.transform = `rotate(${el.rot||0}deg)`;
     }
   }
 }
 
-/* ===================== SELECTION UI ===================== */
-function clearSelection(){ state.selectedIds.clear(); selectionLayer.innerHTML=''; tableToolbar.style.display='none'; syncPropsPanel(); }
+/* 核心：diff-based 渲染 */
+function diffRender(nextElements){
+  state.elements = nextElements;
+  const nextIds = new Set();
+  for(const el of nextElements) nextIds.add(el.id);
+
+  // 1) 移除
+  for(const [id,node] of [...domById]){
+    if(!nextIds.has(id)){ node.remove(); domById.delete(id); nodeSig.delete(id); }
+  }
+
+  // 2) 排序，逐個新增/更新
+  nextElements.sort((a,b)=>(a.z||0)-(b.z||0));
+  for(const el of nextElements){
+    const existing = domById.get(el.id);
+    const newSig = sigOf(el);
+    if(!existing){
+      addToDOM(el);
+    } else if(nodeSig.get(el.id) !== newSig){
+      existing.remove();
+      addToDOM(el);
+    } else {
+      updateNodeGeometry(el);
+    }
+  }
+}
+
+/* 完整重建（只在切 slate / 初次載入時用） */
+function fullRender(){
+  pathsLayer.innerHTML=''; shapesLayer.innerHTML=''; elementsLayer.innerHTML='';
+  domById.clear(); nodeSig.clear();
+  diffRender(state.elements);
+  clearSelection();
+  renderSelection();
+}
+
+/* ===================== SELECTION (增量更新) ===================== */
+let selOutline = null;
+const selHandles = new Map(); // key -> rect
+let selEndpointHandles = null;
+
+function clearSelection(){
+  state.selectedIds.clear();
+  if(selOutline){ selOutline.remove(); selOutline=null; }
+  for(const h of selHandles.values()) h.remove();
+  selHandles.clear();
+  if(selEndpointHandles){ selEndpointHandles.forEach(h=>h.remove()); selEndpointHandles=null; }
+  tableToolbar.style.display='none';
+  syncPropsPanel();
+}
 function setSelection(ids){
   state.selectedIds = new Set(ids);
   renderSelection();
@@ -1067,44 +1290,77 @@ function selectionBBox(){
   return {x:minX,y:minY,w:maxX-minX,h:maxY-minY};
 }
 function renderSelection(){
-  selectionLayer.innerHTML='';
   const ids=[...state.selectedIds];
-  if(!ids.length){ tableToolbar.style.display='none'; return; }
 
+  // 清掉端點 handles（line/arrow 專用）
+  if(selEndpointHandles){ selEndpointHandles.forEach(h=>h.remove()); selEndpointHandles=null; }
+
+  if(!ids.length){
+    if(selOutline){ selOutline.remove(); selOutline=null; }
+    for(const h of selHandles.values()) h.remove();
+    selHandles.clear();
+    tableToolbar.style.display='none';
+    return;
+  }
+
+  // line/arrow 走端點
   if(ids.length===1){
     const el = state.elements.find(e=>e.id===ids[0]);
     if(el && el.type==='shape' && (el.shapeKind==='line'||el.shapeKind==='arrow')){
+      if(selOutline){ selOutline.remove(); selOutline=null; }
+      for(const h of selHandles.values()) h.remove();
+      selHandles.clear();
       renderEndpointHandles(el);
       positionTableToolbar(null);
       return;
     }
   }
+
   const b = selectionBBox();
   if(!b) return;
-  const rect = svgEl('rect',{x:b.x,y:b.y,width:b.w,height:b.h,class:'sel-outline'});
-  selectionLayer.appendChild(rect);
-  if(ids.length===1){
-    const pts = [
-      ['nw',b.x,b.y,'handle-nwse'],['n',b.x+b.w/2,b.y,'handle-ns'],['ne',b.x+b.w,b.y,'handle-nesw'],
-      ['e',b.x+b.w,b.y+b.h/2,'handle-ew'],['se',b.x+b.w,b.y+b.h,'handle-nwse'],
-      ['s',b.x+b.w/2,b.y+b.h,'handle-ns'],['sw',b.x,b.y+b.h,'handle-nesw'],['w',b.x,b.y+b.h/2,'handle-ew']
-    ];
-    const s = 8/state.view.scale;
-    for(const [key,px,py,cursorClass] of pts){
-      const h = svgEl('rect',{x:px-s/2,y:py-s/2,width:s,height:s,class:'sel-handle '+cursorClass,'data-handle':key});
-      selectionLayer.appendChild(h);
-    }
-    const el = state.elements.find(e=>e.id===ids[0]);
-    if(el && el.type==='table') positionTableToolbar(el); else positionTableToolbar(null);
-  } else {
-    positionTableToolbar(null);
+
+  if(!selOutline){
+    selOutline = svgEl('rect',{class:'sel-outline'});
+    selectionLayer.appendChild(selOutline);
   }
+  selOutline.setAttribute('x',b.x); selOutline.setAttribute('y',b.y);
+  selOutline.setAttribute('width',b.w); selOutline.setAttribute('height',b.h);
+
+  // 多選不顯示 handles
+  if(ids.length>1){
+    for(const h of selHandles.values()) h.remove();
+    selHandles.clear();
+    positionTableToolbar(null);
+    return;
+  }
+
+  // 單選：8 個 handles
+  const s = 8/state.view.scale;
+  const pts = [
+    ['nw',b.x,b.y,'handle-nwse'],['n',b.x+b.w/2,b.y,'handle-ns'],['ne',b.x+b.w,b.y,'handle-nesw'],
+    ['e',b.x+b.w,b.y+b.h/2,'handle-ew'],['se',b.x+b.w,b.y+b.h,'handle-nwse'],
+    ['s',b.x+b.w/2,b.y+b.h,'handle-ns'],['sw',b.x,b.y+b.h,'handle-nesw'],['w',b.x,b.y+b.h/2,'handle-ew']
+  ];
+  for(const [key,px,py,cursorClass] of pts){
+    let h = selHandles.get(key);
+    if(!h){
+      h = svgEl('rect',{class:'sel-handle '+cursorClass,'data-handle':key});
+      selectionLayer.appendChild(h);
+      selHandles.set(key,h);
+    }
+    h.setAttribute('x',px-s/2); h.setAttribute('y',py-s/2);
+    h.setAttribute('width',s); h.setAttribute('height',s);
+  }
+
+  const el = state.elements.find(e=>e.id===ids[0]);
+  if(el && el.type==='table') positionTableToolbar(el); else positionTableToolbar(null);
 }
 function renderEndpointHandles(el){
   const s = 9/state.view.scale;
   const h1 = svgEl('rect',{x:el.x1-s/2,y:el.y1-s/2,width:s,height:s,class:'sel-handle handle-move','data-handle':'p1'});
   const h2 = svgEl('rect',{x:el.x2-s/2,y:el.y2-s/2,width:s,height:s,class:'sel-handle handle-move','data-handle':'p2'});
   selectionLayer.appendChild(h1); selectionLayer.appendChild(h2);
+  selEndpointHandles = [h1,h2];
 }
 function positionTableToolbar(el){
   if(!el){ tableToolbar.style.display='none'; return; }
@@ -1117,37 +1373,48 @@ function positionTableToolbar(el){
 }
 
 /* ===================== HISTORY ===================== */
-let history = [clone(state.elements)];
+let history = [];
 let hIdx = 0;
-function commit(){
+let commitTimer = null;
+
+function commitNow(){
   saveActiveSlate();
   history = history.slice(0, hIdx+1);
-  history.push(clone(state.elements));
+  history.push(state.elements);
   hIdx++;
   if(history.length>120){ history.shift(); hIdx--; }
   updateHistBtns();
-  if(isOwner && roomState.activeSlateId==='main'){
-    syncOwnerToParticipants();
-    sendRealtime('main-delta',{slateId:'main',elements:clone(roomState.main)});
-  } else {
-    sendRealtime('participant-delta',{targetParticipantId:participantId||roomState.activeSlateId,slateId:roomState.activeSlateId,elements:clone(state.elements)});
-  }
+  broadcastActiveSlateDelta();
 }
-function broadcastActiveSlate(){
+/* debounce：短時間內多次 commit 合併成一次網路廣播 */
+function commit(){
   saveActiveSlate();
-  if(isOwner && roomState.activeSlateId==='main'){
-    syncOwnerToParticipants(); sendRealtime('main-delta',{slateId:'main',elements:clone(roomState.main)});
-  } else sendRealtime('participant-delta',{targetParticipantId:participantId||roomState.activeSlateId,slateId:roomState.activeSlateId,elements:clone(state.elements)});
+  history = history.slice(0, hIdx+1);
+  history.push(state.elements);
+  hIdx++;
+  if(history.length>120){ history.shift(); hIdx--; }
+  updateHistBtns();
+
+  clearTimeout(commitTimer);
+  commitTimer = setTimeout(()=>{
+    broadcastActiveSlateDelta();
+  }, 60);
 }
 function undo(){
   if(hIdx<=0) return;
   hIdx--; state.elements = clone(history[hIdx]);
-  fullRender(); updateHistBtns(); broadcastActiveSlate();
+  diffRender(state.elements);
+  updateHistBtns();
+  clearTimeout(commitTimer);
+  commitTimer = setTimeout(()=>broadcastActiveSlateDelta(), 0);
 }
 function redo(){
   if(hIdx>=history.length-1) return;
   hIdx++; state.elements = clone(history[hIdx]);
-  fullRender(); updateHistBtns(); broadcastActiveSlate();
+  diffRender(state.elements);
+  updateHistBtns();
+  clearTimeout(commitTimer);
+  commitTimer = setTimeout(()=>broadcastActiveSlateDelta(), 0);
 }
 function updateHistBtns(){
   document.getElementById('undoBtn').disabled = hIdx<=0;
@@ -1179,7 +1446,7 @@ function updateBoundConnectors(movedId){
   }
 }
 
-/* ===================== TOOL / DEFAULTS UI ===================== */
+/* ===================== TOOL / DEFAULTS ===================== */
 const toolButtons = [...document.querySelectorAll('[data-tool]')];
 function setTool(t){
   state.tool = t;
@@ -1212,28 +1479,25 @@ function toggleDropdown(id, force){
 }
 function closeAllDropdowns(){ document.querySelectorAll('.dd-menu').forEach(m=>m.classList.remove('open')); }
 document.addEventListener('click', closeAllDropdowns);
-
 document.getElementById('fileBtn').addEventListener('click', (e)=>{ e.stopPropagation(); toggleDropdown('fileMenu'); });
 
-/* lock tool */
 const lockBtn = document.getElementById('lockToolBtn');
 lockBtn.addEventListener('click', ()=>{
   state.toolLocked = !state.toolLocked;
   lockBtn.classList.toggle('active', state.toolLocked);
-  toast(state.toolLocked ? 'Tool stays active after placing an item' : 'Tool switches back to Select after placing an item');
+  toast(state.toolLocked ? 'Tool stays active' : 'Tool switches back to Select');
 });
 
-/* clear board */
 document.getElementById('clearBtn').addEventListener('click', ()=>{
   if(isReadOnlySlate()) return;
   if(!state.elements.length) return;
-  if(confirm('Clear the whole board? This cannot be undone once you leave this page.')){
-    state.elements = []; clearSelection(); fullRender(); commit();
+  if(confirm('Clear the whole board?')){
+    state.elements = []; clearSelection(); fullRender(); commitNow();
   }
 });
 
 /* ===================== PROPS PANEL ===================== */
-function buildSwatchRow(container, colors, activeColor, onPick, allowNone){
+function buildSwatchRow(container, colors, activeColor, onPick){
   container.innerHTML='';
   colors.forEach(c=>{
     const s = document.createElement('div');
@@ -1304,6 +1568,7 @@ function formatActiveText(command){
 }
 document.getElementById('bulletBtn').addEventListener('click',()=>formatActiveText('insertUnorderedList'));
 document.getElementById('numberBtn').addEventListener('click',()=>formatActiveText('insertOrderedList'));
+
 function applyToSelection(props){
   if(isReadOnlySlate()) return;
   if(!state.selectedIds.size) return;
@@ -1311,13 +1576,17 @@ function applyToSelection(props){
   for(const id of state.selectedIds){
     const el = state.elements.find(e=>e.id===id); if(!el) continue;
     Object.assign(el, props);
-    updateNodeGeometry(el);
-    if(el.type==='text'||el.type==='sticky'||el.type==='table'){
-      const node = domById.get(id);
-      const fo = node.querySelector('foreignObject');
-      if(el.type==='text'){ const d=fo.querySelector('.el-text'); if(d){ d.style.fontFamily=el.fontFamily; d.style.fontSize=el.fontSize+'px'; d.style.color=el.stroke; d.style.lineHeight=el.lineHeight||'1.35'; } }
-      if(el.type==='sticky'){ const d=fo.querySelector('.sticky-box'); if(d) d.style.background=el.fill; const t=fo.querySelector('.sticky-text'); if(t) t.style.fontFamily=el.fontFamily; }
-      if(el.type==='table'){ const t=fo.querySelector('.wb-table'); if(t) t.style.color=el.stroke; }
+    // 屬性變了，sig 也變了 → 需要重建
+    const node = domById.get(id);
+    if(node){
+      const curSig = nodeSig.get(id);
+      const newSig = sigOf(el);
+      if(curSig !== newSig){
+        node.remove();
+        addToDOM(el);
+      } else {
+        updateNodeGeometry(el);
+      }
     }
     changed=true;
   }
@@ -1334,7 +1603,6 @@ function syncPropsPanel(){
   const stickyTools = ['sticky'];
 
   let relevantType = oneEl ? oneEl.type : null;
-  let relevantShapeKind = oneEl && oneEl.type==='shape' ? oneEl.shapeKind : null;
   if(!oneEl){
     if(drawingTools.includes(state.tool)) relevantType='path';
     else if(shapeTools.includes(state.tool)) relevantType='shape';
@@ -1350,7 +1618,7 @@ function syncPropsPanel(){
   document.getElementById('stickyColorGroup').style.display = (relevantType==='sticky') ? 'flex':'none';
 
   if(oneEl){
-    if(oneEl.stroke) { state.defaults.stroke=oneEl.stroke; }
+    if(oneEl.stroke) state.defaults.stroke=oneEl.stroke;
     if(oneEl.fill) state.defaults.fill = oneEl.fill;
     if(oneEl.type==='text'){
       document.getElementById('lineSpacingSelect').value=oneEl.lineHeight||'1.35';
@@ -1361,7 +1629,7 @@ function syncPropsPanel(){
 }
 syncPropsPanel();
 
-/* ===================== POINTER INTERACTION ===================== */
+/* ===================== POINTER ===================== */
 let dragStartWorld=null, dragOrigins=null, resizeHandle=null, resizeOrigin=null;
 let spaceHeld=false;
 
@@ -1388,9 +1656,7 @@ svg.addEventListener('pointerdown', (e)=>{
   const ceTarget = e.target.closest && e.target.closest('[contenteditable="true"]');
   if(ceTarget) return;
   const isEditingSomething = document.querySelector('[contenteditable="true"]');
-  if(isEditingSomething){
-    finishEditing();
-  }
+  if(isEditingSomething) finishEditing();
   if(isReadOnlySlate() && !annotationMode && !['select','pan'].includes(state.tool)) return;
   svg.setPointerCapture(e.pointerId);
   const wp = toWorld(e.clientX, e.clientY);
@@ -1447,9 +1713,7 @@ svg.addEventListener('pointerdown', (e)=>{
     return;
   }
 
-  if(state.tool==='eraser'){
-    state.mode='erasing'; eraseAt(wp); return;
-  }
+  if(state.tool==='eraser'){ state.mode='erasing'; eraseAt(wp); return; }
 
   if(['rect','ellipse','diamond'].includes(state.tool)){
     state.mode='drawing';
@@ -1505,7 +1769,20 @@ svg.addEventListener('pointerdown', (e)=>{
   }
 });
 
+/* pointermove：rAF 節流 */
+let rafPending = false, lastMoveEvent = null;
 svg.addEventListener('pointermove', (e)=>{
+  lastMoveEvent = e;
+  if(rafPending) return;
+  rafPending = true;
+  requestAnimationFrame(()=>{
+    rafPending = false;
+    handlePointerMove(lastMoveEvent);
+  });
+});
+
+function handlePointerMove(e){
+  if(!e) return;
   const wp = toWorld(e.clientX, e.clientY);
   if(state.mode==='panning'){
     state.view.x = dragStartWorld.vx + (e.clientX-dragStartWorld.x);
@@ -1564,7 +1841,7 @@ svg.addEventListener('pointermove', (e)=>{
     doResize(wp);
     return;
   }
-});
+}
 
 function doResize(wp){
   const dx = wp.x-resizeOrigin.start.x, dy = wp.y-resizeOrigin.start.y;
@@ -1607,9 +1884,12 @@ svg.addEventListener('pointerup', (e)=>{
         updateNodeGeometry(state.current);
       }
       state.elements.push(state.current);
+      // 讓 sig 更新
+      nodeSig.set(state.current.id, sigOf(state.current));
     } else if(state.current.type==='shape'){
       if(state.current.w<3 && state.current.h<3){ removeFromDOM(state.current.id); state.current=null; state.mode='idle'; return; }
       state.elements.push(state.current);
+      nodeSig.set(state.current.id, sigOf(state.current));
     }
     const id = state.current.id;
     state.current=null;
@@ -1625,7 +1905,10 @@ svg.addEventListener('pointerup', (e)=>{
     }
     const len = Math.hypot(state.current.x2-state.current.x1, state.current.y2-state.current.y1);
     if(len<3){ removeFromDOM(state.current.id); }
-    else state.elements.push(state.current);
+    else {
+      state.elements.push(state.current);
+      nodeSig.set(state.current.id, sigOf(state.current));
+    }
     const id = state.current.id;
     state.current=null;
     commit();
@@ -1633,9 +1916,7 @@ svg.addEventListener('pointerup', (e)=>{
     if(state.tool==='select' && len>=3) setSelection([id]);
   }
   else if(state.mode==='dragging'){
-    let moved=false;
-    for(const o of dragOrigins){ const el=state.elements.find(x=>x.id===o.id); if(el) moved = moved || true; }
-    if(moved) commit();
+    commit();
     renderSelection();
   }
   else if(state.mode==='resizing'){
@@ -1655,7 +1936,7 @@ svg.addEventListener('pointerup', (e)=>{
     }
   }
   else if(state.mode==='erasing'){
-    commit();
+    commitNow();
   }
 
   state.mode='idle'; dragStartWorld=null; dragOrigins=null; resizeHandle=null; resizeOrigin=null;
@@ -1673,7 +1954,7 @@ function eraseAt(wp){
   if(removed) renderSelection();
 }
 
-/* wheel: zoom (ctrl/cmd) or pan */
+/* wheel */
 boardWrap.addEventListener('wheel', (e)=>{
   e.preventDefault();
   if(e.ctrlKey || e.metaKey){
@@ -1693,7 +1974,6 @@ boardWrap.addEventListener('wheel', (e)=>{
   renderSelection();
 }, {passive:false});
 
-/* zoom buttons */
 function zoomBy(f){
   const r = svg.getBoundingClientRect();
   const cx=r.width/2, cy=r.height/2;
@@ -1714,7 +1994,7 @@ document.getElementById('zoomFit').addEventListener('click', ()=>{
   applyView(); renderSelection();
 });
 
-/* ===================== EDITING TEXT/STICKY/TABLE ===================== */
+/* ===================== EDITING ===================== */
 svg.addEventListener('dblclick', (e)=>{
   if(isReadOnlySlate() && !annotationMode) return;
   const id = elIdFromEvent(e);
@@ -1773,8 +2053,15 @@ function placeCaretEnd(div){
   range.selectNodeContents(div); range.collapse(false);
   const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
 }
+let finishTimer = null;
+function finishEditingDebounced(){
+  clearTimeout(finishTimer);
+  finishTimer = setTimeout(finishEditing, 120);
+}
 function finishEditing(){
-  document.querySelectorAll('[contenteditable="true"]').forEach(d=>{
+  const editables = document.querySelectorAll('[contenteditable="true"]');
+  if(!editables.length){ state.editingId=null; return; }
+  editables.forEach(d=>{
     d.contentEditable='false';
     const node = d.closest('[data-id]');
     if(node){
@@ -1789,14 +2076,28 @@ function finishEditing(){
       }
     }
   });
-  if(state.editingId) commit();
+  if(state.editingId){
+    // sticky / text 的 html 變了 → sig 變了，要重建該節點
+    const id = state.editingId;
+    const el = state.elements.find(x=>x.id===id);
+    const node = domById.get(id);
+    if(el && node){
+      const curSig = nodeSig.get(id);
+      const newSig = sigOf(el);
+      if(curSig !== newSig){
+        node.remove();
+        addToDOM(el);
+      }
+    }
+    commit();
+  }
   state.editingId=null;
 }
 elementsLayer.addEventListener('blur', (e)=>{
-  if(e.target.isContentEditable){ setTimeout(finishEditing, 60); }
+  if(e.target.isContentEditable) finishEditingDebounced();
 }, true);
 
-/* table toolbar actions */
+/* table toolbar */
 tableToolbar.addEventListener('click', (e)=>{
   if(isReadOnlySlate()) return;
   const btn = e.target.closest('button'); if(!btn) return;
@@ -1807,9 +2108,9 @@ tableToolbar.addEventListener('click', (e)=>{
   if(act==='delrow' && el.rows>1){ el.rows--; el.cells.pop(); }
   if(act==='addcol'){ el.cols++; el.cells.forEach(row=>row.push('')); el.w += el.w/(el.cols-1); }
   if(act==='delcol' && el.cols>1){ el.cols--; el.cells.forEach(row=>row.pop()); }
+  // table 結構變了 → 重建節點
   const node = domById.get(id);
-  node.querySelector('foreignObject').firstChild.innerHTML = buildTableInner(el);
-  updateNodeGeometry(el);
+  if(node){ node.remove(); addToDOM(el); }
   renderSelection();
   commit();
 });
@@ -1821,7 +2122,7 @@ function deleteSelected(){
   for(const id of state.selectedIds){ removeFromDOM(id); }
   state.elements = state.elements.filter(el=>!state.selectedIds.has(el.id));
   clearSelection();
-  commit();
+  commitNow();
 }
 function duplicateSelected(){
   if(isReadOnlySlate()) return;
@@ -1838,7 +2139,7 @@ function duplicateSelected(){
     state.elements.push(copy); addToDOM(copy); newIds.push(copy.id);
   }
   setSelection(newIds);
-  commit();
+  commitNow();
 }
 function bringToFront(){
   if(isReadOnlySlate()) return;
@@ -1850,7 +2151,7 @@ function bringToFront(){
     const node = domById.get(id);
     if(node && node.parentNode) node.parentNode.appendChild(node);
   }
-  commit();
+  commitNow();
 }
 document.getElementById('deleteBtn').addEventListener('click', deleteSelected);
 document.getElementById('duplicateBtn').addEventListener('click', duplicateSelected);
@@ -1940,11 +2241,11 @@ document.addEventListener('paste', (e)=>{
     copy.z = state.elements.length;
     state.elements.push(copy); addToDOM(copy); newIds.push(copy.id);
   }
-  setTool('select'); setSelection(newIds); commit();
+  setTool('select'); setSelection(newIds); commitNow();
   toast('Pasted '+newIds.length+' item'+(newIds.length>1?'s':''));
 });
 
-/* ===================== IMAGE IMPORT ===================== */
+/* ===================== IMAGE ===================== */
 document.getElementById('imageBtn').addEventListener('click', ()=>document.getElementById('imageInput').click());
 document.getElementById('imageInput').addEventListener('change', (e)=>{
   const f = e.target.files[0]; if(f) loadImageFile(f);
@@ -1962,7 +2263,7 @@ function loadImageFile(file){
       const scale = Math.min(1, maxW/img.width);
       const w = img.width*scale, h = img.height*scale;
       const el = makeEl({type:'image', x:c.x-w/2, y:c.y-h/2, w, h, src});
-      state.elements.push(el); addToDOM(el); commit();
+      state.elements.push(el); addToDOM(el); commitNow();
       setTool('select'); setSelection([el.id]);
     };
     img.src = src;
@@ -1976,7 +2277,7 @@ boardWrap.addEventListener('drop', e=>{
   if(file && file.type.startsWith('image/')) loadImageFile(file);
 });
 
-/* ===================== EXPORT / IMPORT JSON ===================== */
+/* ===================== EXPORT / IMPORT ===================== */
 function download(filename, blobOrUrl){
   const a = document.createElement('a');
   a.href = typeof blobOrUrl==='string'? blobOrUrl : URL.createObjectURL(blobOrUrl);
@@ -2003,7 +2304,8 @@ document.getElementById('jsonInput').addEventListener('change', (e)=>{
         if(parsed.theme) setTheme(parsed.theme);
         if(parsed.bgStyle) setBgStyle(parsed.bgStyle);
         fullRender();
-        history=[clone(state.elements)]; hIdx=0; updateHistBtns();
+        history=[state.elements]; hIdx=0; updateHistBtns();
+        lastBroadcastElements = clone(state.elements);
         toast('Board loaded from '+f.name);
         document.getElementById('zoomFit').click();
       }
@@ -2013,7 +2315,7 @@ document.getElementById('jsonInput').addEventListener('change', (e)=>{
   e.target.value='';
 });
 
-/* ===================== EXPORT SVG / PNG / PRINT ===================== */
+/* ===================== SVG / PNG / PRINT ===================== */
 const EXPORT_CSS = `
 .el-text{padding:4px 6px; line-height:1.35;}
 .sticky-box{width:100%;height:100%;display:flex;flex-direction:column;border-radius:3px 14px 3px 14px;box-shadow:2px 6px 14px rgba(0,0,0,.16);padding:12px 12px 10px;}
@@ -2035,15 +2337,12 @@ function buildExportSvgString(){
   const sel = clonedSvg.querySelector('#selectionLayer'); if(sel) sel.remove();
   const mq = clonedSvg.querySelector('#marqueeLayer'); if(mq) mq.remove();
   clonedSvg.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
-
   const bg = state.theme==='chalk' ? '#1E2A24' : '#FBF9F3';
   const bgRect = svgEl('rect', {x:b.x,y:b.y,width:b.w,height:b.h,fill:bg});
   clonedSvg.insertBefore(bgRect, clonedSvg.firstChild);
-
   const style = document.createElementNS(NS,'style');
   style.textContent = EXPORT_CSS;
   clonedSvg.insertBefore(style, clonedSvg.firstChild);
-
   const xml = new XMLSerializer().serializeToString(clonedSvg);
   return { xml, bbox:b };
 }
@@ -2084,7 +2383,7 @@ document.getElementById('printBtn').addEventListener('click', ()=>{
   });
 });
 
-/* ===================== THEME / BACKGROUND ===================== */
+/* ===================== THEME / BG ===================== */
 function setTheme(t){
   state.theme = t;
   boardWrap.classList.toggle('theme-chalk', t==='chalk');
@@ -2106,7 +2405,7 @@ document.getElementById('gridBtn').addEventListener('click', ()=>{
   setBgStyle(BG_STYLES[(idx+1)%BG_STYLES.length]);
 });
 
-/* ===================== RESIZE / RESPONSIVE ===================== */
+/* ===================== RESIZE ===================== */
 function fitSvg(){
   const r = boardWrap.getBoundingClientRect();
   svg.setAttribute('width', r.width); svg.setAttribute('height', r.height);
@@ -2123,9 +2422,10 @@ async function init(){
   setBgStyle('dot');
   state.elements = [];
   fullRender();
-  history=[clone(state.elements)]; hIdx=0;
+  history=[state.elements]; hIdx=0;
   updateHistBtns();
   renderSlateTabs();
+  lastBroadcastElements = clone(state.elements);
   setTimeout(()=>document.getElementById('zoomFit').click(), 30);
   connectRealtime();
 }
