@@ -527,15 +527,14 @@ const state = {
     fontSize: 18,
     stickyColor: '#F3C55D'
   },
-  mode: 'idle', // idle|drawing|dragging|resizing|panning|marquee|erasing|linedraw
+  mode: 'idle',
   current: null,
   clipboard: null,
   editingId: null
 };
 let annotationMode = false;
 
-// The active canvas remains exposed as state.elements for the existing tools,
-// while the room keeps one independent array per slate.
+// 房間狀態 (slate 系統)
 const roomState = { main: [], participants: {}, participantMeta: {}, activeSlateId:'main' };
 const params = new URLSearchParams(location.search);
 const isOwner = (params.get('role') || 'owner').toLowerCase() !== 'participant';
@@ -543,8 +542,7 @@ let participantId = null;
 let joinOrder = null;
 let displayName = params.get('name') || '';
 
-/* ===================== REALTIME (EPHEMERAL) ===================== */
-// Replace these two values, or pass ?room=room-name in the URL.
+/* ===================== REALTIME 設定 ===================== */
 const REALTIME_CONFIG = {
   supabaseUrl: 'https://wpklmzmerhwokfvtklnx.supabase.co',
   anonKey: 'sb_publishable_RROBN-EPYL26R3SpwaUBag_f9RLHfWu',
@@ -580,6 +578,7 @@ function syncOwnerToParticipants(){
       const sourceId = source.ownerSourceId || source.id; mainIds.add(sourceId);
       const existing = bySource.get(sourceId);
       if(existing){
+        // 保留參與者的本地幾何，只同步其他屬性
         const localGeometry={x:existing.x,y:existing.y,w:existing.w,h:existing.h,x1:existing.x1,y1:existing.y1,x2:existing.x2,y2:existing.y2};
         Object.assign(existing, clone(source), {id:existing.id, ownerSourceId:sourceId});
         for(const k of ['x','y','w','h','x1','y1','x2','y2']) if(localGeometry[k]!==undefined) existing[k]=localGeometry[k];
@@ -1109,8 +1108,6 @@ function renderEndpointHandles(el){
 }
 function positionTableToolbar(el){
   if(!el){ tableToolbar.style.display='none'; return; }
-  // tableToolbar is positioned inside boardWrap, so use coordinates relative
-  // to boardWrap rather than viewport coordinates from getBoundingClientRect().
   const sx = state.view.x + el.x*state.view.scale;
   const sy = state.view.y + el.y*state.view.scale - 52;
   tableToolbar.style.left = Math.max(4, sx)+'px';
@@ -1389,7 +1386,7 @@ function handleFromEvent(e){
 
 svg.addEventListener('pointerdown', (e)=>{
   const ceTarget = e.target.closest && e.target.closest('[contenteditable="true"]');
-  if(ceTarget) return; // let native text editing / caret placement handle this click
+  if(ceTarget) return;
   const isEditingSomething = document.querySelector('[contenteditable="true"]');
   if(isEditingSomething){
     finishEditing();
@@ -1431,7 +1428,6 @@ svg.addEventListener('pointerdown', (e)=>{
       }
       return;
     }
-    // marquee
     state.mode='marquee';
     dragStartWorld = wp;
     if(!e.shiftKey) clearSelection();
@@ -1666,8 +1662,6 @@ svg.addEventListener('pointerup', (e)=>{
 });
 
 function eraseAt(wp){
-  // the eraser lifts ink (pen / highlighter strokes) only — use Select + Delete
-  // for shapes, text, sticky notes, tables and images.
   const r = 14/state.view.scale;
   let removed=false;
   for(let i=state.elements.length-1;i>=0;i--){
@@ -1745,8 +1739,6 @@ function enterEdit(id){
   if(!div) return;
   div.contentEditable='true';
   state.editingId = id;
-  // foreignObject editing becomes reliable after the newly-created SVG node
-  // has been painted once, especially in Safari and mobile browsers.
   requestAnimationFrame(()=>{
     div.focus({preventScroll:true});
     placeCaretEnd(div);
