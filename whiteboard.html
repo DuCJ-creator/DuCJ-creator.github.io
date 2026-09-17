@@ -156,6 +156,10 @@ input,select,textarea{font-family:inherit;}
 .annotate-btn{display:none;border:1px solid #C1694F;background:rgba(193,105,79,.16);color:#f0b09b;border-radius:8px;padding:7px 11px;font:600 12px var(--font-ui);white-space:nowrap}.annotate-btn.visible{display:block}.annotate-btn.active{background:rgba(193,105,79,.35);color:#ffd3c4}
 .share-btn{height:30px;border:1px solid var(--accent);background:var(--accent-soft);color:#b9e1cf;border-radius:8px;padding:0 11px;font:600 12px var(--font-ui)}
 .share-btn:hover{background:rgba(79,146,119,.3)}
+.participant-tools{display:none;align-items:center;gap:6px;padding:0 6px;border-right:1px solid var(--frame-line)}
+.participant-tools button{height:32px;border:1px solid transparent;background:transparent;color:var(--frame-text-dim);border-radius:8px;padding:0 10px;font:500 12px var(--font-ui)}
+.participant-tools button:hover,.participant-tools button.active{background:var(--accent-soft);color:#b9e1cf}
+body.participant-mode #frameBar .tool-group{display:none!important}body.participant-mode #frameBar .share-btn{display:none!important}body.participant-mode #propsBar{display:none!important}body.participant-mode #slateTabs .slate-tab{display:none!important}body.participant-mode #annotateBtn{display:none!important}body.participant-mode #boardWrap .zoom-dock,body.participant-mode #boardWrap .board-toggles{display:none!important}
 .share-modal{position:fixed;inset:0;background:rgba(8,10,13,.7);display:none;align-items:center;justify-content:center;z-index:100}
 .share-modal.open{display:flex}
 .share-card{width:min(440px,calc(100vw - 28px));background:var(--frame-2);border:1px solid var(--frame-line);border-radius:16px;padding:20px;color:var(--frame-text);box-shadow:0 20px 70px rgba(0,0,0,.45)}
@@ -336,6 +340,13 @@ input[type=color].custom-swatch{
     <div class="brand">
       <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="15" rx="3" stroke="#4F9277" stroke-width="1.6"/><path d="M7 19v2M17 19v2" stroke="#4F9277" stroke-width="1.6" stroke-linecap="round"/><path d="M6 9l3.2 4L12 10l4 5" stroke="#E7E7E2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <div class="brand-name"><b>Slate</b></div>
+    </div>
+
+    <div class="participant-tools" id="participantTools" aria-label="Participant tools">
+      <button type="button" data-participant-tool="select">Select / Edit</button>
+      <button type="button" data-participant-tool="text">Text</button>
+      <button type="button" data-participant-tool="pen">Draw</button>
+      <button type="button" data-participant-tool="highlighter">Highlight</button>
     </div>
 
     <div class="tool-group">
@@ -711,6 +722,7 @@ function applyOwnerDeltaToParticipant(payload){
     diffRender(next);
     applyingRemote = false;
   }
+  lastBroadcastElements=clone(next);
 }
 
 /* 接收完整 snapshot（僅在加入時） */
@@ -814,6 +826,7 @@ async function connectRealtime(){
           if(roomState.activeSlateId===participantId){
             applyingRemote = true; diffRender(next); applyingRemote = false;
           }
+          lastBroadcastElements=clone(next);
           return;
         }
         if(isOwner){
@@ -1044,7 +1057,7 @@ function renderSlateTabs(){
     const b=document.createElement('button');
     b.className='slate-tab'+(roomState.activeSlateId===id?' active':'');
     b.dataset.slate=id;
-    b.textContent=id==='main'?'Main':(roomState.participantMeta[id]?.displayName||('Participant '+roomState.participantMeta[id]?.joinOrder));
+    b.textContent=!isOwner ? ('My Slate · Participant '+(joinOrder||id.replace(/^p/,'')||'—')) : (id==='main'?'Main':(roomState.participantMeta[id]?.displayName||('Participant '+roomState.participantMeta[id]?.joinOrder)));
     if(!isOwner) b.disabled=true;
     b.addEventListener('click',()=>activateSlate(id));
     tabs.insertBefore(b,tabs.querySelector('.room-role'));
@@ -1064,6 +1077,7 @@ function activateSlate(id){
   renderSlateTabs();
 }
 function isReadOnlySlate(){ return isOwner && roomState.activeSlateId!=='main'; }
+function canEditTextElement(el){ return !!el && (isOwner || !el.ownerSourceId || !!el.ownerAnnotation); }
 function updateAnnotationUI(){
   const btn=document.getElementById('annotateBtn');
   btn.classList.toggle('visible',isOwner && roomState.activeSlateId!=='main');
@@ -1459,6 +1473,7 @@ function setTool(t){
   if(!isOwner && !['select','pen','highlighter','text'].includes(t)) t='select';
   state.tool = t;
   toolButtons.forEach(b=>b.classList.toggle('active', b.dataset.tool===t));
+  document.querySelectorAll('[data-participant-tool]').forEach(b=>b.classList.toggle('active',b.dataset.participantTool===t));
   document.getElementById('shapeBtn').classList.toggle('active', ['rect','ellipse','diamond'].includes(t));
   appEl.className = 'tool-'+t;
   closeAllDropdowns();
@@ -1497,7 +1512,7 @@ lockBtn.addEventListener('click', ()=>{
 });
 
 document.getElementById('clearBtn').addEventListener('click', ()=>{
-  if(isReadOnlySlate()) return;
+  if(!isOwner || isReadOnlySlate()) return;
   if(!state.elements.length) return;
   if(confirm('Clear the whole board?')){
     state.elements = []; clearSelection(); fullRender(); commitNow();
@@ -1578,7 +1593,7 @@ document.getElementById('bulletBtn').addEventListener('click',()=>formatActiveTe
 document.getElementById('numberBtn').addEventListener('click',()=>formatActiveText('insertOrderedList'));
 
 function applyToSelection(props){
-  if(isReadOnlySlate()) return;
+  if(!isOwner || isReadOnlySlate()) return;
   if(!state.selectedIds.size) return;
   let changed=false;
   for(const id of state.selectedIds){
@@ -1677,7 +1692,7 @@ svg.addEventListener('pointerdown', (e)=>{
 
   if(state.tool==='select'){
     const handle = handleFromEvent(e);
-    if(handle && !isReadOnlySlate()){
+    if(handle && isOwner && !isReadOnlySlate()){
       state.mode='resizing'; resizeHandle=handle;
       const ids=[...state.selectedIds];
       resizeOrigin = { start: wp, elements: ids.map(id=>clone(state.elements.find(x=>x.id===id))) };
@@ -1692,7 +1707,7 @@ svg.addEventListener('pointerdown', (e)=>{
       } else if(!state.selectedIds.has(id)){
         setSelection([id]);
       }
-      if(state.selectedIds.size && !isReadOnlySlate()){
+      if(state.selectedIds.size && isOwner && !isReadOnlySlate()){
         state.mode='dragging';
         dragStartWorld = wp;
         dragOrigins = [...state.selectedIds].map(sid=>{
@@ -2009,6 +2024,7 @@ svg.addEventListener('dblclick', (e)=>{
   if(!id) return;
   const el = state.elements.find(x=>x.id===id);
   if(!el) return;
+  if(!isOwner && el.ownerSourceId && !el.ownerAnnotation) return;
   if(isReadOnlySlate() && !el.ownerAnnotation) return;
   if(el.type==='text' || el.type==='sticky'){ setSelection([id]); enterEdit(id); }
   else if(el.type==='table'){
@@ -2039,7 +2055,7 @@ elementsLayer.addEventListener('pointerdown', e=>{
     const text=e.target.closest && e.target.closest('.el-text, .sticky-text');
     const node=text && text.closest('[data-id]');
     const el=node && state.elements.find(x=>x.id===node.dataset.id);
-    if(node && el && (!isReadOnlySlate() || el.ownerAnnotation)){
+    if(node && el && canEditTextElement(el) && (!isReadOnlySlate() || el.ownerAnnotation)){
       e.stopPropagation();
       setSelection([node.dataset.id]);
       enterEdit(node.dataset.id);
@@ -2053,7 +2069,7 @@ elementsLayer.addEventListener('click', e=>{
     const text=e.target.closest && e.target.closest('.el-text, .sticky-text');
     const node=text && text.closest('[data-id]');
     const el=node && state.elements.find(x=>x.id===node.dataset.id);
-    if(node && el && (!isReadOnlySlate() || el.ownerAnnotation)){ setSelection([node.dataset.id]); enterEdit(node.dataset.id); }
+    if(node && el && canEditTextElement(el) && (!isReadOnlySlate() || el.ownerAnnotation)){ setSelection([node.dataset.id]); enterEdit(node.dataset.id); }
   }
 });
 function placeCaretEnd(div){
@@ -2125,7 +2141,7 @@ tableToolbar.addEventListener('click', (e)=>{
 
 /* ===================== DELETE / DUPLICATE / ORDER ===================== */
 function deleteSelected(){
-  if(isReadOnlySlate()) return;
+  if(!isOwner || isReadOnlySlate()) return;
   if(!state.selectedIds.size) return;
   for(const id of state.selectedIds){ removeFromDOM(id); }
   state.elements = state.elements.filter(el=>!state.selectedIds.has(el.id));
@@ -2133,7 +2149,7 @@ function deleteSelected(){
   commitNow();
 }
 function duplicateSelected(){
-  if(isReadOnlySlate()) return;
+  if(!isOwner || isReadOnlySlate()) return;
   if(!state.selectedIds.size) return;
   const newIds=[];
   for(const id of state.selectedIds){
@@ -2150,7 +2166,7 @@ function duplicateSelected(){
   commitNow();
 }
 function bringToFront(){
-  if(isReadOnlySlate()) return;
+  if(!isOwner || isReadOnlySlate()) return;
   if(!state.selectedIds.size) return;
   let maxZ = Math.max(0,...state.elements.map(e=>e.z||0));
   for(const id of state.selectedIds){
@@ -2185,7 +2201,7 @@ window.addEventListener('keydown', (e)=>{
   if(e.key==='+' || e.key==='='){ zoomBy(1.15); return; }
   if(e.key==='-'){ zoomBy(1/1.15); return; }
   if(state.selectedIds.size && ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){
-    if(isReadOnlySlate()) return;
+    if(!isOwner || isReadOnlySlate()) return;
     e.preventDefault();
     const d = e.shiftKey?10:1;
     const dx = e.key==='ArrowLeft'?-d:e.key==='ArrowRight'?d:0;
@@ -2219,6 +2235,7 @@ document.addEventListener('copy', (e)=>{
   toast('Copied '+data.length+' item'+(data.length>1?'s':''));
 });
 document.addEventListener('paste', (e)=>{
+  if(!isOwner){ e.preventDefault(); return; }
   const activeIsEditable = document.activeElement && document.activeElement.isContentEditable;
   if(activeIsEditable) return;
   const items = e.clipboardData && e.clipboardData.items;
@@ -2422,16 +2439,10 @@ window.addEventListener('resize', fitSvg);
 
 function setupParticipantMode(){
   document.body.classList.add('participant-mode');
-  const allowed=new Set(['select','pen','highlighter','text']);
-  document.querySelectorAll('[data-tool]').forEach(btn=>{
-    if(!allowed.has(btn.dataset.tool)) btn.style.display='none';
+  document.querySelectorAll('[data-participant-tool]').forEach(btn=>{
+    btn.addEventListener('click',()=>setTool(btn.dataset.participantTool));
   });
-  ['shapeBtn','imageBtn','undoBtn','redoBtn','lockToolBtn','clearBtn','fileBtn','shareBtn','gridBtn','themeBtn','zoomIn','zoomOut','zoomFit'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.style.display='none';
-  });
-  document.getElementById('propsBar').style.display='none';
-  document.getElementById('tableToolbar').style.display='none';
-  document.getElementById('annotateBtn').style.display='none';
+  document.getElementById('participantTools').style.display='flex';
   document.getElementById('roomRole').textContent='Participant · connecting';
 }
 
