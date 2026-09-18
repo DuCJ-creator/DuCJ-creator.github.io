@@ -1179,6 +1179,13 @@ function buildNode(el){
   }
   const wrap = node.tagName==='g' ? node : svgEl('g');
   if(node.tagName!=='g'){ wrap.appendChild(node); }
+  // Keep sticky rotation on the SVG wrapper. CSS transforms inside a
+  // foreignObject are clipped/mis-positioned by mobile Safari, which made
+  // the same sticky appear as a thin edge on Participant devices.
+  if(el.type==='sticky'){
+    const cx=el.x+el.w/2, cy=el.y+el.h/2;
+    wrap.setAttribute('transform', `rotate(${el.rot||0} ${cx} ${cy})`);
+  }
   wrap.setAttribute('data-id', el.id);
   wrap.setAttribute('data-type', el.type);
   wrap.style.cursor = 'pointer';
@@ -1220,7 +1227,7 @@ function buildTextInner(el){
   return `<div class="el-text" contenteditable="false" style="font-family:${el.fontFamily};font-size:${el.fontSize}px;line-height:${el.lineHeight||'1.35'};color:${color};font-weight:${el.bold?700:400};font-style:${el.italic?'italic':'normal'};text-align:${el.align||'left'};">${el.html||''}</div>`;
 }
 function buildStickyInner(el){
-  return `<div class="sticky-box" style="background:${el.fill};transform:rotate(${el.rot||0}deg);">
+  return `<div class="sticky-box" style="background:${el.fill};">
     <div class="sticky-text" contenteditable="false" style="font-family:${el.fontFamily||"'Kalam', cursive"};font-size:${el.fontSize||16}px;">${el.html||''}</div>
   </div>`;
 }
@@ -1289,8 +1296,8 @@ function updateNodeGeometry(el){
       fo.setAttribute('width',Math.max(el.w,10)); fo.setAttribute('height',Math.max(el.h,10));
     }
     if(el.type==='sticky'){
-      const box = node.querySelector('.sticky-box');
-      if(box) box.style.transform = `rotate(${el.rot||0}deg)`;
+      const cx=el.x+el.w/2, cy=el.y+el.h/2;
+      node.setAttribute('transform', `rotate(${el.rot||0} ${cx} ${cy})`);
     }
   }
 }
