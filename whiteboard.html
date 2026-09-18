@@ -2450,9 +2450,9 @@ function setupParticipantMode(){
 
 /* ===================== INIT ===================== */
 async function init(){
-  if(!isOwner && !displayName){
-    displayName = (window.prompt('Display name (optional)', '') || '').trim();
-  }
+  // Avoid blocking prompt dialogs: some embedded/mobile browsers do not support
+  // prompt(), which would abort initialization before participant mode is set.
+  if(!isOwner && !displayName) displayName='';
   fitSvg();
   applyView();
   setBgStyle('dot');
