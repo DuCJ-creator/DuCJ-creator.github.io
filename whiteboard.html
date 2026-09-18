@@ -717,7 +717,35 @@ function broadcastActiveSlateDelta(){
 function applyOwnerDeltaToParticipant(payload){
   if(isOwner || !payload || payload.targetParticipantId!==participantId) return;
   const cur = roomState.participants[participantId] || [];
-  const next = payload.delta ? applyDelta(cur, payload.delta) : (payload.elements || cur);
+  const delta=payload.delta;
+  if(!delta){
+    const next=payload.elements || cur;
+    roomState.participants[participantId]=next;
+    if(roomState.activeSlateId===participantId){ applyingRemote=true; diffRender(next); applyingRemote=false; }
+    lastBroadcastElements=clone(next);
+    return;
+  }
+  const map=new Map(cur.map(e=>[e.id,e]));
+  const bySource=new Map(cur.filter(e=>e.ownerSourceId).map(e=>[e.ownerSourceId,e]));
+  const addOwner=(source)=>{
+    const sourceId=source.ownerSourceId||source.id;
+    if(bySource.has(sourceId)) return;
+    const copy=clone(source); copy.id=newId(); copy.ownerSourceId=sourceId;
+    map.set(copy.id,copy); bySource.set(sourceId,copy);
+  };
+  for(const source of delta.add) addOwner(source);
+  for(const source of delta.update){
+    const sourceId=source.ownerSourceId||source.id;
+    const existing=bySource.get(sourceId);
+    if(!existing){ addOwner(source); continue; }
+    const geometry={x:existing.x,y:existing.y,w:existing.w,h:existing.h,x1:existing.x1,y1:existing.y1,x2:existing.x2,y2:existing.y2};
+    Object.assign(existing,clone(source),{id:existing.id,ownerSourceId:sourceId});
+    for(const k in geometry) if(geometry[k]!==undefined) existing[k]=geometry[k];
+  }
+  for(const id of delta.remove){
+    for(const [localId,e] of [...map]) if(e.id===id || e.ownerSourceId===id) map.delete(localId);
+  }
+  const next=[...map.values()];
   roomState.participants[participantId] = next;
   if(roomState.activeSlateId===participantId){
     applyingRemote = true;
