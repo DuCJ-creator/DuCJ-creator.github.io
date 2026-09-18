@@ -2333,6 +2333,7 @@ document.getElementById('imageInput').addEventListener('change', (e)=>{
 function loadImageFile(file){
   const reader = new FileReader();
   reader.onload = (ev)=>{
+    const rawSrc = ev.target.result;
     const img = new Image();
     img.onload = ()=>{
       // Realtime broadcast payloads are intentionally small. The original
@@ -2357,7 +2358,7 @@ function loadImageFile(file){
       state.elements.push(el); addToDOM(el); commitNow();
       setTool('select'); setSelection([el.id]);
     };
-    img.src = src;
+    img.src = rawSrc;
   };
   reader.readAsDataURL(file);
 }
