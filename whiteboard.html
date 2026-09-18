@@ -666,9 +666,10 @@ function applyMainDeltaToParticipant(pid, delta){
     const srcId = el.ownerSourceId || el.id;
     const exist = srcMap.get(srcId);
     if(exist){
-      const geo = {x:exist.x,y:exist.y,w:exist.w,h:exist.h,x1:exist.x1,y1:exist.y1,x2:exist.x2,y2:exist.y2};
+      // Owner geometry is authoritative for owner-derived objects. Without
+      // this, sticky resizing and image movement stayed at the old size on
+      // Participant screens.
       Object.assign(exist, clone(el), {id:exist.id, ownerSourceId:srcId});
-      for(const k in geo) if(geo[k]!==undefined) exist[k]=geo[k];
     } else {
       const cp = ownerCopy(el);
       map.set(cp.id, cp);
@@ -738,9 +739,8 @@ function applyOwnerDeltaToParticipant(payload){
     const sourceId=source.ownerSourceId||source.id;
     const existing=bySource.get(sourceId);
     if(!existing){ addOwner(source); continue; }
-    const geometry={x:existing.x,y:existing.y,w:existing.w,h:existing.h,x1:existing.x1,y1:existing.y1,x2:existing.x2,y2:existing.y2};
+    // Apply all owner fields, including x/y/w/h and image src.
     Object.assign(existing,clone(source),{id:existing.id,ownerSourceId:sourceId});
-    for(const k in geometry) if(geometry[k]!==undefined) existing[k]=geometry[k];
   }
   for(const id of delta.remove){
     for(const [localId,e] of [...map]) if(e.id===id || e.ownerSourceId===id) map.delete(localId);
@@ -2333,14 +2333,26 @@ document.getElementById('imageInput').addEventListener('change', (e)=>{
 function loadImageFile(file){
   const reader = new FileReader();
   reader.onload = (ev)=>{
-    const src = ev.target.result;
     const img = new Image();
     img.onload = ()=>{
+      // Realtime broadcast payloads are intentionally small. The original
+      // phone photo can be several MB even when displayed at 360px, which
+      // causes Supabase to drop the image delta while smaller elements work.
+      const maxPixels = 1200;
+      const factor = Math.min(1, maxPixels/Math.max(img.width,img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(img.width*factor));
+      canvas.height = Math.max(1, Math.round(img.height*factor));
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      const src = canvas.toDataURL('image/jpeg',0.78);
       const r = svg.getBoundingClientRect();
       const c = toWorld(r.left+r.width/2, r.top+r.height/2);
       const maxW = 360;
-      const scale = Math.min(1, maxW/img.width);
-      const w = img.width*scale, h = img.height*scale;
+      const scale = Math.min(1, maxW/canvas.width);
+      const w = canvas.width*scale, h = canvas.height*scale;
       const el = makeEl({type:'image', x:c.x-w/2, y:c.y-h/2, w, h, src});
       state.elements.push(el); addToDOM(el); commitNow();
       setTool('select'); setSelection([el.id]);
