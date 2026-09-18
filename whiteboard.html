@@ -160,6 +160,8 @@ input,select,textarea{font-family:inherit;}
 .participant-tools button{height:32px;border:1px solid transparent;background:transparent;color:var(--frame-text-dim);border-radius:8px;padding:0 10px;font:500 12px var(--font-ui)}
 .participant-tools button:hover,.participant-tools button.active{background:var(--accent-soft);color:#b9e1cf}
 body.participant-mode #frameBar .tool-group{display:none!important}body.participant-mode #frameBar .share-btn{display:none!important}body.participant-mode #propsBar{display:none!important}body.participant-mode #slateTabs .slate-tab{display:none!important}body.participant-mode #annotateBtn{display:none!important}body.participant-mode #boardWrap .zoom-dock,body.participant-mode #boardWrap .board-toggles{display:none!important}
+body.participant-mode #frameBar > *:not(.brand):not(#participantTools):not(#realtimeStatus){display:none!important}
+body.participant-mode #frameBar{padding:8px 12px;min-height:48px}
 .share-modal{position:fixed;inset:0;background:rgba(8,10,13,.7);display:none;align-items:center;justify-content:center;z-index:100}
 .share-modal.open{display:flex}
 .share-card{width:min(440px,calc(100vw - 28px));background:var(--frame-2);border:1px solid var(--frame-line);border-radius:16px;padding:20px;color:var(--frame-text);box-shadow:0 20px 70px rgba(0,0,0,.45)}
