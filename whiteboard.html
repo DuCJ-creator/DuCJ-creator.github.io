@@ -721,7 +721,7 @@ function applyOwnerDeltaToParticipant(payload){
   if(!delta){
     const next=payload.elements || cur;
     roomState.participants[participantId]=next;
-    if(roomState.activeSlateId===participantId){ applyingRemote=true; diffRender(next); applyingRemote=false; }
+    if(roomState.activeSlateId===participantId){ applyingRemote=true; diffRender(next); applyingRemote=false; fitParticipantView(); }
     lastBroadcastElements=clone(next);
     return;
   }
@@ -751,6 +751,7 @@ function applyOwnerDeltaToParticipant(payload){
     applyingRemote = true;
     diffRender(next);
     applyingRemote = false;
+    fitParticipantView();
   }
   lastBroadcastElements=clone(next);
 }
@@ -771,6 +772,7 @@ function applySlateSnapshot(payload){
     state.elements = target==='main' ? roomState.main : roomState.participants[target];
     fullRender();
     applyingRemote = false;
+    if(!isOwner) fitParticipantView();
     lastBroadcastElements = clone(state.elements);
   }
   if(isOwner) renderSlateTabs();
@@ -783,6 +785,7 @@ function assignParticipant(payload){
   roomState.participants[participantId]=payload.elements||[];
   if(payload.view){ state.view=clone(payload.view); applyView(); }
   activateSlate(participantId);
+  fitParticipantView();
   realtimeChannel && realtimeChannel.track({joinedAt:Date.now(),role:'participant',clientId:realtimeClientId,participantId,displayName});
   document.getElementById('roomRole').textContent='Participant '+joinOrder+' · Connected';
   sendRealtime('request-main-snapshot',{targetParticipantId:participantId});
@@ -854,7 +857,7 @@ async function connectRealtime(){
           const next = payload.delta ? applyDelta(cur, payload.delta) : (payload.elements||cur);
           roomState.participants[participantId] = next;
           if(roomState.activeSlateId===participantId){
-            applyingRemote = true; diffRender(next); applyingRemote = false;
+            applyingRemote = true; diffRender(next); applyingRemote = false; fitParticipantView();
           }
           lastBroadcastElements=clone(next);
           return;
@@ -1041,6 +1044,26 @@ function contentBBox(){
   }
   const pad=60;
   return {x:minX-pad, y:minY-pad, w:(maxX-minX)+pad*2, h:(maxY-minY)+pad*2};
+}
+
+// Each device has a different viewport. Participant screens must fit the
+// shared world contents locally instead of inheriting the owner's camera.
+function fitViewToContent(){
+  const b = contentBBox();
+  const r = svg.getBoundingClientRect();
+  if(!r.width || !r.height) return;
+  const scale = clamp(Math.min(r.width/b.w, r.height/b.h) * 0.92, 0.1, 3);
+  state.view.scale = scale;
+  state.view.x = r.width/2 - (b.x+b.w/2)*scale;
+  state.view.y = r.height/2 - (b.y+b.h/2)*scale;
+  applyView();
+  renderSelection();
+}
+function fitParticipantView(){
+  if(isOwner || !state.elements.length) return;
+  // Wait for the board layout to settle, especially on mobile Safari after
+  // the compact participant toolbar changes the board height.
+  requestAnimationFrame(()=>requestAnimationFrame(()=>fitViewToContent()));
 }
 
 /* ===================== PATH / SHAPE ===================== */
@@ -2038,13 +2061,7 @@ function zoomBy(f){
 document.getElementById('zoomIn').addEventListener('click', ()=>zoomBy(1.2));
 document.getElementById('zoomOut').addEventListener('click', ()=>zoomBy(1/1.2));
 document.getElementById('zoomFit').addEventListener('click', ()=>{
-  const b = contentBBox();
-  const r = svg.getBoundingClientRect();
-  const scale = clamp(Math.min(r.width/b.w, r.height/b.h), 0.1, 3);
-  state.view.scale=scale;
-  state.view.x = r.width/2 - (b.x+b.w/2)*scale;
-  state.view.y = r.height/2 - (b.y+b.h/2)*scale;
-  applyView(); renderSelection();
+  fitViewToContent();
 });
 
 /* ===================== EDITING ===================== */
@@ -2464,6 +2481,7 @@ document.getElementById('gridBtn').addEventListener('click', ()=>{
 function fitSvg(){
   const r = boardWrap.getBoundingClientRect();
   svg.setAttribute('width', r.width); svg.setAttribute('height', r.height);
+  if(!isOwner && state.elements.length) fitParticipantView();
 }
 window.addEventListener('resize', fitSvg);
 
