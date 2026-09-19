@@ -166,11 +166,26 @@
       margin: 10px 0; 
       font-size: 14px; 
     }
+    .audio-warning {
+      display: none;
+      text-align: center;
+      background: #fff0ed;
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      padding: 10px;
+      border-radius: 8px;
+      margin: 0 0 16px;
+      font-size: 13px;
+    }
   </style>
 </head>
 <body>
   <h1> Shirley's National Vocabulary Contest Practice </h1>
    <h2> Confusing Words Dictation + Past Paper Practice </h2>
+
+  <div class="audio-warning" id="audioWarning">
+    ⚠️ 偵測到裝置目前無法播放聲音，請確認：① iPad 側邊靜音鍵未切到靜音、② 音量已調大、③ 已允許此網頁播放音效。
+  </div>
   
   <!-- 分類按鈕 -->
   <div class="category-buttons" id="categoryButtons">
@@ -206,6 +221,7 @@
     <div class="word-list" id="wordList"></div>
     <div class="controls">
       <button class="btn" id="submitAllBtn">提交全部答案</button>
+      <button class="btn" id="replayBtn" style="background:#3a6b35;">🔊 重新播放</button>
     </div>
   </div>
 
@@ -302,11 +318,14 @@
     let currentWords = [];
     let errorWords = [];
     let isPlaying = false;
+    let audioUnlocked = false;
+    let voiceReady = false;
 
     const categoryButtons = document.getElementById('categoryButtons');
     const practiceArea = document.getElementById('practiceArea');
     const wordList = document.getElementById('wordList');
     const submitAllBtn = document.getElementById('submitAllBtn');
+    const replayBtn = document.getElementById('replayBtn');
     const resultArea = document.getElementById('resultArea');
     const statusText = document.getElementById('statusText');
     const userAnswersDiv = document.getElementById('userAnswers');
@@ -317,17 +336,29 @@
     const mixedCountSelect = document.getElementById('mixedCount');
     const countdownEl = document.getElementById('countdown');
     const timerValueEl = document.getElementById('timerValue');
+    const audioWarningEl = document.getElementById('audioWarning');
 
-    // 數字轉英文序數
-    function numberToOrdinal(n) {
-      const ordinals = [
-        "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
-        "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty",
-        "twenty-one", "twenty-two", "twenty-three", "twenty-four", "twenty-five", "twenty-six", "twenty-seven", "twenty-eight", "twenty-nine", "thirty",
-        "thirty-one", "thirty-two", "thirty-three", "thirty-four", "thirty-five", "thirty-six", "thirty-seven", "thirty-eight", "thirty-nine", "forty",
-        "forty-one", "forty-two", "forty-three", "forty-four", "forty-five", "forty-six", "forty-seven", "forty-eight", "forty-nine", "fifty"
-      ];
-      return ordinals[n] || n.toString();
+    // ---- iOS / iPadOS 音訊解鎖 ----
+    // iOS Safari 要求語音／音訊必須在「使用者手勢」當下的同一個呼叫堆疊內啟動，
+    // 才會被允許播放。之後在 setTimeout/setInterval 裡才觸發的播放會被靜音。
+    // 這裡在使用者「點擊按鈕」的瞬間，同步播放一段極短、幾乎無聲的語音，
+    // 先把音訊引擎解鎖，後續倒數結束後的自動播放才不會被擋掉。
+    function unlockAudioForIOS() {
+      if (audioUnlocked || typeof responsiveVoice === 'undefined') return;
+      try {
+        responsiveVoice.speak('.', 'US English Male', {
+          volume: 0.01,
+          onend: () => { voiceReady = true; },
+          onerror: () => { voiceReady = false; showAudioWarning(); }
+        });
+        audioUnlocked = true;
+      } catch (e) {
+        showAudioWarning();
+      }
+    }
+
+    function showAudioWarning() {
+      audioWarningEl.style.display = 'block';
     }
 
     // 開始練習
@@ -335,6 +366,7 @@
       currentWords = [...words];
       practiceArea.style.display = 'block';
       resultArea.style.display = 'none';
+      countdownEl.style.display = 'block';
       renderWordInputs();
       startAutoPlay();
     }
@@ -396,12 +428,26 @@
       }
     }
 
+    // 數字轉英文序數
+    function numberToOrdinal(n) {
+      const ordinals = [
+        "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+        "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty",
+        "twenty-one", "twenty-two", "twenty-three", "twenty-four", "twenty-five", "twenty-six", "twenty-seven", "twenty-eight", "twenty-nine", "thirty",
+        "thirty-one", "thirty-two", "thirty-three", "thirty-four", "thirty-five", "thirty-six", "thirty-seven", "thirty-eight", "thirty-nine", "forty",
+        "forty-one", "forty-two", "forty-three", "forty-four", "forty-five", "forty-six", "forty-seven", "forty-eight", "forty-nine", "fifty"
+      ];
+      return ordinals[n] || n.toString();
+    }
+
     // 播放文字
     function speakText(text) {
       return new Promise((resolve) => {
+        if (typeof responsiveVoice === 'undefined') { resolve(); return; }
         responsiveVoice.speak(text, "US English Male", {
           rate: 0.9,
-          onend: resolve
+          onend: resolve,
+          onerror: () => { showAudioWarning(); resolve(); }
         });
       });
     }
@@ -409,9 +455,11 @@
     // 播放單字
     function speakWord(word) {
       return new Promise((resolve) => {
+        if (typeof responsiveVoice === 'undefined') { resolve(); return; }
         responsiveVoice.speak(word, "US English Male", {
           rate: 0.8,
-          onend: resolve
+          onend: resolve,
+          onerror: () => { showAudioWarning(); resolve(); }
         });
       });
     }
@@ -420,6 +468,16 @@
     function sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
     }
+
+    // 重新播放（也是使用者手勢觸發，可再次確保音訊已解鎖）
+    replayBtn.addEventListener('click', () => {
+      unlockAudioForIOS();
+      isPlaying = false;
+      setTimeout(() => {
+        isPlaying = true;
+        playAllWords();
+      }, 50);
+    });
 
     // 提交全部答案
     submitAllBtn.addEventListener('click', () => {
@@ -492,14 +550,16 @@
       countdownEl.style.display = 'block';
     });
 
-    // 按鈕事件
+    // 按鈕事件（在這裡先同步解鎖音訊，再開始練習流程）
     categoryButtons.addEventListener('click', (e) => {
       if (e.target.classList.contains('btn')) {
+        unlockAudioForIOS();
         startPractice(wordData[e.target.dataset.category]);
       }
     });
 
     startMixedBtn.addEventListener('click', () => {
+      unlockAudioForIOS();
       const count = parseInt(mixedCountSelect.value);
       const selectedWords = getRandomWords(allWords, count);
       startPractice(selectedWords);
