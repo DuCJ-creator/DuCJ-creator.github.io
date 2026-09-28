@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>中秋佳節 Word Search</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+<style>
+:root{--night:#0b1030;--deep:#1a2358;--cell:#222c6b;--moon:#f7e8b2;--gold:#e3a93b;--jade:#6fd3b6;--ink:#10163d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--moon);font-family:system-ui,"Noto Sans TC",sans-serif;
+background:radial-gradient(ellipse at 50% -10%,#2b3585 0,var(--night) 60%) var(--night);
+display:flex;flex-direction:column;align-items:center;-webkit-user-select:none;user-select:none}
+header{text-align:center;margin:22px 12px 8px}
+.moon{--p:0;width:84px;height:84px;border-radius:50%;margin:0 auto 10px;
+background:radial-gradient(circle at 35% 35%,#fffbe6,var(--moon) 55%,#d8c583);
+filter:brightness(calc(.45 + .55*var(--p)));
+box-shadow:0 0 calc(12px + 50px*var(--p)) calc(2px + 10px*var(--p)) rgba(247,232,178,.55);transition:.6s}
+h1{font-family:"Noto Serif TC",serif;font-weight:900;font-size:clamp(1.6rem,6vw,2.3rem);margin:0;letter-spacing:.12em;color:var(--moon)}
+.sub{margin:4px 0 0;opacity:.75;font-size:.9rem}
+.wrap{width:95vw;max-width:600px;display:flex;flex-direction:column;gap:18px;padding-bottom:40px}
+#grid{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;padding:6px;background:linear-gradient(160deg,var(--gold),#a8741c);
+border-radius:14px;touch-action:none;box-shadow:0 0 30px rgba(227,169,59,.25)}
+.cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:var(--cell);border-radius:4px;
+font-weight:700;font-size:clamp(.8rem,3.6vw,1.3rem);cursor:pointer;transition:background .1s}
+.cell.sel{background:var(--jade);color:var(--ink)}
+.cell.found{background:var(--moon);color:var(--ink)}
+.bar{display:flex;justify-content:space-between;align-items:center;font-size:.95rem}
+button{font:inherit;background:none;color:var(--moon);border:1px solid var(--gold);border-radius:20px;padding:6px 16px;cursor:pointer}
+button:hover,button:focus-visible{background:var(--gold);color:var(--ink);outline:none}
+#list{list-style:none;margin:0;padding:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+background:rgba(255,255,255,.05);border:1px solid rgba(227,169,59,.5);border-radius:12px}
+#list li{text-align:center;font-size:.85rem;padding:4px 2px;font-family:"Noto Serif TC",serif}
+#list li small{display:block;opacity:.7;font-size:.75rem}
+#list li.done{color:var(--gold);text-decoration:line-through;opacity:.6}
+#win{display:none;text-align:center;padding:14px;border-radius:12px;background:var(--gold);color:var(--ink);font-family:"Noto Serif TC",serif;font-weight:600}
+@media(max-width:480px){#list{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="moon" id="moon"></div>
+  <h1>中秋佳節</h1>
+  <p class="sub">找出藏在夜空裡的中秋單字，每找到一個，月亮就更亮一點</p>
+</header>
+<div class="wrap">
+  <div class="bar"><span id="count">0 / 15</span><button id="again">重新出題</button></div>
+  <div id="grid"></div>
+  <div id="win">🥮 中秋快樂！你找到全部單字了，月圓人團圓 🌕</div>
+  <ul id="list"></ul>
+</div>
+<script>
+const N=12;
+const WORDS={MOONCAKE:"月餅",OSMANTHUS:"桂花",BARBECUE:"烤肉",FESTIVAL:"節日",REUNION:"團圓",LANTERN:"燈籠",
+HARVEST:"豐收",POMELO:"柚子",RABBIT:"玉兔",FAMILY:"家人",AUTUMN:"秋天",CHANGE:"嫦娥",MOON:"月亮",JADE:"玉",TEA:"茶"};
+const KEYS=Object.keys(WORDS);
+const DIRS=[[0,1],[1,0],[1,1],[0,-1],[-1,0],[-1,-1],[1,-1],[-1,1]];
+let g,found,sel,active,start;
+const $=id=>document.getElementById(id);
+
+function build(){
+  for(;;){ // retry until every word fits
+    g=Array(N*N).fill("");
+    const ok=[...KEYS].sort((a,b)=>b.length-a.length).every(place);
+    if(ok)break;
+  }
+  for(let i=0;i<g.length;i++)if(!g[i])g[i]=String.fromCharCode(65+Math.random()*26|0);
+}
+function place(w){
+  for(let t=0;t<200;t++){
+    const [dr,dc]=DIRS[Math.random()*DIRS.length|0],r=Math.random()*N|0,c=Math.random()*N|0;
+    const er=r+dr*(w.length-1),ec=c+dc*(w.length-1);
+    if(er<0||er>=N||ec<0||ec>=N)continue;
+    let fit=true;
+    for(let i=0;i<w.length;i++){const v=g[(r+dr*i)*N+c+dc*i];if(v&&v!==w[i]){fit=false;break}}
+    if(!fit)continue;
+    for(let i=0;i<w.length;i++)g[(r+dr*i)*N+c+dc*i]=w[i];
+    return true;
+  }
+  return false;
+}
+function render(){
+  const ge=$("grid");ge.innerHTML="";
+  g.forEach((l,i)=>{const d=document.createElement("div");d.className="cell";d.textContent=l;d.dataset.i=i;ge.appendChild(d)});
+  const ul=$("list");ul.innerHTML="";
+  [...KEYS].sort().forEach(w=>{const li=document.createElement("li");li.id="w-"+w;li.innerHTML=w+"<small>"+WORDS[w]+"</small>";ul.appendChild(li)});
+  update();
+}
+function update(){
+  $("count").textContent=found.length+" / "+KEYS.length;
+  $("moon").style.setProperty("--p",found.length/KEYS.length);
+  $("win").style.display=found.length===KEYS.length?"block":"none";
+}
+function cellAt(e){
+  const el=document.elementFromPoint(e.clientX,e.clientY);
+  return el&&el.classList.contains("cell")?+el.dataset.i:null;
+}
+function line(a,b){ // straight line of cells from a to b, or null
+  const r0=a/N|0,c0=a%N,dr=(b/N|0)-r0,dc=b%N-c0;
+  if(dr&&dc&&Math.abs(dr)!==Math.abs(dc))return null;
+  const n=Math.max(Math.abs(dr),Math.abs(dc)),sr=Math.sign(dr),sc=Math.sign(dc),out=[];
+  for(let i=0;i<=n;i++)out.push((r0+sr*i)*N+c0+sc*i);
+  return out;
+}
+function paint(){
+  document.querySelectorAll(".cell.sel").forEach(c=>c.classList.remove("sel"));
+  sel.forEach(i=>$("grid").children[i].classList.add("sel"));
+}
+function setup(){
+  const ge=$("grid");
+  ge.addEventListener("pointerdown",e=>{
+    const i=cellAt(e);if(i===null)return;
+    active=true;start=i;sel=[i];paint();
+    ge.setPointerCapture&&ge.setPointerCapture(e.pointerId);
+  });
+  ge.addEventListener("pointermove",e=>{
+    if(!active)return;
+    const i=cellAt(e);if(i===null)return;
+    const l=line(start,i);if(l){sel=l;paint()}
+  });
+  const end=()=>{
+    if(!active)return;active=false;
+    const s=sel.map(i=>g[i]).join(""),r=[...s].reverse().join("");
+    KEYS.forEach(w=>{
+      if((s===w||r===w)&&!found.includes(w)){
+        found.push(w);
+        sel.forEach(i=>ge.children[i].classList.add("found"));
+        $("w-"+w).classList.add("done");
+      }
+    });
+    sel=[];paint();update();
+  };
+  ge.addEventListener("pointerup",end);
+  ge.addEventListener("pointercancel",end);
+}
+function start_(){found=[];sel=[];active=false;build();render()}
+setup();
+$("again").onclick=start_;
+start_();
+</script>
+</body>
+</html>
