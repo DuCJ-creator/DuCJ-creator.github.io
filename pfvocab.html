@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flow Sheet: Public Forum Vocabulary 辯論詞彙</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#eef1f5;--paper:#fff;--ink:#14213d;--mute:#5d6b85;--line:#cfd7e4;--pro:#1f5fd6;--con:#c8402f;--ok:#1d8a55;--hl:#fff3b0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1626;--paper:#18223a;--ink:#e8edf7;--mute:#97a4bf;--line:#2d3b5c;--pro:#6aa0ff;--con:#ff7d6b;--ok:#4cc58a;--hl:#4a4320}}
+:root[data-theme="dark"]{--bg:#0f1626;--paper:#18223a;--ink:#e8edf7;--mute:#97a4bf;--line:#2d3b5c;--pro:#6aa0ff;--con:#ff7d6b;--ok:#4cc58a;--hl:#4a4320}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.55 Newsreader,Georgia,serif}
+main{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+h1{font:800 clamp(30px,7vw,46px)/1.05 "Bricolage Grotesque",system-ui,sans-serif;margin:8px 0 6px;letter-spacing:-.02em}
+h1 .p{color:var(--pro)}h1 .c{color:var(--con)}
+.sub{color:var(--mute);margin:0 0 18px}
+.bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--line);margin:10px 0 4px}
+.bar i{display:block;background:var(--ok);transition:width .4s}
+.meta{display:flex;justify-content:space-between;font:500 14px "Bricolage Grotesque",system-ui,sans-serif;color:var(--mute)}
+.tabs,.cats{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0}
+button{font:600 15px "Bricolage Grotesque",system-ui,sans-serif;color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:8px;padding:9px 14px;cursor:pointer}
+button:hover{border-color:var(--pro)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--pro);outline-offset:2px}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.cat{font-size:13px;padding:5px 11px;border-radius:99px}
+.cat[aria-pressed="true"]{background:var(--pro);color:#fff;border-color:var(--pro)}
+.sheet{background:var(--paper);border:1.5px solid var(--line);border-left:8px solid var(--pro);border-radius:6px 14px 14px 6px;padding:26px 24px;min-height:260px;display:flex;flex-direction:column;justify-content:center}
+.sheet.con{border-left-color:var(--con)}.sheet.ok{border-left-color:var(--ok)}
+.tag{font:600 13px "Bricolage Grotesque",system-ui,sans-serif;color:var(--mute);margin-bottom:8px}
+.term{font:800 clamp(30px,8vw,44px)/1.1 "Bricolage Grotesque",system-ui,sans-serif;margin:0 0 8px}
+.def{font-size:20px;margin:0 0 12px}
+.ex{font-style:italic;color:var(--mute);margin:0}
+mark{background:var(--hl);color:inherit;padding:0 4px;border-radius:3px;font-style:normal;font-weight:600}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.row button{flex:1;min-width:120px}
+.good{background:var(--ok);color:#fff;border-color:var(--ok)}
+.again{background:var(--con);color:#fff;border-color:var(--con)}
+.opts{display:grid;gap:10px;margin-top:16px}
+.opt{text-align:left;font-size:17px;padding:12px 14px}
+.opt.right{background:var(--ok);color:#fff;border-color:var(--ok)}
+.opt.wrong{background:var(--con);color:#fff;border-color:var(--con)}
+input[type=text]{width:100%;font:600 20px "Bricolage Grotesque",system-ui,sans-serif;padding:12px;border-radius:8px;border:2px solid var(--line);background:var(--bg);color:var(--ink);margin-top:14px}
+.fb{min-height:1.5em;margin-top:12px;font-weight:600}
+.big{font:800 64px/1 "Bricolage Grotesque",system-ui,sans-serif}
+.hint{font-size:14px;color:var(--mute);margin-top:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:12px}
+.tile{padding:12px 8px;font-size:15px;min-height:54px;word-break:break-word}
+.tile.sel{border-color:var(--pro);background:var(--hl)}
+.tile.gone{opacity:.25}
+.tile.bad{background:var(--con);color:#fff;border-color:var(--con)}
+.built{display:flex;gap:6px;flex-wrap:wrap;min-height:54px;padding:8px;border:2px dashed var(--line);border-radius:8px;margin-top:12px}
+.tile.lt{min-width:46px;font-size:22px;text-transform:uppercase}
+.sp{font-size:13px;padding:4px 9px;margin:8px 6px 0 0}
+.wi{padding:14px 0;border-bottom:1px solid var(--line)}
+.wi b{font:700 21px "Bricolage Grotesque",system-ui,sans-serif}
+.wz{color:var(--pro);font-weight:600;margin-left:10px}
+.ck{color:var(--ok);font-weight:700}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<h1>Flow <span class="p">Sheet</span>: <span class="c">PF</span> vocab</h1>
+<p class="sub">Learn 56 Public Forum terms in English and Traditional Chinese 繁體中文, Browse the full list first, then choose how to study: flip cards, quiz, 60s sprint, match pairs, scramble, or fill the speech.</p>
+<div class="bar"><i id="prog" style="width:0"></i></div>
+<div class="meta"><span id="mc">0 of 0 mastered</span><button id="reset" style="padding:2px 8px;font-size:12px">Reset</button></div>
+<div class="tabs" role="tablist" id="tabs"></div>
+<div class="cats" id="langs"></div><div class="cats" id="cats"></div>
+<div id="stage"></div>
+</main>
+<script>
+const D=[
+["resolution","Structure","The topic statement both teams debate in the round.","Today's __ asks whether the US should ban single-use plastics."],
+["constructive","Structure","The first speech, where each side presents its case.","In my __, I will read two contentions."],
+["crossfire","Structure","A short question-and-answer period between opposing debaters.","During __, she asked where that statistic came from."],
+["summary","Structure","The speech that narrows the round to the most important issues.","In __, we collapse to our strongest contention."],
+["final focus","Structure","The last speech, which tells the judge exactly why you win.","Our __ gives three reasons to vote Pro."],
+["framework","Structure","A lens that tells the judge how to decide the round.","Our __ says the best policy maximizes overall well-being."],
+["case","Structure","The set of prepared arguments a team reads in its constructive.","Our __ is built on economic and health arguments."],
+["flow","Structure","The notes you take tracking every argument in the round.","I lost track because it was not on my __."],
+["contention","Argument","A main argument that supports your side of the resolution.","Our first __ is that nuclear power cuts emissions."],
+["claim","Argument","A statement you say is true, before you prove it.","Their __ is that tariffs protect jobs, but they never prove it."],
+["warrant","Argument","The reasoning that explains why a claim is true.","You have a claim, but where is the __?"],
+["evidence","Argument","Facts, statistics, or expert quotes that support an argument.","Our __ from a 2024 study shows prices fell 12 percent."],
+["impact","Argument","The final consequence of an argument and why it matters.","The __ is 10,000 lost jobs in rural counties."],
+["link","Argument","The chain of logic that connects an action to its impact.","Their __ breaks: subsidies do not cause inflation."],
+["burden of proof","Argument","Your duty to prove that your side of the resolution is true.","The __ is on Pro to show the ban actually works."],
+["status quo","Argument","The way things are right now, if nothing changes.","Under the __, emissions keep rising every year."],
+["rebuttal","Clash","A response that attacks an argument from the other team.","In my __, I will answer their first contention."],
+["turn","Clash","An argument showing the opponent's point actually helps your side.","We read a __: their tariffs hurt the workers they claim to protect."],
+["delink","Clash","To show that the connection between an action and an impact does not hold.","We __ their economic impact because subsidies do not change prices."],
+["extend","Clash","To carry an argument into a later speech and explain it again.","Please __ our second contention across the flow."],
+["dropped argument","Clash","An argument the other team never answered.","They never responded, so this is a __."],
+["concede","Clash","To agree that something is true, often to move on.","My opponents __ that the status quo is flawed."],
+["clash","Clash","Direct engagement where teams answer each other's arguments.","There is no __ if both teams only repeat their cases."],
+["mitigate","Clash","To reduce how serious or how large an impact is.","Even if it is true, we __ their harm because it is temporary."],
+["weighing","Weighing","Comparing impacts to show why yours matter more.","Without __, the judge has no reason to prefer our impact."],
+["magnitude","Weighing","A weighing tool: how large or severe the impact is.","On __, our harm is death; theirs is inconvenience."],
+["probability","Weighing","A weighing tool: how likely the impact is to happen.","On __, our impact is already happening today."],
+["timeframe","Weighing","A weighing tool: how soon the impact happens.","On __, our benefit arrives this year, theirs in fifty years."],
+["scope","Weighing","A weighing tool: how many people the impact affects.","On __, our impact reaches every household in the country."],
+["outweigh","Weighing","To matter more than the other side's impact.","Our impact will __ theirs on both magnitude and probability."],
+["voter","Weighing","A key issue that should decide the whole round.","Our biggest __ is protecting public health."]
+];
+let auto=false;
+function say(t,l){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang=l;u.rate=.85;
+const v=speechSynthesis.getVoices().find(x=>x.lang.replace("_","-")===l);if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+const q2=t=>t.replace(/"/g,"&quot;");
+const spk=(d,full)=>`<div><button class="sp" data-say="${q2(d[0])}" data-l="en-US" aria-label="Hear ${q2(d[0])} in English">🔊 English</button><button class="sp" data-say="${q2(d[4])}" data-l="zh-TW" aria-label="聽中文發音">🔊 中文</button>${full?`<button class="sp" data-say="${q2(d[3].replace("__",d[0]))}" data-l="en-US" aria-label="Hear the example sentence">🔊 Sentence</button>`:""}</div>`;
+document.addEventListener("click",e=>{const b=e.target.closest(".sp");if(b)say(b.dataset.say,b.dataset.l)});
+const CATS=["All","Structure","Argument","Clash","Weighing","Phrases"];
+let lang="both";
+const Z="辯題|立論|交叉質詢|總結|最終聚焦|框架|立論稿|流程記錄|論點|主張|理由|證據|影響|連結|舉證責任|現狀|反駁|反轉|切斷連結|延伸|被忽略的論點|承認|交鋒|減輕|權衡比較|嚴重程度|可能性|時間框架|影響範圍|勝過|決勝點".split("|");
+D.forEach((d,k)=>d[4]=Z[k]);
+D.push(
+["pro","Structure","The side that supports the resolution.","The __ team argued that cities should ban cars.","正方"],
+["con","Structure","The side that opposes the resolution.","The __ team said the ban would hurt small shops.","反方"],
+["coin flip","Structure","A toss at the start where one team picks a side or a speaking order.","The winner of the __ chose to speak second.","擲硬幣"],
+["prep time","Structure","Extra time each team can use between speeches to get ready.","We have two minutes of __ left.","準備時間"],
+["grand crossfire","Structure","A crossfire where all four debaters question each other together.","In __, all four debaters can ask questions.","全體交叉質詢"],
+["ballot","Structure","The form where the judge writes the winner and feedback.","The judge wrote her reason for decision on the __.","評分表"],
+["stakeholder","Argument","A person or group who is directly affected by the issue.","Farmers are the main __ in this debate.","利害關係人"],
+["causation","Argument","When one thing truly makes another thing happen.","They show correlation, but not __.","因果關係"],
+["correlation","Argument","When two things happen together, without proof that one causes the other.","Ice cream sales and sunburns show __, not cause.","相關性"],
+["solvency","Argument","How well a policy actually solves the problem it aims at.","Our __ is strong because the program already works abroad.","解決能力"],
+["trade-off","Argument","Giving up one benefit to get another.","Every policy has a __ between cost and speed.","取捨"],
+["net benefit","Argument","What is left after you subtract the harms from the benefits.","Our side has the greater __ for society.","淨效益"],
+["unintended consequence","Argument","A side effect nobody planned that follows from an action.","The tax had an __: shoppers crossed the border.","意外後果"],
+["cross-apply","Clash","To use an argument you made in one place to answer a different point.","Judge, __ our warrant from the first contention here.","交叉套用"],
+["pre-empt","Clash","To answer an argument before the opponent has made it.","I will __ their economy argument now.","預先反駁"],
+["frontline","Clash","Prepared answers that defend your own case against attacks.","Our __ answers all three of their rebuttals.","前線回應"],
+["collapse","Clash","To drop weaker arguments and focus on your best one or two.","In summary we will __ to our second contention.","收斂論點"],
+["refute","Clash","To prove that an argument is wrong.","We __ their claim with newer evidence.","駁斥"],
+["non-unique","Clash","Showing the impact will happen anyway, with or without the plan.","Their harm is __ because prices already rise.","非獨有"],
+["reversibility","Weighing","A weighing tool: whether the harm can be undone later.","On __, extinction can never be fixed.","可逆性"],
+["on the flow","Phrases","A signpost meaning: in my notes, this argument was or was not answered.","Judge, it is still __ because they never answered.","在流程記錄上"],
+["vote Pro","Phrases","A standard closing phrase asking the judge to decide for the Pro side.","For these three reasons, please __.","投給正方"],
+["even if","Phrases","A signpost for a backup argument: you still win under their assumption.","__ they are right, our impact is bigger.","即使"]
+);
+let mode="list",cat="All",mastered=new Set();
+try{mastered=new Set(JSON.parse(localStorage.getItem("pfv")||"[]"))}catch(e){}
+const save=()=>{try{localStorage.setItem("pfv",JSON.stringify([...mastered]))}catch(e){}};
+const $=id=>document.getElementById(id);
+const norm=s=>s.toLowerCase().replace(/[^a-z]/g,"");
+const shuf=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
+const pool=()=>D.filter(d=>cat==="All"||d[1]===cat);
+const fill=(d,w)=>d[3].replace("__",w?`<mark>${d[0]}</mark>`:"<mark>_____</mark>");
+const side=d=>["Argument","Weighing"].includes(d[1])?"":"con";
+function prog(){const n=D.length,m=[...mastered].filter(t=>D.some(d=>d[0]===t)).length;
+$("prog").style.width=(m/n*100)+"%";$("mc").textContent=m+" of "+n+" terms mastered";}
+function head(){
+$("tabs").innerHTML=[["list","Word list"],["cards","Flip cards"],["quiz","Quiz"],["sprint","60s sprint"],["match","Match pairs"],["scramble","Scramble"],["cloze","Fill the speech"]].map(([k,l])=>`<button class="tab" role="tab" aria-selected="${mode===k}" data-m="${k}">${l}</button>`).join("");
+$("langs").innerHTML=[["en","English"],["zh","中文"],["both","English + 中文"]].map(([k,l])=>`<button class="cat" aria-pressed="${lang===k}" data-l="${k}">${l}</button>`)+`<button class="cat" aria-pressed="${auto}" data-au="1">🔊 Auto-play</button>`;
+$("langs").onclick=e=>{if(e.target.dataset.au){auto=!auto;if(auto)say("Auto play is on","en-US");head();return}const l=e.target.dataset.l;if(l){lang=l;start()}};
+$("cats").innerHTML=CATS.map(c=>`<button class="cat" aria-pressed="${cat===c}" data-c="${c}">${c}</button>`).join("");
+$("tabs").onclick=e=>{const m=e.target.dataset.m;if(m){mode=m;start()}};
+$("cats").onclick=e=>{const c=e.target.dataset.c;if(c){cat=c;start()}};}
+function start(){clearInterval(tm);head();prog();({list,cards,quiz,sprint,match,scramble,cloze})[mode]();}
+
+/* word list */
+function list(){
+const M=[["cards","Flip cards"],["quiz","Quiz"],["sprint","60s sprint"],["match","Match pairs"],["scramble","Scramble"],["cloze","Fill the speech"]];
+const go=t=>`<div class="sheet" style="min-height:0;margin-top:16px"><div class="tag">${t}</div><div class="row" style="margin-top:4px">${M.map(([k,l])=>`<button data-m="${k}">${l}</button>`).join("")}</div></div>`;
+$("stage").innerHTML=`${go("Ready? Choose how to study these words")}<input type="text" id="q" placeholder="Search a word, 中文 or meaning" aria-label="Search words"><div id="wl"></div>${go("Done browsing? Choose how to study")}`;
+const draw=()=>{const v=$("q").value.trim().toLowerCase(),it=pool().filter(d=>!v||(d[0]+d[4]+d[2]).toLowerCase().includes(v));
+$("wl").innerHTML=`<p class="hint">${it.length} terms${cat==="All"?"":" in "+cat}. Tap 🔊 to hear a word.</p>`+(it.map(d=>`<div class="wi"><b>${d[0]}</b>${lang==="en"?"":`<span class="wz">${d[4]}</span>`}${mastered.has(d[0])?'<span class="ck"> ✓</span>':""}<div class="tag" style="margin:2px 0">${d[1]}</div><div>${d[2]}</div><div class="ex">${fill(d,true)}</div>${spk(d,1)}</div>`).join("")||"<p>No matching words.</p>")};
+$("q").oninput=draw;draw();
+$("stage").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{mode=b.dataset.m;start();window.scrollTo(0,0)});}
+
+/* flip cards */
+let deck=[],i=0,flipped=false;
+function cards(){deck=shuf(pool().filter(d=>!mastered.has(d[0])));i=0;flipped=false;drawCard();}
+function drawCard(){
+const st=$("stage");
+if(!deck.length||i>=deck.length){st.innerHTML=`<div class="sheet ok"><p class="term">Deck cleared</p><p class="def">${deck.length?"You went through every card.":"Every term here is mastered."} Try the quiz, or reset to start again.</p><div class="row"><button id="rs">Review this set again</button></div></div>`;
+$("rs").onclick=()=>{pool().forEach(d=>mastered.delete(d[0]));save();start()};return;}
+const d=deck[i];
+st.innerHTML=`<div class="sheet ${side(d)}"><div class="tag">${d[1]} · card ${i+1} of ${deck.length}</div>`+
+(flipped?`<p class="def">${d[2]}</p><p class="ex">${fill(d,true)}</p><p class="term" style="font-size:22px;margin-top:12px">${d[0]} · ${d[4]}</p>${spk(d,1)}`:`<p class="term">${d[0]}</p>${lang!=="en"?`<p class="def">${d[4]}</p>`:""}${spk(d)}<p class="hint">Say the definition out loud, then flip.</p>`)+`</div>
+<div class="row">${flipped?`<button class="again" id="ag">Study again</button><button class="good" id="gt">Got it</button>`:`<button id="fl">Flip card</button>`}</div>`;
+if(flipped){$("ag").onclick=()=>{deck.push(d);next()};$("gt").onclick=()=>{mastered.add(d[0]);save();prog();next()}}
+else{$("fl").onclick=()=>{flipped=true;drawCard()};if(auto)say(d[0],"en-US")}}
+function next(){i++;flipped=false;drawCard();}
+
+/* quiz + sprint */
+let qs=[],qi=0,score=0,streak=0,best=0,locked=false,sp=false,tl=0,tm=null;
+function mk(d){const t=lang==="en"?0:lang==="zh"?1+(Math.random()<.5):Math.floor(Math.random()*3);
+return{d,t,opts:shuf([d,...shuf(D.filter(x=>x[0]!==d[0])).slice(0,3)])};}
+const qp=q=>q.t===0?`Which term means: <b>${q.d[2]}</b>`:q.t===1?`Which English term is <b>${q.d[4]}</b>?`:`What is the Chinese for <b>${q.d[0]}</b>?`;
+function quiz(){sp=false;qs=shuf(pool()).slice(0,10).map(mk);qi=0;score=0;streak=0;best=0;drawQ();}
+function sprint(){sp=true;qs=[];qi=0;score=0;streak=0;best=0;tl=60;nq();
+tm=setInterval(()=>{tl--;const e=$("tl");if(e)e.textContent=tl+"s";if(tl<=0){clearInterval(tm);drawQ()}},1000);}
+function nq(){qs.push(mk(shuf(pool())[0]));drawQ();}
+function drawQ(){
+const st=$("stage"),over=sp?tl<=0:qi>=qs.length;
+if(over){clearInterval(tm);st.innerHTML=`<div class="sheet ok"><div class="tag">${sp?"Time is up":"Round over"}</div><div class="big">${sp?score:score+"/"+qs.length}</div><p class="def">${sp?"correct answers in 60 seconds.":score>=qs.length*.7?"Strong round.":"Good start. Flip through the cards, then try again."} Best streak: ${best}.</p><div class="row"><button id="pa">Play again</button></div></div>`;$("pa").onclick=sp?sprint:quiz;return;}
+const q=qs[qi];locked=false;
+st.innerHTML=`<div class="sheet ${side(q.d)}"><div class="tag">${sp?`<span id="tl">${tl}s</span> left · score ${score}`:`Question ${qi+1} of ${qs.length}`} · streak ${streak}</div><p class="def" style="font-size:22px">${qp(q)}</p>
+<div class="opts">${q.opts.map((o,k)=>`<button class="opt" data-t="${o[0]}">${k+1}. ${q.t===2?o[4]:o[0]}</button>`).join("")}</div><div class="fb" id="fb"></div></div><div class="row" id="nx"></div>`;
+st.querySelectorAll(".opt").forEach(b=>b.onclick=()=>pick(b,q));}
+function pick(b,q){
+if(locked)return;locked=true;const d=q.d,ok=b.dataset.t===d[0];
+document.querySelectorAll(".opt").forEach(o=>{if(o.dataset.t===d[0])o.classList.add("right")});
+if(ok){score++;streak++;best=Math.max(best,streak);mastered.add(d[0])}else{b.classList.add("wrong");streak=0;if(!sp)mastered.delete(d[0])}
+save();prog();if(auto)say(d[0],"en-US");
+$("fb").innerHTML=(ok?"Correct. ":"Not quite. ")+`<b>${d[0]} · ${d[4]}</b><br><span class="ex">${fill(d,true)}</span><br>${spk(d,1)}`;
+if(sp){setTimeout(()=>{if(mode==="sprint"&&tl>0){qi++;nq()}},ok?700:1800);return}
+$("nx").innerHTML=`<button id="nb">${qi+1>=qs.length?"See score":"Next question"}</button>`;
+$("nb").onclick=()=>{qi++;drawQ()};$("nb").focus();}
+
+/* match pairs */
+function match(){
+const ds=shuf(pool()).slice(0,6);
+let tiles=shuf(ds.flatMap(d=>[{k:d[0],s:d[0],l:1},{k:d[0],s:d[4],l:2}])),sel=null,bad=[],moves=0,done=0,t0=Date.now();
+function r(){
+const st=$("stage");
+if(done===ds.length){st.innerHTML=`<div class="sheet ok"><div class="tag">All pairs found</div><div class="big">${Math.round((Date.now()-t0)/1000)}s</div><p class="def">${moves} moves for ${ds.length} pairs. Fewer moves is better.</p><div class="row"><button id="pa">New board</button></div></div>`;$("pa").onclick=match;return;}
+st.innerHTML=`<div class="sheet"><div class="tag">Tap an English term, then its Chinese meaning · moves ${moves}</div><div class="grid">${tiles.map((x,i)=>`<button class="tile${x.d?" gone":""}${sel===i?" sel":""}${bad.includes(i)?" bad":""}" data-i="${i}" ${x.d?"disabled":""}>${x.s}</button>`).join("")}</div></div>`;
+st.querySelectorAll(".tile").forEach(b=>b.onclick=()=>{const i=+b.dataset.i;say(tiles[i].s,tiles[i].l===1?"en-US":"zh-TW");
+if(sel===null){sel=i;return r()}
+if(sel===i){sel=null;return r()}
+const a=tiles[sel],c=tiles[i];moves++;
+if(a.k===c.k&&a.l!==c.l){a.d=c.d=true;done++;sel=null;r()}
+else{bad=[sel,i];sel=null;r();setTimeout(()=>{if(mode==="match"){bad=[];r()}},600)}});}
+r();}
+
+/* scramble */
+function scramble(){
+const q=shuf(pool().filter(d=>d[0].replace(/[^a-z]/gi,"").length<=15));let k=0;
+function nxt(){if(k>=q.length)k=0;const d=q[k++];
+r(d,shuf([...d[0].replace(/[^a-z]/gi,"")].map((c,i)=>({c,i}))),[],0);}
+function r(d,av,bt,res){
+const st=$("stage");
+st.innerHTML=`<div class="sheet ${res===2?"ok":side(d)}"><div class="tag">${d[1]} · letters ${d[0].split(/[ -]/).map(w=>w.length).join(" + ")}</div><p class="def" style="font-size:20px">${lang==="en"?d[2]:d[4]+" · "+d[2]}</p>
+<div class="built">${bt.map((x,i)=>`<button class="tile lt" data-b="${i}">${x.c}</button>`).join("")}</div>
+<div class="grid">${av.map((x,i)=>`<button class="tile lt" data-a="${i}">${x.c}</button>`).join("")}</div>
+<div class="fb">${res===2?`<span style="color:var(--ok)">Correct.</span> <b>${d[0]} · ${d[4]}</b><br><span class="ex">${fill(d,true)}</span><br>${spk(d,1)}`:res===1?"Not quite. Tap a letter to take it back.":""}</div></div>
+<div class="row"><button id="sk">Skip</button><button id="cl">Clear</button>${res===2?`<button class="good" id="nw">Next word</button>`:""}</div>`;
+$("sk").onclick=nxt;$("cl").onclick=()=>r(d,shuf(av.concat(bt)),[],0);if(res===2){$("nw").onclick=nxt;$("nw").focus();}
+st.querySelectorAll(".tile").forEach(b=>b.onclick=()=>{if(res===2)return;
+if(b.dataset.a!==undefined){bt.push(av.splice(+b.dataset.a,1)[0]);
+if(!av.length){if(norm(bt.map(y=>y.c).join(""))===norm(d[0])){mastered.add(d[0]);save();prog();return r(d,av,bt,2)}return r(d,av,bt,1)}
+return r(d,av,bt,0)}
+av.push(bt.splice(+b.dataset.b,1)[0]);r(d,av,bt,0)});}
+nxt();}
+
+/* cloze */
+let cq=[],ci=0,hinted=false,skipped=null;
+function cloze(){cq=shuf(pool());ci=0;skipped=null;drawC();}
+function drawC(){
+const st=$("stage");if(ci>=cq.length)cq=shuf(pool()),ci=0;
+const d=cq[ci],sk0=skipped;hinted=false;
+st.innerHTML=`<div class="sheet ${side(d)}"><div class="tag">${d[1]} · finish the speech</div><p class="def" style="font-size:22px">"${fill(d,false)}"</p><p class="hint">Meaning: ${lang==="en"?"":d[4]+" · "}${d[2]}</p>
+<input type="text" id="an" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Your answer" placeholder="Type the missing term">
+<div class="fb" id="fb"></div></div><div class="row"><button id="hn">Hint</button><button id="sk">Skip</button><button id="ck" class="good">Check</button></div>`;
+const inp=$("an");inp.focus();
+inp.onkeydown=e=>{if(e.key==="Enter")chk(d)};
+$("ck").onclick=()=>chk(d);
+$("sk").onclick=()=>{skipped=d;ci++;drawC()};
+if(sk0){$("fb").innerHTML=`Skipped: <b>${sk0[0]} · ${sk0[4]}</b><br><span class="ex">${fill(sk0,true)}</span><br>${spk(sk0,1)}`;skipped=null}
+$("hn").onclick=()=>{hinted=true;$("fb").textContent=`Starts with "${d[0][0]}", ${d[0].length} letters.`;inp.focus()};}
+function chk(d){
+const v=norm($("an").value);if(!v){$("fb").textContent="Type an answer first, or use the hint.";return;}
+if(v===norm(d[0])){if(!hinted){mastered.add(d[0]);save();prog();}
+$("fb").innerHTML=`<span style="color:var(--ok)">Correct.</span> <span class="ex">${fill(d,true)}</span><br>${spk(d,1)}`;
+$("ck").textContent="Next";$("ck").onclick=()=>{ci++;drawC()};$("an").onkeydown=e=>{if(e.key==="Enter"){ci++;drawC()}};$("hn").style.display="none";$("ck").focus();}
+else{$("fb").innerHTML=`<span style="color:var(--con)">Not that one.</span> Check the meaning and try again, or skip.`;}}
+
+$("reset").onclick=()=>{mastered=new Set();save();start()};
+document.addEventListener("keydown",e=>{
+if((mode==="quiz"||mode==="sprint")&&!locked&&/^[1-4]$/.test(e.key)){const b=document.querySelectorAll(".opt")[+e.key-1];if(b)b.click()}
+if(mode==="cards"&&e.target===document.body&&(e.key===" "||e.key==="Enter")){const f=$("fl");if(f){e.preventDefault();f.click()}}});
+start();
+</script>
+</body>
+</html>
