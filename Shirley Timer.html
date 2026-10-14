@@ -1,871 +1,431 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Shirley's Timer</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 12px 16px;
-            color: #f0f8ff;
-            touch-action: manipulation;
-            overflow: hidden;
-        }
-        
-        .container {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 24px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-            padding: 24px;
-            width: 100%;
-            max-width: 780px;
-            display: flex;
-            gap: 24px;
-            position: relative;
-            overflow: hidden;
-            z-index: 10;
-        }
-        
-        /* --- 右上角時間與日期 --- */
-        .current-time-wrapper {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-
-        .current-time-label {
-            font-size: 0.7rem;
-            color: rgba(230, 216, 165, 0.6);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 2px;
-        }
-
-        .current-time-display {
-            font-size: 2.2rem;
-            color: #e6d8a5;
-            letter-spacing: 1px;
-            font-weight: 300;
-            text-shadow: 0 0 15px rgba(230, 216, 165, 0.4);
-            font-variant-numeric: tabular-nums;
-            line-height: 1;
-        }
-
-        .current-date-display {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.7);
-            letter-spacing: 1px;
-            font-weight: 400;
-            margin-top: 4px;
-            text-transform: uppercase;
-        }
-
-        .left-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .right-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-            z-index: 2;
-        }
-        
-        /* 月亮裝飾 */
-        .moon-decoration {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 56px;
-            height: 56px;
-            background: radial-gradient(circle at 30% 30%, #f9f3d7, #e6d8a5);
-            border-radius: 50%;
-            box-shadow: 0 0 25px rgba(249, 243, 215, 0.4);
-            z-index: 1;
-            opacity: 0.8;
-        }
-        
-        h1 {
-            color: #e6d8a5;
-            margin-bottom: 10px;
-            margin-top: 30px;
-            font-weight: 300;
-            font-size: 2.2rem;
-            letter-spacing: 2px;
-            text-shadow: 0 0 15px rgba(230, 216, 165, 0.3);
-            text-align: center;
-        }
-        
-        .timer-display {
-            font-size: 4.2rem;
-            font-weight: 100;
-            color: #ffffff;
-            margin: 10px 0;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-            letter-spacing: 4px;
-            font-variant-numeric: tabular-nums;
-            text-align: center;
-            line-height: 1;
-        }
-        
-        /* --- 液態金沙漏設計 --- */
-        .sandglass-container {
-            height: 130px;
-            margin: 16px auto;
-            position: relative;
-        }
-        
-        .sandglass {
-            width: 86px;
-            height: 130px;
-            margin: 0 auto;
-            position: relative;
-        }
-        
-        .glass {
-            width: 86px;
-            height: 65px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 43px 43px 0 0;
-            position: absolute;
-            top: 0;
-            overflow: hidden;
-            border: 2px solid rgba(230, 216, 165, 0.5);
-            border-bottom: none;
-            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
-            z-index: 5;
-        }
-        
-        .glass.bottom {
-            top: 65px;
-            border-radius: 0 0 43px 43px;
-            border-top: none;
-            border-bottom: 2px solid rgba(230, 216, 165, 0.5);
-        }
-        
-        /* 金屬液體質感 */
-        .sand {
-            position: absolute;
-            width: 82px;
-            /* 使用更豐富的漸層模擬金屬光澤 */
-            background: linear-gradient(90deg, 
-                #b88a44 0%, 
-                #e6d8a5 25%, 
-                #f9f3d7 50%, 
-                #e6d8a5 75%, 
-                #b88a44 100%);
-            background-size: 200% 100%;
-            transition: height 0.5s linear; /* 更平滑的過渡 */
-            box-shadow: 0 0 15px rgba(230, 216, 165, 0.6);
-            /* 加入流動動畫 */
-            animation: liquid-shimmer 3s linear infinite;
-        }
-
-        @keyframes liquid-shimmer {
-            0% { background-position: 100% 0; }
-            100% { background-position: -100% 0; }
-        }
-        
-        .sand.top {
-            top: 0;
-            height: 65px;
-            border-radius: 41px 41px 0 0;
-            left: 2px; /* 微調居中 */
-        }
-        
-        .sand.bottom {
-            bottom: 0;
-            height: 0;
-            border-radius: 0 0 41px 41px;
-            left: 2px;
-        }
-
-        /* 中間流動的沙柱 */
-        .stream {
-            position: absolute;
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 0; /* 預設為0，JS控制 */
-            background: linear-gradient(90deg, #b88a44, #f9f3d7, #b88a44);
-            z-index: 4;
-            opacity: 0;
-            transition: opacity 0.3s, height 0.3s;
-            box-shadow: 0 0 8px rgba(230, 216, 165, 0.8);
-            animation: stream-flow 0.5s linear infinite;
-        }
-
-        .stream.active {
-            height: 70px; /* 連接上下 */
-            opacity: 1;
-        }
-
-        @keyframes stream-flow {
-            0% { opacity: 0.8; width: 3px; }
-            50% { opacity: 1; width: 4px; }
-            100% { opacity: 0.8; width: 3px; }
-        }
-        
-        .neck {
-            width: 20px;
-            height: 20px;
-            background: rgba(230, 216, 165, 0.6);
-            border-radius: 50%;
-            position: absolute;
-            top: 60px;
-            left: 33px;
-            z-index: 6; /* 確保蓋在沙柱上面 */
-            box-shadow: 0 0 10px rgba(230, 216, 165, 0.4);
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-        
-        /* --- 按鈕樣式 --- */
-        .time-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 12px;
-            margin: 16px 0;
-        }
-        
-        .time-btn {
-            background: rgba(230, 216, 165, 0.15);
-            border: 1px solid rgba(230, 216, 165, 0.25);
-            border-radius: 50px;
-            padding: 12px 20px;
-            font-size: 0.9rem;
-            color: #e6d8a5;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            min-width: 80px;
-            letter-spacing: 0.5px;
-        }
-        
-        .time-btn:hover {
-            background: rgba(230, 216, 165, 0.25);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            border-color: rgba(230, 216, 165, 0.5);
-        }
-        
-        .custom-input {
-            display: flex;
-            justify-content: center;
-            margin: 16px 0;
-        }
-        
-        .custom-input input {
-            width: 130px;
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(230, 216, 165, 0.3);
-            border-radius: 50px 0 0 50px;
-            font-size: 1rem;
-            text-align: center;
-            outline: none;
-            color: #f0f8ff;
-            transition: background 0.3s;
-        }
-        
-        .custom-input input:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(230, 216, 165, 0.6);
-        }
-        
-        .custom-input button {
-            background: rgba(230, 216, 165, 0.25);
-            color: #e6d8a5;
-            border: 1px solid rgba(230, 216, 165, 0.3);
-            border-left: none;
-            border-radius: 0 50px 50px 0;
-            padding: 0 24px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.95rem;
-            letter-spacing: 0.5px;
-        }
-        
-        .custom-input button:hover {
-            background: rgba(230, 216, 165, 0.35);
-        }
-        
-        .control-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin-top: 24px;
-        }
-        
-        .control-btn {
-            padding: 14px 32px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            font-weight: 500;
-            min-width: 120px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        
-        .start-btn {
-            background: linear-gradient(135deg, rgba(74, 170, 153, 0.9), rgba(91, 187, 170, 0.9));
-            color: white;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .start-btn:hover {
-            background: linear-gradient(135deg, rgba(91, 187, 170, 0.9), rgba(108, 203, 187, 0.9));
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(74, 170, 153, 0.4);
-        }
-        
-        .reset-btn {
-            background: rgba(255, 255, 255, 0.08);
-            color: #f0f8ff;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-        
-        .reset-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-        
-        .reset-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        /* --- 炫彩氣泡效果 --- */
-        .bubble {
-            position: absolute;
-            bottom: -30px;
-            border-radius: 50%;
-            
-            /* 炫彩效果核心 */
-            background: radial-gradient(
-                120% 120% at 30% 30%, 
-                rgba(255, 255, 255, 0.9) 0%, 
-                rgba(255, 220, 180, 0.4) 20%, 
-                rgba(255, 100, 150, 0.1) 40%, 
-                rgba(100, 200, 255, 0.1) 60%, 
-                rgba(255, 255, 255, 0.2) 100%
-            );
-            box-shadow: 
-                inset 0 0 10px rgba(255, 255, 255, 0.5),
-                0 0 15px rgba(255, 255, 255, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            
-            pointer-events: none;
-            z-index: 1;
-            animation: rise linear forwards, colorful-shimmer 3s ease-in-out infinite alternate;
-            backdrop-filter: blur(2px);
-        }
-
-        @keyframes colorful-shimmer {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(40deg); }
-        }
-
-        @keyframes rise {
-            0% {
-                bottom: -30px;
-                opacity: 0;
-                transform: translateX(0) scale(0.5);
-            }
-            10% {
-                opacity: 0.8;
-            }
-            50% {
-                transform: translateX(var(--sway)) scale(1);
-            }
-            100% {
-                bottom: 110%;
-                opacity: 0;
-                transform: translateX(calc(var(--sway) * -1)) scale(1.2);
-            }
-        }
-        
-        .notification {
-            position: fixed;
-            top: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-20px);
-            background: rgba(230, 216, 165, 0.9);
-            color: #0f2027;
-            padding: 16px 40px;
-            border-radius: 50px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            opacity: 0;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 100;
-            font-weight: 500;
-            font-size: 1.1rem;
-            pointer-events: none;
-            backdrop-filter: blur(5px);
-            letter-spacing: 1px;
-        }
-        
-        .notification.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-        
-        .stars {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        .star {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle 4s infinite;
-        }
-        
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.2; transform: scale(0.8); }
-            50% { opacity: 0.8; transform: scale(1.2); }
-        }
-        
-        /* 響應式調整 */
-        @media (max-width: 768px) {
-            .current-time-wrapper {
-                position: static;
-                align-items: center;
-                margin-bottom: 10px;
-            }
-            
-            .current-time-display {
-                font-size: 1.8rem;
-            }
-            
-            .moon-decoration {
-                display: none;
-            }
-
-            .container {
-                flex-direction: column;
-                max-width: 480px;
-                padding: 30px 20px;
-            }
-            
-            h1 {
-                margin-top: 10px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Shirley's Timer</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI','Helvetica Neue',sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:linear-gradient(135deg,#0f2027 0%,#203a43 50%,#2c5364 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:12px 16px;color:#f0f8ff;touch-action:manipulation;overflow:hidden}
+.container{background:rgba(255,255,255,.08);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:24px;box-shadow:0 15px 35px rgba(0,0,0,.3),inset 0 0 0 1px rgba(255,255,255,.1);padding:24px;width:100%;max-width:780px;display:flex;gap:24px;position:relative;overflow:hidden;z-index:10}
+.current-time-wrapper{position:absolute;top:20px;right:30px;z-index:20;display:flex;flex-direction:column;align-items:flex-end}
+.current-time-label{font-size:.7rem;color:rgba(230,216,165,.6);letter-spacing:2px;text-transform:uppercase;margin-bottom:2px}
+.current-time-display{font-size:2.2rem;color:#e6d8a5;letter-spacing:1px;font-weight:300;text-shadow:0 0 15px rgba(230,216,165,.4);font-variant-numeric:tabular-nums;line-height:1}
+.current-date-display{font-size:.85rem;color:rgba(255,255,255,.7);letter-spacing:1px;margin-top:4px;text-transform:uppercase}
+.left-panel,.right-panel{flex:1;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2}
+.moon-decoration{position:absolute;top:20px;left:20px;width:56px;height:56px;background:radial-gradient(circle at 30% 30%,#f9f3d7,#e6d8a5);border-radius:50%;box-shadow:0 0 25px rgba(249,243,215,.4);z-index:1;opacity:.8}
+h1{color:#e6d8a5;margin:30px 0 10px;font-weight:300;font-size:2.2rem;letter-spacing:2px;text-shadow:0 0 15px rgba(230,216,165,.3);text-align:center}
+.timer-display{font-size:4.2rem;font-weight:100;color:#fff;margin:10px 0;text-shadow:0 0 20px rgba(255,255,255,.4);letter-spacing:4px;font-variant-numeric:tabular-nums;text-align:center;line-height:1}
+.timer-display.pulse{animation:pulse .5s ease-in-out infinite;color:#ffd6e8}
+@keyframes pulse{50%{transform:scale(1.12)}}
+.sandglass-container{height:140px;margin:16px auto;position:relative}
+.sstream{opacity:0;transition:opacity .3s}.sstream.active{opacity:1;animation:sflick .4s linear infinite}
+@keyframes sflick{50%{opacity:.7}}
+.sandglass{width:86px;height:130px;margin:0 auto;position:relative}
+.glass{width:86px;height:65px;background:rgba(255,255,255,.05);border-radius:43px 43px 0 0;position:absolute;top:0;overflow:hidden;border:2px solid rgba(230,216,165,.5);border-bottom:none;box-shadow:inset 0 0 10px rgba(255,255,255,.1);z-index:5}
+.glass.bottom{top:65px;border-radius:0 0 43px 43px;border-top:none;border-bottom:2px solid rgba(230,216,165,.5)}
+.sand{position:absolute;width:82px;background:linear-gradient(90deg,#b88a44 0%,#e6d8a5 25%,#f9f3d7 50%,#e6d8a5 75%,#b88a44 100%);background-size:200% 100%;transition:height .5s linear;box-shadow:0 0 15px rgba(230,216,165,.6);animation:shimmer 3s linear infinite}
+@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+.sand.top{top:0;height:65px;border-radius:41px 41px 0 0;left:2px}
+.sand.bottom{bottom:0;height:0;border-radius:0 0 41px 41px;left:2px}
+.stream{position:absolute;top:60px;left:50%;transform:translateX(-50%);width:4px;height:0;background:linear-gradient(90deg,#b88a44,#f9f3d7,#b88a44);z-index:4;opacity:0;transition:opacity .3s,height .3s;box-shadow:0 0 8px rgba(230,216,165,.8);animation:flow .5s linear infinite}
+.stream.active{height:70px;opacity:1}
+@keyframes flow{0%,100%{opacity:.8;width:3px}50%{opacity:1;width:4px}}
+.neck{width:20px;height:20px;background:rgba(230,216,165,.6);border-radius:50%;position:absolute;top:60px;left:33px;z-index:6;box-shadow:0 0 10px rgba(230,216,165,.4);border:1px solid rgba(255,255,255,.3)}
+.time-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:16px 0}
+.time-btn{background:rgba(230,216,165,.15);border:1px solid rgba(230,216,165,.25);border-radius:50px;padding:12px 20px;font-size:.9rem;color:#e6d8a5;cursor:pointer;transition:all .3s;min-width:80px;letter-spacing:.5px}
+.time-btn:hover{background:rgba(230,216,165,.25);transform:translateY(-2px);border-color:rgba(230,216,165,.5)}
+.custom-input{display:flex;justify-content:center;margin:16px 0}
+.custom-input input{width:130px;padding:12px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(230,216,165,.3);border-radius:50px 0 0 50px;font-size:1rem;text-align:center;outline:none;color:#f0f8ff}
+.custom-input input:focus{background:rgba(255,255,255,.1);border-color:rgba(230,216,165,.6)}
+.custom-input button{background:rgba(230,216,165,.25);color:#e6d8a5;border:1px solid rgba(230,216,165,.3);border-left:none;border-radius:0 50px 50px 0;padding:0 24px;cursor:pointer;font-size:.95rem}
+.control-buttons{display:flex;justify-content:center;gap:16px;margin-top:24px}
+.control-btn{padding:14px 32px;border:none;border-radius:50px;font-size:1rem;cursor:pointer;transition:all .3s;box-shadow:0 4px 15px rgba(0,0,0,.2);font-weight:500;min-width:120px;letter-spacing:1px;text-transform:uppercase}
+.start-btn{background:linear-gradient(135deg,rgba(74,170,153,.9),rgba(91,187,170,.9));color:#fff;border:1px solid rgba(255,255,255,.1)}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(74,170,153,.4)}
+.reset-btn{background:rgba(255,255,255,.08);color:#f0f8ff;border:1px solid rgba(255,255,255,.15)}
+.reset-btn:disabled{opacity:.5;cursor:not-allowed}
+.bubble{position:absolute;bottom:-30px;border-radius:50%;background:radial-gradient(120% 120% at 30% 30%,rgba(255,255,255,.9) 0%,rgba(255,220,180,.4) 20%,rgba(255,100,150,.1) 40%,rgba(100,200,255,.1) 60%,rgba(255,255,255,.2) 100%);box-shadow:inset 0 0 10px rgba(255,255,255,.5),0 0 15px rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.3);pointer-events:none;z-index:1;animation:rise linear forwards,shimmer2 3s ease-in-out infinite alternate}
+@keyframes shimmer2{to{filter:hue-rotate(40deg)}}
+@keyframes rise{0%{bottom:-30px;opacity:0;transform:translateX(0) scale(.5)}10%{opacity:.8}50%{transform:translateX(var(--sway)) scale(1)}100%{bottom:110%;opacity:0;transform:translateX(calc(var(--sway)*-1)) scale(1.2)}}
+/* 倒數最後 10 秒：快爆了的抖動 */
+.container.rumble{animation:rumble .18s linear infinite}
+.container.rumble.hard{animation-duration:.09s}
+@keyframes rumble{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(-2px,1px) rotate(-.4deg)}50%{transform:translate(2px,-1px) rotate(.4deg)}75%{transform:translate(-1px,-2px) rotate(-.2deg)}100%{transform:translate(0,0) rotate(0)}}
+.notification{position:fixed;top:30px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(230,216,165,.9);color:#0f2027;padding:16px 40px;border-radius:50px;box-shadow:0 10px 30px rgba(0,0,0,.4);opacity:0;transition:all .5s cubic-bezier(.175,.885,.32,1.275);z-index:100;font-weight:500;font-size:1.1rem;pointer-events:none;letter-spacing:1px}
+.notification.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.themes{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:6px}.chip{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:50px;padding:8px 14px;font-size:.85rem;color:#f0f8ff;cursor:pointer}.chip.active{background:rgba(230,216,165,.3);border-color:#e6d8a5;color:#e6d8a5}
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:50;pointer-events:none}
+#clearBtn{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;display:none;padding:14px 32px;border:none;border-radius:50px;font-size:1.05rem;background:#fff;color:#2c5364;box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer}
+.stars{position:absolute;inset:0;pointer-events:none;z-index:0}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 4s infinite}
+@keyframes twinkle{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:.8;transform:scale(1.2)}}
+@media(max-width:768px){
+.current-time-wrapper{position:static;align-items:center;margin-bottom:10px}
+.current-time-display{font-size:1.8rem}
+.moon-decoration{display:none}
+.container{flex-direction:column;max-width:480px;padding:30px 20px}
+h1{margin-top:10px}}
+</style>
 </head>
 <body>
-    <div class="stars" id="stars"></div>
-    
-    <div class="container" id="mainContainer">
-        <div class="current-time-wrapper">
-            <span class="current-time-label">Current Time</span>
-            <div class="current-time-display" id="realTimeDisplay">--:--</div>
-            <div class="current-date-display" id="realDateDisplay">-- --, --</div>
-        </div>
-        
-        <div class="moon-decoration"></div>
-        
-        <div class="left-panel">
-            <h1>Shirley's Timer</h1>
-            
-            <div class="sandglass-container">
-                <div class="sandglass">
-                    <div class="glass">
-                        <div class="sand top" id="topSand"></div>
-                    </div>
-                    <div class="stream" id="sandStream"></div>
-                    <div class="neck"></div>
-                    <div class="glass bottom">
-                        <div class="sand bottom" id="bottomSand"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="timer-display" id="timerDisplay">00:00</div>
-            
-            <div class="control-buttons">
-                <button class="control-btn start-btn" id="startBtn">Start</button>
-                <button class="control-btn reset-btn" id="resetBtn" disabled>Reset</button>
-            </div>
-        </div>
-        
-        <div class="right-panel">
-            <div class="time-buttons">
-                <button class="time-btn" data-minutes="2">2 min</button>
-                <button class="time-btn" data-minutes="3">3 min</button>
-                <button class="time-btn" data-minutes="4">4 min</button>
-                <button class="time-btn" data-minutes="5">5 min</button>
-                <button class="time-btn" data-minutes="10">10 min</button>
-                <button class="time-btn" data-minutes="15">15 min</button>
-            </div>
-            
-            <div class="custom-input">
-                <input type="number" id="customMinutes" placeholder="Minutes" min="1" max="600" inputmode="numeric">
-                <button id="setCustomTime">Set</button>
-            </div>
-        </div>
+<div class="stars" id="stars"></div>
+<div class="container" id="mainContainer">
+  <div class="current-time-wrapper">
+    <span class="current-time-label">Current Time</span>
+    <div class="current-time-display" id="realTimeDisplay">--:--</div>
+    <div class="current-date-display" id="realDateDisplay">-- --, --</div>
+  </div>
+  <div class="moon-decoration"></div>
+  <div class="left-panel">
+    <h1>Shirley's Timer</h1>
+    <div class="sandglass-container" id="glassBox">
+      <svg viewBox="0 0 100 140" width="100" height="140" style="display:block;margin:0 auto;overflow:visible">
+        <defs>
+          <clipPath id="gc"><path d="M22 18 C22 46 46 56 47 70 C46 84 22 94 22 122 L78 122 C78 94 54 84 53 70 C54 56 78 46 78 18 Z"/></clipPath>
+          <linearGradient id="sg" gradientUnits="userSpaceOnUse" x1="22" x2="78" y1="0" y2="0"><stop offset="0" stop-color="#b88a44"/><stop offset=".5" stop-color="#f9f3d7"/><stop offset="1" stop-color="#b88a44"/></linearGradient>
+          <linearGradient id="fg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f9f3d7"/><stop offset="1" stop-color="#b88a44"/></linearGradient>
+        </defs>
+        <path d="M22 18 C22 46 46 56 47 70 C46 84 22 94 22 122 L78 122 C78 94 54 84 53 70 C54 56 78 46 78 18 Z" fill="rgba(255,255,255,.08)"/>
+        <g clip-path="url(#gc)">
+          <rect id="topSand" x="0" y="18" width="100" height="52" fill="url(#sg)"/>
+          <rect id="bottomSand" x="0" y="122" width="100" height="0" fill="url(#sg)"/>
+          <rect id="sandStream" class="sstream" x="49" y="66" width="2" height="56" fill="#f9f3d7"/>
+        </g>
+        <path d="M22 18 C22 46 46 56 47 70 C46 84 22 94 22 122 L78 122 C78 94 54 84 53 70 C54 56 78 46 78 18 Z" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2"/>
+        <path d="M30 26 C30 40 37 47 42 55" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2" stroke-linecap="round"/>
+        <rect x="14" y="14" width="3.5" height="112" rx="1.7" fill="#b88a44"/>
+        <rect x="82.5" y="14" width="3.5" height="112" rx="1.7" fill="#b88a44"/>
+        <rect x="10" y="8" width="80" height="10" rx="5" fill="url(#fg)"/>
+        <rect x="10" y="122" width="80" height="10" rx="5" fill="url(#fg)"/>
+      </svg>
     </div>
+    <div class="timer-display" id="timerDisplay">00:00</div>
+    <div class="control-buttons">
+      <button class="control-btn start-btn" id="startBtn">Start</button>
+      <button class="control-btn reset-btn" id="resetBtn" disabled>Reset</button>
+    </div>
+  </div>
+  <div class="right-panel">
+    <div class="time-buttons">
+      <button class="time-btn" data-minutes="0.5">30 sec</button>
+      <button class="time-btn" data-minutes="2">2 min</button>
+      <button class="time-btn" data-minutes="3">3 min</button>
+      <button class="time-btn" data-minutes="4">4 min</button>
+      <button class="time-btn" data-minutes="5">5 min</button>
+      <button class="time-btn" data-minutes="10">10 min</button>
+      <button class="time-btn" data-minutes="15">15 min</button>
+    </div>
+    <div class="custom-input">
+      <input type="number" id="customMinutes" placeholder="Minutes" min="1" max="600" inputmode="numeric">
+      <button id="setCustomTime">Set</button>
+    </div>
+    <div class="themes"><button class="chip" data-theme="popcorn">🍿 Popcorn</button><button class="chip active" data-theme="bubbles">🫧 Bubbles</button><button class="chip" data-theme="ribbons">🎀 Ribbons</button><button class="chip" data-theme="confetti">🎉 Confetti</button><button class="chip" data-theme="random">🎲 Random</button></div>
+  </div>
+</div>
+<canvas id="fx"></canvas>
+<button id="clearBtn">🫧 Clear</button>
+<div class="notification" id="notification">Time's Up!</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const $ = id => document.getElementById(id);
+  const starsContainer = $('stars');
+  for (let i = 0; i < 40; i++) {
+    const s = document.createElement('div'); s.className = 'star';
+    s.style.width = s.style.height = Math.random() * 2 + 1 + 'px';
+    s.style.left = Math.random() * 100 + '%'; s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = Math.random() * 4 + 's';
+    starsContainer.appendChild(s);
+  }
+  const timerDisplay = $('timerDisplay'), realTimeDisplay = $('realTimeDisplay'), realDateDisplay = $('realDateDisplay');
+  const startBtn = $('startBtn'), resetBtn = $('resetBtn'), customMinutesInput = $('customMinutes');
+  const topSand = $('topSand'), bottomSand = $('bottomSand'), sandStream = $('sandStream');
+  const notification = $('notification'), mainContainer = $('mainContainer'), clearBtn = $('clearBtn');
+
+  let countdownInterval = null, bubbleInterval = null, audioContext = null;
+  let isRunning = false, initialDurationMS = 0, remainingMS = 0, endTime = 0;
+
+  function updateRealTime() {
+    const now = new Date();
+    realTimeDisplay.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    realDateDisplay.textContent = now.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+  }
+  updateRealTime(); setInterval(updateRealTime, 1000);
+
+  /* ================= 🫧 爆米花泡泡特效 ================= */
+  const fx = $('fx'), ctx = fx.getContext('2d');
+  const pile = document.createElement('canvas'), pctx = pile.getContext('2d');
+  const BW = 14;                       // 堆積高度圖的欄寬
+  let W = 0, H = 0, floor = [], parts = [], sprites = [];
+  function cv() { const c = document.createElement('canvas'); c.width = c.height = 64; return c; }
+  function emo(e) { const c = cv(), g = c.getContext('2d'); g.font = '48px serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, 32, 36); return c; }
+  function buildPopcorn() {
+    for (let i = 0; i < 8; i++) {
+      const c = cv(), g = c.getContext('2d'), cols = ['#fffaf0', '#fff1c9', '#ffe9ad'];
+      g.fillStyle = '#f0b429'; g.beginPath(); g.arc(32, 46, 9, 0, 7); g.fill();
+      g.lineWidth = 1.5; g.strokeStyle = 'rgba(200,150,60,.5)';
+      for (let k = 0; k < 6; k++) {
+        const a = Math.random() * 6.28, d = 6 + Math.random() * 10;
+        g.fillStyle = cols[k % 3]; g.beginPath(); g.arc(32 + Math.cos(a) * d, 28 + Math.sin(a) * d * .8, 10 + Math.random() * 4, 0, 7); g.fill(); g.stroke();
+      }
+      sprites.push(c);
+    }
+    sprites.push(emo('🍿'));
+  }
+  function buildRibbons() {
+    for (let i = 0; i < 10; i++) {
+      const c = cv(), g = c.getContext('2d'); g.lineCap = 'round';
+      const path = () => { g.beginPath(); g.moveTo(5, 32); g.bezierCurveTo(20, 4, 44, 60, 59, 32); };
+      g.strokeStyle = `hsl(${i * 36},90%,58%)`; g.lineWidth = 9; path(); g.stroke();
+      g.strokeStyle = `hsla(${i * 36},100%,85%,.7)`; g.lineWidth = 3; path(); g.stroke();
+      sprites.push(c);
+    }
+  }
+  function buildConfetti() {
+    for (let i = 0; i < 18; i++) {
+      const c = cv(), g = c.getContext('2d'); g.fillStyle = `hsl(${(i * 47) % 360},90%,60%)`;
+      if (i % 3 === 0) { g.beginPath(); g.arc(32, 32, 8, 0, 7); g.fill(); }
+      else if (i % 3 === 1) g.fillRect(16, 23, 32, 18);
+      else g.fillRect(27, 10, 9, 44);
+      sprites.push(c);
+    }
+    sprites.push(emo('🎊'));
+  }
+  const THEMES = {
+    bubbles: { build: buildBubbleSprites, g: .55, vdrag: 1, drag: .995, flutter: 0, rMin: 11, rMax: 26, power: 1, count: 1100, rate: 1, wave: 'sine', f0: 500, f1: 900 },
+    popcorn: { build: buildPopcorn, g: .7, vdrag: 1, drag: .995, flutter: 0, rMin: 14, rMax: 26, power: 1.15, count: 1000, rate: 1, wave: 'triangle', f0: 180, f1: 300 },
+    ribbons: { build: buildRibbons, g: .18, vdrag: .97, drag: .985, flutter: .35, rMin: 20, rMax: 32, power: .9, count: 700, rate: 1, wave: 'sine', f0: 1000, f1: 1500 },
+    confetti: { build: buildConfetti, g: .2, vdrag: .975, drag: .98, flutter: .25, rMin: 7, rMax: 12, power: .7, count: 2400, rate: 2, wave: 'triangle', f0: 800, f1: 1200 }
+  };
+  const KEYS = ['popcorn', 'bubbles', 'ribbons', 'confetti'];
+  let themeSel = 'bubbles', theme = 'bubbles', T = THEMES.bubbles;
+  function applyTheme(n) { theme = n; T = THEMES[n]; }
+  function buildSprites() { sprites = []; T.build(); }
+  function pickSprite() {
+    if (theme === 'bubbles') return sprites[Math.random() < .8 ? Math.floor(Math.random() * 12) : 12 + Math.floor(Math.random() * 4)];
+    return sprites[Math.floor(Math.random() * sprites.length)];
+  }
+  let bursting = false, emitted = 0, filled = false, raf = 0, lastPop = 0;
+
+  function resizeFx() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight;
+    fx.width = pile.width = W * dpr; fx.height = pile.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); pctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    floor = new Array(Math.ceil(W / BW) + 1).fill(0);
+  }
+  resizeFx(); addEventListener('resize', () => { if (!bursting && !filled) resizeFx(); });
+
+  function buildBubbleSprites() {          // 預先畫好炫彩泡泡與 emoji，之後只貼圖
     
-    <div class="notification" id="notification">Time's Up!</div>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 背景星星邏輯
-            const starsContainer = document.getElementById('stars');
-            for (let i = 0; i < 40; i++) {
-                const star = document.createElement('div');
-                star.classList.add('star');
-                star.style.width = Math.random() * 2 + 1 + 'px';
-                star.style.height = star.style.width;
-                star.style.left = Math.random() * 100 + '%';
-                star.style.top = Math.random() * 100 + '%';
-                star.style.animationDelay = Math.random() * 4 + 's';
-                starsContainer.appendChild(star);
-            }
-            
-            // DOM 元素獲取
-            const timerDisplay = document.getElementById('timerDisplay');
-            const realTimeDisplay = document.getElementById('realTimeDisplay');
-            const realDateDisplay = document.getElementById('realDateDisplay');
-            const startBtn = document.getElementById('startBtn');
-            const resetBtn = document.getElementById('resetBtn');
-            const timeButtons = document.querySelectorAll('.time-btn');
-            const customMinutesInput = document.getElementById('customMinutes');
-            const setCustomTimeBtn = document.getElementById('setCustomTime');
-            const topSand = document.getElementById('topSand');
-            const bottomSand = document.getElementById('bottomSand');
-            const sandStream = document.getElementById('sandStream');
-            const notification = document.getElementById('notification');
-            const mainContainer = document.getElementById('mainContainer');
-            
-            // 變數初始化
-            let countdownInterval = null;
-            let bubbleInterval = null;
-            let audioContext = null;
-            
-            // --- 核心計時邏輯變數 (Critical Logic Fix) ---
-            let isRunning = false;
-            let initialDurationMS = 0; // 總設定時間 (毫秒)
-            let remainingMS = 0;       // 剩餘時間 (毫秒)
-            let endTime = 0;           // 目標結束時間戳
-            
-            // --- 日期與時間功能 ---
-            function updateRealTime() {
-                const now = new Date();
-                
-                // 時間
-                const timeString = now.toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit',
-                    hour12: true 
-                });
-                realTimeDisplay.textContent = timeString;
+    for (let h = 0; h < 360; h += 30) {
+      const c = document.createElement('canvas'); c.width = c.height = 64;
+      const g = c.getContext('2d'), r = g.createRadialGradient(22, 20, 2, 32, 32, 31);
+      r.addColorStop(0, 'rgba(255,255,255,.95)');
+      r.addColorStop(.25, `hsla(${h},90%,85%,.55)`);
+      r.addColorStop(.7, `hsla(${(h + 60) % 360},90%,70%,.25)`);
+      r.addColorStop(1, `hsla(${(h + 120) % 360},90%,80%,.7)`);
+      g.fillStyle = r; g.beginPath(); g.arc(32, 32, 30, 0, 7); g.fill();
+      g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 2; g.stroke();
+      g.fillStyle = 'rgba(255,255,255,.9)'; g.beginPath(); g.ellipse(21, 19, 7, 4, -.7, 0, 7); g.fill();
+      sprites.push(c);
+    }
+    ['🫧', '✨', '🌸', '🎈'].forEach(e => {
+      const c = document.createElement('canvas'); c.width = c.height = 64;
+      const g = c.getContext('2d'); g.font = '48px serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(e, 32, 36); sprites.push(c);
+    });
+  }
 
-                // 日期 (格式：Monday, Jan 19)
-                const dateString = now.toLocaleDateString([], {
-                    weekday: 'long',
-                    month: 'short',
-                    day: 'numeric'
-                });
-                realDateDisplay.textContent = dateString;
-            }
-            updateRealTime();
-            setInterval(updateRealTime, 1000);
+  function popSound() {
+    if (!audioContext || performance.now() - lastPop < 45) return;
+    lastPop = performance.now();
+    const o = audioContext.createOscillator(), g = audioContext.createGain(), t = audioContext.currentTime;
+    o.type = T.wave; o.frequency.setValueAtTime(T.f0 + Math.random() * T.f1, t);
+    o.frequency.exponentialRampToValueAtTime(150, t + .08);
+    g.gain.setValueAtTime(.06, t); g.gain.exponentialRampToValueAtTime(.001, t + .09);
+    o.connect(g); g.connect(audioContext.destination); o.start(t); o.stop(t + .1);
+  }
 
-            // --- 炫彩氣泡特效 ---
-            function createBubble() {
-                if (!isRunning) return;
+  function emit(n, power) {
+    const box = $('glassBox').getBoundingClientRect();
+    const ox = box.left + box.width / 2, oy = box.top + box.height * .3;
+    for (let i = 0; i < n; i++) {
+      const a = -Math.PI / 2 + (Math.random() - .5) * 1.6;
+      const v = (10 + Math.random() * 16) * power * T.power;
+      parts.push({
+        x: ox + (Math.random() - .5) * 30, y: oy, vx: Math.cos(a) * v, vy: Math.sin(a) * v,
+        r: T.rMin + Math.random() * (T.rMax - T.rMin), s: pickSprite(),
+        rot: Math.random() * 6, vr: (Math.random() - .5) * .2, b: 0
+      });
+    }
+  }
 
-                const bubble = document.createElement('div');
-                bubble.classList.add('bubble');
-                
-                const size = Math.random() * 20 + 8 + 'px'; // 稍微變大一點
-                bubble.style.width = size;
-                bubble.style.height = size;
-                
-                bubble.style.left = Math.random() * 100 + '%';
-                
-                const animDuration = Math.random() * 4 + 3 + 's';
-                bubble.style.setProperty('--duration', animDuration);
-                bubble.style.animationDuration = `${animDuration}, 3s`; // 分別對應 rise 和 shimmer
-                
-                const sway = (Math.random() * 50 - 25) + 'px';
-                bubble.style.setProperty('--sway', sway);
-                
-                mainContainer.appendChild(bubble);
-                
-                setTimeout(() => {
-                    bubble.remove();
-                }, parseFloat(animDuration) * 1000);
-            }
+  function land(p) {
+    const b = Math.max(0, Math.min(floor.length - 1, Math.floor(p.x / BW)));
+    const span = Math.ceil(p.r / BW), top = H - (p.y - p.r * .5);
+    for (let k = -span; k <= span; k++) {
+      const i = b + k; if (i < 0 || i >= floor.length) continue;
+      floor[i] = Math.max(floor[i], top - Math.abs(k) * BW * .6);
+    }
+    pctx.drawImage(p.s, p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
+  }
 
-            function startBubbleEffect() {
-                if (bubbleInterval) clearInterval(bubbleInterval);
-                bubbleInterval = setInterval(createBubble, 300); // 頻率稍微調高
-                createBubble();
-            }
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.drawImage(pile, 0, 0, W, H);
+    if (bursting) {
+      if (emitted < T.count) { const n = (emitted < 250 ? 14 : 7) * T.rate; emit(n, 1 + Math.min(1, (Math.min(...floor)) / H) * .8); emitted += n; popSound(); }
+      else if (!parts.length) { bursting = false; filled = true; }
+    }
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      p.vy = (p.vy + T.g) * T.vdrag; p.vx *= T.drag; if (T.flutter) p.vx += Math.sin(p.y * .05 + p.rot) * T.flutter; p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      if (p.x < p.r) { p.x = p.r; p.vx *= -.6; } else if (p.x > W - p.r) { p.x = W - p.r; p.vx *= -.6; }
+      const b = Math.max(0, Math.min(floor.length - 1, Math.floor(p.x / BW)));
+      if (p.vy > 0 && p.y + p.r * .8 >= H - floor[b]) {
+        if (p.b < 1 && p.vy > 7) { p.vy *= -.35; p.b++; p.y = H - floor[b] - p.r * .8; }
+        else { land(p); parts.splice(i, 1); continue; }
+      }
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      ctx.drawImage(p.s, -p.r, -p.r, p.r * 2, p.r * 2); ctx.restore();
+    }
+    if (bursting && Math.min(...floor) > H * .9) { bursting = false; filled = true; emitted = 9999; }
+    if (filled && !parts.length) { clearBtn.style.display = 'block'; fx.style.pointerEvents = 'auto'; }
+    if (bursting || parts.length || (!filled && floor.some(f => f > 0))) raf = requestAnimationFrame(loop);
+  }
 
-            function stopBubbleEffect() {
-                if (bubbleInterval) {
-                    clearInterval(bubbleInterval);
-                    bubbleInterval = null;
-                }
-            }
+  function startBurst() {
+    if (themeSel === 'random') applyTheme(KEYS[Math.floor(Math.random() * 4)]);
+    buildSprites(); clearFx(true);
+    bursting = true; filled = false; emitted = 0;
+    cancelAnimationFrame(raf); raf = requestAnimationFrame(loop);
+  }
+  function clearFx(silent) {
+    cancelAnimationFrame(raf); bursting = false; filled = false; parts = [];
+    pctx.clearRect(0, 0, W, H); ctx.clearRect(0, 0, W, H);
+    floor = floor.map(() => 0);
+    clearBtn.style.display = 'none'; fx.style.pointerEvents = 'none';
+  }
+  clearBtn.addEventListener('click', () => clearFx());
+  fx.addEventListener('click', () => { if (filled) clearFx(); });
 
-            // --- 計時器顯示邏輯 ---
-            
-            // 設定初始時間
-            function setTime(minutes) {
-                if (isRunning) return;
-                
-                initialDurationMS = minutes * 60 * 1000;
-                remainingMS = initialDurationMS;
-                
-                updateDisplay(remainingMS);
-                updateSandglass(0);
-                
-                startBtn.textContent = 'Start';
-                startBtn.disabled = false;
-                resetBtn.disabled = true;
-            }
+  /* ================= 倒數期間的小泡泡 ================= */
+  function createBubble() {
+    if (!isRunning) return;
+    const b = document.createElement('div'); b.className = 'bubble';
+    const size = Math.random() * 20 + 8 + 'px'; b.style.width = b.style.height = size;
+    b.style.left = Math.random() * 100 + '%';
+    const d = Math.random() * 4 + 3 + 's'; b.style.animationDuration = `${d}, 3s`;
+    b.style.setProperty('--sway', (Math.random() * 50 - 25) + 'px');
+    mainContainer.appendChild(b);
+    setTimeout(() => b.remove(), parseFloat(d) * 1000);
+  }
+  function startBubbleEffect() { clearInterval(bubbleInterval); bubbleInterval = setInterval(createBubble, 300); createBubble(); }
+  function stopBubbleEffect() { clearInterval(bubbleInterval); bubbleInterval = null; }
 
-            function updateDisplay(ms) {
-                // 防止顯示負數
-                ms = Math.max(0, ms);
-                
-                const totalSeconds = Math.ceil(ms / 1000);
-                const minutes = Math.floor(totalSeconds / 60);
-                const seconds = totalSeconds % 60;
-                
-                timerDisplay.textContent = 
-                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            }
+  /* ================= 計時邏輯 ================= */
+  function setTime(minutes) {
+    if (isRunning) return;
+    clearFx();
+    initialDurationMS = minutes * 60000; remainingMS = initialDurationMS;
+    updateDisplay(remainingMS); updateSandglass(0);
+    startBtn.textContent = 'Start'; startBtn.disabled = false; resetBtn.disabled = true;
+  }
+  function updateDisplay(ms) {
+    const t = Math.ceil(Math.max(0, ms) / 1000);
+    timerDisplay.textContent = `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
+  }
+  function updateSandglass(p) {
+    p = Math.max(0, Math.min(1, p));
+    const th = 52 * (1 - p), bh = 52 * p;
+    topSand.setAttribute('y', 70 - th); topSand.setAttribute('height', th);
+    bottomSand.setAttribute('y', 122 - bh); bottomSand.setAttribute('height', bh);
+    sandStream.setAttribute('height', Math.max(0, 122 - bh - 66));
+  }
+  function setRumble(sec) {            // 最後 10 秒預熱：抖動 + 數字跳動
+    const on = sec <= 10 && sec > 0;
+    mainContainer.classList.toggle('rumble', on);
+    mainContainer.classList.toggle('hard', sec <= 3 && sec > 0);
+    timerDisplay.classList.toggle('pulse', on);
+  }
+  function startTimer() {
+    if (remainingMS <= 0) return;
+    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === 'suspended') audioContext.resume();
+    isRunning = true; startBtn.textContent = 'Pause'; resetBtn.disabled = false;
+    endTime = Date.now() + remainingMS;
+    runCountdown(); startBubbleEffect(); sandStream.classList.add('active');
+  }
+  function runCountdown() {
+    clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      const left = endTime - Date.now();
+      if (left <= 0) {
+        remainingMS = 0; updateDisplay(0); updateSandglass(1);
+        clearInterval(countdownInterval); timerComplete();
+      } else {
+        remainingMS = left; updateDisplay(left);
+        updateSandglass((initialDurationMS - left) / initialDurationMS);
+        setRumble(Math.ceil(left / 1000));
+      }
+    }, 50);
+  }
+  function pauseTimer() {
+    isRunning = false; clearInterval(countdownInterval);
+    startBtn.textContent = 'Resume'; stopBubbleEffect(); sandStream.classList.remove('active'); setRumble(99);
+  }
+  function toggleTimer() { isRunning ? pauseTimer() : (remainingMS > 0 && startTimer()); }
+  function timerComplete() {
+    isRunning = false; startBtn.textContent = 'Start'; startBtn.disabled = true; resetBtn.disabled = false;
+    stopBubbleEffect(); sandStream.classList.remove('active'); setRumble(0);
+    startBurst();
+    notification.classList.add('show'); playAlarm();
+    setTimeout(() => notification.classList.remove('show'), 4000);
+  }
+  function playAlarm() {
+    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioContext.createOscillator(), g = audioContext.createGain(), t = audioContext.currentTime;
+    o.connect(g); g.connect(audioContext.destination); o.type = 'sine';
+    o.frequency.setValueAtTime(880, t); o.frequency.exponentialRampToValueAtTime(440, t + .5);
+    g.gain.setValueAtTime(.1, t); g.gain.exponentialRampToValueAtTime(.001, t + 1.5);
+    o.start(); setTimeout(() => o.stop(), 1500);
+    if (window.speechSynthesis) {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance('Time is up'); u.lang = 'en-US'; u.rate = .9; speechSynthesis.speak(u);
+    }
+  }
+  function resetTimer() {
+    clearInterval(countdownInterval); isRunning = false; remainingMS = 0; initialDurationMS = 0;
+    stopBubbleEffect(); sandStream.classList.remove('active'); setRumble(99); clearFx();
+    document.querySelectorAll('.bubble').forEach(b => b.remove());
+    updateDisplay(0); updateSandglass(0);
+    startBtn.textContent = 'Start'; startBtn.disabled = false; resetBtn.disabled = true;
+  }
 
-            function updateSandglass(progress) {
-                // progress 0 = 開始 (沙在上面), 1 = 結束 (沙在下面)
-                const clampedProgress = Math.max(0, Math.min(1, progress));
-                
-                const topHeight = 65 * (1 - clampedProgress);
-                const bottomHeight = 65 * clampedProgress;
-                
-                topSand.style.height = `${topHeight}px`;
-                bottomSand.style.height = `${bottomHeight}px`;
-            }
-
-            // --- 核心控制邏輯 ---
-
-            function startTimer() {
-                if (remainingMS <= 0) return;
-                
-                isRunning = true;
-                startBtn.textContent = 'Pause';
-                resetBtn.disabled = false;
-                
-                // 設定目標結束時間 = 現在時間 + 剩餘時間
-                endTime = Date.now() + remainingMS;
-                
-                runCountdown();
-                startBubbleEffect();
-                sandStream.classList.add('active'); // 顯示沙流
-            }
-
-            function runCountdown() {
-                // 清除可能存在的舊 interval
-                if (countdownInterval) clearInterval(countdownInterval);
-
-                countdownInterval = setInterval(() => {
-                    const now = Date.now();
-                    const timeLeft = endTime - now;
-                    
-                    if (timeLeft <= 0) {
-                        // 時間到
-                        remainingMS = 0;
-                        updateDisplay(0);
-                        updateSandglass(1);
-                        clearInterval(countdownInterval);
-                        timerComplete();
-                    } else {
-                        // 更新狀態
-                        remainingMS = timeLeft;
-                        updateDisplay(remainingMS);
-                        
-                        // 計算進度
-                        const elapsed = initialDurationMS - remainingMS;
-                        const progress = elapsed / initialDurationMS;
-                        updateSandglass(progress);
-                    }
-                }, 50); // 使用較短的間隔讓動畫更平滑
-            }
-
-            function pauseTimer() {
-                isRunning = false;
-                clearInterval(countdownInterval);
-                
-                // 這裡不需要額外計算 remainingMS，因為在 runCountdown 裡已經實時更新了
-                
-                startBtn.textContent = 'Resume';
-                stopBubbleEffect();
-                sandStream.classList.remove('active'); // 隱藏沙流
-            }
-
-            function toggleTimer() {
-                if (isRunning) {
-                    pauseTimer();
-                } else {
-                    // 如果剩餘時間大於0，則開始或恢復
-                    if (remainingMS > 0) {
-                        startTimer();
-                    }
-                }
-            }
-
-            function timerComplete() {
-                isRunning = false;
-                startBtn.textContent = 'Start';
-                startBtn.disabled = true;
-                resetBtn.disabled = false;
-                
-                stopBubbleEffect();
-                sandStream.classList.remove('active');
-                
-                notification.classList.add('show');
-                playAlarm();
-                
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 4000);
-            }
-
-            function playAlarm() {
-                if (!audioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(440, audioContext.currentTime + 0.5);
-                
-                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1.5);
-                
-                oscillator.start();
-                setTimeout(() => {
-                    oscillator.stop();
-                }, 1500);
-                
-                if (window.speechSynthesis) {
-                    window.speechSynthesis.cancel();
-                    const utterance = new SpeechSynthesisUtterance("Time is up");
-                    utterance.lang = 'en-US';
-                    utterance.rate = 0.9;
-                    speechSynthesis.speak(utterance);
-                }
-            }
-
-            function resetTimer() {
-                clearInterval(countdownInterval);
-                isRunning = false;
-                remainingMS = 0;
-                initialDurationMS = 0;
-                
-                stopBubbleEffect();
-                sandStream.classList.remove('active');
-                
-                // 清除氣泡
-                document.querySelectorAll('.bubble').forEach(b => b.remove());
-                
-                updateDisplay(0);
-                updateSandglass(0);
-                
-                startBtn.textContent = 'Start';
-                startBtn.disabled = false;
-                resetBtn.disabled = true;
-            }
-
-            // --- 事件監聽 ---
-            startBtn.addEventListener('click', toggleTimer);
-            resetBtn.addEventListener('click', resetTimer);
-
-            timeButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const minutes = parseInt(button.dataset.minutes);
-                    setTime(minutes);
-                });
-            });
-
-            setCustomTimeBtn.addEventListener('click', () => {
-                const minutes = parseInt(customMinutesInput.value);
-                if (minutes >= 1 && minutes <= 600) {
-                    setTime(minutes);
-                    customMinutesInput.value = '';
-                    customMinutesInput.blur();
-                } else {
-                    alert('Please enter a value between 1 and 600 minutes');
-                }
-            });
-
-            customMinutesInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') setCustomTimeBtn.click();
-            });
-
-            let lastTouchEnd = 0;
-            document.addEventListener('touchend', function(e) {
-                const now = Date.now();
-                if (now - lastTouchEnd <= 300) e.preventDefault();
-                lastTouchEnd = now;
-            }, { passive: false });
-
-            // 初始化
-            updateDisplay(0);
-        });
-    </script>
+  startBtn.addEventListener('click', toggleTimer);
+  resetBtn.addEventListener('click', resetTimer);
+  document.querySelectorAll('.time-btn').forEach(b => b.addEventListener('click', () => setTime(parseFloat(b.dataset.minutes))));
+  $('setCustomTime').addEventListener('click', () => {
+    const m = parseInt(customMinutesInput.value);
+    if (m >= 1 && m <= 600) { setTime(m); customMinutesInput.value = ''; customMinutesInput.blur(); }
+    else alert('Please enter a value between 1 and 600 minutes');
+  });
+  customMinutesInput.addEventListener('keypress', e => { if (e.key === 'Enter') $('setCustomTime').click(); });
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', e => { const n = Date.now(); if (n - lastTouchEnd <= 300) e.preventDefault(); lastTouchEnd = n; }, { passive: false });
+  const chips = document.querySelectorAll('.chip');
+  chips.forEach(c => c.addEventListener('click', () => {
+    themeSel = c.dataset.theme; chips.forEach(x => x.classList.toggle('active', x === c));
+    applyTheme(themeSel === 'random' ? KEYS[Math.floor(Math.random() * 4)] : themeSel);
+    if (isRunning) return;
+    clearFx(); buildSprites(); emit(36, .8);
+    cancelAnimationFrame(raf); raf = requestAnimationFrame(loop);
+    setTimeout(() => { if (!bursting && !filled) clearFx(); }, 2600);
+  }));
+  updateDisplay(0);
+});
+</script>
 </body>
 </html>
