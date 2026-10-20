@@ -118,7 +118,7 @@ button:focus-visible,input:focus-visible{outline:3px solid #e3d8ff;outline-offse
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),root=document.documentElement,pet=$('pet'),stage=$('stage'),canvas=$('petCanvas'),g=canvas.getContext('2d'),bubbleCanvas=$('bubbleCanvas'),bg=bubbleCanvas.getContext('2d'),swarmCanvas=$('swarmCanvas'),sg=swarmCanvas.getContext('2d'),clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v)),lerp=(a,b,t)=>a+(b-a)*t;
-const basePet=new Image();basePet.decoding='async';basePet.src='cute-guardian-sleep-v2.png';
+const basePet=new Image();basePet.decoding='async';basePet.src='cute-guardian-source.png';
 let analyser=null,data=null,audioCtx=null,stream=null,useMic=false,level=0,anger=0,raging=false,count=0,quiet=0,best=0,last=performance.now(),soundOn=false,lastCue=0,lastTier=0,purrTimer=0;
 let paintedPose=0,poseChangedAt=0;
 const CFG={warn:45,loud:62};let loudHold=0;
