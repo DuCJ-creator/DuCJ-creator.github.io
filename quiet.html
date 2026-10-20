@@ -118,7 +118,7 @@ button:focus-visible,input:focus-visible{outline:3px solid #e3d8ff;outline-offse
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),root=document.documentElement,pet=$('pet'),stage=$('stage'),canvas=$('petCanvas'),g=canvas.getContext('2d'),bubbleCanvas=$('bubbleCanvas'),bg=bubbleCanvas.getContext('2d'),swarmCanvas=$('swarmCanvas'),sg=swarmCanvas.getContext('2d'),clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v)),lerp=(a,b,t)=>a+(b-a)*t;
-const basePet=new Image();basePet.decoding='async';basePet.src='cute-guardian-source.png';
+const basePet=new Image();basePet.decoding='async';basePet.src='cute-guardian-sleep-v2.png';
 let analyser=null,data=null,audioCtx=null,stream=null,useMic=false,level=0,anger=0,raging=false,count=0,quiet=0,best=0,last=performance.now(),soundOn=false,lastCue=0,lastTier=0,purrTimer=0;
 let paintedPose=0,poseChangedAt=0;
 const CFG={warn:45,loud:62};let loudHold=0;
@@ -152,7 +152,7 @@ function drawBubbles(A,now){const {w,h,dpr}=sizeBubbleCanvas(),dt=Math.min(.05,(
 const marchers=Array.from({length:15},(_,i)=>({dir:i%2?1:-1,lane:.24+(i%5)*.155,speed:42+hash(i+211)*42,phase:hash(i+231)*Math.PI*2,x:0,alpha:0,active:false}));
 let swarmLast=performance.now(),swarmW=0,swarmH=0;
 function sizeSwarm(){const dpr=Math.min(2,devicePixelRatio||1),w=innerWidth,h=innerHeight,W=Math.round(w*dpr),H=Math.round(h*dpr);if(swarmCanvas.width!==W||swarmCanvas.height!==H){swarmCanvas.width=W;swarmCanvas.height=H;swarmW=w;swarmH=h;marchers.forEach((m,i)=>m.x=m.dir>0?-180-i*44:w+180+i*44)}return{w,h,dpr}}
-function drawMarcher(m,now){const depth=.64+m.lane*.48,size=(78+m.lane*70)*depth,bob=reduceMotion?0:Math.abs(Math.sin(now/145+m.phase))*7*depth,sway=reduceMotion?0:Math.sin(now/290+m.phase)*.045,y=swarmH*m.lane;sg.save();sg.globalAlpha=m.alpha*.32;sg.fillStyle='#05030c';sg.beginPath();sg.ellipse(m.x,y+size*.39,size*.31,size*.075,0,0,Math.PI*2);sg.fill();sg.restore();sg.save();sg.globalAlpha=m.alpha*(.58+m.lane*.23);sg.translate(m.x,y-bob);sg.rotate(sway*m.dir);sg.scale(m.dir*(1+Math.sin(now/145+m.phase)*.025),1-Math.sin(now/145+m.phase)*.018);sg.drawImage(basePet,627,627,627,627,-size*.5,-size*.54,size,size);sg.restore();if(!reduceMotion){sg.save();sg.globalAlpha=m.alpha*.34;sg.strokeStyle='rgba(255,174,58,.65)';sg.lineWidth=1.2;for(let j=0;j<3;j++){const trail=m.x-m.dir*(size*.36+j*12),ty=y-size*.03+j*5;sg.beginPath();sg.moveTo(trail,ty);sg.lineTo(trail-m.dir*(10+j*4),ty+Math.sin(now/80+j)*3);sg.stroke()}sg.restore()}}
+function drawMarcher(m,now){const depth=.64+m.lane*.48,size=(78+m.lane*70)*depth,bob=reduceMotion?0:Math.abs(Math.sin(now/145+m.phase))*7*depth,sway=reduceMotion?0:Math.sin(now/290+m.phase)*.045,y=swarmH*m.lane;sg.save();sg.globalAlpha=m.alpha*.32;sg.fillStyle='#05030c';sg.beginPath();sg.ellipse(m.x,y+size*.39,size*.31,size*.075,0,0,Math.PI*2);sg.fill();sg.restore();sg.save();sg.globalAlpha=m.alpha*(.58+m.lane*.23);sg.translate(m.x,y-bob);sg.rotate(sway*m.dir);sg.scale(m.dir*(1+Math.sin(now/145+m.phase)*.025),1-Math.sin(now/145+m.phase)*.018);sg.drawImage(basePet,1024,512,512,512,-size*.5,-size*.54,size,size);sg.restore();if(!reduceMotion){sg.save();sg.globalAlpha=m.alpha*.34;sg.strokeStyle='rgba(255,174,58,.65)';sg.lineWidth=1.2;for(let j=0;j<3;j++){const trail=m.x-m.dir*(size*.36+j*12),ty=y-size*.03+j*5;sg.beginPath();sg.moveTo(trail,ty);sg.lineTo(trail-m.dir*(10+j*4),ty+Math.sin(now/80+j)*3);sg.stroke()}sg.restore()}}
 function drawSwarm(A,now){const {w,h,dpr}=sizeSwarm(),dt=Math.min(.05,(now-swarmLast)/1000);swarmLast=now;sg.setTransform(dpr,0,0,dpr,0,0);sg.clearRect(0,0,w,h);if(!basePet.complete)return;const intensity=clamp((A-58)/42),wanted=Math.round(intensity*marchers.length);marchers.forEach((m,i)=>{const should=i<wanted;if(should&&!m.active){m.active=true;m.x=m.dir>0?-120-i*17:w+120+i*17}if(!should&&m.active)m.active=false;m.alpha=clamp(m.alpha+(m.active?dt*2.8:-dt*1.05));if(m.alpha<=0)return;m.x+=m.dir*m.speed*dt*(.85+intensity*.65);if(m.dir>0&&m.x>w+130)m.x=m.active?-130:w+180;if(m.dir<0&&m.x<-130)m.x=m.active?w+130:-180;drawMarcher(m,now)})}
 function ellipseGradient(cx,cy,rx,ry,top='#fff',bottom='#c8c5d0'){
  const grad=g.createLinearGradient(cx,cy-ry,cx,cy+ry);grad.addColorStop(0,top);grad.addColorStop(.58,'#f4f2f5');grad.addColorStop(1,bottom);g.fillStyle=grad;g.beginPath();g.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);g.fill();
@@ -176,12 +176,12 @@ function drawEye(cx,open,roar){
 function drawPet(wake,roar,now){
  g.setTransform(2,0,0,2,0,0);g.clearRect(0,0,360,360);if(!basePet.complete)return;g.save();
  const breathe=Math.sin(now/760)*1.2,scale=1+roar*.055;g.translate(180,180+breathe);g.scale(scale,scale);g.translate(-180,-180);
- // Pose 0: sleeping, 1: awake, 2: alert, 3: roaring. Only one complete
- // painted frame is visible at once; a quick lift-and-squash bridges each cut.
- const desired=roar>.82?3:(roar>.34?2:((wake>.18||roar>.03)?1:0));if(desired!==paintedPose){paintedPose=desired;poseChangedAt=now}
+ // Six complete poses: curled sleep, stir, half-awake, awake, alert and roar.
+ // Only one frame is visible at once; a quick lift-and-squash bridges each cut.
+ const desired=roar>.82?5:(roar>.34?4:(wake>.72?3:(wake>.38?2:((wake>.12||roar>.03)?1:0))));if(desired!==paintedPose){paintedPose=desired;poseChangedAt=now}
  const phase=clamp((now-poseChangedAt)/320),pop=Math.sin(phase*Math.PI)*(1-phase*.35);
- const frames=[[0,0],[627,0],[0,627],[627,627]];
- const f=frames[paintedPose];g.save();g.translate(180,173-pop*4);g.scale(1+pop*.025,1-pop*.018);g.translate(-180,-173);g.drawImage(basePet,f[0],f[1],627,627,15,8,330,330);g.restore();
+ const frames=[[0,0],[512,0],[1024,0],[0,512],[512,512],[1024,512]];
+ const f=frames[paintedPose],topRow=paintedPose<3,sourceH=topRow?470:512,destH=topRow?303:330,destY=topRow?20:8;g.save();g.translate(180,173-pop*4);g.scale(1+pop*.025,1-pop*.018);g.translate(-180,-173);g.drawImage(basePet,f[0],f[1],512,sourceH,15,destY,330,destH);g.restore();
  // The tail flame never freezes: while sleeping it breathes softly, then grows
  // quicker and brighter as the guardian wakes.
  {const energy=.22+wake*.22+roar*.56,pulse=1+Math.sin(now/(155-roar*65))*.11,lean=Math.sin(now/(310-roar*120))*(2.4+roar*4.5);g.save();g.globalCompositeOperation='screen';g.translate(75,249);g.rotate(lean*Math.PI/180);g.scale(pulse,1/pulse);const glow=g.createRadialGradient(0,2,1,0,2,18+energy*18);glow.addColorStop(0,`rgba(255,250,177,${.22+energy*.32})`);glow.addColorStop(.38,`rgba(255,169,48,${.12+energy*.2})`);glow.addColorStop(1,'rgba(255,91,28,0)');g.fillStyle=glow;g.beginPath();g.arc(0,2,18+energy*18,0,Math.PI*2);g.fill();g.beginPath();g.moveTo(0,13);g.bezierCurveTo(-7,6,-4,-4+Math.sin(now/120)*2,1,-14-energy*8);g.bezierCurveTo(4,-5,9,1,6,8);g.bezierCurveTo(4,12,2,13,0,13);g.closePath();const flame=g.createLinearGradient(0,-21,0,14);flame.addColorStop(0,'rgba(255,255,205,.72)');flame.addColorStop(.45,'rgba(255,218,82,.68)');flame.addColorStop(1,'rgba(255,99,31,.18)');g.fillStyle=flame;g.fill();g.restore()}
@@ -206,7 +206,7 @@ function render(L,A,now){
  // Mouth shapes cross-fade and grow continuously from a sleepy smile to a roar.
  const alert=clamp(wake*1.35)*(1-roar);$('sleepMouth').setAttribute('opacity',clamp(1-wake*1.4));$('alertMouth').setAttribute('opacity',alert);$('alertMouth').setAttribute('transform',`translate(180 222) scale(${.65+wake*.35} ${.4+wake*.6}) translate(-180 -222)`);$('angryMouth').setAttribute('opacity',roar);$('angryMouth').setAttribute('transform',`translate(180 224) scale(${.72+roar*.28} ${.25+roar*.75}) translate(-180 -224)`);
  $('cheekL').setAttribute('opacity',lerp(.12,.025,roar));$('cheekR').setAttribute('opacity',lerp(.12,.025,roar));
- const fireScale=.58+wake*.54+roar*.78;$('tailFire').style.transform=`scale(${fireScale})`;const statuses=['Purring softly… the tiny tail flame is steady.','Those ears are twitching. Let’s use quieter voices.','Wide awake! The tail flame is growing.','ROAR! The primordial flame has erupted!'];$('status').textContent=A>25&&L<28?'Calming down… keep the room quiet.':statuses[tier];$('angerValue').textContent=Math.round(A)+'%';
+ const fireScale=.58+wake*.54+roar*.78;$('tailFire').style.transform=`scale(${fireScale})`;const statuses=['Shh… the little guardian is dreaming.','One ear is stirring… let’s stay quiet.','Wide awake! The tail flame is growing.','ROAR! The primordial flame has erupted!'];$('status').textContent=A>25&&L<28?'Calming down… keep the room quiet.':statuses[tier];$('angerValue').textContent=Math.round(A)+'%';
  if(soundOn&&tier!==lastTier){if(tier===2)cue('alert');if(tier===3)cue('roar');if(tier===0&&lastTier>0)cue('purr');lastTier=tier}if(soundOn&&tier===0&&now-purrTimer>18000){cue('purr');purrTimer=now}
 }
 function updateStats(){$('sCount').textContent=count;$('sNow').textContent=Math.floor(quiet);$('sBest').textContent=Math.floor(best)}
