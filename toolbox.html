@@ -3,548 +3,441 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shirley's Toolbox</title>
+<title>Shirley's Toolbox · 大屏工作台</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --denim: #1B3A6B;
-  --denim-deep: #0f2444;
-  --denim-mid: #244d8a;
-  --denim-light: #2d5fa3;
-  --burgundy: #7B1C35;
-  --burgundy-deep: #540f22;
-  --burgundy-mid: #9c2440;
-  --burgundy-bright: #b82d4d;
-  --cream: #f5efe6;
-  --gold: #c9a84c;
-  --gold-light: #e2c47a;
-  --white: #ffffff;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --denim:#1B3A6B;--denim-deep:#0f2444;--denim-mid:#244d8a;
+  --burgundy:#7B1C35;--burgundy-deep:#540f22;--burgundy-bright:#b82d4d;
+  --gold:#c9a84c;--gold-light:#e2c47a;--white:#fff;
+  --side:300px;
 }
+html,body{height:100%;overflow:hidden}
+body{background:var(--denim-deep);color:var(--white);font-family:'DM Sans','Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;font-size:16px;display:flex}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 
-body {
-  min-height: 100vh;
-  background: var(--denim-deep);
-  color: var(--white);
-  font-family: 'DM Sans', sans-serif;
-  overflow-x: hidden;
-}
+/* ---------- Sidebar ---------- */
+.side{width:var(--side);flex-shrink:0;display:flex;flex-direction:column;background:linear-gradient(180deg,var(--burgundy-deep),var(--denim-deep) 38%);border-right:2px solid var(--gold);transition:margin-left .25s}
+.side.hidden{margin-left:calc(var(--side) * -1)}
+.brand{padding:18px 18px 12px;border-bottom:1px solid rgba(201,168,76,.3)}
+.brand b{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:900;line-height:1.1;display:block}
+.brand b i{color:var(--gold-light);font-weight:400}
+.brand span{font-size:.8rem;color:rgba(255,255,255,.55)}
+.search{margin:12px 14px 4px;padding:10px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:var(--white);font:inherit;width:calc(100% - 28px)}
+.search::placeholder{color:rgba(255,255,255,.4)}
+.search:focus{outline:2px solid var(--gold);border-color:transparent}
+.list{flex:1;overflow-y:auto;padding:8px 10px 20px}
+details{margin-top:8px}
+summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:6px;border-left:4px solid var(--c);background:rgba(255,255,255,.06);font-family:'Playfair Display',serif;font-weight:700;font-size:1rem}
+summary::-webkit-details-marker{display:none}
+summary small{margin-left:auto;font-family:'DM Sans',sans-serif;font-weight:400;font-size:.75rem;color:rgba(255,255,255,.55)}
+.tool{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;padding:6px 10px 6px 14px;margin-top:4px;border-radius:6px;text-align:left;border:1px solid transparent}
+.tool:hover{background:rgba(255,255,255,.09);border-color:rgba(201,168,76,.5)}
+.tool .n{flex:1;min-width:0;line-height:1.25}
+.tool .n div:first-child{font-size:.9rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tool .n div:last-child{font-size:.72rem;color:rgba(255,255,255,.5)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);opacity:0}
+.tool.on .dot{opacity:1}
+.tool.on{background:rgba(201,168,76,.13)}
 
-body::before {
-  content: '';
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background:
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 4px),
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.008) 0px, rgba(255,255,255,0.008) 1px, transparent 1px, transparent 6px);
-}
+/* ---------- Main ---------- */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{height:56px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 12px;background:linear-gradient(90deg,var(--burgundy-deep),var(--denim-deep));border-bottom:2px solid var(--gold)}
+.ib{height:38px;min-width:38px;padding:0 12px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;font-size:.85rem}
+.ib:hover{border-color:var(--gold);background:rgba(255,255,255,.14)}
+.ib.act{border-color:var(--gold);background:rgba(201,168,76,.22);color:var(--gold-light)}
+.sp{flex:1}
+.grp{display:flex;gap:6px;align-items:center}
+.grp>span{font-size:.75rem;color:rgba(255,255,255,.5);margin-right:2px}
 
-.hero {
-  position: relative; z-index: 1;
-  text-align: center;
-  padding: 3.5rem 2rem 2rem;
-  background: linear-gradient(180deg, var(--burgundy-deep) 0%, var(--denim-deep) 100%);
-  border-bottom: 3px solid var(--gold);
-}
+.canvas{flex:1;position:relative;overflow:hidden;background:
+  radial-gradient(ellipse at 50% 0%,rgba(36,77,138,.35),transparent 70%),var(--denim-deep)}
+.empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:rgba(255,255,255,.4);text-align:center;pointer-events:none}
+.empty b{font-family:'Playfair Display',serif;font-size:2rem;color:rgba(255,255,255,.55);font-weight:700}
 
-.hero-badge {
-  display: inline-block;
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  color: var(--gold-light);
-  border: 1px solid var(--gold);
-  padding: 5px 18px;
-  border-radius: 2px;
-  margin-bottom: 1.4rem;
-}
+.win{position:absolute;display:flex;flex-direction:column;border-radius:8px;overflow:hidden;background:#101c33;border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 40px rgba(0,0,0,.55);min-width:240px;min-height:160px}
+.win.focus{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 14px 50px rgba(0,0,0,.65)}
+.win.max{left:0!important;top:0!important;width:100%!important;height:100%!important;border-radius:0}
+.win.min{display:none}
+.bar{height:44px;flex-shrink:0;display:flex;align-items:center;gap:6px;padding:0 6px 0 12px;background:linear-gradient(90deg,var(--c),var(--denim-deep));border-bottom:2px solid var(--gold);cursor:grab;touch-action:none;user-select:none}
+.bar:active{cursor:grabbing}
+.bar .t{flex:1;min-width:0;font-family:'Playfair Display',serif;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .t small{font-family:'DM Sans',sans-serif;font-weight:400;font-size:.75rem;color:rgba(255,255,255,.6);margin-left:8px}
+.wb{width:34px;height:34px;border-radius:5px;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;font-size:15px}
+.wb:hover{background:rgba(255,255,255,.2)}
+.wb.x:hover{background:var(--burgundy-bright)}
+.body{flex:1;position:relative;background:#101c33}
+.body iframe{position:absolute;inset:0;width:100%;height:100%;border:none;background:transparent}
+.body .ld{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-size:.9rem}
+.shield{position:absolute;inset:0;z-index:2;display:none}
+.win:not(.focus) .shield{display:block}
+.canvas.busy iframe{pointer-events:none}
+.canvas.busy .shield{display:block}
+.rz{position:absolute;z-index:5;touch-action:none}
+.rz.e{right:0;top:44px;bottom:20px;width:8px;cursor:ew-resize}
+.rz.s{bottom:0;left:0;right:20px;height:8px;cursor:ns-resize}
+.rz.se{right:0;bottom:0;width:22px;height:22px;cursor:nwse-resize;background:linear-gradient(135deg,transparent 55%,var(--gold) 55%,var(--gold) 62%,transparent 62%,transparent 74%,var(--gold) 74%,var(--gold) 81%,transparent 81%)}
+.win.max .rz{display:none}
 
-.hero-title {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(2.8rem, 7vw, 5rem);
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  line-height: 1;
-  color: var(--white);
-  text-shadow: 0 2px 20px rgba(0,0,0,0.5);
-  margin-bottom: 0.5rem;
-}
+.main{position:relative}
+.nt{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--n)}
+.win.note .body{background:var(--n)}
+.nbar{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px dashed rgba(0,0,0,.25);flex-shrink:0}
+.sw{width:26px;height:26px;border-radius:50%;border:2px solid rgba(0,0,0,.3)}
+.sw.on{border-color:#000;box-shadow:0 0 0 2px #fff}
+.fz{margin-left:auto;display:flex;gap:6px}
+.fz button{height:30px;min-width:40px;border-radius:5px;background:rgba(0,0,0,.12);color:#2b2410;font-weight:700}
+.fz button:hover{background:rgba(0,0,0,.25)}
+.nt textarea{flex:1;width:100%;border:none;resize:none;padding:14px 18px;background:transparent;color:#2b2410;font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei','DM Sans',sans-serif;line-height:1.5;outline:none}
+.pop{position:absolute;top:62px;right:12px;z-index:20000;width:360px;max-height:70%;overflow:auto;display:none;padding:14px;border-radius:8px;background:#0f2444;border:1px solid var(--gold);box-shadow:0 14px 50px rgba(0,0,0,.7)}
+.pop.open{display:block}
+.pop h4{font-family:'Playfair Display',serif;font-size:1.05rem;margin-bottom:10px}
+.pop .row{display:flex;gap:6px}
+.pop input{flex:1;min-width:0;padding:9px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font:inherit}
+.pop .it{display:flex;align-items:center;gap:6px;padding:8px;margin-top:8px;border-radius:6px;background:rgba(255,255,255,.06)}
+.pop .it .n{flex:1;min-width:0}
+.pop .it .n b{display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pop .it .n small{color:rgba(255,255,255,.5);font-size:.72rem}
+.pop .hint{color:rgba(255,255,255,.5);font-size:.82rem;margin-top:10px}
+/* ---------- Taskbar ---------- */
+.dock{height:52px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 12px;overflow-x:auto;background:rgba(10,20,40,.95);border-top:1px solid rgba(201,168,76,.4)}
+.chip{height:36px;padding:0 14px;border-radius:18px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);font-size:.85rem}
+.chip i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.chip.focus{border-color:var(--gold);background:rgba(201,168,76,.18)}
+.chip.min{opacity:.55}
+.chip:hover{border-color:var(--gold)}
+.dock .hint{color:rgba(255,255,255,.35);font-size:.8rem}
 
-.hero-title em {
-  font-style: italic;
-  color: var(--gold-light);
-}
-
-.hero-sub {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.05rem;
-  font-style: italic;
-  font-weight: 400;
-  color: rgba(255,255,255,0.65);
-  letter-spacing: 0.06em;
-}
-
-.hero-rule {
-  display: flex; align-items: center; gap: 14px;
-  margin: 1.6rem auto 0;
-  max-width: 360px;
-}
-.hero-rule-line { flex: 1; height: 1px; background: var(--gold); opacity: 0.5; }
-.hero-rule-diamond { width: 8px; height: 8px; background: var(--gold); transform: rotate(45deg); }
-
-.container {
-  position: relative; z-index: 1;
-  max-width: 1060px;
-  margin: 0 auto;
-  padding: 2.8rem 1.6rem 5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-}
-
-.cat-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 1.2rem;
-  padding: 14px 18px;
-  border-radius: 6px 6px 0 0;
-  position: relative;
-}
-
-.cat-num {
-  font-family: 'Playfair Display', serif;
-  font-size: 2rem;
-  font-weight: 900;
-  font-style: italic;
-  opacity: 0.25;
-  line-height: 1;
-  flex-shrink: 0;
-  color: var(--white);
-}
-
-.cat-text { flex: 1; }
-
-.cat-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.6rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--white);
-  line-height: 1.1;
-}
-
-.cat-sub {
-  font-size: 0.72rem;
-  font-weight: 400;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.75);
-  margin-top: 3px;
-}
-
-.cat-icon { font-size: 24px; flex-shrink: 0; opacity: 0.85; }
-
-.cat-time .cat-header    { background: linear-gradient(135deg, var(--denim) 0%, var(--denim-mid) 100%); border-left: 4px solid var(--gold); }
-.cat-class .cat-header   { background: linear-gradient(135deg, var(--burgundy) 0%, var(--burgundy-mid) 100%); border-left: 4px solid var(--gold); }
-.cat-teach .cat-header   { background: linear-gradient(135deg, var(--denim-mid) 0%, #1d4e8f 100%); border-left: 4px solid var(--burgundy-bright); }
-.cat-subject .cat-header { background: linear-gradient(135deg, var(--burgundy-deep) 0%, var(--burgundy) 100%); border-left: 4px solid var(--gold); }
-.cat-fun .cat-header     { background: linear-gradient(135deg, #1a2f55 0%, var(--denim) 100%); border-left: 4px solid var(--burgundy-bright); }
-
-.tools-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
-  gap: 8px;
-  background: rgba(15,36,68,0.5);
-  border: 1px solid rgba(201,168,76,0.2);
-  border-top: none;
-  border-radius: 0 0 6px 6px;
-  padding: 14px;
-}
-
-.tool-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 11px 13px;
-  border-radius: 4px;
-  background: rgba(255,255,255,0.055);
-  border: 1px solid rgba(255,255,255,0.1);
-  cursor: pointer;
-  transition: background 0.18s, border-color 0.18s, transform 0.18s;
-  text-align: left;
-  gap: 6px;
-}
-
-.tool-btn:hover {
-  background: rgba(255,255,255,0.1);
-  border-color: var(--gold);
-  transform: translateY(-2px);
-}
-
-.tool-btn.active {
-  background: rgba(201,168,76,0.15);
-  border-color: var(--gold);
-}
-
-.tool-names { flex: 1; min-width: 0; }
-
-.tool-name {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--white);
-  line-height: 1.3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tool-cn {
-  font-size: 0.65rem;
-  color: rgba(255,255,255,0.5);
-  margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tool-arr {
-  font-size: 10px;
-  color: var(--gold);
-  opacity: 0.6;
-  flex-shrink: 0;
-  transition: opacity 0.2s, transform 0.2s;
-}
-.tool-btn:hover .tool-arr { opacity: 1; transform: translate(2px,-2px); }
-
-/* iFrame Panel */
-.frame-panel {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(10,20,40,0.92);
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.frame-panel.open { display: flex; }
-
-.frame-topbar {
-  width: 100%;
-  background: linear-gradient(90deg, var(--burgundy-deep), var(--denim-deep));
-  border-bottom: 2px solid var(--gold);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 16px;
-  height: 52px;
-  flex-shrink: 0;
-}
-
-.frame-title-text {
-  flex: 1;
-  font-family: 'Playfair Display', serif;
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--white);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.frame-title-cn {
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.55);
-  font-weight: 300;
-  flex-shrink: 0;
-}
-
-.frame-close {
-  width: 34px; height: 34px;
-  border-radius: 4px;
-  background: rgba(123,28,53,0.5);
-  border: 1px solid var(--burgundy-bright);
-  color: var(--white);
-  font-size: 16px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  transition: background 0.15s;
-  font-family: monospace;
-}
-.frame-close:hover { background: var(--burgundy); }
-
-.frame-open-btn {
-  height: 34px;
-  padding: 0 12px;
-  border-radius: 4px;
-  background: rgba(201,168,76,0.12);
-  border: 1px solid var(--gold);
-  color: var(--gold-light);
-  font-size: 0.72rem;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex; align-items: center; gap: 5px;
-  flex-shrink: 0;
-  transition: background 0.15s;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-.frame-open-btn:hover { background: rgba(201,168,76,0.25); }
-
-.frame-wrapper {
-  flex: 1;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-}
-
-.frame-wrapper iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  display: block;
-  background: #fff;
-}
-
-.frame-loading {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: var(--denim-deep);
-  color: rgba(255,255,255,0.5);
-  font-size: 0.85rem;
-  gap: 12px;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-.frame-loading.hidden { opacity: 0; pointer-events: none; }
-
-.spinner {
-  width: 32px; height: 32px;
-  border: 2px solid rgba(201,168,76,0.2);
-  border-top-color: var(--gold);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.footer {
-  position: relative; z-index: 1;
-  text-align: center;
-  padding: 1rem 0 2.5rem;
-  font-family: 'Playfair Display', serif;
-  font-size: 0.85rem;
-  font-style: italic;
-  color: rgba(255,255,255,0.25);
-  letter-spacing: 0.1em;
-  border-top: 1px solid rgba(201,168,76,0.15);
-}
-
-@media (max-width: 500px) {
-  .tools-grid { grid-template-columns: repeat(2, 1fr); }
-  .hero-title { font-size: 2.4rem; }
-  .frame-title-cn { display: none; }
-  .frame-open-btn span { display: none; }
-}
+@media (max-width:900px){:root{--side:240px}.grp>span{display:none}.ib .lb{display:none}}
+@media (min-width:2200px){body{font-size:19px}:root{--side:360px}.bar{height:52px}.wb{width:40px;height:40px}.top{height:64px}.dock{height:60px}}
 </style>
 </head>
 <body>
 
-<div class="frame-panel" id="framePanel">
-  <div class="frame-topbar">
-    <button class="frame-close" id="frameClose" aria-label="Close">✕</button>
-    <div class="frame-title-text" id="frameTitleText">Tool</div>
-    <div class="frame-title-cn" id="frameTitleCn"></div>
-    <button class="frame-open-btn" id="frameOpenBtn">↗ <span>Open in new tab</span></button>
-  </div>
-  <div class="frame-wrapper">
-    <div class="frame-loading" id="frameLoading">
-      <div class="spinner"></div>
-      <span>Loading tool…</span>
+<aside class="side" id="side">
+  <div class="brand"><b><i>Shirley's</i> Toolbox</b><span>教學工具箱 · 大屏工作台</span></div>
+  <input class="search" id="q" type="search" placeholder="搜尋工具… Search">
+  <div class="list" id="list"></div>
+</aside>
+
+<div class="main">
+  <div class="top">
+    <button class="ib" id="tgSide" title="收合/展開工具列">☰</button>
+    <div class="grp">
+      <span>版面</span>
+      <button class="ib" data-lay="grid" title="自動平鋪">▦ <span class="lb">平鋪</span></button>
+      <button class="ib" data-lay="row" title="並排">▥ <span class="lb">並排</span></button>
+      <button class="ib" data-lay="main" title="主視窗＋側欄">◧ <span class="lb">主＋側</span></button>
+      <button class="ib" data-lay="cascade" title="層疊（自由拖曳）">❐ <span class="lb">層疊</span></button>
     </div>
-    <iframe id="mainFrame" title="Tool viewer" allowfullscreen></iframe>
+    <div class="sp"></div>
+    <button class="ib" id="pre" title="儲存／載入常用組合">💾 <span class="lb">常用組合</span></button>
+    <button class="ib" id="minAll" title="全部縮小">⎯ <span class="lb">全部縮小</span></button>
+    <button class="ib" id="closeAll" title="全部關閉">✕ <span class="lb">全部關閉</span></button>
+    <button class="ib" id="fs" title="全螢幕">⛶ <span class="lb">全螢幕</span></button>
   </div>
+
+  <div class="canvas" id="canvas">
+    <div class="empty" id="empty"><b>點選左側工具開始上課</b><span>可同時開啟多個工具，自動排版；拖曳標題列移動、拖曳邊角縮放</span></div>
+  </div>
+
+  <div class="dock" id="dock"></div>
+  <div class="pop" id="pop"></div>
 </div>
-
-<div class="hero">
-  <div class="hero-badge">✦ Digital Teaching Companion ✦</div>
-  <div class="hero-title"><em>Shirley's</em> Toolbox</div>
-  <div class="hero-sub">教學工具箱 — Every tool, one place</div>
-  <div class="hero-rule"><div class="hero-rule-line"></div><div class="hero-rule-diamond"></div><div class="hero-rule-line"></div></div>
-</div>
-
-<div class="container">
-
-  <div class="category cat-time">
-    <div class="cat-header">
-      <div class="cat-num">01</div>
-      <div class="cat-text"><div class="cat-title">Time Management</div><div class="cat-sub">時間管理類</div></div>
-      <div class="cat-icon">⏱</div>
-    </div>
-    <div class="tools-grid">
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/clock.html" data-en="Clock" data-cn="時鐘"><div class="tool-names"><div class="tool-name">Clock</div><div class="tool-cn">時鐘</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Timer" data-en="Timer" data-cn="計時器"><div class="tool-names"><div class="tool-name">Timer</div><div class="tool-cn">計時器</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/quiet.html" data-en="Quiet" data-cn="肅靜"><div class="tool-names"><div class="tool-name">Quiet</div><div class="tool-cn">肅靜</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Stop%20Watch.html" data-en="Stopwatch" data-cn="碼表"><div class="tool-names"><div class="tool-name">Stopwatch</div><div class="tool-cn">碼表</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/countdown.html" data-en="Countdown" data-cn="倒計時"><div class="tool-names"><div class="tool-name">Countdown</div><div class="tool-cn">倒計時</div></div><span class="tool-arr">▶</span></button>
-  </div>
-
-  <div class="category cat-class">
-    <div class="cat-header">
-      <div class="cat-num">02</div>
-      <div class="cat-text"><div class="cat-title">Class Management</div><div class="cat-sub">班務管理類</div></div>
-      <div class="cat-icon">🎲</div>
-    </div>
-    <div class="tools-grid">
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/scoreboard.html" data-en="Scoreboard" data-cn="計分牌"><div class="tool-names"><div class="tool-name">Scoreboard</div><div class="tool-cn">計分牌</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/sign.html" data-en="Signpost" data-cn="指示牌"><div class="tool-names"><div class="tool-name">Signpost</div><div class="tool-cn">指示牌</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Dice2.html" data-en="Lucky Dice" data-cn="幸運骰"><div class="tool-names"><div class="tool-name">Lucky Dice</div><div class="tool-cn">幸運骰</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/coin.html" data-en="Coin Flip" data-cn="擲硬幣"><div class="tool-names"><div class="tool-name">Coin Flip</div><div class="tool-cn">擲硬幣</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/moonblock.html" data-en="Moonblock" data-cn="擲筊"><div class="tool-names"><div class="tool-name">Moonblock</div><div class="tool-cn">擲筊</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Lucky%20Wheel.html" data-en="Lucky Wheel" data-cn="幸運轉盤"><div class="tool-names"><div class="tool-name">Lucky Wheel</div><div class="tool-cn">幸運轉盤</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/grade%20analysis.html" data-en="Grade Analysis" data-cn="成績分析"><div class="tool-names"><div class="tool-name">Grade Analysis</div><div class="tool-cn">成績分析</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/toefljgrade.html" data-en="TOEFL J Grade Charts" data-cn="TOEFL J 可視化圖表"><div class="tool-names"><div class="tool-name">TOEFL J Grade Charts</div><div class="tool-cn">TOEFL J可視化圖表</div></div><span class="tool-arr">▶</span></button>
-
-    </div>
-  </div>
-
-  <div class="category cat-teach">
-    <div class="cat-header">
-      <div class="cat-num">03</div>
-      <div class="cat-text"><div class="cat-title">Teaching Tools</div><div class="cat-sub">教學工具類</div></div>
-      <div class="cat-icon">✏️</div>
-    </div>
-    <div class="tools-grid">
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Pop%20Quiz%20Maker.html" data-en="Quiz Maker" data-cn="測驗製作"><div class="tool-names"><div class="tool-name">Quiz Maker</div><div class="tool-cn">測驗製作</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Flip%20Card.html" data-en="Flip Card Maker" data-cn="翻轉卡製作"><div class="tool-names"><div class="tool-name">Flip Card Maker</div><div class="tool-cn">翻轉卡製作</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/report.html" data-en="Report Formatter" data-cn="報告格式器"><div class="tool-names"><div class="tool-name">Report Formatter</div><div class="tool-cn">報告格式器</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/urlsqrcg.html" data-en="URL Shortner & QR Code Generator" data-cn="短網址及QR生成器"><div name="tool-names"><div class="tool-name">URL Shortner & QR Code Generator</div><div class="tool-cn">短網址及QR生成器</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/slipprint.html" data-en="3*8 slip print" data-cn="3*8 A4滿版標籤生成器"><div name="tool-names"><div class="tool-name">3*8 slip print</div><div class="tool-cn">3*8 A4滿版標籤生成器</div></div><span class="tool-arr">▶</span></button>
-
-    </div>
-  </div>
-
-  <div class="category cat-subject">
-    <div class="cat-header">
-      <div class="cat-num">04</div>
-      <div class="cat-text"><div class="cat-title">Subject Teaching</div><div class="cat-sub">學科教學類</div></div>
-      <div class="cat-icon">📚</div>
-    </div>
-    <div class="tools-grid">
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/etgame.html" data-en="Vocab ET" data-cn="單字外星人"><div class="tool-names"><div class="tool-name">Vocab ET</div><div class="tool-cn">單字外星人</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/iVocab-Self-Practice/escaperoom.html" data-en="Vocab Escape Room" data-cn="單字密室逃脫"><div class="tool-names"><div class="tool-name">Vocab Escape Room</div><div class="tool-cn">單字密室逃脫</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://i-vocab-hungry-snake-mobilev.vercel.app/" data-en="Vocab Hungry Snake" data-cn="單字貪吃蛇"><div class="tool-names"><div class="tool-name">Vocab Hungry Snake</div><div class="tool-cn">單字貪吃蛇</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/ivchampion.html" data-en="Vocab Champion" data-cn="字彙終極戰"><div class="tool-names"><div class="tool-name">Vocab Champion</div><div class="tool-cn">字彙終極戰</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/iVocab-Self-Practice/entry.html" data-en="My Own Words" data-cn="自主單字練習"><div class="tool-names"><div class="tool-name">My Own Words</div><div class="tool-cn">自主單字練習</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Word%20Search%20Maker.html" data-en="Word Search Maker" data-cn="尋字工坊"><div class="tool-names"><div class="tool-name">Word Search Maker</div><div class="tool-cn">尋字工坊</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley%20Crossword%20Maker.html" data-en="Crossword Maker" data-cn="字謎生成"><div class="tool-names"><div class="tool-name">Crossword Maker</div><div class="tool-cn">字謎生成</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley-AI-Writing/version2.html" data-en="Writing Coach" data-cn="寫作教練"><div class="tool-names"><div class="tool-name">Writing Coach</div><div class="tool-cn">寫作教練</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/Teacher-Shirley/study-tools/kk.html" data-en="KK Phonetics" data-cn="KK 音標"><div class="tool-names"><div class="tool-name">KK Phonetics</div><div class="tool-cn">KK 音標</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley-AI-Sentence-Practice/bank.html" data-en="Sentence Reading" data-cn="例句朗讀"><div class="tool-names"><div class="tool-name">Sentence Reading</div><div class="tool-cn">例句朗讀</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/Shirley-AI-Sentence-Practice/entry.html" data-en="My Own Sentences" data-cn="自主句子練習"><div class="tool-names"><div class="tool-name">My Own Sentences</div><div class="tool-cn">自主句子練習</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/events/chhsmonthly/" data-en="CHHS Monthly" data-cn="月刊"><div class="tool-names"><div class="tool-name">CHHS Monthly</div><div class="tool-cn">月刊</div></div><span class="tool-arr">▶</span></button>
-    </div>
-  </div>
-
-  <div class="category cat-fun">
-    <div class="cat-header">
-      <div class="cat-num">05</div>
-      <div class="cat-text"><div class="cat-title">Fun Games</div><div class="cat-sub">遊戲類</div></div>
-      <div class="cat-icon">🎮</div>
-    </div>
-    <div class="tools-grid">
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/shirley%20sudoku.html" data-en="Sudoku" data-cn="數獨"><div class="tool-names"><div class="tool-name">Sudoku</div><div class="tool-cn">數獨</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/gomoku.html" data-en="Gomoku" data-cn="五子棋"><div class="tool-names"><div class="tool-name">Gomoku</div><div class="tool-cn">五子棋</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/go.html" data-en="Go" data-cn="圍棋"><div class="tool-names"><div class="tool-name">Go</div><div class="tool-cn">圍棋</div></div><span class="tool-arr">▶</span></button>
-      <button class="tool-btn" data-url="https://ducj-creator.github.io/gem.html" data-en="Gem" data-cn="連連看"><div class="tool-names"><div class="tool-name">Gem</div><div class="tool-cn">連連看</div></div><span class="tool-arr">▶</span></button>
-    </div>
-  </div>
-
-</div>
-
-<div class="footer">✦ &nbsp; Shirley's Digital Classroom &nbsp;·&nbsp; 數位教室 &nbsp; ✦</div>
 
 <script>
-const panel = document.getElementById('framePanel');
-const frame = document.getElementById('mainFrame');
-const loading = document.getElementById('frameLoading');
-const titleText = document.getElementById('frameTitleText');
-const titleCn = document.getElementById('frameTitleCn');
-const openBtn = document.getElementById('frameOpenBtn');
-let currentUrl = '';
-let activeBtn = null;
-let loadTimer = null;
+const CATS=[
+ {k:'time',en:'Time Management',cn:'時間管理類',c:'#244d8a',tools:[
+  ['Clock','時鐘','https://ducj-creator.github.io/clock.html'],
+  ['Timer','計時器','https://ducj-creator.github.io/Shirley%20Timer'],
+  ['Quiet','肅靜','https://ducj-creator.github.io/quiet.html'],
+  ['Stopwatch','碼表','https://ducj-creator.github.io/Shirley%20Stop%20Watch.html'],
+  ['Countdown','倒計時','https://ducj-creator.github.io/countdown.html']]},
+ {k:'class',en:'Class Management',cn:'班務管理類',c:'#9c2440',tools:[
+  ['Scoreboard','計分牌','https://ducj-creator.github.io/scoreboard.html'],
+  ['Signpost','指示牌','https://ducj-creator.github.io/sign.html'],
+  ['Lucky Dice','幸運骰','https://ducj-creator.github.io/Shirley%20Dice2.html'],
+  ['Coin Flip','擲硬幣','https://ducj-creator.github.io/coin.html'],
+  ['Moonblock','擲筊','https://ducj-creator.github.io/moonblock.html'],
+  ['Lucky Wheel','幸運轉盤','https://ducj-creator.github.io/Shirley%20Lucky%20Wheel.html'],
+  ['Grade Analysis','成績分析','https://ducj-creator.github.io/grade%20analysis.html'],
+  ['TOEFL J Grade Charts','TOEFL J 可視化圖表','https://ducj-creator.github.io/toefljgrade.html']]},
+ {k:'teach',en:'Teaching Tools',cn:'教學工具類',c:'#2d5fa3',tools:[
+  ['Quiz Maker','測驗製作','https://ducj-creator.github.io/Shirley%20Pop%20Quiz%20Maker.html'],
+  ['Flip Card Maker','翻轉卡製作','https://ducj-creator.github.io/Shirley%20Flip%20Card.html'],
+  ['Report Formatter','報告格式器','https://ducj-creator.github.io/report.html'],
+  ['URL Shortener & QR Code','短網址及QR生成器','https://ducj-creator.github.io/urlsqrcg.html'],
+  ['3*8 Slip Print','3*8 A4滿版標籤生成器','https://ducj-creator.github.io/slipprint.html']]},
+ {k:'subject',en:'Subject Teaching',cn:'學科教學類',c:'#7B1C35',tools:[
+  ['Vocab ET','單字外星人','https://ducj-creator.github.io/etgame.html'],
+  ['Vocab Escape Room','單字密室逃脫','https://ducj-creator.github.io/iVocab-Self-Practice/escaperoom.html'],
+  ['Vocab Hungry Snake','單字貪吃蛇','https://i-vocab-hungry-snake-mobilev.vercel.app/'],
+  ['Vocab Champion','字彙終極戰','https://ducj-creator.github.io/ivchampion.html'],
+  ['My Own Words','自主單字練習','https://ducj-creator.github.io/iVocab-Self-Practice/entry.html'],
+  ['Word Search Maker','尋字工坊','https://ducj-creator.github.io/Shirley%20Word%20Search%20Maker.html'],
+  ['Crossword Maker','字謎生成','https://ducj-creator.github.io/Shirley%20Crossword%20Maker.html'],
+  ['Writing Coach','寫作教練','https://ducj-creator.github.io/Shirley-AI-Writing/version2.html'],
+  ['KK Phonetics','KK 音標','https://ducj-creator.github.io/Teacher-Shirley/study-tools/kk.html'],
+  ['Sentence Reading','例句朗讀','https://ducj-creator.github.io/Shirley-AI-Sentence-Practice/bank.html'],
+  ['My Own Sentences','自主句子練習','https://ducj-creator.github.io/Shirley-AI-Sentence-Practice/entry.html'],
+  ['CHHS Monthly','月刊','https://ducj-creator.github.io/events/chhsmonthly/']]},
+ {k:'fun',en:'Fun Games',cn:'遊戲類',c:'#1d4e8f',tools:[
+  ['Sudoku','數獨','https://ducj-creator.github.io/shirley%20sudoku.html'],
+  ['Gomoku','五子棋','https://ducj-creator.github.io/gomoku.html'],
+  ['Go','圍棋','https://ducj-creator.github.io/go.html'],
+  ['Gem','連連看','https://ducj-creator.github.io/gem.html']]}
+];
 
-document.querySelectorAll('.tool-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const url = btn.dataset.url;
-    const en = btn.dataset.en;
-    const cn = btn.dataset.cn;
+const $=s=>document.querySelector(s);
+const canvas=$('#canvas'),dock=$('#dock'),empty=$('#empty'),side=$('#side');
+let wins=[],mode='grid',topZ=10,focused=null;
+const GAP=5;
 
-    // If clicking the same tool that's already open, do nothing
-    if (activeBtn === btn && panel.classList.contains('open')) return;
-
-    if (activeBtn) activeBtn.classList.remove('active');
-    btn.classList.add('active');
-    activeBtn = btn;
-    currentUrl = url;
-
-    titleText.textContent = en;
-    titleCn.textContent = cn;
-
-    // Show panel and spinner
-    loading.classList.remove('hidden');
-    loading.style.opacity = '1';
-    panel.classList.add('open');
-    document.body.style.overflow = 'hidden';
-
-    // Clear any pending load timer
-    if (loadTimer) clearTimeout(loadTimer);
-
-    // Reset iframe cleanly
-    frame.src = 'about:blank';
-
-    // Wait for panel to be fully painted + sized before loading the real URL
-    loadTimer = setTimeout(() => {
-      frame.src = url;
-    }, 80);
+/* ---------- Sidebar ---------- */
+const list=$('#list');
+const HW='📚 今日作業 Homework\n\n1. \n2. \n3. \n\n📅 Due: ';
+(()=>{const d=document.createElement('details');d.open=true;d.style.setProperty('--c','#d4a017');
+ d.innerHTML='<summary>Classroom Notes<small>課堂便利貼</small></summary>';
+ [['＋ Homework Reminder','新增作業提醒',HW],['＋ Blank Sticky Note','新增空白便利貼','']].forEach(([en,cn,txt])=>{
+  const b=document.createElement('button');b.className='tool';b.dataset.s=(en+cn).toLowerCase()+'sticky 便利貼 作業 note';
+  b.innerHTML='<span class="n"><div></div><div></div></span>';
+  b.querySelector('.n').children[0].textContent=en;b.querySelector('.n').children[1].textContent=cn;
+  b.onclick=()=>openNote(txt);d.appendChild(b)});
+ list.appendChild(d)})();
+CATS.forEach(cat=>{
+  const d=document.createElement('details');d.open=true;d.style.setProperty('--c',cat.c);d.dataset.k=cat.k;
+  d.innerHTML=`<summary>${cat.en}<small>${cat.cn}</small></summary>`;
+  cat.tools.forEach(t=>{
+    const b=document.createElement('button');b.className='tool';b.dataset.url=t[2];
+    b.dataset.s=(t[0]+t[1]).toLowerCase();
+    b.innerHTML=`<span class="n"><div></div><div></div></span><span class="dot"></span>`;
+    b.querySelector('.n').children[0].textContent=t[0];
+    b.querySelector('.n').children[1].textContent=t[1];
+    b.onclick=()=>openTool({en:t[0],cn:t[1],url:t[2],c:cat.c});
+    d.appendChild(b);
   });
+  list.appendChild(d);
 });
+$('#q').oninput=e=>{
+  const v=e.target.value.trim().toLowerCase();
+  list.querySelectorAll('details').forEach(d=>{
+    let n=0;
+    d.querySelectorAll('.tool').forEach(b=>{const m=!v||b.dataset.s.includes(v);b.style.display=m?'':'none';if(m)n++});
+    d.style.display=n?'':'none';if(v)d.open=true;
+  });
+};
+$('#tgSide').onclick=()=>{side.classList.toggle('hidden');save();setTimeout(layout,260)};
 
-frame.addEventListener('load', () => {
-  // Ignore the about:blank load event — only hide spinner for real URLs
-  try {
-    if (frame.contentWindow && frame.contentWindow.location.href === 'about:blank') return;
-  } catch(e) {
-    // Cross-origin frames throw on .href access — that means a real page loaded, hide spinner
+/* ---------- Windows ---------- */
+function openTool(t){
+  const ex=wins.find(w=>w.url===t.url);
+  if(ex){ if(ex.min){ex.min=false}; focus(ex); layout(); render(); return }
+  const n=wins.length;
+  const w={...t,id:Date.now()+Math.random(),x:.03+(n%6)*.04,y:.03+(n%6)*.05,w:.5,h:.65,min:false,max:false,z:++topZ};
+  buildEl(w);wins.push(w);
+  focus(w);layout();render();
+}
+const NCOL=['#fff3a3','#ffc9d9','#c8f2c0','#bfe0ff'];
+function openNote(text){
+  const k=wins.filter(x=>x.kind==='note').length,n=wins.length;
+  const w={kind:'note',en:'便利貼',cn:'Sticky Note',url:'note:'+Date.now()+Math.random(),c:'#b8860b',text:text||'',nc:NCOL[k%4],fs:32,
+    x:.03+(n%6)*.04,y:.03+(n%6)*.05,w:.35,h:.5,min:false,max:false,z:++topZ};
+  buildEl(w);wins.push(w);focus(w);layout();render();
+  const ta=w.el.querySelector('textarea');if(ta)setTimeout(()=>ta.focus(),50);
+}
+function initNote(w,el){
+  el.classList.add('note');el.style.setProperty('--n',w.nc);
+  const b=el.querySelector('.body');b.querySelector('iframe').remove();b.querySelector('.ld').remove();
+  b.insertAdjacentHTML('afterbegin','<div class="nt"><div class="nbar"></div><textarea placeholder="輸入作業或提醒… Type here"></textarea></div>');
+  const bar=b.querySelector('.nbar'),ta=b.querySelector('textarea');
+  NCOL.forEach(c=>{const s=document.createElement('button');s.className='sw'+(c===w.nc?' on':'');s.style.background=c;s.title='換顏色';
+    s.onclick=()=>{w.nc=c;el.style.setProperty('--n',c);bar.querySelectorAll('.sw').forEach(x=>x.classList.toggle('on',x===s));save()};bar.appendChild(s)});
+  const fz=document.createElement('div');fz.className='fz';fz.innerHTML='<button title="縮小字體">A−</button><button title="放大字體">A＋</button>';bar.appendChild(fz);
+  const setF=()=>{ta.style.fontSize=w.fs+'px'};setF();
+  fz.children[0].onclick=()=>{w.fs=Math.max(14,w.fs-4);setF();save()};
+  fz.children[1].onclick=()=>{w.fs=Math.min(160,w.fs+4);setF();save()};
+  ta.value=w.text||'';ta.oninput=()=>{w.text=ta.value;save()};
+  el.querySelector('[data-a=new]').remove();
+}
+function kill(w){const f=w.el.querySelector('iframe');if(f)f.src='about:blank';w.el.remove()}
+function buildEl(w){
+  const el=document.createElement('div');el.className='win';el.style.setProperty('--c',w.c);
+  el.innerHTML=`<div class="bar"><div class="t"></div>
+    <button class="wb" data-a="new" title="新分頁開啟">↗</button>
+    <button class="wb" data-a="min" title="縮小">–</button>
+    <button class="wb" data-a="max" title="放大/還原">▢</button>
+    <button class="wb x" data-a="close" title="關閉">✕</button></div>
+    <div class="body"><div class="ld">載入中… Loading</div><iframe allowfullscreen allow="fullscreen; autoplay; microphone; camera; clipboard-write"></iframe><div class="shield"></div></div>
+    <div class="rz e" data-d="e"></div><div class="rz s" data-d="s"></div><div class="rz se" data-d="se"></div>`;
+  const t=el.querySelector('.t');t.textContent=w.en;const sm=document.createElement('small');sm.textContent=w.cn;t.appendChild(sm);
+  if(w.kind==='note')initNote(w,el);else{const fr=el.querySelector('iframe');fr.src=w.url;
+  fr.onload=()=>{fr.style.background='#fff';el.querySelector('.ld').style.display='none'};}
+  el.addEventListener('pointerdown',()=>{if(focused!==w)focus(w)},true);
+  el.querySelector('.shield').addEventListener('pointerdown',()=>focus(w));
+  el.querySelectorAll('.wb').forEach(b=>b.onclick=e=>{
+    e.stopPropagation();const a=b.dataset.a;
+    if(a==='close')closeWin(w);
+    if(a==='min'){w.min=true;if(focused===w)focused=null;layout();render()}
+    if(a==='max'){w.max=!w.max;focus(w);render()}
+    if(a==='new')window.open(w.url,'_blank');
+  });
+  const bar=el.querySelector('.bar');
+  bar.ondblclick=e=>{if(e.target===bar||e.target.closest('.t')){w.max=!w.max;render()}};
+  bar.onpointerdown=e=>{if(e.target.closest('.wb')||w.max)return;startDrag(e,w,'move',bar)};
+  el.querySelectorAll('.rz').forEach(r=>r.onpointerdown=e=>startDrag(e,w,r.dataset.d,r));
+  w.el=el;canvas.appendChild(el);
+}
+function closeWin(w){
+  kill(w);
+  wins=wins.filter(x=>x!==w);if(focused===w)focused=null;
+  layout();render();
+}
+function focus(w){
+  focused=w;w.z=++topZ;render();
+}
+/* ---------- Drag / resize ---------- */
+function startDrag(e,w,kind,handle){
+  e.preventDefault();handle.setPointerCapture(e.pointerId);
+  const cw=canvas.clientWidth,ch=canvas.clientHeight;
+  const s={px:e.clientX,py:e.clientY,x:w.x,y:w.y,w:w.w,h:w.h};
+  canvas.classList.add('busy');
+  if(mode!=='free'){mode='free';markLayout()}
+  const mv=ev=>{
+    const dx=(ev.clientX-s.px)/cw,dy=(ev.clientY-s.py)/ch;
+    if(kind==='move'){w.x=Math.min(Math.max(s.x+dx,-s.w+.1),.95);w.y=Math.min(Math.max(s.y+dy,0),.94)}
+    if(kind==='e'||kind==='se')w.w=Math.max(.12,s.w+dx);
+    if(kind==='s'||kind==='se')w.h=Math.max(.12,s.h+dy);
+    place(w);
+  };
+  const up=()=>{canvas.classList.remove('busy');handle.removeEventListener('pointermove',mv);handle.removeEventListener('pointerup',up);handle.removeEventListener('pointercancel',up);save()};
+  handle.addEventListener('pointermove',mv);handle.addEventListener('pointerup',up);handle.addEventListener('pointercancel',up);
+}
+/* ---------- Layout ---------- */
+function place(w){
+  const s=w.el.style;
+  s.left=`calc(${w.x*100}% + ${GAP}px)`;s.top=`calc(${w.y*100}% + ${GAP}px)`;
+  s.width=`calc(${w.w*100}% - ${GAP*2}px)`;s.height=`calc(${w.h*100}% - ${GAP*2}px)`;
+  s.zIndex=w.max?9000+w.z:w.z;
+}
+function rowsLayout(vis,cols){
+  const rows=Math.ceil(vis.length/cols);
+  vis.forEach((w,i)=>{
+    const r=Math.floor(i/cols),inRow=r<rows-1?cols:vis.length-r*cols;
+    const c=i-r*cols;
+    w.x=c/inRow;w.w=1/inRow;w.y=r/rows;w.h=1/rows;
+  });
+}
+function layout(){
+  const vis=wins.filter(w=>!w.min),n=vis.length;
+  if(mode==='grid'&&n){
+    const ratio=canvas.clientWidth/Math.max(canvas.clientHeight,1);
+    rowsLayout(vis,Math.min(n,Math.max(1,Math.round(Math.sqrt(n*ratio/1.2)))));
+  }else if(mode==='row'&&n){rowsLayout(vis,n)}
+  else if(mode==='main'&&n){
+    const m=vis.find(w=>w===focused)||vis[0];const rest=vis.filter(w=>w!==m);
+    if(!rest.length){m.x=0;m.y=0;m.w=1;m.h=1}
+    else{
+      m.x=0;m.y=0;m.w=.62;m.h=1;
+      rest.forEach((w,i)=>{w.x=.62;w.w=.38;w.y=i/rest.length;w.h=1/rest.length});
+    }
   }
-  loading.style.opacity = '0';
-  setTimeout(() => { loading.classList.add('hidden'); }, 300);
+  wins.forEach(place);save();
+}
+function cascade(){
+  wins.filter(w=>!w.min).forEach((w,i)=>{w.x=.02+i*.04;w.y=.02+i*.05;w.w=.6;w.h=.72;w.max=false});
+  mode='free';
+}
+function markLayout(){document.querySelectorAll('[data-lay]').forEach(b=>b.classList.toggle('act',b.dataset.lay===mode))}
+document.querySelectorAll('[data-lay]').forEach(b=>b.onclick=()=>{
+  const m=b.dataset.lay;wins.forEach(w=>w.max=false);
+  if(m==='cascade')cascade();else mode=m;
+  markLayout();layout();render();
 });
+$('#minAll').onclick=()=>{wins.forEach(w=>w.min=true);focused=null;layout();render()};
+$('#closeAll').onclick=()=>{[...wins].forEach(w=>{kill(w)});wins=[];focused=null;render();save()};
+$('#fs').onclick=()=>{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})};
+window.addEventListener('resize',()=>{if(mode!=='free')layout()});
 
-function closePanel() {
-  panel.classList.remove('open');
-  document.body.style.overflow = '';
-  if (loadTimer) clearTimeout(loadTimer);
-  frame.src = 'about:blank';
-  loading.classList.remove('hidden');
-  loading.style.opacity = '1';
-  if (activeBtn) { activeBtn.classList.remove('active'); activeBtn = null; }
+/* ---------- Render ---------- */
+function render(){
+  const top=wins.filter(w=>!w.min).sort((a,b)=>b.z-a.z)[0];
+  if(!focused||focused.min)focused=top||null;
+  wins.forEach(w=>{
+    w.el.classList.toggle('focus',w===focused);
+    w.el.classList.toggle('min',w.min);
+    w.el.classList.toggle('max',w.max);
+    place(w);
+  });
+  empty.style.display=wins.some(w=>!w.min)?'none':'flex';
+  document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('on',wins.some(w=>w.url===b.dataset.url)));
+  dock.innerHTML='';
+  if(!wins.length)dock.innerHTML='<span class="hint">已開啟的工具會顯示在這裡，點一下可切換、縮小或還原</span>';
+  wins.forEach(w=>{
+    const c=document.createElement('button');c.className='chip'+(w===focused?' focus':'')+(w.min?' min':'');
+    c.style.setProperty('--c',w.c);c.innerHTML='<i></i><span></span>';c.lastChild.textContent=w.kind==='note'?'📝 '+((w.text||'').trim().split('\n')[0].slice(0,14)||'便利貼'):w.en+' · '+w.cn;
+    c.onclick=()=>{
+      if(w.min){w.min=false;focus(w);layout()}
+      else if(w===focused){w.min=true;focused=null;layout()}
+      else focus(w);
+      render();
+    };
+    dock.appendChild(c);
+  });
+  markLayout();save();
 }
 
-document.getElementById('frameClose').addEventListener('click', closePanel);
+/* ---------- Persist ---------- */
+const strip=({kind,en,cn,url,c,x,y,w,h,min,max,z,text,nc,fs})=>({kind,en,cn,url,c,x,y,w,h,min,max,z,text,nc,fs});
+function save(){
+  try{localStorage.setItem('shirleyToolbox2',JSON.stringify({mode,side:side.classList.contains('hidden'),
+    wins:wins.map(strip)}))}catch(e){}
+}
+function restore(){
+  try{
+    const d=JSON.parse(localStorage.getItem('shirleyToolbox2')||'null');if(!d)return;
+    mode=d.mode||'grid';if(d.side)side.classList.add('hidden');
+    (d.wins||[]).forEach(o=>{const w={...o,id:Math.random()};buildEl(w);wins.push(w);topZ=Math.max(topZ,w.z||0)});
+  }catch(e){}
+}
+/* ---------- Saved setups ---------- */
+const PK='shirleyPresets',pop=$('#pop');
+const getP=()=>{try{return JSON.parse(localStorage.getItem(PK)||'[]')}catch(e){return[]}};
+const setP=a=>{try{localStorage.setItem(PK,JSON.stringify(a))}catch(e){alert('無法儲存：瀏覽器禁止儲存資料')}};
+function loadPreset(pr){
+  [...wins].forEach(kill);wins=[];focused=null;mode=pr.mode||'grid';
+  pr.wins.forEach(o=>{const w={...o,min:false};buildEl(w);wins.push(w);w.z=++topZ});
+  layout();render();
+}
+function renderPop(){
+  const ps=getP();pop.innerHTML='';
+  const mk=(t,c,txt)=>{const e=document.createElement(t);if(c)e.className=c;if(txt)e.textContent=txt;return e};
+  pop.appendChild(mk('h4','','💾 常用組合 Saved Setups'));
+  const row=mk('div','row'),inp=mk('input'),sv=mk('button','ib','儲存目前畫面'),hint=mk('div','hint');
+  inp.placeholder='命名，例如：週一早自習';inp.maxLength=30;
+  sv.onclick=()=>{
+    const name=inp.value.trim();
+    if(!wins.length){hint.textContent='請先開啟至少一個工具或便利貼';return}
+    if(!name){inp.focus();hint.textContent='請先為這個組合命名';return}
+    const a=getP().filter(x=>x.name!==name);a.push({name,mode,wins:wins.map(strip)});setP(a);renderPop();
+  };
+  row.append(inp,sv);pop.appendChild(row);
+  if(!ps.length)hint.textContent='目前沒有儲存的組合。開好需要的工具與便利貼後，命名並儲存，下次一鍵載入。';
+  pop.appendChild(hint);
+  ps.forEach(pr=>{
+    const it=mk('div','it'),n=mk('div','n'),b=mk('b','',pr.name);
+    n.append(b,mk('small','',pr.wins.length+' 個視窗：'+pr.wins.map(w=>w.kind==='note'?'便利貼':w.cn).join('、')));
+    const ld=mk('button','ib','載入'),del=mk('button','ib','🗑');del.title='刪除';
+    ld.onclick=()=>{loadPreset(pr);pop.classList.remove('open')};
+    del.onclick=()=>{setP(getP().filter(x=>x.name!==pr.name));renderPop()};
+    it.append(n,ld,del);pop.appendChild(it);
+  });
+}
+$('#pre').onclick=()=>{if(pop.classList.contains('open'))pop.classList.remove('open');else{renderPop();pop.classList.add('open')}};
+document.addEventListener('pointerdown',e=>{if(!pop.contains(e.target)&&!e.target.closest('#pre'))pop.classList.remove('open')});
 
-openBtn.addEventListener('click', () => {
-  if (currentUrl) window.open(currentUrl, '_blank');
-});
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
-});
+restore();layout();render();
 </script>
 </body>
 </html>
