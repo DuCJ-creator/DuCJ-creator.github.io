@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iVocab 愛單字</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--denim:#1B3A6B;--denim-deep:#0f2444;--denim-mid:#244d8a;--burgundy:#7B1C35;--burgundy-deep:#540f22;--burgundy-mid:#9c2440;--burgundy-bright:#b82d4d;--gold:#c9a84c;--gold-light:#e2c47a;--white:#fff}
+body{min-height:100vh;background:var(--denim-deep);color:var(--white);font-family:'DM Sans','Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0 1px,transparent 1px 4px),repeating-linear-gradient(90deg,rgba(255,255,255,.008) 0 1px,transparent 1px 6px)}
+button{font:inherit;color:inherit}
+.hero{position:relative;z-index:1;text-align:center;padding:3.5rem 2rem 2rem;background:linear-gradient(180deg,var(--burgundy-deep) 0%,var(--denim-deep) 100%);border-bottom:3px solid var(--gold)}
+.hero-badge{display:inline-block;font-size:.65rem;font-weight:500;letter-spacing:.4em;text-transform:uppercase;color:var(--gold-light);border:1px solid var(--gold);padding:5px 18px;border-radius:2px;margin-bottom:1.4rem}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,7vw,5rem);font-weight:900;letter-spacing:.04em;line-height:1;text-shadow:0 2px 20px rgba(0,0,0,.5);margin-bottom:.5rem}
+.hero-title em{font-style:italic;color:var(--gold-light)}
+.hero-sub{font-family:'Playfair Display',serif;font-size:1.05rem;font-style:italic;color:rgba(255,255,255,.65);letter-spacing:.06em}
+.hero-rule{display:flex;align-items:center;gap:14px;margin:1.6rem auto 0;max-width:360px}
+.hero-rule-line{flex:1;height:1px;background:var(--gold);opacity:.5}
+.hero-rule-diamond{width:8px;height:8px;background:var(--gold);transform:rotate(45deg)}
+.container{position:relative;z-index:1;max-width:1060px;margin:0 auto;padding:2.8rem 1.6rem 5rem;display:flex;flex-direction:column;gap:3rem}
+.cat-header{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:6px 6px 0 0;border-left:4px solid var(--gold)}
+.cat-ai .cat-header{background:linear-gradient(135deg,var(--denim) 0%,var(--denim-mid) 100%)}
+.cat-subject .cat-header{background:linear-gradient(135deg,var(--burgundy-deep) 0%,var(--burgundy) 100%)}
+.cat-text{flex:1}
+.cat-title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;line-height:1.1}
+.cat-sub{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.75);margin-top:3px}
+.cat-icon{font-size:24px;opacity:.85}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px;background:rgba(15,36,68,.5);border:1px solid rgba(201,168,76,.2);border-top:none;border-radius:0 0 6px 6px;padding:14px}
+.tools-grid.wide{grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}
+.tool-btn{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border-radius:4px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.1);cursor:pointer;transition:background .18s,border-color .18s,transform .18s;text-align:left;gap:8px}
+.tool-btn:hover{background:rgba(255,255,255,.1);border-color:var(--gold);transform:translateY(-2px)}
+.tool-btn.active{background:rgba(201,168,76,.15);border-color:var(--gold)}
+.tool-ic{font-size:26px;flex-shrink:0}
+.tool-names{flex:1;min-width:0}
+.tool-name{font-size:.8rem;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tool-cn{font-size:.65rem;color:rgba(255,255,255,.5);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wide .tool-btn{padding:16px}
+.wide .tool-name{font-size:1rem}
+.wide .tool-cn{font-size:.8rem;color:var(--gold-light)}
+.tool-desc{font-size:.76rem;line-height:1.5;color:rgba(255,255,255,.62);margin-top:6px;white-space:normal}
+.tool-arr{font-size:10px;color:var(--gold);opacity:.6;flex-shrink:0;transition:opacity .2s,transform .2s}
+.tool-btn:hover .tool-arr{opacity:1;transform:translate(2px,-2px)}
+.frame-panel{display:none;position:fixed;inset:0;z-index:1000;background:rgba(10,20,40,.92);flex-direction:column}
+.frame-panel.open{display:flex}
+.frame-topbar{width:100%;background:linear-gradient(90deg,var(--burgundy-deep),var(--denim-deep));border-bottom:2px solid var(--gold);display:flex;align-items:center;gap:12px;padding:0 16px;height:52px;flex-shrink:0}
+.frame-title-text{flex:1;font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.frame-title-cn{font-size:.7rem;color:rgba(255,255,255,.55);flex-shrink:0}
+.frame-close{width:34px;height:34px;border-radius:4px;background:rgba(123,28,53,.5);border:1px solid var(--burgundy-bright);font-size:16px;cursor:pointer;flex-shrink:0}
+.frame-close:hover{background:var(--burgundy)}
+.frame-open-btn{height:34px;padding:0 12px;border-radius:4px;background:rgba(201,168,76,.12);border:1px solid var(--gold);color:var(--gold-light);font-size:.72rem;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.frame-open-btn:hover{background:rgba(201,168,76,.25)}
+.frame-wrapper{flex:1;width:100%;position:relative;overflow:hidden}
+.frame-wrapper iframe{width:100%;height:100%;border:none;display:block;background:#fff}
+.frame-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--denim-deep);color:rgba(255,255,255,.5);font-size:.85rem;gap:12px;pointer-events:none;transition:opacity .3s}
+.frame-loading.hidden{opacity:0}
+.spinner{width:32px;height:32px;border:2px solid rgba(201,168,76,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.footer{position:relative;z-index:1;text-align:center;padding:1rem 0 2.5rem;font-family:'Playfair Display',serif;font-size:.85rem;font-style:italic;color:rgba(255,255,255,.25);letter-spacing:.1em;border-top:1px solid rgba(201,168,76,.15)}
+@media (max-width:500px){.tools-grid{grid-template-columns:repeat(2,1fr)}.tools-grid.wide{grid-template-columns:1fr}.hero-title{font-size:2.4rem}.frame-title-cn{display:none}}
+</style>
+</head>
+<body>
+
+<div class="frame-panel" id="framePanel">
+  <div class="frame-topbar">
+    <button class="frame-close" id="frameClose" aria-label="Close">✕</button>
+    <div class="frame-title-text" id="frameTitleText">Tool</div>
+    <div class="frame-title-cn" id="frameTitleCn"></div>
+    <button class="frame-open-btn" id="frameOpenBtn">↗ Open in new tab</button>
+  </div>
+  <div class="frame-wrapper">
+    <div class="frame-loading" id="frameLoading"><div class="spinner"></div><span>Loading tool…</span></div>
+    <iframe id="mainFrame" title="Tool viewer" allowfullscreen allow="fullscreen; autoplay; microphone; clipboard-write"></iframe>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-badge">✦ Digital Teaching Companion ✦</div>
+  <div class="hero-title"><em>iVocab</em> 愛單字</div>
+  <div class="hero-sub">單字學習、測驗與題庫整合 — Shirley's Digital Classroom</div>
+  <div class="hero-rule"><div class="hero-rule-line"></div><div class="hero-rule-diamond"></div><div class="hero-rule-line"></div></div>
+</div>
+
+<div class="container" id="container"></div>
+
+<div class="footer">✦ &nbsp; Shirley's Digital Classroom &nbsp;·&nbsp; 數位教室 &nbsp; ✦</div>
+
+<script>
+const CATS=[
+ {cls:'cat-subject',wide:true,en:'iVocab',cn:'愛單字',icon:'📖',tools:[
+  {icon:'📖',en:'Shirley Vocab',cn:'Shirley 單字',desc:'Shirley老師單字平台',url:'https://ducj-creator.github.io/shirleyvocab.html'},
+  {icon:'📕',en:'CHHS iVocab',cn:'iVocab 忠信',desc:'iVocab 忠信資源整合支援平台',url:'https://script.google.com/a/macros/chhs.hcc.edu.tw/s/AKfycbzgurpTFuXPlWlBhV9bJ8_E6aiGUTUUxIOifkv1abOLg6AgV39vZ5xWdtlv0tXL2XU9_g/exec'},
+  {icon:'📖',en:'iVocab Quiz',cn:'單字測驗',desc:'互動式單字測驗，強化英文詞彙記憶，支援自訂題庫與即時回饋。',url:'https://ivocab-quiz.vercel.app/'},
+  {icon:'🔗',en:'Quiz-Form',cn:'Form測驗',desc:'將測驗變成線上Google Form。',url:'https://script.google.com/a/macros/chhs.hcc.edu.tw/s/AKfycbyhJVgb2yqreS235fJ7srXcVAdp9Hd9dwHqIQEbJPlbAcbmAGMvnUBi1EukCm3-jdlm/exec'},
+  {icon:'📝',en:'GSAT Mock Creator',cn:'模擬卷生成',desc:'學測模擬卷自動生成器，一鍵建立符合考試格式的練習題組。',url:'https://gsat-mock.vercel.app/'}]}
+];
+const $=id=>document.getElementById(id);
+const panel=$('framePanel'),frame=$('mainFrame'),loading=$('frameLoading');
+let currentUrl='',activeBtn=null,loadTimer=null;
+
+CATS.forEach(cat=>{
+  const sec=document.createElement('div');sec.className='category '+cat.cls;
+  sec.innerHTML='<div class="cat-header"><div class="cat-text"><div class="cat-title"></div><div class="cat-sub"></div></div><div class="cat-icon"></div></div><div class="tools-grid'+(cat.wide?' wide':'')+'"></div>';
+  sec.querySelector('.cat-title').textContent=cat.en;
+  sec.querySelector('.cat-sub').textContent=cat.cn;
+  sec.querySelector('.cat-icon').textContent=cat.icon;
+  const grid=sec.querySelector('.tools-grid');
+  cat.tools.forEach(t=>{
+    const b=document.createElement('button');b.className='tool-btn';
+    b.innerHTML='<span class="tool-ic"></span><div class="tool-names"><div class="tool-name"></div><div class="tool-cn"></div><div class="tool-desc"></div></div><span class="tool-arr">▶</span>';
+    const ic=b.querySelector('.tool-ic');if(t.icon)ic.textContent=t.icon;else ic.remove();
+    b.querySelector('.tool-name').textContent=t.en;
+    b.querySelector('.tool-cn').textContent=t.cn;
+    const d=b.querySelector('.tool-desc');if(t.desc)d.textContent=t.desc;else d.remove();
+    b.onclick=()=>openTool(b,t);
+    grid.appendChild(b);
+  });
+  $('container').appendChild(sec);
+});
+
+function openTool(btn,t){
+  if(activeBtn===btn&&panel.classList.contains('open'))return;
+  if(activeBtn)activeBtn.classList.remove('active');
+  btn.classList.add('active');activeBtn=btn;currentUrl=t.url;
+  $('frameTitleText').textContent=t.en;$('frameTitleCn').textContent=t.cn;
+  loading.classList.remove('hidden');loading.style.opacity='1';
+  panel.classList.add('open');document.body.style.overflow='hidden';
+  if(loadTimer)clearTimeout(loadTimer);
+  frame.src='about:blank';
+  loadTimer=setTimeout(()=>{frame.src=t.url},80);
+}
+frame.addEventListener('load',()=>{
+  try{if(frame.contentWindow&&frame.contentWindow.location.href==='about:blank')return}catch(e){}
+  loading.style.opacity='0';setTimeout(()=>loading.classList.add('hidden'),300);
+});
+function closePanel(){
+  panel.classList.remove('open');document.body.style.overflow='';
+  if(loadTimer)clearTimeout(loadTimer);
+  frame.src='about:blank';loading.classList.remove('hidden');loading.style.opacity='1';
+  if(activeBtn){activeBtn.classList.remove('active');activeBtn=null}
+}
+$('frameClose').onclick=closePanel;
+$('frameOpenBtn').onclick=()=>{if(currentUrl)window.open(currentUrl,'_blank')};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&panel.classList.contains('open'))closePanel()});
+</script>
+</body>
+</html>
