@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>單字比賽考古高頻字及魔王單字練習</title>
+  <title>考古高頻字及魔王單字練習</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fraunces:opsz,wght@9..144,700;9..144,900&display=swap">
   <style>
     :root {
@@ -166,13 +166,47 @@
     #exam-result-panel .result-table tbody tr:nth-child(even){background:rgba(91,75,219,.04)}
     .tab-btn,.chip,.btn{-webkit-tap-highlight-color:transparent}
     @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+
+    /* ===== 配色：深藍 × 金黃 × 奶油 ===== */
+    :root{--primary:#1f2a4a;--primary-hover:#2c3a63;--accent:#e8b43c;--bg-color:#fff7e6;--card-bg:#fffdf8;--text:#1f2a4a;--text-muted:#7b7566;--border:#f0e3c4;--soft:#fbf0d2;--correct:#2f9e6e;--incorrect:#d9534f;--shadow:0 1px 2px rgba(31,42,74,.06),0 10px 28px -10px rgba(31,42,74,.22)}
+    @media(prefers-color-scheme:dark){:root{--primary:#e8b43c;--primary-hover:#f3c75e;--accent:#e8b43c;--bg-color:#141b33;--card-bg:#1f2a4a;--text:#fff3d6;--text-muted:#b9b39f;--border:#33406a;--soft:#2a3760;--shadow:0 10px 28px -10px rgba(0,0,0,.6)}
+      .btn-primary,.tab-btn.active,.chip.on{color:#1f2a4a!important}}
+    body{background:var(--bg-color)}
+    header{background:#1f2a4a;animation:none;border-bottom:6px solid #e8b43c;border-radius:0 0 18px 18px;padding:26px 20px 24px;box-shadow:0 14px 30px -16px rgba(31,42,74,.6)}
+    header::before,header::after{display:none}
+    .bee{position:relative;font-size:2.6rem;line-height:1;margin-bottom:6px}
+    h1{color:#e8b43c;font-family:'Noto Sans TC',sans-serif;font-weight:900;letter-spacing:2px;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+    h1::after{display:none}
+    header p{color:#d6dcf0;letter-spacing:4px;font-size:.8rem;font-weight:500}
+    .nav-tabs{background:#fff;border:1px solid var(--border)}
+    .tab-btn.active{background:#1f2a4a;color:#e8b43c;box-shadow:0 6px 14px -6px #1f2a4a}
+    .card::before{background:linear-gradient(90deg,#1f2a4a,#e8b43c)}
+    .btn-primary{background:#1f2a4a;color:#e8b43c;box-shadow:0 8px 18px -8px #1f2a4a}
+    .btn-primary:hover{background:#2c3a63}
+    .btn-secondary{background:#fbf0d2;color:#1f2a4a}
+    .btn-success{background:linear-gradient(135deg,#e8b43c,#f3c75e);color:#1f2a4a;box-shadow:0 8px 18px -8px #e8b43c}
+    .chip.on{background:#1f2a4a;color:#e8b43c;border-color:#1f2a4a;box-shadow:0 6px 14px -6px #1f2a4a}
+    .p-progress i,.timer-bar{background:linear-gradient(90deg,#1f2a4a,#e8b43c)}
+    #practice .status-bar + .audio-controls .btn-primary{animation:pulse2 2.4s ease-out infinite}
+    @keyframes pulse2{0%{box-shadow:0 0 0 0 rgba(232,180,60,.6)}70%,100%{box-shadow:0 0 0 16px rgba(232,180,60,0)}}
+    .slot.cur{border-color:#e8b43c;background:#fff3cf;box-shadow:0 10px 18px -8px #e8b43c}
+    .slot.hintc{color:#1f2a4a}
+    .tag-freq{background:#e6e9f4;color:#1f2a4a}.tag-hard{background:#fde9c8;color:#a0561a}
+    .hint-box{background:#fff3cf;color:#6b4a0a;border-left-color:#e8b43c}
+    input[type=text]:focus{border-color:#e8b43c;box-shadow:0 0 0 4px rgba(232,180,60,.28)}
+    .word-list-table th,.result-table th{background:#1f2a4a;color:#e8b43c}
+    .word-list-table tbody tr:hover,.result-table tbody tr:hover{background:#fbf0d2}
+    #exam-result-panel .result-table tbody tr:nth-child(even){background:rgba(232,180,60,.08)}
+    #final-score{color:#1f2a4a}
+    @media(prefers-color-scheme:dark){#final-score{color:#e8b43c}.nav-tabs{background:#1f2a4a}.slot.cur{background:#3a3a2a}.word-list-table th,.result-table th{background:#141b33}.btn-secondary{background:#2a3760;color:#fff3d6}}
   </style>
 </head>
 <body>
 
   <header>
-    <h1>🏆 單字比賽考古高頻字及魔王單字練習</h1>
-    <p>模擬考自動推進模式（8 秒極速作答，最後統一核對）</p>
+    <div class="bee">🐝</div>
+    <h1>考古高頻字及魔王單字練習</h1>
+    <p>SPELL • LISTEN • WIN</p>
   </header>
 
   <div class="nav-tabs">
