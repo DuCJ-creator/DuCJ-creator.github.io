@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Learn and practise all 570 word families in the Academic Word List.">
+  <meta name="theme-color" content="#17324d">
+  <title>AWL Study Desk — Academic Word List</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="AWL Study Desk home">
+      <span class="brand-mark" aria-hidden="true">A</span>
+      <span><strong>AWL Study Desk</strong><small>Academic Word List</small></span>
+    </a>
+    <nav class="mode-tabs" aria-label="Study mode">
+      <button class="mode-tab is-active" data-mode="learn" aria-pressed="true" onclick="void 0">Learn</button>
+      <button class="mode-tab" data-mode="practise" aria-pressed="false" onclick="void 0">Practise</button>
+    </nav>
+    <div class="overall-progress" aria-label="Overall learning progress">
+      <span id="progressText">0 of 570 learned</span>
+      <span class="progress-track"><span id="progressFill"></span></span>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="intro" aria-labelledby="pageTitle">
+      <p class="eyebrow">10 sublists · 570 word families</p>
+      <h1 id="pageTitle">Build the language<br>behind strong ideas.</h1>
+      <p class="intro-copy">Study the Academic Word List by frequency, hear each word in British English, and test your understanding in focused practice sets.</p>
+    </section>
+
+    <div class="sublist-strip" aria-label="Choose a sublist" id="sublistNav"></div>
+
+    <section id="learnView" class="workspace" aria-label="Learn words">
+      <aside class="word-browser" aria-label="Word browser">
+        <div class="browser-heading">
+          <div><span class="section-kicker" id="sublistLabel">Sublist 1</span><h2 id="listHeading">Most frequent</h2></div>
+          <span id="resultCount" class="result-count">60 words</span>
+        </div>
+        <label class="search-field">
+          <span class="sr-only">Search all words</span>
+          <span aria-hidden="true">⌕</span>
+          <input id="searchInput" type="search" placeholder="Search all 570 words" autocomplete="off">
+          <button id="clearSearch" type="button" aria-label="Clear search" onclick="void 0" hidden>×</button>
+        </label>
+        <div id="wordList" class="word-list" role="listbox" aria-label="Words"></div>
+      </aside>
+
+      <article id="wordDetail" class="word-detail" aria-live="polite">
+        <div class="detail-topline"><span id="detailMeta">Sublist 1 · Word 1</span><button id="learnedButton" class="learned-button" type="button" aria-pressed="false" onclick="void 0">Mark as learned</button></div>
+        <div class="word-title-row"><h2 id="detailWord">analysis</h2><button class="speak-button" id="speakWord" type="button" aria-label="Hear the word analysis" onclick="void 0"><span aria-hidden="true">◖))</span> Hear word</button></div>
+        <p id="detailPos" class="part-of-speech">noun</p>
+        <section class="detail-section"><h3>Meaning</h3><p id="detailDefinition"></p></section>
+        <section class="detail-section example-block"><div class="section-title-row"><h3>In academic writing</h3><button class="icon-button" id="speakExample" type="button" aria-label="Hear the example sentence" onclick="void 0"><span aria-hidden="true">◖))</span></button></div><blockquote id="detailExample"></blockquote></section>
+        <section class="detail-section"><div class="section-title-row"><h3>Word family</h3><span id="familyCount"></span></div><div id="familyWords" class="family-words"></div></section>
+        <div class="detail-nav"><button id="prevWord" type="button" onclick="void 0">← Previous</button><button id="nextWord" type="button" onclick="void 0">Next word →</button></div>
+      </article>
+    </section>
+
+    <section id="practiseView" class="practise-view" aria-label="Vocabulary practice" hidden>
+      <div class="practice-brief">
+        <span class="section-kicker" id="practiceSublist">Sublist 1 practice</span>
+        <h2>Choose the word that best completes the sentence.</h2>
+        <p>Ten questions are drawn from the current sublist. You can hear the complete sentence after answering.</p>
+      </div>
+      <article class="quiz-card">
+        <div class="quiz-progress"><span id="quizCounter">Question 1 of 10</span><span id="quizScore">0 correct</span></div>
+        <div class="quiz-track"><span id="quizFill"></span></div>
+        <p id="quizPrompt" class="quiz-prompt"></p>
+        <div id="quizOptions" class="quiz-options"></div>
+        <div id="quizFeedback" class="quiz-feedback" role="status" aria-live="polite"></div>
+        <div class="quiz-actions"><button id="restartQuiz" class="secondary-button" type="button" onclick="void 0">New set</button><button id="nextQuestion" class="primary-button" type="button" disabled>Next question</button></div>
+      </article>
+    </section>
+  </main>
+
+  <footer><p>Based on Averil Coxhead’s Academic Word List. Progress is saved on this device.</p><p>Pronunciation uses an available <span lang="en">en-NZ</span> or <span lang="en">en-GB</span> system voice.</p></footer>
+  <div id="status" class="sr-only" aria-live="polite"></div>
+  <script src="app.js" defer></script>
+</body>
+</html>
