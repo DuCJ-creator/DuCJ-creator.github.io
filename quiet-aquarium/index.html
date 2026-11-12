@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#041d24">
+  <meta name="description" content="Shirley 的互動海底世界。">
+  <title>Shirley’s 海底世界</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="aquarium-shell" aria-labelledby="app-title">
+    <canvas id="aquarium" aria-label="動態海底世界：安靜時會迎來有編號的可愛海洋住客，音量升高時鯊魚會靠近"></canvas>
+
+    <div class="water-surface" aria-hidden="true"></div>
+    <div class="glass-edge glass-edge--left" aria-hidden="true"></div>
+    <div class="glass-edge glass-edge--right" aria-hidden="true"></div>
+
+    <header class="masthead">
+      <div class="brand-lockup"><h1 id="app-title">Shirley’s 海底世界</h1></div>
+      <button class="glass-button glass-button--icon" id="fullscreenButton" type="button" aria-label="進入全螢幕" title="全螢幕" onclick="window.aquariumActions.toggleFullscreen()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+      </button>
+    </header>
+
+    <aside class="sound-meter" aria-label="目前分貝">
+      <div class="sound-meter__reading"><span id="dbValue">—</span><small>dB</small></div>
+      <div class="sound-meter__track" id="orbRing" aria-hidden="true"><span id="dbMeterFill"></span></div>
+    </aside>
+
+    <section class="quiet-card quiet-card--compact" id="quietCard" aria-label="安靜進度" hidden>
+      <button class="quiet-card__hide" type="button" aria-label="隱藏安靜進度" title="隱藏進度" onclick="window.aquariumActions.toggleProgress(false)">×</button>
+      <div class="quiet-card__topline">
+        <div>
+          <span class="card-label">下一位住客</span>
+          <strong id="countdown">01:00</strong>
+        </div>
+        <div class="fish-count">
+          <span id="fishCount">1</span>
+          <small>隻</small>
+        </div>
+      </div>
+      <div class="progress-track" role="progressbar" aria-label="安靜一分鐘進度" aria-valuemin="0" aria-valuemax="60" aria-valuenow="0" id="progressBar">
+        <span id="progressFill"></span>
+      </div>
+      <p id="quietMessage" class="visually-hidden" role="status" aria-live="polite"></p>
+    </section>
+
+    <div class="primary-controls">
+      <button class="listen-button" id="listenButton" type="button" onclick="window.aquariumActions.toggleListening()">
+        <span class="listen-button__pulse" aria-hidden="true"></span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Zm-7 9a7 7 0 0 0 14 0M12 19v3M9 22h6"/></svg>
+        <span id="listenLabel" class="visually-hidden">開始聆聽</span>
+      </button>
+      <button class="glass-button glass-button--icon" id="settingsButton" type="button" aria-label="調整靈敏度" title="靈敏度" aria-expanded="false" aria-controls="settingsPanel" onclick="window.aquariumActions.toggleSettings()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M7 14v6"/></svg>
+      </button>
+      <button class="glass-button glass-button--icon" id="progressToggleButton" type="button" aria-label="顯示安靜進度" title="安靜進度" onclick="window.aquariumActions.toggleProgress(true)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v6l4 2M21 12a9 9 0 1 1-3-6.7M18 2v4h-4"/></svg>
+      </button>
+    </div>
+
+    <section class="settings-panel" id="settingsPanel" aria-label="監測設定" hidden>
+      <div class="settings-row">
+        <label for="thresholdRange">安靜門檻</label>
+        <output id="thresholdOutput" for="thresholdRange">50 dB</output>
+      </div>
+      <input id="thresholdRange" type="range" min="38" max="68" value="50" step="1">
+      <div class="settings-row settings-row--calibration">
+        <label for="sensitivityRange">收音校正</label>
+        <output id="sensitivityOutput" for="sensitivityRange">標準</output>
+      </div>
+      <input id="sensitivityRange" type="range" min="-15" max="15" value="0" step="1">
+      <div class="settings-guide" aria-label="鯊魚音量反應門檻">
+        <span>甦醒 <b id="wakeDb">47 dB</b></span>
+        <span>惱怒 <b id="angryDb">54 dB</b></span>
+        <span>攻擊 <b id="attackDb">60 dB</b></span>
+      </div>
+      <p class="settings-guide__note">攻擊音量持續約 1.5 秒，就會鎖定一位住客。</p>
+      <div class="settings-actions">
+        <button class="attack-demo-button" type="button" id="demoAttackButton" onclick="window.aquariumActions.demoAttack()">演示鯊魚攻擊</button>
+        <button type="button" id="testFishButton" onclick="window.aquariumActions.testFish()">迎接一位住客</button>
+        <button type="button" id="resetButton" onclick="window.aquariumActions.reset()">重新開始</button>
+      </div>
+      <p>聲音只在這台裝置上分析，不會錄音或上傳。</p>
+    </section>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
