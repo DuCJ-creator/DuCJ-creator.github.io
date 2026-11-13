@@ -1,0 +1,9 @@
+{
+  "profile": "product-learning",
+  "sourceRoots": ["."],
+  "locale": "zh-Hant",
+  "ownership": {
+    "Select/Listbox": "native"
+  },
+  "requiredCapabilities": []
+}

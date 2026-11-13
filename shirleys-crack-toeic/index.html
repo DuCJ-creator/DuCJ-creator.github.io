@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Shirley's Crack TOEIC：整合七大題型、863 字主題字彙、互動練習與學術學習法的 TOEIC 準備平台。">
+  <meta name="theme-color" content="#17223B">
+  <title>Shirley's Crack TOEIC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=20261113-5">
+  <script src="content.js?v=20261113-5" defer></script>
+  <script src="grammar-proofreading.js?v=20261113-5" defer></script>
+  <script src="app.js?v=20261113-5" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content · 跳到主要內容</a>
+  <div class="app-shell">
+    <aside class="study-rail" aria-label="Primary navigation 主要導覽">
+      <a class="brand" href="#dashboard" aria-label="Shirley's Crack TOEIC home 首頁">
+        <span class="brand-mark" aria-hidden="true">S</span>
+        <span><b>Shirley's</b><small>Crack TOEIC</small></span>
+      </a>
+      <nav class="rail-nav">
+        <a href="#dashboard" data-route="dashboard"><span aria-hidden="true">⌂</span>Overview <small>總覽</small></a>
+        <a href="#exam" data-route="exam"><span aria-hidden="true">07</span>Exam Strategy <small>題型攻略</small></a>
+        <a href="#vocab" data-route="vocab"><span aria-hidden="true">Aa</span>Vocabulary <small>字彙實驗室</small></a>
+        <a href="#practice" data-route="practice"><span aria-hidden="true">✓</span>Practice <small>模擬訓練</small></a>
+        <a href="#proofread" data-route="proofread"><span aria-hidden="true">¶</span>Proofreading <small>校對實驗室</small></a>
+        <a href="#readiness" data-route="readiness"><span aria-hidden="true">✦</span>University <small>大學先修</small></a>
+      </nav>
+      <div class="rail-footer">
+        <p>Study streak · 連續學習</p>
+        <strong><span id="streak-count">0</span> days</strong>
+        <div class="micro-progress" aria-label="Weekly study progress 本週學習進度"><span id="week-progress"></span></div>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="mobile-header">
+        <a class="brand" href="#dashboard"><span class="brand-mark">S</span><span><b>Shirley's</b><small>Crack TOEIC</small></span></a>
+        <button type="button" onclick="void 0" class="icon-button" id="mobile-nav-toggle" aria-expanded="false" aria-controls="mobile-nav"><span class="sr-only">Open navigation · 開啟導覽</span>☰</button>
+      </header>
+      <nav class="mobile-nav" id="mobile-nav" aria-label="行動版導覽">
+        <a href="#dashboard" data-route="dashboard">Overview · 總覽</a>
+        <a href="#exam" data-route="exam">Strategy · 攻略</a>
+        <a href="#vocab" data-route="vocab">Vocabulary · 字彙</a>
+        <a href="#practice" data-route="practice">Practice · 訓練</a>
+        <a href="#proofread" data-route="proofread">Proofread · 校對</a>
+        <a href="#readiness" data-route="readiness">University · 大學</a>
+      </nav>
+
+      <main id="main-content" tabindex="-1">
+        <section class="view" data-view="dashboard" aria-labelledby="dashboard-title">
+          <div class="hero-grid">
+            <div class="hero-copy">
+              <p class="eyebrow">TOEIC L&amp;R · Academic Training Desk</p>
+              <h1 id="dashboard-title">Read the test.<br><em>Own the language.</em><span class="zh-title">看懂考試，掌握語言。</span></h1>
+              <p class="hero-lede">Turn 200 questions into a learnable system: hear intention, read structure, use vocabulary in context, and build skills for university. <span class="zh-support">把 200 題變成可學習的系統：聽出意圖、讀出結構、在情境中運用字彙，並建立大學所需能力。</span></p>
+              <div class="hero-actions">
+                <button type="button" onclick="void 0" class="button primary" data-go="practice">Start today's practice · 開始訓練 <span aria-hidden="true">→</span></button>
+                <button type="button" onclick="void 0" class="button quiet" data-go="exam">Explore the exam · 考試地圖</button>
+              </div>
+            </div>
+            <div class="score-stamp" aria-label="目標分數設定">
+              <span>Target</span>
+              <strong id="target-score-display">850</strong>
+              <button type="button" onclick="void 0" class="text-button" id="edit-target">Edit · 調整</button>
+            </div>
+          </div>
+
+          <section class="exam-map-section" aria-labelledby="exam-map-title">
+            <div class="section-heading compact">
+              <div><p class="eyebrow">The 200-question anatomy</p><h2 id="exam-map-title">See the whole exam <span class="zh-inline">一張圖讀懂整份考卷</span></h2></div>
+              <div class="legend" aria-label="圖例"><span><i class="listen-dot"></i>Listening 45 min</span><span><i class="read-dot"></i>Reading 75 min</span></div>
+            </div>
+            <div class="exam-matrix" id="exam-matrix" aria-label="TOEIC 200 題題型分布圖"></div>
+            <div class="matrix-labels" id="matrix-labels"></div>
+          </section>
+
+          <section class="today-grid" aria-labelledby="today-title">
+            <div class="section-heading compact"><div><p class="eyebrow">Today, not someday</p><h2 id="today-title">Your 24-minute plan <span class="zh-inline">今天的 24 分鐘</span></h2></div><span class="time-badge">24:00</span></div>
+            <article class="today-card accent-listen"><span class="task-index">01</span><div><p>Listening · Part 2</p><h3>Recognise question functions <span class="zh-support">辨認問句功能與間接回答</span></h3><small>8 min · 3 questions · 3 題</small></div><button type="button" onclick="void 0" class="circle-button" data-practice-part="2" aria-label="Start Part 2 practice 開始 Part 2 練習">→</button></article>
+            <article class="today-card accent-read"><span class="task-index">02</span><div><p>Reading · Part 5</p><h3>Identify the part of speech first <span class="zh-support">先判斷詞性，不急著翻譯</span></h3><small>8 min · 4 questions · 4 題</small></div><button type="button" onclick="void 0" class="circle-button" data-practice-part="5" aria-label="Start Part 5 practice 開始 Part 5 練習">→</button></article>
+            <article class="today-card"><span class="task-index">03</span><div><p>Vocabulary · Smart review</p><h3>Review high-frequency workplace words <span class="zh-support">複習尚未熟練的職場字彙</span></h3><small>8 min · 10 words · 10 字</small></div><button type="button" onclick="void 0" class="circle-button" data-go="vocab" aria-label="Start vocabulary review 開始字彙複習">→</button></article>
+          </section>
+
+          <section class="insight-strip" aria-label="學習提示">
+            <span class="quote-mark" aria-hidden="true">“</span>
+            <blockquote>Speed is not reading faster. It is knowing what to look for earlier.</blockquote>
+            <p>Use Survey and Question from SQ3R before entering a Part 7 passage.<span class="zh-support">真正的速度不是讀得快，而是更早知道該找什麼。</span></p>
+          </section>
+        </section>
+
+        <section class="view" data-view="exam" aria-labelledby="exam-title" hidden>
+          <header class="page-header"><p class="eyebrow">Exam intelligence · 考試洞察</p><h1 id="exam-title">Seven parts.<br>Seven decisions.<span class="zh-title">七大題型，七種決策。</span></h1><p>Each part has its own signals, distractors, and time cost. Build a repeatable decision process for each one. <span class="zh-support">每一 Part 都有自己的訊號、干擾選項與時間成本；為每種題型建立可重複的解題程序。</span></p></header>
+          <div class="part-tabs" id="part-tabs" role="tablist" aria-label="選擇 TOEIC 題型"></div>
+          <div id="part-detail" class="part-detail"></div>
+          <section class="time-plan" aria-labelledby="time-plan-title">
+            <div><p class="eyebrow">Reading pacing · 閱讀配速</p><h2 id="time-plan-title">Plan the 75 minutes <span class="zh-inline">規劃 75 分鐘</span></h2><p>Use this as a starting point, then adjust it with evidence from your practice. <span class="zh-support">這是起始建議；請依練習後的正確率調整。</span></p></div>
+            <div class="time-bar" aria-label="閱讀各題型建議時間"><span style="--w:13.3%">P5 <b>10m</b></span><span style="--w:10.7%">P6 <b>8m</b></span><span style="--w:76%">P7 <b>57m</b></span></div>
+          </section>
+        </section>
+
+        <section class="view" data-view="vocab" aria-labelledby="vocab-title" hidden>
+          <header class="page-header split"><div><p class="eyebrow">863 words · 8 domains</p><h1 id="vocab-title">Vocabulary Lab<span class="zh-title">字彙實驗室</span></h1><p>Learn words through part of speech, collocation, and workplace context—not isolated translation. <span class="zh-support">透過詞性、搭配與職場句境學習，不背孤立中文。</span></p></div><div class="vocab-stat"><strong id="mastered-count">0</strong><span>mastered · 已熟練</span></div></header>
+          <div class="vocab-tools">
+            <label class="search-field" for="vocab-search"><span class="sr-only">Search vocabulary 搜尋字彙</span><span aria-hidden="true">⌕</span><input id="vocab-search" type="search" placeholder="Search a word, meaning, or example · 搜尋字彙或例句" autocomplete="off"><button id="clear-search" type="button" onclick="void 0" aria-label="Clear search 清除搜尋" hidden>×</button></label>
+            <label>Domain · 主題<select id="chapter-filter"><option value="all">All domains · 全部主題</option></select></label>
+            <label>Sort · 排序<select id="vocab-sort"><option value="original">Course order · 教材順序</option><option value="az">A–Z</option><option value="unfamiliar">Review first · 待複習優先</option></select></label>
+          </div>
+          <div class="vocab-layout">
+            <section class="flashcard-panel" aria-labelledby="flashcard-title">
+              <div class="flashcard-meta"><span id="flashcard-counter">— / —</span><button type="button" onclick="void 0" class="text-button" id="shuffle-vocab">Random word · 隨機一字</button></div>
+              <article class="flashcard" id="flashcard" tabindex="0" aria-describedby="flip-hint">
+                <div class="card-face card-front"><p id="flashcard-domain"></p><h2 id="flashcard-title">Loading…</h2><span id="flashcard-pos"></span><small id="flip-hint">Click or press Enter to flip · 按一下或按 Enter 翻面</small></div>
+                <div class="card-face card-back"><h3 id="flashcard-meaning"></h3><p id="flashcard-example"></p><p class="translation" id="flashcard-translation"></p></div>
+              </article>
+              <div class="flashcard-actions"><button type="button" onclick="void 0" class="button quiet" id="mark-review">Review again · 還不熟</button><button type="button" onclick="void 0" class="button primary" id="mark-mastered">Mastered · 記住了</button></div>
+            </section>
+            <section class="word-bank" aria-labelledby="bank-title"><div class="bank-head"><h2 id="bank-title">Word bank</h2><span id="word-result-count">0 words</span></div><div class="word-list" id="word-list"></div><button type="button" onclick="void 0" class="button quiet full" id="load-more-words">Load more · 載入更多</button></section>
+          </div>
+        </section>
+
+        <section class="view" data-view="practice" aria-labelledby="practice-title" hidden>
+          <header class="page-header split"><div><p class="eyebrow">Original practice · instant feedback</p><h1 id="practice-title">Practice Room<span class="zh-title">模擬訓練</span></h1><p>Answer in English, then use the bilingual explanation to understand the decision. <span class="zh-support">先用英文作答，再利用雙語解析理解判斷依據。</span></p></div><div class="practice-score"><span>session accuracy · 本回正確率</span><strong id="session-score">—</strong></div></header>
+          <div class="practice-setup" id="practice-setup">
+            <fieldset><legend>Choose a focus · 選擇範圍</legend><div class="segmented" id="practice-part-options"></div></fieldset>
+            <fieldset><legend>Number of questions · 題數</legend><div class="segmented"><label><input type="radio" name="question-count" value="5" checked><span>5 questions · 5 題</span></label><label><input type="radio" name="question-count" value="10"><span>10 questions · 10 題</span></label><label><input type="radio" name="question-count" value="all"><span>All · 全部</span></label></div></fieldset>
+            <button type="button" onclick="void 0" class="button primary large" id="start-practice">Start practice · 開始訓練 <span aria-hidden="true">→</span></button>
+          </div>
+          <section class="quiz-stage" id="quiz-stage" hidden aria-live="polite"></section>
+        </section>
+
+        <section class="view" data-view="proofread" aria-labelledby="proofread-title" hidden>
+          <header class="page-header split"><div><p class="eyebrow">Find it · fix it · explain it</p><h1 id="proofread-title">Proofreading Lab<span class="zh-title">校對實驗室</span></h1><p>Master every grammar focus from the textbook through workplace and academic proofreading. <span class="zh-support">以職場與學術校對題，完整掌握教材列出的每一項重點文法。</span></p></div><div class="practice-score"><span>activities · 練習</span><strong id="proof-count">40</strong></div></header>
+          <section class="grammar-coverage" id="grammar-coverage" aria-label="Textbook grammar coverage"></section>
+          <section class="proofread-intro" aria-label="Proofreading process"><div><span>01</span><b>Read for meaning</b><small>先理解訊息</small></div><div><span>02</span><b>Mark suspicious fragments</b><small>標記可疑片段</small></div><div><span>03</span><b>Check the rule</b><small>核對規則與修正</small></div></section>
+          <div class="proofread-layout">
+            <nav class="proofread-set-list" id="proofread-set-list" aria-label="Proofreading activities"></nav>
+            <section class="proofread-stage" id="proofread-stage" aria-live="polite"></section>
+          </div>
+          <p class="source-note">Interaction model inspired by <a href="https://passageproof.com/" target="_blank" rel="noopener noreferrer">PassageProof</a>: mistakes are deliberately planted in a correct passage and checked against a reliable answer key. All passages and corrections here are original. <span>操作概念參考 PassageProof；本區短文與訂正皆為原創。</span></p>
+        </section>
+
+        <section class="view" data-view="readiness" aria-labelledby="readiness-title" hidden>
+          <header class="page-header"><p class="eyebrow">Ready for University · Complete course</p><h1 id="readiness-title">Prepare for the work<br>that comes next.<span class="zh-title">為下一階段的大學學習做好準備。</span></h1><p>This section transforms the full <i>Ready for University</i> course into six bilingual learning modules—not just a list of study methods. <span class="zh-support">本區將整本《Ready for University》轉化為六個雙語學習模組，而不只是方法清單。</span></p></header>
+          <section class="university-curriculum" aria-labelledby="curriculum-title">
+            <div class="section-heading compact"><div><p class="eyebrow">Six-part university curriculum</p><h2 id="curriculum-title">Study the whole course <span class="zh-inline">完整大學先修課程</span></h2></div><span class="course-badge">6 TOPICS</span></div>
+            <div class="university-topic-tabs" id="university-topic-tabs" role="tablist" aria-label="Ready for University topics"></div>
+            <div class="university-topic-detail" id="university-topic-detail"></div>
+          </section>
+          <section class="transfer-methods" aria-labelledby="methods-title"><div class="section-heading compact"><div><p class="eyebrow">Transferable study methods</p><h2 id="methods-title">Methods you can reuse <span class="zh-inline">可遷移的學習方法</span></h2></div></div><div class="method-grid" id="method-grid"></div></section>
+          <section class="focus-lab" aria-labelledby="focus-title">
+            <div><p class="eyebrow">15 × 4 concentration booster</p><h2 id="focus-title">Commit to 15 minutes <span class="zh-inline">一次只承諾 15 分鐘</span></h2><p>Define one specific task, focus for 15 minutes, and complete up to four rounds before a longer break. <span class="zh-support">設定一個具體任務，專注 15 分鐘；最多完成四輪，再做較長休息。</span></p><label for="focus-task">What will you finish? · 這一輪要完成什麼？</label><input id="focus-task" type="text" placeholder="e.g. Complete and review five Part 5 questions · 完成並訂正 5 題"></div>
+            <div class="timer-card"><span id="focus-round">Round 1 / 4</span><strong id="timer-display">15:00</strong><div><button type="button" onclick="void 0" class="button primary" id="timer-toggle">Start · 開始</button><button type="button" onclick="void 0" class="button quiet" id="timer-reset">Reset · 重設</button></div></div>
+          </section>
+          <section class="cornell-lab" aria-labelledby="cornell-title">
+            <div class="section-heading compact"><div><p class="eyebrow">Cornell note</p><h2 id="cornell-title">Turn mistakes into review cues <span class="zh-inline">把錯題整理成複習線索</span></h2></div><span class="autosave">Auto-save · 自動儲存</span></div>
+            <div class="cornell-sheet"><label class="cue">Cues / Questions · 線索 / 問題<textarea class="resize-none" id="cornell-cues" rows="8" placeholder="What signal is being tested? Which distractor fooled me? · 這題在考哪個訊號？"></textarea></label><label class="notes">Notes / Evidence · 筆記 / 證據<textarea class="resize-none" id="cornell-notes" rows="8" placeholder="Record the pattern, collocation, locator, and correction · 寫下句型、搭配與訂正理由"></textarea></label><label class="summary">One-sentence summary · 一句話總結<textarea class="resize-none" id="cornell-summary" rows="3" placeholder="When I see ___, I will ___ · 下次看到什麼，就要做什麼？"></textarea></label></div>
+          </section>
+        </section>
+      </main>
+      <footer class="site-footer"><p>Shirley's Crack TOEIC · Built for deliberate practice.</p><button type="button" onclick="void 0" class="text-button" id="open-sources">Sources &amp; notes · 來源與聲明</button></footer>
+    </div>
+  </div>
+
+  <dialog id="target-dialog"><form method="dialog" novalidate><button class="dialog-close" value="cancel" aria-label="Close · 關閉">×</button><p class="eyebrow">Define the finish line</p><h2>Set your target <span class="zh-inline">設定目標分數</span></h2><label for="target-score">TOEIC L&amp;R target · 目標（10–990）</label><input id="target-score" type="number" min="10" max="990" step="5" value="850"><p class="field-help" id="target-error">Enter a score from 10 to 990 in steps of five. · 請輸入 10–990，並以 5 分為單位。</p><div class="dialog-actions"><button class="button quiet" value="cancel">Cancel · 取消</button><button class="button primary" id="save-target" value="default">Save target · 儲存目標</button></div></form></dialog>
+  <dialog id="sources-dialog"><form method="dialog" novalidate><button class="dialog-close" value="cancel" aria-label="Close · 關閉">×</button><p class="eyebrow">Sources &amp; scope</p><h2>Sources and notes <span class="zh-inline">內容來源與聲明</span></h2><ul><li><i>To Crack TOEIC Listening &amp; Reading</i>: exam structure, strategy, themes, and grammar. · 題型、策略、主題與文法架構。</li><li><i>Ready for University</i>: the full six-topic university-readiness course. · 完整六大主題大學先修課程。</li><li>Shirley's TOEIC Essential Vocab: 863 bilingual workplace words. · 863 筆雙語職場字彙。</li><li>ETS and TOEIC Taiwan: current format and timing. · 現行題型與時間。</li><li>PassageProof: inspiration for planted-error proofreading interaction. · 校對互動概念參考。</li></ul><p class="fine-print">TOEIC is a registered trademark of ETS. This independent learning project is not sponsored or endorsed by ETS. · 本網站為獨立教學專案，並非 ETS 官方網站。</p><button class="button primary" value="default">Understood · 了解</button></form></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>
