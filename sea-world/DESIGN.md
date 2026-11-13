@@ -29,6 +29,8 @@ Shirley’s 海底世界 is a full-screen classroom sound instrument disguised a
 
 The signature is biological cause and effect: each completed minute of effective quiet welcomes an individually numbered koi, shrimp, crab, seahorse, cuttlefish, sea cucumber or sea urchin, while one shark changes posture, pace, eye, jaw and intent as sound rises. Noisy interruptions do not count toward that minute. Each resident has its own locomotion rhythm and all 1–50 numbers stay unique among active residents. The interface must stay secondary to that ecology.
 
+The independent 1–100 minute classroom timer is represented as a suspended crystal water drop. Layered refraction, a concentrated specular highlight and a faint edge reflection keep it translucent rather than flat. Its setting and action controls flank the drop on opposite sides, leaving the vertical falling-water path completely unobstructed.
+
 The visual anti-references are mobile-game aquariums, glossy 3D mascots, neon cyber dashboards, generic glassmorphism and symmetrical vector animals. Nothing underwater should look airbrushed, inflated or lit by a studio softbox.
 
 ## Colors
@@ -59,6 +61,7 @@ Typography should feel like a small museum label on glass, never like a game HUD
 The aquarium always owns the full viewport. Information sits near the glass perimeter so the centre remains available for animal movement.
 
 - Upper left: the single identity mark, “Shirley’s 海底世界”.
+- Upper centre: one compact water-drop countdown, with minute input and icon controls beneath it.
 - Mid-left: a compact live dB reading and one horizontal sound bar; no explanatory state copy.
 - Lower right: three compact icon controls and an optional quiet-progress label.
 - Settings remain a temporary instrument panel, never a permanent dashboard.
@@ -71,6 +74,7 @@ Depth comes from ecological occlusion, haze, focus, sediment and movement speed�
 - UI surfaces use one thin mineral-coloured border, low-opacity dark fill and at most a small blur.
 - No luminous progress tracks, large drop shadows or glossy inset highlights.
 - Water uses layered haze, irregular caustic lines and sparse suspended matter.
+- Bubbles are clearly edged and react to nearby residents through displacement, turbulence and short tail wakes.
 - Foreground plants and sediment may cross animal silhouettes to reinforce depth.
 
 ## Shapes
@@ -79,12 +83,13 @@ Depth comes from ecological occlusion, haze, focus, sediment and movement speed�
 - Animal silhouettes must be asymmetric and anatomically directional.
 - The shark uses a long spindle body, narrow caudal peduncle, heterocercal tail, integrated fins and a tapered snout.
 - Koi keep irregular scale highlights, translucent fin edges and independent tail motion.
-- Shrimp dart backward, crabs move sideways, seahorses bob upright, cuttlefish pulse their mantle, sea cucumbers contract, and sea-urchin spines breathe with the current.
+- Shrimp dart backward, crabs move sideways, seahorses bob upright, cuttlefish pulse their mantle, sea cucumbers contract, and sea urchins rotate while drifting through the lower water column.
 - Species remain recognizable through silhouette and motion rather than emoji-like styling.
 
 ## Components
 
 - Sound readout: a restrained numeric dB value and a thin reactive bar.
+- Water-drop timer: 1–100 minute native number input on the left, start/pause and reset icon buttons on the right, live status, and reduced-motion-safe ripples. Never place a panel across the drop-to-ripple path.
 - Quiet progress: optional perimeter label with a hide/restore control.
 - Settings panel: opaque enough for legibility, visually flat, and subordinate to the aquarium.
 - Toast: compact rectangular glass label; status acknowledgement only.
@@ -96,6 +101,7 @@ Do:
 
 - Use countershading, denticle/scales, soft tonal variation and moving caustics on animals.
 - Give every species a different motion rhythm.
+- Let nearby swimmers disturb bubbles; motion should reveal water, not decorate it.
 - Keep number badges separate from animal bodies and share one 1–50 pool across species.
 - Keep the shark moving even when calm; quiet changes intent, not whether it is alive.
 - Preserve a clear path from sound level to shark behaviour.

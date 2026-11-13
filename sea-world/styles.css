@@ -134,6 +134,173 @@ h1 {
   line-height: 1;
 }
 
+.drop-timer {
+  position: absolute;
+  z-index: 5;
+  top: max(10px, env(safe-area-inset-top));
+  left: 50%;
+  width: 280px;
+  height: 114px;
+  transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.drop-timer__drop {
+  position: relative;
+  display: grid;
+  width: 96px;
+  height: 82px;
+  margin: 0 auto;
+  place-items: center;
+  isolation: isolate;
+  color: rgba(235, 248, 242, .92);
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.03em;
+}
+
+.drop-timer__drop::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 66px;
+  height: 76px;
+  border: 0;
+  clip-path: polygon(50% 0, 73% 27%, 92% 55%, 94% 72%, 82% 91%, 64% 100%, 36% 100%, 18% 91%, 6% 72%, 8% 55%, 27% 27%);
+  background:
+    radial-gradient(circle at 31% 27%, rgba(255,255,255,.92) 0 1.8px, rgba(236,255,250,.48) 2.4px, transparent 7px),
+    radial-gradient(ellipse at 34% 36%, rgba(226,255,248,.3), transparent 31%),
+    radial-gradient(ellipse at 68% 73%, rgba(119,199,190,.2), transparent 38%),
+    linear-gradient(142deg, rgba(231,255,248,.34), rgba(122,192,184,.1) 37%, rgba(2,35,40,.22) 72%, rgba(176,231,220,.26));
+  filter:
+    drop-shadow(0 0 1px rgba(230, 255, 248, .72))
+    drop-shadow(0 7px 13px rgba(0, 17, 20, .2));
+  backdrop-filter: blur(2.5px) saturate(1.15);
+}
+
+.drop-timer__drop::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: 18px;
+  left: 29px;
+  width: 20px;
+  height: 35px;
+  border-left: 1px solid rgba(244,255,252,.58);
+  border-radius: 50%;
+  opacity: .68;
+  transform: rotate(-17deg);
+  filter: blur(.15px);
+}
+
+.drop-timer__drop strong {
+  position: relative;
+  z-index: 1;
+  margin-top: 4px;
+  font-size: 16px;
+  font-weight: 570;
+  text-shadow: 0 1px 7px rgba(0, 18, 22, .72), 0 0 7px rgba(220,255,247,.12);
+}
+
+.drop-timer__microdrop {
+  position: absolute;
+  left: 50%;
+  bottom: -2px;
+  width: 5px;
+  height: 7px;
+  border-radius: 55% 45% 58% 42%;
+  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.88), rgba(159,218,207,.72) 45%, rgba(39,115,112,.56));
+  filter: drop-shadow(0 0 2px rgba(207,255,246,.6));
+  opacity: 0;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.drop-timer.is-running .drop-timer__microdrop { animation: timerDrip 1s var(--ease-water) infinite; }
+.drop-timer.is-running .drop-timer__drop::before { border-color: rgba(193, 231, 218, .42); }
+.drop-timer.is-finished .drop-timer__drop::before { animation: timerFinishDrop 1.15s var(--ease-water) 2; border-color: rgba(226, 207, 157, .58); }
+
+.drop-timer__ripples {
+  position: relative;
+  width: 72px;
+  height: 10px;
+  margin: -5px auto 0;
+}
+
+.drop-timer__ripples i {
+  position: absolute;
+  inset: 2px 0 auto;
+  height: 5px;
+  border: 1px solid rgba(199, 231, 222, .24);
+  border-radius: 50%;
+  opacity: .35;
+  transform: scaleX(.45);
+}
+.drop-timer__ripples i:nth-child(2) { inset-inline: 9px; animation-delay: .22s; }
+.drop-timer__ripples i:nth-child(3) { inset-inline: 18px; animation-delay: .44s; }
+.drop-timer.is-running .drop-timer__ripples i { animation: timerRipple 1s ease-out infinite; }
+.drop-timer.is-finished .drop-timer__ripples i { animation: timerRipple .72s ease-out 3; border-color: rgba(226, 207, 157, .58); }
+
+.drop-timer__controls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.drop-timer__duration,
+.drop-timer__actions {
+  position: absolute;
+  top: 30px;
+  display: flex;
+  height: 31px;
+  align-items: center;
+  border: 1px solid rgba(213, 239, 230, .16);
+  border-radius: var(--radius);
+  background: rgba(3, 29, 32, .16);
+  box-shadow: inset 0 1px 0 rgba(241,255,251,.025);
+  backdrop-filter: blur(3px);
+  pointer-events: auto;
+}
+
+.drop-timer__duration { left: 4px; width: 75px; padding: 0 7px; }
+.drop-timer__actions { right: 4px; width: 62px; padding: 1px 3px; justify-content: space-between; }
+
+.drop-timer__duration input {
+  width: 35px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(231, 242, 236, .88);
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  appearance: textfield;
+}
+.drop-timer__duration input::-webkit-inner-spin-button,
+.drop-timer__duration input::-webkit-outer-spin-button { margin: 0; appearance: none; }
+.drop-timer__duration input:disabled { color: rgba(231, 242, 236, .42); }
+.drop-timer__unit { margin: 0 4px 0 2px; color: rgba(221, 240, 233, .42); font-size: 8px; letter-spacing: .08em; }
+
+.drop-timer__actions button {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: rgba(224, 239, 233, .66);
+  cursor: pointer;
+}
+.drop-timer__actions button:hover { background: rgba(217, 239, 231, .09); color: var(--foam); }
+.drop-timer__actions svg { width: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.drop-timer__actions .timer-icon--play { fill: currentColor; stroke: none; }
+.timer-icon--pause { display: none; }
+.drop-timer.is-running .timer-icon--play { display: none; }
+.drop-timer.is-running .timer-icon--pause { display: block; }
+
 .glass-button {
   min-height: 44px;
   padding: 0 17px;
@@ -322,9 +489,24 @@ h1 {
 
 @keyframes surfaceDrift { to { transform: translate3d(1.5%, 1%, 0) scale(1.02); } }
 @keyframes listeningPulse { 70%,100% { box-shadow: 0 0 0 9px rgba(121,220,185,0); } }
+@keyframes timerDrip {
+  0%, 34% { opacity: 0; transform: translate(-50%, -3px) rotate(45deg) scale(.7); }
+  42% { opacity: .82; }
+  88%, 100% { opacity: 0; transform: translate(-50%, 20px) rotate(45deg) scale(1.08); }
+}
+@keyframes timerRipple {
+  0%, 44% { opacity: 0; transform: scaleX(.25) scaleY(.7); }
+  56% { opacity: .48; }
+  100% { opacity: 0; transform: scaleX(1.05) scaleY(1.2); }
+}
+@keyframes timerFinishDrop {
+  0%, 100% { transform: translateY(0) scale(1); }
+  48% { transform: translateY(5px) scale(.93, 1.04); }
+}
 
 @media (max-width: 720px) {
   .masthead { inset-inline: 20px; }
+  .drop-timer { top: max(73px, calc(env(safe-area-inset-top) + 62px)); transform: translateX(-50%) scale(.92); transform-origin: top center; }
   .sound-meter { top: 34%; left: 20px; width: 120px; }
   .quiet-card { right: 20px; bottom: 89px; width: calc(100vw - 40px); }
   .quiet-card--compact { left: auto; width: 210px; }

@@ -28,6 +28,12 @@
     testFishButton: document.querySelector("#testFishButton"),
     resetButton: document.querySelector("#resetButton"),
     fullscreenButton: document.querySelector("#fullscreenButton"),
+    dropTimer: document.querySelector("#dropTimer"),
+    timerValue: document.querySelector("#timerValue"),
+    timerMinutes: document.querySelector("#timerMinutes"),
+    timerToggleButton: document.querySelector("#timerToggleButton"),
+    timerResetButton: document.querySelector("#timerResetButton"),
+    timerStatus: document.querySelector("#timerStatus"),
     toast: document.querySelector("#toast")
   };
 
@@ -59,6 +65,15 @@
     sharkHunt: 0,
     sharkAttack: null,
     nextHuntAllowed: 0,
+    nextWakeBubble: 0,
+    examTimer: {
+      durationMinutes: 10,
+      remainingSeconds: 600,
+      running: false,
+      endAt: 0,
+      renderedSecond: -1,
+      finished: false
+    },
     toastTimer: 0,
     lastFrame: performance.now(),
     reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -79,28 +94,70 @@
     reset(initial = false) {
       this.x = random(0.04, 0.96);
       this.y = initial ? random(0.05, 1.05) : random(1, 1.15);
-      this.r = random(1.4, 7.5);
-      this.speed = random(0.012, 0.05);
+      this.r = random(2, 9);
+      this.speed = random(0.014, 0.058);
       this.wobble = random(0.6, 1.8);
       this.phase = random(0, TAU);
-      this.alpha = random(0.12, 0.42);
+      this.alpha = random(0.2, 0.58);
+      this.driftX = 0;
+      this.wake = 0;
     }
     update(dt, time) {
+      const px = this.x * state.width;
+      const py = this.y * state.height;
+      for (const creature of state.creatures) {
+        const dx = px - creature.x;
+        const dy = py - creature.y;
+        const reach = creature.size * (creature.type === "urchin" ? 3.8 : 3.1);
+        const distance = Math.hypot(dx, dy);
+        if (distance > reach || distance < .1) continue;
+        const influence = 1 - distance / reach;
+        this.driftX += (Math.sign(dx) * 42 + creature.direction * creature.speed * .72) * influence * dt;
+        this.y -= influence * .008 * dt;
+        this.wake = Math.max(this.wake, influence);
+      }
+      this.driftX *= Math.pow(.09, dt);
+      this.x += this.driftX * dt / Math.max(1, state.width);
       this.y -= this.speed * dt;
+      if (this.x < .015) this.x = .985;
+      if (this.x > .985) this.x = .015;
       if (this.y < -0.05) this.reset();
       this.draw(time);
+      this.wake = Math.max(0, this.wake - dt * 1.7);
+    }
+    releaseFrom(creature) {
+      this.x = clamp((creature.x - creature.direction * creature.size * random(.6, 1.2)) / state.width, .02, .98);
+      this.y = clamp((creature.y + random(-creature.size * .25, creature.size * .35)) / state.height, .05, .94);
+      this.r = random(1.8, 4.4);
+      this.speed = random(.022, .064);
+      this.alpha = random(.38, .7);
+      this.driftX = -creature.direction * random(8, 24);
+      this.wake = 1;
+      this.phase = random(0, TAU);
     }
     draw(time) {
-      const x = this.x * state.width + Math.sin(time * .001 * this.wobble + this.phase) * 8;
+      const turbulence = 8 + this.wake * 10;
+      const x = this.x * state.width + Math.sin(time * .001 * this.wobble + this.phase) * turbulence;
       const y = this.y * state.height;
-      const gradient = ctx.createRadialGradient(x - this.r * .35, y - this.r * .35, .2, x, y, this.r);
-      gradient.addColorStop(0, `rgba(235,255,252,${this.alpha})`);
+      const radius = this.r * (1 + this.wake * .16);
+      const alpha = Math.min(.84, this.alpha + this.wake * .18);
+      const gradient = ctx.createRadialGradient(x - radius * .35, y - radius * .35, .2, x, y, radius);
+      gradient.addColorStop(0, `rgba(235,255,252,${alpha})`);
       gradient.addColorStop(.28, `rgba(185,244,237,${this.alpha * .08})`);
       gradient.addColorStop(.8, `rgba(149,226,219,${this.alpha * .05})`);
-      gradient.addColorStop(1, `rgba(222,255,250,${this.alpha * .5})`);
+      gradient.addColorStop(1, `rgba(222,255,250,${alpha * .7})`);
       ctx.fillStyle = gradient;
       ctx.beginPath();
-      ctx.ellipse(x, y, this.r * .82, this.r, -.2, 0, TAU);
+      ctx.ellipse(x, y, radius * (.8 + this.wake * .12), radius, -.2 + this.driftX * .003, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = `rgba(226,255,249,${alpha * .5})`;
+      ctx.lineWidth = .65;
+      ctx.beginPath();
+      ctx.arc(x - radius * .12, y - radius * .08, radius * .68, -2.8, -.65);
+      ctx.stroke();
+      ctx.fillStyle = `rgba(248,255,253,${alpha * .8})`;
+      ctx.beginPath();
+      ctx.arc(x - radius * .28, y - radius * .35, Math.max(.65, radius * .105), 0, TAU);
       ctx.fill();
     }
   }
@@ -493,21 +550,20 @@
 
   class Urchin extends AquaticResident {
     constructor(number) {
-      super(number, "urchin", "小海膽", { minSize: 19, maxSize: 26, minY: .84, maxY: .89, minSpeed: .6, maxSpeed: 1.2, bottomDweller: true });
-      this.y = state.height * random(.86, .9);
+      super(number, "urchin", "小海膽", { minSize: 19, maxSize: 26, minY: .46, maxY: .8, minSpeed: 3.2, maxSpeed: 6.5 });
+      this.y = state.height * random(.5, .78);
+      this.rotation = random(0, TAU);
     }
     update(dt, time) {
       if (!this.isAttacked()) {
-        this.x += this.direction * (this.speed + this.flee * 14) * dt;
-        if (this.x < this.size * 2 || this.x > state.width - this.size * 2) this.direction *= -1;
-        this.y = state.height * .88;
-        this.flee = Math.max(0, this.flee - dt);
+        this.patrol(dt, time, .42, .81, 7.5);
+        this.rotation += this.direction * dt * (.18 + this.speed * .018);
       }
       this.draw(time);
     }
     draw(time) {
       const s = this.size * this.depth;
-      ctx.save(); ctx.translate(this.x, this.y);
+      ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.rotation);
       ctx.strokeStyle = "rgba(67,54,70,.92)"; ctx.lineWidth = 1.15;
       for (let i = 0; i < 28; i++) {
         const a = i / 28 * TAU;
@@ -520,7 +576,19 @@
       ctx.fillStyle = core; ctx.beginPath(); ctx.arc(0, 0, s * .5, 0, TAU); ctx.fill();
       ctx.fillStyle = "rgba(130,174,153,.42)";
       for (let i = 0; i < 8; i++) { const a = i * 2.4; ctx.beginPath(); ctx.arc(Math.cos(a) * s * .32, Math.sin(a) * s * .32, 1.15, 0, TAU); ctx.fill(); }
-      ctx.restore(); drawNumberTag(this, s * 1.15);
+      ctx.restore();
+      ctx.save();
+      ctx.strokeStyle = "rgba(146, 205, 184, .32)";
+      ctx.lineWidth = .8;
+      for (let i = 0; i < 4; i++) {
+        const paddle = Math.sin(time * .006 + this.phase + i * 1.5) * 5;
+        ctx.beginPath();
+        ctx.moveTo(this.x - this.direction * s * .2, this.y + (i - 1.5) * s * .13);
+        ctx.quadraticCurveTo(this.x - this.direction * s * .75, this.y + (i - 1.5) * s * .14 + paddle, this.x - this.direction * s, this.y + (i - 1.5) * s * .08);
+        ctx.stroke();
+      }
+      ctx.restore();
+      drawNumberTag(this, s * 1.15);
     }
   }
 
@@ -1353,6 +1421,91 @@
     showToast("聆聽已暫停");
   }
 
+  function readTimerMinutes() {
+    const minutes = clamp(Math.round(Number(ui.timerMinutes.value) || 1), 1, 100);
+    ui.timerMinutes.value = String(minutes);
+    return minutes;
+  }
+
+  function formatExamTime(seconds) {
+    const rounded = Math.max(0, Math.ceil(seconds));
+    const minutes = Math.floor(rounded / 60);
+    const remainder = rounded % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
+  }
+
+  function renderExamTimer(force = false) {
+    const second = Math.max(0, Math.ceil(state.examTimer.remainingSeconds));
+    if (!force && second === state.examTimer.renderedSecond) return;
+    state.examTimer.renderedSecond = second;
+    ui.timerValue.textContent = formatExamTime(second);
+    ui.timerToggleButton.setAttribute("aria-label", state.examTimer.running ? "暫停倒數" : "開始倒數");
+    ui.timerToggleButton.title = state.examTimer.running ? "暫停倒數" : "開始倒數";
+    ui.timerMinutes.disabled = state.examTimer.running;
+    ui.dropTimer.classList.toggle("is-running", state.examTimer.running);
+  }
+
+  function resetExamTimer(announce = false) {
+    const minutes = readTimerMinutes();
+    state.examTimer.durationMinutes = minutes;
+    state.examTimer.remainingSeconds = minutes * 60;
+    state.examTimer.running = false;
+    state.examTimer.endAt = 0;
+    state.examTimer.finished = false;
+    state.examTimer.renderedSecond = -1;
+    ui.dropTimer.classList.remove("is-running", "is-finished");
+    ui.timerStatus.textContent = announce ? `倒數已重設為 ${minutes} 分鐘` : "";
+    renderExamTimer(true);
+  }
+
+  function toggleExamTimer() {
+    if (state.examTimer.running) {
+      state.examTimer.remainingSeconds = Math.max(0, (state.examTimer.endAt - Date.now()) / 1000);
+      state.examTimer.running = false;
+      ui.timerStatus.textContent = `倒數已暫停，剩餘 ${formatExamTime(state.examTimer.remainingSeconds)}`;
+      renderExamTimer(true);
+      return;
+    }
+    const requestedMinutes = readTimerMinutes();
+    if (requestedMinutes !== state.examTimer.durationMinutes) {
+      state.examTimer.durationMinutes = requestedMinutes;
+      state.examTimer.remainingSeconds = requestedMinutes * 60;
+      state.examTimer.renderedSecond = -1;
+    }
+    if (state.examTimer.remainingSeconds <= 0 || state.examTimer.finished) resetExamTimer(false);
+    state.examTimer.running = true;
+    state.examTimer.finished = false;
+    state.examTimer.endAt = Date.now() + state.examTimer.remainingSeconds * 1000;
+    ui.dropTimer.classList.remove("is-finished");
+    ui.timerStatus.textContent = `開始 ${state.examTimer.durationMinutes} 分鐘倒數`;
+    renderExamTimer(true);
+  }
+
+  function updateExamTimer() {
+    if (!state.examTimer.running) return;
+    state.examTimer.remainingSeconds = Math.max(0, (state.examTimer.endAt - Date.now()) / 1000);
+    if (state.examTimer.remainingSeconds <= 0) {
+      state.examTimer.running = false;
+      state.examTimer.finished = true;
+      state.examTimer.remainingSeconds = 0;
+      ui.dropTimer.classList.remove("is-running");
+      ui.dropTimer.classList.add("is-finished");
+      ui.timerStatus.textContent = "倒數結束，時間到";
+      showToast("時間到，最後一滴水已落入海裡");
+    }
+    renderExamTimer();
+  }
+
+  function emitCreatureWake(now) {
+    if (state.reducedMotion || now < state.nextWakeBubble || !state.bubbles.length) return;
+    const swimmers = state.creatures.filter((creature) => !creature.bottomDweller && !creature.isAttacked());
+    if (!swimmers.length) return;
+    const swimmer = swimmers[Math.floor(Math.random() * swimmers.length)];
+    const bubble = state.bubbles[Math.floor(Math.random() * state.bubbles.length)];
+    bubble.releaseFrom(swimmer);
+    state.nextWakeBubble = now + random(150, 260);
+  }
+
   function resetAquarium() {
     state.creatures.length = 0;
     state.usedNumbers.clear();
@@ -1369,10 +1522,12 @@
     state.lastFrame = now;
     if (state.running) measureSound();
     updateBehavior(dt, now);
+    updateExamTimer();
     drawWater(now);
     drawKelp(now);
     state.bubbles.forEach((bubble, index) => { if (index % 2 === 0) bubble.update(dt, now); });
     state.creatures.filter((creature) => !creature.bottomDweller).forEach((creature) => creature.update(dt, now));
+    emitCreatureWake(now);
     drawShark(now);
     drawFloor(now);
     state.creatures.filter((creature) => creature.bottomDweller).forEach((creature) => creature.update(dt, now));
@@ -1396,6 +1551,8 @@
     updateSensitivityControl();
     try { localStorage.setItem("quietAquariumMicOffset", String(state.micOffset)); } catch { /* Optional preference. */ }
   });
+  ui.timerMinutes.addEventListener("change", () => resetExamTimer(false));
+  ui.timerMinutes.addEventListener("blur", () => resetExamTimer(false));
   window.aquariumActions = {
     toggleListening: () => state.running ? stopListening() : startListening(),
     toggleSettings: () => {
@@ -1412,6 +1569,8 @@
     testFish: () => spawnCreature(true),
     demoAttack: demoSharkAttack,
     reset: resetAquarium,
+    toggleTimer: toggleExamTimer,
+    resetTimer: () => resetExamTimer(true),
     toggleFullscreen: async () => {
       try {
         if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
@@ -1429,12 +1588,13 @@
   window.addEventListener("resize", resize, { passive: true });
   window.addEventListener("beforeunload", () => state.stream?.getTracks().forEach((track) => track.stop()));
 
-  state.bubbles = Array.from({ length: state.reducedMotion ? 24 : 58 }, () => new Bubble(true));
+  state.bubbles = Array.from({ length: state.reducedMotion ? 30 : 78 }, () => new Bubble(true));
   state.particles = Array.from({ length: state.reducedMotion ? 40 : 120 }, () => ({
     x: Math.random(), y: Math.random(), r: random(.25, 1.1), speed: random(.00002, .00016), phase: random(0, TAU)
   }));
   resize();
   updateSensitivityControl();
+  resetExamTimer(false);
   spawnCreature(false, false, "koi");
   requestAnimationFrame(frame);
 
@@ -1442,6 +1602,12 @@
     spawnFish: () => spawnCreature(true),
     spawnCreature: (type) => spawnCreature(true, true, type),
     setLevel: (db) => { state.running = true; state.targetDb = clamp(Number(db), 28, 96); },
-    getState: () => ({ creatures: state.creatures.length, numbers: state.creatures.map((creature) => creature.number), types: state.creatures.map((creature) => creature.type), quietSeconds: state.quietSeconds, db: state.displayDb, shark: state.sharkResponse })
+    setTimerSeconds: (seconds) => {
+      state.examTimer.remainingSeconds = clamp(Number(seconds), 0, 6000);
+      state.examTimer.endAt = Date.now() + state.examTimer.remainingSeconds * 1000;
+      state.examTimer.renderedSecond = -1;
+      renderExamTimer(true);
+    },
+    getState: () => ({ creatures: state.creatures.length, numbers: state.creatures.map((creature) => creature.number), types: state.creatures.map((creature) => creature.type), quietSeconds: state.quietSeconds, db: state.displayDb, shark: state.sharkResponse, timer: Math.ceil(state.examTimer.remainingSeconds), timerRunning: state.examTimer.running })
   };
 })();

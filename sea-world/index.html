@@ -23,6 +23,32 @@
       </button>
     </header>
 
+    <section class="drop-timer" id="dropTimer" aria-label="倒數計時器">
+      <div class="drop-timer__drop" id="timerDroplet" aria-hidden="true">
+        <strong id="timerValue">10:00</strong>
+        <span class="drop-timer__microdrop"></span>
+      </div>
+      <div class="drop-timer__ripples" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="drop-timer__controls">
+        <div class="drop-timer__duration">
+          <label class="visually-hidden" for="timerMinutes">倒數分鐘數，1 到 100 分鐘</label>
+          <input id="timerMinutes" type="number" min="1" max="100" step="1" value="10" inputmode="numeric" aria-describedby="timerRangeHint">
+          <span class="drop-timer__unit" aria-hidden="true">min</span>
+          <span class="visually-hidden" id="timerRangeHint">可設定 1 到 100 分鐘</span>
+        </div>
+        <div class="drop-timer__actions">
+          <button id="timerToggleButton" type="button" aria-label="開始倒數" title="開始倒數" onclick="window.aquariumActions.toggleTimer()">
+            <svg class="timer-icon timer-icon--play" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 9 6-9 6Z"/></svg>
+            <svg class="timer-icon timer-icon--pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7v10M15 7v10"/></svg>
+          </button>
+          <button id="timerResetButton" type="button" aria-label="重設倒數" title="重設倒數" onclick="window.aquariumActions.resetTimer()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 7v5h-5M19 12a7 7 0 1 0-2 4.9"/></svg>
+          </button>
+        </div>
+      </div>
+      <span class="visually-hidden" id="timerStatus" role="status" aria-live="polite"></span>
+    </section>
+
     <aside class="sound-meter" aria-label="目前分貝">
       <div class="sound-meter__reading"><span id="dbValue">—</span><small>dB</small></div>
       <div class="sound-meter__track" id="orbRing" aria-hidden="true"><span id="dbMeterFill"></span></div>
